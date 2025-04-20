@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 const TOTAL_MODULES = 18;
@@ -8,10 +8,30 @@ const CourseLayout: React.FC = () => {
   const [completedModules, setCompletedModules] = useState<{[key: string]: boolean}>({});
   const [moduleScores, setModuleScores] = useState<{[key: string]: number}>({});
 
+  useEffect(() => {
+    // Load saved progress from localStorage if available
+    try {
+      const savedCompletedModules = localStorage.getItem('completedModules');
+      const savedModuleScores = localStorage.getItem('moduleScores');
+      
+      if (savedCompletedModules) {
+        setCompletedModules(JSON.parse(savedCompletedModules));
+      }
+      
+      if (savedModuleScores) {
+        setModuleScores(JSON.parse(savedModuleScores));
+      }
+    } catch (error) {
+      console.error('Error loading saved progress:', error);
+    }
+  }, []);
+
   const updateProgress = () => {
     const completedCount = Object.keys(completedModules).length;
     return `Progress: ${completedCount}/${TOTAL_MODULES} modules completed`;
   };
+
+  const isExamEnabled = Object.keys(completedModules).length === TOTAL_MODULES;
 
   const moduleList = Array.from({ length: TOTAL_MODULES }, (_, i) => ({
     id: `part${i + 1}`,
@@ -29,7 +49,7 @@ const CourseLayout: React.FC = () => {
         {updateProgress()}
       </div>
 
-      <nav className="grid grid-cols-3 gap-4 mb-8">
+      <nav className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-8">
         {moduleList.map((module) => (
           <Link 
             key={module.id} 
@@ -48,9 +68,15 @@ const CourseLayout: React.FC = () => {
 
       <Link 
         to="/course/final-exam" 
-        className="block w-full text-center bg-blue-500 text-white p-3 rounded hover:bg-blue-600"
+        className={`block w-full text-center p-3 rounded ${
+          isExamEnabled 
+            ? 'bg-blue-500 text-white hover:bg-blue-600 cursor-pointer' 
+            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+        }`}
+        onClick={(e) => !isExamEnabled && e.preventDefault()}
       >
         Final Exam & Certificate
+        {!isExamEnabled && <p className="text-xs mt-1">Complete all modules to unlock</p>}
       </Link>
     </div>
   );

@@ -9,6 +9,7 @@ import Welcome from "./pages/Welcome";
 import NotFound from "./pages/NotFound";
 import CourseLayout from "./pages/Course/CourseLayout";
 import CourseModule from "./pages/Course/CourseModule";
+import FinalExam from "./pages/Course/FinalExam";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +24,7 @@ const App = () => (
           <Route path="/welcome" element={<Welcome />} />
           <Route path="/course" element={<CourseLayout />} />
           <Route path="/course/:moduleId" element={<CourseModule />} />
+          <Route path="/course/final-exam" element={<FinalExam />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
