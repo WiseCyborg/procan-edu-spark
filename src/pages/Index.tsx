@@ -11,7 +11,7 @@ const Index = () => {
         <div className="space-x-4">
           <Link to="/" className="hover:text-gray-300">Home</Link>
           <Link to="/welcome" className="hover:text-gray-300">Welcome</Link>
-          <Link to="/get-started" className="hover:text-gray-300">Get Started</Link>
+          <Link to="/course" className="hover:text-gray-300">Course</Link>
           <Link to="/enroll" className="hover:text-gray-300">Enroll</Link>
           <Link to="/overview" className="hover:text-gray-300">MCA RVT Program Overview</Link>
         </div>
@@ -26,7 +26,7 @@ const Index = () => {
         <div className="text-center max-w-2xl px-4">
           <h1 className="text-5xl font-bold mb-6">Empowering Minds, Transforming Cannabis Education.</h1>
           <p className="text-xl mb-8">Welcome to ProCann Training</p>
-          <Link to="/get-started">
+          <Link to="/course">
             <Button size="lg" className="bg-green-600 hover:bg-green-700">
               Begin Here
             </Button>
