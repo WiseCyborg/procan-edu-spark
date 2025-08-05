@@ -214,8 +214,7 @@ const Index = () => {
             <div>
               <h5 className="font-semibold mb-3">Support</h5>
               <ul className="space-y-2 text-sm">
-                <li><span className="text-gray-400">support@procann.edu</span></li>
-                <li><span className="text-gray-400">(555) 123-4567</span></li>
+                <li><span className="text-gray-400">info@procannedu.com</span></li>
                 <li><span className="text-gray-400">Mon-Fri 9AM-6PM EST</span></li>
               </ul>
             </div>

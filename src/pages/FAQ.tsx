@@ -219,14 +219,10 @@ const FAQ = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="flex items-center text-gray-600">
-                <Phone className="mr-2 h-4 w-4 text-green-600" />
-                <span>(555) 123-4567</span>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex items-center text-gray-600">
                 <Mail className="mr-2 h-4 w-4 text-green-600" />
-                <span>support@procann.edu</span>
+                <span>info@procannedu.com</span>
               </div>
               <div className="flex items-center text-gray-600">
                 <Clock className="mr-2 h-4 w-4 text-green-600" />
