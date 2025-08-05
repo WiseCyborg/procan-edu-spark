@@ -8,6 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen, Award, Clock, CheckCircle } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
+import { ProfileCompletionBanner } from '@/components/ProfileCompletionBanner';
 
 interface Course {
   id: string;
@@ -120,6 +121,8 @@ const Dashboard = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold text-green-700 mb-8">Learning Dashboard</h1>
+      
+      <ProfileCompletionBanner />
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         <Card>
