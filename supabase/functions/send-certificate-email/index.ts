@@ -37,7 +37,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Sending certificate email to:", email);
 
     const emailResponse = await resend.emails.send({
-      from: "ProCann Edu <certificates@resend.dev>",
+      from: "ProCann Edu <no-reply@procannedu.com>",
       to: [email],
       subject: `Congratulations! Your ${courseTitle} Certificate`,
       html: `
@@ -94,7 +94,7 @@ const handler = async (req: Request): Promise<Response> => {
           
           <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; margin-top: 30px; text-align: center;">
             <p style="color: #9ca3af; font-size: 14px; margin-bottom: 10px;">
-              Questions about your certificate? Contact support@procannedu.com
+              Questions about your certificate? Contact info@procannedu.com
             </p>
             <p style="color: #9ca3af; font-size: 12px;">
               ProCann Training • In accordance with the Maryland Cannabis Administration

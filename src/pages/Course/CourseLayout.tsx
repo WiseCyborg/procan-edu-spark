@@ -1,37 +1,38 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useUserProgress } from '@/hooks/useUserProgress';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { CheckCircle, Lock, BookOpen, Award } from 'lucide-react';
+import { toast } from '@/components/ui/use-toast';
 
 const TOTAL_MODULES = 18;
 
 const CourseLayout: React.FC = () => {
-  const [completedModules, setCompletedModules] = useState<{[key: string]: boolean}>({});
-  const [moduleScores, setModuleScores] = useState<{[key: string]: number}>({});
+  // Default course ID - you may want to make this dynamic based on route params
+  const DEFAULT_COURSE_ID = 'default-course-id';
+  
+  const {
+    getCompletedModulesCount,
+    getTotalScore,
+    isModuleCompleted,
+    migrateFromLocalStorage,
+    isLoading
+  } = useUserProgress(DEFAULT_COURSE_ID);
 
   useEffect(() => {
-    // Load saved progress from localStorage if available
-    try {
-      const savedCompletedModules = localStorage.getItem('completedModules');
-      const savedModuleScores = localStorage.getItem('moduleScores');
-      
-      if (savedCompletedModules) {
-        setCompletedModules(JSON.parse(savedCompletedModules));
-      }
-      
-      if (savedModuleScores) {
-        setModuleScores(JSON.parse(savedModuleScores));
-      }
-    } catch (error) {
-      console.error('Error loading saved progress:', error);
-    }
+    // Migrate any existing localStorage data to Supabase
+    migrateFromLocalStorage(DEFAULT_COURSE_ID);
   }, []);
 
   const updateProgress = () => {
-    const completedCount = Object.keys(completedModules).length;
-    return `Progress: ${completedCount}/${TOTAL_MODULES} modules completed`;
+    const completedCount = getCompletedModulesCount();
+    const averageScore = getTotalScore();
+    return `${completedCount}/${TOTAL_MODULES} modules completed${averageScore > 0 ? ` • Average score: ${averageScore}%` : ''}`;
   };
 
-  const isExamEnabled = Object.keys(completedModules).length === TOTAL_MODULES;
+  const isExamEnabled = getCompletedModulesCount() === TOTAL_MODULES;
 
   const moduleList = Array.from({ length: TOTAL_MODULES }, (_, i) => ({
     id: `part${i + 1}`,
@@ -40,44 +41,83 @@ const CourseLayout: React.FC = () => {
   }));
 
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold text-center mb-4">
-        Maryland Responsible Vendor Training (RVT) Course
-      </h1>
-      
-      <div className="progress text-center font-bold text-green-600 mb-6">
-        {updateProgress()}
+    <div className="container mx-auto p-6 space-y-6">
+      <Card>
+        <CardHeader className="text-center">
+          <CardTitle className="text-3xl font-bold text-primary">
+            Maryland Responsible Vendor Training (RVT) Course
+          </CardTitle>
+          <p className="text-muted-foreground">
+            Complete all modules to unlock the final exam and earn your certificate
+          </p>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center">
+            <Badge variant="secondary" className="text-lg px-4 py-2">
+              {updateProgress()}
+            </Badge>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        {moduleList.map((module) => (
+          <Card key={module.id} className="hover:shadow-md transition-shadow">
+            <CardContent className="p-4">
+              <Link 
+                to={`/course/${module.id}`} 
+                className="block"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center space-x-2">
+                    <BookOpen className="w-5 h-5 text-primary" />
+                    <span className="font-medium">{module.title}</span>
+                    {isModuleCompleted(module.id) && (
+                      <CheckCircle className="w-5 h-5 text-green-600" />
+                    )}
+                  </div>
+                  <Badge variant={isModuleCompleted(module.id) ? "default" : "secondary"}>
+                    {isModuleCompleted(module.id) ? 'Completed' : 'Available'}
+                  </Badge>
+                </div>
+                <p className="text-sm text-muted-foreground">{module.description}</p>
+              </Link>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
-      <nav className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-        {moduleList.map((module) => (
+      <Card className={`${isExamEnabled ? 'border-primary' : 'border-muted'}`}>
+        <CardContent className="p-6">
           <Link 
-            key={module.id} 
-            to={`/course/${module.id}`} 
-            className={`p-4 border rounded text-center ${
-              completedModules[module.id] 
-                ? 'bg-green-100 border-green-300' 
-                : 'bg-gray-100 border-gray-300'
+            to="/course/final-exam" 
+            className={`flex items-center justify-center space-x-2 ${
+              !isExamEnabled && 'pointer-events-none'
             }`}
+            onClick={(e) => !isExamEnabled && e.preventDefault()}
           >
-            <h2>{module.title}</h2>
-            <p className="text-sm text-gray-600">{module.description}</p>
+            <div className="flex items-center space-x-3">
+              {isExamEnabled ? (
+                <Award className="w-6 h-6 text-primary" />
+              ) : (
+                <Lock className="w-6 h-6 text-muted-foreground" />
+              )}
+              <div className="text-center">
+                <h3 className={`text-xl font-bold ${
+                  isExamEnabled ? 'text-primary' : 'text-muted-foreground'
+                }`}>
+                  Final Exam & Certificate
+                </h3>
+                {!isExamEnabled && (
+                  <p className="text-sm text-muted-foreground">
+                    Complete all modules to unlock
+                  </p>
+                )}
+              </div>
+            </div>
           </Link>
-        ))}
-      </nav>
-
-      <Link 
-        to="/course/final-exam" 
-        className={`block w-full text-center p-3 rounded ${
-          isExamEnabled 
-            ? 'bg-blue-500 text-white hover:bg-blue-600 cursor-pointer' 
-            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-        }`}
-        onClick={(e) => !isExamEnabled && e.preventDefault()}
-      >
-        Final Exam & Certificate
-        {!isExamEnabled && <p className="text-xs mt-1">Complete all modules to unlock</p>}
-      </Link>
+        </CardContent>
+      </Card>
     </div>
   );
 };

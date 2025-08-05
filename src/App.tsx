@@ -13,6 +13,7 @@ import CourseModule from "./pages/Course/CourseModule";
 import FinalExam from "./pages/Course/FinalExam";
 import Dashboard from "./components/dashboard/Dashboard";
 import Header from "./components/layout/Header";
+import ChatAssistant from "./components/chat/ChatAssistant";
 
 const queryClient = new QueryClient();
 
@@ -94,6 +95,7 @@ const App = () => (
             } />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <ChatAssistant />
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>

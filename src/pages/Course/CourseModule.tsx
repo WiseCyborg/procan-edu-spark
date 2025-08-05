@@ -2,7 +2,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { toast } from '@/components/ui/sonner';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CheckCircle, XCircle } from 'lucide-react';
+import { toast } from '@/components/ui/use-toast';
+import { useUserProgress } from '@/hooks/useUserProgress';
 
 interface QuizQuestion {
   q: string;
@@ -35,12 +38,20 @@ const CourseModule: React.FC = () => {
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState(0);
 
+  // Default course ID - you may want to make this dynamic
+  const DEFAULT_COURSE_ID = 'default-course-id';
+  const { updateProgress, isModuleCompleted, getModuleProgress } = useUserProgress(DEFAULT_COURSE_ID);
+
   const moduleQuestions = quizzes[moduleId || ''] || [];
   
   // Check if module exists
   useEffect(() => {
     if (moduleId && !quizzes[moduleId]) {
-      toast.error("Module not found");
+      toast({
+        title: "Module not found",
+        description: "The requested module does not exist.",
+        variant: "destructive",
+      });
       navigate('/course');
     }
   }, [moduleId, navigate]);
@@ -54,10 +65,14 @@ const CourseModule: React.FC = () => {
     }));
   };
 
-  const submitQuiz = () => {
+  const submitQuiz = async () => {
     // Check if all questions are answered
     if (Object.keys(selectedAnswers).length < moduleQuestions.length) {
-      toast.error("Please answer all questions");
+      toast({
+        title: "Incomplete Quiz",
+        description: "Please answer all questions before submitting.",
+        variant: "destructive",
+      });
       return;
     }
     
@@ -66,32 +81,35 @@ const CourseModule: React.FC = () => {
       selectedAnswers[index] === q.a
     ).length;
     
+    const finalScore = Math.round((newScore / moduleQuestions.length) * 100);
     setScore(newScore);
     
-    // Save progress to localStorage
     try {
-      // Get existing completed modules
-      const completedModulesJSON = localStorage.getItem('completedModules');
-      const completedModules = completedModulesJSON ? JSON.parse(completedModulesJSON) : {};
-      
-      // Update completed modules
-      if (newScore >= moduleQuestions.length * 0.8) { // 80% pass threshold
-        completedModules[moduleId || ''] = true;
-        localStorage.setItem('completedModules', JSON.stringify(completedModules));
+      if (finalScore >= 80) {
+        // Update progress in Supabase
+        await updateProgress(DEFAULT_COURSE_ID, moduleId!, true, finalScore);
         
-        // Save score
-        const moduleScoresJSON = localStorage.getItem('moduleScores');
-        const moduleScores = moduleScoresJSON ? JSON.parse(moduleScoresJSON) : {};
-        moduleScores[moduleId || ''] = newScore;
-        localStorage.setItem('moduleScores', JSON.stringify(moduleScores));
-        
-        toast.success(`Module completed! Score: ${newScore}/${moduleQuestions.length}`);
+        toast({
+          title: "Congratulations!",
+          description: `You passed with ${finalScore}%! Module completed.`,
+        });
       } else {
-        toast.error(`You need to score at least 80% to pass. Try again.`);
+        // Still save the attempt, but not as completed
+        await updateProgress(DEFAULT_COURSE_ID, moduleId!, false, finalScore);
+        
+        toast({
+          title: "Not quite there",
+          description: `You scored ${finalScore}%. You need 80% to pass. Try again!`,
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error('Error saving progress:', error);
-      toast.error('Unable to save progress');
+      toast({
+        title: "Error",
+        description: "Failed to save progress. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
