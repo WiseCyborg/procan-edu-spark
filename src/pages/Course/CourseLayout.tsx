@@ -8,10 +8,9 @@ import { CheckCircle, Lock, BookOpen, Award } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 
 const TOTAL_MODULES = 18;
+const COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
 
 const CourseLayout: React.FC = () => {
-  // Default course ID - you may want to make this dynamic based on route params
-  const DEFAULT_COURSE_ID = 'default-course-id';
   
   const {
     getCompletedModulesCount,
@@ -19,11 +18,11 @@ const CourseLayout: React.FC = () => {
     isModuleCompleted,
     migrateFromLocalStorage,
     isLoading
-  } = useUserProgress(DEFAULT_COURSE_ID);
+  } = useUserProgress(COURSE_ID);
 
   useEffect(() => {
     // Migrate any existing localStorage data to Supabase
-    migrateFromLocalStorage(DEFAULT_COURSE_ID);
+    migrateFromLocalStorage(COURSE_ID);
   }, []);
 
   const updateProgress = () => {

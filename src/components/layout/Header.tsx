@@ -1,12 +1,16 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserRole } from '@/hooks/useUserRole';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, User } from 'lucide-react';
+import { LogOut, User, BookOpen, BarChart3 } from 'lucide-react';
 
 const Header = () => {
   const { user, signOut } = useAuth();
+  const { isDispensaryManager, isAdmin, roles } = useUserRole();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -44,7 +48,16 @@ const Header = () => {
           
           {user && (
             <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
+              <nav className="hidden md:flex items-center space-x-4">
+                <Button 
+                  onClick={() => navigate('/course')}
+                  variant="ghost"
+                  size="sm"
+                  className="flex items-center space-x-1"
+                >
+                  <BookOpen className="w-4 h-4" />
+                  <span>Course</span>
+                </Button>
                 <Button 
                   onClick={() => navigate('/faq')}
                   variant="ghost"
@@ -53,26 +66,64 @@ const Header = () => {
                   FAQ
                 </Button>
                 <Button 
-                  onClick={() => navigate('/dispensary-portal')}
+                  onClick={() => navigate('/verify')}
                   variant="ghost"
                   size="sm"
                 >
-                  Dispensary Portal
+                  Verify Certificate
                 </Button>
+                {(isDispensaryManager || isAdmin) && (
+                  <Button 
+                    onClick={() => navigate('/dispensary-portal')}
+                    variant="ghost"
+                    size="sm"
+                    className="flex items-center space-x-1"
+                  >
+                    <BarChart3 className="w-4 h-4" />
+                    <span>Dispensary Portal</span>
+                  </Button>
+                )}
+              </nav>
+              
+              <div className="flex items-center space-x-3">
+                <div className="flex space-x-1">
+                  {roles.map(role => (
+                    <Badge key={role} variant="secondary" className="text-xs">
+                      {role.replace('_', ' ').toUpperCase()}
+                    </Badge>
+                  ))}
+                </div>
+                
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="flex items-center space-x-2">
+                      <User className="w-4 h-4" />
+                      <span className="hidden sm:inline">{user.email}</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuItem onClick={() => navigate('/profile')}>
+                      <User className="w-4 h-4 mr-2" />
+                      Edit Profile
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/course')}>
+                      <BookOpen className="w-4 h-4 mr-2" />
+                      My Courses
+                    </DropdownMenuItem>
+                    {(isDispensaryManager || isAdmin) && (
+                      <DropdownMenuItem onClick={() => navigate('/dispensary-portal')}>
+                        <BarChart3 className="w-4 h-4 mr-2" />
+                        Dispensary Portal
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleSignOut}>
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
-              <div className="flex items-center space-x-2">
-                <User size={20} className="text-gray-600" />
-                <span className="text-sm text-gray-700">{user.email}</span>
-              </div>
-              <Button 
-                onClick={handleSignOut}
-                variant="outline"
-                size="sm"
-                className="flex items-center space-x-2"
-              >
-                <LogOut size={16} />
-                <span>Sign Out</span>
-              </Button>
             </div>
           )}
         </div>

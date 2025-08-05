@@ -38,9 +38,8 @@ const CourseModule: React.FC = () => {
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState(0);
 
-  // Default course ID - you may want to make this dynamic
-  const DEFAULT_COURSE_ID = 'default-course-id';
-  const { updateProgress, isModuleCompleted, getModuleProgress } = useUserProgress(DEFAULT_COURSE_ID);
+  const COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
+  const { updateProgress, isModuleCompleted, getModuleProgress } = useUserProgress(COURSE_ID);
 
   const moduleQuestions = quizzes[moduleId || ''] || [];
   
@@ -87,7 +86,7 @@ const CourseModule: React.FC = () => {
     try {
       if (finalScore >= 80) {
         // Update progress in Supabase
-        await updateProgress(DEFAULT_COURSE_ID, moduleId!, true, finalScore);
+        await updateProgress(COURSE_ID, moduleId!, true, finalScore);
         
         toast({
           title: "Congratulations!",
@@ -95,7 +94,7 @@ const CourseModule: React.FC = () => {
         });
       } else {
         // Still save the attempt, but not as completed
-        await updateProgress(DEFAULT_COURSE_ID, moduleId!, false, finalScore);
+        await updateProgress(COURSE_ID, moduleId!, false, finalScore);
         
         toast({
           title: "Not quite there",

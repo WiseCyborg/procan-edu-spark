@@ -11,7 +11,9 @@ import NotFound from "./pages/NotFound";
 import FAQ from "./pages/FAQ";
 import CertificateVerification from "./pages/CertificateVerification";
 import DispensaryPortal from "./pages/DispensaryPortal";
+import EnhancedDispensaryPortal from "./pages/EnhancedDispensaryPortal";
 import AdminDashboard from "./pages/AdminDashboard";
+import Profile from "./pages/Profile";
 import CourseLayout from "./pages/Course/CourseLayout";
 import CourseModule from "./pages/Course/CourseModule";
 import FinalExam from "./pages/Course/FinalExam";
@@ -81,12 +83,17 @@ const App = () => (
             } />
             <Route path="/dispensary-portal" element={
               <ProtectedRoute>
-                <DispensaryPortal />
+                <EnhancedDispensaryPortal />
               </ProtectedRoute>
             } />
             <Route path="/admin" element={
               <ProtectedRoute>
                 <AdminDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <Profile />
               </ProtectedRoute>
             } />
             <Route path="/welcome" element={

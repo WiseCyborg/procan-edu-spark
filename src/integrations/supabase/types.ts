@@ -344,7 +344,12 @@ export type Database = {
       }
       profiles: {
         Row: {
+          address: string | null
+          city: string | null
           created_at: string
+          date_of_birth: string | null
+          emergency_contact_name: string | null
+          emergency_contact_phone: string | null
           first_name: string | null
           id: string
           is_verified: boolean | null
@@ -353,11 +358,19 @@ export type Database = {
           mca_registration_number: string | null
           organization: string | null
           phone: string | null
+          profile_photo_url: string | null
+          state: string | null
           updated_at: string
           user_id: string
+          zip_code: string | null
         }
         Insert: {
+          address?: string | null
+          city?: string | null
           created_at?: string
+          date_of_birth?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
           first_name?: string | null
           id?: string
           is_verified?: boolean | null
@@ -366,11 +379,19 @@ export type Database = {
           mca_registration_number?: string | null
           organization?: string | null
           phone?: string | null
+          profile_photo_url?: string | null
+          state?: string | null
           updated_at?: string
           user_id: string
+          zip_code?: string | null
         }
         Update: {
+          address?: string | null
+          city?: string | null
           created_at?: string
+          date_of_birth?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
           first_name?: string | null
           id?: string
           is_verified?: boolean | null
@@ -379,8 +400,11 @@ export type Database = {
           mca_registration_number?: string | null
           organization?: string | null
           phone?: string | null
+          profile_photo_url?: string | null
+          state?: string | null
           updated_at?: string
           user_id?: string
+          zip_code?: string | null
         }
         Relationships: []
       }
