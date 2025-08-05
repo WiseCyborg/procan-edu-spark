@@ -190,6 +190,39 @@ export type Database = {
         }
         Relationships: []
       }
+      email_verification_codes: {
+        Row: {
+          code: string
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          purpose: string
+          user_id: string | null
+          verified_at: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          purpose: string
+          user_id?: string | null
+          verified_at?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          purpose?: string
+          user_id?: string | null
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
       exam_attempts: {
         Row: {
           attempt_number: number | null
@@ -501,6 +534,16 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
         }
         Returns: boolean
+      }
+      verify_certificate_status: {
+        Args: { cert_number: string }
+        Returns: {
+          certificate_number: string
+          status: string
+          issue_date: string
+          expiry_date: string
+          course_title: string
+        }[]
       }
     }
     Enums: {
