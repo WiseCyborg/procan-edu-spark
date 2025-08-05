@@ -2,15 +2,28 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useUserProgress } from '@/hooks/useUserProgress';
+import { usePaymentStatus } from '@/hooks/usePaymentStatus';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Lock, BookOpen, Award } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
+import { CoursePaymentGate } from '@/components/CoursePaymentGate';
+import { ProtectedCourseAccess } from '@/components/ProtectedCourseAccess';
 
 const TOTAL_MODULES = 18;
 const COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
 
 const CourseLayout: React.FC = () => {
+  const [course] = useState({
+    id: COURSE_ID,
+    title: 'Maryland Responsible Vendor Training (RVT)',
+    description: 'Complete cannabis education course for Maryland compliance',
+    price_cents: 4999,
+    currency: 'usd',
+    payment_required: true
+  });
+
+  const { hasPaid, isLoading: paymentLoading } = usePaymentStatus(COURSE_ID);
   
   const {
     getCompletedModulesCount,
@@ -39,8 +52,30 @@ const CourseLayout: React.FC = () => {
     description: `Module description for Part ${i + 1}`
   }));
 
+  // Show loading state
+  if (isLoading || paymentLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  // Show payment gate if course requires payment and user hasn't paid
+  if (course.payment_required && !hasPaid) {
+    return (
+      <ProtectedCourseAccess>
+        <CoursePaymentGate 
+          course={course} 
+          onPaymentSuccess={() => window.location.reload()} 
+        />
+      </ProtectedCourseAccess>
+    );
+  }
+
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <ProtectedCourseAccess>
+      <div className="container mx-auto p-6 space-y-6">
       <Card>
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-bold text-primary">
@@ -117,7 +152,8 @@ const CourseLayout: React.FC = () => {
           </Link>
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </ProtectedCourseAccess>
   );
 };
 

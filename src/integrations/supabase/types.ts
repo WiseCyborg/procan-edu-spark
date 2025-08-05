@@ -121,31 +121,40 @@ export type Database = {
       courses: {
         Row: {
           created_at: string
+          currency: string | null
           description: string | null
           id: string
           is_active: boolean | null
           module_count: number | null
           passing_score: number | null
+          payment_required: boolean | null
+          price_cents: number | null
           title: string
           updated_at: string
         }
         Insert: {
           created_at?: string
+          currency?: string | null
           description?: string | null
           id?: string
           is_active?: boolean | null
           module_count?: number | null
           passing_score?: number | null
+          payment_required?: boolean | null
+          price_cents?: number | null
           title: string
           updated_at?: string
         }
         Update: {
           created_at?: string
+          currency?: string | null
           description?: string | null
           id?: string
           is_active?: boolean | null
           module_count?: number | null
           passing_score?: number | null
+          payment_required?: boolean | null
+          price_cents?: number | null
           title?: string
           updated_at?: string
         }
@@ -272,6 +281,56 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "exam_attempts_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          amount: number
+          course_id: string | null
+          created_at: string
+          currency: string | null
+          id: string
+          metadata: Json | null
+          status: string | null
+          stripe_customer_id: string | null
+          stripe_session_id: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          course_id?: string | null
+          created_at?: string
+          currency?: string | null
+          id?: string
+          metadata?: Json | null
+          status?: string | null
+          stripe_customer_id?: string | null
+          stripe_session_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          course_id?: string | null
+          created_at?: string
+          currency?: string | null
+          id?: string
+          metadata?: Json | null
+          status?: string | null
+          stripe_customer_id?: string | null
+          stripe_session_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_course_id_fkey"
             columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "courses"

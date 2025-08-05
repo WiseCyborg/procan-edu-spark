@@ -4,12 +4,16 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen, Award, Shield, CheckCircle } from 'lucide-react';
+import { CoursePreviewSystem } from '@/components/EnhancedCoursePreview';
+import { AccessibilityToolbar, MobileOptimizationIndicator } from '@/components/MobileOptimization';
 
 const Index = () => {
   const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
+      <AccessibilityToolbar />
+      <MobileOptimizationIndicator />
       {/* Hero Section */}
       <section className="relative py-20 px-4">
         <div className="container mx-auto text-center">
@@ -155,6 +159,11 @@ const Index = () => {
             </div>
           </div>
         </div>
+      </section>
+
+      {/* Enhanced Course Preview */}
+      <section className="py-16 px-4 bg-gray-50">
+        <CoursePreviewSystem />
       </section>
 
       {/* CTA Section */}

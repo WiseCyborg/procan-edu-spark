@@ -17,6 +17,7 @@ import Profile from "./pages/Profile";
 import CourseLayout from "./pages/Course/CourseLayout";
 import CourseModule from "./pages/Course/CourseModule";
 import FinalExam from "./pages/Course/FinalExam";
+import PaymentSuccess from "./pages/PaymentSuccess";
 import Dashboard from "./components/dashboard/Dashboard";
 import Header from "./components/layout/Header";
 import DraggableVoiceAssistant from "./components/chat/DraggableVoiceAssistant";
@@ -114,6 +115,11 @@ const App = () => (
             <Route path="/course/final-exam" element={
               <ProtectedRoute>
                 <FinalExam />
+              </ProtectedRoute>
+            } />
+            <Route path="/payment-success" element={
+              <ProtectedRoute>
+                <PaymentSuccess />
               </ProtectedRoute>
             } />
             <Route path="*" element={<NotFound />} />

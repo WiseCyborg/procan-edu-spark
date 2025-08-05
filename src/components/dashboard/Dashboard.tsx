@@ -177,6 +177,19 @@ const Dashboard = () => {
                       {certified && <Award className="h-5 w-5 text-yellow-600" />}
                     </CardTitle>
                     <p className="text-gray-600 mt-2">{course.description}</p>
+                    
+                    {/* Enhanced course information */}
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded">
+                        4-6 hours
+                      </span>
+                      <span className="text-xs bg-green-50 text-green-700 px-2 py-1 rounded">
+                        MCA Compliant
+                      </span>
+                      <span className="text-xs bg-purple-50 text-purple-700 px-2 py-1 rounded">
+                        Certificate Included
+                      </span>
+                    </div>
                   </div>
                   <Button 
                     onClick={() => navigate('/course')}
@@ -196,6 +209,29 @@ const Dashboard = () => {
                   <p className="text-sm text-gray-500">
                     {course.module_count} modules • {progressPercent === 100 ? 'Completed' : 'In Progress'}
                   </p>
+                  
+                  {/* Learning path guidance */}
+                  {progressPercent === 0 && (
+                    <div className="mt-3 p-3 bg-blue-50 rounded-lg">
+                      <h4 className="text-sm font-medium text-blue-800 mb-1">
+                        Getting Started
+                      </h4>
+                      <p className="text-xs text-blue-700">
+                        Complete your profile first, then begin with Module 1: Cannabis Fundamentals
+                      </p>
+                    </div>
+                  )}
+                  
+                  {progressPercent > 0 && progressPercent < 100 && (
+                    <div className="mt-3 p-3 bg-orange-50 rounded-lg">
+                      <h4 className="text-sm font-medium text-orange-800 mb-1">
+                        Keep Going!
+                      </h4>
+                      <p className="text-xs text-orange-700">
+                        You're {progressPercent}% complete. Next: Continue where you left off
+                      </p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
