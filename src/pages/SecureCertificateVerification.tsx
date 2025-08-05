@@ -4,26 +4,37 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Shield, Search, CheckCircle, XCircle, Calendar, Award, Lock } from 'lucide-react';
+import { Shield, Search, CheckCircle, XCircle, Calendar, Award, User } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserRole } from '@/hooks/useUserRole';
 
-interface CertificateStatus {
+interface FullCertificate {
+  id: string;
   certificate_number: string;
-  status: string;
   issue_date: string;
   expiry_date: string | null;
-  course_title: string | null;
+  is_revoked: boolean;
+  course_id: string;
+  user_id: string;
+  profiles: {
+    first_name: string;
+    last_name: string;
+  } | null;
+  courses: {
+    title: string;
+  } | null;
 }
 
-const CertificateVerification = () => {
+const SecureCertificateVerification = () => {
   const [certificateNumber, setCertificateNumber] = useState('');
-  const [certificate, setCertificate] = useState<CertificateStatus | null>(null);
+  const [certificate, setCertificate] = useState<FullCertificate | null>(null);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
+  const { isAdmin } = useUserRole();
 
   const verifyCertificate = async () => {
     if (!certificateNumber.trim()) {
@@ -39,9 +50,16 @@ const CertificateVerification = () => {
     setSearched(true);
 
     try {
-      // Use the secure verification function that doesn't expose PII
+      // Admins and authenticated users can see full certificate details
       const { data, error } = await supabase
-        .rpc('verify_certificate_status', { cert_number: certificateNumber.trim() });
+        .from('certificates')
+        .select(`
+          *,
+          profiles:user_id (first_name, last_name),
+          courses:course_id (title)
+        `)
+        .eq('certificate_number', certificateNumber.trim())
+        .maybeSingle();
 
       if (error) {
         console.error('Verification error:', error);
@@ -54,10 +72,9 @@ const CertificateVerification = () => {
         return;
       }
 
-      const result = data?.[0] || null;
-      setCertificate(result);
+      setCertificate(data as any);
       
-      if (!result) {
+      if (!data) {
         toast({
           title: "Certificate Not Found",
           description: "No certificate found with this number. Please check and try again.",
@@ -96,15 +113,37 @@ const CertificateVerification = () => {
     });
   };
 
-  const getCertificateStatus = (cert: CertificateStatus) => {
-    if (cert.status === 'revoked') {
+  const getCertificateStatus = (cert: FullCertificate) => {
+    if (cert.is_revoked) {
       return { status: 'revoked', color: 'bg-red-100 text-red-800', label: 'Revoked' };
     }
-    if (cert.status === 'expired') {
+    if (cert.expiry_date && isExpired(cert.expiry_date)) {
       return { status: 'expired', color: 'bg-yellow-100 text-yellow-800', label: 'Expired' };
     }
     return { status: 'valid', color: 'bg-green-100 text-green-800', label: 'Valid' };
   };
+
+  // Redirect non-authenticated users to public verification
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center">
+            <Alert className="max-w-2xl mx-auto">
+              <Shield className="h-4 w-4" />
+              <AlertDescription>
+                <strong>Authentication Required:</strong> This page requires login to view full certificate details. 
+                <br />
+                <a href="/verify-certificate" className="text-primary underline">
+                  Use public verification
+                </a> to check certificate validity status only.
+              </AlertDescription>
+            </Alert>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
@@ -115,26 +154,15 @@ const CertificateVerification = () => {
             <Shield className="h-16 w-16 text-green-600" />
           </div>
           <h1 className="text-4xl font-bold text-green-700 mb-4">
-            Certificate Verification
+            Secure Certificate Verification
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Verify the authenticity and validity of ProCann Edu certificates. 
-            Enter a certificate number below to check its current status.
+            {isAdmin 
+              ? "Administrative access: View complete certificate details including personal information."
+              : "Authenticated access: View your certificates and limited details for verification purposes."
+            }
           </p>
         </div>
-
-        {/* Security Notice for Public Access */}
-        {!user && (
-          <div className="max-w-2xl mx-auto mb-6">
-            <Alert className="border-blue-200 bg-blue-50">
-              <Lock className="h-4 w-4 text-blue-600" />
-              <AlertDescription className="text-blue-700">
-                <strong>Public Verification:</strong> This service only shows certificate validity status. 
-                For full certificate details, please log in to your account.
-              </AlertDescription>
-            </Alert>
-          </div>
-        )}
 
         {/* Search Section */}
         <div className="max-w-2xl mx-auto mb-8">
@@ -189,42 +217,50 @@ const CertificateVerification = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-6">
-                  <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Certificate Info */}
-                    <div>
-                      <h3 className="font-semibold text-gray-700 mb-4">Certificate Information</h3>
-                      <div className="space-y-3">
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Certificate Number:</span>
-                          <span className="font-mono font-medium">{certificate.certificate_number}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Course:</span>
-                          <span className="font-medium">{certificate.course_title || 'N/A'}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Issue Date:</span>
-                          <span>{formatDate(certificate.issue_date)}</span>
-                        </div>
-                        {certificate.expiry_date && (
+                    <div className="space-y-4">
+                      <div>
+                        <h3 className="font-semibold text-gray-700 mb-2">Certificate Information</h3>
+                        <div className="space-y-2">
                           <div className="flex justify-between">
-                            <span className="text-gray-600">Expiry Date:</span>
-                            <span className={certificate.status === 'expired' ? 'text-red-600 font-medium' : ''}>
-                              {formatDate(certificate.expiry_date)}
-                            </span>
+                            <span className="text-gray-600">Certificate Number:</span>
+                            <span className="font-mono font-medium">{certificate.certificate_number}</span>
                           </div>
-                        )}
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Course:</span>
+                            <span className="font-medium">{certificate.courses?.title || 'N/A'}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Issue Date:</span>
+                            <span>{formatDate(certificate.issue_date)}</span>
+                          </div>
+                          {certificate.expiry_date && (
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">Expiry Date:</span>
+                              <span className={isExpired(certificate.expiry_date) ? 'text-red-600 font-medium' : ''}>
+                                {formatDate(certificate.expiry_date)}
+                              </span>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
 
-                    {/* Privacy Notice */}
-                    <Alert className="border-gray-200 bg-gray-50">
-                      <Lock className="h-4 w-4 text-gray-600" />
-                      <AlertDescription className="text-gray-700">
-                        <strong>Privacy Protection:</strong> Personal information is not displayed in public verification. 
-                        Only certificate validity status is shown for security purposes.
-                      </AlertDescription>
-                    </Alert>
+                    {/* Holder Info - Only show to admin or certificate owner */}
+                    {(isAdmin || certificate.user_id === user.id) && (
+                      <div className="space-y-4">
+                        <div>
+                          <h3 className="font-semibold text-gray-700 mb-2">Certificate Holder</h3>
+                          <div className="flex items-center">
+                            <User className="mr-2 h-4 w-4 text-gray-400" />
+                            <span className="font-medium">
+                              {certificate.profiles?.first_name} {certificate.profiles?.last_name}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Status Alerts */}
@@ -274,36 +310,9 @@ const CertificateVerification = () => {
             )}
           </div>
         )}
-
-        {/* Help Section */}
-        <div className="max-w-4xl mx-auto mt-12">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-green-700">Need Help?</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <h4 className="font-semibold mb-2">For Employers</h4>
-                  <p className="text-gray-600 text-sm">
-                    Use this tool to verify employee certifications. Valid certificates ensure 
-                    compliance with Maryland Cannabis Administration requirements.
-                  </p>
-                </div>
-                <div>
-                  <h4 className="font-semibold mb-2">For Certificate Holders</h4>
-                  <p className="text-gray-600 text-sm">
-                    Share your certificate number with employers for verification. 
-                    Keep track of your expiry date to ensure continuous compliance.
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
       </div>
     </div>
   );
 };
 
-export default CertificateVerification;
+export default SecureCertificateVerification;

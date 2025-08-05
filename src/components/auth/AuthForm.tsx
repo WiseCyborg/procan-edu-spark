@@ -6,9 +6,12 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/components/ui/use-toast';
+import { MFAVerification } from './MFAVerification';
 
 const AuthForm = () => {
   const [loading, setLoading] = useState(false);
+  const [showMFA, setShowMFA] = useState(false);
+  const [mfaEmail, setMfaEmail] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
@@ -80,17 +83,50 @@ const AuthForm = () => {
         } else {
           throw error;
         }
+        setLoading(false);
+        return;
       }
+
+      // Show MFA verification after successful password verification
+      setMfaEmail(email);
+      setShowMFA(true);
+      setLoading(false);
     } catch (error) {
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : 'An error occurred',
         variant: "destructive",
       });
-    } finally {
       setLoading(false);
     }
   };
+
+  const handleMFAVerified = () => {
+    setShowMFA(false);
+    toast({
+      title: "Success",
+      description: "Successfully signed in!",
+    });
+  };
+
+  const handleMFACancel = () => {
+    setShowMFA(false);
+    // Sign out the user since they didn't complete MFA
+    supabase.auth.signOut();
+  };
+
+  if (showMFA) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-blue-50 p-4">
+        <MFAVerification
+          email={mfaEmail}
+          purpose="login"
+          onVerified={handleMFAVerified}
+          onCancel={handleMFACancel}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-blue-50 p-4">

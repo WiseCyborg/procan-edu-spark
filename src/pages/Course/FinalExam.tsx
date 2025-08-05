@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface QuizQuestion {
   q: string;
@@ -17,6 +18,7 @@ interface UserData {
   email: string;
   ip: string;
   photo?: string;
+  certificateNumber?: string;
 }
 
 interface ExamResult {
@@ -290,8 +292,59 @@ const FinalExam: React.FC = () => {
     setExamStage('results');
   };
 
-  const generateCertificate = () => {
-    setExamStage('certificate');
+  const generateCertificate = async () => {
+    try {
+      // First record the exam attempt in the database
+      const { data: examData, error: examError } = await supabase
+        .from('exam_attempts')
+        .insert({
+          user_id: (await supabase.auth.getUser()).data.user?.id,
+          course_id: 'default-course-id', // You might want to get this dynamically
+          total_score: totalScore,
+          passing_score: 80,
+          is_passed: true,
+          time_taken: 5400 - totalTimeLeft,
+          photo_verification_url: userData.photo,
+          ip_address: userData.ip,
+          completed_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+
+      if (examError) {
+        console.error('Error recording exam attempt:', examError);
+        toast.error('Failed to record exam attempt');
+        return;
+      }
+
+      // Generate certificate using secure edge function
+      const { data: certData, error: certError } = await supabase.functions.invoke('generate-certificate', {
+        body: {
+          exam_attempt_id: examData.id,
+          user_data: userData,
+          exam_results: {
+            total_score: totalScore,
+            total_questions: Object.values(quizzes).reduce((sum, section) => sum + section.length, 0),
+            time_taken: 5400 - totalTimeLeft,
+            passing_score: 80
+          }
+        }
+      });
+
+      if (certError) {
+        console.error('Error generating certificate:', certError);
+        toast.error('Failed to generate certificate');
+        return;
+      }
+
+      // Store certificate number for display
+      setUserData(prev => ({ ...prev, certificateNumber: certData.certificate_number }));
+      setExamStage('certificate');
+      toast.success('Certificate generated successfully!');
+    } catch (error) {
+      console.error('Error in certificate generation:', error);
+      toast.error('An unexpected error occurred');
+    }
   };
 
   const printCertificate = () => {
@@ -405,6 +458,7 @@ const FinalExam: React.FC = () => {
           
           <div className="text-center text-sm mb-6">
             <p>on {date}</p>
+            <p>Certificate Number: <strong>{userData.certificateNumber}</strong></p>
             <p>Phone: {userData.phone} | Email: {userData.email}</p>
             <p>IP Address: {userData.ip}</p>
             <p>Total Time: {formatTime(elapsedTime)}</p>
