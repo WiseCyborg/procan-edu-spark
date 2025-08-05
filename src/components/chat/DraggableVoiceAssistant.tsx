@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserRole } from '@/hooks/useUserRole';
 import { toast } from '@/components/ui/use-toast';
 import { useConversation } from '@11labs/react';
 
@@ -130,6 +131,7 @@ const getContextInfo = (pathname: string): ContextInfo => {
 export const DraggableVoiceAssistant: React.FC = () => {
   const location = useLocation();
   const { user } = useAuth();
+  const { roles } = useUserRole();
   const [isOpen, setIsOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -347,7 +349,8 @@ export const DraggableVoiceAssistant: React.FC = () => {
         body: {
           message: text,
           context: contextInfo,
-          user_id: user?.id
+          user_id: user?.id,
+          user_roles: roles
         }
       });
 

@@ -70,6 +70,24 @@ const FAQ = () => {
         question: 'I\'m experiencing audio issues during the course.',
         answer: 'Check your device volume and ensure other applications aren\'t using your audio. Try using headphones or external speakers. Update your browser if needed.',
         category: 'Technical Support'
+      },
+      {
+        id: 'security-1',
+        question: 'How do managers get assigned to oversee my training?',
+        answer: 'Managers are assigned by ProCann Admins based on your organizational structure. Once assigned, they can monitor your progress and compliance status through their management dashboard.',
+        category: 'Access & Security'
+      },
+      {
+        id: 'security-2',
+        question: 'What security measures protect my training data?',
+        answer: 'We use enterprise-grade security including multi-factor authentication, encrypted data transmission, and HIPAA-compliant storage. All access is logged and monitored for compliance.',
+        category: 'Access & Security'
+      },
+      {
+        id: 'security-3',
+        question: 'Who can see my training progress and scores?',
+        answer: 'Only your assigned managers (set by ProCann Admins) and system administrators can view your progress. You can check who has access in your profile settings under "Access Permissions".',
+        category: 'Access & Security'
       }
     ],
     dispensary: [
@@ -108,6 +126,36 @@ const FAQ = () => {
         question: 'What happens if an employee leaves our company?',
         answer: 'You can deactivate employees in your portal. Their certificates remain valid, but they won\'t count toward your billing. You can reactivate them if they return.',
         category: 'Employee Management'
+      },
+      {
+        id: 'mgmt-1',
+        question: 'How do I get manager access assigned by ProCann Admin?',
+        answer: 'ProCann Admins assign manager roles based on your organizational structure and authorization levels. Contact your system administrator or info@procannedu.com to request manager access.',
+        category: 'Manager Access'
+      },
+      {
+        id: 'mgmt-2',
+        question: 'What security protocols should managers follow?',
+        answer: 'Managers must use multi-factor authentication, regularly review access logs, monitor team compliance status, and report any security incidents immediately. All actions are audit-logged.',
+        category: 'Manager Security'
+      },
+      {
+        id: 'mgmt-3',
+        question: 'How do I monitor student progress and compliance?',
+        answer: 'Your manager dashboard provides real-time student progress tracking, completion rates, compliance status, and detailed analytics. You can export reports for audit purposes.',
+        category: 'Student Oversight'
+      },
+      {
+        id: 'mgmt-4',
+        question: 'What data can managers access about students?',
+        answer: 'Managers can view assigned students\' course progress, completion status, exam scores, certification dates, and compliance records. Personal data access is limited and logged.',
+        category: 'Data Access'
+      },
+      {
+        id: 'mgmt-5',
+        question: 'How do I assign or remove student access?',
+        answer: 'Managers can assign students to courses and manage their access levels through the team management interface. All access changes are logged and require approval workflows.',
+        category: 'Access Control'
       }
     ],
     general: [
@@ -150,7 +198,7 @@ const FAQ = () => {
     ]
   };
 
-  const categories = ['Account Management', 'Course Access', 'Certification', 'Technical Support', 'Bulk Management', 'Progress Tracking', 'Compliance', 'Billing', 'Renewal Management', 'Employee Management', 'About Training', 'Pricing'];
+  const categories = ['Account Management', 'Course Access', 'Certification', 'Technical Support', 'Access & Security', 'Bulk Management', 'Progress Tracking', 'Compliance', 'Billing', 'Renewal Management', 'Employee Management', 'Manager Access', 'Manager Security', 'Student Oversight', 'Data Access', 'Access Control', 'About Training', 'Pricing'];
 
   const getAllFAQs = () => {
     return [...faqData.individual, ...faqData.dispensary, ...faqData.general];
@@ -171,12 +219,18 @@ const FAQ = () => {
       'Course Access': 'bg-green-100 text-green-800',
       'Certification': 'bg-yellow-100 text-yellow-800',
       'Technical Support': 'bg-red-100 text-red-800',
+      'Access & Security': 'bg-slate-100 text-slate-800',
       'Bulk Management': 'bg-purple-100 text-purple-800',
       'Progress Tracking': 'bg-indigo-100 text-indigo-800',
       'Compliance': 'bg-orange-100 text-orange-800',
       'Billing': 'bg-cyan-100 text-cyan-800',
       'Renewal Management': 'bg-pink-100 text-pink-800',
       'Employee Management': 'bg-teal-100 text-teal-800',
+      'Manager Access': 'bg-emerald-100 text-emerald-800',
+      'Manager Security': 'bg-rose-100 text-rose-800',
+      'Student Oversight': 'bg-violet-100 text-violet-800',
+      'Data Access': 'bg-sky-100 text-sky-800',
+      'Access Control': 'bg-zinc-100 text-zinc-800',
       'About Training': 'bg-lime-100 text-lime-800',
       'Pricing': 'bg-amber-100 text-amber-800'
     };

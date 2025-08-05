@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { MessageCircle, Send, X, HelpCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserRole } from '@/hooks/useUserRole';
 import { toast } from '@/components/ui/use-toast';
 
 interface Message {
@@ -146,6 +147,7 @@ const getContextInfo = (pathname: string): ContextInfo => {
 export const ChatAssistant: React.FC = () => {
   const location = useLocation();
   const { user } = useAuth();
+  const { roles } = useUserRole();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
@@ -221,7 +223,8 @@ export const ChatAssistant: React.FC = () => {
         body: {
           message: inputMessage.trim(),
           context: contextInfo,
-          user_id: user?.id
+          user_id: user?.id,
+          user_roles: roles
         }
       });
 

@@ -18,6 +18,7 @@ interface ChatRequest {
     systemPrompt: string;
   };
   user_id?: string;
+  user_roles?: string[];
 }
 
 serve(async (req) => {
@@ -31,29 +32,70 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured');
     }
 
-    const { message, context, user_id }: ChatRequest = await req.json();
+    const { message, context, user_id, user_roles }: ChatRequest = await req.json();
 
     if (!message || !context) {
       throw new Error('Message and context are required');
     }
 
-    // Enhanced system prompt with cannabis industry knowledge
+    // Determine role-specific context
+    const isManager = user_roles?.includes('dispensary_manager') || false;
+    const isAdmin = user_roles?.includes('admin') || false;
+    const isStudent = user_roles?.includes('student') || true; // Default to student
+
+    // Role-specific guidance
+    let roleContext = '';
+    if (isAdmin) {
+      roleContext = `
+      ADMIN CONTEXT:
+      - You have full system access and can manage all users and organizations
+      - You can assign manager roles and oversee compliance across all entities
+      - Focus on system administration, security protocols, and organizational oversight
+      - Provide guidance on user management, security policies, and compliance monitoring`;
+    } else if (isManager) {
+      roleContext = `
+      MANAGER CONTEXT:
+      - You have manager access assigned by ProCann Admin
+      - You can oversee students/employees within your assigned scope
+      - You have security responsibilities for team oversight and compliance monitoring
+      - Focus on team management, progress tracking, and compliance reporting
+      - You can access student progress data and generate compliance reports
+      - Emphasize security protocols and data protection responsibilities`;
+    } else {
+      roleContext = `
+      STUDENT CONTEXT:
+      - You are taking cannabis industry training courses
+      - Managers may have been assigned to oversee your progress
+      - Your training data is secure and access is logged and monitored
+      - Focus on course completion, certification, and career development`;
+    }
+
+    // Enhanced system prompt with cannabis industry knowledge and role awareness
     const enhancedSystemPrompt = `${context.systemPrompt}
 
     Additional context:
     - Current page: ${context.route}
+    - User roles: ${user_roles?.join(', ') || 'student'}
+    ${roleContext}
+    
+    Platform Knowledge:
     - Maryland Cannabis Industry Focus: Regulatory compliance, RVT (Responsible Vendor Training), inventory tracking, seed-to-sale systems
     - Common compliance areas: Security requirements, product testing, labeling, advertising restrictions, employee training
     - ProCann Edu specializes in preparing professionals for Maryland's cannabis industry
+    - Security: Multi-factor authentication, encrypted data, HIPAA-compliant storage, audit logging
+    - Access Control: Role-based permissions, manager assignments by ProCann Admin
     - Always be helpful, professional, and encouraging
     - If you don't know something specific about Maryland cannabis laws, recommend contacting info@procannedu.com
     - Keep responses concise but informative
-    - Focus on practical, actionable advice
+    - Focus on practical, actionable advice based on user's role
     
     Response guidelines:
     - Be conversational and friendly
     - Use cannabis industry terminology appropriately
-    - Provide specific help based on the current page context
+    - Provide specific help based on the current page context AND user role
+    - For managers: Include security and oversight responsibilities
+    - For students: Focus on learning and compliance
+    - For admins: Emphasize system management and organizational oversight
     - Always end support requests by mentioning info@procannedu.com for additional help
     - Encourage users to complete their training for career advancement`;
 
