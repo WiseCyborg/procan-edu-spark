@@ -95,23 +95,85 @@ const Profile: React.FC = () => {
     setProfile(prev => ({ ...prev, [field]: value }));
   };
 
+  const validateProfile = () => {
+    const errors: string[] = [];
+    
+    if (profile.date_of_birth) {
+      const birthDate = new Date(profile.date_of_birth);
+      const today = new Date();
+      if (birthDate > today) {
+        errors.push("Date of birth cannot be in the future");
+      }
+    }
+    
+    if (profile.phone && !/^[\d\s\-\(\)\+]+$/.test(profile.phone)) {
+      errors.push("Please enter a valid phone number");
+    }
+    
+    if (profile.emergency_contact_phone && !/^[\d\s\-\(\)\+]+$/.test(profile.emergency_contact_phone)) {
+      errors.push("Please enter a valid emergency contact phone number");
+    }
+    
+    if (profile.zip_code && !/^\d{5}(-\d{4})?$/.test(profile.zip_code)) {
+      errors.push("Please enter a valid ZIP code");
+    }
+    
+    return errors;
+  };
+
   const handleSave = async () => {
     if (!user) return;
 
+    // Validate profile data
+    const validationErrors = validateProfile();
+    if (validationErrors.length > 0) {
+      toast({
+        title: "Validation Error",
+        description: validationErrors[0],
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsSaving(true);
     try {
+      // Prepare profile data with proper null handling
+      const profileData = {
+        user_id: user.id,
+        first_name: profile.first_name.trim() || null,
+        last_name: profile.last_name.trim() || null,
+        phone: profile.phone.trim() || null,
+        organization: profile.organization.trim() || null,
+        job_title: profile.job_title.trim() || null,
+        mca_registration_number: profile.mca_registration_number.trim() || null,
+        date_of_birth: profile.date_of_birth || null,
+        address: profile.address.trim() || null,
+        city: profile.city.trim() || null,
+        state: profile.state.trim() || 'Maryland',
+        zip_code: profile.zip_code.trim() || null,
+        emergency_contact_name: profile.emergency_contact_name.trim() || null,
+        emergency_contact_phone: profile.emergency_contact_phone.trim() || null,
+      };
+
       const { error } = await supabase
         .from('profiles')
-        .upsert({
-          user_id: user.id,
-          ...profile
+        .upsert(profileData, {
+          onConflict: 'user_id'
         });
 
       if (error) {
         console.error('Error saving profile:', error);
+        let errorMessage = "Failed to save profile changes";
+        
+        if (error.code === '23505') {
+          errorMessage = "A profile with this information already exists";
+        } else if (error.code === '22007') {
+          errorMessage = "Invalid date format. Please check your date of birth";
+        }
+        
         toast({
           title: "Error",
-          description: "Failed to save profile changes",
+          description: errorMessage,
           variant: "destructive"
         });
         return;

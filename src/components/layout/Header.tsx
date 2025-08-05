@@ -66,7 +66,7 @@ const Header = () => {
                   FAQ
                 </Button>
                 <Button 
-                  onClick={() => navigate('/verify')}
+                  onClick={() => navigate('/verify-certificate')}
                   variant="ghost"
                   size="sm"
                 >

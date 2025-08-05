@@ -75,19 +75,23 @@ export const useProfileCompletion = () => {
   const calculateCompletion = (profileData: Partial<ProfileCompletionData> | null) => {
     if (!profileData) {
       setCompletionPercentage(0);
-      setMissingFields(REQUIRED_FIELDS.map(field => field.replace('_', ' ')));
+      setMissingFields(REQUIRED_FIELDS.map(field => 
+        field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+      ));
       return;
     }
 
     const completedFields = REQUIRED_FIELDS.filter(field => {
       const value = profileData[field];
-      return value && value.toString().trim().length > 0;
+      return value !== null && value !== undefined && value.toString().trim().length > 0;
     });
 
     const missing = REQUIRED_FIELDS.filter(field => {
       const value = profileData[field];
-      return !value || value.toString().trim().length === 0;
-    }).map(field => field.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()));
+      return value === null || value === undefined || value.toString().trim().length === 0;
+    }).map(field => 
+      field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+    );
 
     const percentage = Math.round((completedFields.length / REQUIRED_FIELDS.length) * 100);
     
