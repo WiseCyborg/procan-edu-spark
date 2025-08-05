@@ -22,23 +22,60 @@ const Header = () => {
           <span className="text-sm text-gray-600">Maryland Cannabis Training</span>
         </div>
         
-        {user && (
-          <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-4">
+          {!user && (
             <div className="flex items-center space-x-2">
-              <User size={20} className="text-gray-600" />
-              <span className="text-sm text-gray-700">{user.email}</span>
+              <Button 
+                onClick={() => navigate('/faq')}
+                variant="ghost"
+                size="sm"
+              >
+                FAQ
+              </Button>
+              <Button 
+                onClick={() => navigate('/verify-certificate')}
+                variant="ghost"
+                size="sm"
+              >
+                Verify Certificate
+              </Button>
             </div>
-            <Button 
-              onClick={handleSignOut}
-              variant="outline"
-              size="sm"
-              className="flex items-center space-x-2"
-            >
-              <LogOut size={16} />
-              <span>Sign Out</span>
-            </Button>
-          </div>
-        )}
+          )}
+          
+          {user && (
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <Button 
+                  onClick={() => navigate('/faq')}
+                  variant="ghost"
+                  size="sm"
+                >
+                  FAQ
+                </Button>
+                <Button 
+                  onClick={() => navigate('/dispensary-portal')}
+                  variant="ghost"
+                  size="sm"
+                >
+                  Dispensary Portal
+                </Button>
+              </div>
+              <div className="flex items-center space-x-2">
+                <User size={20} className="text-gray-600" />
+                <span className="text-sm text-gray-700">{user.email}</span>
+              </div>
+              <Button 
+                onClick={handleSignOut}
+                variant="outline"
+                size="sm"
+                className="flex items-center space-x-2"
+              >
+                <LogOut size={16} />
+                <span>Sign Out</span>
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );

@@ -39,6 +39,14 @@ const Index = () => {
             >
               Sign In
             </Button>
+            <Button 
+              onClick={() => navigate('/faq')}
+              size="lg"
+              variant="ghost"
+              className="px-8 py-3"
+            >
+              FAQ
+            </Button>
           </div>
         </div>
       </section>
@@ -170,14 +178,47 @@ const Index = () => {
 
       {/* Footer */}
       <footer className="bg-gray-800 text-white py-8 px-4">
-        <div className="container mx-auto text-center">
-          <h4 className="text-lg font-semibold mb-2">ProCann Training</h4>
-          <p className="text-gray-400 mb-4">
-            In accordance with the Maryland Cannabis Administration
-          </p>
-          <p className="text-sm text-gray-500">
-            © 2024 ProCann Edu. All rights reserved.
-          </p>
+        <div className="container mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-6">
+            <div>
+              <h4 className="text-lg font-semibold mb-4">ProCann Edu</h4>
+              <p className="text-gray-400 text-sm">
+                Maryland's premier cannabis education platform, providing MCA-compliant training and certification.
+              </p>
+            </div>
+            <div>
+              <h5 className="font-semibold mb-3">Quick Links</h5>
+              <ul className="space-y-2 text-sm">
+                <li><a href="/faq" className="text-gray-400 hover:text-white">FAQ</a></li>
+                <li><a href="/verify-certificate" className="text-gray-400 hover:text-white">Verify Certificate</a></li>
+                <li><a href="/auth" className="text-gray-400 hover:text-white">Sign In</a></li>
+              </ul>
+            </div>
+            <div>
+              <h5 className="font-semibold mb-3">For Organizations</h5>
+              <ul className="space-y-2 text-sm">
+                <li><span className="text-gray-400">Bulk Training</span></li>
+                <li><span className="text-gray-400">Compliance Reports</span></li>
+                <li><span className="text-gray-400">Employee Management</span></li>
+              </ul>
+            </div>
+            <div>
+              <h5 className="font-semibold mb-3">Support</h5>
+              <ul className="space-y-2 text-sm">
+                <li><span className="text-gray-400">support@procann.edu</span></li>
+                <li><span className="text-gray-400">(555) 123-4567</span></li>
+                <li><span className="text-gray-400">Mon-Fri 9AM-6PM EST</span></li>
+              </ul>
+            </div>
+          </div>
+          <div className="border-t border-gray-700 pt-6 text-center">
+            <p className="text-gray-400 mb-2">
+              In accordance with the Maryland Cannabis Administration
+            </p>
+            <p className="text-sm text-gray-500">
+              © 2024 ProCann Edu. All rights reserved.
+            </p>
+          </div>
         </div>
       </footer>
     </div>

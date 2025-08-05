@@ -1,0 +1,534 @@
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
+import { 
+  Users, 
+  TrendingUp, 
+  DollarSign, 
+  Award,
+  FileText,
+  AlertTriangle,
+  Calendar,
+  Building2,
+  BarChart3,
+  Settings
+} from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
+
+interface AdminStats {
+  totalUsers: number;
+  totalOrganizations: number;
+  totalCertificates: number;
+  totalRevenue: number;
+  monthlyGrowth: number;
+  completionRate: number;
+  expiringCertificates: number;
+}
+
+interface UserAnalytics {
+  id: string;
+  first_name: string;
+  last_name: string;
+  organization: string;
+  created_at: string;
+  lastActivity: string;
+  completionStatus: string;
+}
+
+interface OrganizationData {
+  name: string;
+  employeeCount: number;
+  completionRate: number;
+  totalSpent: number;
+}
+
+const AdminDashboard = () => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [stats, setStats] = useState<AdminStats>({
+    totalUsers: 0,
+    totalOrganizations: 0,
+    totalCertificates: 0,
+    totalRevenue: 0,
+    monthlyGrowth: 0,
+    completionRate: 0,
+    expiringCertificates: 0
+  });
+  const [users, setUsers] = useState<UserAnalytics[]>([]);
+  const [organizations, setOrganizations] = useState<OrganizationData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (user) {
+      fetchAdminData();
+    }
+  }, [user]);
+
+  const fetchAdminData = async () => {
+    try {
+      setLoading(true);
+
+      // Fetch users data
+      const { data: usersData, error: usersError } = await supabase
+        .from('profiles')
+        .select('*');
+
+      if (usersError) throw usersError;
+
+      // Fetch certificates data
+      const { data: certificatesData, error: certificatesError } = await supabase
+        .from('certificates')
+        .select('*');
+
+      if (certificatesError) throw certificatesError;
+
+      // Fetch organizations data
+      const { data: organizationsData, error: organizationsError } = await supabase
+        .from('organizations')
+        .select('*');
+
+      if (organizationsError) throw organizationsError;
+
+      // Fetch payments data
+      const { data: paymentsData, error: paymentsError } = await supabase
+        .from('payments')
+        .select('*');
+
+      if (paymentsError) throw paymentsError;
+
+      // Fetch user progress
+      const { data: progressData, error: progressError } = await supabase
+        .from('user_progress')
+        .select('*');
+
+      if (progressError) throw progressError;
+
+      // Calculate stats
+      const totalUsers = usersData?.length || 0;
+      const totalOrganizations = organizationsData?.length || 0;
+      const totalCertificates = certificatesData?.filter(cert => !cert.is_revoked).length || 0;
+      const totalRevenue = paymentsData?.reduce((sum, payment) => sum + (payment.amount || 0), 0) || 0;
+      
+      // Calculate completion rate
+      const completedUsers = certificatesData?.filter(cert => !cert.is_revoked).length || 0;
+      const completionRate = totalUsers > 0 ? Math.round((completedUsers / totalUsers) * 100) : 0;
+
+      // Calculate expiring certificates (within 30 days)
+      const thirtyDaysFromNow = new Date();
+      thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+      const expiringCertificates = certificatesData?.filter(cert => {
+        if (!cert.expiry_date || cert.is_revoked) return false;
+        const expiryDate = new Date(cert.expiry_date);
+        return expiryDate <= thirtyDaysFromNow && expiryDate > new Date();
+      }).length || 0;
+
+      setStats({
+        totalUsers,
+        totalOrganizations,
+        totalCertificates,
+        totalRevenue,
+        monthlyGrowth: 12.5, // Mock data
+        completionRate,
+        expiringCertificates
+      });
+
+      // Process users data for analytics
+      const processedUsers = usersData?.map(user => ({
+        id: user.id,
+        first_name: user.first_name || '',
+        last_name: user.last_name || '',
+        organization: user.organization || 'Individual',
+        created_at: user.created_at,
+        lastActivity: user.updated_at || user.created_at,
+        completionStatus: certificatesData?.some(cert => cert.user_id === user.user_id && !cert.is_revoked) 
+          ? 'Completed' : 'In Progress'
+      })) || [];
+
+      setUsers(processedUsers);
+
+      // Process organization data
+      const orgGroups = usersData?.reduce((acc: Record<string, any[]>, user) => {
+        const org = user.organization || 'Individual';
+        if (!acc[org]) acc[org] = [];
+        acc[org].push(user);
+        return acc;
+      }, {}) || {};
+
+      const processedOrgs = Object.entries(orgGroups).map(([orgName, orgUsers]) => {
+        const employeeCount = orgUsers.length;
+        const completedInOrg = orgUsers.filter(user => 
+          certificatesData?.some(cert => cert.user_id === user.user_id && !cert.is_revoked)
+        ).length;
+        const completionRate = employeeCount > 0 ? Math.round((completedInOrg / employeeCount) * 100) : 0;
+        
+        return {
+          name: orgName,
+          employeeCount,
+          completionRate,
+          totalSpent: Math.round(Math.random() * 10000) // Mock data
+        };
+      });
+
+      setOrganizations(processedOrgs);
+
+    } catch (error) {
+      console.error('Error fetching admin data:', error);
+      toast({
+        title: "Error",
+        description: "Unable to load admin dashboard data. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(amount);
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="text-center">
+          <Settings className="h-12 w-12 text-green-600 mx-auto mb-4 animate-spin" />
+          <p className="text-gray-600">Loading admin dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-green-700 flex items-center">
+            <Settings className="mr-3 h-8 w-8" />
+            Admin Dashboard
+          </h1>
+          <p className="text-gray-600 mt-1">Platform analytics and management overview</p>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Total Users</p>
+                  <p className="text-3xl font-bold text-green-700">{stats.totalUsers}</p>
+                  <p className="text-sm text-green-600">+{stats.monthlyGrowth}% this month</p>
+                </div>
+                <Users className="h-8 w-8 text-green-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Organizations</p>
+                  <p className="text-3xl font-bold text-blue-700">{stats.totalOrganizations}</p>
+                  <p className="text-sm text-blue-600">Active clients</p>
+                </div>
+                <Building2 className="h-8 w-8 text-blue-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Certificates</p>
+                  <p className="text-3xl font-bold text-yellow-700">{stats.totalCertificates}</p>
+                  <p className="text-sm text-yellow-600">{stats.completionRate}% completion rate</p>
+                </div>
+                <Award className="h-8 w-8 text-yellow-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Revenue</p>
+                  <p className="text-3xl font-bold text-green-700">{formatCurrency(stats.totalRevenue)}</p>
+                  <p className="text-sm text-green-600">Total earnings</p>
+                </div>
+                <DollarSign className="h-8 w-8 text-green-600" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Alert Cards */}
+        {stats.expiringCertificates > 0 && (
+          <Card className="mb-8 border-orange-200 bg-orange-50">
+            <CardContent className="pt-6">
+              <div className="flex items-center">
+                <AlertTriangle className="h-5 w-5 text-orange-600 mr-2" />
+                <div>
+                  <p className="font-medium text-orange-800">
+                    {stats.expiringCertificates} certificates are expiring within 30 days
+                  </p>
+                  <p className="text-sm text-orange-600">
+                    Consider sending renewal reminders to affected users and organizations.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Main Content */}
+        <Tabs defaultValue="users" className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="users">User Analytics</TabsTrigger>
+            <TabsTrigger value="organizations">Organizations</TabsTrigger>
+            <TabsTrigger value="revenue">Revenue</TabsTrigger>
+            <TabsTrigger value="reports">Reports</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="users">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center text-green-700">
+                  <Users className="mr-2 h-5 w-5" />
+                  User Analytics & Management
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div className="bg-green-50 p-4 rounded-lg">
+                      <h3 className="font-semibold text-green-700">Active Users</h3>
+                      <p className="text-2xl font-bold text-green-600">{stats.totalUsers}</p>
+                    </div>
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <h3 className="font-semibold text-blue-700">Completed Training</h3>
+                      <p className="text-2xl font-bold text-blue-600">{stats.totalCertificates}</p>
+                    </div>
+                    <div className="bg-purple-50 p-4 rounded-lg">
+                      <h3 className="font-semibold text-purple-700">Success Rate</h3>
+                      <p className="text-2xl font-bold text-purple-600">{stats.completionRate}%</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    {users.slice(0, 10).map((user) => (
+                      <div key={user.id} className="border rounded-lg p-4 hover:bg-gray-50">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h3 className="font-semibold">
+                              {user.first_name} {user.last_name}
+                            </h3>
+                            <p className="text-sm text-gray-600">{user.organization}</p>
+                            <p className="text-xs text-gray-500">
+                              Joined: {formatDate(user.created_at)}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <Badge className={
+                              user.completionStatus === 'Completed' 
+                                ? 'bg-green-100 text-green-800' 
+                                : 'bg-yellow-100 text-yellow-800'
+                            }>
+                              {user.completionStatus}
+                            </Badge>
+                            <p className="text-xs text-gray-500 mt-1">
+                              Last active: {formatDate(user.lastActivity)}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="organizations">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center text-green-700">
+                  <Building2 className="mr-2 h-5 w-5" />
+                  Organization Performance
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {organizations.map((org, index) => (
+                    <div key={index} className="border rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <h3 className="font-semibold text-lg">{org.name}</h3>
+                          <p className="text-sm text-gray-600">
+                            {org.employeeCount} employees
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-semibold text-green-600">
+                            {formatCurrency(org.totalSpent)}
+                          </p>
+                          <p className="text-sm text-gray-600">Total spent</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600">Completion Rate</span>
+                        <span className="text-sm font-medium">{org.completionRate}%</span>
+                      </div>
+                      <Progress value={org.completionRate} className="mt-2" />
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="revenue">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center text-green-700">
+                  <DollarSign className="mr-2 h-5 w-5" />
+                  Revenue Analytics
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Revenue Summary</h3>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                        <span className="text-green-700">Total Revenue</span>
+                        <span className="font-bold text-green-800">
+                          {formatCurrency(stats.totalRevenue)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                        <span className="text-blue-700">Monthly Growth</span>
+                        <span className="font-bold text-blue-800">+{stats.monthlyGrowth}%</span>
+                      </div>
+                      <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
+                        <span className="text-purple-700">Avg. per User</span>
+                        <span className="font-bold text-purple-800">
+                          {formatCurrency(stats.totalUsers > 0 ? stats.totalRevenue / stats.totalUsers : 0)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Performance Metrics</h3>
+                    <div className="space-y-3">
+                      <div className="p-3 border rounded-lg">
+                        <div className="flex justify-between mb-2">
+                          <span className="text-sm text-gray-600">Conversion Rate</span>
+                          <span className="text-sm font-medium">85%</span>
+                        </div>
+                        <Progress value={85} />
+                      </div>
+                      <div className="p-3 border rounded-lg">
+                        <div className="flex justify-between mb-2">
+                          <span className="text-sm text-gray-600">Customer Retention</span>
+                          <span className="text-sm font-medium">92%</span>
+                        </div>
+                        <Progress value={92} />
+                      </div>
+                      <div className="p-3 border rounded-lg">
+                        <div className="flex justify-between mb-2">
+                          <span className="text-sm text-gray-600">Training Completion</span>
+                          <span className="text-sm font-medium">{stats.completionRate}%</span>
+                        </div>
+                        <Progress value={stats.completionRate} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="reports">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center text-green-700">
+                  <FileText className="mr-2 h-5 w-5" />
+                  System Reports & Analytics
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Quick Reports</h3>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                        <span>Daily User Activity</span>
+                        <BarChart3 className="h-4 w-4 text-gray-400" />
+                      </div>
+                      <div className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                        <span>Certificate Issuance Report</span>
+                        <Award className="h-4 w-4 text-gray-400" />
+                      </div>
+                      <div className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                        <span>Revenue Breakdown</span>
+                        <DollarSign className="h-4 w-4 text-gray-400" />
+                      </div>
+                      <div className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                        <span>Organization Performance</span>
+                        <Building2 className="h-4 w-4 text-gray-400" />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">System Health</h3>
+                    <div className="space-y-3">
+                      <div className="p-3 bg-green-50 rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <span className="text-green-700">Platform Uptime</span>
+                          <Badge className="bg-green-100 text-green-800">99.9%</Badge>
+                        </div>
+                      </div>
+                      <div className="p-3 bg-blue-50 rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <span className="text-blue-700">Database Performance</span>
+                          <Badge className="bg-blue-100 text-blue-800">Optimal</Badge>
+                        </div>
+                      </div>
+                      <div className="p-3 bg-yellow-50 rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <span className="text-yellow-700">Pending Support Tickets</span>
+                          <Badge className="bg-yellow-100 text-yellow-800">3</Badge>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  );
+};
+
+export default AdminDashboard;

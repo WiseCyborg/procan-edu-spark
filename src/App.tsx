@@ -8,6 +8,10 @@ import Auth from "./pages/Auth";
 import Index from "./pages/Index";
 import Welcome from "./pages/Welcome";
 import NotFound from "./pages/NotFound";
+import FAQ from "./pages/FAQ";
+import CertificateVerification from "./pages/CertificateVerification";
+import DispensaryPortal from "./pages/DispensaryPortal";
+import AdminDashboard from "./pages/AdminDashboard";
 import CourseLayout from "./pages/Course/CourseLayout";
 import CourseModule from "./pages/Course/CourseModule";
 import FinalExam from "./pages/Course/FinalExam";
@@ -68,9 +72,21 @@ const App = () => (
                 <Index />
               </PublicRoute>
             } />
+            <Route path="/faq" element={<FAQ />} />
+            <Route path="/verify-certificate" element={<CertificateVerification />} />
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/dispensary-portal" element={
+              <ProtectedRoute>
+                <DispensaryPortal />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin" element={
+              <ProtectedRoute>
+                <AdminDashboard />
               </ProtectedRoute>
             } />
             <Route path="/welcome" element={
