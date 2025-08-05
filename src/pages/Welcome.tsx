@@ -1,35 +1,160 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useNavigate } from 'react-router-dom';
+import { CheckCircle, BookOpen, Award } from 'lucide-react';
+import { toast } from '@/components/ui/use-toast';
 
 const Welcome = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const sendWelcomeEmail = async () => {
+      if (!user) return;
+
+      try {
+        const userMetadata = user.user_metadata || {};
+        const firstName = userMetadata.first_name || '';
+        const lastName = userMetadata.last_name || '';
+
+        await supabase.functions.invoke('send-welcome-email', {
+          body: {
+            email: user.email,
+            firstName,
+            lastName,
+          },
+        });
+
+        console.log('Welcome email sent successfully');
+      } catch (error) {
+        console.error('Error sending welcome email:', error);
+      }
+    };
+
+    sendWelcomeEmail();
+  }, [user]);
+
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-3xl mx-auto px-4 py-12">
-        <h1 className="text-4xl font-bold text-center text-[#2c3e50] mb-4">Welcome to ProCann Training</h1>
-        <p className="text-center italic text-lg mb-8">Empowering Maryland Dispensaries Through Cannabis Education</p>
-        
-        <div className="prose max-w-none">
-          <div className="mb-8">
-            <p className="mb-4">At ProCann Training, we proudly deliver the Maryland Cannabis Administration (MCA) certified <strong>Responsible Vendor Training (RVT)</strong> — designed specifically for dispensary professionals across the state.</p>
-            <p className="mb-4">Our program is tailored to meet <em>COMAR allowbreak 14.17.11.01–.19</em>, ensuring your staff is trained, compliant, and confident in every role they perform.</p>
-            <p className="mb-4">From registration and ID verification to safe cannabis handling, recordkeeping, and security protocols, ProCann provides the tools and knowledge needed to meet Maryland's highest standards for cannabis retail.</p>
-            <p>Whether you're a manager, budtender, or inventory specialist — you're in the right place.</p>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
+      <div className="container mx-auto px-4 py-12">
+        <div className="max-w-4xl mx-auto">
+          <Card className="mb-8">
+            <CardHeader className="text-center bg-green-600 text-white">
+              <CardTitle className="text-3xl mb-2">
+                🎉 Welcome to ProCann Edu!
+              </CardTitle>
+              <p className="text-green-100">
+                Your journey to cannabis certification starts here
+              </p>
+            </CardHeader>
+            <CardContent className="p-8">
+              <div className="text-center mb-8">
+                <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+                  Hello {user?.user_metadata?.first_name}!
+                </h2>
+                <p className="text-gray-600 text-lg">
+                  Thank you for joining Maryland's premier cannabis training platform. 
+                  You're now ready to begin your certification journey.
+                </p>
+              </div>
 
-          <div className="border-t border-gray-200 my-8"></div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div className="text-center">
+                  <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-4" />
+                  <h3 className="font-semibold mb-2">Account Created</h3>
+                  <p className="text-sm text-gray-600">Your account is set up and ready</p>
+                </div>
+                <div className="text-center">
+                  <BookOpen className="h-12 w-12 text-blue-600 mx-auto mb-4" />
+                  <h3 className="font-semibold mb-2">Course Access</h3>
+                  <p className="text-sm text-gray-600">18 modules now available</p>
+                </div>
+                <div className="text-center">
+                  <Award className="h-12 w-12 text-yellow-600 mx-auto mb-4" />
+                  <h3 className="font-semibold mb-2">Certification Ready</h3>
+                  <p className="text-sm text-gray-600">Earn your official certificate</p>
+                </div>
+              </div>
 
-          <h2 className="text-2xl font-bold text-[#2980b9] mb-4">Why Train with ProCann?</h2>
-          <ul className="list-disc pl-6 mb-8">
-            <li>MCA-compliant RVT curriculum</li>
-            <li>Mobile-ready, easy-to-access TalentLMS platform</li>
-            <li>Built by Maryland-based cannabis compliance experts</li>
-            <li>Fast certification & instant test results</li>
-            <li>Custom support for dispensary teams of all sizes</li>
-          </ul>
+              <Card className="bg-gray-50 mb-8">
+                <CardContent className="p-6">
+                  <h3 className="font-semibold text-lg mb-4">What's Next?</h3>
+                  <div className="space-y-3">
+                    <div className="flex items-start">
+                      <div className="bg-green-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-3 mt-0.5">1</div>
+                      <div>
+                        <p className="font-medium">Complete Your Profile</p>
+                        <p className="text-sm text-gray-600">Add any additional information to your profile</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start">
+                      <div className="bg-green-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-3 mt-0.5">2</div>
+                      <div>
+                        <p className="font-medium">Start the RVT Course</p>
+                        <p className="text-sm text-gray-600">Begin with Module 1 of the Maryland Responsible Vendor Training</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start">
+                      <div className="bg-green-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-3 mt-0.5">3</div>
+                      <div>
+                        <p className="font-medium">Take the Final Exam</p>
+                        <p className="text-sm text-gray-600">Complete all modules and pass the certification exam</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-          <div className="border-t border-gray-200 my-8"></div>
+              <div className="text-center">
+                <Button 
+                  onClick={() => navigate('/dashboard')}
+                  size="lg"
+                  className="bg-green-600 hover:bg-green-700 mr-4"
+                >
+                  Go to Dashboard
+                </Button>
+                <Button 
+                  onClick={() => navigate('/course')}
+                  size="lg"
+                  variant="outline"
+                >
+                  Start Course
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
 
-          <p className="text-center font-bold">Let's make Maryland a leader in cannabis education — one responsible vendor at a time.</p>
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="font-semibold text-lg mb-4">Course Overview: Maryland RVT</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="font-medium text-green-700 mb-3">Course Structure</h4>
+                  <ul className="space-y-2 text-sm text-gray-600">
+                    <li>• 18 comprehensive modules</li>
+                    <li>• Self-paced learning</li>
+                    <li>• Interactive quizzes</li>
+                    <li>• Final certification exam</li>
+                    <li>• Immediate certificate upon passing</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium text-green-700 mb-3">Key Topics Covered</h4>
+                  <ul className="space-y-2 text-sm text-gray-600">
+                    <li>• Maryland cannabis regulations</li>
+                    <li>• Patient safety and compliance</li>
+                    <li>• Inventory management</li>
+                    <li>• Security requirements</li>
+                    <li>• Quality control standards</li>
+                  </ul>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
