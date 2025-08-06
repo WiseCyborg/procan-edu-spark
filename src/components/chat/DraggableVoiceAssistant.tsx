@@ -139,7 +139,13 @@ export const DraggableVoiceAssistant: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showProactiveTip, setShowProactiveTip] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
-  const [position, setPosition] = useState<Position>({ x: 20, y: 20 });
+  const [position, setPosition] = useState<Position>(() => {
+    const agentWidth = 280; // Default width
+    return {
+      x: window.innerWidth - agentWidth - 20,
+      y: window.innerHeight - 400 - 20
+    };
+  });
   const [dragOffset, setDragOffset] = useState<Position>({ x: 0, y: 0 });
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);

@@ -22,7 +22,13 @@ const Header = () => {
     <header className="bg-white border-b shadow-sm">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <div className="flex items-center space-x-2">
-          <h1 className="text-2xl font-bold text-green-700">ProCann Edu</h1>
+          <Button 
+            onClick={() => navigate('/')}
+            variant="ghost"
+            className="p-0 h-auto hover:bg-transparent"
+          >
+            <h1 className="text-2xl font-bold text-green-700 hover:text-green-600 transition-colors">ProCann Edu</h1>
+          </Button>
           <span className="text-sm text-gray-600">Maryland Cannabis Training</span>
         </div>
         
