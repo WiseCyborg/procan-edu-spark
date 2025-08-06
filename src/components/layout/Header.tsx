@@ -43,6 +43,14 @@ const Header = () => {
               >
                 Verify Certificate
               </Button>
+              <Button 
+                onClick={() => navigate('/auth?role=admin')}
+                variant="outline"
+                size="sm"
+                className="border-red-300 text-red-700 hover:bg-red-50 hover:border-red-400"
+              >
+                Admin Login
+              </Button>
             </div>
           )}
           
