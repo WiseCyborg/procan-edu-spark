@@ -11,7 +11,7 @@ const corsHeaders = {
 interface EmailRequest {
   to: string;
   subject: string;
-  type: 'welcome' | 'verification' | 'certificate' | 'password-reset';
+  type: 'welcome' | 'verification' | 'certificate' | 'password-reset' | 'dispensary-welcome' | 'dispensary-payment-confirmation' | 'dispensary-setup-complete' | 'student-invitation' | 'student-welcome-with-dispensary';
   data: Record<string, any>;
 }
 
@@ -38,26 +38,27 @@ const getEmailTemplate = (type: string, data: Record<string, any>) => {
         <div class="container">
           <div class="header">
             <h1>Welcome to ProCann Edu!</h1>
-            <p>Maryland's Premier Cannabis Training Platform</p>
+            <p>${data.dispensaryName ? `Training Sponsored by ${data.dispensaryName}` : 'Maryland\'s Premier Cannabis Training Platform'}</p>
           </div>
           <div class="content">
             <h2>Welcome ${data.firstName || 'to ProCann Edu'}!</h2>
-            <p>Thank you for joining Maryland's leading cannabis education platform. We're excited to help you advance your career in the cannabis industry.</p>
+            <p>Thank you for joining Maryland's leading cannabis education platform. ${data.dispensaryName ? `Your training is proudly sponsored by <strong>${data.dispensaryName}</strong>.` : 'We\'re excited to help you advance your career in the cannabis industry.'}</p>
             
             <p><strong>What's next?</strong></p>
             <ul>
-              <li>Complete your profile to get personalized course recommendations</li>
-              <li>Browse our comprehensive course catalog</li>
+              <li>Complete your profile to get ${data.dispensaryName ? 'started with your sponsored training' : 'personalized course recommendations'}</li>
+              <li>${data.dispensaryName ? 'Access your sponsored training modules' : 'Browse our comprehensive course catalog'}</li>
               <li>Start earning industry-recognized certificates</li>
+              ${data.dispensaryName ? `<li>Your progress is tracked for ${data.dispensaryName}</li>` : ''}
             </ul>
             
             <a href="https://procannedu.com/dashboard" class="button">Get Started</a>
             
-            <p>If you have any questions, our support team is here to help at <a href="mailto:support@procannedu.com">support@procannedu.com</a></p>
+            <p>If you have any questions, our support team is here to help at <a href="mailto:support@procannedu.com">support@procannedu.com</a>${data.dispensaryName ? `. For workplace questions, reach out to your manager at ${data.dispensaryName}` : ''}.</p>
           </div>
           <div class="footer">
             <p><strong>ProCann Edu</strong><br>
-            Maryland Cannabis Training Platform<br>
+            ${data.dispensaryName ? `Training sponsored by ${data.dispensaryName}` : 'Maryland Cannabis Training Platform'}<br>
             <a href="https://procannedu.com">procannedu.com</a></p>
           </div>
         </div>
@@ -105,12 +106,14 @@ const getEmailTemplate = (type: string, data: Record<string, any>) => {
           <div class="content">
             <h2>Your certificate is ready for download</h2>
             <p>Congratulations! You have successfully completed <strong>${data.courseName}</strong> and earned your certificate.</p>
+            ${data.dispensaryName ? `<p><strong>Training sponsored by:</strong> ${data.dispensaryName}</p>` : ''}
             
             <p><strong>Certificate Details:</strong></p>
             <ul>
               <li>Course: ${data.courseName}</li>
               <li>Completion Date: ${data.completionDate}</li>
               <li>Certificate Number: ${data.certificateNumber}</li>
+              ${data.dispensaryName ? `<li>Sponsored by: ${data.dispensaryName}</li>` : ''}
             </ul>
             
             <a href="https://procannedu.com/certificates" class="button">Download Certificate</a>
@@ -120,6 +123,218 @@ const getEmailTemplate = (type: string, data: Record<string, any>) => {
           <div class="footer">
             <p><strong>ProCann Edu</strong><br>
             Maryland Cannabis Training Platform<br>
+            <a href="https://procannedu.com">procannedu.com</a></p>
+          </div>
+        </div>
+      `;
+
+    case 'dispensary-welcome':
+      return `
+        ${baseStyle}
+        <div class="container">
+          <div class="header">
+            <h1>Welcome to ProCann Edu Partners!</h1>
+            <p>Dispensary Training Partnership Program</p>
+          </div>
+          <div class="content">
+            <h2>Welcome ${data.dispensaryName || data.contactPerson}!</h2>
+            <p>Thank you for joining ProCann Edu's Dispensary Partnership Program. We're excited to help you train your entire team with Maryland's leading cannabis education platform.</p>
+            
+            <p><strong>Your Partnership Benefits:</strong></p>
+            <ul>
+              <li>Bulk training for all your employees</li>
+              <li>Dedicated dispensary management dashboard</li>
+              <li>Employee progress tracking and reporting</li>
+              <li>Industry-recognized certificates for your team</li>
+              <li>Maryland compliance training standards</li>
+            </ul>
+            
+            <p><strong>Next Steps:</strong></p>
+            <ol>
+              <li>Complete your payment to activate your account</li>
+              <li>Receive your unique dispensary access key</li>
+              <li>Share the key with your employees for registration</li>
+              <li>Monitor progress through your management dashboard</li>
+            </ol>
+            
+            <a href="https://procannedu.com/dispensary-setup" class="button">Complete Setup</a>
+            
+            <p>If you have any questions, our dedicated dispensary support team is here to help at <a href="mailto:dispensary-support@procannedu.com">dispensary-support@procannedu.com</a></p>
+          </div>
+          <div class="footer">
+            <p><strong>ProCann Edu</strong><br>
+            Dispensary Partnership Program<br>
+            <a href="https://procannedu.com">procannedu.com</a></p>
+          </div>
+        </div>
+      `;
+
+    case 'dispensary-payment-confirmation':
+      return `
+        ${baseStyle}
+        <div class="container">
+          <div class="header">
+            <h1>Payment Confirmed!</h1>
+            <p>Your Dispensary Training Account is Active</p>
+          </div>
+          <div class="content">
+            <h2>Welcome to ProCann Edu, ${data.dispensaryName}!</h2>
+            <p>Your payment has been processed successfully and your dispensary training account is now active.</p>
+            
+            <div class="verification-code">${data.dispensaryKey}</div>
+            <p style="text-align: center; margin-top: 10px;"><strong>Your Unique Dispensary Access Key</strong></p>
+            
+            <p><strong>Important Instructions:</strong></p>
+            <ul>
+              <li>Share this key with all employees who need training</li>
+              <li>Employees will use this key during registration</li>
+              <li>Keep this key secure - it provides access to your training program</li>
+              <li>This key never expires and can be reused for new employees</li>
+            </ul>
+            
+            <p><strong>Account Details:</strong></p>
+            <ul>
+              <li>Dispensary: ${data.dispensaryName}</li>
+              <li>Training Licenses: ${data.trainingLicenses || 'Unlimited'}</li>
+              <li>Payment Amount: $${data.amount}</li>
+              <li>Transaction ID: ${data.transactionId}</li>
+            </ul>
+            
+            <a href="https://procannedu.com/dispensary-dashboard" class="button">Access Dashboard</a>
+            
+            <p>Your employees can now register at <a href="https://procannedu.com">procannedu.com</a> using your dispensary key.</p>
+          </div>
+          <div class="footer">
+            <p><strong>ProCann Edu</strong><br>
+            Dispensary Partnership Program<br>
+            <a href="https://procannedu.com">procannedu.com</a></p>
+          </div>
+        </div>
+      `;
+
+    case 'dispensary-setup-complete':
+      return `
+        ${baseStyle}
+        <div class="container">
+          <div class="header">
+            <h1>Setup Complete!</h1>
+            <p>Your Dispensary Training Program is Ready</p>
+          </div>
+          <div class="content">
+            <h2>Congratulations, ${data.dispensaryName}!</h2>
+            <p>Your dispensary training program setup is complete. You can now manage employee training and track progress through your dedicated dashboard.</p>
+            
+            <p><strong>Your Dispensary Key:</strong></p>
+            <div class="verification-code">${data.dispensaryKey}</div>
+            
+            <p><strong>How to Invite Employees:</strong></p>
+            <ol>
+              <li>Share your dispensary key with employees</li>
+              <li>Direct them to register at <a href="https://procannedu.com">procannedu.com</a></li>
+              <li>They'll enter your key during the registration process</li>
+              <li>Monitor their progress through your dashboard</li>
+            </ol>
+            
+            <p><strong>Management Features:</strong></p>
+            <ul>
+              <li>Employee progress tracking</li>
+              <li>Completion reports and analytics</li>
+              <li>Certificate downloads for your team</li>
+              <li>Compliance reporting for Maryland regulations</li>
+            </ul>
+            
+            <a href="https://procannedu.com/dispensary-dashboard" class="button">Access Dashboard</a>
+            
+            <p>For ongoing support, contact our dispensary team at <a href="mailto:dispensary-support@procannedu.com">dispensary-support@procannedu.com</a></p>
+          </div>
+          <div class="footer">
+            <p><strong>ProCann Edu</strong><br>
+            Dispensary Partnership Program<br>
+            <a href="https://procannedu.com">procannedu.com</a></p>
+          </div>
+        </div>
+      `;
+
+    case 'student-invitation':
+      return `
+        ${baseStyle}
+        <div class="container">
+          <div class="header">
+            <h1>Training Invitation</h1>
+            <p>Your Cannabis Education Journey Starts Here</p>
+          </div>
+          <div class="content">
+            <h2>Hello ${data.employeeName || 'Team Member'}!</h2>
+            <p>You've been invited by <strong>${data.dispensaryName}</strong> to complete cannabis training through ProCann Edu, Maryland's premier cannabis education platform.</p>
+            
+            <p><strong>Your Training is Sponsored by:</strong> ${data.dispensaryName}</p>
+            
+            <div class="verification-code">${data.dispensaryKey}</div>
+            <p style="text-align: center; margin-top: 10px;"><strong>Your Registration Key</strong></p>
+            
+            <p><strong>Getting Started:</strong></p>
+            <ol>
+              <li>Visit <a href="https://procannedu.com">ProCann Edu</a></li>
+              <li>Click "Student Registration"</li>
+              <li>Enter the key above when prompted</li>
+              <li>Complete your profile and start training</li>
+            </ol>
+            
+            <p><strong>What You'll Learn:</strong></p>
+            <ul>
+              <li>Maryland cannabis regulations and compliance</li>
+              <li>Product knowledge and safety protocols</li>
+              <li>Customer service best practices</li>
+              <li>Industry standards and certifications</li>
+            </ul>
+            
+            <a href="https://procannedu.com" class="button">Start Training</a>
+            
+            <p>Questions? Contact your manager at ${data.dispensaryName} or our support team at <a href="mailto:support@procannedu.com">support@procannedu.com</a></p>
+          </div>
+          <div class="footer">
+            <p><strong>ProCann Edu</strong><br>
+            Training sponsored by ${data.dispensaryName}<br>
+            <a href="https://procannedu.com">procannedu.com</a></p>
+          </div>
+        </div>
+      `;
+
+    case 'student-welcome-with-dispensary':
+      return `
+        ${baseStyle}
+        <div class="container">
+          <div class="header">
+            <h1>Welcome to ProCann Edu!</h1>
+            <p>Training Sponsored by ${data.dispensaryName}</p>
+          </div>
+          <div class="content">
+            <h2>Welcome ${data.firstName || 'to ProCann Edu'}!</h2>
+            <p>Thank you for joining Maryland's leading cannabis education platform. Your training is proudly sponsored by <strong>${data.dispensaryName}</strong>.</p>
+            
+            <p><strong>Your Training Journey:</strong></p>
+            <ul>
+              <li>Complete your profile to get started</li>
+              <li>Access comprehensive cannabis education modules</li>
+              <li>Earn industry-recognized certificates</li>
+              <li>Your progress is tracked for ${data.dispensaryName}</li>
+            </ul>
+            
+            <p><strong>Sponsored Training Benefits:</strong></p>
+            <ul>
+              <li>Full course access at no cost to you</li>
+              <li>Support from both ProCann Edu and ${data.dispensaryName}</li>
+              <li>Certificates that advance your cannabis career</li>
+              <li>Maryland compliance training standards</li>
+            </ul>
+            
+            <a href="https://procannedu.com/dashboard" class="button">Start Learning</a>
+            
+            <p>For training questions, contact <a href="mailto:support@procannedu.com">support@procannedu.com</a>. For workplace questions, reach out to your manager at ${data.dispensaryName}.</p>
+          </div>
+          <div class="footer">
+            <p><strong>ProCann Edu</strong><br>
+            Training sponsored by ${data.dispensaryName}<br>
             <a href="https://procannedu.com">procannedu.com</a></p>
           </div>
         </div>
