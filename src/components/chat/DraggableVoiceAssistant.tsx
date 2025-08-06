@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { 
   MessageCircle, 
   Send, 
@@ -15,19 +16,28 @@ import {
   MicOff,
   Volume2,
   VolumeX,
-  Move
+  Move,
+  Maximize2,
+  Minimize2
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { toast } from '@/components/ui/use-toast';
 import { useConversation } from '@11labs/react';
+import { DraggableMessage } from './DraggableMessage';
+import { PinnedMessagesManager, usePinnedMessages } from './PinnedMessagesManager';
 
 interface Message {
   id: string;
   content: string;
   isUser: boolean;
   timestamp: Date;
+  pageContext?: {
+    route: string;
+    title: string;
+    description: string;
+  };
 }
 
 interface ContextInfo {
@@ -132,6 +142,7 @@ export const DraggableVoiceAssistant: React.FC = () => {
   const location = useLocation();
   const { user } = useAuth();
   const { roles } = useUserRole();
+  const { isPinned, pinMessage, unpinMessage } = usePinnedMessages();
   const [isOpen, setIsOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -139,8 +150,18 @@ export const DraggableVoiceAssistant: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showProactiveTip, setShowProactiveTip] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [windowSize, setWindowSize] = useState({ width: 320, height: 400 });
   const [position, setPosition] = useState<Position>(() => {
-    const agentWidth = 280; // Default width
+    const savedPosition = localStorage.getItem('chatAssistantPosition');
+    if (savedPosition) {
+      try {
+        return JSON.parse(savedPosition);
+      } catch (error) {
+        console.error('Error parsing saved position:', error);
+      }
+    }
+    const agentWidth = 320;
     return {
       x: window.innerWidth - agentWidth - 20,
       y: window.innerHeight - 400 - 20
@@ -161,15 +182,27 @@ export const DraggableVoiceAssistant: React.FC = () => {
   const contextInfo = getContextInfo(location.pathname);
   const isChatDisabled = contextInfo.route === 'final-exam';
 
-  // Calculate agent size based on screen (10:1 ratio)
-  const getAgentSize = () => {
-    const screenWidth = window.innerWidth;
-    const maxWidth = Math.min(screenWidth / 10, 400);
-    const minWidth = 280;
-    return Math.max(maxWidth, minWidth);
-  };
+  // Save position to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem('chatAssistantPosition', JSON.stringify(position));
+  }, [position]);
 
-  const [agentWidth] = useState(getAgentSize());
+  // Save window size to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem('chatAssistantSize', JSON.stringify(windowSize));
+  }, [windowSize]);
+
+  // Load saved window size on mount
+  useEffect(() => {
+    const savedSize = localStorage.getItem('chatAssistantSize');
+    if (savedSize) {
+      try {
+        setWindowSize(JSON.parse(savedSize));
+      } catch (error) {
+        console.error('Error parsing saved size:', error);
+      }
+    }
+  }, []);
 
   // For future ElevenLabs Conversational AI integration
   // const conversation = useConversation({...});
@@ -193,14 +226,14 @@ export const DraggableVoiceAssistant: React.FC = () => {
     const newY = e.clientY - dragOffset.y;
     
     // Keep within screen bounds
-    const maxX = window.innerWidth - agentWidth;
-    const maxY = window.innerHeight - 400; // Approximate agent height
+    const maxX = window.innerWidth - windowSize.width;
+    const maxY = window.innerHeight - windowSize.height;
     
     setPosition({
       x: Math.max(0, Math.min(newX, maxX)),
       y: Math.max(0, Math.min(newY, maxY))
     });
-  }, [isDragging, dragOffset, agentWidth]);
+  }, [isDragging, dragOffset, windowSize]);
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
@@ -343,7 +376,12 @@ export const DraggableVoiceAssistant: React.FC = () => {
       id: Date.now().toString(),
       content: text,
       isUser: true,
-      timestamp: new Date()
+      timestamp: new Date(),
+      pageContext: {
+        route: contextInfo.route,
+        title: contextInfo.title,
+        description: contextInfo.description
+      }
     };
 
     setMessages(prev => [...prev, userMessage]);
@@ -366,7 +404,12 @@ export const DraggableVoiceAssistant: React.FC = () => {
         id: (Date.now() + 1).toString(),
         content: data.response,
         isUser: false,
-        timestamp: new Date()
+        timestamp: new Date(),
+        pageContext: {
+          route: contextInfo.route,
+          title: contextInfo.title,
+          description: contextInfo.description
+        }
       };
 
       setMessages(prev => [...prev, assistantMessage]);
@@ -429,7 +472,7 @@ export const DraggableVoiceAssistant: React.FC = () => {
       <div 
         ref={cardRef}
         className="fixed z-50"
-        style={{ left: position.x, top: position.y, width: agentWidth }}
+        style={{ left: position.x, top: position.y, width: windowSize.width }}
       >
         <Card className="bg-muted border-border">
           <CardContent className="p-4 text-center">
@@ -453,7 +496,7 @@ export const DraggableVoiceAssistant: React.FC = () => {
           style={{ 
             left: position.x, 
             top: position.y - 80,
-            width: agentWidth 
+            width: windowSize.width
           }}
         >
           <Card className="bg-primary text-primary-foreground shadow-lg">
@@ -486,7 +529,7 @@ export const DraggableVoiceAssistant: React.FC = () => {
           setShowProactiveTip(false);
         }}
         className="fixed z-50 h-12 w-12 rounded-full shadow-lg"
-        style={{ left: position.x + agentWidth - 60, top: position.y - 60 }}
+        style={{ left: position.x + windowSize.width - 60, top: position.y - 60 }}
         size="icon"
       >
         {isOpen ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
@@ -500,7 +543,7 @@ export const DraggableVoiceAssistant: React.FC = () => {
           style={{ 
             left: position.x, 
             top: position.y,
-            width: agentWidth,
+            width: windowSize.width,
             height: 'auto',
             maxHeight: '70vh'
           }}
@@ -593,15 +636,17 @@ export const DraggableVoiceAssistant: React.FC = () => {
                       key={message.id}
                       className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
                     >
-                      <div
-                        className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${
-                          message.isUser
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-muted text-foreground'
-                        }`}
-                      >
-                        {message.content}
-                      </div>
+                      <DraggableMessage
+                        message={message}
+                        currentPageContext={{
+                          route: contextInfo.route,
+                          title: contextInfo.title,
+                          description: contextInfo.description
+                        }}
+                        onPin={pinMessage}
+                        onUnpin={unpinMessage}
+                        isPinned={isPinned(message.id)}
+                      />
                     </div>
                   ))}
                   {isLoading && (
@@ -651,6 +696,16 @@ export const DraggableVoiceAssistant: React.FC = () => {
           </Card>
         </div>
       )}
+
+      {/* Pinned Messages Manager */}
+      <PinnedMessagesManager
+        messages={messages}
+        currentPageContext={{
+          route: contextInfo.route,
+          title: contextInfo.title,
+          description: contextInfo.description
+        }}
+      />
     </>
   );
 };
