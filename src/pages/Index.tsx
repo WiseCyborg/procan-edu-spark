@@ -17,32 +17,97 @@ const Index = () => {
       {/* Hero Section */}
       <section className="relative py-20 px-4">
         <div className="container mx-auto text-center">
+          {/* Dispensary Setup Required Banner */}
+          <div className="bg-amber-100 border border-amber-300 rounded-lg p-4 mb-8 max-w-4xl mx-auto">
+            <p className="text-amber-800 font-semibold text-lg">
+              🏢 Dispensary Setup Required First
+            </p>
+            <p className="text-amber-700 text-sm mt-1">
+              Individual student access requires dispensary sponsorship
+            </p>
+          </div>
+
           <h1 className="text-5xl font-bold text-green-700 mb-6">
             ProCann Edu
           </h1>
           <h2 className="text-2xl text-gray-700 mb-4">
             Maryland Cannabis Training Platform
           </h2>
+          
+          {/* Process Flow Explanation */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8 max-w-4xl mx-auto">
+            <h3 className="text-lg font-semibold text-blue-800 mb-3">How ProCann Edu Works</h3>
+            <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-blue-700">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm">1</div>
+                <span className="font-medium">Admin manages platform</span>
+              </div>
+              <div className="hidden md:block text-blue-400">→</div>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm">2</div>
+                <span className="font-medium">Dispensary purchases training</span>
+              </div>
+              <div className="hidden md:block text-blue-400">→</div>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm">3</div>
+                <span className="font-medium">Employees complete courses</span>
+              </div>
+            </div>
+          </div>
+
           <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
             Get certified with Maryland's premier cannabis education platform. 
             Complete your Responsible Vendor Training (RVT) and earn your official certificate.
           </p>
+          
+          {/* Role-Based Entry Points */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto mb-8">
+            <Card className="border-2 border-red-200 hover:border-red-300 transition-colors">
+              <CardContent className="p-6 text-center">
+                <Shield className="h-12 w-12 text-red-600 mx-auto mb-3" />
+                <h3 className="font-bold text-red-700 mb-2">Admin Login</h3>
+                <p className="text-sm text-gray-600 mb-4">Platform administrators</p>
+                <Button 
+                  onClick={() => navigate('/auth?role=admin')}
+                  variant="outline"
+                  className="border-red-300 text-red-700 hover:bg-red-50"
+                >
+                  Admin Access
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="border-2 border-green-200 hover:border-green-300 transition-colors">
+              <CardContent className="p-6 text-center">
+                <BookOpen className="h-12 w-12 text-green-600 mx-auto mb-3" />
+                <h3 className="font-bold text-green-700 mb-2">Dispensary Portal</h3>
+                <p className="text-sm text-gray-600 mb-4">Setup & manage employee training</p>
+                <Button 
+                  onClick={() => navigate('/auth?role=dispensary')}
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                >
+                  Get Started
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="border-2 border-blue-200 hover:border-blue-300 transition-colors">
+              <CardContent className="p-6 text-center">
+                <Award className="h-12 w-12 text-blue-600 mx-auto mb-3" />
+                <h3 className="font-bold text-blue-700 mb-2">Student Login</h3>
+                <p className="text-sm text-gray-600 mb-4">Requires dispensary access key</p>
+                <Button 
+                  onClick={() => navigate('/auth?role=student')}
+                  variant="outline"
+                  className="border-blue-300 text-blue-700 hover:bg-blue-50"
+                >
+                  Employee Access
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+
           <div className="flex justify-center gap-4">
-            <Button 
-              onClick={() => navigate('/auth')}
-              size="lg"
-              className="bg-green-600 hover:bg-green-700 text-white px-8 py-3"
-            >
-              Get Started
-            </Button>
-            <Button 
-              onClick={() => navigate('/auth')}
-              size="lg"
-              variant="outline"
-              className="px-8 py-3"
-            >
-              Sign In
-            </Button>
             <Button 
               onClick={() => navigate('/faq')}
               size="lg"

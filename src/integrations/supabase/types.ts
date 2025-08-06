@@ -160,6 +160,57 @@ export type Database = {
         }
         Relationships: []
       }
+      dispensary_applications: {
+        Row: {
+          address: string | null
+          admin_notes: string | null
+          application_status: string | null
+          contact_email: string
+          contact_person: string
+          contact_phone: string | null
+          created_at: string
+          id: string
+          license_number: string | null
+          organization_name: string
+          requested_credits: number | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          admin_notes?: string | null
+          application_status?: string | null
+          contact_email: string
+          contact_person: string
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          license_number?: string | null
+          organization_name: string
+          requested_credits?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          admin_notes?: string | null
+          application_status?: string | null
+          contact_email?: string
+          contact_person?: string
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          license_number?: string | null
+          organization_name?: string
+          requested_credits?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       email_logs: {
         Row: {
           created_at: string
@@ -341,38 +392,56 @@ export type Database = {
       organizations: {
         Row: {
           address: string | null
+          admin_approved: boolean | null
           contact_email: string | null
           contact_person: string | null
           contact_phone: string | null
+          course_credits: number | null
           created_at: string
           id: string
           is_active: boolean | null
           license_number: string | null
           name: string
+          payment_status: string | null
+          stripe_customer_id: string | null
+          stripe_session_id: string | null
+          unique_access_key: string | null
           updated_at: string
         }
         Insert: {
           address?: string | null
+          admin_approved?: boolean | null
           contact_email?: string | null
           contact_person?: string | null
           contact_phone?: string | null
+          course_credits?: number | null
           created_at?: string
           id?: string
           is_active?: boolean | null
           license_number?: string | null
           name: string
+          payment_status?: string | null
+          stripe_customer_id?: string | null
+          stripe_session_id?: string | null
+          unique_access_key?: string | null
           updated_at?: string
         }
         Update: {
           address?: string | null
+          admin_approved?: boolean | null
           contact_email?: string | null
           contact_person?: string | null
           contact_phone?: string | null
+          course_credits?: number | null
           created_at?: string
           id?: string
           is_active?: boolean | null
           license_number?: string | null
           name?: string
+          payment_status?: string | null
+          stripe_customer_id?: string | null
+          stripe_session_id?: string | null
+          unique_access_key?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -440,6 +509,7 @@ export type Database = {
           city: string | null
           created_at: string
           date_of_birth: string | null
+          dispensary_access_key: string | null
           emergency_contact_name: string | null
           emergency_contact_phone: string | null
           first_name: string | null
@@ -449,6 +519,7 @@ export type Database = {
           last_name: string | null
           mca_registration_number: string | null
           organization: string | null
+          organization_id: string | null
           phone: string | null
           profile_photo_url: string | null
           state: string | null
@@ -461,6 +532,7 @@ export type Database = {
           city?: string | null
           created_at?: string
           date_of_birth?: string | null
+          dispensary_access_key?: string | null
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
           first_name?: string | null
@@ -470,6 +542,7 @@ export type Database = {
           last_name?: string | null
           mca_registration_number?: string | null
           organization?: string | null
+          organization_id?: string | null
           phone?: string | null
           profile_photo_url?: string | null
           state?: string | null
@@ -482,6 +555,7 @@ export type Database = {
           city?: string | null
           created_at?: string
           date_of_birth?: string | null
+          dispensary_access_key?: string | null
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
           first_name?: string | null
@@ -491,6 +565,7 @@ export type Database = {
           last_name?: string | null
           mca_registration_number?: string | null
           organization?: string | null
+          organization_id?: string | null
           phone?: string | null
           profile_photo_url?: string | null
           state?: string | null
@@ -498,7 +573,15 @@ export type Database = {
           user_id?: string
           zip_code?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_progress: {
         Row: {
@@ -584,6 +667,10 @@ export type Database = {
     }
     Functions: {
       generate_certificate_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_dispensary_key: {
         Args: Record<PropertyKey, never>
         Returns: string
       }
