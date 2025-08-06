@@ -15,6 +15,10 @@ import {
   BarChart3,
   Settings
 } from 'lucide-react';
+import { SmartNotificationSystem } from '@/components/admin/SmartNotificationSystem';
+import { BulkOperationsManager } from '@/components/admin/BulkOperationsManager';
+import { PredictiveAnalyticsDashboard } from '@/components/admin/PredictiveAnalyticsDashboard';
+import { EnhancedSearchFilter } from '@/components/admin/EnhancedSearchFilter';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -301,11 +305,14 @@ const AdminDashboard = () => {
 
         {/* Main Content */}
         <Tabs defaultValue="users" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="users">User Analytics</TabsTrigger>
             <TabsTrigger value="organizations">Organizations</TabsTrigger>
             <TabsTrigger value="revenue">Revenue</TabsTrigger>
             <TabsTrigger value="reports">Reports</TabsTrigger>
+            <TabsTrigger value="notifications">Smart Notifications</TabsTrigger>
+            <TabsTrigger value="bulk">Bulk Operations</TabsTrigger>
+            <TabsTrigger value="analytics">Predictive Analytics</TabsTrigger>
           </TabsList>
 
           <TabsContent value="users">
@@ -525,7 +532,22 @@ const AdminDashboard = () => {
               </CardContent>
             </Card>
           </TabsContent>
+
+          <TabsContent value="notifications">
+            <SmartNotificationSystem />
+          </TabsContent>
+
+          <TabsContent value="bulk">
+            <BulkOperationsManager />
+          </TabsContent>
+
+          <TabsContent value="analytics">
+            <PredictiveAnalyticsDashboard />
+          </TabsContent>
         </Tabs>
+
+        {/* Enhanced Search Filter - Always Available */}
+        <EnhancedSearchFilter />
       </div>
     </div>
   );
