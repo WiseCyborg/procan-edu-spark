@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,6 +17,58 @@ const AuthForm = () => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [phone, setPhone] = useState('');
+  
+  // Smart authentication flow states
+  const [emailExists, setEmailExists] = useState<boolean | null>(null);
+  const [emailChecking, setEmailChecking] = useState(false);
+  const [activeTab, setActiveTab] = useState('signup');
+  const [showWelcomeMessage, setShowWelcomeMessage] = useState(false);
+
+  // Debounced email checking
+  const checkEmailExists = useCallback(async (emailToCheck: string) => {
+    if (!emailToCheck || !emailToCheck.includes('@')) return;
+    
+    setEmailChecking(true);
+    try {
+      // Use password reset as a way to check if email exists without revealing account existence explicitly
+      const { error } = await supabase.auth.resetPasswordForEmail(emailToCheck, {
+        redirectTo: `${window.location.origin}/auth`
+      });
+      
+      // If no error, email likely exists
+      setEmailExists(!error);
+      
+      if (!error && emailExists !== true) {
+        setActiveTab('signin');
+        setShowWelcomeMessage(true);
+        setTimeout(() => setShowWelcomeMessage(false), 3000);
+      }
+    } catch (error) {
+      // Email probably doesn't exist
+      setEmailExists(false);
+    } finally {
+      setEmailChecking(false);
+    }
+  }, [emailExists]);
+
+  // Debounce email checking
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (email) {
+        checkEmailExists(email);
+      }
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, [email, checkEmailExists]);
+
+  // Reset email existence check when email changes significantly
+  useEffect(() => {
+    if (email.length < 3) {
+      setEmailExists(null);
+      setActiveTab('signup');
+    }
+  }, [email]);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -138,10 +190,22 @@ const AuthForm = () => {
           <p className="text-gray-600">Maryland Cannabis Training Platform</p>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="signin" className="w-full">
+          {showWelcomeMessage && (
+            <div className="mb-4 p-3 bg-green-100 border border-green-300 rounded-md text-green-800 text-sm">
+              Welcome back! We found your account.
+            </div>
+          )}
+          
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+              <TabsTrigger value="signin" disabled={emailExists === false}>
+                Sign In
+                {emailChecking && <span className="ml-1 text-xs">...</span>}
+              </TabsTrigger>
+              <TabsTrigger value="signup" disabled={emailExists === true}>
+                Sign Up
+                {emailExists === false && <span className="ml-1 text-xs text-green-600">•</span>}
+              </TabsTrigger>
             </TabsList>
             
             <TabsContent value="signin">
