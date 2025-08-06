@@ -6,7 +6,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, User, BookOpen, BarChart3 } from 'lucide-react';
+import { LogOut, User, BookOpen, BarChart3, Award } from 'lucide-react';
 
 const Header = () => {
   const { user, signOut } = useAuth();
@@ -59,6 +59,15 @@ const Header = () => {
                   <span>Course</span>
                 </Button>
                 <Button 
+                  onClick={() => navigate('/certificates')}
+                  variant="ghost"
+                  size="sm"
+                  className="flex items-center space-x-1"
+                >
+                  <Award className="w-4 h-4" />
+                  <span>Certificates</span>
+                </Button>
+                <Button 
                   onClick={() => navigate('/faq')}
                   variant="ghost"
                   size="sm"
@@ -109,6 +118,10 @@ const Header = () => {
                     <DropdownMenuItem onClick={() => navigate('/course')}>
                       <BookOpen className="w-4 h-4 mr-2" />
                       My Courses
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/certificates')}>
+                      <Award className="w-4 h-4 mr-2" />
+                      My Certificates
                     </DropdownMenuItem>
                     {(isDispensaryManager || isAdmin) && (
                       <DropdownMenuItem onClick={() => navigate('/dispensary-portal')}>

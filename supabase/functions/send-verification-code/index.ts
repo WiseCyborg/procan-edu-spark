@@ -58,7 +58,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send email with verification code
     const emailResponse = await resend.emails.send({
-      from: "ProCann Edu <no-reply@procann.edu>",
+      from: "ProCann Edu <no-reply@procannedu.com>",
       to: [email],
       subject: `Verification Code - ${purpose === 'login' ? 'Login' : 'Exam Submission'}`,
       html: `

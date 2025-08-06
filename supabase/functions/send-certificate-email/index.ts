@@ -74,11 +74,11 @@ const handler = async (req: Request): Promise<Response> => {
           </div>
           
           <div style="text-align: center; margin: 30px 0;">
-            <a href="${Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '.app')}/course" 
+            <a href="https://zhmpwczrvitomsxjwpzc.lovableproject.com/dashboard" 
                style="background: #16a34a; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block; margin-right: 10px;">
               View Dashboard
             </a>
-            <a href="${Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '.app')}/certificates" 
+            <a href="https://zhmpwczrvitomsxjwpzc.lovableproject.com/certificates" 
                style="background: #6b7280; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
               Download Certificate
             </a>
