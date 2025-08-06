@@ -7,10 +7,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/components/ui/use-toast';
 import { MFAVerification } from './MFAVerification';
+import { ForgotPassword } from './ForgotPassword';
 
 const AuthForm = () => {
   const [loading, setLoading] = useState(false);
   const [showMFA, setShowMFA] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [mfaEmail, setMfaEmail] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -23,29 +25,34 @@ const AuthForm = () => {
   const [emailChecking, setEmailChecking] = useState(false);
   const [activeTab, setActiveTab] = useState('signup');
   const [showWelcomeMessage, setShowWelcomeMessage] = useState(false);
+  const [skipMFA, setSkipMFA] = useState(false);
 
-  // Debounced email checking
+  // Safe email checking without side effects
   const checkEmailExists = useCallback(async (emailToCheck: string) => {
     if (!emailToCheck || !emailToCheck.includes('@')) return;
     
     setEmailChecking(true);
     try {
-      // Use password reset as a way to check if email exists without revealing account existence explicitly
-      const { error } = await supabase.auth.resetPasswordForEmail(emailToCheck, {
-        redirectTo: `${window.location.origin}/auth`
+      const { data, error } = await supabase.functions.invoke('check-email-exists', {
+        body: { email: emailToCheck }
       });
       
-      // If no error, email likely exists
-      setEmailExists(!error);
+      if (error) {
+        console.error('Email check error:', error);
+        setEmailExists(null);
+        return;
+      }
       
-      if (!error && emailExists !== true) {
+      setEmailExists(data.exists);
+      
+      if (data.exists && emailExists !== true) {
         setActiveTab('signin');
         setShowWelcomeMessage(true);
         setTimeout(() => setShowWelcomeMessage(false), 3000);
       }
     } catch (error) {
-      // Email probably doesn't exist
-      setEmailExists(false);
+      console.error('Email check failed:', error);
+      setEmailExists(null);
     } finally {
       setEmailChecking(false);
     }
@@ -139,9 +146,17 @@ const AuthForm = () => {
         return;
       }
 
-      // Show MFA verification after successful password verification
-      setMfaEmail(email);
-      setShowMFA(true);
+      // Make MFA optional - only show for high-risk operations
+      if (skipMFA) {
+        toast({
+          title: "Success",
+          description: "Successfully signed in!",
+        });
+      } else {
+        // Show MFA verification after successful password verification
+        setMfaEmail(email);
+        setShowMFA(true);
+      }
       setLoading(false);
     } catch (error) {
       toast({
@@ -167,9 +182,17 @@ const AuthForm = () => {
     supabase.auth.signOut();
   };
 
+  if (showForgotPassword) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/5 p-4">
+        <ForgotPassword onBack={() => setShowForgotPassword(false)} />
+      </div>
+    );
+  }
+
   if (showMFA) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-blue-50 p-4">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/5 p-4">
         <MFAVerification
           email={mfaEmail}
           purpose="login"
@@ -181,17 +204,17 @@ const AuthForm = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-blue-50 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/5 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-green-700">
+          <CardTitle className="text-2xl font-bold text-primary">
             ProCann Edu
           </CardTitle>
-          <p className="text-gray-600">Maryland Cannabis Training Platform</p>
+          <p className="text-muted-foreground">Maryland Cannabis Training Platform</p>
         </CardHeader>
         <CardContent>
           {showWelcomeMessage && (
-            <div className="mb-4 p-3 bg-green-100 border border-green-300 rounded-md text-green-800 text-sm">
+            <div className="mb-4 p-3 bg-primary/10 border border-primary/20 rounded-md text-primary text-sm">
               Welcome back! We found your account.
             </div>
           )}
@@ -204,7 +227,7 @@ const AuthForm = () => {
               </TabsTrigger>
               <TabsTrigger value="signup" disabled={emailExists === true}>
                 Sign Up
-                {emailExists === false && <span className="ml-1 text-xs text-green-600">•</span>}
+                {emailExists === false && <span className="ml-1 text-xs text-primary">•</span>}
               </TabsTrigger>
             </TabsList>
             
@@ -228,13 +251,36 @@ const AuthForm = () => {
                     required
                   />
                 </div>
+                
+                <div className="flex items-center justify-between text-sm">
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={skipMFA}
+                      onChange={(e) => setSkipMFA(e.target.checked)}
+                      className="rounded border-input"
+                    />
+                    <span className="text-muted-foreground">Skip verification for this device</span>
+                  </label>
+                </div>
+                
                 <Button 
                   type="submit" 
-                  className="w-full bg-green-600 hover:bg-green-700"
+                  className="w-full"
                   disabled={loading}
                 >
                   {loading ? 'Signing In...' : 'Sign In'}
                 </Button>
+                
+                <div className="text-center">
+                  <button
+                    type="button"
+                    onClick={() => setShowForgotPassword(true)}
+                    className="text-sm text-primary hover:underline"
+                  >
+                    Forgot your password?
+                  </button>
+                </div>
               </form>
             </TabsContent>
             
@@ -283,7 +329,7 @@ const AuthForm = () => {
                 </div>
                 <Button 
                   type="submit" 
-                  className="w-full bg-green-600 hover:bg-green-700"
+                  className="w-full"
                   disabled={loading}
                 >
                   {loading ? 'Creating Account...' : 'Sign Up'}
