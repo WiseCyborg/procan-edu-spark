@@ -68,6 +68,59 @@ export type Database = {
           },
         ]
       }
+      communication_logs: {
+        Row: {
+          clicked_at: string | null
+          communication_type: string
+          content: string | null
+          created_at: string
+          delivery_status: string | null
+          id: string
+          metadata: Json | null
+          opened_at: string | null
+          organization_id: string | null
+          recipient_email: string
+          subject: string | null
+          user_id: string | null
+        }
+        Insert: {
+          clicked_at?: string | null
+          communication_type: string
+          content?: string | null
+          created_at?: string
+          delivery_status?: string | null
+          id?: string
+          metadata?: Json | null
+          opened_at?: string | null
+          organization_id?: string | null
+          recipient_email: string
+          subject?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          clicked_at?: string | null
+          communication_type?: string
+          content?: string | null
+          created_at?: string
+          delivery_status?: string | null
+          id?: string
+          metadata?: Json | null
+          opened_at?: string | null
+          organization_id?: string | null
+          recipient_email?: string
+          subject?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "communication_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       course_modules: {
         Row: {
           content: string | null
@@ -339,6 +392,108 @@ export type Database = {
           },
         ]
       }
+      notification_queue: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          metadata: Json | null
+          organization_id: string | null
+          priority: string | null
+          recipient_email: string
+          rule_id: string | null
+          scheduled_for: string
+          sent_at: string | null
+          status: string | null
+          subject: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          metadata?: Json | null
+          organization_id?: string | null
+          priority?: string | null
+          recipient_email: string
+          rule_id?: string | null
+          scheduled_for: string
+          sent_at?: string | null
+          status?: string | null
+          subject: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          metadata?: Json | null
+          organization_id?: string | null
+          priority?: string | null
+          recipient_email?: string
+          rule_id?: string | null
+          scheduled_for?: string
+          sent_at?: string | null
+          status?: string | null
+          subject?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_queue_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_queue_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "notification_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_rules: {
+        Row: {
+          created_at: string
+          enabled: boolean | null
+          escalation_enabled: boolean | null
+          escalation_levels: Json | null
+          id: string
+          message_template: string
+          target_roles: string[] | null
+          trigger_days: number | null
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean | null
+          escalation_enabled?: boolean | null
+          escalation_levels?: Json | null
+          id?: string
+          message_template: string
+          target_roles?: string[] | null
+          trigger_days?: number | null
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean | null
+          escalation_enabled?: boolean | null
+          escalation_levels?: Json | null
+          id?: string
+          message_template?: string
+          target_roles?: string[] | null
+          trigger_days?: number | null
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           amount: number
@@ -583,6 +738,53 @@ export type Database = {
           },
         ]
       }
+      staff_invitations: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invitation_token: string
+          inviter_id: string | null
+          metadata: Json | null
+          organization_id: string | null
+          role: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          invitation_token: string
+          inviter_id?: string | null
+          metadata?: Json | null
+          organization_id?: string | null
+          role?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invitation_token?: string
+          inviter_id?: string | null
+          metadata?: Json | null
+          organization_id?: string | null
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_invitations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_progress: {
         Row: {
           completed_at: string | null
@@ -661,6 +863,42 @@ export type Database = {
         }
         Relationships: []
       }
+      workflow_automations: {
+        Row: {
+          actions: Json
+          created_at: string
+          created_by: string | null
+          enabled: boolean | null
+          id: string
+          name: string
+          trigger_conditions: Json
+          trigger_type: string
+          updated_at: string
+        }
+        Insert: {
+          actions: Json
+          created_at?: string
+          created_by?: string | null
+          enabled?: boolean | null
+          id?: string
+          name: string
+          trigger_conditions: Json
+          trigger_type: string
+          updated_at?: string
+        }
+        Update: {
+          actions?: Json
+          created_at?: string
+          created_by?: string | null
+          enabled?: boolean | null
+          id?: string
+          name?: string
+          trigger_conditions?: Json
+          trigger_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -671,6 +909,10 @@ export type Database = {
         Returns: string
       }
       generate_dispensary_key: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_invitation_token: {
         Args: Record<PropertyKey, never>
         Returns: string
       }
