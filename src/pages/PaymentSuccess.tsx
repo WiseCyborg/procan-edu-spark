@@ -1,11 +1,66 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { CheckCircle, Award, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/components/ui/use-toast';
 
 const PaymentSuccess: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const verifyPayment = async () => {
+      const token = searchParams.get('token');
+      const PayerID = searchParams.get('PayerID');
+      const courseId = searchParams.get('course_id');
+      const applicationId = searchParams.get('application_id');
+
+      if (token && PayerID) {
+        try {
+          if (courseId) {
+            // Verify course payment
+            const { data, error } = await supabase.functions.invoke('verify-payment-paypal', {
+              body: { orderId: token }
+            });
+
+            if (error) throw error;
+
+            if (data?.paid) {
+              toast({
+                title: "Payment Verified!",
+                description: "Your course access has been activated.",
+              });
+            }
+          } else if (applicationId) {
+            // Verify dispensary payment
+            const { data, error } = await supabase.functions.invoke('verify-dispensary-payment-paypal', {
+              body: { orderId: token }
+            });
+
+            if (error) throw error;
+
+            if (data?.paid) {
+              toast({
+                title: "Payment Verified!",
+                description: `Your organization has been set up with ${data.credits} training credits.`,
+              });
+            }
+          }
+        } catch (error) {
+          console.error('Payment verification error:', error);
+          toast({
+            title: "Payment Verification Failed",
+            description: "Please contact support if you continue to see this message.",
+            variant: "destructive"
+          });
+        }
+      }
+    };
+
+    verifyPayment();
+  }, [searchParams]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">

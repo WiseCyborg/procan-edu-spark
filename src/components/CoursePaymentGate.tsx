@@ -39,15 +39,15 @@ export const CoursePaymentGate: React.FC<CoursePaymentGateProps> = ({
 
     setIsProcessing(true);
     try {
-      const { data, error } = await supabase.functions.invoke('create-course-payment', {
+      const { data, error } = await supabase.functions.invoke('create-course-payment-paypal', {
         body: { courseId: course.id }
       });
 
       if (error) throw error;
 
       if (data?.url) {
-        // Open Stripe checkout in a new tab
-        window.open(data.url, '_blank');
+        // Redirect to PayPal checkout
+        window.location.href = data.url;
         
         // Start polling for payment completion
         pollForPaymentCompletion();
@@ -163,7 +163,7 @@ export const CoursePaymentGate: React.FC<CoursePaymentGateProps> = ({
           </div>
 
           <div className="text-center text-sm text-gray-500">
-            <p>Secure payment powered by Stripe</p>
+            <p>Secure payment powered by PayPal</p>
             <p>Your payment information is encrypted and secure</p>
           </div>
         </CardContent>

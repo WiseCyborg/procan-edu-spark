@@ -1,1 +1,13 @@
 project_id = "zhmpwczrvitomsxjwpzc"
+
+[functions.create-course-payment-paypal]
+verify_jwt = true
+
+[functions.create-dispensary-payment-paypal]
+verify_jwt = false
+
+[functions.verify-payment-paypal]
+verify_jwt = false
+
+[functions.verify-dispensary-payment-paypal]
+verify_jwt = false

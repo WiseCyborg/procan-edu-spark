@@ -502,6 +502,9 @@ export type Database = {
           currency: string | null
           id: string
           metadata: Json | null
+          paypal_order_id: string | null
+          paypal_payer_id: string | null
+          paypal_payment_id: string | null
           status: string | null
           stripe_customer_id: string | null
           stripe_session_id: string | null
@@ -515,6 +518,9 @@ export type Database = {
           currency?: string | null
           id?: string
           metadata?: Json | null
+          paypal_order_id?: string | null
+          paypal_payer_id?: string | null
+          paypal_payment_id?: string | null
           status?: string | null
           stripe_customer_id?: string | null
           stripe_session_id?: string | null
@@ -528,6 +534,9 @@ export type Database = {
           currency?: string | null
           id?: string
           metadata?: Json | null
+          paypal_order_id?: string | null
+          paypal_payer_id?: string | null
+          paypal_payment_id?: string | null
           status?: string | null
           stripe_customer_id?: string | null
           stripe_session_id?: string | null
@@ -558,6 +567,8 @@ export type Database = {
           license_number: string | null
           name: string
           payment_status: string | null
+          paypal_order_id: string | null
+          paypal_payer_id: string | null
           stripe_customer_id: string | null
           stripe_session_id: string | null
           unique_access_key: string | null
@@ -576,6 +587,8 @@ export type Database = {
           license_number?: string | null
           name: string
           payment_status?: string | null
+          paypal_order_id?: string | null
+          paypal_payer_id?: string | null
           stripe_customer_id?: string | null
           stripe_session_id?: string | null
           unique_access_key?: string | null
@@ -594,6 +607,8 @@ export type Database = {
           license_number?: string | null
           name?: string
           payment_status?: string | null
+          paypal_order_id?: string | null
+          paypal_payer_id?: string | null
           stripe_customer_id?: string | null
           stripe_session_id?: string | null
           unique_access_key?: string | null
