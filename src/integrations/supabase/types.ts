@@ -658,6 +658,36 @@ export type Database = {
           },
         ]
       }
+      performance_metrics: {
+        Row: {
+          created_at: string
+          id: string
+          metadata: Json | null
+          metric_name: string
+          metric_value: number
+          session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          metric_name: string
+          metric_value: number
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          metric_name?: string
+          metric_value?: number
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address: string | null
@@ -979,6 +1009,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      cleanup_performance_metrics: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       generate_certificate_number: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -990,6 +1024,16 @@ export type Database = {
       generate_invitation_token: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_database_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          index_size: string
+          row_count: number
+          table_name: string
+          table_size: string
+          total_size: string
+        }[]
       }
       has_role: {
         Args: {
