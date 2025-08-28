@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import Auth from "./pages/Auth";
 import Index from "./pages/Index";
 import Welcome from "./pages/Welcome";
@@ -62,90 +63,92 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <div className="min-h-screen bg-background">
-            <Header />
-            <main>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/welcome" element={<Welcome />} />
-                <Route path="/faq" element={<FAQ />} />
-                <Route path="/verify-certificate" element={<CertificateVerification />} />
-                
-                <Route path="/auth" element={
-                  <PublicRoute>
-                    <Auth />
-                  </PublicRoute>
-                } />
-                
-                <Route path="/dashboard" element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/profile" element={
-                  <ProtectedRoute>
-                    <Profile />
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/course" element={
-                  <ProtectedRoute>
-                    <CourseLayout />
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/course/:moduleId" element={
-                  <ProtectedRoute>
-                    <CourseModule />
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/course/final-exam" element={
-                  <ProtectedRoute>
-                    <FinalExam />
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/payment-success" element={
-                  <ProtectedRoute>
-                    <PaymentSuccess />
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/certificates" element={
-                  <ProtectedRoute>
-                    <Certificates />
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/dispensary-portal" element={
-                  <ProtectedRoute>
-                    <EnhancedDispensaryPortal />
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/admin" element={
-                  <ProtectedRoute>
-                    <AdminDashboard />
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </main>
-          </div>
-          <DraggableVoiceAssistant />
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <div className="min-h-screen bg-background">
+              <Header />
+              <main>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/welcome" element={<Welcome />} />
+                  <Route path="/faq" element={<FAQ />} />
+                  <Route path="/verify-certificate" element={<CertificateVerification />} />
+                  
+                  <Route path="/auth" element={
+                    <PublicRoute>
+                      <Auth />
+                    </PublicRoute>
+                  } />
+                  
+                  <Route path="/dashboard" element={
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  } />
+                  
+                  <Route path="/profile" element={
+                    <ProtectedRoute>
+                      <Profile />
+                    </ProtectedRoute>
+                  } />
+                  
+                  <Route path="/course" element={
+                    <ProtectedRoute>
+                      <CourseLayout />
+                    </ProtectedRoute>
+                  } />
+                  
+                  <Route path="/course/:moduleId" element={
+                    <ProtectedRoute>
+                      <CourseModule />
+                    </ProtectedRoute>
+                  } />
+                  
+                  <Route path="/course/final-exam" element={
+                    <ProtectedRoute>
+                      <FinalExam />
+                    </ProtectedRoute>
+                  } />
+                  
+                  <Route path="/payment-success" element={
+                    <ProtectedRoute>
+                      <PaymentSuccess />
+                    </ProtectedRoute>
+                  } />
+                  
+                  <Route path="/certificates" element={
+                    <ProtectedRoute>
+                      <Certificates />
+                    </ProtectedRoute>
+                  } />
+                  
+                  <Route path="/dispensary-portal" element={
+                    <ProtectedRoute>
+                      <EnhancedDispensaryPortal />
+                    </ProtectedRoute>
+                  } />
+                  
+                  <Route path="/admin" element={
+                    <ProtectedRoute>
+                      <AdminDashboard />
+                    </ProtectedRoute>
+                  } />
+                  
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </main>
+            </div>
+            <DraggableVoiceAssistant />
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;
