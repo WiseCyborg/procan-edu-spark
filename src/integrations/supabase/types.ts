@@ -1050,6 +1050,24 @@ export type Database = {
           total_size: string
         }[]
       }
+      get_organization_employees: {
+        Args: { org_id: string }
+        Returns: {
+          certificates_count: number
+          created_at: string
+          email: string
+          first_name: string
+          last_activity: string
+          last_name: string
+          phone: string
+          progress_percentage: number
+          user_id: string
+        }[]
+      }
+      get_user_organization_id: {
+        Args: { user_uuid: string }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
