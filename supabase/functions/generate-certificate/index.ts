@@ -54,7 +54,51 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
+    // Check rate limit for certificate generation (3 per hour)
+    const { data: rateLimitCheck, error: rateLimitError } = await supabase
+      .rpc('check_rate_limit', {
+        _user_id: user.id,
+        _action_type: 'certificate_generation',
+        _max_requests: 3,
+        _window_minutes: 60
+      });
+
+    if (rateLimitError) {
+      console.error('Rate limit check failed:', rateLimitError);
+      return new Response(
+        JSON.stringify({ error: 'Security check failed' }),
+        { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+      );
+    }
+
+    if (!rateLimitCheck) {
+      // Log rate limit violation
+      await supabase.rpc('log_security_event', {
+        _event_type: 'rate_limit_violation',
+        _details: {
+          action: 'certificate_generation',
+          ip_address: req.headers.get('x-forwarded-for') || 'unknown',
+          user_agent: req.headers.get('user-agent') || 'unknown'
+        }
+      });
+
+      return new Response(
+        JSON.stringify({ error: 'Rate limit exceeded. You can only generate 3 certificates per hour.' }),
+        { status: 429, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+      );
+    }
+
     const { exam_attempt_id, user_data, exam_results }: GenerateCertificateRequest = await req.json();
+
+    // Log certificate generation attempt
+    await supabase.rpc('log_security_event', {
+      _event_type: 'certificate_generation_attempted',
+      _details: {
+        exam_attempt_id,
+        ip_address: req.headers.get('x-forwarded-for') || 'unknown',
+        user_agent: req.headers.get('user-agent') || 'unknown'
+      }
+    });
 
     console.log(`Generating certificate for user ${user.id}, exam attempt ${exam_attempt_id}`);
 
@@ -127,6 +171,16 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     console.log('Certificate created successfully:', certificate.certificate_number);
+
+    // Log successful certificate generation
+    await supabase.rpc('log_security_event', {
+      _event_type: 'certificate_generation_completed',
+      _details: {
+        certificate_number: certificate.certificate_number,
+        exam_attempt_id,
+        course_id: examAttempt.course_id
+      }
+    });
 
     // Return certificate details
     return new Response(
