@@ -67,31 +67,36 @@ const DispensaryPortal = () => {
     try {
       setLoading(true);
 
-      // Get current user's profile to determine organization
-      const { data: currentProfile } = await supabase
-        .from('profiles')
-        .select('organization')
-        .eq('user_id', user?.id)
-        .single();
+      // Get current user's organization_id
+      const { data: userOrgId, error: orgError } = await supabase
+        .rpc('get_user_organization_id', { user_uuid: user?.id });
 
-      if (!currentProfile?.organization) {
+      if (orgError || !userOrgId) {
         toast({
           title: "Access Required",
-          description: "Please update your profile with organization information to access the dispensary portal.",
+          description: "You must be associated with an organization to access this portal.",
           variant: "destructive"
         });
         return;
       }
 
-      // Fetch employees from the same organization
+      // Fetch organization employees using the new function
       const { data: employeeData, error: employeeError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('organization', currentProfile.organization);
+        .rpc('get_organization_employees', { org_id: userOrgId });
 
       if (employeeError) throw employeeError;
 
-      setEmployees(employeeData || []);
+      // Transform data to match expected interface
+      const transformedEmployees = employeeData?.map(emp => ({
+        id: emp.user_id,
+        first_name: emp.first_name || 'Unknown',
+        last_name: emp.last_name || 'User',
+        user_id: emp.user_id,
+        organization: 'Current Organization',
+        created_at: emp.created_at
+      })) || [];
+
+      setEmployees(transformedEmployees);
 
       // Fetch certificates for organization employees
       const userIds = employeeData?.map(emp => emp.user_id) || [];

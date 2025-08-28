@@ -75,58 +75,41 @@ const EnhancedDispensaryPortal: React.FC = () => {
 
   const fetchEmployeeData = async () => {
     try {
-      // This would need to be implemented based on your organization structure
-      // For now, we'll fetch all user progress data
-      const { data: progressData, error: progressError } = await supabase
-        .from('user_progress')
-        .select(`
-          user_id,
-          course_id,
-          is_completed,
-          score,
-          updated_at
-        `)
-        .eq('course_id', 'e6841a2f-4e92-47c3-9ed4-243ccc22338b');
+      // Get current user's organization_id
+      const { data: userOrgId, error: orgError } = await supabase
+        .rpc('get_user_organization_id', { user_uuid: user?.id });
 
-      if (progressError) {
-        console.error('Error fetching progress data:', progressError);
+      if (orgError || !userOrgId) {
+        toast({
+          title: "Access Required", 
+          description: "You must be associated with an organization to access this portal.",
+          variant: "destructive"
+        });
         return;
       }
 
-      // Process the data to get employee summaries
-      const employeeMap = new Map<string, any>();
-      
-      progressData?.forEach(item => {
-        const userId = item.user_id;
-        if (!employeeMap.has(userId)) {
-          employeeMap.set(userId, {
-            user_id: userId,
-            first_name: 'Employee',
-            last_name: userId.substring(0, 8),
-            organization: 'Sample Organization',
-            completed_modules: 0,
-            total_modules: 18,
-            total_score: 0,
-            scores: [],
-            last_activity: item.updated_at,
-            is_completed: false
-          });
-        }
+      // Fetch real organization employees
+      const { data: employeeData, error: employeeError } = await supabase
+        .rpc('get_organization_employees', { org_id: userOrgId });
 
-        const employee = employeeMap.get(userId);
-        if (item.is_completed) {
-          employee.completed_modules++;
-          if (item.score) {
-            employee.scores.push(item.score);
-          }
-        }
-        employee.is_completed = employee.completed_modules === 18;
-        employee.total_score = employee.scores.length > 0 
-          ? Math.round(employee.scores.reduce((a: number, b: number) => a + b, 0) / employee.scores.length)
-          : 0;
-      });
+      if (employeeError) {
+        console.error('Error fetching employee data:', employeeError);
+        return;
+      }
 
-      const employees = Array.from(employeeMap.values());
+      // Transform to match interface
+      const employees = employeeData?.map(emp => ({
+        user_id: emp.user_id,
+        email: emp.email || '',
+        first_name: emp.first_name || 'Unknown',
+        last_name: emp.last_name || 'User',
+        organization: 'Current Organization',
+        completed_modules: Math.floor((emp.progress_percentage || 0) * 18 / 100),
+        total_score: Math.round((emp.progress_percentage || 0) * 0.85), // Estimate score from progress
+        last_activity: emp.last_activity || emp.created_at,
+        is_completed: (emp.progress_percentage || 0) >= 100
+      })) || [];
+
       setEmployeeProgress(employees);
 
       // Calculate organization stats
@@ -168,8 +151,28 @@ const EnhancedDispensaryPortal: React.FC = () => {
 
     setIsSendingInvite(true);
     try {
-      // This would integrate with your email system
-      // For now, we'll just show a success message
+      // Get current user's organization
+      const { data: userOrgId, error: orgError } = await supabase
+        .rpc('get_user_organization_id', { user_uuid: user?.id });
+
+      if (orgError || !userOrgId) {
+        throw new Error('Organization not found');
+      }
+
+      // Send invitation using staff invitation manager
+      const { data, error } = await supabase.functions.invoke('staff-invitation-manager', {
+        body: {
+          action: 'invite_single',
+          organizationId: userOrgId,
+          inviterId: user?.id,
+          email: newEmployeeEmail,
+          role: 'student',
+          customMessage: 'You have been invited to complete cannabis training for your organization.'
+        }
+      });
+
+      if (error) throw error;
+
       toast({
         title: "Invitation Sent",
         description: `Training invitation sent to ${newEmployeeEmail}`,

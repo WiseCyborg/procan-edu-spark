@@ -21,6 +21,8 @@ import { PredictiveAnalyticsDashboard } from '@/components/admin/PredictiveAnaly
 import { EnhancedSearchFilter } from '@/components/admin/EnhancedSearchFilter';
 import DispensaryApplicationManager from '@/components/admin/DispensaryApplicationManager';
 import DispensaryManagerSetup from '@/components/admin/DispensaryManagerSetup';
+import { ComprehensiveAdminOversight } from '@/components/admin/ComprehensiveAdminOversight';
+import { StaffInvitationSystem } from '@/components/admin/StaffInvitationSystem';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -307,16 +309,18 @@ const AdminDashboard = () => {
 
         {/* Main Content */}
         <Tabs defaultValue="users" className="w-full">
-          <TabsList className="grid w-full grid-cols-9">
-            <TabsTrigger value="users">User Analytics</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-11">
+            <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="organizations">Organizations</TabsTrigger>
             <TabsTrigger value="applications">Applications</TabsTrigger>
-            <TabsTrigger value="setup">Organization Setup</TabsTrigger>
+            <TabsTrigger value="setup">Setup</TabsTrigger>
+            <TabsTrigger value="oversight">Oversight</TabsTrigger>
+            <TabsTrigger value="invitations">Invitations</TabsTrigger>
             <TabsTrigger value="revenue">Revenue</TabsTrigger>
             <TabsTrigger value="reports">Reports</TabsTrigger>
-            <TabsTrigger value="notifications">Smart Notifications</TabsTrigger>
-            <TabsTrigger value="bulk">Bulk Operations</TabsTrigger>
-            <TabsTrigger value="analytics">Predictive Analytics</TabsTrigger>
+            <TabsTrigger value="notifications">Notifications</TabsTrigger>
+            <TabsTrigger value="bulk">Bulk Ops</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
 
           <TabsContent value="users">
@@ -422,6 +426,14 @@ const AdminDashboard = () => {
 
           <TabsContent value="setup">
             <DispensaryManagerSetup />
+          </TabsContent>
+
+          <TabsContent value="oversight">
+            <ComprehensiveAdminOversight />
+          </TabsContent>
+
+          <TabsContent value="invitations">
+            <StaffInvitationSystem />
           </TabsContent>
 
           <TabsContent value="revenue">
