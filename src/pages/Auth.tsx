@@ -5,6 +5,7 @@ import AuthForm from '@/components/auth/AuthForm';
 import DispensaryAuthForm from '@/components/auth/DispensaryAuthForm';
 import StudentAuthForm from '@/components/auth/StudentAuthForm';
 import AdminAuthForm from '@/components/auth/AdminAuthForm';
+import DispensaryManagerAuthForm from '@/components/auth/DispensaryManagerAuthForm';
 
 const Auth = () => {
   const [searchParams] = useSearchParams();
@@ -16,6 +17,8 @@ const Auth = () => {
       return <AdminAuthForm />;
     case 'dispensary':
       return <DispensaryAuthForm />;
+    case 'dispensary_manager':
+      return <DispensaryManagerAuthForm />;
     case 'student':
       return <StudentAuthForm />;
     default:

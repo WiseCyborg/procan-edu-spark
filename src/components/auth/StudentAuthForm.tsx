@@ -110,8 +110,21 @@ const StudentAuthForm = () => {
         return;
       }
 
+      // Get organization details for credit deduction
+      const { data: orgData, error: orgError } = await supabase
+        .from('organizations')
+        .select('id, course_credits')
+        .eq('unique_access_key', dispensaryKey)
+        .eq('payment_status', 'paid')
+        .eq('admin_approved', true)
+        .single();
+
+      if (orgError || !orgData) {
+        throw new Error('Invalid dispensary access key');
+      }
+
       // Create the user account
-      const { error } = await supabase.auth.signUp({
+      const { data: authData, error } = await supabase.auth.signUp({
         email: regEmail,
         password: regPassword,
         options: {
@@ -121,9 +134,28 @@ const StudentAuthForm = () => {
             last_name: lastName,
             phone: phone,
             dispensary_access_key: dispensaryKey,
+            organization_id: orgData.id
           }
         }
       });
+
+      // If user creation successful, deduct a credit
+      if (!error && authData.user) {
+        try {
+          const { error: creditError } = await supabase
+            .from('organizations')
+            .update({ 
+              course_credits: Math.max(0, orgData.course_credits - 1) 
+            })
+            .eq('id', orgData.id);
+
+          if (creditError) {
+            console.error('Error deducting credit:', creditError);
+          }
+        } catch (creditError) {
+          console.error('Error deducting credit:', creditError);
+        }
+      }
 
       if (error) {
         if (error.message.includes('already registered')) {

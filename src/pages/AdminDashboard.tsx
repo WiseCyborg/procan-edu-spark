@@ -19,6 +19,8 @@ import { SmartNotificationSystem } from '@/components/admin/SmartNotificationSys
 import { BulkOperationsManager } from '@/components/admin/BulkOperationsManager';
 import { PredictiveAnalyticsDashboard } from '@/components/admin/PredictiveAnalyticsDashboard';
 import { EnhancedSearchFilter } from '@/components/admin/EnhancedSearchFilter';
+import DispensaryApplicationManager from '@/components/admin/DispensaryApplicationManager';
+import DispensaryManagerSetup from '@/components/admin/DispensaryManagerSetup';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -305,9 +307,11 @@ const AdminDashboard = () => {
 
         {/* Main Content */}
         <Tabs defaultValue="users" className="w-full">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-9">
             <TabsTrigger value="users">User Analytics</TabsTrigger>
             <TabsTrigger value="organizations">Organizations</TabsTrigger>
+            <TabsTrigger value="applications">Applications</TabsTrigger>
+            <TabsTrigger value="setup">Organization Setup</TabsTrigger>
             <TabsTrigger value="revenue">Revenue</TabsTrigger>
             <TabsTrigger value="reports">Reports</TabsTrigger>
             <TabsTrigger value="notifications">Smart Notifications</TabsTrigger>
@@ -410,6 +414,14 @@ const AdminDashboard = () => {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="applications">
+            <DispensaryApplicationManager />
+          </TabsContent>
+
+          <TabsContent value="setup">
+            <DispensaryManagerSetup />
           </TabsContent>
 
           <TabsContent value="revenue">
