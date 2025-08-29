@@ -121,6 +121,53 @@ export type Database = {
           },
         ]
       }
+      compliance_metrics: {
+        Row: {
+          calculation_date: string
+          compliance_score: number | null
+          created_at: string
+          id: string
+          metadata: Json | null
+          metric_type: string
+          metric_value: number
+          organization_id: string | null
+          risk_level: string | null
+          updated_at: string
+        }
+        Insert: {
+          calculation_date?: string
+          compliance_score?: number | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          metric_type: string
+          metric_value: number
+          organization_id?: string | null
+          risk_level?: string | null
+          updated_at?: string
+        }
+        Update: {
+          calculation_date?: string
+          compliance_score?: number | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          metric_type?: string
+          metric_value?: number
+          organization_id?: string | null
+          risk_level?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_metrics_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       course_modules: {
         Row: {
           content: string | null
@@ -388,6 +435,53 @@ export type Database = {
             columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_preferences: {
+        Row: {
+          created_at: string
+          delivery_method: string[] | null
+          enabled: boolean | null
+          frequency: string | null
+          id: string
+          metadata: Json | null
+          notification_type: string
+          organization_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          delivery_method?: string[] | null
+          enabled?: boolean | null
+          frequency?: string | null
+          id?: string
+          metadata?: Json | null
+          notification_type: string
+          organization_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          delivery_method?: string[] | null
+          enabled?: boolean | null
+          frequency?: string | null
+          id?: string
+          metadata?: Json | null
+          notification_type?: string
+          organization_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_preferences_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -849,6 +943,56 @@ export type Database = {
         }
         Relationships: []
       }
+      security_events: {
+        Row: {
+          created_at: string
+          details: Json | null
+          event_type: string
+          id: string
+          organization_id: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string | null
+          source_ip: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          details?: Json | null
+          event_type: string
+          id?: string
+          organization_id?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string | null
+          source_ip?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          details?: Json | null
+          event_type?: string
+          id?: string
+          organization_id?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string | null
+          source_ip?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "security_events_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       staff_invitations: {
         Row: {
           accepted_at: string | null
@@ -1015,6 +1159,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_compliance_score: {
+        Args: { org_id: string }
+        Returns: number
+      }
       check_rate_limit: {
         Args: {
           _action_type: string
@@ -1031,6 +1179,19 @@ export type Database = {
       generate_certificate_number: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      generate_compliance_report: {
+        Args: { org_id?: string }
+        Returns: {
+          active_certificates: number
+          completion_rate: number
+          compliance_score: number
+          expired_certificates: number
+          organization_name: string
+          risk_level: string
+          total_employees: number
+          trained_employees: number
+        }[]
       }
       generate_dispensary_key: {
         Args: Record<PropertyKey, never>

@@ -23,6 +23,9 @@ import DispensaryApplicationManager from '@/components/admin/DispensaryApplicati
 import DispensaryManagerSetup from '@/components/admin/DispensaryManagerSetup';
 import { ComprehensiveAdminOversight } from '@/components/admin/ComprehensiveAdminOversight';
 import { StaffInvitationSystem } from '@/components/admin/StaffInvitationSystem';
+import { ComplianceReportingDashboard } from '@/components/admin/ComplianceReportingDashboard';
+import { AdvancedEmployeeManagement } from '@/components/admin/AdvancedEmployeeManagement';
+import { SecurityMonitoringDashboard } from '@/components/admin/SecurityMonitoringDashboard';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -309,17 +312,18 @@ const AdminDashboard = () => {
 
         {/* Main Content */}
         <Tabs defaultValue="users" className="w-full">
-          <TabsList className="grid w-full grid-cols-11">
+          <TabsList className="grid w-full grid-cols-6 lg:grid-cols-12">
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="organizations">Organizations</TabsTrigger>
             <TabsTrigger value="applications">Applications</TabsTrigger>
             <TabsTrigger value="setup">Setup</TabsTrigger>
             <TabsTrigger value="oversight">Oversight</TabsTrigger>
             <TabsTrigger value="invitations">Invitations</TabsTrigger>
+            <TabsTrigger value="compliance">Compliance</TabsTrigger>
+            <TabsTrigger value="employees">Employees</TabsTrigger>
+            <TabsTrigger value="security">Security</TabsTrigger>
             <TabsTrigger value="revenue">Revenue</TabsTrigger>
-            <TabsTrigger value="reports">Reports</TabsTrigger>
             <TabsTrigger value="notifications">Notifications</TabsTrigger>
-            <TabsTrigger value="bulk">Bulk Ops</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
 
@@ -434,6 +438,18 @@ const AdminDashboard = () => {
 
           <TabsContent value="invitations">
             <StaffInvitationSystem />
+          </TabsContent>
+
+          <TabsContent value="compliance">
+            <ComplianceReportingDashboard />
+          </TabsContent>
+
+          <TabsContent value="employees">
+            <AdvancedEmployeeManagement />
+          </TabsContent>
+
+          <TabsContent value="security">
+            <SecurityMonitoringDashboard />
           </TabsContent>
 
           <TabsContent value="revenue">
