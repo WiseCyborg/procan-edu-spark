@@ -16,6 +16,24 @@ interface ChatRequest {
     description: string;
     helpTips: string[];
     systemPrompt: string;
+    // Enhanced context for Charm AI
+    intent?: 'help' | 'training' | 'compliance' | 'general' | 'urgent';
+    urgency?: 'low' | 'medium' | 'high';
+    topic?: string;
+    userContext?: Record<string, any>;
+    conversationHistory?: string[];
+    userProfile?: {
+      userId: string;
+      roles: string[];
+      organizationId?: string;
+      trainingProgress?: number;
+      preferences?: Record<string, any>;
+    };
+    suggestedLinks?: Array<{
+      text: string;
+      url: string;
+      description: string;
+    }>;
   };
   user_id?: string;
   user_roles?: string[];
@@ -76,18 +94,32 @@ serve(async (req) => {
     Additional context:
     - Current page: ${context.route}
     - User roles: ${user_roles?.join(', ') || 'student'}
+    - Conversation intent: ${context.intent || 'general'}
+    - Urgency level: ${context.urgency || 'low'}
+    - Topic: ${context.topic || 'general assistance'}
+    - Training progress: ${context.userProfile?.trainingProgress || 0}%
+    - Organization context: ${context.userContext?.organizationId ? 'Organization member' : 'Individual learner'}
+    ${context.conversationHistory?.length ? `- Recent conversation: ${context.conversationHistory.join(' | ')}` : ''}
     ${roleContext}
     
     Platform Knowledge:
     - Maryland Cannabis Industry Focus: Regulatory compliance, RVT (Responsible Vendor Training), inventory tracking, seed-to-sale systems
     - Common compliance areas: Security requirements, product testing, labeling, advertising restrictions, employee training
-    - ProCann Edu specializes in preparing professionals for Maryland's cannabis industry
+    - ProCann Edu specializes in preparing professionals for Maryland's cannabis industry based in Baltimore, MD
     - Security: Multi-factor authentication, encrypted data, HIPAA-compliant storage, audit logging
     - Access Control: Role-based permissions, manager assignments by ProCann Admin
+    - Local context: Baltimore/Maryland references when appropriate for engagement
+    - Personality: Professional yet approachable, understanding the unique challenges of cannabis industry professionals
+    
+    Response Intelligence:
+    - Adapt response style based on urgency: high urgency = direct solutions, low urgency = educational
+    - For training intent: Focus on learning paths, progress, and practical application
+    - For compliance intent: Emphasize regulations, best practices, and risk mitigation
+    - For help intent: Provide step-by-step guidance and suggest relevant resources
     - Always be helpful, professional, and encouraging
     - If you don't know something specific about Maryland cannabis laws, recommend contacting info@procannedu.com
-    - Keep responses concise but informative
-    - Focus on practical, actionable advice based on user's role
+    - Keep responses concise but informative unless detailed explanation is requested
+    - Focus on practical, actionable advice based on user's role and context
     
     Response guidelines:
     - Be conversational and friendly
@@ -142,7 +174,13 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         response: assistantResponse,
-        context: context.route
+        context: context.route,
+        metadata: {
+          intent: context.intent,
+          urgency: context.urgency,
+          suggestedLinks: context.suggestedLinks,
+          canVoiceResponse: true
+        }
       }), 
       {
         headers: { 
