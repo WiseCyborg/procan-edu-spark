@@ -3,101 +3,143 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, Award, Shield, CheckCircle } from 'lucide-react';
+import { BookOpen, Award, Shield, CheckCircle, Play, Pause } from 'lucide-react';
 import { CoursePreviewSystem } from '@/components/EnhancedCoursePreview';
 import { AccessibilityToolbar, MobileOptimizationIndicator } from '@/components/MobileOptimization';
+import { TrustStats, ComplianceBadges, TestimonialCarousel } from '@/components/TrustIndicators';
 
 const Index = () => {
   const navigate = useNavigate();
+  const [isVideoPlaying, setIsVideoPlaying] = React.useState(true);
+  const videoRef = React.useRef<HTMLVideoElement>(null);
+
+  const toggleVideo = () => {
+    if (videoRef.current) {
+      if (isVideoPlaying) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play();
+      }
+      setIsVideoPlaying(!isVideoPlaying);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
+    <div className="min-h-screen">
       <AccessibilityToolbar />
       <MobileOptimizationIndicator />
-      {/* Hero Section */}
-      <section className="relative py-20 px-4">
-        <div className="container mx-auto text-center">
-          {/* Dispensary Setup Required Banner */}
-          <div className="bg-amber-100 border border-amber-300 rounded-lg p-4 mb-8 max-w-4xl mx-auto">
-            <p className="text-amber-800 font-semibold text-lg">
-              🏢 Dispensary Setup Required First
-            </p>
-            <p className="text-amber-700 text-sm mt-1">
-              Individual student access requires dispensary sponsorship
-            </p>
-          </div>
+      {/* Enhanced Hero Section with Video Background */}
+      <section className="relative h-screen flex items-center justify-center overflow-hidden">
+        {/* Video Background */}
+        <video
+          ref={videoRef}
+          className="video-background"
+          autoPlay
+          muted
+          loop
+          playsInline
+          poster="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?auto=format&fit=crop&w=1920&q=80"
+        >
+          <source src="https://assets.mixkit.co/videos/preview/mixkit-cannabis-plants-in-a-greenhouse-44885-large.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
 
-          <h1 className="text-5xl font-bold text-green-700 mb-6">
+        {/* Video Overlay */}
+        <div className="absolute inset-0 video-overlay"></div>
+
+        {/* Video Controls */}
+        <button
+          onClick={toggleVideo}
+          className="absolute top-6 right-6 z-20 bg-white/20 backdrop-blur-sm text-white p-3 rounded-full hover:bg-white/30 transition-colors"
+          aria-label={isVideoPlaying ? "Pause video" : "Play video"}
+        >
+          {isVideoPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+        </button>
+
+        <div className="relative z-10 container mx-auto text-center px-4">
+          {/* Compliance Badges */}
+          <ComplianceBadges />
+
+          {/* Main Heading */}
+          <h1 className="text-6xl md:text-7xl font-bold text-white mb-4 leading-tight">
             ProCann Edu
           </h1>
-          <h2 className="text-2xl text-gray-700 mb-4">
-            Maryland Cannabis Training Platform
+          <h2 className="text-2xl md:text-3xl text-white/90 mb-6 font-medium">
+            Maryland's Premier Cannabis Training Platform
           </h2>
-          
-          {/* Process Flow Explanation */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8 max-w-3xl mx-auto">
-            <h3 className="text-lg font-semibold text-blue-800 mb-3">How ProCann Edu Works</h3>
-            <div className="flex flex-col md:flex-row items-center justify-center gap-6 text-blue-700">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold">1</div>
-                <span className="font-medium text-lg">Dispensary purchases training</span>
-              </div>
-              <div className="hidden md:block text-blue-400 text-2xl">→</div>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold">2</div>
-                <span className="font-medium text-lg">Employees complete courses</span>
-              </div>
-            </div>
-          </div>
 
-          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-            Get certified with Maryland's premier cannabis education platform. 
+          {/* Trust Statistics */}
+          <TrustStats />
+
+          {/* Testimonial */}
+          <TestimonialCarousel />
+          {/* Enhanced Value Proposition */}
+          <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-4xl mx-auto leading-relaxed">
+            Join 2,500+ cannabis professionals who trust ProCann Edu for MCA-compliant training. 
+            <br className="hidden md:block" />
             Complete your Responsible Vendor Training (RVT) and earn your official certificate.
           </p>
-          
-          {/* Role-Based Entry Points */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto mb-8">
-            <Card className="border-2 border-green-200 hover:border-green-300 transition-colors">
-              <CardContent className="p-8 text-center">
-                <BookOpen className="h-16 w-16 text-green-600 mx-auto mb-4" />
-                <h3 className="font-bold text-green-700 mb-3 text-xl">Dispensary Portal</h3>
-                <p className="text-gray-600 mb-6">Setup & manage employee training programs</p>
-                <Button 
-                  onClick={() => navigate('/auth?role=dispensary')}
-                  className="bg-green-600 hover:bg-green-700 text-white px-8 py-3"
-                  size="lg"
-                >
-                  Get Started
-                </Button>
-              </CardContent>
-            </Card>
 
-            <Card className="border-2 border-blue-200 hover:border-blue-300 transition-colors">
-              <CardContent className="p-8 text-center">
-                <Award className="h-16 w-16 text-blue-600 mx-auto mb-4" />
-                <h3 className="font-bold text-blue-700 mb-3 text-xl">Employee Login</h3>
-                <p className="text-gray-600 mb-6">Access training with dispensary key</p>
-                <Button 
-                  onClick={() => navigate('/auth?role=student')}
-                  variant="outline"
-                  className="border-blue-300 text-blue-700 hover:bg-blue-50 px-8 py-3"
-                  size="lg"
-                >
-                  Start Training
-                </Button>
-              </CardContent>
-            </Card>
+          {/* Urgency Banner */}
+          <div className="bg-accent/90 backdrop-blur-sm border border-accent rounded-lg p-4 mb-8 max-w-2xl mx-auto">
+            <p className="text-accent-foreground font-semibold">
+              🚨 Compliance Deadline Approaching
+            </p>
+            <p className="text-accent-foreground/80 text-sm mt-1">
+              Ensure your team meets Maryland's training requirements
+            </p>
+          </div>
+          
+          {/* Enhanced CTA Buttons */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto mb-8">
+            <Button 
+              onClick={() => navigate('/auth?role=dispensary')}
+              size="lg"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 h-auto text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105"
+            >
+              <BookOpen className="h-6 w-6 mr-3" />
+              <div className="text-left">
+                <div>Dispensary Portal</div>
+                <div className="text-sm font-normal opacity-90">Setup training programs</div>
+              </div>
+            </Button>
+
+            <Button 
+              onClick={() => navigate('/auth?role=student')}
+              variant="outline"
+              size="lg"
+              className="border-2 border-white/30 text-white hover:bg-white/10 backdrop-blur-sm px-8 py-4 h-auto text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105"
+            >
+              <Award className="h-6 w-6 mr-3" />
+              <div className="text-left">
+                <div>Employee Login</div>
+                <div className="text-sm font-normal opacity-80">Start your training</div>
+              </div>
+            </Button>
           </div>
 
-          <div className="flex justify-center gap-4">
-            <Button 
+          {/* Quick Links */}
+          <div className="flex flex-wrap justify-center gap-4 text-white/80">
+            <button 
               onClick={() => navigate('/faq')}
-              size="lg"
-              variant="ghost"
-              className="px-8 py-3"
+              className="hover:text-white transition-colors underline"
             >
               FAQ
-            </Button>
+            </button>
+            <span>•</span>
+            <button 
+              onClick={() => navigate('/verify-certificate')}
+              className="hover:text-white transition-colors underline"
+            >
+              Verify Certificate
+            </button>
+            <span>•</span>
+            <a 
+              href="mailto:info@procannedu.com"
+              className="hover:text-white transition-colors underline"
+            >
+              Contact Support
+            </a>
           </div>
         </div>
       </section>

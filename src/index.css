@@ -4,35 +4,45 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 120 12% 97%;
+    --foreground: 136 31% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 136 31% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 136 31% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 142 76% 36%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 120 13% 95%;
+    --secondary-foreground: 136 31% 15%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 120 13% 95%;
+    --muted-foreground: 136 16% 46%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 45 93% 47%;
+    --accent-foreground: 136 31% 15%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 120 13% 91%;
+    --input: 120 13% 91%;
+    --ring: 142 76% 36%;
 
     --radius: 0.5rem;
+
+    /* Cannabis industry colors */
+    --cannabis-green: 142 76% 36%;
+    --cannabis-green-dark: 142 76% 26%;
+    --cannabis-gold: 45 93% 47%;
+    --trust-blue: 212 100% 47%;
+    
+    /* Video overlay */
+    --video-overlay: 0 0% 0% / 0.4;
+    --video-overlay-light: 0 0% 0% / 0.2;
 
     --sidebar-background: 0 0% 98%;
 
@@ -97,5 +107,42 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Video background styles */
+  .video-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1;
+  }
+
+  .video-overlay {
+    background: linear-gradient(135deg, 
+      hsl(var(--cannabis-green) / 0.9) 0%, 
+      hsl(var(--trust-blue) / 0.8) 100%);
+  }
+
+  /* Trust indicator animations */
+  .trust-counter {
+    animation: countUp 2s ease-out;
+  }
+
+  @keyframes countUp {
+    from { opacity: 0; transform: scale(0.5); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  /* Floating badge animation */
+  .floating-badge {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
   }
 }
