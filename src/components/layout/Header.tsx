@@ -1,17 +1,20 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, User, BookOpen, BarChart3, Award } from 'lucide-react';
+import { LogOut, User, BookOpen, BarChart3, Award, MessageSquare } from 'lucide-react';
+import { CommunicationHub } from '@/components/communication/CommunicationHub';
 
 const Header = () => {
   const { user, signOut } = useAuth();
   const { isDispensaryManager, isAdmin, roles } = useUserRole();
   const navigate = useNavigate();
+  const [showCommunicationHub, setShowCommunicationHub] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
@@ -105,17 +108,35 @@ const Header = () => {
                     <BarChart3 className="w-4 h-4" />
                     <span>Dispensary Portal</span>
                   </Button>
-                )}
-              </nav>
-              
-              <div className="flex items-center space-x-3">
-                <div className="flex space-x-1">
-                  {roles.map(role => (
-                    <Badge key={role} variant="secondary" className="text-xs">
-                      {role.replace('_', ' ').toUpperCase()}
-                    </Badge>
-                  ))}
-                </div>
+                 )}
+               </nav>
+               
+               {/* Communication Hub Button */}
+               <Dialog open={showCommunicationHub} onOpenChange={setShowCommunicationHub}>
+                 <DialogTrigger asChild>
+                   <Button variant="ghost" size="sm" className="flex items-center space-x-1">
+                     <MessageSquare className="w-4 h-4" />
+                     <span className="hidden sm:inline">Messages</span>
+                   </Button>
+                 </DialogTrigger>
+                 <DialogContent className="max-w-6xl h-[80vh] p-0">
+                   <DialogHeader className="p-6 pb-0">
+                     <DialogTitle>Team Communication</DialogTitle>
+                   </DialogHeader>
+                   <div className="p-6 pt-4 h-full">
+                     <CommunicationHub />
+                   </div>
+                 </DialogContent>
+               </Dialog>
+               
+               <div className="flex items-center space-x-3">
+                 <div className="flex space-x-1">
+                   {roles.map(role => (
+                     <Badge key={role} variant="secondary" className="text-xs">
+                       {role.replace('_', ' ').toUpperCase()}
+                     </Badge>
+                   ))}
+                 </div>
                 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
