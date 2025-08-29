@@ -116,12 +116,31 @@ const DispensaryApplicationManager = () => {
       return;
     }
 
+    setIsProcessing(true);
     try {
+      // Check if organization already exists for this application
+      const { data: existingOrg } = await supabase
+        .from('organizations')
+        .select('id, unique_access_key')
+        .eq('name', application.organization_name)
+        .maybeSingle();
+
+      if (existingOrg) {
+        toast({
+          title: "Organization Exists",
+          description: `Organization already created with access key: ${existingOrg.unique_access_key}`,
+        });
+        setIsProcessing(false);
+        return;
+      }
+
       // Create PayPal payment checkout
       const response = await supabase.functions.invoke('create-dispensary-payment-paypal', {
         body: {
           applicationId: application.id,
-          credits: application.requested_credits
+          credits: application.requested_credits,
+          organizationName: application.organization_name,
+          contactEmail: application.contact_email
         }
       });
 
@@ -135,7 +154,7 @@ const DispensaryApplicationManager = () => {
         
         toast({
           title: "Payment Link Created",
-          description: "PayPal payment window opened. Payment processing will complete automatically.",
+          description: "PayPal payment window opened. Organization will be created after successful payment.",
         });
       }
     } catch (error) {
@@ -145,6 +164,8 @@ const DispensaryApplicationManager = () => {
         description: "Failed to create payment link.",
         variant: "destructive"
       });
+    } finally {
+      setIsProcessing(false);
     }
   };
 

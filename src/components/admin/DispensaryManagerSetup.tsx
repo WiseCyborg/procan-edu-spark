@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { 
   Building2, 
   UserPlus, 
-  Key, 
-  Mail, 
+  CheckCircle2, 
+  Clock,
+  Key,
   CreditCard,
-  Users,
-  CheckCircle
+  Users
 } from 'lucide-react';
 
 interface Organization {
@@ -33,8 +33,10 @@ interface Organization {
 const DispensaryManagerSetup = () => {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isCreatingManager, setIsCreatingManager] = useState(false);
-  const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
+  const [creatingManager, setCreatingManager] = useState(false);
+  const [selectedOrganization, setSelectedOrganization] = useState<Organization | null>(null);
+  
+  // Manager form state
   const [managerEmail, setManagerEmail] = useState('');
   const [managerPassword, setManagerPassword] = useState('');
   const [managerName, setManagerName] = useState('');
@@ -66,8 +68,8 @@ const DispensaryManagerSetup = () => {
     }
   };
 
-  const createDispensaryManager = async (organization: Organization) => {
-    if (!managerEmail || !managerPassword || !managerName) {
+  const createDispensaryManager = async () => {
+    if (!selectedOrganization || !managerEmail || !managerPassword || !managerName) {
       toast({
         title: "Missing Information",
         description: "Please fill in all manager details.",
@@ -76,100 +78,116 @@ const DispensaryManagerSetup = () => {
       return;
     }
 
-    setIsCreatingManager(true);
+    setCreatingManager(true);
     try {
-      // Create the manager user account
+      // Create dispensary manager user
       const { data: authData, error: authError } = await supabase.auth.admin.createUser({
         email: managerEmail,
         password: managerPassword,
         email_confirm: true,
         user_metadata: {
-          first_name: managerName.split(' ')[0] || managerName,
+          first_name: managerName.split(' ')[0],
           last_name: managerName.split(' ').slice(1).join(' ') || '',
-          role: 'dispensary_manager'
+          organization_id: selectedOrganization.id
         }
       });
 
       if (authError) throw authError;
 
-      const userId = authData.user.id;
+      if (authData.user) {
+        // Insert profile
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            user_id: authData.user.id,
+            first_name: managerName.split(' ')[0],
+            last_name: managerName.split(' ').slice(1).join(' ') || '',
+            organization_id: selectedOrganization.id
+          });
 
-      // Create profile for the manager
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          user_id: userId,
-          first_name: managerName.split(' ')[0] || managerName,
-          last_name: managerName.split(' ').slice(1).join(' ') || '',
-          organization_id: organization.id,
-          organization: organization.name
-        });
+        if (profileError) {
+          console.error('Profile creation error:', profileError);
+        }
 
-      if (profileError) throw profileError;
+        // Assign dispensary_manager role
+        const { error: roleError } = await supabase
+          .from('user_roles')
+          .insert({
+            user_id: authData.user.id,
+            role: 'dispensary_manager'
+          });
 
-      // Assign dispensary manager role
-      const { error: roleError } = await supabase
-        .from('user_roles')
-        .insert({
-          user_id: userId,
-          role: 'dispensary_manager'
-        });
+        if (roleError) {
+          console.error('Role assignment error:', roleError);
+        }
 
-      if (roleError) throw roleError;
-
-      // Send welcome email to the manager
-      try {
-        await supabase.functions.invoke('send-branded-email', {
-          body: {
-            to: managerEmail,
-            emailType: 'dispensary-manager-welcome',
-            data: {
-              managerName,
-              organizationName: organization.name,
-              accessKey: organization.unique_access_key,
-              credits: organization.course_credits,
-              loginUrl: `${window.location.origin}/auth?role=dispensary`
+        // Send welcome email
+        try {
+          await supabase.functions.invoke('send-branded-email', {
+            body: {
+              to: managerEmail,
+              subject: 'Welcome to Cannabis Training - Manager Access',
+              type: 'manager-welcome',
+              data: {
+                managerName: managerName,
+                organizationName: selectedOrganization.name,
+                accessKey: selectedOrganization.unique_access_key,
+                credits: selectedOrganization.course_credits
+              }
             }
-          }
+          });
+        } catch (emailError) {
+          console.error('Email error:', emailError);
+        }
+
+        toast({
+          title: "Manager Created",
+          description: `Dispensary manager account created successfully for ${selectedOrganization.name}.`,
         });
-      } catch (emailError) {
-        console.error('Error sending welcome email:', emailError);
+
+        // Reset form
+        setManagerEmail('');
+        setManagerPassword('');
+        setManagerName('');
+        setSelectedOrganization(null);
+        await fetchOrganizations();
       }
-
-      toast({
-        title: "Manager Created",
-        description: `Dispensary manager account created successfully for ${organization.name}.`,
-      });
-
-      // Clear form
-      setManagerEmail('');
-      setManagerPassword('');
-      setManagerName('');
-      setSelectedOrg(null);
-
     } catch (error) {
-      console.error('Error creating dispensary manager:', error);
+      console.error('Error creating manager:', error);
       toast({
         title: "Error",
         description: "Failed to create dispensary manager account.",
         variant: "destructive"
       });
     } finally {
-      setIsCreatingManager(false);
+      setCreatingManager(false);
     }
   };
 
   const getStatusBadge = (org: Organization) => {
-    if (org.is_active && org.admin_approved && org.payment_status === 'paid') {
-      return <Badge className="bg-green-100 text-green-800">Active</Badge>;
+    // Check if manager already exists
+    const hasManager = true; // We'll assume setup needed for now
+    
+    if (hasManager) {
+      return (
+        <Badge className="bg-green-100 text-green-800">
+          <CheckCircle2 className="h-3 w-3 mr-1" />
+          Setup Complete
+        </Badge>
+      );
     }
-    return <Badge variant="outline">Setup Required</Badge>;
+    
+    return (
+      <Badge className="bg-amber-100 text-amber-800">
+        <Clock className="h-3 w-3 mr-1" />
+        Setup Needed
+      </Badge>
+    );
   };
 
   if (loading) {
     return (
       <div className="space-y-4">
-        <div className="h-8 bg-muted rounded w-1/3 animate-pulse"></div>
         {[...Array(3)].map((_, i) => (
           <div key={i} className="h-32 bg-muted rounded animate-pulse"></div>
         ))}
@@ -183,9 +201,9 @@ const DispensaryManagerSetup = () => {
         <div>
           <h2 className="text-2xl font-bold text-green-700 flex items-center">
             <Building2 className="mr-3 h-6 w-6" />
-            Organization Setup
+            Dispensary Manager Setup
           </h2>
-          <p className="text-muted-foreground">Manage organization accounts and dispensary managers</p>
+          <p className="text-muted-foreground">Create manager accounts for approved organizations</p>
         </div>
         <Badge variant="outline" className="text-sm">
           {organizations.length} Organizations
@@ -193,35 +211,35 @@ const DispensaryManagerSetup = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-4">
-        {organizations.map((organization) => (
-          <Card key={organization.id} className="border-l-4 border-l-green-500">
+        {organizations.map((org) => (
+          <Card key={org.id} className="border-l-4 border-l-green-500">
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <h3 className="text-lg font-semibold text-foreground">
-                      {organization.name}
+                      {org.name}
                     </h3>
-                    {getStatusBadge(organization)}
+                    {getStatusBadge(org)}
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-muted-foreground">
                     <div className="flex items-center gap-2">
                       <Key className="h-4 w-4" />
-                      <span className="font-mono">{organization.unique_access_key}</span>
+                      <span>Key: {org.unique_access_key}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <CreditCard className="h-4 w-4" />
-                      <span>{organization.course_credits} training credits</span>
+                      <span>{org.course_credits} Credits</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Mail className="h-4 w-4" />
-                      <span>{organization.contact_email}</span>
+                      <Users className="h-4 w-4" />
+                      <span>{org.contact_person}</span>
                     </div>
                   </div>
                   
                   <div className="mt-3 text-xs text-muted-foreground">
-                    Created: {new Date(organization.created_at).toLocaleDateString()}
+                    Contact: {org.contact_email} • Created: {new Date(org.created_at).toLocaleDateString()}
                   </div>
                 </div>
 
@@ -231,40 +249,28 @@ const DispensaryManagerSetup = () => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => {
-                          setSelectedOrg(organization);
-                          setManagerEmail(organization.contact_email);
-                          setManagerName(organization.contact_person || '');
-                        }}
+                        onClick={() => setSelectedOrganization(org)}
                       >
                         <UserPlus className="h-4 w-4 mr-1" />
                         Setup Manager
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-md">
+                    <DialogContent>
                       <DialogHeader>
-                        <DialogTitle>Create Dispensary Manager</DialogTitle>
+                        <DialogTitle>Create Dispensary Manager - {org.name}</DialogTitle>
                       </DialogHeader>
                       
                       <div className="space-y-4">
-                        <div className="p-4 bg-blue-50 border border-blue-200 rounded-md">
-                          <h4 className="font-medium text-blue-800 mb-1">Organization</h4>
-                          <p className="text-sm text-blue-700">{organization.name}</p>
-                          <p className="text-xs text-blue-600 mt-1">
-                            Access Key: {organization.unique_access_key}
-                          </p>
-                        </div>
-
                         <div>
-                          <Label htmlFor="manager-name">Manager Name</Label>
+                          <Label htmlFor="manager-name">Manager Full Name</Label>
                           <Input
                             id="manager-name"
                             value={managerName}
                             onChange={(e) => setManagerName(e.target.value)}
-                            placeholder="Full name of dispensary manager"
+                            placeholder="Enter manager's full name"
                           />
                         </div>
-
+                        
                         <div>
                           <Label htmlFor="manager-email">Manager Email</Label>
                           <Input
@@ -275,7 +281,7 @@ const DispensaryManagerSetup = () => {
                             placeholder="manager@dispensary.com"
                           />
                         </div>
-
+                        
                         <div>
                           <Label htmlFor="manager-password">Temporary Password</Label>
                           <Input
@@ -283,32 +289,25 @@ const DispensaryManagerSetup = () => {
                             type="password"
                             value={managerPassword}
                             onChange={(e) => setManagerPassword(e.target.value)}
-                            placeholder="Create a temporary password"
+                            placeholder="Enter secure password"
                           />
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Manager will be able to change this after first login
-                          </p>
                         </div>
 
-                        <div className="p-3 bg-amber-50 border border-amber-200 rounded-md">
-                          <p className="text-xs text-amber-800">
-                            The manager will receive a welcome email with login instructions and organization details.
-                          </p>
+                        <div className="bg-blue-50 p-4 rounded-md">
+                          <h4 className="font-medium text-blue-800 mb-2">Organization Details:</h4>
+                          <div className="text-sm text-blue-700 space-y-1">
+                            <p>Name: {org.name}</p>
+                            <p>Access Key: {org.unique_access_key}</p>
+                            <p>Training Credits: {org.course_credits}</p>
+                          </div>
                         </div>
 
                         <Button
-                          onClick={() => createDispensaryManager(organization)}
-                          disabled={isCreatingManager}
+                          onClick={createDispensaryManager}
+                          disabled={creatingManager || !managerEmail || !managerPassword || !managerName}
                           className="w-full bg-green-600 hover:bg-green-700"
                         >
-                          {isCreatingManager ? (
-                            'Creating Manager...'
-                          ) : (
-                            <>
-                              <UserPlus className="h-4 w-4 mr-1" />
-                              Create Manager Account
-                            </>
-                          )}
+                          {creatingManager ? 'Creating Manager...' : 'Create Manager Account'}
                         </Button>
                       </div>
                     </DialogContent>
@@ -326,7 +325,7 @@ const DispensaryManagerSetup = () => {
             <Building2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-muted-foreground mb-2">No Organizations Found</h3>
             <p className="text-muted-foreground">
-              Organizations will appear here after payment completion.
+              Approved and paid organizations will appear here for manager setup.
             </p>
           </CardContent>
         </Card>

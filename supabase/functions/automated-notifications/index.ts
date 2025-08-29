@@ -393,15 +393,25 @@ async function sendBulkNotifications(advanceDays?: number[]): Promise<Response> 
   
   for (const notification of pendingNotifications || []) {
     try {
+      // Skip notifications without recipient email
+      if (!notification.recipient_email) {
+        console.error(`No recipient email for notification ${notification.id}`);
+        await supabase
+          .from('notification_queue')
+          .update({ status: 'failed' })
+          .eq('id', notification.id);
+        continue;
+      }
+
       // Call the send-branded-email function
       const emailResponse = await supabase.functions.invoke('send-branded-email', {
         body: {
           to: notification.recipient_email,
           subject: notification.subject,
-          type: 'student-welcome-with-dispensary', // Default template
+          type: 'compliance-reminder',
           data: {
             message: notification.message,
-            metadata: notification.metadata
+            metadata: notification.metadata || {}
           }
         }
       });

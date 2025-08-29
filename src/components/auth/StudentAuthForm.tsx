@@ -139,6 +139,39 @@ const StudentAuthForm = () => {
         }
       });
 
+      // If user creation successful, assign student role and update profile
+      if (!error && authData.user) {
+        try {
+          // Insert user role
+          const { error: roleError } = await supabase
+            .from('user_roles')
+            .insert({
+              user_id: authData.user.id,
+              role: 'student'
+            });
+
+          if (roleError) {
+            console.error('Error assigning user role:', roleError);
+          }
+
+          // Update profile with organization link
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .update({ 
+              organization_id: orgData.id,
+              dispensary_access_key: dispensaryKey,
+              phone: phone
+            })
+            .eq('user_id', authData.user.id);
+
+          if (profileError) {
+            console.error('Error updating profile:', profileError);
+          }
+        } catch (assignmentError) {
+          console.error('Error in post-registration setup:', assignmentError);
+        }
+      }
+
       // If user creation successful, deduct a credit
       if (!error && authData.user) {
         try {
