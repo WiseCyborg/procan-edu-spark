@@ -6,7 +6,7 @@ import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Play, Pause, Volume2 } from 'lucide-react';
+import { Play, Pause, Volume2, X, ArrowLeft } from 'lucide-react';
 import { useUnifiedVoice } from '@/providers/UnifiedVoiceProvider';
 
 interface VoiceSettingsPanelProps {
@@ -62,6 +62,20 @@ export const VoiceSettingsPanel: React.FC<VoiceSettingsPanelProps> = ({
     });
   };
 
+  // Handle escape key to close panel
+  React.useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isVisible) {
+        onClose();
+      }
+    };
+    
+    if (isVisible) {
+      document.addEventListener('keydown', handleEscape);
+      return () => document.removeEventListener('keydown', handleEscape);
+    }
+  }, [isVisible, onClose]);
+
   if (!isVisible || !isSupported) return null;
 
   return (
@@ -69,10 +83,20 @@ export const VoiceSettingsPanel: React.FC<VoiceSettingsPanelProps> = ({
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg">Voice Settings</CardTitle>
-          <Badge variant="outline">
-            <Volume2 className="h-3 w-3 mr-1" />
-            {isSpeaking ? 'Speaking' : 'Ready'}
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline">
+              <Volume2 className="h-3 w-3 mr-1" />
+              {isSpeaking ? 'Speaking' : 'Ready'}
+            </Badge>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClose}
+              className="h-8 w-8 p-0 hover:bg-destructive hover:text-destructive-foreground"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </CardHeader>
       
@@ -209,7 +233,8 @@ export const VoiceSettingsPanel: React.FC<VoiceSettingsPanelProps> = ({
         {/* Actions */}
         <div className="flex gap-2 pt-4 border-t">
           <Button variant="outline" onClick={onClose} className="flex-1">
-            Close
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Chat
           </Button>
           <Button
             onClick={() => {

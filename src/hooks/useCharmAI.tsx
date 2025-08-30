@@ -160,7 +160,7 @@ export const useCharmAI = () => {
     return links;
   }, []);
 
-  // Enhanced message sending with context
+  // Enhanced message sending with context and security
   const sendEnhancedMessage = useCallback(async (message: string) => {
     if (!userProfile) return null;
 
@@ -170,6 +170,10 @@ export const useCharmAI = () => {
     // Add to conversation history for context
     setConversationHistory(prev => [...prev.slice(-9), message]);
 
+    // Enhanced security context
+    const securityLevel = roles.includes('admin') ? 'admin' : 
+                         roles.includes('dispensary_manager') ? 'manager' : 'student';
+
     try {
       const { data, error } = await supabase.functions.invoke('chat-assistant', {
         body: {
@@ -177,11 +181,24 @@ export const useCharmAI = () => {
           context: {
             ...analyzedState,
             conversationHistory: conversationHistory.slice(-3), // Last 3 messages for context
-            userProfile,
-            suggestedLinks: generateContextualLinks(analyzedState.intent, roles[0] || 'student')
+            userProfile: {
+              ...userProfile,
+              securityLevel,
+              accessLevel: securityLevel,
+              canAccessDispensaryInfo: securityLevel !== 'student',
+              canAccessAdminInfo: securityLevel === 'admin'
+            },
+            suggestedLinks: generateContextualLinks(analyzedState.intent, roles[0] || 'student'),
+            securityRules: {
+              level: securityLevel,
+              restrictDispensaryInfo: securityLevel === 'student',
+              restrictAdminInfo: securityLevel !== 'admin',
+              auditLog: true
+            }
           },
           user_id: user?.id,
-          user_roles: roles
+          user_roles: roles,
+          security_level: securityLevel
         }
       });
 

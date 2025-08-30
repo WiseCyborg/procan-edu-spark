@@ -10,33 +10,24 @@ const corsHeaders = {
 
 interface ChatRequest {
   message: string;
-  context: {
-    route: string;
-    title: string;
-    description: string;
-    helpTips: string[];
-    systemPrompt: string;
-    // Enhanced context for Charm AI
-    intent?: 'help' | 'training' | 'compliance' | 'general' | 'urgent';
-    urgency?: 'low' | 'medium' | 'high';
+  context?: {
+    intent?: string;
+    urgency?: string;
     topic?: string;
     userContext?: Record<string, any>;
     conversationHistory?: string[];
-    userProfile?: {
-      userId: string;
-      roles: string[];
-      organizationId?: string;
-      trainingProgress?: number;
-      preferences?: Record<string, any>;
+    userProfile?: any;
+    suggestedLinks?: Array<{ text: string; url: string; description: string }>;
+    securityRules?: {
+      level: 'student' | 'manager' | 'admin';
+      restrictDispensaryInfo: boolean;
+      restrictAdminInfo: boolean;
+      auditLog: boolean;
     };
-    suggestedLinks?: Array<{
-      text: string;
-      url: string;
-      description: string;
-    }>;
   };
   user_id?: string;
   user_roles?: string[];
+  security_level?: string;
 }
 
 serve(async (req) => {
@@ -50,7 +41,7 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured');
     }
 
-    const { message, context, user_id, user_roles }: ChatRequest = await req.json();
+    const { message, context = {}, user_id, user_roles = [], security_level = 'student' } = await req.json() as ChatRequest;
 
     if (!message || !context) {
       throw new Error('Message and context are required');

@@ -5,17 +5,20 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { MessageCircle, Send, X, HelpCircle } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { MessageCircle, Send, X, HelpCircle, Settings, Mic } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
-import { toast } from '@/components/ui/use-toast';
+import { useCharmAI } from '@/hooks/useCharmAI';
+import { VoiceSettingsPanel } from './VoiceSettingsPanel';
+import { useUnifiedVoice } from '@/providers/UnifiedVoiceProvider';
+import { toast } from '@/hooks/use-toast';
 
 interface Message {
   id: string;
   content: string;
   isUser: boolean;
   timestamp: Date;
+  links?: Array<{ text: string; url: string; description: string }>;
 }
 
 interface ContextInfo {
@@ -23,10 +26,15 @@ interface ContextInfo {
   title: string;
   description: string;
   helpTips: string[];
-  systemPrompt: string;
+  securityLevel: 'student' | 'manager' | 'admin';
 }
 
-const getContextInfo = (pathname: string): ContextInfo => {
+const getContextInfo = (pathname: string, userRoles: string[]): ContextInfo => {
+  const isAdmin = userRoles.includes('admin');
+  const isManager = userRoles.includes('dispensary_manager');
+  
+  const securityLevel = isAdmin ? 'admin' : isManager ? 'manager' : 'student';
+  
   if (pathname === '/auth') {
     return {
       route: 'auth',
@@ -38,34 +46,25 @@ const getContextInfo = (pathname: string): ContextInfo => {
         'Forgot your password?',
         'Questions about Maryland cannabis training requirements?'
       ],
-      systemPrompt: `You are a helpful assistant for ProCann Edu, Maryland's premier cannabis training platform. You're helping users with authentication and account issues. Key points:
-      - ProCann Edu provides Maryland cannabis compliance training
-      - Users need accounts to access training modules and earn certificates
-      - Support email: info@procannedu.com
-      - Be encouraging about the cannabis industry opportunity in Maryland
-      - Help with technical issues like login problems, password resets, account creation
-      - Explain the value of cannabis education and certification`
+      securityLevel
     };
   }
   
   if (pathname === '/dashboard') {
+    const tips = ['How do I start a course?', 'Where can I see my progress?'];
+    if (securityLevel !== 'student') {
+      tips.push('How do I manage my team?', 'Where are compliance reports?');
+    }
+    if (securityLevel === 'admin') {
+      tips.push('How do I manage organizations?', 'Where are system analytics?');
+    }
+    
     return {
       route: 'dashboard',
-      title: 'Dashboard & Courses',
-      description: 'Navigate your training progress and courses',
-      helpTips: [
-        'How do I start a course?',
-        'Where can I see my progress?',
-        'How do I download my certificate?',
-        'What courses are available?'
-      ],
-      systemPrompt: `You are a helpful assistant for ProCann Edu's dashboard. Help users navigate their training progress and courses. Key points:
-      - Users can see available courses, progress, and certificates here
-      - Maryland cannabis training includes 18 modules covering compliance
-      - Certificates are available after passing the final exam with 80%+
-      - Support contact: info@procannedu.com
-      - Encourage completion of training for career advancement
-      - Help with navigation, progress tracking, and certificate access`
+      title: 'Dashboard & Training Hub',
+      description: `Navigate your ${securityLevel === 'student' ? 'training progress' : 'management dashboard'}`,
+      helpTips: tips,
+      securityLevel
     };
   }
   
@@ -76,7 +75,7 @@ const getContextInfo = (pathname: string): ContextInfo => {
         title: 'Chat Unavailable',
         description: 'Chat assistance is disabled during the final exam to maintain integrity',
         helpTips: [],
-        systemPrompt: ''
+        securityLevel
       };
     }
     
@@ -90,36 +89,37 @@ const getContextInfo = (pathname: string): ContextInfo => {
         'Navigation between modules',
         'Understanding compliance requirements'
       ],
-      systemPrompt: `You are a cannabis industry expert assistant for ProCann Edu course modules. Help users understand Maryland cannabis regulations and course content. Key points:
-      - Focus on Maryland-specific cannabis laws and compliance
-      - Explain complex regulatory concepts clearly
-      - Help with module navigation and technical issues
-      - Encourage completion of all modules before the final exam
-      - Support contact: info@procannedu.com
-      - Emphasize the importance of compliance in the cannabis industry
-      - Provide practical, real-world context for regulations`
+      securityLevel
     };
   }
   
-  if (pathname === '/welcome') {
+  if (pathname === '/dispensary-portal' && securityLevel !== 'student') {
     return {
-      route: 'welcome',
-      title: 'Welcome to ProCann Edu',
-      description: 'Learn about the platform and get started',
+      route: 'dispensary-portal',
+      title: 'Dispensary Management',
+      description: 'Manage your team and organizational compliance',
       helpTips: [
-        'What is ProCann Edu?',
-        'How does the training work?',
-        'What will I learn?',
-        'How long does it take?'
+        'How do I add new employees?',
+        'Where can I see team progress?',
+        'How do I generate compliance reports?',
+        'Managing certificate renewals'
       ],
-      systemPrompt: `You are a welcoming assistant for new ProCann Edu users. Help them understand the platform and get excited about cannabis education. Key points:
-      - ProCann Edu is Maryland's premier cannabis training platform
-      - Training covers all aspects of cannabis compliance and regulations
-      - 18 comprehensive modules plus final exam
-      - Certificates recognized by Maryland cannabis industry
-      - Support contact: info@procannedu.com
-      - Be enthusiastic about cannabis industry opportunities
-      - Guide users toward starting their training journey`
+      securityLevel
+    };
+  }
+  
+  if (pathname === '/admin-dashboard' && securityLevel === 'admin') {
+    return {
+      route: 'admin-dashboard',
+      title: 'System Administration',
+      description: 'Manage the entire ProCann Edu platform',
+      helpTips: [
+        'How do I manage organizations?',
+        'User role management',
+        'System analytics and reporting',
+        'Security monitoring'
+      ],
+      securityLevel
     };
   }
   
@@ -134,21 +134,19 @@ const getContextInfo = (pathname: string): ContextInfo => {
       'How do I get certified?',
       'Cannabis industry questions'
     ],
-    systemPrompt: `You are a helpful assistant for ProCann Edu, Maryland's premier cannabis training platform. Provide general help and information. Key points:
-    - ProCann Edu provides comprehensive cannabis compliance training
-    - Maryland-focused cannabis education and certification
-    - Support contact: info@procannedu.com
-    - Help users navigate the platform and understand cannabis regulations
-    - Be encouraging about career opportunities in cannabis
-    - Guide users to appropriate sections of the platform`
+    securityLevel
   };
 };
 
-export const ChatAssistant: React.FC = () => {
+export const EnhancedChatAssistant: React.FC = () => {
   const location = useLocation();
   const { user } = useAuth();
   const { roles } = useUserRole();
+  const { sendEnhancedMessage } = useCharmAI();
+  const { speak, isSupported: voiceSupported } = useUnifiedVoice();
+  
   const [isOpen, setIsOpen] = useState(false);
+  const [showVoiceSettings, setShowVoiceSettings] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -156,7 +154,7 @@ export const ChatAssistant: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout>();
 
-  const contextInfo = getContextInfo(location.pathname);
+  const contextInfo = getContextInfo(location.pathname, roles);
   const isChatDisabled = contextInfo.route === 'final-exam';
 
   // Scroll to bottom of messages
@@ -172,17 +170,15 @@ export const ChatAssistant: React.FC = () => {
   useEffect(() => {
     if (isChatDisabled) return;
     
-    // Clear existing timeout
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
     
-    // Set proactive help after 2 minutes of inactivity
     timeoutRef.current = setTimeout(() => {
       if (!isOpen && contextInfo.helpTips.length > 0) {
         setShowProactiveTip(true);
       }
-    }, 120000); // 2 minutes
+    }, 120000);
 
     return () => {
       if (timeoutRef.current) {
@@ -191,18 +187,24 @@ export const ChatAssistant: React.FC = () => {
     };
   }, [location.pathname, isOpen, isChatDisabled]);
 
-  // Initial welcome message when chat opens
+  // Enhanced welcome message with role-based content
   useEffect(() => {
     if (isOpen && messages.length === 0 && !isChatDisabled) {
+      const roleContext = contextInfo.securityLevel === 'admin' ? 
+        'system administrator' : 
+        contextInfo.securityLevel === 'manager' ? 
+        'dispensary manager' : 
+        'student';
+        
       const welcomeMessage: Message = {
         id: Date.now().toString(),
-        content: `Hi! I'm your ProCann Edu assistant. I'm here to help you with ${contextInfo.description.toLowerCase()}. What can I help you with today?`,
+        content: `Hi! I'm your ProCann Edu assistant with ${contextInfo.securityLevel} access level. As a ${roleContext}, I can help you with ${contextInfo.description.toLowerCase()}. I understand Maryland cannabis regulations and can provide role-specific guidance. What can I help you with today?`,
         isUser: false,
         timestamp: new Date()
       };
       setMessages([welcomeMessage]);
     }
-  }, [isOpen, contextInfo.description, isChatDisabled]);
+  }, [isOpen, contextInfo, isChatDisabled]);
 
   const sendMessage = async () => {
     if (!inputMessage.trim() || isLoading || isChatDisabled) return;
@@ -219,30 +221,39 @@ export const ChatAssistant: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('chat-assistant', {
-        body: {
-          message: inputMessage.trim(),
-          context: contextInfo,
-          user_id: user?.id,
-          user_roles: roles
+      const response = await sendEnhancedMessage(inputMessage.trim());
+      
+      if (response) {
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          content: response.response || response.message || "I understand your question, but I'm having trouble generating a response right now. Please contact info@procannedu.com for assistance.",
+          isUser: false,
+          timestamp: new Date(),
+          links: response.suggestedLinks || []
+        };
+
+        setMessages(prev => [...prev, assistantMessage]);
+        
+        // Auto-speak response if voice is enabled
+        if (voiceSupported && response.response) {
+          speak(response.response, { priority: 'low' });
         }
-      });
-
-      if (error) throw error;
-
-      const assistantMessage: Message = {
+      } else {
+        throw new Error('No response received');
+      }
+    } catch (error) {
+      console.error('Enhanced chat error:', error);
+      const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: data.response,
+        content: "I'm having trouble right now. Please contact info@procannedu.com for support or try asking your question differently.",
         isUser: false,
         timestamp: new Date()
       };
-
-      setMessages(prev => [...prev, assistantMessage]);
-    } catch (error) {
-      console.error('Chat error:', error);
+      setMessages(prev => [...prev, errorMessage]);
+      
       toast({
-        title: "Chat Error",
-        description: "Sorry, I'm having trouble right now. Please contact info@procannedu.com for support.",
+        title: "Chat Assistant Unavailable",
+        description: "The assistant is temporarily unavailable. Please try again or contact support.",
         variant: "destructive",
       });
     } finally {
@@ -253,6 +264,10 @@ export const ChatAssistant: React.FC = () => {
   const handleQuickTip = (tip: string) => {
     setInputMessage(tip);
     if (!isOpen) setIsOpen(true);
+  };
+
+  const handleLinkClick = (url: string) => {
+    window.location.href = url;
   };
 
   if (isChatDisabled) {
@@ -273,6 +288,12 @@ export const ChatAssistant: React.FC = () => {
 
   return (
     <>
+      {/* Voice Settings Panel */}
+      <VoiceSettingsPanel 
+        isVisible={showVoiceSettings} 
+        onClose={() => setShowVoiceSettings(false)} 
+      />
+
       {/* Proactive Help Tooltip */}
       {showProactiveTip && !isOpen && (
         <div className="fixed bottom-20 right-4 z-40 animate-in slide-in-from-right">
@@ -318,9 +339,26 @@ export const ChatAssistant: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="text-sm">{contextInfo.title}</CardTitle>
-                <Badge variant="secondary" className="text-xs mt-1">
-                  {contextInfo.route}
-                </Badge>
+                <div className="flex items-center gap-2 mt-1">
+                  <Badge variant="secondary" className="text-xs">
+                    {contextInfo.route}
+                  </Badge>
+                  <Badge variant="outline" className="text-xs">
+                    {contextInfo.securityLevel}
+                  </Badge>
+                </div>
+              </div>
+              <div className="flex items-center gap-1">
+                {voiceSupported && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    onClick={() => setShowVoiceSettings(true)}
+                  >
+                    <Settings className="w-4 h-4" />
+                  </Button>
+                )}
               </div>
             </div>
           </CardHeader>
@@ -347,22 +385,38 @@ export const ChatAssistant: React.FC = () => {
             )}
 
             {/* Messages */}
-            <ScrollArea className="flex-1 pr-3 overflow-y-auto overscroll-contain" style={{ scrollbarWidth: 'thin' }}>
+            <ScrollArea className="flex-1 pr-3 overflow-y-auto overscroll-contain" style={{ scrollbarWidth: 'thin', scrollbarColor: 'hsl(var(--border)) transparent' }}>
               <div className="space-y-2">
                 {messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div
-                      className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${
-                        message.isUser
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted text-foreground'
-                      }`}
-                    >
-                      {message.content}
+                  <div key={message.id}>
+                    <div className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}>
+                      <div
+                        className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${
+                          message.isUser
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-muted text-foreground'
+                        }`}
+                      >
+                        {message.content}
+                      </div>
                     </div>
+                    
+                    {/* Contextual Links */}
+                    {message.links && message.links.length > 0 && (
+                      <div className="mt-2 space-y-1">
+                        {message.links.map((link, index) => (
+                          <Button
+                            key={index}
+                            variant="outline"
+                            size="sm"
+                            className="w-full text-xs h-7 justify-start"
+                            onClick={() => handleLinkClick(link.url)}
+                          >
+                            {link.text}
+                          </Button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ))}
                 {isLoading && (
@@ -406,4 +460,4 @@ export const ChatAssistant: React.FC = () => {
   );
 };
 
-export default ChatAssistant;
+export default EnhancedChatAssistant;
