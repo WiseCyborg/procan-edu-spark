@@ -3,7 +3,6 @@ import { useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { 
@@ -18,15 +17,26 @@ import {
   VolumeX,
   Move,
   Maximize2,
-  Minimize2
+  Minimize2,
+  Download,
+  History,
+  Archive
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { toast } from '@/components/ui/use-toast';
 import { useConversation } from '@11labs/react';
+import { useUnifiedVoice } from '@/providers/UnifiedVoiceProvider';
 import { DraggableMessage } from './DraggableMessage';
 import { PinnedMessagesManager, usePinnedMessages } from './PinnedMessagesManager';
+import { EnhancedScrollArea } from './EnhancedScrollArea';
+import { ChatWelcomeOverlay } from './ChatWelcomeOverlay';
+import { VoiceSettingsPanel } from './VoiceSettingsPanel';
+import { ChatExportDialog } from './ChatExportDialog';
+import { InteractiveMessage } from './InteractiveMessage';
+import { ChatAnnouncementSystem } from './ChatAnnouncementSystem';
+import { useChatPersistence } from '@/hooks/useChatPersistence';
 
 interface Message {
   id: string;
@@ -143,15 +153,30 @@ export const DraggableVoiceAssistant: React.FC = () => {
   const { user } = useAuth();
   const { roles } = useUserRole();
   const { isPinned, pinMessage, unpinMessage } = usePinnedMessages();
+  const { speak, stop, settings: voiceSettings, isSpeaking } = useUnifiedVoice();
+  const {
+    chatSessions,
+    currentSessionId,
+    startNewSession,
+    saveMessage,
+    saveMessages,
+    getCurrentSession
+  } = useChatPersistence();
+  
   const [isOpen, setIsOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showVoiceSettings, setShowVoiceSettings] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
+  const [showAnnouncement, setShowAnnouncement] = useState(true);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showProactiveTip, setShowProactiveTip] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [windowSize, setWindowSize] = useState({ width: 320, height: 400 });
+  const [hoveredMessageId, setHoveredMessageId] = useState<string | null>(null);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [windowSize, setWindowSize] = useState({ width: 380, height: 480 });
   const [position, setPosition] = useState<Position>(() => {
     const savedPosition = localStorage.getItem('chatAssistantPosition');
     if (savedPosition) {
@@ -161,17 +186,14 @@ export const DraggableVoiceAssistant: React.FC = () => {
         console.error('Error parsing saved position:', error);
       }
     }
-    const agentWidth = 320;
+    const agentWidth = 380;
     return {
       x: window.innerWidth - agentWidth - 20,
-      y: window.innerHeight - 400 - 20
+      y: window.innerHeight - 480 - 20
     };
   });
   const [dragOffset, setDragOffset] = useState<Position>({ x: 0, y: 0 });
   const [isListening, setIsListening] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [voiceEnabled, setVoiceEnabled] = useState(false);
-  const [volume, setVolume] = useState(0.8);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout>();
@@ -181,6 +203,14 @@ export const DraggableVoiceAssistant: React.FC = () => {
 
   const contextInfo = getContextInfo(location.pathname);
   const isChatDisabled = contextInfo.route === 'final-exam';
+
+  // Check if user should see welcome overlay
+  useEffect(() => {
+    const hasSeenWelcome = localStorage.getItem('chat-welcome-seen');
+    if (!hasSeenWelcome && !isChatDisabled) {
+      setShowWelcome(true);
+    }
+  }, [isChatDisabled]);
 
   // Save position to localStorage when it changes
   useEffect(() => {
@@ -355,9 +385,15 @@ export const DraggableVoiceAssistant: React.FC = () => {
     };
   }, [location.pathname, isOpen, isChatDisabled]);
 
-  // Initial welcome message with Baltimore charm
+  // Enhanced session management
   useEffect(() => {
     if (isOpen && messages.length === 0 && !isChatDisabled) {
+      // Start new session or load existing
+      let sessionId = currentSessionId;
+      if (!sessionId) {
+        sessionId = startNewSession(contextInfo.route, contextInfo.title);
+      }
+
       const getWeatherContext = () => {
         const hour = new Date().getHours();
         const season = new Date().getMonth();
@@ -373,11 +409,20 @@ export const DraggableVoiceAssistant: React.FC = () => {
         id: Date.now().toString(),
         content: `${getWeatherContext()} I'm Charm AI, your Baltimore cannabis training assistant. I'm here to help you with ${contextInfo.description.toLowerCase()}. Maryland's cannabis industry is growing fast - what can I help you with today?`,
         isUser: false,
-        timestamp: new Date()
+        timestamp: new Date(),
+        pageContext: {
+          route: contextInfo.route,
+          title: contextInfo.title,
+          description: contextInfo.description
+        }
       };
+      
       setMessages([welcomeMessage]);
+      if (sessionId) {
+        saveMessage(sessionId, welcomeMessage);
+      }
     }
-  }, [isOpen, contextInfo.description, isChatDisabled]);
+  }, [isOpen, contextInfo, isChatDisabled, currentSessionId, startNewSession, saveMessage]);
 
   const sendMessage = async (messageText?: string) => {
     const text = messageText || inputMessage.trim();
@@ -426,8 +471,8 @@ export const DraggableVoiceAssistant: React.FC = () => {
       setMessages(prev => [...prev, assistantMessage]);
 
       // Text-to-speech for assistant response
-      if (voiceEnabled && volume > 0) {
-        await playTextAsVoice(data.response);
+      if (voiceSettings.enabled && voiceSettings.volume > 0) {
+        speak(data.response);
       }
     } catch (error) {
       console.error('Chat error:', error);
@@ -441,29 +486,6 @@ export const DraggableVoiceAssistant: React.FC = () => {
     }
   };
 
-  const playTextAsVoice = async (text: string) => {
-    try {
-      setIsSpeaking(true);
-      
-      const { data, error } = await supabase.functions.invoke('text-to-voice', {
-        body: { 
-          text, 
-          voice: 'Aria' // Using Aria voice from ElevenLabs
-        }
-      });
-
-      if (error) throw error;
-
-      // Play the audio
-      const audio = new Audio(`data:audio/mp3;base64,${data.audioContent}`);
-      audio.volume = volume;
-      audio.onended = () => setIsSpeaking(false);
-      await audio.play();
-    } catch (error) {
-      console.error('Text-to-speech error:', error);
-      setIsSpeaking(false);
-    }
-  };
 
   const handleQuickTip = (tip: string) => {
     setInputMessage(tip);
@@ -599,20 +621,26 @@ export const DraggableVoiceAssistant: React.FC = () => {
                         size="sm"
                         variant="ghost"
                         className="h-6 w-6 p-0"
-                        onClick={() => setVolume(volume > 0 ? 0 : 0.8)}
+                        onClick={() => setShowVoiceSettings(true)}
                       >
-                        {volume > 0 ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+                        <Volume2 className="w-4 h-4" />
                       </Button>
                     </div>
-                    <input
-                      type="range"
-                      min="0"
-                      max="1"
-                      step="0.1"
-                      value={volume}
-                      onChange={(e) => setVolume(parseFloat(e.target.value))}
-                      className="w-full"
-                    />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setShowVoiceSettings(true)}
+                      className="w-full text-xs"
+                    >
+                      Voice Settings
+                    </Button>
+                    
+                    <ChatExportDialog messages={messages}>
+                      <Button size="sm" variant="outline" className="w-full text-xs">
+                        <Download className="w-4 h-4 mr-1" />
+                        Export Chat
+                      </Button>
+                    </ChatExportDialog>
                   </div>
                 </div>
               )}
@@ -640,7 +668,7 @@ export const DraggableVoiceAssistant: React.FC = () => {
               )}
 
               {/* Messages */}
-              <ScrollArea className="flex-1 pr-3 max-h-60">
+              <EnhancedScrollArea className="flex-1 pr-3 max-h-60">
                 <div className="space-y-2">
                   {messages.map((message) => (
                     <div
@@ -673,7 +701,7 @@ export const DraggableVoiceAssistant: React.FC = () => {
                   )}
                 </div>
                 <div ref={messagesEndRef} />
-              </ScrollArea>
+              </EnhancedScrollArea>
 
               {/* Input */}
               <div className="flex space-x-2 mt-3">
@@ -706,6 +734,34 @@ export const DraggableVoiceAssistant: React.FC = () => {
             </CardContent>
           </Card>
         </div>
+      )}
+
+      {/* Welcome Overlay */}
+      <ChatWelcomeOverlay 
+        isVisible={showWelcome}
+        onClose={() => setShowWelcome(false)}
+      />
+
+      {/* Voice Settings Panel */}
+      {showVoiceSettings && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <VoiceSettingsPanel 
+            isVisible={showVoiceSettings}
+            onClose={() => setShowVoiceSettings(false)}
+          />
+        </div>
+      )}
+
+      {/* Announcement System */}
+      {showAnnouncement && (
+        <ChatAnnouncementSystem
+          onDismiss={() => setShowAnnouncement(false)}
+          onOpenChat={() => {
+            setIsOpen(true);
+            setShowAnnouncement(false);
+          }}
+          currentRoute={location.pathname}
+        />
       )}
 
       {/* Pinned Messages Manager */}
