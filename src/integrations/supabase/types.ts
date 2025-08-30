@@ -466,32 +466,47 @@ export type Database = {
         Row: {
           code: string
           created_at: string
+          delivery_attempts: number | null
+          delivery_method: string | null
+          delivery_status: string | null
           email: string
           expires_at: string
           id: string
+          phone_number: string | null
           purpose: string
           user_id: string | null
           verified_at: string | null
+          vonage_request_id: string | null
         }
         Insert: {
           code: string
           created_at?: string
+          delivery_attempts?: number | null
+          delivery_method?: string | null
+          delivery_status?: string | null
           email: string
           expires_at?: string
           id?: string
+          phone_number?: string | null
           purpose: string
           user_id?: string | null
           verified_at?: string | null
+          vonage_request_id?: string | null
         }
         Update: {
           code?: string
           created_at?: string
+          delivery_attempts?: number | null
+          delivery_method?: string | null
+          delivery_status?: string | null
           email?: string
           expires_at?: string
           id?: string
+          phone_number?: string | null
           purpose?: string
           user_id?: string | null
           verified_at?: string | null
+          vonage_request_id?: string | null
         }
         Relationships: []
       }
@@ -971,10 +986,12 @@ export type Database = {
           organization: string | null
           organization_id: string | null
           phone: string | null
+          phone_verified: boolean | null
           profile_photo_url: string | null
           state: string | null
           updated_at: string
           user_id: string
+          verification_method_preference: string | null
           zip_code: string | null
         }
         Insert: {
@@ -994,10 +1011,12 @@ export type Database = {
           organization?: string | null
           organization_id?: string | null
           phone?: string | null
+          phone_verified?: boolean | null
           profile_photo_url?: string | null
           state?: string | null
           updated_at?: string
           user_id: string
+          verification_method_preference?: string | null
           zip_code?: string | null
         }
         Update: {
@@ -1017,10 +1036,12 @@ export type Database = {
           organization?: string | null
           organization_id?: string | null
           phone?: string | null
+          phone_verified?: boolean | null
           profile_photo_url?: string | null
           state?: string | null
           updated_at?: string
           user_id?: string
+          verification_method_preference?: string | null
           zip_code?: string | null
         }
         Relationships: [
@@ -1269,6 +1290,39 @@ export type Database = {
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_verification_preferences: {
+        Row: {
+          backup_method: string | null
+          created_at: string
+          id: string
+          last_successful_method: string | null
+          phone_number: string | null
+          preferred_method: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          backup_method?: string | null
+          created_at?: string
+          id?: string
+          last_successful_method?: string | null
+          phone_number?: string | null
+          preferred_method?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          backup_method?: string | null
+          created_at?: string
+          id?: string
+          last_successful_method?: string | null
+          phone_number?: string | null
+          preferred_method?: string | null
           updated_at?: string
           user_id?: string
         }

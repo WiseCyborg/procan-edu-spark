@@ -1,5 +1,11 @@
 project_id = "zhmpwczrvitomsxjwpzc"
 
+[functions.vonage-verify-start]
+verify_jwt = false
+
+[functions.vonage-verify-check]
+verify_jwt = false
+
 [functions.create-course-payment-paypal]
 verify_jwt = true
 

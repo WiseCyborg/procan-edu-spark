@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/components/ui/use-toast';
-import { MFAVerification } from './MFAVerification';
+import { EnhancedMFAVerification } from './EnhancedMFAVerification';
 import { ForgotPassword } from './ForgotPassword';
 
 const AuthForm = () => {
@@ -193,8 +193,9 @@ const AuthForm = () => {
   if (showMFA) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/5 p-4">
-        <MFAVerification
+        <EnhancedMFAVerification
           email={mfaEmail}
+          phone={phone}
           purpose="login"
           onVerified={handleMFAVerified}
           onCancel={handleMFACancel}
