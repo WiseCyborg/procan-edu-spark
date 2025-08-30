@@ -8,8 +8,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/components/ui/use-toast';
-import { User, Save, Calendar, MapPin, Phone } from 'lucide-react';
+import { User, Save, Calendar, MapPin, Phone, Settings } from 'lucide-react';
+import { VerificationPreferencesSetup } from '@/components/auth/VerificationPreferencesSetup';
 
 interface ProfileData {
   first_name: string;
@@ -222,6 +224,21 @@ const Profile: React.FC = () => {
         </div>
       </div>
 
+      <Tabs defaultValue="profile" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="profile" className="flex items-center gap-2">
+            <User className="w-4 h-4" />
+            Profile Information
+          </TabsTrigger>
+          <TabsTrigger value="verification" className="flex items-center gap-2">
+            <Settings className="w-4 h-4" />
+            Verification Settings
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="profile" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Personal Information */}
         <Card>
@@ -398,12 +415,19 @@ const Profile: React.FC = () => {
         </Card>
       </div>
 
-      <div className="flex justify-end">
-        <Button onClick={handleSave} disabled={isSaving} className="flex items-center space-x-2">
-          <Save className="w-4 h-4" />
-          <span>{isSaving ? 'Saving...' : 'Save Changes'}</span>
-        </Button>
-      </div>
+          <div className="flex justify-end">
+            <Button onClick={handleSave} disabled={isSaving} className="flex items-center space-x-2">
+              <Save className="w-4 h-4" />
+              <span>{isSaving ? 'Saving...' : 'Save Changes'}</span>
+            </Button>
+          </div>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="verification" className="space-y-6">
+          <VerificationPreferencesSetup />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

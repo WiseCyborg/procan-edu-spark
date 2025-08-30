@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useSearchParams } from 'react-router-dom';
-import AuthForm from '@/components/auth/AuthForm';
+import SmartAuthForm from '@/components/auth/SmartAuthForm';
 import DispensaryAuthForm from '@/components/auth/DispensaryAuthForm';
 import StudentAuthForm from '@/components/auth/StudentAuthForm';
 import AdminAuthForm from '@/components/auth/AdminAuthForm';
@@ -22,7 +22,7 @@ const Auth = () => {
     case 'student':
       return <StudentAuthForm />;
     default:
-      return <AuthForm />;
+      return <SmartAuthForm />;
   }
 };
 
