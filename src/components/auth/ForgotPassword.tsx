@@ -31,8 +31,14 @@ export const ForgotPassword: React.FC<ForgotPasswordProps> = ({ onBack }) => {
 
     setLoading(true);
     try {
+      const currentParams = new URLSearchParams(window.location.search);
+      const role = currentParams.get('role') || '';
+      const redirectUrl = role ? 
+        `${window.location.origin}/auth?role=${role}&mode=reset` : 
+        `${window.location.origin}/auth?mode=reset`;
+        
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth?mode=reset`
+        redirectTo: redirectUrl
       });
 
       if (error) {

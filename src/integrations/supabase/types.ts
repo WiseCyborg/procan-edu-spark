@@ -462,6 +462,36 @@ export type Database = {
         }
         Relationships: []
       }
+      email_preferences: {
+        Row: {
+          created_at: string | null
+          custom_redirect_url: string | null
+          custom_subject: string | null
+          enabled: boolean | null
+          id: string
+          template_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          custom_redirect_url?: string | null
+          custom_subject?: string | null
+          enabled?: boolean | null
+          id?: string
+          template_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          custom_redirect_url?: string | null
+          custom_subject?: string | null
+          enabled?: boolean | null
+          id?: string
+          template_type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       email_verification_codes: {
         Row: {
           code: string
