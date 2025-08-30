@@ -69,20 +69,41 @@ async function handleNewUserSignup(user: any) {
     
     const confirmationLink = `${Deno.env.get('SUPABASE_URL')}/auth/v1/verify?token=${user.confirmation_token}&type=signup&redirect_to=${encodeURIComponent(`${baseUrl}/dashboard`)}`;
     
-    // Call our branded email function
-    const emailResponse = await supabase.functions.invoke('send-branded-email', {
-      body: {
-        to: user.email,
-        subject: 'Confirm Your ProCann Edu Account',
-        type: 'email-confirmation',
-        data: {
-          firstName: user.raw_user_meta_data?.first_name || '',
-          confirmationLink: confirmationLink
+    // Try branded email first, fallback to Supabase default if it fails
+    try {
+      const emailResponse = await supabase.functions.invoke('send-branded-email', {
+        body: {
+          to: user.email,
+          subject: 'Confirm Your ProCann Edu Account',
+          type: 'email-confirmation',
+          data: {
+            firstName: user.raw_user_meta_data?.first_name || '',
+            confirmationLink: confirmationLink
+          }
         }
-      }
-    });
+      });
 
-    console.log('Confirmation email sent:', emailResponse);
+      if (emailResponse.error) {
+        throw new Error(`Branded email failed: ${emailResponse.error.message}`);
+      }
+
+      console.log('Branded confirmation email sent successfully:', emailResponse);
+    } catch (error) {
+      console.log('Branded email failed, using fallback:', error);
+      
+      // Fallback to Supabase default email
+      await supabase.functions.invoke('send-fallback-email', {
+        body: {
+          type: 'signup',
+          email: user.email,
+          user_id: user.id,
+          confirmation_token: user.confirmation_token,
+          redirect_to: `${Deno.env.get('ENVIRONMENT') === 'production' ? 'https://procannedu.com' : 'http://localhost:3000'}/dashboard`
+        }
+      });
+      
+      console.log('Fallback confirmation email sent');
+    }
   }
 }
 
@@ -105,20 +126,41 @@ async function handleUserUpdate(user: any, oldUser: any) {
       .eq('user_id', user.id)
       .single();
     
-    // Call our branded email function
-    const emailResponse = await supabase.functions.invoke('send-branded-email', {
-      body: {
-        to: user.email,
-        subject: 'Reset Your ProCann Edu Password',
-        type: 'password-reset',
-        data: {
-          firstName: profile?.first_name || user.raw_user_meta_data?.first_name || '',
-          resetLink: resetLink
+    // Try branded email first, fallback to Supabase default if it fails
+    try {
+      const emailResponse = await supabase.functions.invoke('send-branded-email', {
+        body: {
+          to: user.email,
+          subject: 'Reset Your ProCann Edu Password',
+          type: 'password-reset',
+          data: {
+            firstName: profile?.first_name || user.raw_user_meta_data?.first_name || '',
+            resetLink: resetLink
+          }
         }
-      }
-    });
+      });
 
-    console.log('Password reset email sent:', emailResponse);
+      if (emailResponse.error) {
+        throw new Error(`Branded email failed: ${emailResponse.error.message}`);
+      }
+
+      console.log('Branded password reset email sent successfully:', emailResponse);
+    } catch (error) {
+      console.log('Branded email failed, using fallback:', error);
+      
+      // Fallback to Supabase default email
+      await supabase.functions.invoke('send-fallback-email', {
+        body: {
+          type: 'recovery',
+          email: user.email,
+          user_id: user.id,
+          recovery_token: user.recovery_token,
+          redirect_to: `${Deno.env.get('ENVIRONMENT') === 'production' ? 'https://procannedu.com' : 'http://localhost:3000'}/auth?mode=reset`
+        }
+      });
+      
+      console.log('Fallback password reset email sent');
+    }
   }
 
   // Handle magic link emails
@@ -141,20 +183,41 @@ async function handleUserUpdate(user: any, oldUser: any) {
         .eq('user_id', user.id)
         .single();
       
-      // Call our branded email function
-      const emailResponse = await supabase.functions.invoke('send-branded-email', {
-        body: {
-          to: user.email,
-          subject: 'Your ProCann Edu Magic Link',
-          type: 'magic-link',
-          data: {
-            firstName: profile?.first_name || user.raw_user_meta_data?.first_name || '',
-            magicLink: magicLink
+      // Try branded email first, fallback to Supabase default if it fails
+      try {
+        const emailResponse = await supabase.functions.invoke('send-branded-email', {
+          body: {
+            to: user.email,
+            subject: 'Your ProCann Edu Magic Link',
+            type: 'magic-link',
+            data: {
+              firstName: profile?.first_name || user.raw_user_meta_data?.first_name || '',
+              magicLink: magicLink
+            }
           }
-        }
-      });
+        });
 
-      console.log('Magic link email sent:', emailResponse);
+        if (emailResponse.error) {
+          throw new Error(`Branded email failed: ${emailResponse.error.message}`);
+        }
+
+        console.log('Branded magic link email sent successfully:', emailResponse);
+      } catch (error) {
+        console.log('Branded email failed, using fallback:', error);
+        
+        // Fallback to Supabase default email
+        await supabase.functions.invoke('send-fallback-email', {
+          body: {
+            type: 'magiclink',
+            email: user.email,
+            user_id: user.id,
+            recovery_token: user.recovery_token,
+            redirect_to: `${Deno.env.get('ENVIRONMENT') === 'production' ? 'https://procannedu.com' : 'http://localhost:3000'}/dashboard`
+          }
+        });
+        
+        console.log('Fallback magic link email sent');
+      }
     }
   }
 }
