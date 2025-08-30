@@ -13,44 +13,7 @@ import {
   ZoomIn
 } from 'lucide-react';
 
-export const MobileOptimizationIndicator: React.FC = () => {
-  const [isMobile, setIsMobile] = React.useState(false);
-  const [isTablet, setIsTablet] = React.useState(false);
-
-  React.useEffect(() => {
-    const checkDevice = () => {
-      setIsMobile(window.innerWidth < 768);
-      setIsTablet(window.innerWidth >= 768 && window.innerWidth < 1024);
-    };
-
-    checkDevice();
-    window.addEventListener('resize', checkDevice);
-    return () => window.removeEventListener('resize', checkDevice);
-  }, []);
-
-  return (
-    <div className="fixed bottom-4 right-4 z-50">
-      <Card className="w-48 bg-background/95 backdrop-blur border">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm flex items-center gap-2">
-            {isMobile && <Smartphone className="h-4 w-4 text-blue-500" />}
-            {isTablet && <Tablet className="h-4 w-4 text-green-500" />}
-            {!isMobile && !isTablet && <Monitor className="h-4 w-4 text-purple-500" />}
-            Device Mode
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <Badge 
-            variant={isMobile ? "default" : "secondary"}
-            className="text-xs"
-          >
-            {isMobile ? "Mobile" : isTablet ? "Tablet" : "Desktop"}
-          </Badge>
-        </CardContent>
-      </Card>
-    </div>
-  );
-};
+// Device mode indicator removed as requested - no longer needed in production
 
 export const AccessibilityToolbar: React.FC = () => {
   const [fontSize, setFontSize] = React.useState(16);

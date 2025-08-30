@@ -62,7 +62,12 @@ async function handleNewUserSignup(user: any) {
   
   // Only send custom email if user needs email confirmation
   if (!user.email_confirmed_at && user.confirmation_token) {
-    const confirmationLink = `${Deno.env.get('SUPABASE_URL')}/auth/v1/verify?token=${user.confirmation_token}&type=signup&redirect_to=${encodeURIComponent('https://procannedu.com/dashboard')}`;
+    // Determine the appropriate redirect URL based on environment
+    const baseUrl = Deno.env.get('ENVIRONMENT') === 'production' 
+      ? 'https://procannedu.com' 
+      : 'http://localhost:3000';
+    
+    const confirmationLink = `${Deno.env.get('SUPABASE_URL')}/auth/v1/verify?token=${user.confirmation_token}&type=signup&redirect_to=${encodeURIComponent(`${baseUrl}/dashboard`)}`;
     
     // Call our branded email function
     const emailResponse = await supabase.functions.invoke('send-branded-email', {
@@ -86,7 +91,12 @@ async function handleUserUpdate(user: any, oldUser: any) {
   
   // Handle password reset emails
   if (user.recovery_token && !oldUser?.recovery_token) {
-    const resetLink = `${Deno.env.get('SUPABASE_URL')}/auth/v1/verify?token=${user.recovery_token}&type=recovery&redirect_to=${encodeURIComponent('https://procannedu.com/auth?mode=reset')}`;
+    // Determine the appropriate redirect URL based on environment
+    const baseUrl = Deno.env.get('ENVIRONMENT') === 'production' 
+      ? 'https://procannedu.com' 
+      : 'http://localhost:3000';
+    
+    const resetLink = `${Deno.env.get('SUPABASE_URL')}/auth/v1/verify?token=${user.recovery_token}&type=recovery&redirect_to=${encodeURIComponent(`${baseUrl}/auth?mode=reset`)}`;
     
     // Get user profile for personalization
     const { data: profile } = await supabase
@@ -117,7 +127,12 @@ async function handleUserUpdate(user: any, oldUser: any) {
     const timeDiff = new Date(user.recovery_sent_at).getTime() - new Date(user.updated_at).getTime();
     
     if (Math.abs(timeDiff) < 5000) { // Within 5 seconds, likely magic link
-      const magicLink = `${Deno.env.get('SUPABASE_URL')}/auth/v1/verify?token=${user.recovery_token}&type=magiclink&redirect_to=${encodeURIComponent('https://procannedu.com/dashboard')}`;
+      // Determine the appropriate redirect URL based on environment
+      const baseUrl = Deno.env.get('ENVIRONMENT') === 'production' 
+        ? 'https://procannedu.com' 
+        : 'http://localhost:3000';
+      
+      const magicLink = `${Deno.env.get('SUPABASE_URL')}/auth/v1/verify?token=${user.recovery_token}&type=magiclink&redirect_to=${encodeURIComponent(`${baseUrl}/dashboard`)}`;
       
       // Get user profile for personalization
       const { data: profile } = await supabase

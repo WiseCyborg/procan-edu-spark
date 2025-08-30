@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen, Award, Shield, CheckCircle } from 'lucide-react';
 import { CoursePreviewSystem } from '@/components/EnhancedCoursePreview';
-import { AccessibilityToolbar, MobileOptimizationIndicator } from '@/components/MobileOptimization';
+import { AccessibilityToolbar } from '@/components/MobileOptimization';
 import { TrustStats, ComplianceBadges, TestimonialCarousel } from '@/components/TrustIndicators';
 import { EnhancedPlayControls } from '@/components/ui/enhanced-play-controls';
 import { HoverCallout } from '@/components/ui/hover-callout';
@@ -29,7 +29,6 @@ const Index = () => {
   return (
     <div className="min-h-screen">
       <AccessibilityToolbar />
-      <MobileOptimizationIndicator />
       {/* Enhanced Hero Section with Video Background */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
         {/* Video Background */}
