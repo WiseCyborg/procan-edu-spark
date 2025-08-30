@@ -153,7 +153,7 @@ serve(async (req) => {
     - Local ordinance variations across Maryland municipalities
     - Maryland cannabis testing laboratory requirements
     - State-specific packaging and labeling compliance
-    - Maryland employment screening and training mandates
+    - Maryland employment screening and training mandates`;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
