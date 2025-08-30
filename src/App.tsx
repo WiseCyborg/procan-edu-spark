@@ -16,6 +16,7 @@ import DispensaryPortal from "./pages/DispensaryPortal";
 import EnhancedDispensaryPortal from "./pages/EnhancedDispensaryPortal";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminManagement from "./pages/AdminManagement";
+import EnhancedAdminDashboard from "./pages/EnhancedAdminDashboard";
 import Profile from "./pages/Profile";
 import CourseLayout from "./pages/Course/CourseLayout";
 import EnhancedCourseModule from "./components/course/EnhancedCourseModule";
@@ -145,6 +146,12 @@ const App = () => (
                    <Route path="/admin/management" element={
                      <ProtectedRoute>
                        <AdminManagement />
+                     </ProtectedRoute>
+                   } />
+                   
+                   <Route path="/enhanced-admin-dashboard" element={
+                     <ProtectedRoute>
+                       <EnhancedAdminDashboard />
                      </ProtectedRoute>
                    } />
                   
