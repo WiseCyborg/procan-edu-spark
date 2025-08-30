@@ -108,12 +108,12 @@ const Index = () => {
               onClick={() => navigate('/auth?role=student')}
               variant="outline"
               size="lg"
-              className="border-2 border-white/30 text-white hover:bg-white/10 backdrop-blur-sm px-8 py-4 h-auto text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105"
+              className="border-2 border-white/40 text-white bg-white/5 hover:bg-white/15 backdrop-blur-sm px-8 py-4 h-auto text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/50"
             >
               <Award className="h-6 w-6 mr-3" />
               <div className="text-left">
                 <div>Employee Login</div>
-                <div className="text-sm font-normal opacity-80">Start your training</div>
+                <div className="text-sm font-normal opacity-90">Start your training</div>
               </div>
             </Button>
           </div>

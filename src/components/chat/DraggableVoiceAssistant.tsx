@@ -75,7 +75,7 @@ const getContextInfo = (pathname: string): ContextInfo => {
         'Forgot your password? No worries!',
         'Questions about Maryland cannabis training requirements?'
       ],
-      systemPrompt: `You are Charm AI, Baltimore's friendly cannabis training assistant for ProCann Edu. You're helping users with authentication and account issues. Keep that Baltimore warmth while being professional and helpful.`
+      systemPrompt: `You are ProCann Assist, Maryland's friendly cannabis training assistant for ProCann Edu. You're helping users with authentication and account issues. Keep that Maryland warmth while being professional and helpful.`
     };
   }
   
@@ -90,7 +90,7 @@ const getContextInfo = (pathname: string): ContextInfo => {
         'How do I download my certificate?',
         'What courses help with MCA compliance?'
       ],
-      systemPrompt: `You are Charm AI, helping Baltimore-area cannabis professionals navigate their training dashboard. Show that local pride while keeping users on track with their education goals.`
+      systemPrompt: `You are ProCann Assist, helping Maryland cannabis professionals navigate their training dashboard. Show that local pride while keeping users on track with their education goals.`
     };
   }
   
@@ -115,7 +115,7 @@ const getContextInfo = (pathname: string): ContextInfo => {
         'What are MCA compliance requirements?',
         'How does Maryland compare to other states?'
       ],
-      systemPrompt: `You are Charm AI, Baltimore's cannabis education expert. Help users understand Maryland's specific cannabis laws and regulations. Keep it clear, practical, and show that Maryland pride.`
+      systemPrompt: `You are ProCann Assist, Maryland's cannabis education expert. Help users understand Maryland's specific cannabis laws and regulations. Keep it clear, practical, and show that Maryland pride.`
     };
   }
   
@@ -130,21 +130,21 @@ const getContextInfo = (pathname: string): ContextInfo => {
         'What will I learn for the Maryland market?',
         'How long does certification take?'
       ],
-      systemPrompt: `You are Charm AI, Baltimore's welcoming cannabis training assistant. Get new users excited about cannabis education while highlighting Maryland's opportunities. Be enthusiastic but professional.`
+      systemPrompt: `You are ProCann Assist, Maryland's welcoming cannabis training assistant. Get new users excited about cannabis education while highlighting Maryland's opportunities. Be enthusiastic but professional.`
     };
   }
   
   return {
     route: 'general',
-    title: 'Charm AI Assistant',
-    description: 'Your Baltimore cannabis education and compliance expert',
+    title: 'ProCann Assist',
+    description: 'Your Maryland cannabis education and compliance expert',
     helpTips: [
       'Tell me about Maryland cannabis opportunities',
       'What training is available in Baltimore?',
       'How do I get MCA compliant?',
       'Cannabis industry questions'
     ],
-    systemPrompt: `You are Charm AI, Baltimore's premier cannabis training assistant for ProCann Edu. Provide helpful information with that authentic Charm City character while keeping it professional and informative.`
+    systemPrompt: `You are ProCann Assist, Maryland's premier cannabis training assistant for ProCann Edu. Provide helpful information with that authentic Maryland character while keeping it professional and informative.`
   };
 };
 
@@ -398,16 +398,16 @@ export const DraggableVoiceAssistant: React.FC = () => {
         const hour = new Date().getHours();
         const season = new Date().getMonth();
         
-        if (hour < 12) return "Good morning from Baltimore!";
+        if (hour < 12) return "Good morning from Maryland!";
         if (hour < 17) return "Hey there!";
-        if (season >= 11 || season <= 2) return "Hope you're staying warm in Charm City!";
-        if (season >= 5 && season <= 8) return "Beautiful day in Baltimore!";
-        return "How's it going in Baltimore today?";
+        if (season >= 11 || season <= 2) return "Hope you're staying warm in Maryland!";
+        if (season >= 5 && season <= 8) return "Beautiful day in Maryland!";
+        return "How's it going in Maryland today?";
       };
 
       const welcomeMessage: Message = {
         id: Date.now().toString(),
-        content: `${getWeatherContext()} I'm Charm AI, your Baltimore cannabis training assistant. I'm here to help you with ${contextInfo.description.toLowerCase()}. Maryland's cannabis industry is growing fast - what can I help you with today?`,
+        content: `${getWeatherContext()} I'm ProCann Assist, your Maryland cannabis training assistant. I'm here to help you with ${contextInfo.description.toLowerCase()}. Maryland's cannabis industry is growing fast - what can I help you with today?`,
         isUser: false,
         timestamp: new Date(),
         pageContext: {

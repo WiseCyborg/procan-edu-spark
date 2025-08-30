@@ -28,7 +28,7 @@ export const VoiceSettingsPanel: React.FC<VoiceSettingsPanelProps> = ({
     isSupported 
   } = useUnifiedVoice();
   
-  const [testText] = useState("Hey there! I'm Charm AI, your Baltimore cannabis training assistant. How does this voice sound to you?");
+  const [testText] = useState("Hey there! I'm ProCann Assist, your Maryland cannabis training assistant. How does this voice sound to you?");
 
   const handleTestVoice = () => {
     if (isSpeaking) {

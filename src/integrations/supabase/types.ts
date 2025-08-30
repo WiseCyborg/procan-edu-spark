@@ -1302,6 +1302,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      create_initial_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       generate_certificate_number: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -1355,6 +1359,16 @@ export type Database = {
         Args: { user_uuid: string }
         Returns: string
       }
+      get_users_with_roles: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          created_at: string
+          first_name: string
+          last_name: string
+          roles: string[]
+          user_id: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1365,6 +1379,17 @@ export type Database = {
       log_security_event: {
         Args: { _details?: Json; _event_type: string }
         Returns: undefined
+      }
+      manage_user_role: {
+        Args: {
+          action: string
+          new_role: Database["public"]["Enums"]["app_role"]
+          target_user_id: string
+        }
+        Returns: {
+          message: string
+          success: boolean
+        }[]
       }
       verify_certificate_status: {
         Args: { cert_number: string }

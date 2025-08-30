@@ -15,6 +15,7 @@ import CertificateVerification from "./pages/CertificateVerification";
 import DispensaryPortal from "./pages/DispensaryPortal";
 import EnhancedDispensaryPortal from "./pages/EnhancedDispensaryPortal";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminManagement from "./pages/AdminManagement";
 import Profile from "./pages/Profile";
 import CourseLayout from "./pages/Course/CourseLayout";
 import CourseModule from "./pages/Course/CourseModule";
@@ -135,11 +136,17 @@ const App = () => (
                     </ProtectedRoute>
                   } />
                   
-                  <Route path="/admin" element={
-                    <ProtectedRoute>
-                      <AdminDashboard />
-                    </ProtectedRoute>
-                  } />
+                   <Route path="/admin" element={
+                     <ProtectedRoute>
+                       <AdminDashboard />
+                     </ProtectedRoute>
+                   } />
+                   
+                   <Route path="/admin/management" element={
+                     <ProtectedRoute>
+                       <AdminManagement />
+                     </ProtectedRoute>
+                   } />
                   
                   <Route path="*" element={<NotFound />} />
                 </Routes>
