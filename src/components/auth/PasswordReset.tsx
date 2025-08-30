@@ -19,48 +19,24 @@ export const PasswordReset: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Get token and email from URL parameters
+    // Check if we're in password reset mode
     const urlParams = new URLSearchParams(window.location.search);
-    const tokenParam = urlParams.get('token');
-    const emailParam = urlParams.get('email');
+    const mode = urlParams.get('mode');
     
-    if (!tokenParam) {
-      toast({
-        title: "Invalid Reset Link",
-        description: "The password reset link is missing required parameters",
-        variant: "destructive"
-      });
+    if (mode !== 'reset') {
       navigate('/auth');
       return;
     }
     
-    setToken(tokenParam);
-    if (emailParam) {
-      setEmail(emailParam);
-    }
-    
-    // Verify token validity
-    const verifyToken = async () => {
-      const { data, error } = await supabase.functions.invoke('custom-password-reset', {
-        body: {
-          email: emailParam || '',
-          token: tokenParam,
-          action: 'verify'
-        }
-      });
-      
-      if (error || (data && !data.success)) {
-        toast({
-          title: "Invalid Reset Link",
-          description: "The password reset link is invalid or expired",
-          variant: "destructive"
-        });
-        navigate('/auth');
+    // Listen for auth state changes to handle successful password reset
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        console.log('Password recovery mode activated');
       }
-    };
+    });
     
-    verifyToken();
-  }, [navigate, toast]);
+    return () => subscription.unsubscribe();
+  }, [navigate]);
 
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,22 +61,13 @@ export const PasswordReset: React.FC = () => {
 
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('custom-password-reset', {
-        body: {
-          email,
-          token,
-          password,
-          action: 'update'
-        }
+      const { error } = await supabase.auth.updateUser({
+        password: password
       });
 
       if (error) {
         console.error('Password update error:', error);
-        throw new Error('Failed to update password');
-      }
-
-      if (data && !data.success) {
-        throw new Error(data.message || 'Failed to update password');
+        throw new Error(error.message || 'Failed to update password');
       }
 
       setSuccess(true);

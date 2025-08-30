@@ -911,36 +911,6 @@ export type Database = {
         }
         Relationships: []
       }
-      password_reset_tokens: {
-        Row: {
-          created_at: string
-          email: string
-          expires_at: string
-          id: string
-          token: string
-          used_at: string | null
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          expires_at?: string
-          id?: string
-          token: string
-          used_at?: string | null
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          expires_at?: string
-          id?: string
-          token?: string
-          used_at?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
       payments: {
         Row: {
           amount: number
@@ -1442,10 +1412,6 @@ export type Database = {
         }
         Returns: boolean
       }
-      cleanup_expired_password_reset_tokens: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
       cleanup_performance_metrics: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -1476,10 +1442,6 @@ export type Database = {
         Returns: string
       }
       generate_invitation_token: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      generate_password_reset_token: {
         Args: Record<PropertyKey, never>
         Returns: string
       }

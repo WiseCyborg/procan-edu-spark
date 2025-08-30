@@ -31,11 +31,8 @@ export const ForgotPassword: React.FC<ForgotPasswordProps> = ({ onBack }) => {
 
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('custom-password-reset', {
-        body: {
-          email: email.trim(),
-          action: 'request'
-        }
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: `${window.location.origin}/auth?mode=reset`,
       });
 
       if (error) {
@@ -43,15 +40,6 @@ export const ForgotPassword: React.FC<ForgotPasswordProps> = ({ onBack }) => {
         toast({
           title: "Error",
           description: "Failed to send password reset email. Please try again.",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      if (data && !data.success) {
-        toast({
-          title: "Error",
-          description: data.message || "Failed to send password reset email",
           variant: "destructive"
         });
         return;
