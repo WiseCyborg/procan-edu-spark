@@ -1,7 +1,29 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+// Initialize Resend client safely
+let resend: Resend | null = null;
+
+const getResendClient = () => {
+  const apiKey = Deno.env.get("RESEND_API_KEY");
+  
+  if (!apiKey) {
+    console.error('RESEND_API_KEY environment variable is not set');
+    throw new Error('RESEND_API_KEY is required but not configured');
+  }
+  
+  if (!apiKey.startsWith('re_')) {
+    console.error('RESEND_API_KEY appears to be invalid (should start with "re_")');
+    throw new Error('RESEND_API_KEY format appears to be invalid');
+  }
+  
+  if (!resend) {
+    resend = new Resend(apiKey);
+    console.log('Resend client initialized successfully');
+  }
+  
+  return resend;
+};
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -486,8 +508,11 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const html = getEmailTemplate(type, data);
+    
+    // Get the Resend client with proper error handling
+    const resendClient = getResendClient();
 
-    const emailResponse = await resend.emails.send({
+    const emailResponse = await resendClient.emails.send({
       from: "ProCann Edu <no-reply@procannedu.com>",
       to: [to],
       subject,
