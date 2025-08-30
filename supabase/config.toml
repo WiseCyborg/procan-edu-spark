@@ -6,6 +6,18 @@ verify_jwt = false
 [functions.vonage-verify-check]
 verify_jwt = false
 
+[functions.send-welcome-email]
+verify_jwt = false
+
+[functions.send-verification-code]
+verify_jwt = false
+
+[functions.verify-code]
+verify_jwt = false
+
+[functions.check-email-exists]
+verify_jwt = false
+
 [functions.create-course-payment-paypal]
 verify_jwt = true
 
