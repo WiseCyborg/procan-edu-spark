@@ -1,6 +1,8 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 
+// Automatic fallback system implemented - fallback to Supabase defaults if branded emails fail
+
 // Initialize Resend client safely
 let resend: Resend | null = null;
 

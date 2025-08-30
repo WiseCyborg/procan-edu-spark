@@ -423,6 +423,33 @@ export type Database = {
         }
         Relationships: []
       }
+      email_fallback_log: {
+        Row: {
+          created_at: string
+          email: string
+          error_message: string | null
+          fallback_type: string
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          error_message?: string | null
+          fallback_type: string
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          error_message?: string | null
+          fallback_type?: string
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       email_logs: {
         Row: {
           created_at: string
