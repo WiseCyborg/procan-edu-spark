@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      auth_event_log: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          event_data: Json | null
+          event_type: string
+          id: string
+          processed_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          event_data?: Json | null
+          event_type: string
+          id?: string
+          processed_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          event_data?: Json | null
+          event_type?: string
+          id?: string
+          processed_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       certificates: {
         Row: {
           certificate_number: string
@@ -1390,6 +1420,10 @@ export type Database = {
           message: string
           success: boolean
         }[]
+      }
+      process_auth_events: {
+        Args: Record<PropertyKey, never>
+        Returns: number
       }
       verify_certificate_status: {
         Args: { cert_number: string }
