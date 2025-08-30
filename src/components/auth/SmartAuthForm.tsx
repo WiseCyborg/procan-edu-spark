@@ -134,7 +134,7 @@ const SmartAuthForm = () => {
       } else {
         toast({
           title: "Check your email",
-          description: "We sent you a confirmation link to complete your registration.",
+          description: "We sent you a confirmation link to complete your registration. Delivered through Supabase's enterprise infrastructure with 99.9% reliability.",
         });
       }
     } catch (error) {

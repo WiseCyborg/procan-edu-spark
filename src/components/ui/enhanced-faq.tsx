@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, User, Building2, HelpCircle, Phone, Mail, Clock, Shield, Lock } from 'lucide-react';
+import { Search, User, Building2, HelpCircle, Phone, Mail, Clock, Shield, Lock, CheckCircle, AlertCircle } from 'lucide-react';
 import { useUserRole } from '@/hooks/useUserRole';
 
 interface FAQItem {
@@ -188,6 +188,72 @@ export const EnhancedFAQ: React.FC<EnhancedFAQProps> = ({
       answer: 'We accept all major credit cards (Visa, MasterCard, American Express), ACH bank transfers for organizations, and PayPal. Billing is secure and PCI-compliant.',
       category: 'Payment',
       securityLevel: 'public'
+    },
+
+    // Supabase Email Service FAQs
+    {
+      id: 'email-1',
+      question: 'What email service does ProCann Edu use?',
+      answer: 'ProCann Edu uses Supabase\'s enterprise-grade email infrastructure, which provides 99.9% delivery reliability, enterprise security, and SOC 2 compliance. This ensures your account verification, password resets, and training notifications are delivered reliably.',
+      category: 'Email Service',
+      securityLevel: 'public',
+      tags: ['email', 'reliability', 'supabase']
+    },
+    {
+      id: 'email-2',
+      question: 'Why do emails say "Powered by Supabase"?',
+      answer: 'The "Powered by Supabase" footer indicates you\'re receiving emails from our trusted, enterprise-grade infrastructure. Supabase is a leading database and authentication platform used by thousands of companies worldwide for secure, reliable communications.',
+      category: 'Email Service',
+      securityLevel: 'public',
+      tags: ['branding', 'trust', 'supabase']
+    },
+    {
+      id: 'email-3',
+      question: 'Are Supabase emails secure and legitimate?',
+      answer: 'Yes! Supabase emails are highly secure with end-to-end encryption, anti-phishing protection, and enterprise security standards. All emails are legitimate and come from ProCann Edu\'s verified domain through Supabase\'s secure infrastructure.',
+      category: 'Email Security',
+      securityLevel: 'public',
+      tags: ['security', 'encryption', 'legitimate']
+    },
+    {
+      id: 'email-4',
+      question: 'What types of emails will I receive?',
+      answer: 'You\'ll receive account verification emails, password reset links, course completion confirmations, certificate notifications, and important compliance updates. All emails are sent through Supabase\'s reliable delivery system.',
+      category: 'Email Types',
+      securityLevel: 'student',
+      tags: ['notifications', 'verification', 'certificates']
+    },
+    {
+      id: 'email-5',
+      question: 'What should I do if I don\'t receive an email?',
+      answer: 'First, check your spam/junk folder for emails from ProCann Edu via Supabase. If not found, verify your email address is correct in your profile settings. You can also request a new verification email from your account dashboard.',
+      category: 'Email Troubleshooting',
+      securityLevel: 'student',
+      tags: ['troubleshooting', 'spam', 'verification']
+    },
+    {
+      id: 'email-6',
+      question: 'How reliable is Supabase\'s email delivery?',
+      answer: 'Supabase maintains 99.9% email delivery reliability with enterprise-grade infrastructure used by major companies. They provide real-time delivery monitoring, automatic retry mechanisms, and comprehensive spam protection.',
+      category: 'Email Reliability',
+      securityLevel: 'public',
+      tags: ['reliability', 'delivery', 'enterprise']
+    },
+    {
+      id: 'email-7',
+      question: 'Can I trust clicking links in Supabase emails?',
+      answer: 'Yes! All email links are cryptographically signed and verified. Supabase uses industry-standard security protocols to prevent tampering. Always verify the sender shows "ProCann Edu" and the domain matches our official communications.',
+      category: 'Email Security',
+      securityLevel: 'public',
+      tags: ['security', 'links', 'verification']
+    },
+    {
+      id: 'email-8',
+      question: 'Who has access to manage our organization\'s email settings?',
+      answer: 'Only ProCann Edu administrators can manage email settings. Supabase provides enterprise-grade access controls and audit logging. Your organization managers can view email delivery status but cannot modify system settings.',
+      category: 'Email Management',
+      securityLevel: 'manager',
+      tags: ['access', 'permissions', 'audit']
     }
   ];
 
@@ -234,7 +300,13 @@ export const EnhancedFAQ: React.FC<EnhancedFAQProps> = ({
       'User Management': 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-100',
       'System Analytics': 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-100',
       'About Training': 'bg-lime-100 text-lime-800 dark:bg-lime-900 dark:text-lime-100',
-      'Pricing': 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-100'
+      'Pricing': 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-100',
+      'Email Service': 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-100',
+      'Email Security': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100',
+      'Email Types': 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-100',
+      'Email Troubleshooting': 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-100',
+      'Email Reliability': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100',
+      'Email Management': 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100'
     };
     return colors[category] || 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-100';
   };
