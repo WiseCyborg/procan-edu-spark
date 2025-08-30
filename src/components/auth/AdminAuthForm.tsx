@@ -5,11 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Shield, Lock } from 'lucide-react';
+import { ForgotPassword } from './ForgotPassword';
 
 const AdminAuthForm = () => {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   const handleAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,6 +69,14 @@ const AdminAuthForm = () => {
     }
   };
 
+  if (showForgotPassword) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-orange-50 p-4">
+        <ForgotPassword onBack={() => setShowForgotPassword(false)} />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-orange-50 p-4">
       <Card className="w-full max-w-md">
@@ -118,6 +128,16 @@ const AdminAuthForm = () => {
               {loading ? 'Signing In...' : 'Sign In to Admin Portal'}
             </Button>
           </form>
+
+          <div className="mt-4 text-center">
+            <button
+              type="button"
+              onClick={() => setShowForgotPassword(true)}
+              className="text-sm text-red-600 hover:text-red-700 underline"
+            >
+              Forgot Password?
+            </button>
+          </div>
 
           <div className="mt-6 p-3 bg-gray-50 rounded-md">
             <p className="text-xs text-gray-600 text-center">
