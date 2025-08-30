@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Users, UserPlus, Shield, Trash2, Plus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
+import { SensitiveOperationWrapper } from '@/components/auth/SensitiveOperationWrapper';
 
 interface UserWithRoles {
   user_id: string;
@@ -46,7 +47,7 @@ export const AdminUserManagement: React.FC = () => {
     }
   };
 
-  const handleAddRole = async () => {
+  const executeAddRole = async () => {
     if (!selectedUser || !newRole) return;
 
     try {
@@ -77,7 +78,7 @@ export const AdminUserManagement: React.FC = () => {
     }
   };
 
-  const handleRemoveRole = async (userId: string, role: string) => {
+  const executeRemoveRole = async (userId: string, role: string) => {
     try {
       const { data, error } = await supabase.rpc('manage_user_role', {
         target_user_id: userId,
@@ -182,9 +183,15 @@ export const AdminUserManagement: React.FC = () => {
                     </SelectContent>
                   </Select>
                 </div>
-                <Button onClick={handleAddRole} className="w-full">
+                <SensitiveOperationWrapper
+                  operation="user_role_management"
+                  operationDescription="Adding administrative roles to users"
+                  onExecute={executeAddRole}
+                  urgency="high"
+                  className="w-full"
+                >
                   Add Role
-                </Button>
+                </SensitiveOperationWrapper>
               </div>
             </DialogContent>
           </Dialog>
@@ -225,16 +232,19 @@ export const AdminUserManagement: React.FC = () => {
                 <TableCell>
                   <div className="flex gap-1">
                     {user.roles.map((role) => (
-                      <Button
+                      <SensitiveOperationWrapper
                         key={role}
+                        operation="user_role_management"
+                        operationDescription={`Removing ${role} role from ${user.first_name} ${user.last_name}`}
+                        onExecute={() => executeRemoveRole(user.user_id, role)}
+                        urgency={role === 'admin' ? 'high' : 'medium'}
                         variant="outline"
                         size="sm"
-                        onClick={() => handleRemoveRole(user.user_id, role)}
                         className="text-xs"
                       >
                         <Trash2 className="h-3 w-3 mr-1" />
                         Remove {role}
-                      </Button>
+                      </SensitiveOperationWrapper>
                     ))}
                   </div>
                 </TableCell>

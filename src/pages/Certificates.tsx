@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Download, Eye, FileCheck, Calendar, Shield } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { SensitiveOperationWrapper } from '@/components/auth/SensitiveOperationWrapper';
 
 interface Certificate {
   id: string;
@@ -208,15 +209,18 @@ export default function Certificates() {
                           View Details
                         </Button>
                         
-                        <Button
+                        <SensitiveOperationWrapper
+                          operation="certificate_download"
+                          operationDescription={`Downloading certificate ${certificate.certificate_number}`}
+                          onExecute={() => downloadCertificate(certificate.id, certificate.certificate_number)}
+                          urgency="low"
                           size="sm"
-                          onClick={() => downloadCertificate(certificate.id, certificate.certificate_number)}
                           disabled={certificate.is_revoked}
                           className="flex items-center gap-2"
                         >
                           <Download className="h-4 w-4" />
                           Download
-                        </Button>
+                        </SensitiveOperationWrapper>
                       </div>
                     </div>
                     
