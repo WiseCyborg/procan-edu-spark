@@ -11,7 +11,7 @@ const corsHeaders = {
 interface EmailRequest {
   to: string;
   subject: string;
-  type: 'welcome' | 'verification' | 'certificate' | 'password-reset' | 'dispensary-welcome' | 'dispensary-payment-confirmation' | 'dispensary-setup-complete' | 'student-invitation' | 'student-welcome-with-dispensary';
+  type: 'welcome' | 'verification' | 'certificate' | 'password-reset' | 'email-confirmation' | 'magic-link' | 'dispensary-welcome' | 'dispensary-payment-confirmation' | 'dispensary-setup-complete' | 'student-invitation' | 'student-welcome-with-dispensary';
   data: Record<string, any>;
 }
 
@@ -335,6 +335,116 @@ const getEmailTemplate = (type: string, data: Record<string, any>) => {
           <div class="footer">
             <p><strong>ProCann Edu</strong><br>
             Training sponsored by ${data.dispensaryName}<br>
+            <a href="https://procannedu.com">procannedu.com</a></p>
+          </div>
+        </div>
+      `;
+
+    case 'password-reset':
+      return `
+        ${baseStyle}
+        <div class="container">
+          <div class="header">
+            <h1>Reset Your Password</h1>
+            <p>Secure access to your ProCann Edu account</p>
+          </div>
+          <div class="content">
+            <h2>Password Reset Request</h2>
+            <p>Hi ${data.firstName || 'there'},</p>
+            <p>We received a request to reset the password for your ProCann Edu account. Click the button below to create a new password:</p>
+            
+            <a href="${data.resetLink}" class="button">Reset Password</a>
+            
+            <p><strong>Security Information:</strong></p>
+            <ul>
+              <li>This link expires in 1 hour for your security</li>
+              <li>Only use this link on the official ProCann Edu website</li>
+              <li>If you didn't request this reset, you can safely ignore this email</li>
+              <li>Your current password remains unchanged until you create a new one</li>
+            </ul>
+            
+            <p>If the button doesn't work, copy and paste this link into your browser:<br>
+            <a href="${data.resetLink}" style="color: #059669; word-break: break-all;">${data.resetLink}</a></p>
+            
+            <p>For security questions or support, contact us at <a href="mailto:support@procannedu.com">support@procannedu.com</a></p>
+          </div>
+          <div class="footer">
+            <p><strong>ProCann Edu</strong><br>
+            Maryland Cannabis Training Platform<br>
+            <a href="https://procannedu.com">procannedu.com</a></p>
+          </div>
+        </div>
+      `;
+
+    case 'email-confirmation':
+      return `
+        ${baseStyle}
+        <div class="container">
+          <div class="header">
+            <h1>Confirm Your Email</h1>
+            <p>Complete your ProCann Edu registration</p>
+          </div>
+          <div class="content">
+            <h2>Welcome to ProCann Edu!</h2>
+            <p>Hi ${data.firstName || 'there'},</p>
+            <p>Thank you for registering with ProCann Edu. To complete your account setup and start your cannabis education journey, please confirm your email address:</p>
+            
+            <a href="${data.confirmationLink}" class="button">Confirm Email Address</a>
+            
+            <p><strong>What happens next?</strong></p>
+            <ul>
+              <li>Confirm your email to activate your account</li>
+              <li>Complete your profile for personalized recommendations</li>
+              <li>Start accessing our comprehensive course catalog</li>
+              <li>Begin earning industry-recognized certificates</li>
+            </ul>
+            
+            <p>If the button doesn't work, copy and paste this link into your browser:<br>
+            <a href="${data.confirmationLink}" style="color: #059669; word-break: break-all;">${data.confirmationLink}</a></p>
+            
+            <p><strong>Security Notice:</strong> This confirmation link expires in 24 hours. If you didn't create this account, you can safely ignore this email.</p>
+            
+            <p>Questions? Our support team is here to help at <a href="mailto:support@procannedu.com">support@procannedu.com</a></p>
+          </div>
+          <div class="footer">
+            <p><strong>ProCann Edu</strong><br>
+            Maryland Cannabis Training Platform<br>
+            <a href="https://procannedu.com">procannedu.com</a></p>
+          </div>
+        </div>
+      `;
+
+    case 'magic-link':
+      return `
+        ${baseStyle}
+        <div class="container">
+          <div class="header">
+            <h1>Your Magic Link</h1>
+            <p>Quick and secure access to ProCann Edu</p>
+          </div>
+          <div class="content">
+            <h2>Sign in to your account</h2>
+            <p>Hi ${data.firstName || 'there'},</p>
+            <p>Click the button below to instantly sign in to your ProCann Edu account:</p>
+            
+            <a href="${data.magicLink}" class="button">Sign In Now</a>
+            
+            <p><strong>Security Information:</strong></p>
+            <ul>
+              <li>This magic link expires in 1 hour</li>
+              <li>It can only be used once</li>
+              <li>Only use this link on the official ProCann Edu website</li>
+              <li>If you didn't request this link, you can safely ignore this email</li>
+            </ul>
+            
+            <p>If the button doesn't work, copy and paste this link into your browser:<br>
+            <a href="${data.magicLink}" style="color: #059669; word-break: break-all;">${data.magicLink}</a></p>
+            
+            <p>For security questions or support, contact us at <a href="mailto:support@procannedu.com">support@procannedu.com</a></p>
+          </div>
+          <div class="footer">
+            <p><strong>ProCann Edu</strong><br>
+            Maryland Cannabis Training Platform<br>
             <a href="https://procannedu.com">procannedu.com</a></p>
           </div>
         </div>
