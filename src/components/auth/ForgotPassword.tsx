@@ -31,30 +31,42 @@ export const ForgotPassword: React.FC<ForgotPasswordProps> = ({ onBack }) => {
 
     setLoading(true);
     try {
-      const currentParams = new URLSearchParams(window.location.search);
-      const role = currentParams.get('role') || '';
-      const redirectUrl = role ? 
-        `${window.location.origin}/auth?role=${role}&mode=reset` : 
-        `${window.location.origin}/auth?mode=reset`;
-        
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: redirectUrl
+      const { data, error } = await supabase.functions.invoke('custom-password-reset', {
+        body: {
+          email: email.trim(),
+          action: 'request'
+        }
       });
 
       if (error) {
-        throw error;
+        console.error('Password reset error:', error);
+        toast({
+          title: "Error",
+          description: "Failed to send password reset email. Please try again.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (data && !data.success) {
+        toast({
+          title: "Error",
+          description: data.message || "Failed to send password reset email",
+          variant: "destructive"
+        });
+        return;
       }
 
       setEmailSent(true);
       toast({
         title: "Password Reset Email Sent",
-        description: "Check your email for a link to reset your password",
+        description: "If the email exists, a password reset link has been sent. Check your email.",
       });
     } catch (error) {
-      console.error('Password reset error:', error);
+      console.error('Unexpected error:', error);
       toast({
         title: "Error",
-        description: "Failed to send password reset email. Please try again.",
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive"
       });
     } finally {

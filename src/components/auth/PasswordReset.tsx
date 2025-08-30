@@ -13,14 +13,43 @@ export const PasswordReset: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [email, setEmail] = useState('');
+  const [token, setToken] = useState('');
   const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if we have a valid session from the reset link
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
+    // Get token and email from URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const tokenParam = urlParams.get('token');
+    const emailParam = urlParams.get('email');
+    
+    if (!tokenParam) {
+      toast({
+        title: "Invalid Reset Link",
+        description: "The password reset link is missing required parameters",
+        variant: "destructive"
+      });
+      navigate('/auth');
+      return;
+    }
+    
+    setToken(tokenParam);
+    if (emailParam) {
+      setEmail(emailParam);
+    }
+    
+    // Verify token validity
+    const verifyToken = async () => {
+      const { data, error } = await supabase.functions.invoke('custom-password-reset', {
+        body: {
+          email: emailParam || '',
+          token: tokenParam,
+          action: 'verify'
+        }
+      });
+      
+      if (error || (data && !data.success)) {
         toast({
           title: "Invalid Reset Link",
           description: "The password reset link is invalid or expired",
@@ -30,7 +59,7 @@ export const PasswordReset: React.FC = () => {
       }
     };
     
-    checkSession();
+    verifyToken();
   }, [navigate, toast]);
 
   const handlePasswordReset = async (e: React.FormEvent) => {
@@ -56,12 +85,22 @@ export const PasswordReset: React.FC = () => {
 
     setLoading(true);
     try {
-      const { error } = await supabase.auth.updateUser({
-        password: password
+      const { data, error } = await supabase.functions.invoke('custom-password-reset', {
+        body: {
+          email,
+          token,
+          password,
+          action: 'update'
+        }
       });
 
       if (error) {
-        throw error;
+        console.error('Password update error:', error);
+        throw new Error('Failed to update password');
+      }
+
+      if (data && !data.success) {
+        throw new Error(data.message || 'Failed to update password');
       }
 
       setSuccess(true);
@@ -79,7 +118,7 @@ export const PasswordReset: React.FC = () => {
       console.error('Password update error:', error);
       toast({
         title: "Error",
-        description: "Failed to update password. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to update password. Please try again.",
         variant: "destructive"
       });
     } finally {
