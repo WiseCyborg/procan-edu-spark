@@ -3,9 +3,9 @@ import { useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { MessageCircle, Send, X, HelpCircle, Settings, Mic } from 'lucide-react';
+import { MessageCircle, Send, X, HelpCircle, Settings, Maximize2, Minimize2 } from 'lucide-react';
+import { EnhancedScrollArea } from './EnhancedScrollArea';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useCharmAI } from '@/hooks/useCharmAI';
@@ -38,7 +38,7 @@ const getContextInfo = (pathname: string, userRoles: string[]): ContextInfo => {
   if (pathname === '/auth') {
     return {
       route: 'auth',
-      title: 'Authentication Help',
+      title: 'ProCann Assistant',
       description: 'Get help with signing in or creating your account',
       helpTips: [
         'Having trouble signing in?',
@@ -61,7 +61,7 @@ const getContextInfo = (pathname: string, userRoles: string[]): ContextInfo => {
     
     return {
       route: 'dashboard',
-      title: 'Dashboard & Training Hub',
+      title: 'ProCann Assistant',
       description: `Navigate your ${securityLevel === 'student' ? 'training progress' : 'management dashboard'}`,
       helpTips: tips,
       securityLevel
@@ -81,7 +81,7 @@ const getContextInfo = (pathname: string, userRoles: string[]): ContextInfo => {
     
     return {
       route: 'course',
-      title: 'Course Module Help',
+      title: 'ProCann Assistant',
       description: 'Get help with course content and navigation',
       helpTips: [
         'Explain cannabis regulations in Maryland',
@@ -96,7 +96,7 @@ const getContextInfo = (pathname: string, userRoles: string[]): ContextInfo => {
   if (pathname === '/dispensary-portal' && securityLevel !== 'student') {
     return {
       route: 'dispensary-portal',
-      title: 'Dispensary Management',
+      title: 'ProCann Assistant',
       description: 'Manage your team and organizational compliance',
       helpTips: [
         'How do I add new employees?',
@@ -111,7 +111,7 @@ const getContextInfo = (pathname: string, userRoles: string[]): ContextInfo => {
   if (pathname === '/admin-dashboard' && securityLevel === 'admin') {
     return {
       route: 'admin-dashboard',
-      title: 'System Administration',
+      title: 'ProCann Assistant',
       description: 'Manage the entire ProCann Edu platform',
       helpTips: [
         'How do I manage organizations?',
@@ -126,7 +126,7 @@ const getContextInfo = (pathname: string, userRoles: string[]): ContextInfo => {
   // Default/fallback context
   return {
     route: 'general',
-    title: 'ProCann Edu Assistant',
+    title: 'ProCann Assistant',
     description: 'Your cannabis education and compliance expert',
     helpTips: [
       'Tell me about ProCann Edu',
@@ -146,11 +146,13 @@ export const EnhancedChatAssistant: React.FC = () => {
   const { speak, isSupported: voiceSupported } = useUnifiedVoice();
   
   const [isOpen, setIsOpen] = useState(false);
+  const [isMaximized, setIsMaximized] = useState(false);
   const [showVoiceSettings, setShowVoiceSettings] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showProactiveTip, setShowProactiveTip] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout>();
 
@@ -186,6 +188,13 @@ export const EnhancedChatAssistant: React.FC = () => {
       }
     };
   }, [location.pathname, isOpen, isChatDisabled]);
+
+  // Clear unread count when chat opens
+  useEffect(() => {
+    if (isOpen) {
+      setUnreadCount(0);
+    }
+  }, [isOpen]);
 
   // Enhanced welcome message with role-based content
   useEffect(() => {
@@ -233,6 +242,11 @@ export const EnhancedChatAssistant: React.FC = () => {
         };
 
         setMessages(prev => [...prev, assistantMessage]);
+        
+        // Update unread count if chat window is minimized or closed
+        if (!isOpen || !document.hasFocus()) {
+          setUnreadCount(prev => prev + 1);
+        }
         
         // Auto-speak response if voice is enabled
         if (voiceSupported && response.response) {
@@ -334,7 +348,7 @@ export const EnhancedChatAssistant: React.FC = () => {
 
       {/* Chat Window */}
       {isOpen && (
-        <Card className="fixed bottom-20 right-4 z-40 w-80 h-96 flex flex-col shadow-xl">
+        <Card className={`fixed ${isMaximized ? 'bottom-4 right-4 w-[480px] h-[600px]' : 'bottom-20 right-4 w-80 h-96'} z-40 flex flex-col shadow-xl transition-all duration-300`}>
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <div>
@@ -349,6 +363,14 @@ export const EnhancedChatAssistant: React.FC = () => {
                 </div>
               </div>
               <div className="flex items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0"
+                  onClick={() => setIsMaximized(!isMaximized)}
+                >
+                  {isMaximized ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+                </Button>
                 {voiceSupported && (
                   <Button
                     variant="ghost"
@@ -385,8 +407,12 @@ export const EnhancedChatAssistant: React.FC = () => {
             )}
 
             {/* Messages */}
-            <ScrollArea className="flex-1 pr-3 overflow-y-auto overscroll-contain" style={{ scrollbarWidth: 'thin', scrollbarColor: 'hsl(var(--border)) transparent' }}>
-              <div className="space-y-2">
+            <EnhancedScrollArea 
+              className="flex-1" 
+              showUnreadCount={unreadCount}
+              autoScroll={true}
+            >
+              <div className="space-y-2 p-1">
                 {messages.map((message) => (
                   <div key={message.id}>
                     <div className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}>
@@ -430,9 +456,9 @@ export const EnhancedChatAssistant: React.FC = () => {
                     </div>
                   </div>
                 )}
+                <div ref={messagesEndRef} />
               </div>
-              <div ref={messagesEndRef} />
-            </ScrollArea>
+            </EnhancedScrollArea>
 
             {/* Input */}
             <div className="flex space-x-2 mt-3">
