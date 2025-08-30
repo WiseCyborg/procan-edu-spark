@@ -151,20 +151,16 @@ serve(async (req) => {
         console.error("Error updating application status:", statusError);
       }
 
-      // Send setup completion email
+      // Send setup completion email using send-welcome-email function
       try {
-        await supabaseService.functions.invoke('send-branded-email', {
+        await supabaseService.functions.invoke('send-welcome-email', {
           body: {
-            to: application.contact_email,
-            subject: 'ProCann Edu - Organization Setup Complete',
-            template: 'organization_setup_complete',
-            data: {
-              organization_name: application.organization_name,
-              contact_person: application.contact_person,
-              access_key: accessKey,
-              credits: credits,
-              login_url: `${req.headers.get("origin")}/auth?role=dispensary`
-            }
+            email: application.contact_email,
+            userName: application.contact_person,
+            dispensaryName: application.organization_name,
+            accessKey: accessKey,
+            credits: credits,
+            isSetupComplete: true
           }
         });
       } catch (emailError) {

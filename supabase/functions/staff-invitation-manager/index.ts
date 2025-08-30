@@ -101,18 +101,15 @@ async function inviteSingleStaff(organizationId: string, inviterId: string, emai
     .eq('id', organizationId)
     .single();
 
-  // Send invitation email
-  const emailResponse = await supabase.functions.invoke('send-branded-email', {
+  // Send invitation email using send-welcome-email function
+  const emailResponse = await supabase.functions.invoke('send-welcome-email', {
     body: {
-      to: email,
-      subject: `Invitation to Cannabis Training Program`,
-      type: 'student-invitation',
-      data: {
-        employeeName: email.split('@')[0],
-        dispensaryName: organization?.name || 'Cannabis Training Organization',
-        dispensaryKey: invitationToken,
-        customMessage: customMessage
-      }
+      email: email,
+      userName: email.split('@')[0],
+      dispensaryName: organization?.name || 'Cannabis Training Organization',
+      accessKey: invitationToken,
+      isInvitation: true,
+      customMessage: customMessage
     }
   });
 
@@ -206,18 +203,15 @@ async function inviteBulkStaff(organizationId: string, inviterId: string, emails
         continue;
       }
 
-      // Send invitation email
-      const emailResponse = await supabase.functions.invoke('send-branded-email', {
+      // Send invitation email using send-welcome-email function
+      const emailResponse = await supabase.functions.invoke('send-welcome-email', {
         body: {
-          to: email.trim(),
-          subject: `Invitation to Cannabis Training Program`,
-          type: 'student-invitation',
-          data: {
-            employeeName: email.split('@')[0],
-            dispensaryName: organization?.name || 'Cannabis Training Organization',
-            dispensaryKey: invitationToken,
-            customMessage: customMessage
-          }
+          email: email.trim(),
+          userName: email.split('@')[0],
+          dispensaryName: organization?.name || 'Cannabis Training Organization',
+          accessKey: invitationToken,
+          isInvitation: true,
+          customMessage: customMessage
         }
       });
 
@@ -297,18 +291,15 @@ async function resendInvitation(invitationId: string): Promise<Response> {
       .eq('id', invitationId);
   }
 
-  // Resend invitation email
-  const emailResponse = await supabase.functions.invoke('send-branded-email', {
+  // Resend invitation email using send-welcome-email function
+  const emailResponse = await supabase.functions.invoke('send-welcome-email', {
     body: {
-      to: invitation.email,
-      subject: `Reminder: Invitation to Cannabis Training Program`,
-      type: 'student-invitation',
-      data: {
-        employeeName: invitation.email.split('@')[0],
-        dispensaryName: invitation.organizations?.name || 'Cannabis Training Organization',
-        dispensaryKey: invitation.invitation_token,
-        isReminder: true
-      }
+      email: invitation.email,
+      userName: invitation.email.split('@')[0],
+      dispensaryName: invitation.organizations?.name || 'Cannabis Training Organization',
+      accessKey: invitation.invitation_token,
+      isInvitation: true,
+      isReminder: true
     }
   });
 

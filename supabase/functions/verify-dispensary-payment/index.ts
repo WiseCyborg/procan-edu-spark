@@ -97,18 +97,16 @@ serve(async (req) => {
           console.error("Error updating application:", appError);
         }
 
-        // Send dispensary setup completion email
+        // Send dispensary setup completion email using send-welcome-email function
         try {
-          await supabaseService.functions.invoke('send-branded-email', {
+          await supabaseService.functions.invoke('send-welcome-email', {
             body: {
-              to: session.customer_details?.email,
-              emailType: 'dispensary-setup-complete',
-              data: {
-                organizationName,
-                accessKey,
-                credits,
-                loginUrl: `${req.headers.get("origin")}/auth?role=dispensary`
-              }
+              email: session.customer_details?.email,
+              userName: organizationName,
+              dispensaryName: organizationName,
+              accessKey,
+              credits,
+              isSetupComplete: true
             }
           });
         } catch (emailError) {

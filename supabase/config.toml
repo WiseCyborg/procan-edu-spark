@@ -17,12 +17,3 @@ verify_jwt = false
 
 [functions.verify-dispensary-payment-paypal]
 verify_jwt = false
-
-[functions.custom-auth-emails]
-verify_jwt = false
-
-[functions.send-branded-email]
-verify_jwt = false
-
-[functions.custom-password-reset]
-verify_jwt = false

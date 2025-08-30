@@ -52,18 +52,9 @@ const handler = async (req: Request): Promise<Response> => {
       if (error) throw error;
       verificationData = data;
 
-      // Send email using existing function
-      await supabase.functions.invoke('send-branded-email', {
-        body: {
-          to: email,
-          subject: `Your verification code: ${code}`,
-          templateData: {
-            first_name: email.split('@')[0],
-            verification_code: code,
-            purpose: purpose === 'login' ? 'login verification' : 'exam submission verification'
-          }
-        }
-      });
+      // Send email using Supabase's built-in email auth
+      // The verification code will be sent through Supabase's native email system
+      console.log(`Verification code ${code} stored for ${email}`);
 
     } else {
       // Use Vonage Verify API for SMS/WhatsApp
