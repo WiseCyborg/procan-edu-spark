@@ -237,31 +237,49 @@ export const DraggableVoiceAssistant: React.FC = () => {
   // For future ElevenLabs Conversational AI integration
   // const conversation = useConversation({...});
 
-  // Dragging functionality
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if (!cardRef.current) return;
+  // Dragging functionality for toggle button
+  const handleToggleMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     
-    const rect = cardRef.current.getBoundingClientRect();
+    // Calculate offset from toggle button position
+    const toggleButtonX = position.x + windowSize.width - 60;
+    const toggleButtonY = position.y - 60;
+    
     setDragOffset({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top
+      x: e.clientX - toggleButtonX,
+      y: e.clientY - toggleButtonY
     });
     setIsDragging(true);
-  }, []);
+  }, [position, windowSize]);
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!isDragging) return;
     
-    const newX = e.clientX - dragOffset.x;
-    const newY = e.clientY - dragOffset.y;
+    // Calculate new toggle button position
+    const newToggleX = e.clientX - dragOffset.x;
+    const newToggleY = e.clientY - dragOffset.y;
     
-    // Keep within screen bounds
-    const maxX = window.innerWidth - windowSize.width;
-    const maxY = window.innerHeight - windowSize.height;
+    // Convert to chat window position
+    const newChatX = newToggleX - windowSize.width + 60;
+    const newChatY = newToggleY + 60;
+    
+    // Keep toggle button within screen bounds
+    const minToggleX = windowSize.width - 60; // Ensure chat window doesn't go off left edge
+    const maxToggleX = window.innerWidth - 60; // Ensure toggle button doesn't go off right edge
+    const minToggleY = 60; // Ensure toggle button doesn't go off top edge
+    const maxToggleY = window.innerHeight - 60; // Ensure toggle button doesn't go off bottom edge
+    
+    const clampedToggleX = Math.max(minToggleX, Math.min(newToggleX, maxToggleX));
+    const clampedToggleY = Math.max(minToggleY, Math.min(newToggleY, maxToggleY));
+    
+    // Convert back to chat window position
+    const finalChatX = clampedToggleX - windowSize.width + 60;
+    const finalChatY = clampedToggleY + 60;
     
     setPosition({
-      x: Math.max(0, Math.min(newX, maxX)),
-      y: Math.max(0, Math.min(newY, maxY))
+      x: finalChatX,
+      y: finalChatY
     });
   }, [isDragging, dragOffset, windowSize]);
 
@@ -555,13 +573,16 @@ export const DraggableVoiceAssistant: React.FC = () => {
         </div>
       )}
 
-      {/* Chat Toggle Button */}
+      {/* Chat Toggle Button - Now Draggable */}
       <Button
-        onClick={() => {
-          setIsOpen(!isOpen);
-          setShowProactiveTip(false);
+        onClick={(e) => {
+          if (!isDragging) {
+            setIsOpen(!isOpen);
+            setShowProactiveTip(false);
+          }
         }}
-        className="fixed z-50 h-12 w-12 rounded-full shadow-lg"
+        onMouseDown={handleToggleMouseDown}
+        className={`fixed z-50 h-12 w-12 rounded-full shadow-lg transition-transform hover:scale-105 ${isDragging ? 'cursor-grabbing scale-105' : 'cursor-grab'}`}
         style={{ left: position.x + windowSize.width - 60, top: position.y - 60 }}
         size="icon"
       >
@@ -572,7 +593,7 @@ export const DraggableVoiceAssistant: React.FC = () => {
       {isOpen && (
         <div 
           ref={cardRef}
-          className="fixed z-40 flex flex-col shadow-xl cursor-move"
+          className="fixed z-40 flex flex-col shadow-xl"
           style={{ 
             left: position.x, 
             top: position.y,
@@ -580,10 +601,9 @@ export const DraggableVoiceAssistant: React.FC = () => {
             height: 'auto',
             maxHeight: '70vh'
           }}
-          onMouseDown={handleMouseDown}
         >
           <Card className="h-full flex flex-col">
-            <CardHeader className="pb-2 relative cursor-move">
+            <CardHeader className="pb-2 relative">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Move className="w-4 h-4 text-muted-foreground" />
