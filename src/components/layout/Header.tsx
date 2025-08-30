@@ -7,8 +7,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, User, BookOpen, BarChart3, Award, MessageSquare } from 'lucide-react';
+import { LogOut, User, MessageSquare, BookOpen, Award, BarChart3 } from 'lucide-react';
 import { CommunicationHub } from '@/components/communication/CommunicationHub';
+import { IntelligentNavigation } from '@/components/navigation/IntelligentNavigation';
 
 const Header = () => {
   const { user, signOut } = useAuth();
@@ -65,51 +66,7 @@ const Header = () => {
           
           {user && (
             <div className="flex items-center space-x-4">
-              <nav className="hidden md:flex items-center space-x-4">
-                <Button 
-                  onClick={() => navigate('/course')}
-                  variant="ghost"
-                  size="sm"
-                  className="flex items-center space-x-1"
-                >
-                  <BookOpen className="w-4 h-4" />
-                  <span>Course</span>
-                </Button>
-                <Button 
-                  onClick={() => navigate('/certificates')}
-                  variant="ghost"
-                  size="sm"
-                  className="flex items-center space-x-1"
-                >
-                  <Award className="w-4 h-4" />
-                  <span>Certificates</span>
-                </Button>
-                <Button 
-                  onClick={() => navigate('/faq')}
-                  variant="ghost"
-                  size="sm"
-                >
-                  FAQ
-                </Button>
-                <Button 
-                  onClick={() => navigate('/verify-certificate')}
-                  variant="ghost"
-                  size="sm"
-                >
-                  Verify Certificate
-                </Button>
-                {(isDispensaryManager || isAdmin) && (
-                  <Button 
-                    onClick={() => navigate('/dispensary-portal')}
-                    variant="ghost"
-                    size="sm"
-                    className="flex items-center space-x-1"
-                  >
-                    <BarChart3 className="w-4 h-4" />
-                    <span>Dispensary Portal</span>
-                  </Button>
-                 )}
-               </nav>
+                <IntelligentNavigation />
                
                {/* Communication Hub Button */}
                <Dialog open={showCommunicationHub} onOpenChange={setShowCommunicationHub}>

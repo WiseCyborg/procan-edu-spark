@@ -40,6 +40,7 @@ interface DraggableMessageProps {
   onUnpin?: (messageId: string) => void;
   isPinned?: boolean;
   pinnedPosition?: Position;
+  className?: string;
 }
 
 export const DraggableMessage: React.FC<DraggableMessageProps> = ({
@@ -48,7 +49,8 @@ export const DraggableMessage: React.FC<DraggableMessageProps> = ({
   onPin,
   onUnpin,
   isPinned = false,
-  pinnedPosition
+  pinnedPosition,
+  className
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState<Position>({ x: 0, y: 0 });
@@ -172,7 +174,7 @@ export const DraggableMessage: React.FC<DraggableMessageProps> = ({
           : 'bg-muted max-w-[80%]'
       } ${isDragging ? 'shadow-lg scale-105' : ''} ${
         isPinned ? 'border-2 border-primary shadow-lg' : ''
-      }`}
+      } ${className || ''}`}
       style={isPinned ? { 
         position: 'fixed', 
         left: localPosition.x, 

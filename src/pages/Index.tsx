@@ -3,10 +3,12 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, Award, Shield, CheckCircle, Play, Pause } from 'lucide-react';
+import { BookOpen, Award, Shield, CheckCircle } from 'lucide-react';
 import { CoursePreviewSystem } from '@/components/EnhancedCoursePreview';
 import { AccessibilityToolbar, MobileOptimizationIndicator } from '@/components/MobileOptimization';
 import { TrustStats, ComplianceBadges, TestimonialCarousel } from '@/components/TrustIndicators';
+import { EnhancedPlayControls } from '@/components/ui/enhanced-play-controls';
+import { HoverCallout } from '@/components/ui/hover-callout';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -47,14 +49,15 @@ const Index = () => {
         {/* Video Overlay */}
         <div className="absolute inset-0 video-overlay"></div>
 
-        {/* Video Controls */}
-        <button
-          onClick={toggleVideo}
-          className="absolute top-6 right-6 z-20 bg-white/20 backdrop-blur-sm text-white p-3 rounded-full hover:bg-white/30 transition-colors"
-          aria-label={isVideoPlaying ? "Pause video" : "Play video"}
-        >
-          {isVideoPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
-        </button>
+        {/* Enhanced Video Controls */}
+        <div className="absolute top-6 right-6 z-20">
+          <EnhancedPlayControls
+            isPlaying={isVideoPlaying}
+            onTogglePlay={toggleVideo}
+            size="lg"
+            className="bg-background/20 backdrop-blur-sm rounded-lg p-2"
+          />
+        </div>
 
         <div className="relative z-10 container mx-auto text-center px-4">
           {/* Compliance Badges */}
@@ -151,53 +154,61 @@ const Index = () => {
             Why Choose ProCann Edu?
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="text-center">
-              <CardHeader>
-                <Shield className="h-12 w-12 text-green-600 mx-auto mb-4" />
-                <CardTitle className="text-lg">MCA Compliant</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">
-                  Fully compliant with Maryland Cannabis Administration requirements
-                </p>
-              </CardContent>
-            </Card>
+            <HoverCallout content="Our training program meets all Maryland Cannabis Administration regulatory requirements and is regularly updated to reflect the latest compliance standards.">
+              <Card className="text-center hover:shadow-lg transition-shadow cursor-help">
+                <CardHeader>
+                  <Shield className="h-12 w-12 text-green-600 mx-auto mb-4" />
+                  <CardTitle className="text-lg">MCA Compliant</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600">
+                    Fully compliant with Maryland Cannabis Administration requirements
+                  </p>
+                </CardContent>
+              </Card>
+            </HoverCallout>
 
-            <Card className="text-center">
-              <CardHeader>
-                <BookOpen className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-                <CardTitle className="text-lg">Comprehensive Training</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">
-                  18 modules covering all aspects of cannabis regulations and operations
-                </p>
-              </CardContent>
-            </Card>
+            <HoverCallout content="Our comprehensive curriculum includes 18 detailed modules covering cannabis laws, safety protocols, patient care, inventory management, and quality control standards.">
+              <Card className="text-center hover:shadow-lg transition-shadow cursor-help">
+                <CardHeader>
+                  <BookOpen className="h-12 w-12 text-blue-600 mx-auto mb-4" />
+                  <CardTitle className="text-lg">Comprehensive Training</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600">
+                    18 modules covering all aspects of cannabis regulations and operations
+                  </p>
+                </CardContent>
+              </Card>
+            </HoverCallout>
 
-            <Card className="text-center">
-              <CardHeader>
-                <Award className="h-12 w-12 text-yellow-600 mx-auto mb-4" />
-                <CardTitle className="text-lg">Official Certificates</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">
-                  Earn recognized certificates upon successful course completion
-                </p>
-              </CardContent>
-            </Card>
+            <HoverCallout content="Upon successful completion of the course and final exam, you'll receive an official certificate valid through 2025 that meets all MCA requirements for Responsible Vendor Training.">
+              <Card className="text-center hover:shadow-lg transition-shadow cursor-help">
+                <CardHeader>
+                  <Award className="h-12 w-12 text-yellow-600 mx-auto mb-4" />
+                  <CardTitle className="text-lg">Official Certificates</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600">
+                    Earn recognized certificates upon successful course completion
+                  </p>
+                </CardContent>
+              </Card>
+            </HoverCallout>
 
-            <Card className="text-center">
-              <CardHeader>
-                <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-4" />
-                <CardTitle className="text-lg">Easy Online Access</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">
-                  Study at your own pace with 24/7 online access
-                </p>
-              </CardContent>
-            </Card>
+            <HoverCallout content="Access your training materials anytime, anywhere. Our platform is mobile-friendly and allows you to study at your own pace with automatic progress saving.">
+              <Card className="text-center hover:shadow-lg transition-shadow cursor-help">
+                <CardHeader>
+                  <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-4" />
+                  <CardTitle className="text-lg">Easy Online Access</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600">
+                    Study at your own pace with 24/7 online access
+                  </p>
+                </CardContent>
+              </Card>
+            </HoverCallout>
           </div>
         </div>
       </section>
