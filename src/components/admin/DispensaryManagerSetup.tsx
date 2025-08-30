@@ -121,23 +121,18 @@ const DispensaryManagerSetup = () => {
           console.error('Role assignment error:', roleError);
         }
 
-        // Send welcome email
+        // Send welcome email using existing email service
         try {
-          await supabase.functions.invoke('send-branded-email', {
+          await supabase.functions.invoke('send-welcome-email', {
             body: {
-              to: managerEmail,
-              subject: 'Welcome to Cannabis Training - Manager Access',
-              type: 'manager-welcome',
-              data: {
-                managerName: managerName,
-                organizationName: selectedOrganization.name,
-                accessKey: selectedOrganization.unique_access_key,
-                credits: selectedOrganization.course_credits
-              }
+              email: managerEmail,
+              firstName: managerName.split(' ')[0],
+              lastName: managerName.split(' ').slice(1).join(' ') || ''
             }
           });
         } catch (emailError) {
           console.error('Email error:', emailError);
+          // Don't fail the entire process if email fails
         }
 
         toast({
