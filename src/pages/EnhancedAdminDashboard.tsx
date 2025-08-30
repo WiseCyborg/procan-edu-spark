@@ -11,11 +11,13 @@ import {
   BarChart3,
   Shield,
   Zap,
-  Eye
+  Eye,
+  Activity
 } from 'lucide-react';
 import { HoverCallout } from '@/components/ui/hover-callout';
 import { SimpleFAQManager } from '@/components/faq/SimpleFAQManager';
 import { EnhancedDraggableChat } from '@/components/chat/EnhancedDraggableChat';
+import { Link } from 'react-router-dom';
 
 const EnhancedAdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -70,6 +72,15 @@ const EnhancedAdminDashboard = () => {
               <BarChart3 className="h-4 w-4 mr-2" />
               Analytics
             </Button>
+          </HoverCallout>
+          
+          <HoverCallout content="Access live operations monitoring dashboard">
+            <Link to="/realtime-operations">
+              <Button variant="default" size="sm">
+                <Activity className="h-4 w-4 mr-2" />
+                Real-Time Ops
+              </Button>
+            </Link>
           </HoverCallout>
           
           <HoverCallout content="Access system settings and configuration options">
