@@ -1,0 +1,20 @@
+-- Remove custom email system components - proper order
+
+-- Drop triggers first (they depend on functions)
+DROP TRIGGER IF EXISTS auth_users_trigger ON auth.users;
+DROP TRIGGER IF EXISTS trigger_custom_auth_emails ON auth.users;
+DROP TRIGGER IF EXISTS auth_user_events ON auth.users;
+DROP TRIGGER IF EXISTS handle_auth_user_updates ON auth.users;
+
+-- Now drop functions that were used by custom email system
+DROP FUNCTION IF EXISTS public.handle_auth_events() CASCADE;
+DROP FUNCTION IF EXISTS public.trigger_custom_auth_emails() CASCADE;
+DROP FUNCTION IF EXISTS public.process_auth_events() CASCADE;
+
+-- Drop tables used for custom email logging and fallback
+DROP TABLE IF EXISTS public.email_fallback_log CASCADE;
+DROP TABLE IF EXISTS public.auth_event_log CASCADE;
+DROP TABLE IF EXISTS public.email_preferences CASCADE;
+
+-- Note: We're keeping other tables like email_logs, email_verification_codes 
+-- as they may be used by other systems

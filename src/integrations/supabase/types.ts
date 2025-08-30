@@ -14,36 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      auth_event_log: {
-        Row: {
-          created_at: string | null
-          email: string | null
-          event_data: Json | null
-          event_type: string
-          id: string
-          processed_at: string | null
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          email?: string | null
-          event_data?: Json | null
-          event_type: string
-          id?: string
-          processed_at?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          email?: string | null
-          event_data?: Json | null
-          event_type?: string
-          id?: string
-          processed_at?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
       certificates: {
         Row: {
           certificate_number: string
@@ -423,33 +393,6 @@ export type Database = {
         }
         Relationships: []
       }
-      email_fallback_log: {
-        Row: {
-          created_at: string
-          email: string
-          error_message: string | null
-          fallback_type: string
-          id: string
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          error_message?: string | null
-          fallback_type: string
-          id?: string
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          error_message?: string | null
-          fallback_type?: string
-          id?: string
-          user_id?: string | null
-        }
-        Relationships: []
-      }
       email_logs: {
         Row: {
           created_at: string
@@ -486,36 +429,6 @@ export type Database = {
           status?: string | null
           subject?: string | null
           user_id?: string | null
-        }
-        Relationships: []
-      }
-      email_preferences: {
-        Row: {
-          created_at: string | null
-          custom_redirect_url: string | null
-          custom_subject: string | null
-          enabled: boolean | null
-          id: string
-          template_type: string
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          custom_redirect_url?: string | null
-          custom_subject?: string | null
-          enabled?: boolean | null
-          id?: string
-          template_type: string
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          custom_redirect_url?: string | null
-          custom_subject?: string | null
-          enabled?: boolean | null
-          id?: string
-          template_type?: string
-          updated_at?: string | null
         }
         Relationships: []
       }
@@ -1531,10 +1444,6 @@ export type Database = {
           message: string
           success: boolean
         }[]
-      }
-      process_auth_events: {
-        Args: Record<PropertyKey, never>
-        Returns: number
       }
       verify_certificate_status: {
         Args: { cert_number: string }
