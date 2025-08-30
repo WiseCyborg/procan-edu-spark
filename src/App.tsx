@@ -18,7 +18,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminManagement from "./pages/AdminManagement";
 import Profile from "./pages/Profile";
 import CourseLayout from "./pages/Course/CourseLayout";
-import CourseModule from "./pages/Course/CourseModule";
+import EnhancedCourseModule from "./components/course/EnhancedCourseModule";
 import FinalExam from "./pages/Course/FinalExam";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import Certificates from "./pages/Certificates";
@@ -106,11 +106,11 @@ const App = () => (
                     </ProtectedRoute>
                   } />
                   
-                  <Route path="/course/:moduleId" element={
-                    <ProtectedRoute>
-                      <CourseModule />
-                    </ProtectedRoute>
-                  } />
+                   <Route path="/course/:moduleId" element={
+                     <ProtectedRoute>
+                       <EnhancedCourseModule />
+                     </ProtectedRoute>
+                   } />
                   
                   <Route path="/course/final-exam" element={
                     <ProtectedRoute>
