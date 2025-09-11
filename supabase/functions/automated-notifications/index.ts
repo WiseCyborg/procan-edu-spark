@@ -38,9 +38,11 @@ const handler = async (req: Request): Promise<Response> => {
       case 'compliance_check':
         return await generateComplianceReport(organizationId);
       case 'bulk_notification':
+      case 'bulk_notifications': // Handle both variants
         return await sendBulkNotifications(scheduleAdvanceDays);
       default:
-        throw new Error('Invalid notification type');
+        console.error(`Unknown notification type: ${type}`);
+        throw new Error(`Invalid notification type: ${type}`);
     }
 
   } catch (error: any) {
