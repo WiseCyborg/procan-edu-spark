@@ -1375,6 +1375,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      approve_dispensary_application: {
+        Args: { application_id: string; credits?: number }
+        Returns: {
+          access_key: string
+          message: string
+          organization_id: string
+          success: boolean
+        }[]
+      }
       calculate_compliance_score: {
         Args: { org_id: string }
         Returns: number
@@ -1395,6 +1404,15 @@ export type Database = {
       create_initial_admin: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      create_test_organization: {
+        Args: { contact_email: string; credits?: number; org_name: string }
+        Returns: {
+          access_key: string
+          message: string
+          organization_id: string
+          success: boolean
+        }[]
       }
       generate_certificate_number: {
         Args: Record<PropertyKey, never>
@@ -1476,6 +1494,13 @@ export type Database = {
           new_role: Database["public"]["Enums"]["app_role"]
           target_user_id: string
         }
+        Returns: {
+          message: string
+          success: boolean
+        }[]
+      }
+      reject_dispensary_application: {
+        Args: { application_id: string; rejection_reason: string }
         Returns: {
           message: string
           success: boolean

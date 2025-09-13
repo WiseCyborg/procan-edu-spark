@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useSecurityMonitoring } from '@/hooks/useSecurityMonitoring';
 import { 
   FileText, 
   Eye, 
@@ -45,6 +46,7 @@ const DispensaryApplicationManager = () => {
   const [selectedApplication, setSelectedApplication] = useState<DispensaryApplication | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [adminNotes, setAdminNotes] = useState('');
+  const { performSecurityCheck } = useSecurityMonitoring();
 
   useEffect(() => {
     fetchApplications();
@@ -71,34 +73,117 @@ const DispensaryApplicationManager = () => {
     }
   };
 
-  const updateApplicationStatus = async (applicationId: string, status: string, notes: string) => {
+  const approveApplication = async (applicationId: string, credits: number = 10) => {
+    if (!await performSecurityCheck('dispensary_approval')) return;
+
     setIsProcessing(true);
     try {
-      const { error } = await supabase
-        .from('dispensary_applications')
-        .update({
-          application_status: status,
-          admin_notes: notes,
-          reviewed_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', applicationId);
+      const { data, error } = await supabase.rpc('approve_dispensary_application', {
+        application_id: applicationId,
+        credits: credits
+      });
 
       if (error) throw error;
 
-      toast({
-        title: "Application Updated",
-        description: `Application has been ${status}.`,
-      });
-
-      await fetchApplications();
-      setSelectedApplication(null);
-      setAdminNotes('');
+      const result = data[0];
+      if (result.success) {
+        toast({
+          title: "Application Approved",
+          description: `Organization created with access key: ${result.access_key}`,
+        });
+        fetchApplications(); // Refresh the list
+        setSelectedApplication(null);
+        setAdminNotes('');
+      } else {
+        toast({
+          title: "Error",
+          description: result.message,
+          variant: "destructive"
+        });
+      }
     } catch (error) {
-      console.error('Error updating application:', error);
+      console.error('Error approving application:', error);
       toast({
         title: "Error",
-        description: "Failed to update application status.",
+        description: "Failed to approve application",
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const rejectApplication = async (applicationId: string, reason: string) => {
+    if (!await performSecurityCheck('dispensary_rejection')) return;
+
+    setIsProcessing(true);
+    try {
+      const { data, error } = await supabase.rpc('reject_dispensary_application', {
+        application_id: applicationId,
+        rejection_reason: reason
+      });
+
+      if (error) throw error;
+
+      const result = data[0];
+      if (result.success) {
+        toast({
+          title: "Application Rejected",
+          description: "Application rejected successfully",
+        });
+        fetchApplications(); // Refresh the list
+        setSelectedApplication(null);
+        setAdminNotes('');
+      } else {
+        toast({
+          title: "Error",
+          description: result.message,
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error rejecting application:', error);
+      toast({
+        title: "Error",
+        description: "Failed to reject application",
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const createTestOrganization = async (orgName: string, contactEmail: string, credits: number = 10) => {
+    if (!await performSecurityCheck('test_org_creation')) return;
+
+    setIsProcessing(true);
+    try {
+      const { data, error } = await supabase.rpc('create_test_organization', {
+        org_name: orgName,
+        contact_email: contactEmail,
+        credits: credits
+      });
+
+      if (error) throw error;
+
+      const result = data[0];
+      if (result.success) {
+        toast({
+          title: "Test Organization Created",
+          description: `"${orgName}" created with access key: ${result.access_key}`,
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: result.message,
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error creating test organization:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create test organization",
         variant: "destructive"
       });
     } finally {
@@ -334,16 +419,16 @@ const DispensaryApplicationManager = () => {
                           {application.application_status === 'pending' && (
                             <>
                               <Button
-                                onClick={() => updateApplicationStatus(application.id, 'approved', adminNotes)}
+                                onClick={() => approveApplication(application.id, 10)}
                                 disabled={isProcessing}
                                 className="bg-green-600 hover:bg-green-700"
                               >
                                 <CheckCircle className="h-4 w-4 mr-1" />
-                                Approve
+                                Approve (10 Credits)
                               </Button>
                               <Button
                                 variant="destructive"
-                                onClick={() => updateApplicationStatus(application.id, 'rejected', adminNotes)}
+                                onClick={() => rejectApplication(application.id, adminNotes || 'Application rejected by admin')}
                                 disabled={isProcessing}
                               >
                                 <XCircle className="h-4 w-4 mr-1" />
@@ -384,6 +469,59 @@ const DispensaryApplicationManager = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Test Organization Creator */}
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center">
+            <Building2 className="mr-2 h-5 w-5" />
+            Create Test Organization
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="testOrgName">Organization Name</Label>
+              <Input
+                id="testOrgName"
+                placeholder="Test Dispensary Inc."
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="testOrgEmail">Contact Email</Label>
+              <Input
+                id="testOrgEmail"
+                type="email"
+                placeholder="test@dispensary.com"
+                className="mt-1"
+              />
+            </div>
+          </div>
+          <Button
+            onClick={() => {
+              const nameInput = document.getElementById('testOrgName') as HTMLInputElement;
+              const emailInput = document.getElementById('testOrgEmail') as HTMLInputElement;
+              if (nameInput.value && emailInput.value) {
+                createTestOrganization(nameInput.value, emailInput.value);
+                nameInput.value = '';
+                emailInput.value = '';
+              } else {
+                toast({
+                  title: "Missing Information",
+                  description: "Please fill in both name and email",
+                  variant: "destructive"
+                });
+              }
+            }}
+            disabled={isProcessing}
+            className="w-full"
+          >
+            <Building2 className="h-4 w-4 mr-2" />
+            Create Test Organization
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 };
