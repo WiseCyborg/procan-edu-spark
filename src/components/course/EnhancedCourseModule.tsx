@@ -17,6 +17,7 @@ interface ModuleContent {
   title: string;
   description: string;
   videoUrl?: string;
+  stoplight_tier?: 'green' | 'yellow' | 'red';
   documents: Array<{
     id: string;
     title: string;
@@ -297,10 +298,25 @@ const EnhancedCourseModule: React.FC = () => {
               <p className="text-muted-foreground mt-2">{module.description}</p>
             </div>
             <div className="text-right">
-              <Badge variant={isModuleCompleted(moduleId!) ? "default" : "secondary"}>
-                {isModuleCompleted(moduleId!) ? 'Completed' : 'In Progress'}
-              </Badge>
-              <div className="flex items-center space-x-2 mt-2">
+              <div className="flex gap-2 mb-2">
+                {module.stoplight_tier && (
+                  <Badge 
+                    className={`
+                      ${module.stoplight_tier === 'green' && 'bg-stoplight-green text-white'} 
+                      ${module.stoplight_tier === 'yellow' && 'bg-stoplight-yellow text-white'} 
+                      ${module.stoplight_tier === 'red' && 'bg-stoplight-red text-white'}
+                    `}
+                  >
+                    {module.stoplight_tier === 'green' && '🟢 Green Tier'}
+                    {module.stoplight_tier === 'yellow' && '🟡 Yellow Tier'}
+                    {module.stoplight_tier === 'red' && '🔴 Red Tier'}
+                  </Badge>
+                )}
+                <Badge variant={isModuleCompleted(moduleId!) ? "default" : "secondary"}>
+                  {isModuleCompleted(moduleId!) ? 'Completed' : 'In Progress'}
+                </Badge>
+              </div>
+              <div className="flex items-center space-x-2">
                 <Clock className="w-4 h-4" />
                 <span className="text-sm text-muted-foreground">{module.estimatedTime} min</span>
               </div>

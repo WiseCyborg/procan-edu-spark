@@ -12,6 +12,8 @@ import Welcome from "./pages/Welcome";
 import NotFound from "./pages/NotFound";
 import FAQ from "./pages/FAQ";
 import CertificateVerification from "./pages/CertificateVerification";
+import StoplightStandard from "./pages/StoplightStandard";
+import ProCannLive from "./pages/ProCannLive";
 import DispensaryPortal from "./pages/DispensaryPortal";
 import EnhancedDispensaryPortal from "./pages/EnhancedDispensaryPortal";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -82,7 +84,17 @@ const App = () => (
                   <Route path="/" element={<Index />} />
                   <Route path="/welcome" element={<Welcome />} />
                   <Route path="/faq" element={<FAQ />} />
-                  <Route path="/verify-certificate" element={<CertificateVerification />} />
+                   <Route path="/verify-certificate" element={<CertificateVerification />} />
+                   <Route path="/stoplight-standard" element={
+                     <ProtectedRoute>
+                       <StoplightStandard />
+                     </ProtectedRoute>
+                   } />
+                   <Route path="/live" element={
+                     <ProtectedRoute>
+                       <ProCannLive />
+                     </ProtectedRoute>
+                   } />
                   
                   <Route path="/auth" element={
                     <PublicRoute>

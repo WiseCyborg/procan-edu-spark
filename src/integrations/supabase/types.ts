@@ -25,6 +25,7 @@ export type Database = {
           is_revoked: boolean | null
           issue_date: string
           pdf_url: string | null
+          tier_badge: string | null
           user_id: string
         }
         Insert: {
@@ -37,6 +38,7 @@ export type Database = {
           is_revoked?: boolean | null
           issue_date?: string
           pdf_url?: string | null
+          tier_badge?: string | null
           user_id: string
         }
         Update: {
@@ -49,6 +51,7 @@ export type Database = {
           is_revoked?: boolean | null
           issue_date?: string
           pdf_url?: string | null
+          tier_badge?: string | null
           user_id?: string
         }
         Relationships: [
@@ -260,6 +263,7 @@ export type Database = {
           is_active: boolean | null
           module_number: number
           quiz_questions: Json | null
+          stoplight_tier: string | null
           title: string
           updated_at: string
           video_url: string | null
@@ -273,6 +277,7 @@ export type Database = {
           is_active?: boolean | null
           module_number: number
           quiz_questions?: Json | null
+          stoplight_tier?: string | null
           title: string
           updated_at?: string
           video_url?: string | null
@@ -286,6 +291,7 @@ export type Database = {
           is_active?: boolean | null
           module_number?: number
           quiz_questions?: Json | null
+          stoplight_tier?: string | null
           title?: string
           updated_at?: string
           video_url?: string | null
@@ -569,6 +575,86 @@ export type Database = {
           is_active?: boolean | null
           question?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      live_session_registrations: {
+        Row: {
+          attended: boolean | null
+          id: string
+          registered_at: string | null
+          session_id: string | null
+          user_id: string
+        }
+        Insert: {
+          attended?: boolean | null
+          id?: string
+          registered_at?: string | null
+          session_id?: string | null
+          user_id: string
+        }
+        Update: {
+          attended?: boolean | null
+          id?: string
+          registered_at?: string | null
+          session_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_session_registrations_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "live_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      live_sessions: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          duration_minutes: number | null
+          host_bio: string | null
+          host_name: string
+          id: string
+          is_active: boolean | null
+          max_attendees: number | null
+          session_date: string
+          session_type: string | null
+          title: string
+          updated_at: string | null
+          zoom_link: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          host_bio?: string | null
+          host_name: string
+          id?: string
+          is_active?: boolean | null
+          max_attendees?: number | null
+          session_date: string
+          session_type?: string | null
+          title: string
+          updated_at?: string | null
+          zoom_link?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          host_bio?: string | null
+          host_name?: string
+          id?: string
+          is_active?: boolean | null
+          max_attendees?: number | null
+          session_date?: string
+          session_type?: string | null
+          title?: string
+          updated_at?: string | null
+          zoom_link?: string | null
         }
         Relationships: []
       }
@@ -995,6 +1081,7 @@ export type Database = {
           phone_verified: boolean | null
           profile_photo_url: string | null
           state: string | null
+          tier_status: string | null
           updated_at: string
           user_id: string
           verification_method_preference: string | null
@@ -1020,6 +1107,7 @@ export type Database = {
           phone_verified?: boolean | null
           profile_photo_url?: string | null
           state?: string | null
+          tier_status?: string | null
           updated_at?: string
           user_id: string
           verification_method_preference?: string | null
@@ -1045,6 +1133,7 @@ export type Database = {
           phone_verified?: boolean | null
           profile_photo_url?: string | null
           state?: string | null
+          tier_status?: string | null
           updated_at?: string
           user_id?: string
           verification_method_preference?: string | null

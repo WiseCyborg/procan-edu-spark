@@ -15,6 +15,7 @@ interface Certificate {
   issue_date: string;
   expiry_date: string;
   is_revoked: boolean;
+  tier_badge?: string;
   courses: {
     title: string;
     description: string;
@@ -172,9 +173,27 @@ export default function Certificates() {
                           Certificate #{certificate.certificate_number}
                         </p>
                       </div>
-                      <Badge className={status.color}>
-                        {status.label}
-                      </Badge>
+                      <div className="flex gap-2">
+                        {certificate.tier_badge && (
+                          <Badge 
+                            className={`
+                              ${certificate.tier_badge === 'green' && 'bg-stoplight-green'} 
+                              ${certificate.tier_badge === 'yellow' && 'bg-stoplight-yellow'} 
+                              ${certificate.tier_badge === 'red' && 'bg-stoplight-red'} 
+                              text-white
+                            `}
+                          >
+                            {certificate.tier_badge === 'green' && '🟢'}
+                            {certificate.tier_badge === 'yellow' && '🟡'}
+                            {certificate.tier_badge === 'red' && '🔴'}
+                            {' '}
+                            {certificate.tier_badge?.toUpperCase()} TIER
+                          </Badge>
+                        )}
+                        <Badge className={status.color}>
+                          {status.label}
+                        </Badge>
+                      </div>
                     </div>
                   </CardHeader>
                   

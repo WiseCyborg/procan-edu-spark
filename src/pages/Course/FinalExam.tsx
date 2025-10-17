@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { CertificateAchievement } from '@/components/certificates/CertificateAchievement';
 
 interface QuizQuestion {
   q: string;
@@ -418,7 +419,7 @@ const FinalExam: React.FC = () => {
         
         <p className="mb-6">
           {passed 
-            ? 'You have successfully passed the Maryland Responsible Vendor Training exam.' 
+            ? `You've completed the Responsible Vendor Training! You're part of Maryland's growing community of responsible cannabis professionals. Keep your certificate safe — and your standards even higher.`
             : 'A minimum score of 80% is required to pass. Please review the materials and try again.'}
         </p>
         
@@ -441,64 +442,21 @@ const FinalExam: React.FC = () => {
 
   // Render certificate
   const renderCertificate = () => {
-    const date = new Date().toLocaleDateString();
-    const elapsedTime = 5400 - totalTimeLeft;
+    const date = new Date().toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
     
     return (
-      <div className="certificate bg-white border-4 border-green-700 p-8 mx-auto max-w-4xl print:max-w-full">
-        <h1 className="text-3xl font-bold text-center text-green-800 mb-2">Certificate of Completion</h1>
-        
-        <div className="border-2 border-green-600 p-6 my-4">
-          <p className="text-center">This certifies that</p>
-          <h2 className="text-2xl font-bold text-center my-2">{userData.name}</h2>
-          <p className="text-center mb-4">has successfully completed the</p>
-          <h3 className="text-xl font-bold text-center text-green-700 mb-4">
-            Maryland Responsible Vendor Training (RVT)
-          </h3>
-          
-          <div className="text-center text-sm mb-6">
-            <p>on {date}</p>
-            <p>Certificate Number: <strong>{userData.certificateNumber}</strong></p>
-            <p>Phone: {userData.phone} | Email: {userData.email}</p>
-            <p>IP Address: {userData.ip}</p>
-            <p>Total Time: {formatTime(elapsedTime)}</p>
-          </div>
-          
-          {userData.photo && (
-            <div className="flex justify-center mb-4">
-              <img 
-                src={userData.photo} 
-                alt="User verification" 
-                className="max-w-[200px] border border-gray-300" 
-              />
-            </div>
-          )}
-          
-          <p className="text-center">Presented by ProCann Training</p>
-          <p className="text-center">In accordance with the Maryland Cannabis Administration</p>
-          <p className="text-center font-semibold">Valid: {new Date().getFullYear()} - 2025</p>
-        </div>
-        
-        <div className="flex justify-between text-center mt-8">
-          <div>
-            <p className="font-serif italic text-lg">Louis Hendricks</p>
-            <p className="text-sm">Louis Hendricks</p>
-          </div>
-          <div>
-            <p className="font-serif italic text-lg">William Cunningham</p>
-            <p className="text-sm">William Cunningham</p>
-          </div>
-          <div>
-            <p className="font-serif italic text-lg">Danielle Brooks</p>
-            <p className="text-sm">Danielle Brooks</p>
-          </div>
-        </div>
-        
-        <div className="flex justify-center gap-4 mt-8 print:hidden">
-          <Button onClick={printCertificate}>Print Certificate</Button>
-          <Button onClick={emailCertificate}>Email Certificate</Button>
-        </div>
-      </div>
+      <CertificateAchievement
+        certificateNumber={userData.certificateNumber || 'CERT-2025-XXX-XXXX'}
+        userName={userData.name}
+        completionDate={date}
+        tierStatus="red"
+        onDownload={printCertificate}
+        onShare={emailCertificate}
+      />
     );
   };
 

@@ -122,6 +122,28 @@ export const useUserProgress = (courseId?: string) => {
       // Invalidate and refetch progress data
       queryClient.invalidateQueries({ queryKey: ['user-progress', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-data', user?.id] });
+      
+      // Check for tier completion celebrations
+      const completedCount = progressData?.filter(p => p.is_completed).length || 0;
+      if (completedCount === 6 && !localStorage.getItem('green_tier_celebrated')) {
+        toast({
+          title: '🟢 Green Tier Complete!',
+          description: "You've mastered the fundamentals of responsible cannabis education. Moving to Yellow Tier.",
+        });
+        localStorage.setItem('green_tier_celebrated', 'true');
+      } else if (completedCount === 12 && !localStorage.getItem('yellow_tier_celebrated')) {
+        toast({
+          title: '🟡 Yellow Tier Complete!',
+          description: "You're now tackling advanced compliance and safety protocols. Entering Red Tier.",
+        });
+        localStorage.setItem('yellow_tier_celebrated', 'true');
+      } else if (completedCount === 18 && !localStorage.getItem('red_tier_celebrated')) {
+        toast({
+          title: '🔴 Red Tier Complete!',
+          description: "You've achieved mastery across all training domains. Ready for Final Exam!",
+        });
+        localStorage.setItem('red_tier_celebrated', 'true');
+      }
     },
     onError: (error) => {
       console.error('Error updating progress:', error);

@@ -62,13 +62,26 @@ const Index = () => {
           {/* Compliance Badges */}
           <ComplianceBadges />
 
-          {/* Main Heading */}
-          <h1 className="text-6xl md:text-7xl font-bold text-white mb-4 leading-tight">
-            ProCann Edu
-          </h1>
-          <h2 className="text-2xl md:text-3xl text-white/90 mb-6 font-medium">
-            Maryland's Premier Cannabis Training Platform
+          {/* Heartbeat Logo Animation */}
+          <div className="relative mb-6">
+            <div className="absolute inset-0 bg-gradient-to-r from-stoplight-green via-stoplight-yellow to-stoplight-red opacity-30 blur-3xl animate-heartbeat"></div>
+            <h1 className="relative text-6xl md:text-7xl font-bold text-white mb-4 leading-tight font-poppins">
+              ProCann Edu
+            </h1>
+          </div>
+
+          <h2 className="text-2xl md:text-3xl text-white/90 mb-6 font-medium font-poppins">
+            The Heartbeat of Responsible Cannabis Education in Maryland
           </h2>
+
+          {/* New Tagline Section */}
+          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 mb-8 max-w-3xl mx-auto">
+            <p className="text-xl text-white/95 font-inter leading-relaxed">
+              We don't just teach compliance.
+              <br />
+              We teach <strong>confidence</strong>, <strong>community</strong>, and <strong>care</strong>.
+            </p>
+          </div>
 
           {/* Trust Statistics */}
           <TrustStats />
@@ -143,6 +156,52 @@ const Index = () => {
               Contact Support
             </a>
           </div>
+        </div>
+      </section>
+
+      {/* Maryland First Section */}
+      <section className="py-16 px-4 bg-gradient-to-br from-stoplight-green/10 to-stoplight-cream">
+        <div className="container mx-auto text-center">
+          <h3 className="text-3xl font-bold text-stoplight-charcoal mb-6 font-poppins">
+            Built in Maryland, for Maryland
+          </h3>
+          <div className="max-w-4xl mx-auto mb-8">
+            <p className="text-lg text-gray-700 mb-6 font-inter">
+              Designed by local educators, cannabis professionals, and community advocates who understand the culture and values of our state.
+            </p>
+            
+            {/* Maryland Imagery Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <img 
+                src="https://images.unsplash.com/photo-1606081541033-e06b96dd8e86?w=400" 
+                alt="Baltimore Inner Harbor" 
+                className="rounded-lg shadow-md h-32 w-full object-cover"
+              />
+              <img 
+                src="https://images.unsplash.com/photo-1599644898299-27b0f7e5cfc6?w=400" 
+                alt="Maryland State House" 
+                className="rounded-lg shadow-md h-32 w-full object-cover"
+              />
+              <img 
+                src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400" 
+                alt="Community gathering" 
+                className="rounded-lg shadow-md h-32 w-full object-cover"
+              />
+              <img 
+                src="https://images.unsplash.com/photo-1587408777892-52db0a9a1e2d?w=400" 
+                alt="Maryland landscape" 
+                className="rounded-lg shadow-md h-32 w-full object-cover"
+              />
+            </div>
+          </div>
+          
+          <Button 
+            size="lg" 
+            onClick={() => navigate('/stoplight-standard')}
+            className="bg-stoplight-green hover:bg-stoplight-green/90 text-white font-poppins"
+          >
+            Learn the Stoplight Standard™
+          </Button>
         </div>
       </section>
 
