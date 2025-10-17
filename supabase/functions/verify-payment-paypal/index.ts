@@ -89,6 +89,47 @@ serve(async (req) => {
         // Course payment
         const courseId = customId.split("course_")[1]?.split("_user_")[0] || referenceId;
         responseData = { ...responseData, courseId };
+
+        // Fetch order and user details for payment confirmation email
+        const { data: order } = await supabaseService
+          .from("orders")
+          .select(`
+            user_id,
+            course_id,
+            amount,
+            currency,
+            id
+          `)
+          .eq("paypal_order_id", orderId)
+          .single();
+
+        if (order) {
+          const { data: { user } } = await supabaseService.auth.admin.getUserById(order.user_id);
+          const { data: profile } = await supabaseService
+            .from("profiles")
+            .select("first_name, last_name")
+            .eq("user_id", order.user_id)
+            .single();
+
+          const { data: course } = await supabaseService
+            .from("courses")
+            .select("title")
+            .eq("id", order.course_id)
+            .single();
+
+          // Trigger payment confirmation email (fire-and-forget)
+          supabaseService.functions.invoke('send-payment-confirmation', {
+            body: {
+              orderId: order.id,
+              courseId: order.course_id,
+              courseTitle: course?.title || 'Maryland Responsible Vendor Training',
+              amount: (order.amount / 100).toFixed(2),
+              currency: order.currency.toUpperCase(),
+              userEmail: user?.email,
+              userName: `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || 'Student'
+            }
+          }).catch(err => console.error('Payment confirmation email failed:', err));
+        }
       } else if (customId.includes("dispensary_")) {
         // Dispensary payment - extract application ID
         const applicationId = customId.split("dispensary_")[1]?.split("_credits_")[0] || referenceId;

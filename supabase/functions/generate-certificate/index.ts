@@ -182,6 +182,35 @@ const handler = async (req: Request): Promise<Response> => {
       }
     });
 
+    // Fetch user and course details for certificate email
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("first_name, last_name")
+      .eq("user_id", user.id)
+      .single();
+
+    const { data: course } = await supabase
+      .from("courses")
+      .select("title")
+      .eq("id", examAttempt.course_id)
+      .single();
+
+    // Trigger certificate email (fire-and-forget)
+    supabase.functions.invoke('send-certificate-email', {
+      body: {
+        email: user.email,
+        firstName: profile?.first_name || 'Student',
+        lastName: profile?.last_name || '',
+        certificateNumber: certificate.certificate_number,
+        courseTitle: course?.title || 'Maryland Responsible Vendor Training',
+        issueDate: new Date(certificate.issue_date).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        })
+      }
+    }).catch(err => console.error('Certificate email failed:', err));
+
     // Return certificate details
     return new Response(
       JSON.stringify({

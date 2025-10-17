@@ -79,47 +79,72 @@ const handler = async (req: Request): Promise<Response> => {
       to: [email],
       subject: "Welcome to ProCann Edu - Maryland Cannabis Training",
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #F9F7EE;">
           <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="color: #16a34a; font-size: 28px; margin-bottom: 10px;">Welcome to ProCann Edu</h1>
-            <p style="color: #666; font-size: 16px;">Maryland Cannabis Training Platform</p>
+            <div style="background: linear-gradient(135deg, #2A7F3F 0%, #FFB300 50%, #C62828 100%); width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
+              <span style="font-size: 40px;">🌱</span>
+            </div>
+            <h1 style="color: #2A7F3F; font-size: 32px; margin-bottom: 10px; font-weight: bold;">Welcome to ProCann Edu</h1>
+            <p style="color: #1E1E1E; font-size: 16px; font-weight: bold;">The Heartbeat of Responsible Cannabis Education in Maryland</p>
           </div>
           
-          <div style="background: #f8fafc; padding: 25px; border-radius: 8px; margin-bottom: 25px;">
-            <h2 style="color: #1f2937; margin-bottom: 15px;">Hello ${firstName} ${lastName}!</h2>
+          <div style="background: white; padding: 30px; border-radius: 12px; margin-bottom: 25px; border-left: 4px solid #2A7F3F;">
+            <h2 style="color: #1E1E1E; margin-bottom: 15px; font-size: 20px;">Hello ${firstName} ${lastName || ''}!</h2>
             <p style="color: #4b5563; line-height: 1.6; margin-bottom: 15px;">
               Thank you for joining ProCann Edu, Maryland's premier cannabis training platform. 
               You're now ready to begin your journey toward becoming a certified cannabis professional.
             </p>
             <p style="color: #4b5563; line-height: 1.6;">
-              Our comprehensive training program covers all aspects of Maryland cannabis regulations, 
-              responsible vendor practices, and industry best practices.
+              Our comprehensive training program teaches the <strong>Stoplight Standard™</strong> — 
+              a revolutionary approach to responsible cannabis dosage that protects consumers 
+              and empowers vendors with clear, color-coded guidance.
             </p>
           </div>
           
+          <div style="background: linear-gradient(135deg, #2A7F3F 0%, #FFB300 50%, #C62828 100%); padding: 3px; border-radius: 12px; margin-bottom: 25px;">
+            <div style="background: white; padding: 25px; border-radius: 10px;">
+              <h3 style="color: #1E1E1E; margin-bottom: 15px; font-size: 18px;">🚦 The Stoplight Standard™</h3>
+              <p style="color: #4b5563; line-height: 1.6; margin-bottom: 15px;">
+                Learn our three-tier dosage system that's transforming cannabis safety:
+              </p>
+              <ul style="color: #4b5563; line-height: 1.8; padding-left: 20px; margin: 0;">
+                <li><strong style="color: #2A7F3F;">🟢 Green Tier:</strong> Beginner-friendly products (5mg THC or less)</li>
+                <li><strong style="color: #FFB300;">🟡 Yellow Tier:</strong> Intermediate experiences (5-10mg THC)</li>
+                <li><strong style="color: #C62828;">🔴 Red Tier:</strong> Advanced consumer products (10mg+ THC)</li>
+              </ul>
+            </div>
+          </div>
+          
           <div style="margin-bottom: 25px;">
-            <h3 style="color: #1f2937; margin-bottom: 15px;">What's Next?</h3>
-            <ul style="color: #4b5563; line-height: 1.6; padding-left: 20px;">
+            <h3 style="color: #1E1E1E; margin-bottom: 15px;">What's Next?</h3>
+            <ul style="color: #4b5563; line-height: 1.8; padding-left: 20px;">
               <li style="margin-bottom: 8px;">Complete your profile setup</li>
-              <li style="margin-bottom: 8px;">Start the Maryland Responsible Vendor Training (RVT)</li>
-              <li style="margin-bottom: 8px;">Progress through all 18 modules</li>
-              <li style="margin-bottom: 8px;">Take the final exam to earn your certificate</li>
+              <li style="margin-bottom: 8px;">Explore the Stoplight Standard™ methodology</li>
+              <li style="margin-bottom: 8px;">Progress through all 18 comprehensive modules</li>
+              <li style="margin-bottom: 8px;">Pass the final exam to earn your MCA-compliant certificate</li>
             </ul>
           </div>
           
           <div style="text-align: center; margin: 30px 0;">
+            <a href="https://zhmpwczrvitomsxjwpzc.lovableproject.com/stoplight-standard" 
+               style="background: #FFB300; color: #1E1E1E; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; margin-right: 10px; font-size: 16px;">
+              Learn the Stoplight Standard™
+            </a>
             <a href="https://zhmpwczrvitomsxjwpzc.lovableproject.com/course" 
-               style="background: #16a34a; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
+               style="background: #2A7F3F; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; font-size: 16px;">
               Start Your Training
             </a>
           </div>
           
-          <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; margin-top: 30px; text-align: center;">
+          <div style="border-top: 2px solid #e5e7eb; padding-top: 20px; margin-top: 30px; text-align: center;">
+            <p style="color: #1E1E1E; font-size: 16px; font-weight: bold; margin-bottom: 10px;">
+              The Heartbeat of Responsible Cannabis Education in Maryland
+            </p>
             <p style="color: #9ca3af; font-size: 14px; margin-bottom: 10px;">
               Questions? Contact our support team at info@procannedu.com
             </p>
             <p style="color: #9ca3af; font-size: 12px;">
-              ProCann Training • In accordance with the Maryland Cannabis Administration
+              ProCann Edu • In accordance with the Maryland Cannabis Administration
             </p>
           </div>
         </div>

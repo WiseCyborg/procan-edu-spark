@@ -41,63 +41,91 @@ const handler = async (req: Request): Promise<Response> => {
       to: [email],
       subject: `Congratulations! Your ${courseTitle} Certificate`,
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #F9F7EE;">
           <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="color: #16a34a; font-size: 28px; margin-bottom: 10px;">🎉 Congratulations!</h1>
-            <p style="color: #666; font-size: 16px;">You've Successfully Completed Your Training</p>
+            <div style="background: linear-gradient(135deg, #2A7F3F 0%, #FFB300 50%, #C62828 100%); width: 100px; height: 100px; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
+              <span style="font-size: 56px;">🎓</span>
+            </div>
+            <h1 style="color: #C62828; font-size: 32px; margin-bottom: 10px; font-weight: bold;">🔴 Achievement Unlocked!</h1>
+            <p style="color: #1E1E1E; font-size: 16px;">You've mastered the Stoplight Standard™</p>
           </div>
           
-          <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); padding: 25px; border-radius: 12px; margin-bottom: 25px; border: 2px solid #16a34a;">
-            <h2 style="color: #15803d; margin-bottom: 15px; text-align: center;">Certificate Earned</h2>
+          <div style="background: white; padding: 30px; border-radius: 12px; margin-bottom: 25px; border-left: 4px solid #C62828;">
             <div style="text-align: center; margin-bottom: 20px;">
-              <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                <h3 style="color: #1f2937; margin-bottom: 10px;">${firstName} ${lastName}</h3>
+              <div style="display: inline-block; background: #C62828; color: white; padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: bold; margin-bottom: 15px;">
+                🔴 RED TIER CERTIFIED
+              </div>
+            </div>
+            <h2 style="color: #1E1E1E; margin-bottom: 15px; text-align: center; font-size: 22px;">Official Certificate of Completion</h2>
+            <div style="text-align: center; margin-bottom: 20px;">
+              <div style="background: #f8fafc; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                <h3 style="color: #1E1E1E; margin-bottom: 10px; font-size: 20px;">${firstName} ${lastName}</h3>
                 <p style="color: #4b5563; font-size: 14px; margin-bottom: 15px;">has successfully completed</p>
-                <h4 style="color: #16a34a; font-size: 18px; font-weight: bold; margin-bottom: 15px;">${courseTitle}</h4>
-                <div style="border-top: 1px solid #e5e7eb; padding-top: 15px;">
-                  <p style="color: #6b7280; font-size: 12px; margin-bottom: 5px;">Certificate Number</p>
-                  <p style="color: #1f2937; font-weight: bold; font-family: monospace;">${certificateNumber}</p>
+                <h4 style="color: #2A7F3F; font-size: 18px; font-weight: bold; margin-bottom: 15px;">${courseTitle}</h4>
+                <p style="color: #4b5563; font-size: 14px; margin-bottom: 15px;">including mastery of the <strong>Stoplight Standard™</strong> three-tier dosage system</p>
+                <div style="border-top: 2px solid #e5e7eb; padding-top: 15px;">
+                  <p style="color: #6b7280; font-size: 12px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;">Certificate Number</p>
+                  <p style="color: #1E1E1E; font-weight: bold; font-family: monospace; font-size: 16px;">${certificateNumber}</p>
                   <p style="color: #6b7280; font-size: 12px; margin-top: 10px;">Issue Date: ${issueDate}</p>
+                  <p style="color: #6b7280; font-size: 12px;">Valid through: ${new Date(new Date(issueDate).setFullYear(new Date(issueDate).getFullYear() + 2)).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                 </div>
               </div>
             </div>
           </div>
           
+          <div style="background: linear-gradient(135deg, #2A7F3F 0%, #FFB300 50%, #C62828 100%); padding: 3px; border-radius: 12px; margin-bottom: 25px;">
+            <div style="background: white; padding: 25px; border-radius: 10px;">
+              <h3 style="color: #1E1E1E; margin-bottom: 15px;">🚦 Your Stoplight Standard™ Mastery</h3>
+              <p style="color: #4b5563; line-height: 1.6; margin-bottom: 15px;">
+                You've demonstrated comprehensive knowledge of all three tiers:
+              </p>
+              <ul style="color: #4b5563; line-height: 1.8; padding-left: 20px; margin: 0;">
+                <li><strong style="color: #2A7F3F;">🟢 Green Tier:</strong> Beginner-friendly products (5mg THC or less)</li>
+                <li><strong style="color: #FFB300;">🟡 Yellow Tier:</strong> Intermediate experiences (5-10mg THC)</li>
+                <li><strong style="color: #C62828;">🔴 Red Tier:</strong> Advanced consumer products (10mg+ THC)</li>
+              </ul>
+            </div>
+          </div>
+          
           <div style="margin-bottom: 25px;">
-            <h3 style="color: #1f2937; margin-bottom: 15px;">What This Means</h3>
-            <ul style="color: #4b5563; line-height: 1.6; padding-left: 20px;">
-              <li style="margin-bottom: 8px;">You are now certified for cannabis operations in Maryland</li>
-              <li style="margin-bottom: 8px;">Your certificate is valid through 2025</li>
-              <li style="margin-bottom: 8px;">This certification meets MCA requirements</li>
-              <li style="margin-bottom: 8px;">You can download your certificate anytime from your dashboard</li>
+            <h3 style="color: #1E1E1E; margin-bottom: 15px;">What This Certification Means</h3>
+            <ul style="color: #4b5563; line-height: 1.8; padding-left: 20px;">
+              <li style="margin-bottom: 8px;">✅ You are now certified for cannabis operations in Maryland</li>
+              <li style="margin-bottom: 8px;">✅ Your certificate is valid for 2 years</li>
+              <li style="margin-bottom: 8px;">✅ This certification meets MCA requirements</li>
+              <li style="margin-bottom: 8px;">✅ Download your certificate anytime from your dashboard</li>
             </ul>
           </div>
           
           <div style="text-align: center; margin: 30px 0;">
-            <a href="https://zhmpwczrvitomsxjwpzc.lovableproject.com/dashboard" 
-               style="background: #16a34a; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block; margin-right: 10px;">
-              View Dashboard
-            </a>
             <a href="https://zhmpwczrvitomsxjwpzc.lovableproject.com/certificates" 
-               style="background: #6b7280; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
+               style="background: #C62828; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; margin-right: 10px; font-size: 16px;">
               Download Certificate
+            </a>
+            <a href="https://zhmpwczrvitomsxjwpzc.lovableproject.com/dashboard" 
+               style="background: #2A7F3F; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; font-size: 16px;">
+              View Dashboard
             </a>
           </div>
           
-          <div style="background: #fef3c7; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
-            <h4 style="color: #92400e; margin-bottom: 10px;">Important Reminder</h4>
-            <p style="color: #78350f; font-size: 14px; line-height: 1.5;">
-              Keep your certificate in a safe place and ensure it's accessible during cannabis operations. 
-              This certificate demonstrates your compliance with Maryland Cannabis Administration requirements.
+          <div style="background: #fef3c7; padding: 20px; border-radius: 8px; margin-bottom: 25px; border-left: 4px solid #FFB300;">
+            <h4 style="color: #92400e; margin-bottom: 10px;">📋 Important Certificate Guidelines</h4>
+            <p style="color: #78350f; font-size: 14px; line-height: 1.5; margin: 0;">
+              Keep your certificate accessible during all cannabis operations. This certification demonstrates 
+              your compliance with Maryland Cannabis Administration requirements and your expertise in the 
+              Stoplight Standard™ responsible dosage system.
             </p>
           </div>
           
-          <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; margin-top: 30px; text-align: center;">
+          <div style="border-top: 2px solid #e5e7eb; padding-top: 20px; margin-top: 30px; text-align: center;">
+            <p style="color: #1E1E1E; font-size: 16px; font-weight: bold; margin-bottom: 10px;">
+              The Heartbeat of Responsible Cannabis Education in Maryland
+            </p>
             <p style="color: #9ca3af; font-size: 14px; margin-bottom: 10px;">
               Questions about your certificate? Contact info@procannedu.com
             </p>
             <p style="color: #9ca3af; font-size: 12px;">
-              ProCann Training • In accordance with the Maryland Cannabis Administration
+              ProCann Edu • In accordance with the Maryland Cannabis Administration
             </p>
           </div>
         </div>
