@@ -41,33 +41,28 @@ export const TrustStats = () => {
         <div className="text-2xl font-bold text-white">
           <AnimatedCounter end={2500} suffix="+" />
         </div>
-        <div className="text-sm text-white/80">Students Trained</div>
+        <div className="text-sm text-white/80">Agents Capacity</div>
       </Card>
       
       <Card className="p-4 text-center bg-white/10 backdrop-blur-sm border-white/20">
         <div className="text-2xl font-bold text-white">
           <AnimatedCounter end={150} suffix="+" />
         </div>
-        <div className="text-sm text-white/80">Dispensaries</div>
+        <div className="text-sm text-white/80">Dispensary Reach</div>
       </Card>
       
       <Card className="p-4 text-center bg-white/10 backdrop-blur-sm border-white/20">
         <div className="text-2xl font-bold text-white">
-          <AnimatedCounter end={98} suffix="%" />
+          <AnimatedCounter end={18} suffix="" />
         </div>
-        <div className="text-sm text-white/80">Pass Rate</div>
+        <div className="text-sm text-white/80">Training Modules</div>
       </Card>
       
       <Card className="p-4 text-center bg-white/10 backdrop-blur-sm border-white/20">
         <div className="text-2xl font-bold text-white">
-          <AnimatedCounter end={4} suffix=".9" />
+          100%
         </div>
-        <div className="text-sm text-white/80">
-          <div className="flex items-center justify-center gap-1">
-            <Star className="h-3 w-3 fill-accent text-accent" />
-            Rating
-          </div>
-        </div>
+        <div className="text-sm text-white/80">MD Educators</div>
       </Card>
     </div>
   );
@@ -108,22 +103,22 @@ export const ComplianceBadges = () => {
 export const TestimonialCarousel = () => {
   const testimonials = [
     {
-      quote: "ProCann Edu made compliance training straightforward and engaging for our entire team.",
-      author: "Sarah M.",
-      role: "Dispensary Manager",
-      company: "GreenLeaf Wellness"
+      quote: "We built ProCann Edu because Maryland deserves cannabis training that reflects our values: community, care, and compliance done right.",
+      author: "ProCann Edu Team",
+      role: "Founders",
+      company: "Built in Maryland"
     },
     {
-      quote: "The comprehensive curriculum and expert support helped us achieve 100% certification rate.",
-      author: "Michael R.",
-      role: "Operations Director", 
-      company: "Capital Cannabis"
+      quote: "Our curriculum was designed by local educators and cannabis professionals who understand Maryland's unique regulatory landscape.",
+      author: "Curriculum Team",
+      role: "Education Specialists", 
+      company: "ProCann Edu"
     },
     {
-      quote: "Outstanding training platform with excellent customer service and quick certificate processing.",
-      author: "Jennifer L.",
-      role: "HR Manager",
-      company: "Harvest Health"
+      quote: "We're committed to training the next generation of responsible cannabis professionals right here in Maryland.",
+      author: "ProCann Edu",
+      role: "Mission Statement",
+      company: "Serving Maryland"
     }
   ];
 

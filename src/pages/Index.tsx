@@ -90,7 +90,7 @@ const Index = () => {
           <TestimonialCarousel />
           {/* Enhanced Value Proposition */}
           <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-4xl mx-auto leading-relaxed">
-            Join 2,500+ cannabis professionals who trust ProCann Edu for MCA-compliant training. 
+            Training Maryland's next 2,500+ cannabis professionals with MCA-compliant education. 
             <br className="hidden md:block" />
             Complete your Responsible Vendor Training (RVT) and earn your official certificate.
           </p>
@@ -98,10 +98,10 @@ const Index = () => {
           {/* Urgency Banner */}
           <div className="bg-accent/90 backdrop-blur-sm border border-accent rounded-lg p-4 mb-8 max-w-2xl mx-auto">
             <p className="text-accent-foreground font-semibold">
-              🚨 Compliance Deadline Approaching
+              ✨ Early Access Available
             </p>
             <p className="text-accent-foreground/80 text-sm mt-1">
-              Ensure your team meets Maryland's training requirements
+              Join the founding cohort of Maryland's premier cannabis training platform
             </p>
           </div>
           
@@ -331,14 +331,14 @@ const Index = () => {
             Ready to Get Certified?
           </h3>
           <p className="text-xl text-green-100 mb-8">
-            Join thousands of cannabis professionals who trust ProCann Edu
+            Be among the first to complete Maryland's most comprehensive cannabis training
           </p>
           <Button 
             onClick={() => navigate('/auth')}
             size="lg"
             className="bg-white text-green-600 hover:bg-gray-100 px-8 py-3"
           >
-            Start Your Training Today
+            Join Founding Cohort
           </Button>
         </div>
       </section>
