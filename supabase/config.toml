@@ -21,6 +21,9 @@ verify_jwt = false
 [functions.check-email-exists]
 verify_jwt = false
 
+[functions.test-paypal-connection]
+verify_jwt = false
+
 [functions.create-course-payment-paypal]
 verify_jwt = true
 
