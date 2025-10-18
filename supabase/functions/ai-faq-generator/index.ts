@@ -54,6 +54,21 @@ async function gatherPlatformContext(): Promise<string> {
   const contexts: string[] = [];
 
   try {
+    // Add regulatory updates context
+    const { data: recentUpdates } = await supabase
+      .from('regulatory_updates')
+      .select('section_number, ai_impact_analysis, detected_at')
+      .order('detected_at', { ascending: false })
+      .limit(10);
+    
+    if (recentUpdates && recentUpdates.length > 0) {
+      const regulatoryContext = recentUpdates.map(u => 
+        `COMAR ${u.section_number} updated on ${new Date(u.detected_at).toLocaleDateString()}: ${u.ai_impact_analysis}`
+      ).join(' ');
+      
+      contexts.push(`Recent regulatory changes: ${regulatoryContext}`);
+    }
+
     // Analyze user progress patterns
     const { data: progressData } = await supabase
       .from('user_progress')

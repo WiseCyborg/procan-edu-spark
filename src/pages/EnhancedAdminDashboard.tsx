@@ -18,6 +18,8 @@ import { HoverCallout } from '@/components/ui/hover-callout';
 import { SimpleFAQManager } from '@/components/faq/SimpleFAQManager';
 import { EnhancedDraggableChat } from '@/components/chat/EnhancedDraggableChat';
 import { Link } from 'react-router-dom';
+import { OutdatedContentWarning } from '@/components/admin/OutdatedContentWarning';
+import { ImageAssetManager } from '@/components/admin/ImageAssetManager';
 
 const EnhancedAdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -181,6 +183,11 @@ const EnhancedAdminDashboard = () => {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <OutdatedContentWarning />
+            <ImageAssetManager />
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <Card>
               <CardHeader>

@@ -171,6 +171,62 @@ export type Database = {
           },
         ]
       }
+      content_review_queue: {
+        Row: {
+          ai_suggested_change: string | null
+          assigned_to: string | null
+          completed_at: string | null
+          content_id: string | null
+          content_type: string
+          created_at: string | null
+          due_date: string | null
+          id: string
+          location: string
+          regulatory_update_id: string | null
+          status: string | null
+          updated_at: string | null
+          urgency: string | null
+        }
+        Insert: {
+          ai_suggested_change?: string | null
+          assigned_to?: string | null
+          completed_at?: string | null
+          content_id?: string | null
+          content_type: string
+          created_at?: string | null
+          due_date?: string | null
+          id?: string
+          location: string
+          regulatory_update_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+          urgency?: string | null
+        }
+        Update: {
+          ai_suggested_change?: string | null
+          assigned_to?: string | null
+          completed_at?: string | null
+          content_id?: string | null
+          content_type?: string
+          created_at?: string | null
+          due_date?: string | null
+          id?: string
+          location?: string
+          regulatory_update_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+          urgency?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_review_queue_regulatory_update_id_fkey"
+            columns: ["regulatory_update_id"]
+            isOneToOne: false
+            referencedRelation: "regulatory_updates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       conversation_participants: {
         Row: {
           conversation_id: string
@@ -575,6 +631,51 @@ export type Database = {
           is_active?: boolean | null
           question?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      image_assets: {
+        Row: {
+          alt_text: string
+          asset_key: string
+          created_at: string | null
+          dimensions: Json | null
+          file_size_kb: number | null
+          id: string
+          is_active: boolean | null
+          public_url: string
+          storage_path: string
+          updated_at: string | null
+          uploaded_by: string | null
+          usage_locations: string[] | null
+        }
+        Insert: {
+          alt_text: string
+          asset_key: string
+          created_at?: string | null
+          dimensions?: Json | null
+          file_size_kb?: number | null
+          id?: string
+          is_active?: boolean | null
+          public_url: string
+          storage_path: string
+          updated_at?: string | null
+          uploaded_by?: string | null
+          usage_locations?: string[] | null
+        }
+        Update: {
+          alt_text?: string
+          asset_key?: string
+          created_at?: string | null
+          dimensions?: Json | null
+          file_size_kb?: number | null
+          id?: string
+          is_active?: boolean | null
+          public_url?: string
+          storage_path?: string
+          updated_at?: string | null
+          uploaded_by?: string | null
+          usage_locations?: string[] | null
         }
         Relationships: []
       }
@@ -1176,6 +1277,96 @@ export type Database = {
         }
         Relationships: []
       }
+      regulatory_content: {
+        Row: {
+          content_html: string | null
+          content_text: string
+          created_at: string | null
+          effective_date: string | null
+          id: string
+          last_checked_at: string | null
+          last_modified_at: string | null
+          section_number: string
+          section_title: string
+          source_url: string
+          version_hash: string
+        }
+        Insert: {
+          content_html?: string | null
+          content_text: string
+          created_at?: string | null
+          effective_date?: string | null
+          id?: string
+          last_checked_at?: string | null
+          last_modified_at?: string | null
+          section_number: string
+          section_title: string
+          source_url: string
+          version_hash: string
+        }
+        Update: {
+          content_html?: string | null
+          content_text?: string
+          created_at?: string | null
+          effective_date?: string | null
+          id?: string
+          last_checked_at?: string | null
+          last_modified_at?: string | null
+          section_number?: string
+          section_title?: string
+          source_url?: string
+          version_hash?: string
+        }
+        Relationships: []
+      }
+      regulatory_updates: {
+        Row: {
+          admin_notes: string | null
+          affected_modules: string[] | null
+          ai_impact_analysis: string | null
+          change_type: string
+          created_at: string | null
+          detected_at: string | null
+          id: string
+          new_content: string
+          previous_content: string | null
+          review_status: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          section_number: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          affected_modules?: string[] | null
+          ai_impact_analysis?: string | null
+          change_type: string
+          created_at?: string | null
+          detected_at?: string | null
+          id?: string
+          new_content: string
+          previous_content?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          section_number: string
+        }
+        Update: {
+          admin_notes?: string | null
+          affected_modules?: string[] | null
+          ai_impact_analysis?: string | null
+          change_type?: string
+          created_at?: string | null
+          detected_at?: string | null
+          id?: string
+          new_content?: string
+          previous_content?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          section_number?: string
+        }
+        Relationships: []
+      }
       security_audit_log: {
         Row: {
           action_type: string
@@ -1501,6 +1692,19 @@ export type Database = {
           message: string
           organization_id: string
           success: boolean
+        }[]
+      }
+      detect_outdated_content: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          content_id: string
+          content_type: string
+          days_since_update: number
+          last_updated_at: string
+          location: string
+          relevant_regulatory_updates: number
+          status: string
+          urgency_score: number
         }[]
       }
       generate_certificate_number: {

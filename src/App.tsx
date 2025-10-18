@@ -29,6 +29,7 @@ import Certificates from "./pages/Certificates";
 import Dashboard from "./components/dashboard/Dashboard";
 import Header from "./components/layout/Header";
 import DraggableVoiceAssistant from "./components/chat/DraggableVoiceAssistant";
+import ContentReviewDashboard from "./pages/ContentReviewDashboard";
 
 const queryClient = new QueryClient();
 
@@ -171,6 +172,12 @@ const App = () => (
                    <Route path="/realtime-operations" element={
                      <ProtectedRoute>
                        <RealTimeOperationsDashboard />
+                     </ProtectedRoute>
+                   } />
+                   
+                   <Route path="/admin/content-review" element={
+                     <ProtectedRoute>
+                       <ContentReviewDashboard />
                      </ProtectedRoute>
                    } />
                   
