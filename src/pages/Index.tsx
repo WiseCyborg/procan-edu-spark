@@ -3,7 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, Award, Shield, CheckCircle } from 'lucide-react';
+import { BookOpen, Award, Shield, CheckCircle, Building2, Waves, Users, Leaf } from 'lucide-react';
 import { CoursePreviewSystem } from '@/components/EnhancedCoursePreview';
 import { AccessibilityToolbar } from '@/components/MobileOptimization';
 import { TrustStats, ComplianceBadges, TestimonialCarousel } from '@/components/TrustIndicators';
@@ -170,28 +170,35 @@ const Index = () => {
               Designed by local educators, cannabis professionals, and community advocates who understand the culture and values of our state.
             </p>
             
-            {/* Maryland Imagery Grid */}
+            {/* Maryland Icon Cards Grid */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <img 
-                src="https://images.unsplash.com/photo-1606081541033-e06b96dd8e86?w=400" 
-                alt="Baltimore Inner Harbor" 
-                className="rounded-lg shadow-md h-32 w-full object-cover"
-              />
-              <img 
-                src="https://images.unsplash.com/photo-1599644898299-27b0f7e5cfc6?w=400" 
-                alt="Maryland State House" 
-                className="rounded-lg shadow-md h-32 w-full object-cover"
-              />
-              <img 
-                src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400" 
-                alt="Community gathering" 
-                className="rounded-lg shadow-md h-32 w-full object-cover"
-              />
-              <img 
-                src="https://images.unsplash.com/photo-1587408777892-52db0a9a1e2d?w=400" 
-                alt="Maryland landscape" 
-                className="rounded-lg shadow-md h-32 w-full object-cover"
-              />
+              <Card className="relative overflow-hidden group hover:scale-105 transition-transform duration-300 h-48 flex items-center justify-center bg-gradient-to-br from-red-600 to-red-700 border-none shadow-lg hover:shadow-xl">
+                <CardContent className="p-6 text-center">
+                  <Building2 className="h-16 w-16 text-white mx-auto mb-3" />
+                  <p className="text-white text-sm font-medium">State House Heritage</p>
+                </CardContent>
+              </Card>
+
+              <Card className="relative overflow-hidden group hover:scale-105 transition-transform duration-300 h-48 flex items-center justify-center bg-gradient-to-br from-amber-500 to-yellow-600 border-none shadow-lg hover:shadow-xl">
+                <CardContent className="p-6 text-center">
+                  <Waves className="h-16 w-16 text-white mx-auto mb-3" />
+                  <p className="text-white text-sm font-medium">Chesapeake Bay</p>
+                </CardContent>
+              </Card>
+
+              <Card className="relative overflow-hidden group hover:scale-105 transition-transform duration-300 h-48 flex items-center justify-center bg-gradient-to-br from-green-600 to-emerald-700 border-none shadow-lg hover:shadow-xl">
+                <CardContent className="p-6 text-center">
+                  <Users className="h-16 w-16 text-white mx-auto mb-3" />
+                  <p className="text-white text-sm font-medium">Community Focused</p>
+                </CardContent>
+              </Card>
+
+              <Card className="relative overflow-hidden group hover:scale-105 transition-transform duration-300 h-48 flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900 border-none shadow-lg hover:shadow-xl">
+                <CardContent className="p-6 text-center">
+                  <Leaf className="h-16 w-16 text-white mx-auto mb-3" />
+                  <p className="text-white text-sm font-medium">Cannabis Expertise</p>
+                </CardContent>
+              </Card>
             </div>
           </div>
           
