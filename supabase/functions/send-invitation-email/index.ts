@@ -131,7 +131,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send email via Resend
     const emailResponse = await resend.emails.send({
-      from: "ProCann Edu <onboarding@resend.dev>",
+      from: "ProCann Edu <no-reply@procannedu.com>",
       to: [email],
       subject: subject,
       html: htmlContent,
