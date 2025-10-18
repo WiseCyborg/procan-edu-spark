@@ -98,11 +98,11 @@ const handler = async (req: Request): Promise<Response> => {
           </div>
           
           <div style="text-align: center; margin: 30px 0;">
-            <a href="https://zhmpwczrvitomsxjwpzc.lovableproject.com/certificates" 
+            <a href="https://www.procannedu.com/certificates" 
                style="background: #C62828; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; margin-right: 10px; font-size: 16px;">
               Download Certificate
             </a>
-            <a href="https://zhmpwczrvitomsxjwpzc.lovableproject.com/dashboard" 
+            <a href="https://www.procannedu.com/dashboard" 
                style="background: #2A7F3F; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; font-size: 16px;">
               View Dashboard
             </a>

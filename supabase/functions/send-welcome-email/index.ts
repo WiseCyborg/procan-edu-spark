@@ -126,11 +126,11 @@ const handler = async (req: Request): Promise<Response> => {
           </div>
           
           <div style="text-align: center; margin: 30px 0;">
-            <a href="https://zhmpwczrvitomsxjwpzc.lovableproject.com/stoplight-standard" 
+            <a href="https://www.procannedu.com/stoplight-standard" 
                style="background: #FFB300; color: #1E1E1E; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; margin-right: 10px; font-size: 16px;">
               Learn the Stoplight Standard™
             </a>
-            <a href="https://zhmpwczrvitomsxjwpzc.lovableproject.com/course" 
+            <a href="https://www.procannedu.com/course" 
                style="background: #2A7F3F; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; font-size: 16px;">
               Start Your Training
             </a>

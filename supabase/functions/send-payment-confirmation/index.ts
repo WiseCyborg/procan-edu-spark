@@ -139,7 +139,7 @@ const handler = async (req: Request): Promise<Response> => {
           </div>
           
           <div style="text-align: center; margin: 30px 0;">
-            <a href="https://zhmpwczrvitomsxjwpzc.lovableproject.com/course" 
+            <a href="https://www.procannedu.com/course" 
                style="background: #2A7F3F; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; font-size: 16px;">
               Start Your Training Journey
             </a>
