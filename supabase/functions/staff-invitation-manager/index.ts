@@ -101,14 +101,26 @@ async function inviteSingleStaff(organizationId: string, inviterId: string, emai
     .eq('id', organizationId)
     .single();
 
-  // Send invitation email using send-welcome-email function
-  const emailResponse = await supabase.functions.invoke('send-welcome-email', {
+  // Get inviter details
+  const { data: inviter } = await supabase
+    .from('profiles')
+    .select('first_name, last_name')
+    .eq('user_id', inviterId)
+    .single();
+
+  const inviterName = inviter 
+    ? `${inviter.first_name} ${inviter.last_name}`.trim() 
+    : 'Your Administrator';
+
+  // Send invitation email using dedicated send-invitation-email function
+  const emailResponse = await supabase.functions.invoke('send-invitation-email', {
     body: {
       email: email,
-      userName: email.split('@')[0],
-      dispensaryName: organization?.name || 'Cannabis Training Organization',
-      accessKey: invitationToken,
-      isInvitation: true,
+      organizationName: organization?.name || 'Cannabis Training Organization',
+      inviterName: inviterName,
+      role: role,
+      invitationToken: invitationToken,
+      expiryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
       customMessage: customMessage
     }
   });
@@ -203,14 +215,26 @@ async function inviteBulkStaff(organizationId: string, inviterId: string, emails
         continue;
       }
 
-      // Send invitation email using send-welcome-email function
-      const emailResponse = await supabase.functions.invoke('send-welcome-email', {
+      // Get inviter details
+      const { data: inviter } = await supabase
+        .from('profiles')
+        .select('first_name, last_name')
+        .eq('user_id', inviterId)
+        .single();
+
+      const inviterName = inviter 
+        ? `${inviter.first_name} ${inviter.last_name}`.trim() 
+        : 'Your Administrator';
+
+      // Send invitation email using dedicated send-invitation-email function
+      const emailResponse = await supabase.functions.invoke('send-invitation-email', {
         body: {
           email: email.trim(),
-          userName: email.split('@')[0],
-          dispensaryName: organization?.name || 'Cannabis Training Organization',
-          accessKey: invitationToken,
-          isInvitation: true,
+          organizationName: organization?.name || 'Cannabis Training Organization',
+          inviterName: inviterName,
+          role: role,
+          invitationToken: invitationToken,
+          expiryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
           customMessage: customMessage
         }
       });
@@ -291,14 +315,27 @@ async function resendInvitation(invitationId: string): Promise<Response> {
       .eq('id', invitationId);
   }
 
-  // Resend invitation email using send-welcome-email function
-  const emailResponse = await supabase.functions.invoke('send-welcome-email', {
+  // Get inviter details
+  const { data: inviter } = await supabase
+    .from('profiles')
+    .select('first_name, last_name')
+    .eq('user_id', invitation.inviter_id)
+    .single();
+
+  const inviterName = inviter 
+    ? `${inviter.first_name} ${inviter.last_name}`.trim() 
+    : 'Your Administrator';
+
+  // Resend invitation email using dedicated send-invitation-email function
+  const emailResponse = await supabase.functions.invoke('send-invitation-email', {
     body: {
       email: invitation.email,
-      userName: invitation.email.split('@')[0],
-      dispensaryName: invitation.organizations?.name || 'Cannabis Training Organization',
-      accessKey: invitation.invitation_token,
-      isInvitation: true,
+      organizationName: invitation.organizations?.name || 'Cannabis Training Organization',
+      inviterName: inviterName,
+      role: invitation.role,
+      invitationToken: invitation.invitation_token,
+      expiryDate: invitation.expires_at,
+      customMessage: invitation.metadata?.custom_message,
       isReminder: true
     }
   });
