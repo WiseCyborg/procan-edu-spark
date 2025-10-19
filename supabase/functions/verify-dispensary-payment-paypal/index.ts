@@ -112,6 +112,15 @@ serve(async (req) => {
 
       const accessKey = accessKeyData;
 
+      // Get default course
+      const { data: defaultCourse } = await supabaseService
+        .from("courses")
+        .select("id")
+        .limit(1)
+        .single();
+
+      const courseId = defaultCourse?.id;
+
       // Create organization record
       const { data: organization, error: orgError } = await supabaseService
         .from("organizations")
@@ -138,6 +147,42 @@ serve(async (req) => {
         throw new Error("Failed to create organization");
       }
 
+      // Create RVT purchase record
+      const { data: purchase, error: purchaseError } = await supabaseService
+        .from("rvt_purchases")
+        .insert({
+          organization_id: organization.id,
+          quantity: credits,
+          amount_paid: (credits * 49.99).toFixed(2),
+          currency: "USD",
+          payment_method: "paypal",
+          paypal_order_id: orderId,
+        })
+        .select()
+        .single();
+
+      if (purchaseError) {
+        console.error("Error creating purchase record:", purchaseError);
+      }
+
+      // Create individual seats
+      if (purchase && courseId) {
+        const seats = Array.from({ length: credits }, () => ({
+          purchase_id: purchase.id,
+          organization_id: organization.id,
+          course_id: courseId,
+          status: "available"
+        }));
+
+        const { error: seatsError } = await supabaseService
+          .from("rvt_seats")
+          .insert(seats);
+
+        if (seatsError) {
+          console.error("Error creating seats:", seatsError);
+        }
+      }
+
       // Update application status to completed
       const { error: statusError } = await supabaseService
         .from("dispensary_applications")
@@ -151,20 +196,20 @@ serve(async (req) => {
         console.error("Error updating application status:", statusError);
       }
 
-      // Send setup completion email using send-welcome-email function
+      // Send seat purchase confirmation emails
       try {
-        await supabaseService.functions.invoke('send-welcome-email', {
+        await supabaseService.functions.invoke('send-seat-purchase-confirmation', {
           body: {
-            email: application.contact_email,
-            userName: application.contact_person,
-            dispensaryName: application.organization_name,
-            accessKey: accessKey,
-            credits: credits,
-            isSetupComplete: true
+            coordinatorEmail: application.contact_email,
+            coordinatorName: application.contact_person,
+            organizationName: application.organization_name,
+            quantity: credits,
+            amountPaid: (credits * 49.99).toFixed(2),
+            purchaseId: purchase?.id || organization.id
           }
         });
       } catch (emailError) {
-        console.error("Error sending setup email:", emailError);
+        console.error("Error sending purchase confirmation:", emailError);
         // Don't fail the entire process if email fails
       }
 
