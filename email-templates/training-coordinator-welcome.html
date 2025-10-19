@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome Training Coordinator</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f4f7fa; margin: 0; padding: 20px;">
+  <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+    
+    <!-- Header -->
+    <div style="background: linear-gradient(135deg, #2A7F3F 0%, #1a5c2e 100%); padding: 40px 30px; text-align: center;">
+      <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 600;">Welcome to Your New Role!</h1>
+      <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0; font-size: 16px;">Training Coordinator - ProCann Edu</p>
+    </div>
+
+    <!-- Content -->
+    <div style="padding: 40px 30px;">
+      <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0 0 20px;">Hi <strong>{{ .CoordinatorName }}</strong>,</p>
+      
+      <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0 0 20px;">
+        Congratulations on your appointment as a Training Coordinator for <strong>{{ .OrganizationName }}</strong>! 
+        You play a vital role in ensuring your team maintains compliance with Maryland cannabis regulations.
+      </p>
+
+      <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0 0 30px;">
+        This email contains everything you need to get started in your new role.
+      </p>
+
+      <!-- Quick Start Card -->
+      <div style="background: #f8f9fa; border-left: 4px solid #2A7F3F; padding: 20px; margin-bottom: 30px; border-radius: 4px;">
+        <h2 style="color: #2A7F3F; margin: 0 0 15px; font-size: 20px;">Your First Steps</h2>
+        <ol style="color: #555; margin: 0; padding-left: 20px; line-height: 1.8;">
+          <li><strong>Review your dashboard</strong> - Familiarize yourself with all three tabs</li>
+          <li><strong>Complete your profile</strong> - Add your contact information and preferences</li>
+          <li><strong>Invite your first employee</strong> - Send an invitation to start onboarding</li>
+          <li><strong>Read the complete guide</strong> - Understand all your responsibilities</li>
+        </ol>
+      </div>
+
+      <!-- Key Responsibilities -->
+      <h2 style="color: #333; font-size: 20px; margin: 30px 0 15px;">Your Key Responsibilities</h2>
+      <ul style="color: #555; line-height: 1.8; margin: 0 0 30px; padding-left: 20px;">
+        <li><strong>Onboarding:</strong> Invite new employees and assign training seats</li>
+        <li><strong>Monitoring:</strong> Track employee progress through all 18 modules</li>
+        <li><strong>Support:</strong> Send reminders and provide assistance when needed</li>
+        <li><strong>Reporting:</strong> Generate compliance reports for management</li>
+        <li><strong>Communication:</strong> Serve as the training point of contact</li>
+      </ul>
+
+      <!-- Access Information -->
+      <div style="background: #fff8e1; border: 2px solid #ffc107; padding: 20px; margin-bottom: 30px; border-radius: 8px;">
+        <h3 style="color: #f57c00; margin: 0 0 10px; font-size: 18px;">📋 Organization Information</h3>
+        <p style="color: #555; margin: 5px 0; line-height: 1.6;">
+          <strong>Organization:</strong> {{ .OrganizationName }}<br>
+          <strong>Your Role:</strong> Training Coordinator<br>
+          <strong>Available Seats:</strong> {{ .AvailableSeats }}<br>
+          <strong>Current Employees:</strong> {{ .EmployeeCount }}
+        </p>
+      </div>
+
+      <!-- Important Resources -->
+      <h2 style="color: #333; font-size: 20px; margin: 30px 0 15px;">Essential Resources</h2>
+      
+      <div style="margin-bottom: 15px;">
+        <a href="{{ .DashboardURL }}" style="display: inline-block; background: #2A7F3F; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; margin-right: 10px; margin-bottom: 10px;">
+          Access Your Dashboard
+        </a>
+        <a href="{{ .GuideURL }}" style="display: inline-block; background: #0066cc; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; margin-bottom: 10px;">
+          View Complete Guide
+        </a>
+      </div>
+
+      <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+        <p style="color: #555; margin: 0 0 10px; font-size: 14px;"><strong>📚 Training Coordinator Guide</strong> - Complete manual with step-by-step instructions</p>
+        <p style="color: #555; margin: 0 0 10px; font-size: 14px;"><strong>🎥 Video Tutorials</strong> - Watch how to perform common tasks</p>
+        <p style="color: #555; margin: 0 0 10px; font-size: 14px;"><strong>💬 Help Center</strong> - Searchable knowledge base and FAQ</p>
+        <p style="color: #555; margin: 0; font-size: 14px;"><strong>📧 Support Email</strong> - support@procannedu.com</p>
+      </div>
+
+      <!-- Tips for Success -->
+      <div style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); padding: 20px; border-radius: 8px; margin: 30px 0;">
+        <h3 style="color: #1565c0; margin: 0 0 15px; font-size: 18px;">💡 Tips for Success</h3>
+        <ul style="color: #555; margin: 0; padding-left: 20px; line-height: 1.8;">
+          <li>Check your dashboard daily (takes just 5 minutes)</li>
+          <li>Send encouraging messages to employees</li>
+          <li>Celebrate milestone completions (like tier achievements)</li>
+          <li>Address issues early before they become problems</li>
+          <li>Keep your manager informed with weekly progress reports</li>
+        </ul>
+      </div>
+
+      <!-- What to Expect -->
+      <h2 style="color: #333; font-size: 20px; margin: 30px 0 15px;">What to Expect This Week</h2>
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+        <tr>
+          <td style="padding: 12px; border: 1px solid #e0e0e0; background: #f8f9fa; font-weight: 600; color: #555;">Day 1</td>
+          <td style="padding: 12px; border: 1px solid #e0e0e0; color: #555;">Complete your profile and tour the dashboard</td>
+        </tr>
+        <tr>
+          <td style="padding: 12px; border: 1px solid #e0e0e0; background: #f8f9fa; font-weight: 600; color: #555;">Day 2-3</td>
+          <td style="padding: 12px; border: 1px solid #e0e0e0; color: #555;">Invite employees and send welcome messages</td>
+        </tr>
+        <tr>
+          <td style="padding: 12px; border: 1px solid #e0e0e0; background: #f8f9fa; font-weight: 600; color: #555;">Day 4-5</td>
+          <td style="padding: 12px; border: 1px solid #e0e0e0; color: #555;">Generate your first report and establish routines</td>
+        </tr>
+      </table>
+
+      <!-- Need Help -->
+      <p style="color: #555; font-size: 14px; line-height: 1.6; margin: 30px 0 20px;">
+        <strong>Need Help?</strong><br>
+        Your Dispensary Manager is your primary point of contact for organizational questions. 
+        For technical support or platform questions, email us at 
+        <a href="mailto:support@procannedu.com" style="color: #2A7F3F; text-decoration: none;">support@procannedu.com</a>
+      </p>
+
+      <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 30px 0 0;">
+        Welcome to the team! We're excited to support you in creating a culture of compliance and excellence.
+      </p>
+
+      <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 20px 0 0;">
+        Best regards,<br>
+        <strong>The ProCann Edu Team</strong>
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <div style="background: #f8f9fa; padding: 30px; text-align: center; border-top: 1px solid #e0e0e0;">
+      <p style="color: #888; font-size: 13px; margin: 0 0 10px;">
+        ProCann Edu - Maryland Cannabis Training & Compliance
+      </p>
+      <p style="color: #888; font-size: 12px; margin: 0;">
+        This is an automated email. Please do not reply directly to this message.<br>
+        For support, email <a href="mailto:support@procannedu.com" style="color: #2A7F3F; text-decoration: none;">support@procannedu.com</a>
+      </p>
+    </div>
+
+  </div>
+</body>
+</html>
