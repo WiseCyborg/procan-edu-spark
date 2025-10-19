@@ -1,18 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { DeadlineCountdown } from '@/components/course/DeadlineCountdown';
-import { Award, BookOpen, Target, TrendingUp } from 'lucide-react';
+import { Award, BookOpen, Target, TrendingUp, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { MockCertificatePreview } from '@/components/certificates/MockCertificatePreview';
 
 const StudentDashboard = () => {
   const { user } = useAuth();
   const { isStudent } = useUserRole();
   const navigate = useNavigate();
+  const [showMockPreview, setShowMockPreview] = useState(false);
 
   if (!isStudent) {
     return null;
@@ -88,6 +91,29 @@ const StudentDashboard = () => {
         </CardContent>
       </Card>
 
+      {/* Preview Certificate */}
+      <Card className="border-2 border-dashed border-stoplight-green/50 bg-stoplight-cream/30">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Eye className="w-5 h-5" />
+            Preview Your Certificate
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground mb-4">
+            See what your certificate will look like when you complete the training. Try adding your photo!
+          </p>
+          <Button 
+            variant="outline" 
+            onClick={() => setShowMockPreview(true)}
+            className="w-full"
+          >
+            <Eye className="w-4 h-4 mr-2" />
+            View Sample Certificate
+          </Button>
+        </CardContent>
+      </Card>
+
       {/* Achievements */}
       <Card>
         <CardHeader>
@@ -140,6 +166,18 @@ const StudentDashboard = () => {
           </div>
         </CardContent>
       </Card>
+
+      <Dialog open={showMockPreview} onOpenChange={setShowMockPreview}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Certificate Preview</DialogTitle>
+          </DialogHeader>
+          <MockCertificatePreview 
+            userName={user?.user_metadata?.full_name || user?.email?.split('@')[0] || ''}
+            onClose={() => setShowMockPreview(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

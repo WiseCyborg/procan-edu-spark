@@ -7,6 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { Download, Eye, FileCheck, Calendar, Shield } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { SensitiveOperationWrapper } from '@/components/auth/SensitiveOperationWrapper';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { MockCertificatePreview } from '@/components/certificates/MockCertificatePreview';
 
 interface Certificate {
   id: string;
@@ -27,6 +29,7 @@ export default function Certificates() {
   const { toast } = useToast();
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showMockPreview, setShowMockPreview] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -151,9 +154,18 @@ export default function Certificates() {
               <p className="text-gray-600 mb-6">
                 Complete your training courses to earn certificates.
               </p>
-              <Button onClick={() => window.location.href = '/course'}>
-                Start Training
-              </Button>
+              <div className="flex gap-4 justify-center">
+                <Button onClick={() => window.location.href = '/course'}>
+                  Start Training
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowMockPreview(true)}
+                >
+                  <Eye className="w-4 h-4 mr-2" />
+                  Preview Certificate
+                </Button>
+              </div>
             </CardContent>
           </Card>
         ) : (
@@ -274,7 +286,33 @@ export default function Certificates() {
             <li>• Valid certificates are recognized throughout Maryland's cannabis industry</li>
           </ul>
         </div>
+
+        {certificates.length > 0 && (
+          <div className="fixed bottom-6 right-6">
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={() => setShowMockPreview(true)}
+              className="shadow-lg"
+            >
+              <Eye className="w-4 h-4 mr-2" />
+              Preview Certificate
+            </Button>
+          </div>
+        )}
       </div>
+
+      <Dialog open={showMockPreview} onOpenChange={setShowMockPreview}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Certificate Preview</DialogTitle>
+          </DialogHeader>
+          <MockCertificatePreview 
+            userName={user?.user_metadata?.full_name || user?.email?.split('@')[0] || ''}
+            onClose={() => setShowMockPreview(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
