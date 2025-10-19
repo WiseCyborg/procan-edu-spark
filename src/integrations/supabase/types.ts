@@ -1503,15 +1503,44 @@ export type Database = {
           },
         ]
       }
+      tier_achievements: {
+        Row: {
+          created_at: string | null
+          id: string
+          modules_completed: number
+          tier: string
+          unlocked_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          modules_completed: number
+          tier: string
+          unlocked_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          modules_completed?: number
+          tier?: string
+          unlocked_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_progress: {
         Row: {
           completed_at: string | null
           course_id: string
           created_at: string
+          current_tier: string | null
           id: string
           is_completed: boolean | null
           module_id: string | null
           score: number | null
+          tier_unlocked_at: string | null
           time_spent: number | null
           updated_at: string
           user_id: string
@@ -1520,10 +1549,12 @@ export type Database = {
           completed_at?: string | null
           course_id: string
           created_at?: string
+          current_tier?: string | null
           id?: string
           is_completed?: boolean | null
           module_id?: string | null
           score?: number | null
+          tier_unlocked_at?: string | null
           time_spent?: number | null
           updated_at?: string
           user_id: string
@@ -1532,10 +1563,12 @@ export type Database = {
           completed_at?: string | null
           course_id?: string
           created_at?: string
+          current_tier?: string | null
           id?: string
           is_completed?: boolean | null
           module_id?: string | null
           score?: number | null
+          tier_unlocked_at?: string | null
           time_spent?: number | null
           updated_at?: string
           user_id?: string
@@ -1747,17 +1780,23 @@ export type Database = {
         Returns: {
           certificates_count: number
           created_at: string
+          current_tier: string
           email: string
           first_name: string
           last_activity: string
           last_name: string
           phone: string
           progress_percentage: number
+          tier_unlocked_at: string
           user_id: string
         }[]
       }
       get_user_organization_id: {
         Args: { user_uuid: string }
+        Returns: string
+      }
+      get_user_tier: {
+        Args: { _user_id: string }
         Returns: string
       }
       get_users_with_roles: {
@@ -1769,6 +1808,13 @@ export type Database = {
           roles: string[]
           user_id: string
         }[]
+      }
+      has_any_role: {
+        Args: {
+          _roles: Database["public"]["Enums"]["app_role"][]
+          _user_id: string
+        }
+        Returns: boolean
       }
       has_role: {
         Args: {
@@ -1798,6 +1844,10 @@ export type Database = {
           message: string
           success: boolean
         }[]
+      }
+      unlock_tier: {
+        Args: { _modules_completed: number; _tier: string; _user_id: string }
+        Returns: boolean
       }
       verify_certificate_status: {
         Args: { cert_number: string }

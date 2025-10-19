@@ -28,7 +28,7 @@ interface NavigationItem {
 export const IntelligentNavigation: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { roles, isStudent, isDispensaryManager, isAdmin } = useUserRole();
+  const { roles, isStudent, isDispensaryManager, isTrainingCoordinator, isAdmin } = useUserRole();
 
   const navigationConfig: NavigationItem[] = [
     {
@@ -36,7 +36,7 @@ export const IntelligentNavigation: React.FC = () => {
       label: 'Dashboard',
       path: '/',
       icon: Home,
-      roles: ['student', 'dispensary_manager', 'admin'],
+      roles: ['student', 'dispensary_manager', 'training_coordinator', 'admin'],
       description: 'Your personalized learning dashboard with progress tracking and course overview'
     },
     {
@@ -44,7 +44,7 @@ export const IntelligentNavigation: React.FC = () => {
       label: 'Training',
       path: '/course',
       icon: BookOpen,
-      roles: ['student', 'dispensary_manager', 'admin'],
+      roles: ['student', 'dispensary_manager', 'training_coordinator', 'admin'],
       description: 'Access your MCA-compliant cannabis training modules and continue your learning journey'
     },
     {
@@ -52,15 +52,15 @@ export const IntelligentNavigation: React.FC = () => {
       label: 'Certificates',
       path: '/certificates',
       icon: Award,
-      roles: ['student', 'dispensary_manager', 'admin'],
+      roles: ['student', 'dispensary_manager', 'training_coordinator', 'admin'],
       description: 'View and download your earned certificates, track completion status'
     },
     {
       id: 'dispensary-portal',
-      label: 'Management Portal',
-      path: '/dispensary-portal',
+      label: 'Team Management',
+      path: '/team-management',
       icon: BarChart3,
-      roles: ['dispensary_manager', 'admin'],
+      roles: ['dispensary_manager', 'training_coordinator', 'admin'],
       description: 'Manage your team training, view compliance reports, and track employee progress'
     },
     {
@@ -76,7 +76,7 @@ export const IntelligentNavigation: React.FC = () => {
       label: 'FAQ',
       path: '/faq',
       icon: HelpCircle,
-      roles: ['student', 'dispensary_manager', 'admin'],
+      roles: ['student', 'dispensary_manager', 'training_coordinator', 'admin'],
       description: 'Frequently asked questions and comprehensive help documentation'
     }
   ];

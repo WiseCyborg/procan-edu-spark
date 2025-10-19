@@ -2,34 +2,40 @@ import React from 'react';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Trophy, Target, Flame } from 'lucide-react';
+import { Tier } from '@/hooks/useTierProgress';
 
 interface TieredProgressBarProps {
   completedModules: number;
   totalModules: number;
+  currentTier?: Tier;
 }
 
 export const TieredProgressBar: React.FC<TieredProgressBarProps> = ({
   completedModules,
-  totalModules
+  totalModules,
+  currentTier = 'green'
 }) => {
   const progressPercentage = (completedModules / totalModules) * 100;
   
-  const getCurrentTier = () => {
-    if (completedModules <= 6) return { name: 'Green Tier', color: 'bg-stoplight-green', icon: Target };
-    if (completedModules <= 12) return { name: 'Yellow Tier', color: 'bg-stoplight-yellow', icon: Flame };
-    return { name: 'Red Tier', color: 'bg-stoplight-red', icon: Trophy };
+  const getTierConfig = (tier: Tier) => {
+    const configs = {
+      green: { name: 'Green Tier', color: 'bg-stoplight-green', icon: Target },
+      yellow: { name: 'Yellow Tier', color: 'bg-stoplight-yellow', icon: Flame },
+      red: { name: 'Red Tier', color: 'bg-stoplight-red', icon: Trophy }
+    };
+    return configs[tier];
   };
 
-  const currentTier = getCurrentTier();
-  const TierIcon = currentTier.icon;
+  const tierConfig = getTierConfig(currentTier);
+  const TierIcon = tierConfig.icon;
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <div className="flex items-center space-x-2">
-          <TierIcon className={`w-6 h-6 text-white ${currentTier.color} rounded-full p-1`} />
-          <Badge className={`${currentTier.color} text-white`}>
-            {currentTier.name}
+      <div className="flex items-center space-x-2">
+          <TierIcon className={`w-6 h-6 text-white ${tierConfig.color} rounded-full p-1`} />
+          <Badge className={`${tierConfig.color} text-white`}>
+            {tierConfig.name}
           </Badge>
         </div>
         <span className="text-sm font-semibold text-gray-600">

@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from '@/components/ui/use-toast';
+import { useTierProgress } from './useTierProgress';
 
 export interface UserProgress {
   id: string;
@@ -27,6 +28,7 @@ export interface ModuleProgress {
 export const useUserProgress = (courseId?: string) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const { checkAndUnlockTier } = useTierProgress();
 
   // Fetch user progress for a specific course
   const {
@@ -118,31 +120,42 @@ export const useUserProgress = (courseId?: string) => {
         return data;
       }
     },
-    onSuccess: () => {
+    onSuccess: async (_, variables) => {
       // Invalidate and refetch progress data
       queryClient.invalidateQueries({ queryKey: ['user-progress', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-data', user?.id] });
       
-      // Check for tier completion celebrations
-      const completedCount = progressData?.filter(p => p.is_completed).length || 0;
-      if (completedCount === 6 && !localStorage.getItem('green_tier_celebrated')) {
-        toast({
-          title: '🟢 Green Tier Complete!',
-          description: "You've mastered the fundamentals of responsible cannabis education. Moving to Yellow Tier.",
-        });
-        localStorage.setItem('green_tier_celebrated', 'true');
-      } else if (completedCount === 12 && !localStorage.getItem('yellow_tier_celebrated')) {
-        toast({
-          title: '🟡 Yellow Tier Complete!',
-          description: "You're now tackling advanced compliance and safety protocols. Entering Red Tier.",
-        });
-        localStorage.setItem('yellow_tier_celebrated', 'true');
-      } else if (completedCount === 18 && !localStorage.getItem('red_tier_celebrated')) {
-        toast({
-          title: '🔴 Red Tier Complete!',
-          description: "You've achieved mastery across all training domains. Ready for Final Exam!",
-        });
-        localStorage.setItem('red_tier_celebrated', 'true');
+      // Check for tier unlock after completing a module
+      if (variables.isCompleted) {
+        const completedCount = (progressData?.filter(p => p.is_completed).length || 0) + 1;
+        
+        // Attempt to unlock tier
+        const tierUnlocked = await checkAndUnlockTier(completedCount);
+        
+        if (tierUnlocked) {
+          console.log('New tier unlocked at', completedCount, 'modules');
+        }
+        
+        // Show tier completion celebrations
+        if (completedCount === 6 && !localStorage.getItem('green_tier_celebrated')) {
+          toast({
+            title: '🟢 Green Tier Complete!',
+            description: "You've mastered the fundamentals. Yellow Tier unlocked!",
+          });
+          localStorage.setItem('green_tier_celebrated', 'true');
+        } else if (completedCount === 12 && !localStorage.getItem('yellow_tier_celebrated')) {
+          toast({
+            title: '🟡 Yellow Tier Complete!',
+            description: "Advanced protocols mastered. Red Tier unlocked!",
+          });
+          localStorage.setItem('yellow_tier_celebrated', 'true');
+        } else if (completedCount === 18 && !localStorage.getItem('red_tier_celebrated')) {
+          toast({
+            title: '🔴 Red Tier Complete!',
+            description: "All modules mastered! Ready for certification!",
+          });
+          localStorage.setItem('red_tier_celebrated', 'true');
+        }
       }
     },
     onError: (error) => {
