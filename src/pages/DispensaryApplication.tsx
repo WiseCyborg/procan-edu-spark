@@ -40,6 +40,28 @@ const DispensaryApplication = () => {
   const [privacyAcknowledgment, setPrivacyAcknowledgment] = useState(false);
   const [trainingResponsibility, setTrainingResponsibility] = useState(false);
 
+  const validateDatabaseSchema = async () => {
+    try {
+      const { error } = await supabase
+        .from('dispensary_applications')
+        .select('compliance_affirmation')
+        .limit(0);
+      
+      if (error && error.code === '42703') {
+        toast({
+          title: "System Configuration Error",
+          description: "The application form is not properly configured. Please contact support at support@procannedu.com",
+          variant: "destructive",
+        });
+        return false;
+      }
+      return true;
+    } catch (err) {
+      console.error('Schema validation error:', err);
+      return false;
+    }
+  };
+
   const handleSubmit = async () => {
     if (!complianceAffirmation || !privacyAcknowledgment || !trainingResponsibility) {
       toast({
@@ -47,6 +69,11 @@ const DispensaryApplication = () => {
         description: "Please confirm all attestations to continue.",
         variant: "destructive",
       });
+      return;
+    }
+
+    // Validate schema before submission
+    if (!(await validateDatabaseSchema())) {
       return;
     }
 
@@ -79,11 +106,39 @@ const DispensaryApplication = () => {
         title: "Application Submitted!",
         description: "We'll review your application and contact you within 24-48 hours.",
       });
-    } catch (error) {
-      console.error('Error submitting application:', error);
+    } catch (error: any) {
+      console.error('❌ Application submission failed:', {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+        timestamp: new Date().toISOString(),
+        formData: {
+          organization_name: organizationName,
+          contact_email: contactEmail,
+          license_number: licenseNumber,
+          estimated_employees: estimatedEmployees,
+          compliance_affirmation: complianceAffirmation
+        }
+      });
+      
+      let errorMessage = "Failed to submit application. ";
+      
+      if (error.code === '23505') {
+        errorMessage += "This license number is already registered.";
+      } else if (error.code === '23502') {
+        errorMessage += "Please fill in all required fields.";
+      } else if (error.code === '42703') {
+        errorMessage += "Database schema error - please contact support at support@procannedu.com";
+      } else if (error.code === '23514') {
+        errorMessage += "Invalid date range - expiry date must be after issue date.";
+      } else {
+        errorMessage += error.message || "Please try again.";
+      }
+      
       toast({
-        title: "Error",
-        description: "Failed to submit application. Please try again.",
+        title: "Submission Error",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

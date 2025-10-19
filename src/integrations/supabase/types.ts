@@ -409,13 +409,22 @@ export type Database = {
           address: string | null
           admin_notes: string | null
           application_status: string | null
+          compliance_affirmation: boolean | null
           contact_email: string
           contact_person: string
           contact_phone: string | null
           created_at: string
+          dba_name: string | null
+          dispensary_number: string | null
+          estimated_employees: number | null
           id: string
+          legal_entity_name: string | null
+          license_expiry_date: string | null
+          license_issue_date: string | null
           license_number: string | null
+          license_type: string | null
           organization_name: string
+          preferred_start_date: string | null
           requested_credits: number | null
           reviewed_at: string | null
           reviewed_by: string | null
@@ -425,13 +434,22 @@ export type Database = {
           address?: string | null
           admin_notes?: string | null
           application_status?: string | null
+          compliance_affirmation?: boolean | null
           contact_email: string
           contact_person: string
           contact_phone?: string | null
           created_at?: string
+          dba_name?: string | null
+          dispensary_number?: string | null
+          estimated_employees?: number | null
           id?: string
+          legal_entity_name?: string | null
+          license_expiry_date?: string | null
+          license_issue_date?: string | null
           license_number?: string | null
+          license_type?: string | null
           organization_name: string
+          preferred_start_date?: string | null
           requested_credits?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -441,13 +459,22 @@ export type Database = {
           address?: string | null
           admin_notes?: string | null
           application_status?: string | null
+          compliance_affirmation?: boolean | null
           contact_email?: string
           contact_person?: string
           contact_phone?: string | null
           created_at?: string
+          dba_name?: string | null
+          dispensary_number?: string | null
+          estimated_employees?: number | null
           id?: string
+          legal_entity_name?: string | null
+          license_expiry_date?: string | null
+          license_issue_date?: string | null
           license_number?: string | null
+          license_type?: string | null
           organization_name?: string
+          preferred_start_date?: string | null
           requested_credits?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -1758,6 +1785,10 @@ export type Database = {
         }[]
       }
       generate_dispensary_key: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_dispensary_number: {
         Args: Record<PropertyKey, never>
         Returns: string
       }
