@@ -125,6 +125,53 @@ serve(async (req) => {
         );
       }
 
+      // **Check seat availability before accepting**
+      const { data: defaultCourse } = await supabase
+        .from('courses')
+        .select('id')
+        .eq('is_active', true)
+        .limit(1)
+        .single();
+
+      if (!defaultCourse) {
+        return new Response(
+          JSON.stringify({ success: false, message: 'No active course found' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // **Allocate seat to user atomically**
+      try {
+        const { data: seatId, error: seatError } = await supabase
+          .rpc('allocate_seat_to_user', {
+            org_id: invitation.organization_id,
+            user_id: userId,
+            course_id: defaultCourse.id
+          });
+
+        if (seatError) {
+          console.error('No available seats:', seatError);
+          return new Response(
+            JSON.stringify({ 
+              success: false, 
+              message: 'No available seats. Your organization needs to purchase more training seats.' 
+            }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+
+        console.log(`Seat ${seatId} allocated to user ${userId}`);
+      } catch (err) {
+        console.error('Error allocating seat:', err);
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            message: 'Failed to allocate training seat. Please contact your manager.' 
+          }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
       // Mark invitation as accepted
       const { error: updateError } = await supabase
         .from('staff_invitations')
@@ -150,7 +197,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({
           success: true,
-          message: 'Invitation accepted successfully'
+          message: 'Invitation accepted successfully and training seat allocated'
         }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );

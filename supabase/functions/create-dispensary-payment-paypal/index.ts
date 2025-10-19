@@ -6,7 +6,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// PayPal API base URLs
 const PAYPAL_API_BASE = Deno.env.get("PAYPAL_ENVIRONMENT") === "production" 
   ? "https://api-m.paypal.com"
   : "https://api-m.sandbox.paypal.com";
@@ -17,30 +16,118 @@ serve(async (req) => {
   }
 
   try {
-    const { applicationId, credits } = await req.json();
-    
-    if (!applicationId || !credits) {
-      throw new Error("Application ID and credits are required");
+    // Authenticate user via JWT
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      throw new Error("Missing authorization header");
     }
 
-    // Initialize Supabase service client
+    const supabaseClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+    if (authError || !user) {
+      throw new Error("Unauthorized");
+    }
+
+    // Initialize service client for privileged operations
     const supabaseService = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
       { auth: { persistSession: false } }
     );
 
-    // Get application details
-    const { data: application, error: appError } = await supabaseService
-      .from('dispensary_applications')
-      .select('*')
-      .eq('id', applicationId)
-      .eq('application_status', 'approved')
+    const { quantity, idempotencyKey } = await req.json();
+    
+    if (!quantity || !idempotencyKey) {
+      throw new Error("Quantity and idempotency key are required");
+    }
+
+    // Verify user role
+    const { data: hasPermission } = await supabaseService.rpc('has_any_role', {
+      _user_id: user.id,
+      _roles: ['dispensary_manager', 'training_coordinator']
+    });
+
+    if (!hasPermission) {
+      throw new Error("Insufficient permissions. Only Managers and Coordinators can purchase seats.");
+    }
+
+    // Check idempotency - prevent duplicate orders
+    const { data: existingPurchase } = await supabaseService
+      .from('rvt_purchases')
+      .select('*, paypal_order_id')
+      .eq('idempotency_key', idempotencyKey)
+      .maybeSingle();
+
+    if (existingPurchase) {
+      console.log("Idempotency check: returning existing order", existingPurchase.paypal_order_id);
+      
+      // If order already exists and has PayPal order ID, return it
+      if (existingPurchase.paypal_order_id) {
+        return new Response(JSON.stringify({ 
+          orderId: existingPurchase.paypal_order_id,
+          message: "Order already exists"
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        });
+      }
+    }
+
+    // Get user's organization
+    const { data: profile } = await supabaseService
+      .from('profiles')
+      .select('organization_id, organizations(*)')
+      .eq('user_id', user.id)
       .single();
 
-    if (appError || !application) {
-      throw new Error("Application not found or not approved");
+    if (!profile?.organization_id) {
+      throw new Error("User is not associated with an organization");
     }
+
+    const organization = profile.organizations;
+
+    if (!organization.admin_approved) {
+      throw new Error("Organization not yet approved by admin");
+    }
+
+    if (!organization.dispensary_number) {
+      throw new Error("Organization missing dispensary number");
+    }
+
+    // Calculate amount
+    const unitAmount = 49.99;
+    const totalAmount = (quantity * unitAmount).toFixed(2);
+
+    // Create pending purchase record BEFORE PayPal interaction
+    const { data: purchase, error: purchaseError } = await supabaseService
+      .from('rvt_purchases')
+      .insert({
+        organization_id: organization.id,
+        quantity,
+        amount_paid: totalAmount,
+        currency: 'USD',
+        payment_method: 'paypal',
+        status: 'pending',
+        idempotency_key: idempotencyKey,
+        metadata: {
+          user_id: user.id,
+          user_email: user.email
+        }
+      })
+      .select()
+      .single();
+
+    if (purchaseError) {
+      console.error("Error creating purchase record:", purchaseError);
+      throw new Error("Failed to create purchase record");
+    }
+
+    console.log("Created purchase record:", purchase.id);
 
     // Get PayPal access token
     const paypalAuth = btoa(`${Deno.env.get("PAYPAL_CLIENT_ID")}:${Deno.env.get("PAYPAL_CLIENT_SECRET")}`);
@@ -57,25 +144,21 @@ serve(async (req) => {
     const tokenData = await tokenResponse.json();
     const accessToken = tokenData.access_token;
 
-    // Calculate amount (credits * $49.99)
-    const unitAmount = 49.99;
-    const totalAmount = (credits * unitAmount).toFixed(2);
-
-    // Create PayPal order
+    // Create PayPal order with purchase_id in custom_id
     const orderPayload = {
       intent: "CAPTURE",
       purchase_units: [{
-        reference_id: applicationId,
+        reference_id: purchase.id,
         amount: {
           currency_code: "USD",
           value: totalAmount,
         },
-        description: `${credits} ProCann Edu Training Licenses for ${application.organization_name}`,
-        custom_id: `dispensary_${applicationId}_credits_${credits}`,
+        description: `${quantity} ProCann Edu Training Seats for ${organization.name}`,
+        custom_id: `purchase_${purchase.id}_org_${organization.id}_qty_${quantity}`,
       }],
       application_context: {
-        return_url: `${req.headers.get("origin")}/payment-success?application_id=${applicationId}`,
-        cancel_url: `${req.headers.get("origin")}/auth?role=dispensary`,
+        return_url: `${req.headers.get("origin")}/payment-success`,
+        cancel_url: `${req.headers.get("origin")}/purchase-seats`,
         brand_name: "ProCann Edu",
         landing_page: "BILLING",
         user_action: "PAY_NOW",
@@ -95,40 +178,49 @@ serve(async (req) => {
 
     if (!orderResponse.ok) {
       console.error("PayPal order creation error:", orderData);
+      
+      // Update purchase to failed
+      await supabaseService
+        .from('rvt_purchases')
+        .update({ status: 'failed', metadata: { ...purchase.metadata, paypal_error: orderData } })
+        .eq('id', purchase.id);
+      
       throw new Error(`PayPal order creation failed: ${orderData.message || "Unknown error"}`);
     }
 
-    // Create order record
-    const { error: orderError } = await supabaseService
-      .from("orders")
+    // Update purchase with PayPal order ID
+    await supabaseService
+      .from('rvt_purchases')
+      .update({ paypal_order_id: orderData.id })
+      .eq('id', purchase.id);
+
+    // Log audit event
+    await supabaseService
+      .from('payment_audit_log')
       .insert({
-        paypal_order_id: orderData.id,
-        amount: Math.round(parseFloat(totalAmount) * 100), // Store in cents
-        currency: "usd",
-        status: "pending",
-        metadata: {
-          application_id: applicationId,
-          organization_name: application.organization_name,
-          credits: credits,
-          type: "dispensary_bulk_training",
-          payment_method: "paypal"
+        order_id: orderData.id,
+        event_type: 'ORDER_CREATED',
+        event_data: {
+          purchase_id: purchase.id,
+          organization_id: organization.id,
+          quantity,
+          amount: totalAmount
         }
       });
 
-    if (orderError) {
-      console.error("Error creating order:", orderError);
-    }
-
-    // Find the approval URL from PayPal response
+    // Find the approval URL
     const approvalUrl = orderData.links?.find((link: any) => link.rel === "approve")?.href;
 
     if (!approvalUrl) {
       throw new Error("PayPal approval URL not found");
     }
 
+    console.log("PayPal order created successfully:", orderData.id);
+
     return new Response(JSON.stringify({ 
       url: approvalUrl,
-      orderId: orderData.id 
+      orderId: orderData.id,
+      purchaseId: purchase.id
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,

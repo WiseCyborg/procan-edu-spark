@@ -6,7 +6,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// PayPal API base URLs
 const PAYPAL_API_BASE = Deno.env.get("PAYPAL_ENVIRONMENT") === "production" 
   ? "https://api-m.paypal.com"
   : "https://api-m.sandbox.paypal.com";
@@ -20,8 +19,21 @@ serve(async (req) => {
     const { orderId } = await req.json();
     
     if (!orderId) {
-      throw new Error("PayPal order ID is required");
+      throw new Error("Order ID is required");
     }
+
+    const supabaseService = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { persistSession: false } }
+    );
+
+    // Log audit event
+    await supabaseService.from('payment_audit_log').insert({
+      order_id: orderId,
+      event_type: 'VERIFICATION_STARTED',
+      event_data: { timestamp: new Date().toISOString() }
+    });
 
     // Get PayPal access token
     const paypalAuth = btoa(`${Deno.env.get("PAYPAL_CLIENT_ID")}:${Deno.env.get("PAYPAL_CLIENT_SECRET")}`);
@@ -38,9 +50,8 @@ serve(async (req) => {
     const tokenData = await tokenResponse.json();
     const accessToken = tokenData.access_token;
 
-    // Get order details from PayPal
+    // Get PayPal order details
     const orderResponse = await fetch(`${PAYPAL_API_BASE}/v2/checkout/orders/${orderId}`, {
-      method: "GET",
       headers: {
         "Authorization": `Bearer ${accessToken}`,
         "Content-Type": "application/json",
@@ -48,190 +59,214 @@ serve(async (req) => {
     });
 
     const orderData = await orderResponse.json();
+    console.log("PayPal order data:", JSON.stringify(orderData, null, 2));
 
-    if (!orderResponse.ok) {
-      console.error("PayPal order verification error:", orderData);
-      throw new Error(`PayPal order verification failed: ${orderData.message || "Unknown error"}`);
-    }
+    await supabaseService.from('payment_audit_log').insert({
+      order_id: orderId,
+      event_type: 'PAYPAL_ORDER_FETCHED',
+      event_data: { status: orderData.status }
+    });
 
-    // Initialize Supabase service client
-    const supabaseService = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-      { auth: { persistSession: false } }
-    );
-
-    // Check if order is completed/approved
-    if (orderData.status === "COMPLETED" || orderData.status === "APPROVED") {
-      // Update order status in database
-      const { error: updateError } = await supabaseService
-        .from("orders")
-        .update({ 
-          status: "paid",
-          updated_at: new Date().toISOString(),
-          paypal_payer_id: orderData.payer?.payer_id,
-          paypal_payment_id: orderData.purchase_units?.[0]?.payments?.captures?.[0]?.id
-        })
-        .eq("paypal_order_id", orderId);
-
-      if (updateError) {
-        console.error("Error updating order:", updateError);
-        throw new Error("Failed to update order status");
-      }
-
-      // Extract application details from custom_id
-      const customId = orderData.purchase_units?.[0]?.custom_id || "";
-      const referenceId = orderData.purchase_units?.[0]?.reference_id;
+    // Check if payment is completed
+    if (orderData.status === 'COMPLETED' || orderData.status === 'APPROVED') {
+      const customId = orderData.purchase_units[0]?.payments?.captures?.[0]?.custom_id || 
+                       orderData.purchase_units[0]?.custom_id;
       
-      const applicationId = customId.split("dispensary_")[1]?.split("_credits_")[0] || referenceId;
-      const credits = parseInt(customId.split("_credits_")[1]) || 0;
-
-      if (!applicationId) {
-        throw new Error("Application ID not found in payment data");
+      if (!customId) {
+        throw new Error("Custom ID not found in PayPal order");
       }
 
-      // Get application details
-      const { data: application, error: appError } = await supabaseService
-        .from('dispensary_applications')
+      const purchaseId = customId.split('purchase_')[1]?.split('_org_')[0];
+      const organizationId = customId.split('_org_')[1]?.split('_qty_')[0];
+      const quantity = parseInt(customId.split('_qty_')[1]);
+
+      if (!purchaseId || !organizationId || !quantity) {
+        throw new Error("Failed to parse purchase details from custom_id");
+      }
+
+      console.log("Parsed:", { purchaseId, organizationId, quantity });
+
+      // Check if already processed (idempotency)
+      const { data: existingPurchase } = await supabaseService
+        .from('rvt_purchases')
         .select('*')
-        .eq('id', applicationId)
+        .eq('id', purchaseId)
         .single();
 
-      if (appError || !application) {
-        throw new Error("Application not found");
+      if (existingPurchase?.status === 'paid') {
+        console.log("Purchase already processed - idempotency check passed");
+        
+        await supabaseService.from('payment_audit_log').insert({
+          order_id: orderId,
+          event_type: 'IDEMPOTENCY_CHECK',
+          event_data: { message: 'Already processed', purchase_id: purchaseId }
+        });
+
+        return new Response(JSON.stringify({ 
+          paid: true,
+          alreadyProcessed: true,
+          purchaseId,
+          organizationId
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        });
       }
 
-      // Generate unique access key
-      const { data: accessKeyData, error: keyError } = await supabaseService
-        .rpc('generate_dispensary_key');
-
-      if (keyError || !accessKeyData) {
-        console.error("Error generating access key:", keyError);
-        throw new Error("Failed to generate access key");
-      }
-
-      const accessKey = accessKeyData;
+      const captureId = orderData.purchase_units[0]?.payments?.captures?.[0]?.id;
+      const payerId = orderData.payer?.payer_id;
 
       // Get default course
       const { data: defaultCourse } = await supabaseService
-        .from("courses")
-        .select("id")
+        .from('courses')
+        .select('id')
+        .eq('is_active', true)
         .limit(1)
         .single();
 
-      const courseId = defaultCourse?.id;
+      if (!defaultCourse) {
+        throw new Error("No active course found");
+      }
 
-      // Create organization record
-      const { data: organization, error: orgError } = await supabaseService
-        .from("organizations")
-        .insert({
-          name: application.organization_name,
-          contact_person: application.contact_person,
-          contact_email: application.contact_email,
-          contact_phone: application.contact_phone,
-          address: application.address,
-          license_number: application.license_number,
-          unique_access_key: accessKey,
-          course_credits: credits,
-          payment_status: "paid",
+      // **ATOMIC TRANSACTION: Update purchase + Create seats**
+      
+      // 1. Update purchase to 'paid'
+      const { error: updateError } = await supabaseService
+        .from('rvt_purchases')
+        .update({
+          status: 'paid',
           paypal_order_id: orderId,
-          paypal_payer_id: orderData.payer?.payer_id,
-          admin_approved: true,
-          is_active: true
+          paypal_capture_id: captureId,
+          paypal_payer_id: payerId,
+          completed_at: new Date().toISOString()
         })
-        .select()
+        .eq('id', purchaseId);
+
+      if (updateError) {
+        console.error("Error updating purchase:", updateError);
+        throw new Error("Failed to update purchase record");
+      }
+
+      await supabaseService.from('payment_audit_log').insert({
+        order_id: orderId,
+        event_type: 'PURCHASE_UPDATED',
+        event_data: { purchase_id: purchaseId, status: 'paid' }
+      });
+
+      // 2. Create N seats atomically
+      const seats = Array.from({ length: quantity }, () => ({
+        purchase_id: purchaseId,
+        organization_id: organizationId,
+        course_id: defaultCourse.id,
+        status: 'available'
+      }));
+
+      const { error: seatsError } = await supabaseService
+        .from('rvt_seats')
+        .insert(seats);
+
+      if (seatsError) {
+        console.error("Error creating seats:", seatsError);
+        
+        // Rollback purchase status
+        await supabaseService
+          .from('rvt_purchases')
+          .update({ status: 'failed' })
+          .eq('id', purchaseId);
+        
+        throw new Error("Failed to allocate seats");
+      }
+
+      await supabaseService.from('payment_audit_log').insert({
+        order_id: orderId,
+        event_type: 'SEATS_ALLOCATED',
+        event_data: { purchase_id: purchaseId, quantity }
+      });
+
+      // 3. Update organization's course_credits (best effort)
+      const { data: org } = await supabaseService
+        .from('organizations')
+        .select('course_credits')
+        .eq('id', organizationId)
         .single();
 
-      if (orgError) {
-        console.error("Error creating organization:", orgError);
-        throw new Error("Failed to create organization");
+      if (org) {
+        await supabaseService
+          .from('organizations')
+          .update({ 
+            course_credits: (org.course_credits || 0) + quantity 
+          })
+          .eq('id', organizationId);
       }
 
-      // Create RVT purchase record
-      const { data: purchase, error: purchaseError } = await supabaseService
-        .from("rvt_purchases")
-        .insert({
-          organization_id: organization.id,
-          quantity: credits,
-          amount_paid: (credits * 49.99).toFixed(2),
-          currency: "USD",
-          payment_method: "paypal",
-          paypal_order_id: orderId,
-        })
-        .select()
+      // 4. Send confirmation email
+      const { data: organization } = await supabaseService
+        .from('organizations')
+        .select('*')
+        .eq('id', organizationId)
         .single();
 
-      if (purchaseError) {
-        console.error("Error creating purchase record:", purchaseError);
-      }
-
-      // Create individual seats
-      if (purchase && courseId) {
-        const seats = Array.from({ length: credits }, () => ({
-          purchase_id: purchase.id,
-          organization_id: organization.id,
-          course_id: courseId,
-          status: "available"
-        }));
-
-        const { error: seatsError } = await supabaseService
-          .from("rvt_seats")
-          .insert(seats);
-
-        if (seatsError) {
-          console.error("Error creating seats:", seatsError);
-        }
-      }
-
-      // Update application status to completed
-      const { error: statusError } = await supabaseService
-        .from("dispensary_applications")
-        .update({ 
-          application_status: "completed",
-          updated_at: new Date().toISOString()
-        })
-        .eq("id", applicationId);
-
-      if (statusError) {
-        console.error("Error updating application status:", statusError);
-      }
-
-      // Send seat purchase confirmation emails
-      try {
+      if (organization) {
         await supabaseService.functions.invoke('send-seat-purchase-confirmation', {
           body: {
-            coordinatorEmail: application.contact_email,
-            coordinatorName: application.contact_person,
-            organizationName: application.organization_name,
-            quantity: credits,
-            amountPaid: (credits * 49.99).toFixed(2),
-            purchaseId: purchase?.id || organization.id
+            recipientEmail: organization.contact_email,
+            organizationName: organization.name,
+            quantity,
+            totalAmount: (quantity * 49.99).toFixed(2),
+            accessKey: organization.unique_access_key,
+            purchaseId
           }
+        }).catch(err => {
+          console.error("Failed to send confirmation email:", err);
         });
-      } catch (emailError) {
-        console.error("Error sending purchase confirmation:", emailError);
-        // Don't fail the entire process if email fails
       }
 
-      return new Response(JSON.stringify({
+      await supabaseService.from('payment_audit_log').insert({
+        order_id: orderId,
+        event_type: 'PAYMENT_COMPLETED',
+        event_data: { 
+          purchase_id: purchaseId,
+          organization_id: organizationId,
+          quantity,
+          seats_allocated: quantity
+        }
+      });
+
+      console.log("Payment verification complete");
+
+      return new Response(JSON.stringify({ 
         paid: true,
-        accessKey,
-        organizationId: organization.id,
-        credits
+        purchaseId,
+        organizationId,
+        quantity,
+        message: "Payment verified and seats allocated successfully"
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
       });
     } else {
-      // Payment not completed
-      return new Response(JSON.stringify({ paid: false, status: orderData.status }), {
+      await supabaseService.from('payment_audit_log').insert({
+        order_id: orderId,
+        event_type: 'PAYMENT_NOT_COMPLETED',
+        event_data: { status: orderData.status }
+      });
+
+      return new Response(JSON.stringify({ 
+        paid: false,
+        status: orderData.status,
+        message: `Payment status: ${orderData.status}`
+      }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
       });
     }
   } catch (error) {
     console.error("Error in verify-dispensary-payment-paypal:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    
+    return new Response(JSON.stringify({ 
+      error: error.message,
+      paid: false
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });

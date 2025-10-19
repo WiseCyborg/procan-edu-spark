@@ -1,27 +1,74 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
-import { Loader2, ShoppingCart, Users } from "lucide-react";
+import { Loader2, ShoppingCart, Users, AlertCircle } from "lucide-react";
 
 const SEAT_PRICE = 49.99;
 
 export default function PurchaseSeats() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { hasRole, isLoading: rolesLoading } = useUserRole();
   const [quantity, setQuantity] = useState(10);
   const [loading, setLoading] = useState(false);
+  const [organization, setOrganization] = useState<any>(null);
+  const [idempotencyKey] = useState(() => crypto.randomUUID());
+
+  const isAuthorized = hasRole('dispensary_manager') || hasRole('training_coordinator');
+
+  useEffect(() => {
+    if (!rolesLoading && !isAuthorized) {
+      navigate('/dashboard');
+      toast.error("Only Managers and Coordinators can purchase seats");
+    }
+  }, [rolesLoading, isAuthorized, navigate]);
+
+  useEffect(() => {
+    const fetchOrganization = async () => {
+      if (!user) return;
+      
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('organization_id, organizations(*)')
+        .eq('user_id', user.id)
+        .single();
+      
+      if (profile?.organizations) {
+        setOrganization(profile.organizations);
+      }
+    };
+    
+    fetchOrganization();
+  }, [user]);
 
   const totalPrice = (quantity * SEAT_PRICE).toFixed(2);
 
   const handlePurchase = async () => {
     if (!user) {
       toast.error("Please log in to purchase seats");
+      return;
+    }
+
+    if (!organization) {
+      toast.error("No organization found. Please contact support.");
+      return;
+    }
+
+    if (!organization.admin_approved) {
+      toast.error("Your organization is pending admin approval");
+      return;
+    }
+
+    if (!organization.dispensary_number) {
+      toast.error("Organization missing dispensary number. Please contact support.");
       return;
     }
 
@@ -32,62 +79,42 @@ export default function PurchaseSeats() {
 
     setLoading(true);
     try {
-      // Get user's organization
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("organization_id, organizations(*)")
-        .eq("user_id", user.id)
-        .single();
-
-      if (!profile?.organization_id) {
-        toast.error("No organization found for your account");
-        return;
-      }
-
-      // Create dispensary application for purchase
-      const { data: application, error: appError } = await supabase
-        .from("dispensary_applications")
-        .insert({
-          organization_name: profile.organizations.name,
-          contact_person: profile.organizations.contact_person,
-          contact_email: profile.organizations.contact_email,
-          contact_phone: profile.organizations.contact_phone,
-          address: profile.organizations.address,
-          license_number: profile.organizations.license_number,
-          requested_credits: quantity,
-          application_status: "approved"
-        })
-        .select()
-        .single();
-
-      if (appError) throw appError;
-
-      // Create PayPal order
-      const { data: paypalData, error: paypalError } = await supabase.functions.invoke(
-        "create-dispensary-payment-paypal",
+      const { data, error } = await supabase.functions.invoke(
+        'create-dispensary-payment-paypal',
         {
           body: {
-            applicationId: application.id,
-            credits: quantity
+            quantity,
+            idempotencyKey
           }
         }
       );
 
-      if (paypalError) throw paypalError;
+      if (error) throw error;
 
-      // Redirect to PayPal
-      if (paypalData?.approvalUrl) {
-        window.location.href = paypalData.approvalUrl;
+      if (data?.url) {
+        window.location.href = data.url;
       } else {
-        throw new Error("Failed to create PayPal order");
+        throw new Error("No PayPal URL returned");
       }
     } catch (error: any) {
-      console.error("Purchase error:", error);
+      console.error('Purchase error:', error);
       toast.error(error.message || "Failed to initiate purchase");
     } finally {
       setLoading(false);
     }
   };
+
+  if (rolesLoading) {
+    return (
+      <div className="container mx-auto py-8 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
+  if (!isAuthorized) {
+    return null;
+  }
 
   return (
     <div className="container max-w-2xl mx-auto py-8 px-4">
@@ -99,6 +126,24 @@ export default function PurchaseSeats() {
         ← Back to Team Management
       </Button>
 
+      {organization && !organization.admin_approved && (
+        <Alert className="mb-6">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Your organization is pending admin approval. You cannot purchase seats yet.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {organization && !organization.dispensary_number && (
+        <Alert className="mb-6">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Your organization is missing a dispensary number. Please contact support.
+          </AlertDescription>
+        </Alert>
+      )}
+
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
@@ -106,7 +151,7 @@ export default function PurchaseSeats() {
             <CardTitle>Purchase Training Seats</CardTitle>
           </div>
           <CardDescription>
-            Buy bulk training seats for your organization at $49.99 per seat
+            Buy bulk training seats for your organization at ${SEAT_PRICE} per seat
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -176,7 +221,7 @@ export default function PurchaseSeats() {
 
           <Button
             onClick={handlePurchase}
-            disabled={loading}
+            disabled={loading || !organization?.admin_approved || !organization?.dispensary_number}
             size="lg"
             className="w-full"
           >

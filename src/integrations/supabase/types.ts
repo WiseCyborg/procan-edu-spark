@@ -1104,6 +1104,30 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_audit_log: {
+        Row: {
+          created_at: string
+          event_data: Json | null
+          event_type: string
+          id: string
+          order_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_data?: Json | null
+          event_type: string
+          id?: string
+          order_id: string
+        }
+        Update: {
+          created_at?: string
+          event_data?: Json | null
+          event_type?: string
+          id?: string
+          order_id?: string
+        }
+        Relationships: []
+      }
       payments: {
         Row: {
           amount: number
@@ -1417,6 +1441,123 @@ export type Database = {
           role?: Database["public"]["Enums"]["app_role"]
         }
         Relationships: []
+      }
+      rvt_purchases: {
+        Row: {
+          amount_paid: number
+          completed_at: string | null
+          created_at: string
+          currency: string
+          id: string
+          idempotency_key: string
+          metadata: Json | null
+          organization_id: string
+          payment_method: string
+          paypal_capture_id: string | null
+          paypal_order_id: string | null
+          paypal_payer_id: string | null
+          quantity: number
+          status: string
+        }
+        Insert: {
+          amount_paid: number
+          completed_at?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          idempotency_key: string
+          metadata?: Json | null
+          organization_id: string
+          payment_method?: string
+          paypal_capture_id?: string | null
+          paypal_order_id?: string | null
+          paypal_payer_id?: string | null
+          quantity: number
+          status?: string
+        }
+        Update: {
+          amount_paid?: number
+          completed_at?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          idempotency_key?: string
+          metadata?: Json | null
+          organization_id?: string
+          payment_method?: string
+          paypal_capture_id?: string | null
+          paypal_order_id?: string | null
+          paypal_payer_id?: string | null
+          quantity?: number
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rvt_purchases_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rvt_seats: {
+        Row: {
+          assigned_at: string | null
+          assigned_user_id: string | null
+          course_id: string
+          created_at: string
+          id: string
+          organization_id: string
+          purchase_id: string
+          status: string
+          used_at: string | null
+        }
+        Insert: {
+          assigned_at?: string | null
+          assigned_user_id?: string | null
+          course_id: string
+          created_at?: string
+          id?: string
+          organization_id: string
+          purchase_id: string
+          status?: string
+          used_at?: string | null
+        }
+        Update: {
+          assigned_at?: string | null
+          assigned_user_id?: string | null
+          course_id?: string
+          created_at?: string
+          id?: string
+          organization_id?: string
+          purchase_id?: string
+          status?: string
+          used_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rvt_seats_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rvt_seats_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rvt_seats_purchase_id_fkey"
+            columns: ["purchase_id"]
+            isOneToOne: false
+            referencedRelation: "rvt_purchases"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       security_audit_log: {
         Row: {
@@ -1778,6 +1919,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      allocate_seat_to_user: {
+        Args: { course_id: string; org_id: string; user_id: string }
+        Returns: string
+      }
       approve_dispensary_application: {
         Args: { application_id: string; credits?: number }
         Returns: {
@@ -1798,6 +1943,10 @@ export type Database = {
           _user_id: string
           _window_minutes?: number
         }
+        Returns: boolean
+      }
+      check_seat_availability: {
+        Args: { course_id: string; org_id: string }
         Returns: boolean
       }
       cleanup_performance_metrics: {
@@ -1883,6 +2032,16 @@ export type Database = {
           progress_percentage: number
           tier_unlocked_at: string
           user_id: string
+        }[]
+      }
+      get_organization_seat_status: {
+        Args: { org_id: string }
+        Returns: {
+          assigned: number
+          available: number
+          total_purchased: number
+          used: number
+          utilization_percentage: number
         }[]
       }
       get_user_organization_id: {
