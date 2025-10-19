@@ -274,9 +274,9 @@ const DispensaryApplication = () => {
                       <SelectValue placeholder="Select license type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="dispensary">Dispensary</SelectItem>
-                      <SelectItem value="grower">Grower</SelectItem>
-                      <SelectItem value="processor">Processor</SelectItem>
+                      <SelectItem value="Adult Use">Adult Use Dispensary</SelectItem>
+                      <SelectItem value="Medical">Medical Dispensary</SelectItem>
+                      <SelectItem value="Dual License">Dual License (Adult Use + Medical)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
