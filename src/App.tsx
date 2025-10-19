@@ -29,6 +29,9 @@ import Certificates from "./pages/Certificates";
 import Dashboard from "./components/dashboard/Dashboard";
 import Header from "./components/layout/Header";
 import DraggableVoiceAssistant from "./components/chat/DraggableVoiceAssistant";
+import PurchaseSeats from "./pages/PurchaseSeats";
+import SecureCertificateVerification from "./pages/SecureCertificateVerification";
+import AdvancedAnalytics from "./pages/AdvancedAnalytics";
 import ContentReviewDashboard from "./pages/ContentReviewDashboard";
 import TrainingHandbook from "./pages/TrainingHandbook";
 
@@ -147,13 +150,19 @@ const App = () => (
                     </ProtectedRoute>
                   } />
                   
-                  <Route path="/dispensary-portal" element={
-                    <ProtectedRoute>
-                      <EnhancedDispensaryPortal />
-                    </ProtectedRoute>
-                  } />
-                  
-                   <Route path="/admin" element={
+                   <Route path="/dispensary-portal" element={
+                     <ProtectedRoute>
+                       <EnhancedDispensaryPortal />
+                     </ProtectedRoute>
+                   } />
+                   
+                   <Route path="/purchase-seats" element={
+                     <ProtectedRoute>
+                       <PurchaseSeats />
+                     </ProtectedRoute>
+                   } />
+                   
+                    <Route path="/admin" element={
                      <ProtectedRoute>
                        <AdminDashboard />
                      </ProtectedRoute>

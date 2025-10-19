@@ -35,3 +35,18 @@ verify_jwt = false
 
 [functions.verify-dispensary-payment-paypal]
 verify_jwt = false
+
+[functions.generate-join-code]
+verify_jwt = true
+
+[functions.validate-join-code]
+verify_jwt = false
+
+[functions.send-seat-purchase-confirmation]
+verify_jwt = false
+
+[functions.send-employee-invitation]
+verify_jwt = false
+
+[functions.send-deadline-reminders]
+verify_jwt = false

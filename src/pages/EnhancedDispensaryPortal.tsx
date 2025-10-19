@@ -9,10 +9,12 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { toast } from '@/components/ui/use-toast';
+import { SeatManagementWidget } from "@/components/team/SeatManagementWidget";
+import { CompletionAnalyticsWidget } from "@/components/team/CompletionAnalyticsWidget";
+import { toast } from 'sonner';
 import { 
   Users, 
-  BarChart3, 
+  BarChart3,
   UserPlus, 
   Download, 
   Mail, 
@@ -59,13 +61,12 @@ const EnhancedDispensaryPortal: React.FC = () => {
   const [newEmployeeEmail, setNewEmployeeEmail] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSendingInvite, setIsSendingInvite] = useState(false);
+  const [organizationId, setOrganizationId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user || (!isDispensaryManager && !isAdmin)) {
-      toast({
-        title: "Access Denied",
-        description: "You don't have permission to access this portal.",
-        variant: "destructive"
+      toast.error("Access Denied", {
+        description: "You don't have permission to access this portal."
       });
       return;
     }
@@ -80,13 +81,13 @@ const EnhancedDispensaryPortal: React.FC = () => {
         .rpc('get_user_organization_id', { user_uuid: user?.id });
 
       if (orgError || !userOrgId) {
-        toast({
-          title: "Access Required", 
-          description: "You must be associated with an organization to access this portal.",
-          variant: "destructive"
+        toast.error("Access Required", {
+          description: "You must be associated with an organization to access this portal."
         });
         return;
       }
+
+      setOrganizationId(userOrgId);
 
       // Fetch real organization employees
       const { data: employeeData, error: employeeError } = await supabase
@@ -129,11 +130,7 @@ const EnhancedDispensaryPortal: React.FC = () => {
       setOrganizationStats(stats);
     } catch (error) {
       console.error('Error in fetchEmployeeData:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load employee data.",
-        variant: "destructive"
-      });
+      toast.error("Failed to load employee data");
     } finally {
       setIsLoading(false);
     }
@@ -141,11 +138,7 @@ const EnhancedDispensaryPortal: React.FC = () => {
 
   const sendInvitation = async () => {
     if (!newEmployeeEmail.trim()) {
-      toast({
-        title: "Invalid Email",
-        description: "Please enter a valid email address.",
-        variant: "destructive"
-      });
+      toast.error("Please enter a valid email address");
       return;
     }
 
@@ -173,18 +166,11 @@ const EnhancedDispensaryPortal: React.FC = () => {
 
       if (error) throw error;
 
-      toast({
-        title: "Invitation Sent",
-        description: `Training invitation sent to ${newEmployeeEmail}`,
-      });
+      toast.success(`Training invitation sent to ${newEmployeeEmail}`);
       setNewEmployeeEmail('');
     } catch (error) {
       console.error('Error sending invitation:', error);
-      toast({
-        title: "Error",
-        description: "Failed to send invitation.",
-        variant: "destructive"
-      });
+      toast.error("Failed to send invitation");
     } finally {
       setIsSendingInvite(false);
     }
@@ -366,6 +352,13 @@ const EnhancedDispensaryPortal: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-4">
+          {organizationId && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <SeatManagementWidget organizationId={organizationId} />
+              <CompletionAnalyticsWidget organizationId={organizationId} />
+            </div>
+          )}
+          
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">

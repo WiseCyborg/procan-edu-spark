@@ -28,12 +28,15 @@ export function DeadlineCountdown() {
 
       if (error && error.code !== 'PGRST116') throw error;
 
-      if (data && typeof data === 'object' && 'deadline_at' in data) {
-        setEnrollment(data);
-        const deadline = new Date((data as any).deadline_at);
-        const now = new Date();
-        const days = Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-        setDaysRemaining(days);
+      if (data) {
+        const enrollmentData = data as any;
+        if (enrollmentData && enrollmentData.deadline_at) {
+          setEnrollment(enrollmentData);
+          const deadline = new Date(enrollmentData.deadline_at);
+          const now = new Date();
+          const days = Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+          setDaysRemaining(days);
+        }
       }
     } catch (error) {
       console.error("Error fetching enrollment:", error);
