@@ -27,6 +27,7 @@ import { StaffInvitationSystem } from '@/components/admin/StaffInvitationSystem'
 import { ComplianceReportingDashboard } from '@/components/admin/ComplianceReportingDashboard';
 import { AdvancedEmployeeManagement } from '@/components/admin/AdvancedEmployeeManagement';
 import { SecurityMonitoringDashboard } from '@/components/admin/SecurityMonitoringDashboard';
+import EmailMonitoringDashboard from '@/components/admin/EmailMonitoringDashboard';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -324,6 +325,7 @@ const AdminDashboard = () => {
             <TabsTrigger value="compliance">Compliance</TabsTrigger>
             <TabsTrigger value="employees">Employees</TabsTrigger>
             <TabsTrigger value="security">Security</TabsTrigger>
+            <TabsTrigger value="email-monitoring">📧 Email</TabsTrigger>
             <TabsTrigger value="revenue">Revenue</TabsTrigger>
             <TabsTrigger value="notifications">Notifications</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
@@ -456,6 +458,10 @@ const AdminDashboard = () => {
 
           <TabsContent value="security">
             <SecurityMonitoringDashboard />
+          </TabsContent>
+
+          <TabsContent value="email-monitoring">
+            <EmailMonitoringDashboard />
           </TabsContent>
 
           <TabsContent value="revenue">

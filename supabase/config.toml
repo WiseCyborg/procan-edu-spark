@@ -53,3 +53,9 @@ verify_jwt = false
 
 [functions.assign-training-coordinator]
 verify_jwt = true
+
+[functions.track-email-open]
+verify_jwt = false
+
+[functions.track-email-click]
+verify_jwt = false

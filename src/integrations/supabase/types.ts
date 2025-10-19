@@ -488,6 +488,7 @@ export type Database = {
           delivered_at: string | null
           email_type: string
           id: string
+          metadata: Json | null
           provider_id: string | null
           recipient_email: string
           sent_at: string | null
@@ -500,6 +501,7 @@ export type Database = {
           delivered_at?: string | null
           email_type: string
           id?: string
+          metadata?: Json | null
           provider_id?: string | null
           recipient_email: string
           sent_at?: string | null
@@ -512,6 +514,7 @@ export type Database = {
           delivered_at?: string | null
           email_type?: string
           id?: string
+          metadata?: Json | null
           provider_id?: string | null
           recipient_email?: string
           sent_at?: string | null
