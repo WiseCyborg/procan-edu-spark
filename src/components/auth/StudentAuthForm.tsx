@@ -237,8 +237,31 @@ const StudentAuthForm = () => {
             .limit(1)
             .single();
 
-          // Create enrollment with 30-day deadline
+          // Call allocate_seat_to_user RPC to assign a seat
           if (courseData) {
+            try {
+              const { data: seatId, error: seatError } = await supabase
+                .rpc('allocate_seat_to_user', {
+                  org_id: orgData.id,
+                  user_id: authData.user.id,
+                  course_id: courseData.id
+                });
+
+              if (seatError) {
+                console.error('Error allocating seat:', seatError);
+                toast({
+                  title: "Seat Assignment Warning",
+                  description: "Account created but seat assignment failed. Contact your manager.",
+                  variant: "destructive",
+                });
+              } else {
+                console.log('Seat allocated:', seatId);
+              }
+            } catch (seatAllocationError) {
+              console.error('Error in seat allocation:', seatAllocationError);
+            }
+
+            // Create enrollment with 30-day deadline
             const deadlineDate = new Date();
             deadlineDate.setDate(deadlineDate.getDate() + 30);
             

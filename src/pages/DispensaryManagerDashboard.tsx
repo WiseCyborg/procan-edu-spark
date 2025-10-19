@@ -66,6 +66,14 @@ const DispensaryManagerDashboard = () => {
       if (orgError) throw orgError;
       setOrganization(org as any);
 
+      // Get employees using the RPC function
+      const { data: empData, error: empError } = await supabase
+        .rpc('get_organization_employees', { org_id: profile.organization_id });
+
+      if (empError) {
+        console.error('Error fetching employees:', empError);
+      }
+
       // Get training coordinators
       const { data: coords } = await supabase
         .from('user_roles')
