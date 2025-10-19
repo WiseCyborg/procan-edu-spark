@@ -39,6 +39,7 @@ import ContentReviewDashboard from "./pages/ContentReviewDashboard";
 import TrainingHandbook from "./pages/TrainingHandbook";
 import DispensaryApplication from "./pages/DispensaryApplication";
 import GetStarted from "./pages/GetStarted";
+import TeamManagement from "./pages/TeamManagement";
 import { COMARBanner } from "./components/layout/COMARBanner";
 
 const queryClient = new QueryClient();
@@ -174,6 +175,12 @@ const App = () => (
                    <Route path="/org/apply" element={<DispensaryApplication />} />
                    
                    <Route path="/get-started" element={<GetStarted />} />
+                   
+                   <Route path="/team-management" element={
+                     <ProtectedRoute>
+                       <TeamManagement />
+                     </ProtectedRoute>
+                   } />
                    
                     <Route path="/admin" element={
                      <ProtectedRoute>
