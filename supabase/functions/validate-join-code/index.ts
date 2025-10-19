@@ -63,6 +63,43 @@ serve(async (req) => {
       });
     }
 
+    // Check seat availability
+    const { data: hasSeats, error: seatError } = await supabase.rpc('check_seat_availability', {
+      org_id: joinCode.organization_id,
+      course_id: null // Will use default course
+    });
+
+    if (seatError) {
+      console.error('Error checking seat availability:', seatError);
+    }
+
+    if (!hasSeats) {
+      // Get manager contact info
+      const { data: managerProfile } = await supabase
+        .from('user_roles')
+        .select('profiles(first_name, last_name, email)')
+        .eq('role', 'dispensary_manager')
+        .limit(1)
+        .maybeSingle();
+
+      const managerName = managerProfile?.profiles 
+        ? `${managerProfile.profiles.first_name} ${managerProfile.profiles.last_name}`
+        : 'your manager';
+      const managerEmail = managerProfile?.profiles?.email || '';
+
+      return new Response(JSON.stringify({ 
+        valid: false, 
+        error: "No available training seats",
+        message: `Your organization has no available training seats. Please contact ${managerName}${managerEmail ? ` at ${managerEmail}` : ''} to purchase more seats.`,
+        organizationName: joinCode.organizations.name,
+        managerName,
+        managerEmail
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
     return new Response(JSON.stringify({ 
       valid: true,
       organizationId: joinCode.organization_id,

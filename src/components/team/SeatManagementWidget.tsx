@@ -5,6 +5,7 @@ import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { ShoppingCart, Users, CheckCircle, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "@/components/ui/use-toast";
 
 interface SeatStatus {
   total_purchased: number;
@@ -25,6 +26,41 @@ export function SeatManagementWidget({ organizationId }: SeatManagementWidgetPro
 
   useEffect(() => {
     fetchSeatStatus();
+
+    // Subscribe to real-time seat changes
+    const channel = supabase
+      .channel('seat-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'rvt_seats',
+          filter: `organization_id=eq.${organizationId}`
+        },
+        (payload) => {
+          console.log('Seat change detected:', payload);
+          fetchSeatStatus();
+          
+          // Show toast notifications
+          if (payload.eventType === 'INSERT') {
+            toast({
+              title: "New seat allocated!",
+              description: "A seat has been assigned to a student.",
+            });
+          } else if (payload.eventType === 'UPDATE' && (payload.new as any)?.status === 'used') {
+            toast({
+              title: "Student completed training!",
+              description: "A seat has been marked as used.",
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [organizationId]);
 
   const fetchSeatStatus = async () => {
@@ -68,7 +104,15 @@ export function SeatManagementWidget({ organizationId }: SeatManagementWidgetPro
       </CardHeader>
       <CardContent className="space-y-4">
         {loading ? (
-          <div className="text-center py-4">Loading...</div>
+          <div className="space-y-4">
+            <div className="h-8 w-full bg-muted animate-pulse rounded" />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="h-24 w-full bg-muted animate-pulse rounded" />
+              <div className="h-24 w-full bg-muted animate-pulse rounded" />
+              <div className="h-24 w-full bg-muted animate-pulse rounded" />
+              <div className="h-24 w-full bg-muted animate-pulse rounded" />
+            </div>
+          </div>
         ) : (
           <>
             <div className="space-y-2">

@@ -1,25 +1,78 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useProfileCompletion } from '@/hooks/useProfileCompletion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { DeadlineCountdown } from '@/components/course/DeadlineCountdown';
-import { Award, BookOpen, Target, TrendingUp } from 'lucide-react';
+import { ProfileCompletionBanner } from '@/components/ProfileCompletionBanner';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Award, BookOpen, Target, TrendingUp, AlertTriangle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
 const StudentDashboard = () => {
   const { user } = useAuth();
   const { isStudent } = useUserRole();
+  const { completionPercentage, isProfileComplete } = useProfileCompletion();
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate data loading
+    const timer = setTimeout(() => setIsLoading(false), 800);
+    return () => clearTimeout(timer);
+  }, []);
 
   if (!isStudent) {
     return null;
   }
 
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-6 space-y-6">
+        <Skeleton className="h-12 w-64" />
+        <div className="grid gap-4 md:grid-cols-3">
+          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-32 w-full" />
+        </div>
+        <Skeleton className="h-48 w-full" />
+        <Skeleton className="h-64 w-full" />
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto p-6 space-y-6">
+      {/* Profile Completion Banner */}
+      <ProfileCompletionBanner />
+
+      {/* Profile Completion Card (if incomplete) */}
+      {!isProfileComplete() && (
+        <Card className="border-orange-200 bg-orange-50 dark:bg-orange-950">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-orange-600" />
+              Action Required: Complete Your Profile
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Progress value={completionPercentage} className="h-2" />
+            <p className="text-sm text-muted-foreground">
+              {completionPercentage}% complete - Finish your profile to access all course features
+            </p>
+            <Button 
+              onClick={() => navigate('/profile')} 
+              className="bg-orange-600 hover:bg-orange-700"
+            >
+              Complete Profile Now ({100 - completionPercentage}% remaining)
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-foreground">My Training Dashboard</h1>

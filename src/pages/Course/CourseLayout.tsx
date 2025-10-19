@@ -13,6 +13,7 @@ import { toast } from '@/components/ui/use-toast';
 import { CoursePaymentGate } from '@/components/CoursePaymentGate';
 import { ProtectedCourseAccess } from '@/components/ProtectedCourseAccess';
 import { EmployeeAccessMessage } from '@/components/EmployeeAccessMessage';
+import { Breadcrumbs } from '@/components/navigation/Breadcrumbs';
 
 const TOTAL_MODULES = 18; // Main course modules (not including Module 0)
 const COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
@@ -111,6 +112,7 @@ const CourseLayout: React.FC = () => {
   return (
     <ProtectedCourseAccess>
       <div className="container mx-auto p-6 space-y-6">
+      <Breadcrumbs />
       <Card>
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-bold text-primary">

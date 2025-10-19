@@ -42,6 +42,8 @@ import GetStarted from "./pages/GetStarted";
 import TeamManagement from "./pages/TeamManagement";
 import { COMARBanner } from "./components/layout/COMARBanner";
 
+import { ProtectedCourseAccess } from "./components/ProtectedCourseAccess";
+
 const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -132,19 +134,25 @@ const App = () => (
                   
                   <Route path="/course" element={
                     <ProtectedRoute>
-                      <CourseLayout />
+                      <ProtectedCourseAccess>
+                        <CourseLayout />
+                      </ProtectedCourseAccess>
                     </ProtectedRoute>
                   } />
                   
                    <Route path="/course/:moduleId" element={
                      <ProtectedRoute>
-                       <EnhancedCourseModule />
+                       <ProtectedCourseAccess>
+                         <EnhancedCourseModule />
+                       </ProtectedCourseAccess>
                      </ProtectedRoute>
                    } />
                   
                   <Route path="/course/final-exam" element={
                     <ProtectedRoute>
-                      <FinalExam />
+                      <ProtectedCourseAccess>
+                        <FinalExam />
+                      </ProtectedCourseAccess>
                     </ProtectedRoute>
                   } />
                   

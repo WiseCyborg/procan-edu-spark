@@ -1,15 +1,16 @@
-
 import React, { useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useProfileCompletion } from '@/hooks/useProfileCompletion';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle, BookOpen, Award } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
+import { CheckCircle, BookOpen, Award, Lock } from 'lucide-react';
 
 const Welcome = () => {
   const { user } = useAuth();
+  const { completionPercentage, isProfileComplete } = useProfileCompletion();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -65,6 +66,82 @@ const Welcome = () => {
                 </p>
               </div>
 
+              {/* Interactive Onboarding Checklist */}
+              <Card className="bg-gradient-to-r from-green-50 to-blue-50 mb-8">
+                <CardContent className="p-6">
+                  <h3 className="font-semibold text-lg mb-4">Your Onboarding Checklist</h3>
+                  <div className="space-y-4">
+                    {/* Step 1: Account Created */}
+                    <div className="flex items-start gap-3">
+                      <CheckCircle className="h-6 w-6 text-green-600 mt-1 flex-shrink-0" />
+                      <div className="flex-1">
+                        <p className="font-medium text-lg">Account Created ✅</p>
+                        <p className="text-sm text-muted-foreground">Welcome to ProCann Edu!</p>
+                      </div>
+                    </div>
+                    
+                    {/* Step 2: Complete Profile */}
+                    <div className="flex items-start gap-3">
+                      {isProfileComplete() ? (
+                        <CheckCircle className="h-6 w-6 text-green-600 mt-1 flex-shrink-0" />
+                      ) : (
+                        <div className="bg-orange-200 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mt-1 flex-shrink-0">
+                          {completionPercentage}%
+                        </div>
+                      )}
+                      <div className="flex-1">
+                        <p className="font-medium text-lg">
+                          Complete Profile {isProfileComplete() ? '✅' : '⏳'}
+                        </p>
+                        <Progress value={completionPercentage} className="mt-2 h-2" />
+                        <p className="text-sm text-muted-foreground mt-2">
+                          {isProfileComplete() 
+                            ? "Your profile is complete!" 
+                            : `${100 - completionPercentage}% remaining`}
+                        </p>
+                        {!isProfileComplete() && (
+                          <Button 
+                            size="sm" 
+                            className="mt-3 bg-orange-600 hover:bg-orange-700" 
+                            onClick={() => navigate('/profile')}
+                          >
+                            Complete Now ({100 - completionPercentage}% remaining)
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Step 3: Start Training */}
+                    <div className="flex items-start gap-3">
+                      {isProfileComplete() ? (
+                        <div className="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mt-1 flex-shrink-0">
+                          3
+                        </div>
+                      ) : (
+                        <Lock className="h-6 w-6 text-gray-400 mt-1 flex-shrink-0" />
+                      )}
+                      <div className="flex-1">
+                        <p className="font-medium text-lg">Start Training 🚀</p>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {isProfileComplete() 
+                            ? "Ready to begin! Click below to start Module 1." 
+                            : "Complete your profile first to unlock training."}
+                        </p>
+                        {isProfileComplete() && (
+                          <Button 
+                            size="sm" 
+                            className="mt-3 bg-blue-600 hover:bg-blue-700" 
+                            onClick={() => navigate('/course')}
+                          >
+                            Start Module 1
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div className="text-center">
                   <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-4" />
@@ -83,35 +160,6 @@ const Welcome = () => {
                 </div>
               </div>
 
-              <Card className="bg-gray-50 mb-8">
-                <CardContent className="p-6">
-                  <h3 className="font-semibold text-lg mb-4">What's Next?</h3>
-                  <div className="space-y-3">
-                    <div className="flex items-start">
-                      <div className="bg-green-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-3 mt-0.5">1</div>
-                      <div>
-                        <p className="font-medium">Complete Your Profile</p>
-                        <p className="text-sm text-gray-600">Add any additional information to your profile</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start">
-                      <div className="bg-green-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-3 mt-0.5">2</div>
-                      <div>
-                        <p className="font-medium">Start the RVT Course</p>
-                        <p className="text-sm text-gray-600">Begin with Module 1 of the Maryland Responsible Vendor Training</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start">
-                      <div className="bg-green-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-3 mt-0.5">3</div>
-                      <div>
-                        <p className="font-medium">Take the Final Exam</p>
-                        <p className="text-sm text-gray-600">Complete all modules and pass the certification exam</p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
               <div className="text-center">
                 <Button 
                   onClick={() => navigate('/dashboard')}
@@ -120,13 +168,15 @@ const Welcome = () => {
                 >
                   Go to Dashboard
                 </Button>
-                <Button 
-                  onClick={() => navigate('/course')}
-                  size="lg"
-                  variant="outline"
-                >
-                  Start Course
-                </Button>
+                {isProfileComplete() && (
+                  <Button 
+                    onClick={() => navigate('/course')}
+                    size="lg"
+                    variant="outline"
+                  >
+                    Start Course
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>

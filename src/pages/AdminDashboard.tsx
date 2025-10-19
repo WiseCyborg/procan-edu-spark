@@ -1,3 +1,4 @@
+import { Breadcrumbs } from '@/components/navigation/Breadcrumbs';
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -269,6 +270,7 @@ const AdminDashboard = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
       <div className="container mx-auto px-4 py-8">
+        <Breadcrumbs />
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-green-700 flex items-center">
