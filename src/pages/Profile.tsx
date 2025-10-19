@@ -10,8 +10,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/components/ui/use-toast';
-import { User, Save, Calendar, MapPin, Phone, Settings } from 'lucide-react';
+import { User, Save, Calendar, MapPin, Phone, Settings, AlertCircle, ArrowRight } from 'lucide-react';
 import { VerificationPreferencesSetup } from '@/components/auth/VerificationPreferencesSetup';
+import { ProfileChangeHistoryViewer } from '@/components/admin/ProfileChangeHistoryViewer';
 
 interface ProfileData {
   first_name: string;
@@ -47,6 +48,8 @@ const Profile: React.FC = () => {
     emergency_contact_name: '',
     emergency_contact_phone: ''
   });
+  const [originalProfile, setOriginalProfile] = useState<ProfileData | null>(null);
+  const [changedFields, setChangedFields] = useState<Set<keyof ProfileData>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -67,7 +70,7 @@ const Profile: React.FC = () => {
         }
 
         if (data) {
-          setProfile({
+          const loadedProfile = {
             first_name: data.first_name || '',
             last_name: data.last_name || '',
             phone: data.phone || '',
@@ -81,7 +84,9 @@ const Profile: React.FC = () => {
             zip_code: data.zip_code || '',
             emergency_contact_name: data.emergency_contact_name || '',
             emergency_contact_phone: data.emergency_contact_phone || ''
-          });
+          };
+          setProfile(loadedProfile);
+          setOriginalProfile(loadedProfile);
         }
       } catch (error) {
         console.error('Error in fetchProfile:', error);
@@ -95,6 +100,17 @@ const Profile: React.FC = () => {
 
   const handleInputChange = (field: keyof ProfileData, value: string) => {
     setProfile(prev => ({ ...prev, [field]: value }));
+    
+    // Track which fields have changed
+    if (originalProfile && value !== originalProfile[field]) {
+      setChangedFields(prev => new Set(prev).add(field));
+    } else {
+      setChangedFields(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(field);
+        return newSet;
+      });
+    }
   };
 
   const validateProfile = () => {
@@ -206,8 +222,12 @@ const Profile: React.FC = () => {
 
       toast({
         title: "Success",
-        description: "Profile updated successfully"
+        description: `${changedFields.size} field(s) updated successfully`
       });
+      
+      // Update baseline after successful save
+      setOriginalProfile(profile);
+      setChangedFields(new Set());
     } catch (error) {
       console.error('Error in handleSave:', error);
       toast({
@@ -247,8 +267,34 @@ const Profile: React.FC = () => {
         </div>
       </div>
 
+      {changedFields.size > 0 && (
+        <Card className="border-orange-500 bg-orange-50 dark:bg-orange-950">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-orange-900 dark:text-orange-100">
+              <AlertCircle className="w-5 h-5" />
+              Pending Changes ({changedFields.size})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-2">
+              {Array.from(changedFields).map(field => (
+                <li key={field} className="flex items-center gap-2 text-sm">
+                  <ArrowRight className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                  <span className="font-medium">
+                    {field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                  </span>
+                  <span className="text-muted-foreground">
+                    {originalProfile?.[field] || '(empty)'} → {profile[field] || '(empty)'}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
+
       <Tabs defaultValue="profile" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="profile" className="flex items-center gap-2">
             <User className="w-4 h-4" />
             Profile Information
@@ -256,6 +302,10 @@ const Profile: React.FC = () => {
           <TabsTrigger value="verification" className="flex items-center gap-2">
             <Settings className="w-4 h-4" />
             Verification Settings
+          </TabsTrigger>
+          <TabsTrigger value="history" className="flex items-center gap-2">
+            <Calendar className="w-4 h-4" />
+            My Change History
           </TabsTrigger>
         </TabsList>
         
@@ -446,6 +496,10 @@ const Profile: React.FC = () => {
         
         <TabsContent value="verification" className="space-y-6">
           <VerificationPreferencesSetup />
+        </TabsContent>
+        
+        <TabsContent value="history" className="space-y-6">
+          {user && <ProfileChangeHistoryViewer userId={user.id} showAsUser={true} />}
         </TabsContent>
       </Tabs>
     </div>

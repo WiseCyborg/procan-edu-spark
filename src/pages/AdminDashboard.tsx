@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { 
   Users, 
   TrendingUp, 
@@ -13,7 +15,8 @@ import {
   Calendar,
   Building2,
   BarChart3,
-  Settings
+  Settings,
+  Search
 } from 'lucide-react';
 import { SmartNotificationSystem } from '@/components/admin/SmartNotificationSystem';
 import { BulkOperationsManager } from '@/components/admin/BulkOperationsManager';
@@ -28,6 +31,7 @@ import { ComplianceReportingDashboard } from '@/components/admin/ComplianceRepor
 import { AdvancedEmployeeManagement } from '@/components/admin/AdvancedEmployeeManagement';
 import { SecurityMonitoringDashboard } from '@/components/admin/SecurityMonitoringDashboard';
 import EmailMonitoringDashboard from '@/components/admin/EmailMonitoringDashboard';
+import { ProfileChangeHistoryViewer } from '@/components/admin/ProfileChangeHistoryViewer';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -74,12 +78,48 @@ const AdminDashboard = () => {
   const [users, setUsers] = useState<UserAnalytics[]>([]);
   const [organizations, setOrganizations] = useState<OrganizationData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [userSearchTerm, setUserSearchTerm] = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [selectedUserId, setSelectedUserId] = useState<string>('');
+  const [searchLoading, setSearchLoading] = useState(false);
 
   useEffect(() => {
     if (user) {
       fetchAdminData();
     }
   }, [user]);
+
+  const searchUsers = async (term: string) => {
+    if (!term || term.length < 2) {
+      setSearchResults([]);
+      return;
+    }
+
+    setSearchLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('user_id, first_name, last_name')
+        .or(`first_name.ilike.%${term}%,last_name.ilike.%${term}%`)
+        .limit(10);
+
+      if (error) throw error;
+      setSearchResults(data || []);
+    } catch (error) {
+      console.error('Error searching users:', error);
+      setSearchResults([]);
+    } finally {
+      setSearchLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const delaySearch = setTimeout(() => {
+      searchUsers(userSearchTerm);
+    }, 300);
+
+    return () => clearTimeout(delaySearch);
+  }, [userSearchTerm]);
 
   const fetchAdminData = async () => {
     try {
@@ -314,7 +354,7 @@ const AdminDashboard = () => {
 
         {/* Main Content */}
         <Tabs defaultValue="users" className="w-full">
-          <TabsList className="grid w-full grid-cols-6 lg:grid-cols-12">
+          <TabsList className="grid w-full grid-cols-6 lg:grid-cols-13">
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="organizations">Organizations</TabsTrigger>
             <TabsTrigger value="applications">Applications</TabsTrigger>
@@ -325,6 +365,7 @@ const AdminDashboard = () => {
             <TabsTrigger value="compliance">Compliance</TabsTrigger>
             <TabsTrigger value="employees">Employees</TabsTrigger>
             <TabsTrigger value="security">Security</TabsTrigger>
+            <TabsTrigger value="profile-audit">👤 Profile Audit</TabsTrigger>
             <TabsTrigger value="email-monitoring">📧 Email</TabsTrigger>
             <TabsTrigger value="revenue">Revenue</TabsTrigger>
             <TabsTrigger value="notifications">Notifications</TabsTrigger>
@@ -458,6 +499,52 @@ const AdminDashboard = () => {
 
           <TabsContent value="security">
             <SecurityMonitoringDashboard />
+          </TabsContent>
+
+          <TabsContent value="profile-audit">
+            <Card>
+              <CardHeader>
+                <CardTitle>Profile Change Audit Log</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Search User</Label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search by name..."
+                      value={userSearchTerm}
+                      onChange={e => setUserSearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                  {searchLoading && (
+                    <p className="text-sm text-muted-foreground">Searching...</p>
+                  )}
+                  {searchResults.length > 0 && (
+                    <div className="border rounded-md divide-y max-h-48 overflow-y-auto">
+                      {searchResults.map(user => (
+                        <button
+                          key={user.user_id}
+                          onClick={() => {
+                            setSelectedUserId(user.user_id);
+                            setUserSearchTerm(`${user.first_name} ${user.last_name}`);
+                            setSearchResults([]);
+                          }}
+                          className="w-full px-4 py-2 text-left hover:bg-accent transition-colors"
+                        >
+                          {user.first_name} {user.last_name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {selectedUserId && (
+                  <ProfileChangeHistoryViewer userId={selectedUserId} />
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="email-monitoring">

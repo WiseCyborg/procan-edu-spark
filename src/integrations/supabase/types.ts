@@ -2044,6 +2044,16 @@ export type Database = {
           utilization_percentage: number
         }[]
       }
+      get_profile_change_history: {
+        Args: { _limit?: number; _user_id: string }
+        Returns: {
+          changed_at: string
+          changed_by: string
+          field_name: string
+          new_value: string
+          old_value: string
+        }[]
+      }
       get_user_organization_id: {
         Args: { user_uuid: string }
         Returns: string
@@ -2081,6 +2091,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_own_profile: {
+        Args: { _profile_user_id: string; _user_id: string }
         Returns: boolean
       }
       log_security_event: {
