@@ -88,9 +88,10 @@ const DispensaryApplicationManager = () => {
 
       const result = data[0];
       if (result.success) {
+        const dispensaryNumber = (result as any).dispensary_number || 'N/A';
         toast({
           title: "Application Approved",
-          description: `Organization created with access key: ${result.access_key}`,
+          description: `Dispensary #${dispensaryNumber} created! Access key: ${result.access_key}`,
         });
         fetchApplications(); // Refresh the list
         setSelectedApplication(null);

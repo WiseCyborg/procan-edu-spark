@@ -229,6 +229,33 @@ const StudentAuthForm = () => {
             console.error('Error updating profile:', profileError);
           }
 
+          // Get default course (RVT-MD)
+          const { data: courseData } = await supabase
+            .from('courses')
+            .select('id')
+            .eq('is_active', true)
+            .limit(1)
+            .single();
+
+          // Create enrollment with 30-day deadline
+          if (courseData) {
+            const deadlineDate = new Date();
+            deadlineDate.setDate(deadlineDate.getDate() + 30);
+            
+            const { error: enrollmentError } = await supabase
+              .from('rvt_enrollments' as any)
+              .insert({
+                user_id: authData.user.id,
+                organization_id: orgData.id,
+                course_id: courseData.id,
+                deadline_at: deadlineDate.toISOString(),
+              });
+
+            if (enrollmentError) {
+              console.error('Error creating enrollment:', enrollmentError);
+            }
+          }
+
           // If from invitation, mark it as accepted
           if (invitationToken && invitationData) {
             const { error: acceptError } = await supabase.functions.invoke('accept-invitation', {

@@ -37,6 +37,7 @@ import SecureCertificateVerification from "./pages/SecureCertificateVerification
 import AdvancedAnalytics from "./pages/AdvancedAnalytics";
 import ContentReviewDashboard from "./pages/ContentReviewDashboard";
 import TrainingHandbook from "./pages/TrainingHandbook";
+import DispensaryApplication from "./pages/DispensaryApplication";
 
 const queryClient = new QueryClient();
 
@@ -164,6 +165,8 @@ const App = () => (
                        <PurchaseSeats />
                      </ProtectedRoute>
                    } />
+                   
+                   <Route path="/org/apply" element={<DispensaryApplication />} />
                    
                     <Route path="/admin" element={
                      <ProtectedRoute>
