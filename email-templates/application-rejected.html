@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Application Status Update</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .header {
+      background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+      color: white;
+      padding: 40px 30px;
+      text-align: center;
+      border-radius: 8px 8px 0 0;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 28px;
+    }
+    .content {
+      background: #f9fafb;
+      padding: 30px;
+      border-radius: 0 0 8px 8px;
+    }
+    .reason-box {
+      background: #fff7ed;
+      border-left: 4px solid #f59e0b;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    .reason-box h3 {
+      color: #d97706;
+      margin-top: 0;
+    }
+    .next-steps {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+      border-left: 4px solid #3b82f6;
+    }
+    .next-steps h3 {
+      color: #3b82f6;
+      margin-top: 0;
+    }
+    .next-steps ol {
+      padding-left: 20px;
+    }
+    .next-steps li {
+      margin: 12px 0;
+    }
+    .cta-button {
+      display: inline-block;
+      background: #3b82f6;
+      color: white;
+      padding: 14px 28px;
+      text-decoration: none;
+      border-radius: 6px;
+      margin: 20px 0;
+      font-weight: bold;
+    }
+    .cta-button:hover {
+      background: #2563eb;
+    }
+    .info-box {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    .footer {
+      text-align: center;
+      color: #6b7280;
+      font-size: 14px;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #e5e7eb;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Application Status Update</h1>
+    <p style="font-size: 16px; margin: 10px 0 0 0;">{{ .OrganizationName }}</p>
+  </div>
+  
+  <div class="content">
+    <p>Dear <strong>{{ .ContactPerson }}</strong>,</p>
+    
+    <p>Thank you for your interest in ProCannEdu's Maryland Responsible Vendor Training platform. After careful review, we are unable to approve your application at this time.</p>
+    
+    <div class="reason-box">
+      <h3>📋 Reason for Decision</h3>
+      <p>{{ .RejectionReason }}</p>
+    </div>
+
+    <div class="next-steps">
+      <h3>🔄 What You Can Do Next</h3>
+      <ol>
+        <li>
+          <strong>Address the Issues:</strong><br>
+          Review the reason provided above and gather any missing documentation or information.
+        </li>
+        <li>
+          <strong>Contact Support:</strong><br>
+          Our team is happy to discuss your application and provide guidance on how to proceed.
+        </li>
+        <li>
+          <strong>Resubmit Your Application:</strong><br>
+          Once you've addressed the concerns, you're welcome to submit a new application.
+        </li>
+      </ol>
+    </div>
+
+    <center>
+      <a href="{{ .ReapplyURL }}" class="cta-button">
+        Resubmit Application
+      </a>
+    </center>
+
+    <div class="info-box">
+      <h3 style="margin-top: 0; color: #3b82f6;">Need Assistance?</h3>
+      <p>Our support team is here to help you through the process:</p>
+      <ul style="padding-left: 20px;">
+        <li>📧 Email: <a href="mailto:support@procannedu.com">support@procannedu.com</a></li>
+        <li>📞 Phone: 1-800-PROCANN</li>
+        <li>💬 Live Chat: Available on our website</li>
+      </ul>
+      <p style="margin-bottom: 0;">We're committed to helping every Maryland dispensary achieve compliance.</p>
+    </div>
+
+    <p style="margin-top: 30px; font-size: 14px; color: #6b7280;">
+      We appreciate your understanding and look forward to the possibility of working with you in the future.
+    </p>
+  </div>
+  
+  <div class="footer">
+    <p>© 2024 ProCannEdu - Maryland Responsible Vendor Training</p>
+    <p style="margin-top: 10px; font-size: 12px;">
+      This decision does not affect your eligibility for other training programs or services.
+    </p>
+  </div>
+</body>
+</html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seat Purchase Confirmation</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .header {
+      background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+      border-radius: 8px 8px 0 0;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 28px;
+    }
+    .content {
+      background: #f9fafb;
+      padding: 30px;
+      border-radius: 0 0 8px 8px;
+    }
+    .summary-box {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+      border-left: 4px solid #16a34a;
+    }
+    .summary-box h3 {
+      margin-top: 0;
+      color: #16a34a;
+    }
+    .summary-item {
+      display: flex;
+      justify-between;
+      margin: 10px 0;
+      padding: 8px 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .summary-item:last-child {
+      border-bottom: none;
+      font-weight: bold;
+      font-size: 18px;
+    }
+    .cta-button {
+      display: inline-block;
+      background: #16a34a;
+      color: white;
+      padding: 14px 28px;
+      text-decoration: none;
+      border-radius: 6px;
+      margin: 20px 0;
+      font-weight: bold;
+    }
+    .cta-button:hover {
+      background: #15803d;
+    }
+    .next-steps {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    .next-steps ol {
+      padding-left: 20px;
+    }
+    .next-steps li {
+      margin: 12px 0;
+    }
+    .footer {
+      text-align: center;
+      color: #6b7280;
+      font-size: 14px;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #e5e7eb;
+    }
+    .icon {
+      font-size: 48px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="icon">🎉</div>
+    <h1>Purchase Successful!</h1>
+    <p>Thank you for your purchase</p>
+  </div>
+  
+  <div class="content">
+    <p>Hi <strong>{{ .CoordinatorName }}</strong>,</p>
+    
+    <p>Congratulations! You've successfully purchased training seats for your organization.</p>
+    
+    <div class="summary-box">
+      <h3>📋 Purchase Summary</h3>
+      <div class="summary-item">
+        <span>Seats Purchased:</span>
+        <span><strong>{{ .QuantityPurchased }}</strong></span>
+      </div>
+      <div class="summary-item">
+        <span>Amount Paid:</span>
+        <span><strong>${{ .TotalAmount }}</strong></span>
+      </div>
+      <div class="summary-item">
+        <span>Purchase Date:</span>
+        <span>{{ .OrderDate }}</span>
+      </div>
+      <div class="summary-item">
+        <span>Organization:</span>
+        <span>{{ .OrganizationName }}</span>
+      </div>
+    </div>
+
+    <div class="next-steps">
+      <h3>🚀 Next Steps</h3>
+      <ol>
+        <li><strong>Assign Seats:</strong> Allocate training seats to your employees through the Seat Management dashboard.</li>
+        <li><strong>Invite Employees:</strong> Send email invitations to employees who have been assigned seats.</li>
+        <li><strong>Track Progress:</strong> Monitor employee training progress and completion rates from your dashboard.</li>
+        <li><strong>Download Reports:</strong> Generate compliance reports for regulatory audits and internal reviews.</li>
+      </ol>
+    </div>
+
+    <center>
+      <a href="{{ .AssignSeatsURL }}" class="cta-button">
+        Assign Seats Now →
+      </a>
+    </center>
+
+    <p style="margin-top: 30px; font-size: 14px; color: #6b7280;">
+      <strong>Access Key:</strong> {{ .AccessKey }}<br>
+      Save this for your records
+    </p>
+  </div>
+  
+  <div class="footer">
+    <p>Need help? Contact us at <a href="mailto:support@procannedu.com">support@procannedu.com</a></p>
+    <p>© 2024 ProCannEdu - Maryland Responsible Vendor Training</p>
+  </div>
+</body>
+</html>

@@ -89,11 +89,23 @@ const DispensaryApplicationManager = () => {
       const result = data[0];
       if (result.success) {
         const dispensaryNumber = (result as any).dispensary_number || 'N/A';
+        
+        // Send approval notification
+        await supabase.functions.invoke('notify-application-status', {
+          body: {
+            application_id: applicationId,
+            status: 'approved',
+            access_key: result.access_key,
+            applicant_email: selectedApplication.contact_email,
+            organization_name: selectedApplication.organization_name
+          }
+        });
+        
         toast({
           title: "Application Approved",
           description: `Dispensary #${dispensaryNumber} created! Access key: ${result.access_key}`,
         });
-        fetchApplications(); // Refresh the list
+        fetchApplications();
         setSelectedApplication(null);
         setAdminNotes('');
       } else {
@@ -129,11 +141,22 @@ const DispensaryApplicationManager = () => {
 
       const result = data[0];
       if (result.success) {
+        // Send rejection notification
+        await supabase.functions.invoke('notify-application-status', {
+          body: {
+            application_id: applicationId,
+            status: 'rejected',
+            rejection_reason: reason,
+            applicant_email: selectedApplication.contact_email,
+            organization_name: selectedApplication.organization_name
+          }
+        });
+        
         toast({
           title: "Application Rejected",
           description: "Application rejected successfully",
         });
-        fetchApplications(); // Refresh the list
+        fetchApplications();
         setSelectedApplication(null);
         setAdminNotes('');
       } else {

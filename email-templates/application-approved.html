@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Application Approved</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .header {
+      background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+      color: white;
+      padding: 40px 30px;
+      text-align: center;
+      border-radius: 8px 8px 0 0;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 32px;
+    }
+    .content {
+      background: #f9fafb;
+      padding: 30px;
+      border-radius: 0 0 8px 8px;
+    }
+    .access-key-box {
+      background: #fef3c7;
+      border: 2px solid #f59e0b;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+      text-align: center;
+    }
+    .access-key {
+      font-size: 28px;
+      font-weight: bold;
+      color: #15803d;
+      letter-spacing: 2px;
+      font-family: 'Courier New', monospace;
+      margin: 10px 0;
+    }
+    .next-steps {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+      border-left: 4px solid #16a34a;
+    }
+    .next-steps h3 {
+      color: #16a34a;
+      margin-top: 0;
+    }
+    .next-steps ol {
+      padding-left: 20px;
+    }
+    .next-steps li {
+      margin: 12px 0;
+    }
+    .cta-button {
+      display: inline-block;
+      background: #16a34a;
+      color: white;
+      padding: 14px 28px;
+      text-decoration: none;
+      border-radius: 6px;
+      margin: 20px 0;
+      font-weight: bold;
+    }
+    .cta-button:hover {
+      background: #15803d;
+    }
+    .info-box {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    .footer {
+      text-align: center;
+      color: #6b7280;
+      font-size: 14px;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #e5e7eb;
+    }
+    .icon {
+      font-size: 64px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="icon">🎉</div>
+    <h1>Congratulations!</h1>
+    <p style="font-size: 18px; margin: 10px 0 0 0;">Your Dispensary Application Has Been Approved</p>
+  </div>
+  
+  <div class="content">
+    <p>Dear <strong>{{ .ContactPerson }}</strong>,</p>
+    
+    <p>We're thrilled to inform you that <strong>{{ .OrganizationName }}</strong> has been approved for ProCannEdu's Maryland Responsible Vendor Training platform!</p>
+    
+    <div class="access-key-box">
+      <p style="margin: 0 0 10px 0; font-weight: bold; color: #78350f;">🔑 Your Organization Access Key:</p>
+      <div class="access-key">{{ .AccessKey }}</div>
+      <p style="margin: 10px 0 0 0; font-size: 14px; color: #78350f;">
+        ⚠️ Keep this key secure - you'll need it to register
+      </p>
+    </div>
+
+    <div class="next-steps">
+      <h3>🚀 Get Started in 3 Easy Steps</h3>
+      <ol>
+        <li>
+          <strong>Register Your Manager Account:</strong><br>
+          Use your access key to create your account as Dispensary Manager.
+        </li>
+        <li>
+          <strong>Purchase Training Seats:</strong><br>
+          Buy seats for your employees at $49.99 per seat. We recommend starting with 10 seats.
+        </li>
+        <li>
+          <strong>Invite Your Team:</strong><br>
+          Send invitations to employees and start their compliance training immediately.
+        </li>
+      </ol>
+    </div>
+
+    <center>
+      <a href="{{ .RegistrationURL }}" class="cta-button">
+        Register Now →
+      </a>
+    </center>
+
+    <div class="info-box">
+      <h3 style="margin-top: 0; color: #16a34a;">What's Included?</h3>
+      <ul style="padding-left: 20px;">
+        <li>✅ Full Maryland RVT Certification Course (18 modules)</li>
+        <li>✅ Official MCA-Approved Certification</li>
+        <li>✅ Progress Tracking Dashboard</li>
+        <li>✅ Compliance Reporting Tools</li>
+        <li>✅ 24/7 Online Access</li>
+        <li>✅ Email Support</li>
+      </ul>
+    </div>
+
+    <p style="margin-top: 30px; font-size: 14px; color: #6b7280;">
+      <strong>Important:</strong> Save your access key in a secure location. You'll need it every time you register a new manager or coordinator for your organization.
+    </p>
+  </div>
+  
+  <div class="footer">
+    <p>Questions? We're here to help!</p>
+    <p>📧 <a href="mailto:support@procannedu.com">support@procannedu.com</a></p>
+    <p>📞 Support: 1-800-PROCANN</p>
+    <p style="margin-top: 20px;">© 2024 ProCannEdu - Maryland Responsible Vendor Training</p>
+  </div>
+</body>
+</html>

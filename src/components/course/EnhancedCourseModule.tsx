@@ -11,6 +11,7 @@ import { useUserProgress } from '@/hooks/useUserProgress';
 import { VideoPlayer } from './VideoPlayer';
 import { DocumentViewer } from './DocumentViewer';
 import { InteractiveQuiz } from './InteractiveQuiz';
+import CourseContent from './CourseContent';
 
 interface ModuleContent {
   id: string;
@@ -1473,26 +1474,13 @@ const EnhancedCourseModule: React.FC = () => {
         <TabsContent value="overview" className="space-y-4">
           <Card>
             <CardContent className="p-6">
-              <div 
-                className="prose max-w-none"
-                dangerouslySetInnerHTML={{ __html: module.readingMaterial || '' }}
+              <CourseContent 
+                content={module.readingMaterial || ''} 
+                learningObjectives={module.learningObjectives}
+                estimatedTime={module.estimatedTime}
+                tier={module.stoplight_tier}
+                onComplete={() => setReadingCompleted(true)}
               />
-              <div className="mt-6">
-                <Button 
-                  onClick={() => setReadingCompleted(true)}
-                  disabled={readingCompleted}
-                  className="w-full"
-                >
-                  {readingCompleted ? (
-                    <>
-                      <CheckCircle className="w-4 h-4 mr-2" />
-                      Reading Completed
-                    </>
-                  ) : (
-                    'Mark Reading as Complete'
-                  )}
-                </Button>
-              </div>
             </CardContent>
           </Card>
         </TabsContent>

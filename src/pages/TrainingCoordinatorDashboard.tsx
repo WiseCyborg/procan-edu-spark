@@ -51,18 +51,11 @@ const TrainingCoordinatorDashboard = () => {
 
       setOrganizationId(profile.organization_id);
 
-      // Get employees
-      const { data: empData } = await supabase
-        .from('profiles')
-        .select(`
-          user_id,
-          first_name,
-          last_name,
-          email,
-          created_at
-        `)
-        .eq('organization_id', profile.organization_id);
+      // Get employees with real data using RPC
+      const { data: empData, error: empError } = await supabase
+        .rpc('get_organization_employees', { org_id: profile.organization_id });
 
+      if (empError) throw empError;
       setEmployees(empData || []);
 
       // Get at-risk students
@@ -150,7 +143,9 @@ const TrainingCoordinatorDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {employees.length > 0 ? '67%' : '0%'}
+              {employees.length > 0 
+                ? Math.round(employees.reduce((sum, emp) => sum + (emp.progress_percentage || 0), 0) / employees.length) + '%'
+                : '0%'}
             </div>
           </CardContent>
         </Card>

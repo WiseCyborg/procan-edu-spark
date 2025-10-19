@@ -92,6 +92,12 @@ export default function PurchaseSeats() {
       if (error) throw error;
 
       if (data?.url) {
+        // Store purchase info in sessionStorage for post-payment redirect
+        sessionStorage.setItem('pendingPurchase', JSON.stringify({
+          quantity,
+          totalPrice,
+          organizationId: organization.id
+        }));
         window.location.href = data.url;
       } else {
         throw new Error("No PayPal URL returned");

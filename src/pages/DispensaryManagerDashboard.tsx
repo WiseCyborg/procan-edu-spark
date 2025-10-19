@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SeatManagementWidget } from '@/components/team/SeatManagementWidget';
 import { CompletionAnalyticsWidget } from '@/components/team/CompletionAnalyticsWidget';
+import { SeatAssignmentManager } from '@/components/team/SeatAssignmentManager';
 import { Building2, CreditCard, Users, FileText, Settings, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
@@ -188,6 +189,7 @@ const DispensaryManagerDashboard = () => {
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="seats">Seat Management</TabsTrigger>
           <TabsTrigger value="coordinators">Team Management</TabsTrigger>
           <TabsTrigger value="compliance">Compliance Reports</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
@@ -198,6 +200,10 @@ const DispensaryManagerDashboard = () => {
             <SeatManagementWidget organizationId={organization.id} />
             <CompletionAnalyticsWidget organizationId={organization.id} />
           </div>
+        </TabsContent>
+        
+        <TabsContent value="seats" className="space-y-4">
+          <SeatAssignmentManager organizationId={organization.id} />
         </TabsContent>
 
         <TabsContent value="coordinators" className="space-y-4">
