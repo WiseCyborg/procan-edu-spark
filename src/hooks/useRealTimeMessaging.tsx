@@ -17,6 +17,7 @@ export interface Message {
   sender?: {
     first_name: string;
     last_name: string;
+    profile_photo_url?: string;
   };
 }
 
@@ -121,7 +122,7 @@ export const useRealTimeMessaging = () => {
       const senderIds = [...new Set(data?.map(msg => msg.sender_id) || [])];
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('user_id, first_name, last_name')
+        .select('user_id, first_name, last_name, profile_photo_url')
         .in('user_id', senderIds);
 
       const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
@@ -138,7 +139,8 @@ export const useRealTimeMessaging = () => {
         created_at: msg.created_at,
         sender: profileMap.get(msg.sender_id) ? {
           first_name: profileMap.get(msg.sender_id)!.first_name || '',
-          last_name: profileMap.get(msg.sender_id)!.last_name || ''
+          last_name: profileMap.get(msg.sender_id)!.last_name || '',
+          profile_photo_url: profileMap.get(msg.sender_id)!.profile_photo_url
         } : undefined
       })) || [];
 
@@ -153,7 +155,12 @@ export const useRealTimeMessaging = () => {
   }, []);
 
   // Send a message
-  const sendMessage = useCallback(async (conversationId: string, content: string, messageType: Message['message_type'] = 'text') => {
+  const sendMessage = useCallback(async (
+    conversationId: string, 
+    content: string, 
+    messageType: Message['message_type'] = 'text',
+    metadata?: any
+  ) => {
     if (!user || !content.trim()) return;
 
     try {
@@ -163,7 +170,8 @@ export const useRealTimeMessaging = () => {
           conversation_id: conversationId,
           sender_id: user.id,
           content: content.trim(),
-          message_type: messageType
+          message_type: messageType,
+          metadata: metadata || {}
         });
 
       if (error) throw error;

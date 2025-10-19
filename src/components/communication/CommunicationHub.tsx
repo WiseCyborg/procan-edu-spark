@@ -3,11 +3,13 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { MessageSquare, Plus, Users, Bell, Search } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { MessageSquare, Plus, Users, Bell, Search, Hash } from 'lucide-react';
 import { useRealTimeMessaging, type Conversation } from '@/hooks/useRealTimeMessaging';
 import { ConversationView } from './ConversationView';
 import { CreateConversationDialog } from './CreateConversationDialog';
 import { formatDistanceToNow } from 'date-fns';
+import { useUserRole } from '@/hooks/useUserRole';
 
 export const CommunicationHub = () => {
   const {
@@ -17,25 +19,48 @@ export const CommunicationHub = () => {
     setActiveConversation,
     createConversation
   } = useRealTimeMessaging();
+  const { isAdmin, isDispensaryManager, isTrainingCoordinator } = useUserRole();
 
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterType, setFilterType] = useState<string>('all');
 
-  const filteredConversations = conversations.filter(conv =>
-    conv.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    conv.last_message?.content.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredConversations = conversations
+    .filter(conv => {
+      // Filter by search term
+      const matchesSearch = !searchTerm || 
+        conv.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        conv.last_message?.content.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      // Filter by conversation type
+      const matchesType = filterType === 'all' || 
+        (filterType === 'direct' && conv.conversation_type === 'direct') ||
+        (filterType === 'group' && conv.conversation_type === 'group') ||
+        (filterType === 'announcement' && conv.conversation_type === 'announcement');
+      
+      return matchesSearch && matchesType;
+    })
+    .sort((a, b) => {
+      // Sort by last message time, most recent first
+      const aTime = a.last_message?.created_at || a.created_at;
+      const bTime = b.last_message?.created_at || b.created_at;
+      return new Date(bTime).getTime() - new Date(aTime).getTime();
+    });
 
   const getConversationIcon = (type: Conversation['conversation_type']) => {
     switch (type) {
       case 'announcement':
-        return <Bell className="h-4 w-4" />;
+        return <Bell className="h-4 w-4 text-amber-500" />;
       case 'group':
-        return <Users className="h-4 w-4" />;
+        return <Hash className="h-4 w-4 text-blue-500" />;
+      case 'direct':
+        return <MessageSquare className="h-4 w-4 text-green-500" />;
       default:
         return <MessageSquare className="h-4 w-4" />;
     }
   };
+
+  const canCreateAnnouncement = isAdmin || isDispensaryManager || isTrainingCoordinator;
 
   const getConversationTitle = (conv: Conversation) => {
     return conv.title || `${conv.conversation_type} conversation`;
@@ -54,17 +79,30 @@ export const CommunicationHub = () => {
       {/* Sidebar */}
       <div className="w-80 border-r bg-card">
         {/* Header */}
-        <div className="p-4 border-b bg-card/50">
-          <div className="flex items-center justify-between mb-3">
+        <div className="p-4 border-b bg-card/50 space-y-3">
+          <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-foreground">Messages</h2>
             <Button
               size="sm"
               onClick={() => setShowCreateDialog(true)}
               className="bg-primary text-primary-foreground hover:bg-primary/90"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-4 w-4 mr-1" />
+              New
             </Button>
           </div>
+          
+          {/* Filter Tabs */}
+          <Tabs value={filterType} onValueChange={setFilterType} className="w-full">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="all" className="text-xs">All</TabsTrigger>
+              <TabsTrigger value="direct" className="text-xs">Direct</TabsTrigger>
+              <TabsTrigger value="group" className="text-xs">Groups</TabsTrigger>
+              <TabsTrigger value="announcement" className="text-xs">
+                {canCreateAnnouncement ? 'Announce' : 'News'}
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
           
           {/* Search */}
           <div className="relative">

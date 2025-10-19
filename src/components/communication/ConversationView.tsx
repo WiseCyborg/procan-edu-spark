@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Send, MoreHorizontal } from 'lucide-react';
+import { Send, MoreHorizontal, Paperclip, Download, FileText, Image as ImageIcon } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useRealTimeMessaging } from '@/hooks/useRealTimeMessaging';
 import { formatDistanceToNow, format } from 'date-fns';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface ConversationViewProps {
   conversationId: string;
@@ -17,7 +19,9 @@ export const ConversationView = ({ conversationId }: ConversationViewProps) => {
   const { messages, sendMessage, fetchMessages } = useRealTimeMessaging();
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const conversationMessages = messages[conversationId] || [];
 
@@ -65,6 +69,90 @@ export const ConversationView = ({ conversationId }: ConversationViewProps) => {
     }
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file size (10MB max)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('File too large. Maximum size is 10MB');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${file.name}`;
+      const filePath = `${conversationId}/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('conversation-files')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('conversation-files')
+        .getPublicUrl(filePath);
+
+      await sendMessage(conversationId, file.name, 'file', {
+        fileUrl: publicUrl,
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+      });
+
+      toast.success('File uploaded successfully');
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      toast.error('Failed to upload file');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const renderFileAttachment = (message: any) => {
+    const { fileUrl, fileName, fileType } = message.metadata || {};
+    if (!fileUrl) return null;
+
+    const isImage = fileType?.startsWith('image/');
+
+    return (
+      <div className="mt-2 p-3 border rounded-lg bg-background/50">
+        <div className="flex items-center gap-3">
+          {isImage ? (
+            <ImageIcon className="h-5 w-5 text-muted-foreground" />
+          ) : (
+            <FileText className="h-5 w-5 text-muted-foreground" />
+          )}
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium truncate">{fileName}</p>
+          </div>
+          <a
+            href={fileUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            download={fileName}
+          >
+            <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
+              <Download className="h-4 w-4" />
+            </Button>
+          </a>
+        </div>
+        {isImage && (
+          <img
+            src={fileUrl}
+            alt={fileName}
+            className="mt-2 max-w-full h-auto rounded max-h-64 object-contain"
+          />
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
@@ -101,6 +189,12 @@ export const ConversationView = ({ conversationId }: ConversationViewProps) => {
                 <div className="flex-shrink-0">
                   {showAvatar ? (
                     <Avatar className="h-8 w-8">
+                      {message.sender?.profile_photo_url && (
+                        <AvatarImage 
+                          src={message.sender.profile_photo_url} 
+                          alt={`${message.sender.first_name} ${message.sender.last_name}`}
+                        />
+                      )}
                       <AvatarFallback className="text-xs bg-primary/10 text-primary">
                         {getInitials(message.sender?.first_name, message.sender?.last_name)}
                       </AvatarFallback>
@@ -135,9 +229,12 @@ export const ConversationView = ({ conversationId }: ConversationViewProps) => {
                         {message.content}
                       </div>
                     ) : (
-                      <div className="text-sm whitespace-pre-wrap">
-                        {message.content}
-                      </div>
+                      <>
+                        <div className="text-sm whitespace-pre-wrap">
+                          {message.content}
+                        </div>
+                        {message.message_type === 'file' && renderFileAttachment(message)}
+                      </>
                     )}
                     
                     {isOwn && (
@@ -157,17 +254,34 @@ export const ConversationView = ({ conversationId }: ConversationViewProps) => {
       {/* Message Input */}
       <div className="p-4 border-t bg-card/50">
         <form onSubmit={handleSendMessage} className="flex gap-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            onChange={handleFileUpload}
+            className="hidden"
+            accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv"
+          />
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="px-3"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+          >
+            <Paperclip className="h-4 w-4" />
+          </Button>
           <Input
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            placeholder="Type your message..."
-            disabled={sending}
+            placeholder={uploading ? "Uploading file..." : "Type your message..."}
+            disabled={sending || uploading}
             className="flex-1"
             autoComplete="off"
           />
           <Button 
             type="submit" 
-            disabled={!newMessage.trim() || sending}
+            disabled={!newMessage.trim() || sending || uploading}
             size="sm"
             className="px-3"
           >
