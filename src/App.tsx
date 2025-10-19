@@ -18,6 +18,9 @@ import DispensaryPortal from "./pages/DispensaryPortal";
 import EnhancedDispensaryPortal from "./pages/EnhancedDispensaryPortal";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminManagement from "./pages/AdminManagement";
+import DispensaryManagerDashboard from "./pages/DispensaryManagerDashboard";
+import TrainingCoordinatorDashboard from "./pages/TrainingCoordinatorDashboard";
+import StudentDashboard from "./pages/StudentDashboard";
 import EnhancedAdminDashboard from "./pages/EnhancedAdminDashboard";
 import RealTimeOperationsDashboard from "./pages/RealTimeOperationsDashboard";
 import Profile from "./pages/Profile";
@@ -189,6 +192,24 @@ const App = () => (
                    <Route path="/admin/content-review" element={
                      <ProtectedRoute>
                        <ContentReviewDashboard />
+                     </ProtectedRoute>
+                   } />
+                   
+                   <Route path="/dispensary-manager-dashboard" element={
+                     <ProtectedRoute>
+                       <DispensaryManagerDashboard />
+                     </ProtectedRoute>
+                   } />
+                   
+                   <Route path="/training-coordinator-dashboard" element={
+                     <ProtectedRoute>
+                       <TrainingCoordinatorDashboard />
+                     </ProtectedRoute>
+                   } />
+                   
+                   <Route path="/student-dashboard" element={
+                     <ProtectedRoute>
+                       <StudentDashboard />
                      </ProtectedRoute>
                    } />
                   

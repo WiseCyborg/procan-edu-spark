@@ -50,3 +50,6 @@ verify_jwt = false
 
 [functions.send-deadline-reminders]
 verify_jwt = false
+
+[functions.assign-training-coordinator]
+verify_jwt = true
