@@ -51,13 +51,15 @@ const FinalExam: React.FC = () => {
   const [isPaused, setIsPaused] = useState(false);
   const [timerRestarts, setTimerRestarts] = useState<{[key: string]: number}>({});
   const [showPhotoPopup, setShowPhotoPopup] = useState(false);
+  const [photoPreview, setPhotoPreview] = useState<string>('');
+  const [showInstructions, setShowInstructions] = useState(false);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const sectionTimerRef = useRef<NodeJS.Timeout | null>(null);
   const totalTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Quiz data
+  // Quiz data - All 18 sections with 2 questions each
   const quizzes: {[key: number]: QuizQuestion[]} = {
     1: [
       { q: "Which federal law classifies cannabis as a Schedule I drug?", a: "Controlled Substances Act", options: ["Controlled Substances Act", "Food and Drug Act", "Tax Code"] },
@@ -67,7 +69,91 @@ const FinalExam: React.FC = () => {
       { q: "What is a key SOP for dispensary operations?", a: "Daily inventory checks", options: ["Daily inventory checks", "Monthly sales reports", "Random pricing"] },
       { q: "Who must approve SOPs in Maryland?", a: "Maryland Cannabis Administration", options: ["FDA", "DEA", "Maryland Cannabis Administration"] }
     ],
-    // ... additional quiz sections would be defined here
+    3: [
+      { q: "What must be tracked in inventory?", a: "Batch numbers", options: ["Employee hours", "Batch numbers", "Store hours"] },
+      { q: "How often should inventory be reconciled?", a: "Daily", options: ["Weekly", "Daily", "Monthly"] }
+    ],
+    4: [
+      { q: "What is required before a sale?", a: "ID verification", options: ["ID verification", "Credit check", "Membership"] },
+      { q: "What is the minimum age for cannabis purchase?", a: "21", options: ["19", "21", "25"] }
+    ],
+    5: [
+      { q: "What safety measure prevents diversion?", a: "Locked storage", options: ["Open shelves", "Locked storage", "Public display"] },
+      { q: "What should be worn when handling cannabis?", a: "Gloves", options: ["Gloves", "Aprons", "Masks"] }
+    ],
+    6: [
+      { q: "What is the primary psychoactive component of cannabis?", a: "THC", options: ["CBD", "THC", "CBN"] },
+      { q: "Which is a potential adverse effect of cannabis?", a: "Anxiety", options: ["Pain relief", "Anxiety", "Improved sleep"] }
+    ],
+    7: [
+      { q: "How long must sales records be kept?", a: "5 years", options: ["1 year", "3 years", "5 years"] },
+      { q: "What must be recorded for each sale?", a: "Customer ID", options: ["Customer ID", "Employee mood", "Weather"] }
+    ],
+    8: [
+      { q: "What is required for dispensary security?", a: "Surveillance cameras", options: ["Open windows", "Surveillance cameras", "Signage"] },
+      { q: "Who must be notified of a security breach?", a: "Maryland Cannabis Administration", options: ["Local police only", "Maryland Cannabis Administration", "No one"] }
+    ],
+    9: [
+      { q: "What ensures compliance with COMAR?", a: "Regular audits", options: ["Customer feedback", "Regular audits", "Sales targets"] },
+      { q: "What is a penalty for non-compliance?", a: "Fines", options: ["Fines", "Awards", "Promotions"] }
+    ],
+    10: [
+      { q: "What must cannabis packaging be?", a: "Child-resistant", options: ["Transparent", "Child-resistant", "Colorful"] },
+      { q: "What is prohibited on packaging?", a: "Cartoon characters", options: ["Dosage info", "Cartoon characters", "Batch numbers"] }
+    ],
+    11: [
+      { q: "What must be on a cannabis label?", a: "THC content", options: ["THC content", "Store logo", "Employee name"] },
+      { q: "What warning is required on labels?", a: "Keep out of reach of children", options: ["Enjoy responsibly", "Keep out of reach of children", "Use daily"] }
+    ],
+    12: [
+      { q: "What is required for cannabis transport?", a: "Secure vehicle", options: ["Open truck", "Secure vehicle", "Public transit"] },
+      { q: "Who can transport cannabis?", a: "Licensed agents", options: ["Customers", "Licensed agents", "Anyone"] }
+    ],
+    13: [
+      { q: "How must cannabis waste be disposed?", a: "Rendered unusable", options: ["Thrown in trash", "Rendered unusable", "Recycled"] },
+      { q: "What records are kept for waste?", a: "Weight and date", options: ["Employee name", "Weight and date", "Customer feedback"] }
+    ],
+    14: [
+      { q: "What must be tested in cannabis?", a: "Pesticides", options: ["Color", "Pesticides", "Texture"] },
+      { q: "Who conducts cannabis testing?", a: "Licensed labs", options: ["Dispensary staff", "Licensed labs", "Customers"] }
+    ],
+    15: [
+      { q: "What should customers be educated on?", a: "Dosage forms", options: ["Store hours", "Dosage forms", "Employee names"] },
+      { q: "What symptom should customers report?", a: "Acute intoxication", options: ["Happiness", "Acute intoxication", "Energy"] }
+    ],
+    16: [
+      { q: "What is an emergency procedure?", a: "Evacuation plan", options: ["Price adjustment", "Evacuation plan", "Staff meeting"] },
+      { q: "Who is notified in an emergency?", a: "Authorities", options: ["Customers", "Authorities", "Media"] }
+    ],
+    17: [
+      { q: "How often must agents be trained?", a: "Every 12 months", options: ["Every 6 months", "Every 12 months", "Every 2 years"] },
+      { q: "What training covers drug interactions?", a: "RVT", options: ["Sales training", "RVT", "Marketing"] }
+    ],
+    18: [
+      { q: "What is an ethical duty of agents?", a: "Confidentiality", options: ["Upselling", "Confidentiality", "Advertising"] },
+      { q: "What should agents avoid?", a: "Misrepresenting products", options: ["Educating customers", "Misrepresenting products", "Following SOPs"] }
+    ]
+  };
+
+  const sectionTitles: {[key: number]: string} = {
+    1: "Federal and State Cannabis Laws",
+    2: "Standard Operating Procedures",
+    3: "Inventory Management",
+    4: "Sales Procedures",
+    5: "Safety Protocols",
+    6: "Health and Pharmacology",
+    7: "Record Keeping",
+    8: "Security Measures",
+    9: "Compliance Standards",
+    10: "Packaging Regulations",
+    11: "Labeling Requirements",
+    12: "Transportation Guidelines",
+    13: "Waste Management",
+    14: "Testing Standards",
+    15: "Customer Education",
+    16: "Emergency Procedures",
+    17: "Training Requirements",
+    18: "Ethical Standards"
   };
 
   // Check if all modules are completed before allowing exam access
@@ -175,12 +261,13 @@ const FinalExam: React.FC = () => {
       return;
     }
     
+    setShowInstructions(true);
     setShowPhotoPopup(true);
     
     // Set up camera
     setTimeout(() => {
       if (videoRef.current) {
-        navigator.mediaDevices.getUserMedia({ video: true })
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
           .then(stream => {
             if (videoRef.current) videoRef.current.srcObject = stream;
           })
@@ -192,7 +279,7 @@ const FinalExam: React.FC = () => {
     }, 100);
   };
 
-  const takePhoto = () => {
+  const takeTestShot = () => {
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
@@ -203,18 +290,37 @@ const FinalExam: React.FC = () => {
         canvas.height = video.videoHeight;
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
         const photo = canvas.toDataURL('image/png');
-        setUserData(prev => ({ ...prev, photo }));
-        
-        // Stop camera stream
-        const stream = video.srcObject as MediaStream;
-        if (stream) {
-          stream.getTracks().forEach(track => track.stop());
-        }
-        
-        setShowPhotoPopup(false);
-        setExamStage('ready');
+        setPhotoPreview(photo);
+        setShowInstructions(false);
+        toast.success('Preview captured! Review your photo or take another shot.');
       }
     }
+  };
+
+  const submitFinalPhoto = () => {
+    if (!photoPreview) {
+      toast.error("Please take a photo first");
+      return;
+    }
+    
+    setUserData(prev => ({ ...prev, photo: photoPreview }));
+    
+    // Stop camera stream
+    if (videoRef.current) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+    }
+    
+    setShowPhotoPopup(false);
+    setExamStage('ready');
+    toast.success('Photo verified! You can now start the exam.');
+  };
+
+  const retakePhoto = () => {
+    setPhotoPreview('');
+    setShowInstructions(true);
   };
 
   const cancelPhotoCapture = () => {
@@ -225,6 +331,8 @@ const FinalExam: React.FC = () => {
       }
     }
     setShowPhotoPopup(false);
+    setPhotoPreview('');
+    setShowInstructions(false);
   };
 
   const startExam = () => {
@@ -356,45 +464,85 @@ const FinalExam: React.FC = () => {
     toast.success('Certificate would be emailed to ' + userData.email);
   };
 
+  // Render navigation menu
+  const renderNavMenu = () => {
+    return (
+      <div className="bg-gray-800 text-white p-4 rounded-lg mb-6">
+        <h3 className="font-semibold mb-3">Exam Progress</h3>
+        <div className="grid grid-cols-6 gap-2">
+          {Array.from({ length: 18 }, (_, i) => i + 1).map((section) => (
+            <button
+              key={section}
+              onClick={() => submittedSections.has(section) && setCurrentSection(section)}
+              disabled={!submittedSections.has(section) && section !== currentSection}
+              className={`p-2 rounded text-sm font-medium transition-colors ${
+                section === currentSection
+                  ? 'bg-primary text-white'
+                  : submittedSections.has(section)
+                  ? 'bg-green-600 text-white cursor-pointer hover:bg-green-700'
+                  : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+              }`}
+              title={sectionTitles[section]}
+            >
+              {section}
+              {submittedSections.has(section) && ' ✓'}
+            </button>
+          ))}
+        </div>
+        <p className="text-sm text-gray-300 mt-2">
+          Completed: {submittedSections.size}/18 sections
+        </p>
+      </div>
+    );
+  };
+
   // Render exam section content based on current section
   const renderExamSection = () => {
     const section = currentSection;
     
     return (
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-xl font-semibold mb-4">Section {section}</h2>
-        {(quizzes[section] || []).map((question, index) => (
-          <div key={index} className="mb-6">
-            <p className="font-medium mb-2">{question.q}</p>
-            {shuffleArray(question.options).map((option, i) => (
-              <label key={i} className="block mb-2 p-2 border rounded hover:bg-gray-50">
-                <input 
-                  type="radio" 
-                  name={`q${section}${index}`} 
-                  value={option} 
-                  className="mr-2" 
-                />
-                {option}
-              </label>
-            ))}
-          </div>
-        ))}
+      <div className="space-y-6">
+        {renderNavMenu()}
         
-        <div className="flex flex-wrap gap-2 mt-6">
-          {section > 1 && (
-            <Button variant="outline" onClick={() => setCurrentSection(section - 1)}>
-              Previous Section
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h2 className="text-2xl font-semibold mb-2">
+            Part {section}: {sectionTitles[section]}
+          </h2>
+          <p className="text-gray-600 mb-6">Test your knowledge of {sectionTitles[section].toLowerCase()}.</p>
+          
+          {(quizzes[section] || []).map((question, index) => (
+            <div key={index} className="mb-6 p-4 bg-gray-50 rounded-lg">
+              <p className="font-medium mb-3 text-lg">{index + 1}. {question.q}</p>
+              {shuffleArray(question.options).map((option, i) => (
+                <label key={i} className="block mb-2 p-3 border-2 rounded-lg hover:bg-white hover:border-primary transition-all cursor-pointer">
+                  <input 
+                    type="radio" 
+                    name={`q${section}${index}`} 
+                    value={option} 
+                    className="mr-3" 
+                  />
+                  {option}
+                </label>
+              ))}
+            </div>
+          ))}
+          
+          <div className="flex flex-wrap gap-3 mt-6 pt-6 border-t">
+            {section > 1 && (
+              <Button variant="outline" onClick={() => setCurrentSection(section - 1)}>
+                Go Back
+              </Button>
+            )}
+            <Button variant="outline" onClick={pauseTimer}>
+              {isPaused ? 'Resume' : 'Pause'}
             </Button>
-          )}
-          <Button variant="outline" onClick={pauseTimer}>
-            {isPaused ? 'Resume' : 'Pause'}
-          </Button>
-          <Button variant="outline" onClick={restartSectionTimer}>
-            Restart Timer
-          </Button>
-          <Button onClick={submitSection}>
-            Submit Section
-          </Button>
+            <Button variant="outline" onClick={restartSectionTimer}>
+              Restart Timer
+            </Button>
+            <Button onClick={submitSection} className="bg-primary hover:bg-primary/90">
+              Submit Section
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -447,16 +595,70 @@ const FinalExam: React.FC = () => {
       month: 'long', 
       day: 'numeric' 
     });
+    const elapsedTime = 5400 - totalTimeLeft;
+    const currentYear = new Date().getFullYear();
+    const nextYear = currentYear + 1;
     
     return (
-      <CertificateAchievement
-        certificateNumber={userData.certificateNumber || 'CERT-2025-XXX-XXXX'}
-        userName={userData.name}
-        completionDate={date}
-        tierStatus="red"
-        onDownload={printCertificate}
-        onShare={emailCertificate}
-      />
+      <div className="bg-white border-8 border-double border-primary p-12 rounded-lg shadow-2xl max-w-4xl mx-auto">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-primary mb-2">Certificate of Completion</h1>
+          <div className="w-32 h-1 bg-accent mx-auto mb-4"></div>
+        </div>
+        
+        <div className="border-4 border-primary/20 p-8 mb-8">
+          <p className="text-center text-lg mb-4">This certifies that</p>
+          <h2 className="text-center text-4xl font-bold text-foreground mb-4">{userData.name}</h2>
+          <p className="text-center text-lg mb-2">has successfully completed the</p>
+          <h3 className="text-center text-2xl font-semibold text-primary mb-4">
+            Maryland Responsible Vendor Training (RVT)
+          </h3>
+          <p className="text-center text-lg mb-6">on {date}</p>
+          
+          <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-6">
+            <div><strong>Phone:</strong> {userData.phone}</div>
+            <div><strong>Email:</strong> {userData.email}</div>
+            <div><strong>IP Address:</strong> {userData.ip}</div>
+            <div><strong>Certificate #:</strong> {userData.certificateNumber}</div>
+            <div><strong>Total Time:</strong> {formatTime(elapsedTime)}</div>
+            <div><strong>Timer Restarts:</strong> {Object.values(timerRestarts).reduce((sum, val) => sum + val, 0)}</div>
+          </div>
+          
+          {userData.photo && (
+            <div className="flex justify-center mb-6">
+              <img src={userData.photo} alt="Verification" className="w-48 h-48 rounded-lg shadow-md object-cover" />
+            </div>
+          )}
+          
+          <p className="text-center text-sm mb-4">Presented by ProCann Training</p>
+          <p className="text-center text-sm mb-4">In accordance with the Maryland Cannabis Administration</p>
+          <p className="text-center text-sm font-semibold">Valid: {currentYear} - {nextYear}</p>
+        </div>
+        
+        <div className="flex justify-between text-center mb-8">
+          <div className="flex-1">
+            <div className="font-script text-2xl mb-1">Louis Hendricks</div>
+            <div className="text-sm border-t border-gray-400 pt-1">Louis Hendricks</div>
+          </div>
+          <div className="flex-1">
+            <div className="font-script text-2xl mb-1">William Cunningham</div>
+            <div className="text-sm border-t border-gray-400 pt-1">William Cunningham</div>
+          </div>
+          <div className="flex-1">
+            <div className="font-script text-2xl mb-1">Danielle Brooks</div>
+            <div className="text-sm border-t border-gray-400 pt-1">Danielle Brooks</div>
+          </div>
+        </div>
+        
+        <div className="flex justify-center gap-4 mt-8">
+          <Button onClick={printCertificate} size="lg" className="bg-primary hover:bg-primary/90">
+            Print Certificate
+          </Button>
+          <Button onClick={emailCertificate} size="lg" variant="outline">
+            Email Certificate
+          </Button>
+        </div>
+      </div>
     );
   };
 
@@ -470,9 +672,15 @@ const FinalExam: React.FC = () => {
       
       {/* Timer display - only shown during exam */}
       {examStage === 'exam' && (
-        <div className="text-center mb-6 font-mono bg-gray-100 p-2 rounded">
-          <span className="mr-4">Total Time: {formatTime(totalTimeLeft)}</span>
-          <span>Section Time: {formatTime(sectionTimeLeft)}</span>
+        <div className="grid grid-cols-2 gap-4 max-w-2xl mx-auto mb-6">
+          <div className="bg-primary text-white p-4 rounded-lg text-center">
+            <div className="text-sm mb-1">Total Time Remaining</div>
+            <div className="text-3xl font-bold font-mono">{formatTime(totalTimeLeft)}</div>
+          </div>
+          <div className="bg-accent text-white p-4 rounded-lg text-center">
+            <div className="text-sm mb-1">Section Time Remaining</div>
+            <div className="text-3xl font-bold font-mono">{formatTime(sectionTimeLeft)}</div>
+          </div>
         </div>
       )}
       
@@ -555,31 +763,63 @@ const FinalExam: React.FC = () => {
       {/* Certificate Stage */}
       {examStage === 'certificate' && renderCertificate()}
       
-      {/* Photo Capture Popup */}
+      {/* Enhanced Photo Capture Popup */}
       {showPhotoPopup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
-            <h2 className="text-xl font-semibold mb-4">Photo Verification</h2>
-            <p className="mb-4">Please ensure your face is clearly visible in the camera frame.</p>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <h2 className="text-2xl font-semibold mb-4">Photo Verification</h2>
             
-            <div className="mb-4">
-              <video 
-                ref={videoRef}
-                className="w-full h-auto bg-gray-200" 
-                autoPlay 
-                playsInline
-              />
+            {showInstructions && (
+              <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="font-semibold mb-2">Please follow these steps:</p>
+                <ol className="list-decimal list-inside space-y-1 text-sm">
+                  <li>Ensure your face is centered in the camera frame</li>
+                  <li>Use good lighting and remove any hats or sunglasses</li>
+                  <li>Click "Take Test Shot" to preview your photo</li>
+                  <li>Repeat as needed, then submit the final photo</li>
+                </ol>
+              </div>
+            )}
+            
+            <div className="mb-4 flex justify-center">
+              {!photoPreview ? (
+                <video 
+                  ref={videoRef}
+                  className="w-full max-w-md h-auto bg-gray-200 rounded-lg" 
+                  autoPlay 
+                  playsInline
+                />
+              ) : (
+                <img 
+                  src={photoPreview} 
+                  alt="Photo preview" 
+                  className="w-full max-w-md h-auto rounded-lg shadow-md"
+                />
+              )}
             </div>
             
             <canvas ref={canvasRef} className="hidden" />
             
-            <div className="flex justify-between">
+            <div className="flex flex-wrap gap-2 justify-between">
               <Button variant="outline" onClick={cancelPhotoCapture}>
                 Cancel
               </Button>
-              <Button onClick={takePhoto}>
-                Take Photo
-              </Button>
+              <div className="flex gap-2">
+                {!photoPreview ? (
+                  <Button onClick={takeTestShot} className="bg-primary hover:bg-primary/90">
+                    Take Test Shot
+                  </Button>
+                ) : (
+                  <>
+                    <Button variant="outline" onClick={retakePhoto}>
+                      Retake Photo
+                    </Button>
+                    <Button onClick={submitFinalPhoto} className="bg-green-600 hover:bg-green-700">
+                      Submit Final Photo
+                    </Button>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>
