@@ -7,79 +7,60 @@ import { BookOpen, Award, Shield, CheckCircle, Building2, Waves, Users, Leaf } f
 import { CoursePreviewSystem } from '@/components/EnhancedCoursePreview';
 import { AccessibilityToolbar } from '@/components/MobileOptimization';
 import { TrustStats, ComplianceBadges, TestimonialCarousel } from '@/components/TrustIndicators';
-import { EnhancedPlayControls } from '@/components/ui/enhanced-play-controls';
 import { HoverCallout } from '@/components/ui/hover-callout';
+import { WelcomeVideoSection } from '@/components/WelcomeVideoSection';
 
 const Index = () => {
   const navigate = useNavigate();
-  const [isVideoPlaying, setIsVideoPlaying] = React.useState(true);
-  const videoRef = React.useRef<HTMLVideoElement>(null);
-
-  const toggleVideo = () => {
-    if (videoRef.current) {
-      if (isVideoPlaying) {
-        videoRef.current.pause();
-      } else {
-        videoRef.current.play();
-      }
-      setIsVideoPlaying(!isVideoPlaying);
-    }
-  };
 
   return (
     <div className="min-h-screen">
       <AccessibilityToolbar />
-      {/* Enhanced Hero Section with Video Background */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden">
-        {/* Video Background */}
-        <video
-          ref={videoRef}
-          className="video-background"
-          autoPlay
-          muted
-          loop
-          playsInline
-          poster="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?auto=format&fit=crop&w=1920&q=80"
-        >
-          <source src="https://assets.mixkit.co/videos/preview/mixkit-cannabis-plants-in-a-greenhouse-44885-large.mp4" type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
+      
+      {/* Humanized Hero Section with Welcome Video */}
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden py-16">
+        {/* Gradient Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/90 to-accent"></div>
+        
+        {/* Decorative overlay */}
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDEzNEgxNHYtMjBoMjJ2MjB6bS0yMi0yMEgwdjIwaDE0di0yMHptMCAyMEgwdjE0aDE0di0xNHptMjIgMEgxNHYxNGgyMnYtMTR6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-10"></div>
 
-        {/* Video Overlay */}
-        <div className="absolute inset-0 video-overlay"></div>
+        <div className="relative z-10 container mx-auto px-4">
+          {/* Top welcome message */}
+          <div className="text-center mb-8">
+            <p className="text-white/90 text-lg font-medium">
+              Welcome! Let's get you certified. 👋
+            </p>
+          </div>
 
-        {/* Enhanced Video Controls */}
-        <div className="absolute top-6 right-6 z-20">
-          <EnhancedPlayControls
-            isPlaying={isVideoPlaying}
-            onTogglePlay={toggleVideo}
-            size="lg"
-            className="bg-background/20 backdrop-blur-sm rounded-lg p-2"
-          />
-        </div>
-
-        <div className="relative z-10 container mx-auto text-center px-4">
           {/* Compliance Badges */}
           <ComplianceBadges />
 
-          {/* Heartbeat Logo Animation */}
-          <div className="relative mb-6">
-            <div className="absolute inset-0 bg-gradient-to-r from-stoplight-green via-stoplight-yellow to-stoplight-red opacity-30 blur-3xl animate-heartbeat"></div>
-            <h1 className="relative text-6xl md:text-7xl font-bold text-white mb-4 leading-tight font-poppins">
+          {/* Main Logo and Tagline */}
+          <div className="text-center mb-10">
+            <h1 className="text-5xl md:text-7xl font-bold text-white mb-4 leading-tight">
               ProCann Edu
             </h1>
+            <h2 className="text-2xl md:text-3xl text-white/95 font-medium max-w-3xl mx-auto leading-relaxed">
+              Your friendly guide to becoming a certified cannabis professional in Maryland
+            </h2>
           </div>
 
-          <h2 className="text-2xl md:text-3xl text-white/90 mb-6 font-medium font-poppins">
-            The Heartbeat of Responsible Cannabis Education in Maryland
-          </h2>
+          {/* Welcome Video Section */}
+          <WelcomeVideoSection 
+            videoUrl="https://vimeo.com/1096146284/e90b8e5dfc"
+            className="mb-12"
+          />
 
-          {/* New Tagline Section */}
-          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 mb-8 max-w-3xl mx-auto">
-            <p className="text-xl text-white/95 font-inter leading-relaxed">
-              We don't just teach compliance.
-              <br />
-              We teach <strong>confidence</strong>, <strong>community</strong>, and <strong>care</strong>.
+          {/* Humanized Value Proposition */}
+          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-8 mb-10 max-w-3xl mx-auto">
+            <p className="text-xl text-white/95 leading-relaxed text-center">
+              Join <strong>2,500+ fellow Marylanders</strong> on the path to cannabis certification. 
+              <br className="hidden md:block" />
+              We're in this together! 🌱
+            </p>
+            <p className="text-white/80 mt-4 text-center">
+              No question is too small. We're here to help you succeed, not just check boxes.
             </p>
           </div>
 
@@ -87,35 +68,21 @@ const Index = () => {
           <TrustStats />
 
           {/* Testimonial */}
-          <TestimonialCarousel />
-          {/* Enhanced Value Proposition */}
-          <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-4xl mx-auto leading-relaxed">
-            Training Maryland's next 2,500+ cannabis professionals with MCA-compliant education. 
-            <br className="hidden md:block" />
-            Complete your Responsible Vendor Training (RVT) and earn your official certificate.
-          </p>
-
-          {/* Urgency Banner */}
-          <div className="bg-accent/90 backdrop-blur-sm border border-accent rounded-lg p-4 mb-8 max-w-2xl mx-auto">
-            <p className="text-accent-foreground font-semibold">
-              ✨ Early Access Available
-            </p>
-            <p className="text-accent-foreground/80 text-sm mt-1">
-              Join the founding cohort of Maryland's premier cannabis training platform
-            </p>
+          <div className="mb-10">
+            <TestimonialCarousel />
           </div>
           
-          {/* Enhanced CTA Buttons */}
+          {/* Humanized CTA Buttons */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto mb-8">
             <Button 
               onClick={() => navigate('/auth?role=dispensary')}
               size="lg"
-              className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 h-auto text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105"
+              className="bg-white text-primary hover:bg-white/90 px-8 py-4 h-auto text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105"
             >
-              <BookOpen className="h-6 w-6 mr-3" />
+              <Building2 className="h-6 w-6 mr-3" />
               <div className="text-left">
-                <div>Dispensary Portal</div>
-                <div className="text-sm font-normal opacity-90">Setup training programs</div>
+                <div>For Dispensary Owners</div>
+                <div className="text-sm font-normal opacity-80">Manage your team's training</div>
               </div>
             </Button>
 
@@ -123,51 +90,52 @@ const Index = () => {
               onClick={() => navigate('/auth?role=student')}
               variant="outline"
               size="lg"
-              className="border-2 border-white/40 text-white bg-white/5 hover:bg-white/15 backdrop-blur-sm px-8 py-4 h-auto text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/50"
+              className="border-2 border-white/60 text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm px-8 py-4 h-auto text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105"
             >
               <Award className="h-6 w-6 mr-3" />
               <div className="text-left">
-                <div>Employee Login</div>
-                <div className="text-sm font-normal opacity-90">Start your training</div>
+                <div>I'm a Student</div>
+                <div className="text-sm font-normal opacity-90">Start my certification</div>
               </div>
             </Button>
           </div>
 
           {/* Quick Links */}
-          <div className="flex flex-wrap justify-center gap-4 text-white/80">
+          <div className="flex flex-wrap justify-center gap-4 text-white/80 text-sm">
             <button 
               onClick={() => navigate('/faq')}
               className="hover:text-white transition-colors underline"
             >
-              FAQ
+              Questions? Check our FAQ
             </button>
             <span>•</span>
             <button 
               onClick={() => navigate('/verify-certificate')}
               className="hover:text-white transition-colors underline"
             >
-              Verify Certificate
+              Verify a Certificate
             </button>
             <span>•</span>
             <a 
               href="mailto:info@procannedu.com"
               className="hover:text-white transition-colors underline"
             >
-              Contact Support
+              Chat with us
             </a>
           </div>
         </div>
       </section>
 
       {/* Maryland First Section */}
-      <section className="py-16 px-4 bg-gradient-to-br from-stoplight-green/10 to-stoplight-cream">
+      <section className="py-16 px-4 bg-gradient-to-br from-primary/5 to-accent/10">
         <div className="container mx-auto text-center">
-          <h3 className="text-3xl font-bold text-stoplight-charcoal mb-6 font-poppins">
+          <h3 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
             Built in Maryland, for Maryland
           </h3>
           <div className="max-w-4xl mx-auto mb-8">
-            <p className="text-lg text-gray-700 mb-6 font-inter">
-              Designed by local educators, cannabis professionals, and community advocates who understand the culture and values of our state.
+            <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
+              Created by local educators, cannabis professionals, and community advocates who know and love our state. 
+              We understand Maryland because <strong>we are Maryland</strong>.
             </p>
             
             {/* Maryland Icon Cards Grid */}
@@ -215,9 +183,12 @@ const Index = () => {
       {/* Features Section */}
       <section className="py-16 px-4">
         <div className="container mx-auto">
-          <h3 className="text-3xl font-bold text-center text-gray-800 mb-12">
-            Why Choose ProCann Edu?
+          <h3 className="text-3xl md:text-4xl font-bold text-center text-foreground mb-4">
+            What Makes Us Different?
           </h3>
+          <p className="text-center text-muted-foreground text-lg mb-12 max-w-2xl mx-auto">
+            We're not just another training platform. We're your partners in success. 🤝
+          </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <HoverCallout content="Our training program meets all Maryland Cannabis Administration regulatory requirements and is regularly updated to reflect the latest compliance standards.">
               <Card className="text-center hover:shadow-lg transition-shadow cursor-help">
@@ -332,32 +303,33 @@ const Index = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 px-4 bg-green-600">
+      <section className="py-16 px-4 bg-gradient-to-r from-primary to-accent">
         <div className="container mx-auto text-center">
-          <h3 className="text-3xl font-bold text-white mb-4">
-            Ready to Get Certified?
+          <h3 className="text-3xl md:text-4xl font-bold text-white mb-4">
+            You've Got This! 🎉
           </h3>
-          <p className="text-xl text-green-100 mb-8">
-            Be among the first to complete Maryland's most comprehensive cannabis training
+          <p className="text-xl text-white/95 mb-8 max-w-2xl mx-auto leading-relaxed">
+            Join our community of cannabis professionals who started right where you are. 
+            We'll be with you every step of the way.
           </p>
           <Button 
             onClick={() => navigate('/auth')}
             size="lg"
-            className="bg-white text-green-600 hover:bg-gray-100 px-8 py-3"
+            className="bg-white text-primary hover:bg-white/90 px-8 py-6 text-lg font-semibold rounded-xl shadow-xl hover:shadow-2xl transition-all hover:scale-105"
           >
-            Join Founding Cohort
+            Start Your Journey Today
           </Button>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-800 text-white py-8 px-4">
+      <footer className="bg-foreground text-white py-8 px-4">
         <div className="container mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-6">
             <div>
               <h4 className="text-lg font-semibold mb-4">ProCann Edu</h4>
-              <p className="text-gray-400 text-sm">
-                Maryland's premier cannabis education platform, providing MCA-compliant training and certification.
+              <p className="text-white/70 text-sm leading-relaxed">
+                Your friendly partner in cannabis education. Made with 💚 in Maryland.
               </p>
             </div>
             <div>
