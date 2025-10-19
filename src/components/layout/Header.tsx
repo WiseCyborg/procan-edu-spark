@@ -40,6 +40,13 @@ const Header = () => {
           {!user && (
             <div className="flex items-center space-x-2">
               <Button 
+                onClick={() => navigate('/training-handbook')}
+                variant="ghost"
+                size="sm"
+              >
+                Training Handbook
+              </Button>
+              <Button 
                 onClick={() => navigate('/faq')}
                 variant="ghost"
                 size="sm"
@@ -102,31 +109,35 @@ const Header = () => {
                       <span className="hidden sm:inline">{user.email}</span>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuItem onClick={() => navigate('/profile')}>
-                      <User className="w-4 h-4 mr-2" />
-                      Edit Profile
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate('/course')}>
-                      <BookOpen className="w-4 h-4 mr-2" />
-                      My Courses
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate('/certificates')}>
-                      <Award className="w-4 h-4 mr-2" />
-                      My Certificates
-                    </DropdownMenuItem>
-                    {(isDispensaryManager || isAdmin) && (
-                      <DropdownMenuItem onClick={() => navigate('/dispensary-portal')}>
-                        <BarChart3 className="w-4 h-4 mr-2" />
-                        Dispensary Portal
-                      </DropdownMenuItem>
-                    )}
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleSignOut}>
-                      <LogOut className="w-4 h-4 mr-2" />
-                      Sign Out
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
+                   <DropdownMenuContent align="end" className="w-56">
+                     <DropdownMenuItem onClick={() => navigate('/profile')}>
+                       <User className="w-4 h-4 mr-2" />
+                       Edit Profile
+                     </DropdownMenuItem>
+                     <DropdownMenuItem onClick={() => navigate('/course')}>
+                       <BookOpen className="w-4 h-4 mr-2" />
+                       My Courses
+                     </DropdownMenuItem>
+                     <DropdownMenuItem onClick={() => navigate('/training-handbook')}>
+                       <BookOpen className="w-4 h-4 mr-2" />
+                       Training Handbook
+                     </DropdownMenuItem>
+                     <DropdownMenuItem onClick={() => navigate('/certificates')}>
+                       <Award className="w-4 h-4 mr-2" />
+                       My Certificates
+                     </DropdownMenuItem>
+                     {(isDispensaryManager || isAdmin) && (
+                       <DropdownMenuItem onClick={() => navigate('/dispensary-portal')}>
+                         <BarChart3 className="w-4 h-4 mr-2" />
+                         Dispensary Portal
+                       </DropdownMenuItem>
+                     )}
+                     <DropdownMenuSeparator />
+                     <DropdownMenuItem onClick={handleSignOut}>
+                       <LogOut className="w-4 h-4 mr-2" />
+                       Sign Out
+                     </DropdownMenuItem>
+                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
             </div>

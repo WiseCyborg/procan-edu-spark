@@ -3,6 +3,7 @@ import { Play, Pause, Volume2, VolumeX, Maximize, RotateCcw, Settings } from 'lu
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Card } from '@/components/ui/card';
+import { VimeoPlayer } from './VimeoPlayer';
 
 interface VideoPlayerProps {
   videoUrl: string;
@@ -19,6 +20,22 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   onComplete,
   requiredWatchPercentage = 80
 }) => {
+  // Check if it's a Vimeo URL
+  const isVimeo = videoUrl.includes('vimeo.com');
+
+  if (isVimeo) {
+    return (
+      <VimeoPlayer
+        videoUrl={videoUrl}
+        title={title}
+        onTimeUpdate={onTimeUpdate}
+        onComplete={onComplete}
+        requiredWatchPercentage={requiredWatchPercentage}
+      />
+    );
+  }
+
+  // Original HTML5 video player for non-Vimeo videos
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);

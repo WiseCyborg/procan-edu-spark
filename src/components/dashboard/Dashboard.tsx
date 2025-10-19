@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, Award, Clock, CheckCircle } from 'lucide-react';
+import { BookOpen, Award, Clock, CheckCircle, FileText } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { ProfileCompletionBanner } from '@/components/ProfileCompletionBanner';
 
@@ -124,7 +124,7 @@ const Dashboard = () => {
       
       <ProfileCompletionBanner />
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Courses Available</CardTitle>
@@ -154,6 +154,19 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{certificates.length}</div>
+          </CardContent>
+        </Card>
+
+        <Card 
+          className="cursor-pointer hover:shadow-lg transition-shadow bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20"
+          onClick={() => navigate('/training-handbook')}
+        >
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Training Handbook</CardTitle>
+            <FileText className="h-4 w-4 text-primary" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-sm text-muted-foreground">View Resource →</div>
           </CardContent>
         </Card>
       </div>

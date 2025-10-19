@@ -14,7 +14,7 @@ import { CoursePaymentGate } from '@/components/CoursePaymentGate';
 import { ProtectedCourseAccess } from '@/components/ProtectedCourseAccess';
 import { EmployeeAccessMessage } from '@/components/EmployeeAccessMessage';
 
-const TOTAL_MODULES = 18;
+const TOTAL_MODULES = 18; // Main course modules (not including Module 0)
 const COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
 
 const CourseLayout: React.FC = () => {
@@ -63,11 +63,18 @@ const CourseLayout: React.FC = () => {
 
   const isExamEnabled = getCompletedModulesCount() === TOTAL_MODULES;
 
-  const moduleList = Array.from({ length: TOTAL_MODULES }, (_, i) => ({
-    id: `part${i + 1}`,
-    title: `Part ${i + 1}`,
-    description: `Module description for Part ${i + 1}`
-  }));
+  const moduleList = [
+    {
+      id: 'part0',
+      title: 'Module 0: Welcome & Orientation',
+      description: 'Introduction to MCA training program and course structure'
+    },
+    ...Array.from({ length: TOTAL_MODULES }, (_, i) => ({
+      id: `part${i + 1}`,
+      title: `Part ${i + 1}`,
+      description: `Module ${i + 1} content`
+    }))
+  ];
 
   // Show loading state
   if (isLoading || paymentLoading || rolesLoading || orgLoading) {

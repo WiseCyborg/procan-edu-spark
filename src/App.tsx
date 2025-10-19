@@ -30,6 +30,7 @@ import Dashboard from "./components/dashboard/Dashboard";
 import Header from "./components/layout/Header";
 import DraggableVoiceAssistant from "./components/chat/DraggableVoiceAssistant";
 import ContentReviewDashboard from "./pages/ContentReviewDashboard";
+import TrainingHandbook from "./pages/TrainingHandbook";
 
 const queryClient = new QueryClient();
 
@@ -85,6 +86,7 @@ const App = () => (
                   <Route path="/" element={<Index />} />
                   <Route path="/welcome" element={<Welcome />} />
                   <Route path="/faq" element={<FAQ />} />
+                  <Route path="/training-handbook" element={<TrainingHandbook />} />
                    <Route path="/verify-certificate" element={<CertificateVerification />} />
                    <Route path="/stoplight-standard" element={
                      <ProtectedRoute>
