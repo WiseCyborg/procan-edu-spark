@@ -157,20 +157,41 @@ const Profile: React.FC = () => {
         emergency_contact_phone: profile.emergency_contact_phone.trim() || null,
       };
 
-      const { error } = await supabase
+      // First try to update existing profile
+      const { data: existingProfile } = await supabase
         .from('profiles')
-        .upsert(profileData, {
-          onConflict: 'user_id'
-        });
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+
+      let error;
+      
+      if (existingProfile) {
+        // Update existing profile
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update(profileData)
+          .eq('user_id', user.id);
+        error = updateError;
+      } else {
+        // Insert new profile
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .insert(profileData);
+        error = insertError;
+      }
 
       if (error) {
         console.error('Error saving profile:', error);
-        let errorMessage = "Failed to save profile changes";
+        console.error('Error details:', JSON.stringify(error, null, 2));
+        let errorMessage = `Failed to save profile changes: ${error.message}`;
         
         if (error.code === '23505') {
           errorMessage = "A profile with this information already exists";
         } else if (error.code === '22007') {
           errorMessage = "Invalid date format. Please check your date of birth";
+        } else if (error.code === '42501') {
+          errorMessage = "Permission denied. Please contact support.";
         }
         
         toast({

@@ -56,9 +56,12 @@ const Welcome = () => {
                 <h2 className="text-2xl font-semibold text-gray-800 mb-4">
                   Hello {user?.user_metadata?.first_name}!
                 </h2>
-                <p className="text-gray-600 text-lg">
-                  Thank you for joining Maryland's premier cannabis training platform. 
+                <p className="text-gray-600 text-lg mb-4">
+                  Thank you for joining Maryland's leading cannabis training platform. 
                   You're now ready to begin your certification journey.
+                </p>
+                <p className="text-sm text-gray-500">
+                  Aligned to MCA Responsible Vendor Training standards under COMAR 14.17
                 </p>
               </div>
 

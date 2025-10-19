@@ -38,6 +38,8 @@ import AdvancedAnalytics from "./pages/AdvancedAnalytics";
 import ContentReviewDashboard from "./pages/ContentReviewDashboard";
 import TrainingHandbook from "./pages/TrainingHandbook";
 import DispensaryApplication from "./pages/DispensaryApplication";
+import GetStarted from "./pages/GetStarted";
+import { COMARBanner } from "./components/layout/COMARBanner";
 
 const queryClient = new QueryClient();
 
@@ -88,6 +90,9 @@ const App = () => (
           <BrowserRouter>
             <div className="min-h-screen bg-background">
               <Header />
+              <div className="container mx-auto px-4 py-2">
+                <COMARBanner />
+              </div>
               <main>
                 <Routes>
                   <Route path="/" element={<Index />} />
@@ -167,6 +172,8 @@ const App = () => (
                    } />
                    
                    <Route path="/org/apply" element={<DispensaryApplication />} />
+                   
+                   <Route path="/get-started" element={<GetStarted />} />
                    
                     <Route path="/admin" element={
                      <ProtectedRoute>

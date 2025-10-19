@@ -3,7 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, Award, Shield, CheckCircle, Building2, Waves, Users, Leaf } from 'lucide-react';
+import { BookOpen, Award, Shield, CheckCircle, Building2, Waves, Users, Leaf, UserCog } from 'lucide-react';
 import { CoursePreviewSystem } from '@/components/EnhancedCoursePreview';
 import { AccessibilityToolbar } from '@/components/MobileOptimization';
 import { TrustStats, ComplianceBadges, TestimonialCarousel } from '@/components/TrustIndicators';
@@ -73,16 +73,29 @@ const Index = () => {
           </div>
           
           {/* Humanized CTA Buttons */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto mb-8">
             <Button 
-              onClick={() => navigate('/auth?role=dispensary')}
+              onClick={() => navigate('/org/apply')}
               size="lg"
-              className="bg-white text-primary hover:bg-white/90 px-8 py-4 h-auto text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105"
+              className="bg-white text-primary hover:bg-white/90 px-6 py-4 h-auto text-base font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105"
             >
-              <Building2 className="h-6 w-6 mr-3" />
+              <Building2 className="h-5 w-5 mr-2" />
               <div className="text-left">
-                <div>For Dispensary Owners</div>
-                <div className="text-sm font-normal opacity-80">Manage your team's training</div>
+                <div>Dispensary Manager</div>
+                <div className="text-xs font-normal opacity-80">Submit application</div>
+              </div>
+            </Button>
+
+            <Button 
+              onClick={() => navigate('/auth?role=training_coordinator')}
+              variant="outline"
+              size="lg"
+              className="border-2 border-white/60 text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm px-6 py-4 h-auto text-base font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105"
+            >
+              <UserCog className="h-5 w-5 mr-2" />
+              <div className="text-left">
+                <div>Training Coordinator</div>
+                <div className="text-xs font-normal opacity-90">Manage training</div>
               </div>
             </Button>
 
@@ -90,13 +103,24 @@ const Index = () => {
               onClick={() => navigate('/auth?role=student')}
               variant="outline"
               size="lg"
-              className="border-2 border-white/60 text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm px-8 py-4 h-auto text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105"
+              className="border-2 border-white/60 text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm px-6 py-4 h-auto text-base font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105"
             >
-              <Award className="h-6 w-6 mr-3" />
+              <Award className="h-5 w-5 mr-2" />
               <div className="text-left">
                 <div>I'm a Student</div>
-                <div className="text-sm font-normal opacity-90">Start my certification</div>
+                <div className="text-xs font-normal opacity-90">Start certification</div>
               </div>
+            </Button>
+          </div>
+
+          {/* Or see all options link */}
+          <div className="text-center mb-4">
+            <Button
+              variant="link"
+              onClick={() => navigate('/get-started')}
+              className="text-white/90 hover:text-white underline"
+            >
+              Not sure? See all registration options →
             </Button>
           </div>
 
@@ -190,15 +214,15 @@ const Index = () => {
             We're not just another training platform. We're your partners in success. 🤝
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <HoverCallout content="Our training program meets all Maryland Cannabis Administration regulatory requirements and is regularly updated to reflect the latest compliance standards.">
+            <HoverCallout content="Our training program is aligned to Maryland Cannabis Administration RVT standards under COMAR 14.17 and is regularly updated to reflect the latest compliance requirements.">
               <Card className="text-center hover:shadow-lg transition-shadow cursor-help">
                 <CardHeader>
                   <Shield className="h-12 w-12 text-green-600 mx-auto mb-4" />
-                  <CardTitle className="text-lg">MCA Compliant</CardTitle>
+                  <CardTitle className="text-lg">Aligned to MCA Standards</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-gray-600">
-                    Fully compliant with Maryland Cannabis Administration requirements
+                    Built to Maryland Cannabis Administration RVT requirements (COMAR 14.17)
                   </p>
                 </CardContent>
               </Card>
@@ -218,7 +242,7 @@ const Index = () => {
               </Card>
             </HoverCallout>
 
-            <HoverCallout content="Upon successful completion of the course and final exam, you'll receive an official certificate valid through 2025 that meets all MCA requirements for Responsible Vendor Training.">
+            <HoverCallout content="Upon successful completion of the course and final exam, you'll receive an official certificate that meets Maryland RVT training standards under COMAR 14.17.">
               <Card className="text-center hover:shadow-lg transition-shadow cursor-help">
                 <CardHeader>
                   <Award className="h-12 w-12 text-yellow-600 mx-auto mb-4" />
@@ -358,10 +382,19 @@ const Index = () => {
           </div>
           <div className="border-t border-gray-700 pt-6 text-center">
             <p className="text-gray-400 mb-2">
-              In accordance with the Maryland Cannabis Administration
+              Aligned to{' '}
+              <a
+                href="https://cannabis.maryland.gov/pages/responsible_vendor_training.aspx"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-white"
+              >
+                MCA Responsible Vendor Training
+              </a>
+              {' '}standards (COMAR 14.17). Last reviewed: January 2025
             </p>
             <p className="text-sm text-gray-500">
-              © 2024 ProCann Edu. All rights reserved.
+              © 2025 ProCann Edu. All rights reserved.
             </p>
           </div>
         </div>
