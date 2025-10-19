@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Critical Profile Change Alert</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #C62828 0%, #8e1f1f 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .alert-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .tagline {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .title {
+            font-size: 24px;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        .message {
+            font-size: 16px;
+            color: #4a4a4a;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .alert-box {
+            background: #fff3cd;
+            border-left: 4px solid #FFB300;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .alert-box strong {
+            color: #1a1a1a;
+        }
+        .change-details {
+            background: #f8f9fa;
+            border-left: 4px solid #C62828;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .change-details p {
+            margin: 12px 0;
+            color: #2c3e50;
+            font-size: 15px;
+        }
+        .change-details strong {
+            color: #1a1a1a;
+        }
+        .old-value {
+            color: #C62828;
+            text-decoration: line-through;
+        }
+        .new-value {
+            color: #2A7F3F;
+            font-weight: 600;
+        }
+        .button {
+            display: inline-block;
+            background: linear-gradient(135deg, #C62828 0%, #8e1f1f 100%);
+            color: white;
+            padding: 14px 32px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            margin: 20px 0;
+            transition: transform 0.2s;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+        }
+        .footer {
+            background: #2c3e50;
+            color: white;
+            padding: 30px;
+            text-align: center;
+            font-size: 14px;
+        }
+        .footer a {
+            color: #FFB300;
+            text-decoration: none;
+        }
+        .security-notice {
+            background: #e8f5e9;
+            border: 1px solid #2A7F3F;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        .security-notice p {
+            margin: 5px 0;
+            color: #1b5e20;
+            font-size: 14px;
+        }
+        @media only screen and (max-width: 600px) {
+            .container {
+                margin: 0;
+                border-radius: 0;
+            }
+            .content {
+                padding: 30px 20px;
+            }
+            .header {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="alert-icon">🔔</div>
+            <div class="logo">ProCann Edu</div>
+            <div class="tagline">Critical Profile Change Alert</div>
+        </div>
+        
+        <div class="content">
+            <h1 class="title">Profile Change Notification</h1>
+            
+            <p class="message">
+                A critical profile field has been modified by a user. Please review the changes below for compliance and accuracy.
+            </p>
+            
+            <div class="alert-box">
+                <strong>User:</strong> {{ .UserName }}<br>
+                <strong>Changed At:</strong> {{ .ChangedAt }}
+            </div>
+            
+            <div class="change-details">
+                <p><strong>Field Changed:</strong> {{ .FieldLabel }}</p>
+                <p><strong>Previous Value:</strong> <span class="old-value">{{ .OldValue }}</span></p>
+                <p><strong>New Value:</strong> <span class="new-value">{{ .NewValue }}</span></p>
+            </div>
+            
+            <p class="message">
+                This notification was triggered because the changed field is marked as critical for compliance tracking. 
+                Please verify this change is legitimate and update any necessary records.
+            </p>
+            
+            <a href="{{ .AdminDashboardURL }}" class="button">Review in Admin Dashboard</a>
+            
+            <div class="security-notice">
+                <p><strong>🔒 Security Notice</strong></p>
+                <p>This is an automated notification for critical profile field changes. All changes are logged in the security audit log.</p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>ProCann Edu Admin System</strong></p>
+            <p>Automated compliance and security monitoring</p>
+            <p>Questions? Contact <a href="mailto:admin@procannedu.com">admin@procannedu.com</a></p>
+        </div>
+    </div>
+</body>
+</html>

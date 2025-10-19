@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { loadEmailTemplate } from "../_shared/email-templates.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -64,6 +65,16 @@ serve(async (req) => {
       const newValue = newValues[field] || '(empty)';
       const fieldLabel = field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 
+      // Load and render the profile change alert template
+      const html = await loadEmailTemplate('profile-change-alert', {
+        UserName: userName,
+        FieldLabel: fieldLabel,
+        OldValue: oldValue,
+        NewValue: newValue,
+        ChangedAt: new Date().toLocaleString(),
+        AdminDashboardURL: 'https://procannedu.com/admin',
+      });
+
       // Create notification for each admin
       for (const admin of admins || []) {
         const adminEmail = admin.profiles.email_cache;
@@ -75,16 +86,7 @@ serve(async (req) => {
               user_id: admin.user_id,
               recipient_email: adminEmail,
               subject: '🔔 Critical Profile Change Alert',
-              message: `
-                <h2>Profile Change Notification</h2>
-                <p><strong>User:</strong> ${userName}</p>
-                <p><strong>Field Changed:</strong> ${fieldLabel}</p>
-                <p><strong>Previous Value:</strong> ${oldValue}</p>
-                <p><strong>New Value:</strong> ${newValue}</p>
-                <p><strong>Changed At:</strong> ${new Date().toLocaleString()}</p>
-                <hr>
-                <p><em>This is an automated notification for critical profile field changes.</em></p>
-              `,
+              message: html,
               scheduled_for: new Date().toISOString(),
               priority: 'high',
               metadata: {
