@@ -1394,6 +1394,27 @@ export type Database = {
         }
         Relationships: []
       }
+      role_permissions: {
+        Row: {
+          created_at: string | null
+          id: string
+          permission: Database["public"]["Enums"]["admin_permission"]
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          permission: Database["public"]["Enums"]["admin_permission"]
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          permission?: Database["public"]["Enums"]["admin_permission"]
+          role?: Database["public"]["Enums"]["app_role"]
+        }
+        Relationships: []
+      }
       security_audit_log: {
         Row: {
           action_type: string
@@ -1553,6 +1574,45 @@ export type Database = {
           modules_completed?: number
           tier?: string
           unlocked_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_metadata: {
+        Row: {
+          created_at: string | null
+          department: string | null
+          employee_id: string | null
+          hire_date: string | null
+          id: string
+          manager_id: string | null
+          notes: string | null
+          tags: string[] | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          department?: string | null
+          employee_id?: string | null
+          hire_date?: string | null
+          id?: string
+          manager_id?: string | null
+          notes?: string | null
+          tags?: string[] | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          department?: string | null
+          employee_id?: string | null
+          hire_date?: string | null
+          id?: string
+          manager_id?: string | null
+          notes?: string | null
+          tags?: string[] | null
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: []
@@ -1847,6 +1907,13 @@ export type Database = {
         }
         Returns: boolean
       }
+      has_permission: {
+        Args: {
+          _permission: Database["public"]["Enums"]["admin_permission"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1892,6 +1959,27 @@ export type Database = {
       }
     }
     Enums: {
+      admin_permission:
+        | "user_create"
+        | "user_edit"
+        | "user_delete"
+        | "user_view_all"
+        | "org_create"
+        | "org_edit"
+        | "org_delete"
+        | "org_view_all"
+        | "role_assign"
+        | "role_revoke"
+        | "certificate_issue"
+        | "certificate_revoke"
+        | "certificate_view_all"
+        | "payment_view"
+        | "payment_refund"
+        | "content_edit"
+        | "content_publish"
+        | "analytics_view"
+        | "security_audit"
+        | "system_settings"
       app_role:
         | "student"
         | "dispensary_manager"
@@ -2024,6 +2112,28 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      admin_permission: [
+        "user_create",
+        "user_edit",
+        "user_delete",
+        "user_view_all",
+        "org_create",
+        "org_edit",
+        "org_delete",
+        "org_view_all",
+        "role_assign",
+        "role_revoke",
+        "certificate_issue",
+        "certificate_revoke",
+        "certificate_view_all",
+        "payment_view",
+        "payment_refund",
+        "content_edit",
+        "content_publish",
+        "analytics_view",
+        "security_audit",
+        "system_settings",
+      ],
       app_role: [
         "student",
         "dispensary_manager",

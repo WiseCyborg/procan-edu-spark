@@ -21,6 +21,7 @@ import { PredictiveAnalyticsDashboard } from '@/components/admin/PredictiveAnaly
 import { EnhancedSearchFilter } from '@/components/admin/EnhancedSearchFilter';
 import DispensaryApplicationManager from '@/components/admin/DispensaryApplicationManager';
 import DispensaryManagerSetup from '@/components/admin/DispensaryManagerSetup';
+import TestAccountCreator from '@/components/admin/TestAccountCreator';
 import { ComprehensiveAdminOversight } from '@/components/admin/ComprehensiveAdminOversight';
 import { StaffInvitationSystem } from '@/components/admin/StaffInvitationSystem';
 import { ComplianceReportingDashboard } from '@/components/admin/ComplianceReportingDashboard';
@@ -317,6 +318,7 @@ const AdminDashboard = () => {
             <TabsTrigger value="organizations">Organizations</TabsTrigger>
             <TabsTrigger value="applications">Applications</TabsTrigger>
             <TabsTrigger value="setup">Setup</TabsTrigger>
+            <TabsTrigger value="test-accounts">Test Accounts</TabsTrigger>
             <TabsTrigger value="oversight">Oversight</TabsTrigger>
             <TabsTrigger value="invitations">Invitations</TabsTrigger>
             <TabsTrigger value="compliance">Compliance</TabsTrigger>
@@ -430,6 +432,10 @@ const AdminDashboard = () => {
 
           <TabsContent value="setup">
             <DispensaryManagerSetup />
+          </TabsContent>
+
+          <TabsContent value="test-accounts">
+            <TestAccountCreator />
           </TabsContent>
 
           <TabsContent value="oversight">
