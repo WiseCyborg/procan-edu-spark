@@ -191,7 +191,9 @@ const Profile: React.FC = () => {
         } else if (error.code === '22007') {
           errorMessage = "Invalid date format. Please check your date of birth";
         } else if (error.code === '42501') {
-          errorMessage = "Permission denied. Please contact support.";
+          errorMessage = "You don't have permission to update your profile. Please ensure you're properly logged in or contact support.";
+        } else if (error.code === '23502') {
+          errorMessage = "Please fill in all required fields marked with *";
         }
         
         toast({
@@ -259,8 +261,6 @@ const Profile: React.FC = () => {
         
         <TabsContent value="profile" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Personal Information */}
         <Card>
           <CardHeader>
@@ -436,12 +436,11 @@ const Profile: React.FC = () => {
         </Card>
       </div>
 
-          <div className="flex justify-end">
+          <div className="flex justify-end mt-6">
             <Button onClick={handleSave} disabled={isSaving} className="flex items-center space-x-2">
               <Save className="w-4 h-4" />
               <span>{isSaving ? 'Saving...' : 'Save Changes'}</span>
             </Button>
-          </div>
           </div>
         </TabsContent>
         

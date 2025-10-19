@@ -25,6 +25,7 @@ const REQUIRED_FIELDS: (keyof ProfileCompletionData)[] = [
   'date_of_birth',
   'address',
   'city',
+  'state',
   'zip_code',
   'emergency_contact_name',
   'emergency_contact_phone',
