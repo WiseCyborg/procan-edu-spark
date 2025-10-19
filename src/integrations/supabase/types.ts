@@ -1222,6 +1222,7 @@ export type Database = {
           created_at: string
           date_of_birth: string | null
           dispensary_access_key: string | null
+          email_cache: string | null
           emergency_contact_name: string | null
           emergency_contact_phone: string | null
           first_name: string | null
@@ -1248,6 +1249,7 @@ export type Database = {
           created_at?: string
           date_of_birth?: string | null
           dispensary_access_key?: string | null
+          email_cache?: string | null
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
           first_name?: string | null
@@ -1274,6 +1276,7 @@ export type Database = {
           created_at?: string
           date_of_birth?: string | null
           dispensary_access_key?: string | null
+          email_cache?: string | null
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
           first_name?: string | null

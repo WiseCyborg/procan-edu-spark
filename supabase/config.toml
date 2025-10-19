@@ -59,3 +59,6 @@ verify_jwt = false
 
 [functions.track-email-click]
 verify_jwt = false
+
+[functions.notify-profile-changes]
+verify_jwt = true

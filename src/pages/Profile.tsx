@@ -30,6 +30,14 @@ interface ProfileData {
   emergency_contact_phone: string;
 }
 
+// Critical fields that trigger admin notifications when changed
+const CRITICAL_FIELDS: (keyof ProfileData)[] = [
+  'phone',
+  'address',
+  'emergency_contact_phone',
+  'emergency_contact_name'
+];
+
 const Profile: React.FC = () => {
   const { user } = useAuth();
   const { roles, isLoading: rolesLoading } = useUserRole();
@@ -139,6 +147,21 @@ const Profile: React.FC = () => {
     return errors;
   };
 
+  // Get critical fields that changed (for admin notifications)
+  const getCriticalFieldChanges = (): Set<keyof ProfileData> => {
+    const criticalChanges = new Set<keyof ProfileData>();
+    
+    if (!originalProfile) return criticalChanges;
+    
+    for (const field of CRITICAL_FIELDS) {
+      if (changedFields.has(field)) {
+        criticalChanges.add(field);
+      }
+    }
+    
+    return criticalChanges;
+  };
+
   const handleSave = async () => {
     if (!user) return;
 
@@ -218,6 +241,33 @@ const Profile: React.FC = () => {
           variant: "destructive"
         });
         return;
+      }
+
+      // Check if any critical fields changed and notify admins
+      const criticalChanges = getCriticalFieldChanges();
+      
+      if (criticalChanges.size > 0 && originalProfile) {
+        try {
+          const { error: notifyError } = await supabase.functions.invoke(
+            'notify-profile-changes',
+            {
+              body: {
+                userId: user.id,
+                changedFields: Array.from(criticalChanges),
+                oldValues: originalProfile,
+                newValues: profile
+              }
+            }
+          );
+
+          if (notifyError) {
+            console.error('Failed to send admin notifications:', notifyError);
+            // Don't block user - just log it
+          }
+        } catch (notifyError) {
+          console.error('Error sending notifications:', notifyError);
+          // Don't show error to user - this is background work
+        }
       }
 
       toast({
