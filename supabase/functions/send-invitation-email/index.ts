@@ -42,17 +42,18 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Sending invitation email to ${email}`, { organizationName, role, isReminder });
 
-    // Build the acceptance URL
-    const acceptInvitationURL = `https://www.procannedu.com/auth?action=accept-invitation&token=${invitationToken}`;
+    // Build the acceptance URL - points to student auth with invitation token
+    const baseUrl = supabaseUrl.includes('zhmpwczrvitomsxjwpzc')
+      ? 'https://zhmpwczrvitomsxjwpzc.lovable.app'
+      : 'https://www.procannedu.com';
+    const acceptInvitationURL = `${baseUrl}/auth?role=student&invitation=${invitationToken}`;
     
     // Format expiry date
     const formattedExpiryDate = new Date(expiryDate).toLocaleDateString('en-US', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+      day: 'numeric'
     });
 
     // Prepare HTML email content with dynamic values

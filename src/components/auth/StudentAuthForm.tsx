@@ -1,14 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { GraduationCap, Key } from 'lucide-react';
+import { GraduationCap, Key, Loader2, Mail, CheckCircle2 } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 
 const StudentAuthForm = () => {
+  const [searchParams] = useSearchParams();
+  const invitationToken = searchParams.get('invitation');
+  
   const [loading, setLoading] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
+  const [isLoadingInvitation, setIsLoadingInvitation] = useState(false);
+  const [invitationData, setInvitationData] = useState<{
+    email: string;
+    organizationId: string;
+    organizationName: string;
+    role: string;
+    inviterName: string;
+    accessKey: string;
+  } | null>(null);
   
   // Login form state
   const [email, setEmail] = useState('');
@@ -21,6 +35,51 @@ const StudentAuthForm = () => {
   const [dispensaryKey, setDispensaryKey] = useState('');
   const [regEmail, setRegEmail] = useState('');
   const [regPassword, setRegPassword] = useState('');
+
+  // Load invitation data if token is present
+  useEffect(() => {
+    if (invitationToken) {
+      loadInvitationData();
+    }
+  }, [invitationToken]);
+
+  const loadInvitationData = async () => {
+    setIsLoadingInvitation(true);
+    setIsRegistering(true); // Auto-switch to registration mode
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('accept-invitation', {
+        body: { token: invitationToken, action: 'validate' }
+      });
+
+      if (error) throw error;
+
+      if (data.success) {
+        setInvitationData(data.invitation);
+        setRegEmail(data.invitation.email);
+        setDispensaryKey(data.invitation.accessKey || '');
+        toast({
+          title: "Invitation loaded!",
+          description: `Welcome! You've been invited to join ${data.invitation.organizationName}`,
+        });
+      } else {
+        toast({
+          title: "Invalid invitation",
+          description: data.message || 'This invitation link is invalid or has expired.',
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      console.error('Error loading invitation:', error);
+      toast({
+        title: "Error",
+        description: 'Failed to load invitation. Please try the link again.',
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingInvitation(false);
+    }
+  };
 
   const validateDispensaryKey = async (key: string): Promise<boolean> => {
     if (!key) return false;
@@ -98,16 +157,18 @@ const StudentAuthForm = () => {
     setLoading(true);
 
     try {
-      // First validate the dispensary key
-      const isValidKey = await validateDispensaryKey(dispensaryKey);
-      if (!isValidKey) {
-        toast({
-          title: "Invalid Access Key",
-          description: "Please check your dispensary access key and try again.",
-          variant: "destructive",
-        });
-        setLoading(false);
-        return;
+      // First validate the dispensary key (unless coming from invitation)
+      if (!invitationData) {
+        const isValidKey = await validateDispensaryKey(dispensaryKey);
+        if (!isValidKey) {
+          toast({
+            title: "Invalid Access Key",
+            description: "Please check your dispensary access key and try again.",
+            variant: "destructive",
+          });
+          setLoading(false);
+          return;
+        }
       }
 
       // Get organization details for credit deduction
@@ -167,6 +228,21 @@ const StudentAuthForm = () => {
           if (profileError) {
             console.error('Error updating profile:', profileError);
           }
+
+          // If from invitation, mark it as accepted
+          if (invitationToken && invitationData) {
+            const { error: acceptError } = await supabase.functions.invoke('accept-invitation', {
+              body: { 
+                token: invitationToken, 
+                action: 'accept',
+                userId: authData.user.id
+              }
+            });
+
+            if (acceptError) {
+              console.error('Error accepting invitation:', acceptError);
+            }
+          }
         } catch (assignmentError) {
           console.error('Error in post-registration setup:', assignmentError);
         }
@@ -202,7 +278,7 @@ const StudentAuthForm = () => {
         }
       } else {
         toast({
-          title: "Registration successful!",
+          title: invitationData ? `Welcome to ${invitationData.organizationName}!` : "Registration successful!",
           description: "Check your email for a confirmation link to complete your registration.",
         });
         
@@ -226,6 +302,21 @@ const StudentAuthForm = () => {
     }
   };
 
+  if (isLoadingInvitation) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 p-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="pt-6">
+            <div className="flex flex-col items-center justify-center py-8 space-y-4">
+              <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+              <p className="text-sm text-muted-foreground">Loading your invitation...</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 p-4">
       <Card className="w-full max-w-md">
@@ -233,10 +324,15 @@ const StudentAuthForm = () => {
           <div className="flex items-center justify-center gap-2 mb-2">
             <GraduationCap className="h-8 w-8 text-blue-600" />
             <CardTitle className="text-2xl font-bold text-blue-700">
-              Student Portal
+              {invitationData ? `Join ${invitationData.organizationName}` : 'Student Portal'}
             </CardTitle>
           </div>
-          <p className="text-muted-foreground">Cannabis training for employees</p>
+          <p className="text-muted-foreground">
+            {invitationData 
+              ? `You've been invited by ${invitationData.inviterName} to complete your training`
+              : 'Cannabis training for employees'
+            }
+          </p>
         </CardHeader>
         <CardContent>
           {!isRegistering ? (
@@ -295,12 +391,27 @@ const StudentAuthForm = () => {
             </>
           ) : (
             <>
-              <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-md">
-                <h3 className="font-semibold text-amber-800 mb-2">Employee Registration</h3>
-                <p className="text-sm text-amber-700">
-                  You need a valid dispensary access key from your employer to register.
-                </p>
-              </div>
+              {invitationData && (
+                <Alert className="mb-4 bg-green-50 border-green-200">
+                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+                  <AlertDescription className="text-sm text-green-800">
+                    <strong>Invitation Details:</strong>
+                    <br />
+                    Email: {invitationData.email}
+                    <br />
+                    Organization: {invitationData.organizationName}
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {!invitationData && (
+                <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-md">
+                  <h3 className="font-semibold text-amber-800 mb-2">Employee Registration</h3>
+                  <p className="text-sm text-amber-700">
+                    You need a valid dispensary access key from your employer to register.
+                  </p>
+                </div>
+              )}
 
               <form onSubmit={handleStudentRegistration} className="space-y-4">
                 <div className="grid grid-cols-2 gap-2">
@@ -309,6 +420,7 @@ const StudentAuthForm = () => {
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     required
+                    autoFocus={!!invitationData}
                   />
                   <Input
                     placeholder="Last Name *"
@@ -324,7 +436,15 @@ const StudentAuthForm = () => {
                     value={regEmail}
                     onChange={(e) => setRegEmail(e.target.value)}
                     required
+                    disabled={!!invitationData}
+                    className={invitationData ? 'bg-gray-100' : ''}
                   />
+                  {invitationData && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      <Mail className="inline h-3 w-3 mr-1" />
+                      Pre-filled from your invitation
+                    </p>
+                  )}
                 </div>
                 <div>
                   <Input
@@ -335,17 +455,19 @@ const StudentAuthForm = () => {
                     required
                   />
                 </div>
-                <div>
-                  <Input
-                    placeholder="Dispensary Access Key *"
-                    value={dispensaryKey}
-                    onChange={(e) => setDispensaryKey(e.target.value)}
-                    required
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Get this key from your dispensary manager (format: DISP-YYYY-XXXXXXXX)
-                  </p>
-                </div>
+                {!invitationData && (
+                  <div>
+                    <Input
+                      placeholder="Dispensary Access Key *"
+                      value={dispensaryKey}
+                      onChange={(e) => setDispensaryKey(e.target.value)}
+                      required
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      💡 <strong>Tip:</strong> Ask your manager to send you an email invitation for faster setup!
+                    </p>
+                  </div>
+                )}
                 <div>
                   <Input
                     type="password"
@@ -361,17 +483,26 @@ const StudentAuthForm = () => {
                   className="w-full bg-blue-600 hover:bg-blue-700"
                   disabled={loading}
                 >
-                  {loading ? 'Creating Account...' : 'Register Account'}
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      {invitationData ? 'Accepting Invitation...' : 'Creating Account...'}
+                    </>
+                  ) : (
+                    invitationData ? 'Accept Invitation & Create Account' : 'Register Account'
+                  )}
                 </Button>
 
-                <Button 
-                  type="button"
-                  variant="ghost"
-                  onClick={() => setIsRegistering(false)}
-                  className="w-full"
-                >
-                  Back to Sign In
-                </Button>
+                {!invitationData && (
+                  <Button 
+                    type="button"
+                    variant="ghost"
+                    onClick={() => setIsRegistering(false)}
+                    className="w-full"
+                  >
+                    Back to Sign In
+                  </Button>
+                )}
               </form>
             </>
           )}
