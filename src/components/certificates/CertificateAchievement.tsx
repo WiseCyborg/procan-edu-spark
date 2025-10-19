@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Confetti from 'react-confetti';
 import { motion } from 'framer-motion';
-import { Award, Download, Share2 } from 'lucide-react';
+import { Award, Download, Share2, BadgeCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
@@ -10,6 +10,7 @@ interface CertificateAchievementProps {
   userName: string;
   completionDate: string;
   tierStatus: 'green' | 'yellow' | 'red';
+  userPhoto?: string;
   onDownload: () => void;
   onShare: () => void;
 }
@@ -19,6 +20,7 @@ export const CertificateAchievement: React.FC<CertificateAchievementProps> = ({
   userName,
   completionDate,
   tierStatus,
+  userPhoto,
   onDownload,
   onShare
 }) => {
@@ -69,9 +71,28 @@ export const CertificateAchievement: React.FC<CertificateAchievementProps> = ({
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.5 }}
-          className="bg-white border-4 border-stoplight-green rounded-lg shadow-2xl p-8"
+          className="bg-white border-4 border-stoplight-green rounded-lg shadow-2xl p-8 relative"
         >
-          <div className="text-center space-y-4">
+          {/* Professional ID Photo - Top Right Corner */}
+          {userPhoto && (
+            <div className="absolute top-8 right-8">
+              <div className="relative">
+                <div className="w-32 h-40 rounded-lg overflow-hidden border-4 border-gray-300 shadow-lg bg-white">
+                  <img 
+                    src={userPhoto} 
+                    alt="Certificate holder"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                {/* Verified Badge Overlay */}
+                <div className="absolute -bottom-2 -right-2 bg-stoplight-green rounded-full p-1.5 shadow-md">
+                  <BadgeCheck className="w-5 h-5 text-white" />
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="text-center space-y-4 pr-40">
             <Badge className={`${tier.bg} text-white text-lg px-4 py-2`}>
               {tier.emoji} {tierStatus.toUpperCase()} TIER CERTIFIED
             </Badge>

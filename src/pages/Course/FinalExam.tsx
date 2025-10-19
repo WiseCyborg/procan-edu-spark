@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { CertificateAchievement } from '@/components/certificates/CertificateAchievement';
+import { CameraUnavailableDialog } from '@/components/exam/CameraUnavailableDialog';
 
 interface QuizQuestion {
   q: string;
@@ -53,6 +54,8 @@ const FinalExam: React.FC = () => {
   const [showPhotoPopup, setShowPhotoPopup] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<string>('');
   const [showInstructions, setShowInstructions] = useState(false);
+  const [showCameraUnavailable, setShowCameraUnavailable] = useState(false);
+  const [cameraError, setCameraError] = useState<'no-camera' | 'permission-denied' | 'https-required' | 'in-use' | 'unknown'>('unknown');
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -254,29 +257,111 @@ const FinalExam: React.FC = () => {
     return newArray;
   };
 
-  const startPhotoVerification = () => {
+  // Camera detection and compatibility check
+  const detectCameraSupport = async (): Promise<{ supported: boolean; error?: 'no-camera' | 'permission-denied' | 'https-required' | 'in-use' | 'unknown' }> => {
+    // Check if mediaDevices API is available
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      return { supported: false, error: 'no-camera' };
+    }
+
+    // Check for HTTPS (required for production)
+    if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+      return { supported: false, error: 'https-required' };
+    }
+
+    // Try to enumerate devices to check for camera
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const hasCamera = devices.some(device => device.kind === 'videoinput');
+      
+      if (!hasCamera) {
+        return { supported: false, error: 'no-camera' };
+      }
+
+      return { supported: true };
+    } catch (error) {
+      console.error('Error detecting camera:', error);
+      return { supported: false, error: 'unknown' };
+    }
+  };
+
+  // Enhanced error handling for camera errors
+  const handleCameraError = (error: any): 'no-camera' | 'permission-denied' | 'https-required' | 'in-use' | 'unknown' => {
+    console.error('Camera error:', error);
+
+    if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+      return 'permission-denied';
+    } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+      return 'no-camera';
+    } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
+      return 'in-use';
+    } else if (error.name === 'SecurityError') {
+      return 'https-required';
+    }
+
+    return 'unknown';
+  };
+
+  const startPhotoVerification = async () => {
     // Validate form
     if (!userData.name || !userData.phone || !userData.email) {
       toast.error("Please fill in all fields");
+      return;
+    }
+
+    // Check camera support first
+    const cameraCheck = await detectCameraSupport();
+    if (!cameraCheck.supported) {
+      setCameraError(cameraCheck.error || 'unknown');
+      setShowCameraUnavailable(true);
       return;
     }
     
     setShowInstructions(true);
     setShowPhotoPopup(true);
     
-    // Set up camera
-    setTimeout(() => {
+    // Set up camera with mobile optimizations
+    setTimeout(async () => {
       if (videoRef.current) {
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
-          .then(stream => {
-            if (videoRef.current) videoRef.current.srcObject = stream;
-          })
-          .catch(err => {
-            toast.error('Camera access denied. Please allow camera access to proceed.');
-            console.error(err);
-          });
+        try {
+          // Detect if iOS
+          const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+          
+          // Mobile-optimized constraints
+          const constraints: MediaStreamConstraints = {
+            video: {
+              facingMode: 'user',
+              width: { ideal: 1280 },
+              height: { ideal: 720 }
+            }
+          };
+
+          const stream = await navigator.mediaDevices.getUserMedia(constraints);
+          
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+            
+            // iOS-specific fixes
+            if (isIOS) {
+              videoRef.current.setAttribute('playsinline', 'true');
+              videoRef.current.setAttribute('autoplay', 'true');
+              // Explicitly call play() for iOS
+              await videoRef.current.play().catch(e => console.error('iOS play error:', e));
+            }
+          }
+        } catch (err: any) {
+          const errorType = handleCameraError(err);
+          setCameraError(errorType);
+          setShowCameraUnavailable(true);
+          setShowPhotoPopup(false);
+        }
       }
     }, 100);
+  };
+
+  const retryCameraAccess = async () => {
+    setShowCameraUnavailable(false);
+    await startPhotoVerification();
   };
 
   const takeTestShot = () => {
@@ -588,77 +673,28 @@ const FinalExam: React.FC = () => {
     );
   };
 
-  // Render certificate
+  // Render certificate using CertificateAchievement component
   const renderCertificate = () => {
     const date = new Date().toLocaleDateString('en-US', { 
       year: 'numeric', 
       month: 'long', 
       day: 'numeric' 
     });
-    const elapsedTime = 5400 - totalTimeLeft;
-    const currentYear = new Date().getFullYear();
-    const nextYear = currentYear + 1;
+    
+    // Determine tier status (can be calculated based on score)
+    const tierStatus: 'green' | 'yellow' | 'red' = 
+      totalScore >= 32 ? 'green' : totalScore >= 28 ? 'yellow' : 'red';
     
     return (
-      <div className="bg-white border-8 border-double border-primary p-12 rounded-lg shadow-2xl max-w-4xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-primary mb-2">Certificate of Completion</h1>
-          <div className="w-32 h-1 bg-accent mx-auto mb-4"></div>
-        </div>
-        
-        <div className="border-4 border-primary/20 p-8 mb-8">
-          <p className="text-center text-lg mb-4">This certifies that</p>
-          <h2 className="text-center text-4xl font-bold text-foreground mb-4">{userData.name}</h2>
-          <p className="text-center text-lg mb-2">has successfully completed the</p>
-          <h3 className="text-center text-2xl font-semibold text-primary mb-4">
-            Maryland Responsible Vendor Training (RVT)
-          </h3>
-          <p className="text-center text-lg mb-6">on {date}</p>
-          
-          <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-6">
-            <div><strong>Phone:</strong> {userData.phone}</div>
-            <div><strong>Email:</strong> {userData.email}</div>
-            <div><strong>IP Address:</strong> {userData.ip}</div>
-            <div><strong>Certificate #:</strong> {userData.certificateNumber}</div>
-            <div><strong>Total Time:</strong> {formatTime(elapsedTime)}</div>
-            <div><strong>Timer Restarts:</strong> {Object.values(timerRestarts).reduce((sum, val) => sum + val, 0)}</div>
-          </div>
-          
-          {userData.photo && (
-            <div className="flex justify-center mb-6">
-              <img src={userData.photo} alt="Verification" className="w-48 h-48 rounded-lg shadow-md object-cover" />
-            </div>
-          )}
-          
-          <p className="text-center text-sm mb-4">Presented by ProCann Training</p>
-          <p className="text-center text-sm mb-4">In accordance with the Maryland Cannabis Administration</p>
-          <p className="text-center text-sm font-semibold">Valid: {currentYear} - {nextYear}</p>
-        </div>
-        
-        <div className="flex justify-between text-center mb-8">
-          <div className="flex-1">
-            <div className="font-script text-2xl mb-1">Louis Hendricks</div>
-            <div className="text-sm border-t border-gray-400 pt-1">Louis Hendricks</div>
-          </div>
-          <div className="flex-1">
-            <div className="font-script text-2xl mb-1">William Cunningham</div>
-            <div className="text-sm border-t border-gray-400 pt-1">William Cunningham</div>
-          </div>
-          <div className="flex-1">
-            <div className="font-script text-2xl mb-1">Danielle Brooks</div>
-            <div className="text-sm border-t border-gray-400 pt-1">Danielle Brooks</div>
-          </div>
-        </div>
-        
-        <div className="flex justify-center gap-4 mt-8">
-          <Button onClick={printCertificate} size="lg" className="bg-primary hover:bg-primary/90">
-            Print Certificate
-          </Button>
-          <Button onClick={emailCertificate} size="lg" variant="outline">
-            Email Certificate
-          </Button>
-        </div>
-      </div>
+      <CertificateAchievement
+        certificateNumber={userData.certificateNumber || 'PROCESSING'}
+        userName={userData.name}
+        completionDate={date}
+        tierStatus={tierStatus}
+        userPhoto={userData.photo}
+        onDownload={printCertificate}
+        onShare={emailCertificate}
+      />
     );
   };
 
@@ -763,7 +799,7 @@ const FinalExam: React.FC = () => {
       {/* Certificate Stage */}
       {examStage === 'certificate' && renderCertificate()}
       
-      {/* Enhanced Photo Capture Popup */}
+      {/* Enhanced Photo Capture Popup with Face Guide */}
       {showPhotoPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white p-6 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -781,14 +817,20 @@ const FinalExam: React.FC = () => {
               </div>
             )}
             
-            <div className="mb-4 flex justify-center">
+            <div className="mb-4 flex justify-center relative">
               {!photoPreview ? (
-                <video 
-                  ref={videoRef}
-                  className="w-full max-w-md h-auto bg-gray-200 rounded-lg" 
-                  autoPlay 
-                  playsInline
-                />
+                <div className="relative">
+                  <video 
+                    ref={videoRef}
+                    className="w-full max-w-md h-auto bg-gray-200 rounded-lg" 
+                    autoPlay 
+                    playsInline
+                  />
+                  {/* Face guide overlay */}
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="w-64 h-80 border-4 border-white rounded-full opacity-50"></div>
+                  </div>
+                </div>
               ) : (
                 <img 
                   src={photoPreview} 
@@ -824,6 +866,14 @@ const FinalExam: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Camera Unavailable Dialog */}
+      <CameraUnavailableDialog
+        open={showCameraUnavailable}
+        onClose={() => setShowCameraUnavailable(false)}
+        onRetry={retryCameraAccess}
+        errorType={cameraError}
+      />
     </div>
   );
 };
