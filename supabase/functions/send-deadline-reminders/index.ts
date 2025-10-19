@@ -1,8 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { Resend } from "npm:resend@2.0.0";
-
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+import { SMTPEmailService } from "../_shared/smtp-email-service.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -52,39 +50,48 @@ serve(async (req) => {
                            "📅 Reminder";
 
       try {
-        await resend.emails.send({
-          from: "ProCannEdu <noreply@procannedu.com>",
-          to: [enrollment.users.email],
-          subject: `${urgencyLevel}: Training Deadline in ${daysRemaining} Day${daysRemaining > 1 ? 's' : ''}`,
-          html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-              <h1 style="color: ${daysRemaining === 1 ? '#dc2626' : '#f59e0b'};">${urgencyLevel}</h1>
-              <p>Hi ${enrollment.profiles?.first_name || 'there'},</p>
-              <p>Your Maryland Responsible Vendor Training deadline is approaching soon.</p>
-              
-              <div style="background: #fef3c7; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
-                <h3 style="margin-top: 0;">⏰ ${daysRemaining} Day${daysRemaining > 1 ? 's' : ''} Remaining</h3>
-                <p><strong>Deadline:</strong> ${new Date(enrollment.deadline_at).toLocaleDateString()}</p>
-                <p><strong>Progress:</strong> ${enrollment.completion_percentage}% complete</p>
-              </div>
-
-              <p>${daysRemaining === 1 ? 
-                'This is your final reminder! Complete your training today to meet the deadline.' : 
-                'Don\'t wait until the last minute. Log in now to continue your training.'
-              }</p>
-
-              <a href="${Deno.env.get("SUPABASE_URL")?.replace('.supabase.co', '.lovable.app')}/course" 
-                 style="display: inline-block; background: #16a34a; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0;">
-                Continue Training
-              </a>
-
-              <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
-                Need help? Contact your training coordinator or email support@procannedu.com
-              </p>
+        const emailService = new SMTPEmailService();
+        const html = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: ${daysRemaining === 1 ? '#dc2626' : '#f59e0b'};">${urgencyLevel}</h1>
+            <p>Hi ${enrollment.profiles?.first_name || 'there'},</p>
+            <p>Your Maryland Responsible Vendor Training deadline is approaching soon.</p>
+            
+            <div style="background: #fef3c7; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+              <h3 style="margin-top: 0;">⏰ ${daysRemaining} Day${daysRemaining > 1 ? 's' : ''} Remaining</h3>
+              <p><strong>Deadline:</strong> ${new Date(enrollment.deadline_at).toLocaleDateString()}</p>
+              <p><strong>Progress:</strong> ${enrollment.completion_percentage}% complete</p>
             </div>
-          `,
+
+            <p>${daysRemaining === 1 ? 
+              'This is your final reminder! Complete your training today to meet the deadline.' : 
+              'Don\'t wait until the last minute. Log in now to continue your training.'
+            }</p>
+
+            <a href="https://www.procannedu.com/course" 
+               style="display: inline-block; background: #16a34a; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0;">
+              Continue Training
+            </a>
+
+            <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
+              Need help? Contact your training coordinator or email support@procannedu.com
+            </p>
+          </div>
+        `;
+
+        const result = await emailService.sendEmail({
+          to: enrollment.users.email,
+          subject: `${urgencyLevel}: Training Deadline in ${daysRemaining} Day${daysRemaining > 1 ? 's' : ''}`,
+          html,
+          from: "ProCannEdu <noreply@procannedu.com>",
         });
-        sentCount++;
+        await emailService.close();
+
+        if (result.success) {
+          sentCount++;
+        } else {
+          console.error(`Failed to send reminder to ${enrollment.users.email}:`, result.error);
+        }
       } catch (emailError) {
         console.error(`Failed to send reminder to ${enrollment.users.email}:`, emailError);
       }

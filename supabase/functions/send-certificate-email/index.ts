@@ -1,9 +1,13 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { Resend } from "npm:resend@2.0.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { loadEmailTemplate } from "../_shared/email-templates.ts";
+import { SMTPEmailService } from "../_shared/smtp-email-service.ts";
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+const supabase = createClient(
+  Deno.env.get("SUPABASE_URL") ?? "",
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+);
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -57,14 +61,49 @@ const handler = async (req: Request): Promise<Response> => {
       CertificateURL: certificateUrl || 'https://www.procannedu.com/certificates',
     });
 
-    const emailResponse = await resend.emails.send({
-      from: "ProCann Edu <certificates@procannedu.com>",
-      to: [email],
+    // Log email attempt
+    const { data: logData } = await supabase
+      .from('email_logs')
+      .insert({
+        recipient: email,
+        email_type: 'certificate',
+        status: 'sending',
+        template_name: 'certificate',
+        template_data: {
+          firstName,
+          lastName,
+          certificateNumber,
+          courseTitle,
+        }
+      })
+      .select('id')
+      .single();
+
+    const logId = logData?.id;
+
+    const emailService = new SMTPEmailService();
+    const emailResponse = await emailService.sendEmail({
+      to: email,
       subject: `🎓 Your ${courseTitle} Certificate is Ready!`,
       html,
+      from: "ProCann Edu <certificates@procannedu.com>",
     });
+    await emailService.close();
 
     console.log("Certificate email sent successfully:", emailResponse);
+
+    // Update email log
+    if (logId) {
+      await supabase
+        .from('email_logs')
+        .update({
+          status: emailResponse.success ? 'sent' : 'failed',
+          provider_id: emailResponse.messageId,
+          sent_at: new Date().toISOString(),
+          error: emailResponse.error || null
+        })
+        .eq('id', logId);
+    }
 
     return new Response(JSON.stringify(emailResponse), {
       status: 200,

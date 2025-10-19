@@ -63,5 +63,8 @@ verify_jwt = false
 [functions.notify-profile-changes]
 verify_jwt = true
 
+[functions.test-smtp-connection]
+verify_jwt = true
+
 [functions.notify-application-status]
 verify_jwt = false

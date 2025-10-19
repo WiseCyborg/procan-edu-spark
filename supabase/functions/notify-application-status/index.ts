@@ -1,7 +1,12 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { Resend } from "npm:resend@2.0.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { loadEmailTemplate } from "../_shared/email-templates.ts";
+import { SMTPEmailService } from "../_shared/smtp-email-service.ts";
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+const supabase = createClient(
+  Deno.env.get("SUPABASE_URL") ?? "",
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+);
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -16,33 +21,96 @@ serve(async (req) => {
   try {
     const { application_id, status, access_key, rejection_reason, applicant_email, organization_name } = await req.json();
 
-    const baseUrl = Deno.env.get("SUPABASE_URL")?.replace('.supabase.co', '.lovable.app') || '';
+    const baseUrl = 'https://www.procannedu.com';
+
+    const emailService = new SMTPEmailService();
+    let emailResult;
+    let emailType;
+    let html;
 
     if (status === 'approved') {
-      await resend.emails.send({
-        from: "ProCannEdu <noreply@procannedu.com>",
-        to: [applicant_email],
+      emailType = 'application_approved';
+      html = await loadEmailTemplate('application-approved', {
+        OrganizationName: organization_name,
+        AccessKey: access_key,
+        RegisterLink: `${baseUrl}/auth`,
+      });
+
+      // Log email attempt
+      const { data: logData } = await supabase
+        .from('email_logs')
+        .insert({
+          recipient: applicant_email,
+          email_type: emailType,
+          status: 'sending',
+          template_name: 'application-approved',
+          template_data: { organization_name, access_key }
+        })
+        .select('id')
+        .single();
+
+      emailResult = await emailService.sendEmail({
+        to: applicant_email,
         subject: "🎉 Your Dispensary Application Has Been Approved!",
-        html: `
-          <h1>Congratulations!</h1>
-          <p>Your application for ${organization_name} has been approved.</p>
-          <p><strong>Access Key:</strong> ${access_key}</p>
-          <p><a href="${baseUrl}/auth">Register Now</a></p>
-        `,
-      });
-    } else if (status === 'rejected') {
-      await resend.emails.send({
+        html,
         from: "ProCannEdu <noreply@procannedu.com>",
-        to: [applicant_email],
-        subject: "Application Status Update - ProCannEdu",
-        html: `
-          <h1>Application Update</h1>
-          <p>Thank you for your application for ${organization_name}.</p>
-          <p><strong>Reason:</strong> ${rejection_reason}</p>
-          <p><a href="${baseUrl}/org/apply">Reapply</a></p>
-        `,
       });
+
+      // Update log
+      if (logData?.id) {
+        await supabase
+          .from('email_logs')
+          .update({
+            status: emailResult.success ? 'sent' : 'failed',
+            provider_id: emailResult.messageId,
+            sent_at: new Date().toISOString(),
+            error: emailResult.error || null
+          })
+          .eq('id', logData.id);
+      }
+    } else if (status === 'rejected') {
+      emailType = 'application_rejected';
+      html = await loadEmailTemplate('application-rejected', {
+        OrganizationName: organization_name,
+        RejectionReason: rejection_reason,
+        ReapplyLink: `${baseUrl}/org/apply`,
+      });
+
+      // Log email attempt
+      const { data: logData } = await supabase
+        .from('email_logs')
+        .insert({
+          recipient: applicant_email,
+          email_type: emailType,
+          status: 'sending',
+          template_name: 'application-rejected',
+          template_data: { organization_name, rejection_reason }
+        })
+        .select('id')
+        .single();
+
+      emailResult = await emailService.sendEmail({
+        to: applicant_email,
+        subject: "Application Status Update - ProCannEdu",
+        html,
+        from: "ProCannEdu <noreply@procannedu.com>",
+      });
+
+      // Update log
+      if (logData?.id) {
+        await supabase
+          .from('email_logs')
+          .update({
+            status: emailResult.success ? 'sent' : 'failed',
+            provider_id: emailResult.messageId,
+            sent_at: new Date().toISOString(),
+            error: emailResult.error || null
+          })
+          .eq('id', logData.id);
+      }
     }
+
+    await emailService.close();
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

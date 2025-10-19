@@ -53,6 +53,13 @@ interface EmailMetrics {
   recentCount: number;
 }
 
+interface SMTPHealth {
+  status: 'healthy' | 'unhealthy' | 'checking' | 'unknown';
+  latencyMs: number | null;
+  lastChecked: Date | null;
+  error: string | null;
+}
+
 const EmailMonitoringDashboard = () => {
   const { toast } = useToast();
   const [emailLogs, setEmailLogs] = useState<EmailLog[]>([]);
@@ -68,10 +75,17 @@ const EmailMonitoringDashboard = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
+  const [smtpHealth, setSMTPHealth] = useState<SMTPHealth>({
+    status: 'unknown',
+    latencyMs: null,
+    lastChecked: null,
+    error: null
+  });
 
   useEffect(() => {
     fetchEmailLogs();
     setupRealtimeSubscription();
+    testSMTPConnection(); // Check SMTP health on mount
   }, []);
 
   useEffect(() => {
@@ -264,11 +278,133 @@ const EmailMonitoringDashboard = () => {
     });
   };
 
+  const testSMTPConnection = async () => {
+    try {
+      setSMTPHealth(prev => ({ ...prev, status: 'checking' }));
+      
+      const { data, error } = await supabase.functions.invoke('test-smtp-connection', {
+        body: {}
+      });
+
+      if (error) throw error;
+
+      setSMTPHealth({
+        status: data.success ? 'healthy' : 'unhealthy',
+        latencyMs: data.latencyMs || null,
+        lastChecked: new Date(),
+        error: data.error || null
+      });
+
+      toast({
+        title: data.success ? "SMTP Healthy" : "SMTP Connection Failed",
+        description: data.success 
+          ? `Connection successful (${data.latencyMs}ms)` 
+          : data.error || "Failed to connect",
+        variant: data.success ? "default" : "destructive"
+      });
+    } catch (error: any) {
+      console.error('Error testing SMTP connection:', error);
+      setSMTPHealth({
+        status: 'unhealthy',
+        latencyMs: null,
+        lastChecked: new Date(),
+        error: error.message
+      });
+      toast({
+        title: "SMTP Test Failed",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  };
+
   const failedEmails = emailLogs.filter(log => log.status === 'failed');
   const uniqueTypes = [...new Set(emailLogs.map(log => log.email_type))];
 
   return (
     <div className="space-y-6">
+      {/* SMTP Health Status */}
+      <Card className={
+        smtpHealth.status === 'healthy' ? 'border-green-500' :
+        smtpHealth.status === 'unhealthy' ? 'border-red-500' :
+        smtpHealth.status === 'checking' ? 'border-yellow-500' :
+        ''
+      }>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center">
+              <Mail className="mr-2 h-5 w-5" />
+              SMTP Email Service Status
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={testSMTPConnection}
+              disabled={smtpHealth.status === 'checking'}
+            >
+              {smtpHealth.status === 'checking' ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  Testing...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Test Connection
+                </>
+              )}
+            </Button>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                {smtpHealth.status === 'healthy' && (
+                  <>
+                    <CheckCircle className="h-6 w-6 text-green-600" />
+                    <span className="font-semibold text-green-600">Healthy</span>
+                  </>
+                )}
+                {smtpHealth.status === 'unhealthy' && (
+                  <>
+                    <XCircle className="h-6 w-6 text-red-600" />
+                    <span className="font-semibold text-red-600">Connection Failed</span>
+                  </>
+                )}
+                {smtpHealth.status === 'checking' && (
+                  <>
+                    <Clock className="h-6 w-6 text-yellow-600 animate-pulse" />
+                    <span className="font-semibold text-yellow-600">Checking...</span>
+                  </>
+                )}
+                {smtpHealth.status === 'unknown' && (
+                  <>
+                    <AlertTriangle className="h-6 w-6 text-gray-400" />
+                    <span className="font-semibold text-gray-600">Not Tested</span>
+                  </>
+                )}
+              </div>
+              {smtpHealth.latencyMs !== null && (
+                <p className="text-sm text-muted-foreground">
+                  Response time: <span className="font-medium">{smtpHealth.latencyMs}ms</span>
+                </p>
+              )}
+              {smtpHealth.lastChecked && (
+                <p className="text-xs text-muted-foreground">
+                  Last checked: {smtpHealth.lastChecked.toLocaleTimeString()}
+                </p>
+              )}
+              {smtpHealth.error && (
+                <p className="text-sm text-red-600 mt-2">
+                  Error: {smtpHealth.error}
+                </p>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Metrics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>

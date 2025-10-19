@@ -1,8 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
-import { Resend } from "npm:resend@2.0.0";
+import { SMTPEmailService } from "../_shared/smtp-email-service.ts";
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -130,13 +129,19 @@ const handler = async (req: Request): Promise<Response> => {
       .select()
       .single();
 
-    // Send email via Resend
-    const emailResponse = await resend.emails.send({
-      from: "ProCann Edu <no-reply@procannedu.com>",
-      to: [email],
+    // Send email via SMTP
+    const emailService = new SMTPEmailService();
+    const emailResponse = await emailService.sendEmail({
+      to: email,
       subject: subject,
       html: htmlContent,
+      from: "ProCann Edu <noreply@procannedu.com>",
     });
+    await emailService.close();
+
+    if (!emailResponse.success) {
+      throw new Error(emailResponse.error || 'Failed to send email');
+    }
 
     console.log("Invitation email sent successfully:", emailResponse);
 
@@ -146,7 +151,7 @@ const handler = async (req: Request): Promise<Response> => {
         .from('email_logs')
         .update({
           status: 'sent',
-          provider_id: emailResponse.id,
+          provider_id: emailResponse.messageId,
           sent_at: new Date().toISOString()
         })
         .eq('id', emailLog.id);
@@ -155,7 +160,7 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(
       JSON.stringify({ 
         success: true, 
-        emailId: emailResponse.id,
+        emailId: emailResponse.messageId,
         recipient: email 
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
