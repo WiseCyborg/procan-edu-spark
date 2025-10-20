@@ -12,7 +12,8 @@ import {
   Shield,
   Zap,
   Eye,
-  Activity
+  Activity,
+  Sparkles
 } from 'lucide-react';
 import { HoverCallout } from '@/components/ui/hover-callout';
 import { SimpleFAQManager } from '@/components/faq/SimpleFAQManager';
@@ -20,9 +21,14 @@ import { EnhancedDraggableChat } from '@/components/chat/EnhancedDraggableChat';
 import { Link } from 'react-router-dom';
 import { OutdatedContentWarning } from '@/components/admin/OutdatedContentWarning';
 import { ImageAssetManager } from '@/components/admin/ImageAssetManager';
+import { EnhancedUserManagementView } from '@/components/admin/EnhancedUserManagementView';
+import { AIFeaturesDashboard } from '@/components/admin/AIFeaturesDashboard';
+import { CommunicationManagementView } from '@/components/admin/CommunicationManagementView';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 
 const EnhancedAdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
+  const [openDialog, setOpenDialog] = useState<'users' | 'ai' | 'communication' | null>(null);
 
   // Mock chat messages for demo
   const mockMessages = [
@@ -189,7 +195,10 @@ const EnhancedAdminDashboard = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Card>
+            <Card 
+              className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-[1.02]"
+              onClick={() => setOpenDialog('users')}
+            >
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Users className="h-5 w-5" />
@@ -198,7 +207,7 @@ const EnhancedAdminDashboard = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Enhanced user management with role-based permissions and smart authentication.
+                  Click to verify Louis & Danielle, manage users and roles
                 </p>
                 <div className="space-y-2">
                   <div className="flex justify-between">
@@ -213,16 +222,19 @@ const EnhancedAdminDashboard = () => {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card 
+              className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-[1.02]"
+              onClick={() => setOpenDialog('ai')}
+            >
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  <Bot className="h-5 w-5" />
+                  <Sparkles className="h-5 w-5" />
                   <span>AI Features</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground mb-4">
-                  AI-powered FAQ generation and smart content management.
+                  Click to manage AI-powered FAQ generation and content
                 </p>
                 <div className="space-y-2">
                   <div className="flex justify-between">
@@ -237,7 +249,10 @@ const EnhancedAdminDashboard = () => {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card 
+              className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-[1.02]"
+              onClick={() => setOpenDialog('communication')}
+            >
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <MessageSquare className="h-5 w-5" />
@@ -246,12 +261,12 @@ const EnhancedAdminDashboard = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Enhanced chat system with draggable messages and contextual help.
+                  Click to view email status, conversations and notifications
                 </p>
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-sm">Pinned Messages</span>
-                    <Badge>5</Badge>
+                    <span className="text-sm">Emails Sent</span>
+                    <Badge>345</Badge>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm">Active Chats</span>
@@ -340,6 +355,45 @@ const EnhancedAdminDashboard = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* User Management Sheet */}
+      <Sheet open={openDialog === 'users'} onOpenChange={(open) => !open && setOpenDialog(null)}>
+        <SheetContent side="right" className="w-full sm:max-w-6xl overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>User Management</SheetTitle>
+            <SheetDescription>Verify Louis & Danielle, manage users and assign roles</SheetDescription>
+          </SheetHeader>
+          <div className="mt-6">
+            <EnhancedUserManagementView />
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* AI Features Sheet */}
+      <Sheet open={openDialog === 'ai'} onOpenChange={(open) => !open && setOpenDialog(null)}>
+        <SheetContent side="right" className="w-full sm:max-w-5xl overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>AI Features Dashboard</SheetTitle>
+            <SheetDescription>Manage AI-powered features and analytics</SheetDescription>
+          </SheetHeader>
+          <div className="mt-6">
+            <AIFeaturesDashboard />
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* Communication Sheet */}
+      <Sheet open={openDialog === 'communication'} onOpenChange={(open) => !open && setOpenDialog(null)}>
+        <SheetContent side="right" className="w-full sm:max-w-5xl overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>Communication Management</SheetTitle>
+            <SheetDescription>Monitor email delivery, conversations, and notifications</SheetDescription>
+          </SheetHeader>
+          <div className="mt-6">
+            <CommunicationManagementView />
+          </div>
+        </SheetContent>
+      </Sheet>
 
       {/* Enhanced Draggable Chat Demo */}
       <EnhancedDraggableChat 

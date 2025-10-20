@@ -1935,6 +1935,10 @@ export type Database = {
           success: boolean
         }[]
       }
+      bulk_verify_users: {
+        Args: { admin_notes?: string; target_user_ids: string[] }
+        Returns: Json
+      }
       calculate_compliance_score: {
         Args: { org_id: string }
         Returns: number
@@ -2114,6 +2118,10 @@ export type Database = {
           message: string
           success: boolean
         }[]
+      }
+      manually_verify_user: {
+        Args: { admin_notes?: string; target_user_id: string }
+        Returns: Json
       }
       reject_dispensary_application: {
         Args: { application_id: string; rejection_reason: string }
