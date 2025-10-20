@@ -13,7 +13,11 @@ serve(async (req) => {
   }
 
   try {
-    const { template_id, test = false } = await req.json();
+    const { template_id, test_data, send_test = false } = await req.json();
+
+    if (!template_id) {
+      throw new Error("template_id is required");
+    }
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
@@ -31,11 +35,14 @@ serve(async (req) => {
       throw new Error("Template not found");
     }
 
-    // Generate sample data for all variables
-    const sampleData: { [key: string]: string } = {};
-    template.variables.forEach((variable: string) => {
-      sampleData[variable] = `[Sample ${variable}]`;
-    });
+    // Generate sample data for all variables if not provided
+    const sampleData: { [key: string]: string } = test_data || {};
+    
+    if (!test_data) {
+      (template.variables as string[]).forEach((variable: string) => {
+        sampleData[variable] = `[Sample ${variable}]`;
+      });
+    }
 
     // Replace variables in template
     let renderedHtml = template.html_content;
@@ -44,8 +51,27 @@ serve(async (req) => {
       renderedHtml = renderedHtml.replace(regex, value);
     });
 
+    // Validate rendered output - check for unreplaced variables
+    const unreplacedVars = renderedHtml.match(/\{\{\s*\.\w+\s*\}\}/g);
+    const issues: string[] = [];
+    
+    if (unreplacedVars && unreplacedVars.length > 0) {
+      issues.push(`Unreplaced variables found: ${unreplacedVars.join(', ')}`);
+    }
+
+    // Check for empty src/href attributes
+    const emptySrc = renderedHtml.match(/src=["'](\s*)["']/g);
+    const emptyHref = renderedHtml.match(/href=["'](\s*)["']/g);
+    
+    if (emptySrc && emptySrc.length > 0) {
+      issues.push(`Found ${emptySrc.length} empty src attributes`);
+    }
+    if (emptyHref && emptyHref.length > 0) {
+      issues.push(`Found ${emptyHref.length} empty href attributes`);
+    }
+
     // If test=true, send actual email
-    if (test) {
+    if (send_test) {
       const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
       
       const { data: authUser } = await supabase.auth.getUser(
@@ -63,11 +89,19 @@ serve(async (req) => {
         html: renderedHtml,
       });
 
+      // Update last_tested_at
+      await supabase
+        .from('email_templates')
+        .update({ last_tested_at: new Date().toISOString() })
+        .eq('id', template_id);
+
       return new Response(
         JSON.stringify({ 
           success: true, 
           message: "Test email sent",
-          preview: renderedHtml 
+          html: renderedHtml,
+          issues: issues.length > 0 ? issues : undefined,
+          sent: true
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
@@ -75,7 +109,11 @@ serve(async (req) => {
 
     // Return rendered preview
     return new Response(
-      JSON.stringify({ html: renderedHtml }),
+      JSON.stringify({ 
+        html: renderedHtml,
+        issues: issues.length > 0 ? issues : undefined,
+        sent: false
+      }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error: any) {

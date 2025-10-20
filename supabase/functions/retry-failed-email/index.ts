@@ -42,8 +42,8 @@ serve(async (req) => {
       const { data: emailData, error: sendError } = await resend.emails.send({
         from: "ProCann Edu <noreply@procannedu.com>",
         to: [originalEmail.recipient_email],
-        subject: originalEmail.metadata?.subject || "Message from ProCann Edu",
-        html: originalEmail.metadata?.html || "<p>Please contact support</p>",
+        subject: originalEmail.metadata?.subject || originalEmail.subject || "Message from ProCann Edu",
+        html: originalEmail.metadata?.html || originalEmail.html_content || "<p>Please contact support</p>",
       });
 
       if (sendError) throw sendError;
@@ -54,8 +54,14 @@ serve(async (req) => {
         .update({
           status: 'sent',
           sent_at: new Date().toISOString(),
+          provider: 'resend',
           provider_id: emailData?.id,
-          error_message: null
+          error_message: null,
+          metadata: {
+            ...originalEmail.metadata,
+            retry_count: (originalEmail.metadata?.retry_count || 0) + 1,
+            retry_at: new Date().toISOString()
+          }
         })
         .eq('id', email_id);
 
@@ -63,6 +69,8 @@ serve(async (req) => {
         JSON.stringify({ 
           success: true, 
           message: "Email resent successfully",
+          status: 'sent',
+          provider: 'resend',
           email_id: emailData?.id
         }), 
         {
@@ -78,7 +86,9 @@ serve(async (req) => {
           error_message: `Retry failed: ${resendError.message}`,
           metadata: {
             ...originalEmail.metadata,
-            retry_attempts: (originalEmail.metadata?.retry_attempts || 0) + 1
+            retry_count: (originalEmail.metadata?.retry_count || 0) + 1,
+            last_retry_error: resendError.message,
+            last_retry_at: new Date().toISOString()
           }
         })
         .eq('id', email_id);
@@ -88,7 +98,10 @@ serve(async (req) => {
   } catch (error: any) {
     console.error("Error retrying email:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        success: false,
+        error: error.message 
+      }),
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
