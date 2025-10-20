@@ -524,6 +524,128 @@ export type Database = {
         }
         Relationships: []
       }
+      email_provider_health: {
+        Row: {
+          created_at: string | null
+          error_count: number | null
+          id: string
+          last_check_at: string | null
+          last_success_at: string | null
+          metadata: Json | null
+          provider_name: string
+          response_time_ms: number | null
+          status: string
+        }
+        Insert: {
+          created_at?: string | null
+          error_count?: number | null
+          id?: string
+          last_check_at?: string | null
+          last_success_at?: string | null
+          metadata?: Json | null
+          provider_name: string
+          response_time_ms?: number | null
+          status: string
+        }
+        Update: {
+          created_at?: string | null
+          error_count?: number | null
+          id?: string
+          last_check_at?: string | null
+          last_success_at?: string | null
+          metadata?: Json | null
+          provider_name?: string
+          response_time_ms?: number | null
+          status?: string
+        }
+        Relationships: []
+      }
+      email_template_history: {
+        Row: {
+          change_reason: string | null
+          changed_by: string | null
+          created_at: string | null
+          html_content: string
+          id: string
+          subject_line: string
+          template_id: string | null
+          version: number
+        }
+        Insert: {
+          change_reason?: string | null
+          changed_by?: string | null
+          created_at?: string | null
+          html_content: string
+          id?: string
+          subject_line: string
+          template_id?: string | null
+          version: number
+        }
+        Update: {
+          change_reason?: string | null
+          changed_by?: string | null
+          created_at?: string | null
+          html_content?: string
+          id?: string
+          subject_line?: string
+          template_id?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_template_history_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "email_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_templates: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          html_content: string
+          id: string
+          is_active: boolean | null
+          last_tested_at: string | null
+          subject_line: string
+          template_name: string
+          updated_at: string | null
+          updated_by: string | null
+          variables: Json
+          version: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          html_content: string
+          id?: string
+          is_active?: boolean | null
+          last_tested_at?: string | null
+          subject_line: string
+          template_name: string
+          updated_at?: string | null
+          updated_by?: string | null
+          variables?: Json
+          version?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          html_content?: string
+          id?: string
+          is_active?: boolean | null
+          last_tested_at?: string | null
+          subject_line?: string
+          template_name?: string
+          updated_at?: string | null
+          updated_by?: string | null
+          variables?: Json
+          version?: number | null
+        }
+        Relationships: []
+      }
       email_verification_codes: {
         Row: {
           code: string

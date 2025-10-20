@@ -36,6 +36,11 @@ import { ProfileChangeHistoryViewer } from '@/components/admin/ProfileChangeHist
 import { WhoIsHereWidget } from '@/components/realtime/WhoIsHereWidget';
 import { AuthActivityFeed } from '@/components/realtime/AuthActivityFeed';
 import { RealTimeEmailDashboard } from '@/components/admin/RealTimeEmailDashboard';
+import { EnhancedEmailHealthDashboard } from '@/components/admin/EnhancedEmailHealthDashboard';
+import { EmailTemplateManager } from '@/components/admin/EmailTemplateManager';
+import { UserEmailHistory } from '@/components/admin/UserEmailHistory';
+import { EmailAnalyticsCharts } from '@/components/admin/EmailAnalyticsCharts';
+import { EmailProviderSettings } from '@/components/admin/EmailProviderSettings';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -750,6 +755,38 @@ const AdminDashboard = () => {
 
           <TabsContent value="email-tracking">
             <RealTimeEmailDashboard />
+          </TabsContent>
+
+          <TabsContent value="email-health">
+            <Tabs defaultValue="overview" className="space-y-4">
+              <TabsList>
+                <TabsTrigger value="overview">Overview</TabsTrigger>
+                <TabsTrigger value="templates">Templates</TabsTrigger>
+                <TabsTrigger value="search">Search</TabsTrigger>
+                <TabsTrigger value="analytics">Analytics</TabsTrigger>
+                <TabsTrigger value="settings">Settings</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="overview">
+                <EnhancedEmailHealthDashboard />
+              </TabsContent>
+
+              <TabsContent value="templates">
+                <EmailTemplateManager />
+              </TabsContent>
+
+              <TabsContent value="search">
+                <UserEmailHistory />
+              </TabsContent>
+
+              <TabsContent value="analytics">
+                <EmailAnalyticsCharts />
+              </TabsContent>
+
+              <TabsContent value="settings">
+                <EmailProviderSettings />
+              </TabsContent>
+            </Tabs>
           </TabsContent>
         </Tabs>
 
