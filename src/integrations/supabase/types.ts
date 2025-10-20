@@ -2077,6 +2077,10 @@ export type Database = {
           old_value: string
         }[]
       }
+      get_user_organization: {
+        Args: { _user_id: string }
+        Returns: string
+      }
       get_user_organization_id: {
         Args: { user_uuid: string }
         Returns: string
@@ -2114,6 +2118,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_conversation_participant: {
+        Args: { _conversation_id: string; _user_id: string }
         Returns: boolean
       }
       is_own_profile: {
