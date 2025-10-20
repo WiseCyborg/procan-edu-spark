@@ -41,6 +41,7 @@ import { EmailTemplateManager } from '@/components/admin/EmailTemplateManager';
 import { UserEmailHistory } from '@/components/admin/UserEmailHistory';
 import { EmailAnalyticsCharts } from '@/components/admin/EmailAnalyticsCharts';
 import { EmailProviderSettings } from '@/components/admin/EmailProviderSettings';
+import { TestEmailSender } from '@/components/admin/TestEmailSender';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -762,6 +763,7 @@ const AdminDashboard = () => {
               <TabsList>
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="templates">Templates</TabsTrigger>
+                <TabsTrigger value="test">Test</TabsTrigger>
                 <TabsTrigger value="search">Search</TabsTrigger>
                 <TabsTrigger value="analytics">Analytics</TabsTrigger>
                 <TabsTrigger value="settings">Settings</TabsTrigger>
@@ -771,13 +773,17 @@ const AdminDashboard = () => {
                 <EnhancedEmailHealthDashboard />
               </TabsContent>
 
-              <TabsContent value="templates">
-                <EmailTemplateManager />
-              </TabsContent>
+                <TabsContent value="templates">
+                  <EmailTemplateManager />
+                </TabsContent>
 
-              <TabsContent value="search">
-                <UserEmailHistory />
-              </TabsContent>
+                <TabsContent value="test">
+                  <TestEmailSender />
+                </TabsContent>
+
+                <TabsContent value="search">
+                  <UserEmailHistory />
+                </TabsContent>
 
               <TabsContent value="analytics">
                 <EmailAnalyticsCharts />
