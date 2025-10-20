@@ -1,7 +1,9 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { loadEmailTemplate } from "../_shared/email-templates.ts";
-import { SMTPEmailService } from "../_shared/smtp-email-service.ts";
+import { Resend } from "npm:resend@2.0.0";
+
+const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL") ?? "",
@@ -23,7 +25,6 @@ serve(async (req) => {
 
     const baseUrl = 'https://www.procannedu.com';
 
-    const emailService = new SMTPEmailService();
     let emailResult;
     let emailType;
     let html;
@@ -49,11 +50,11 @@ serve(async (req) => {
         .select('id')
         .single();
 
-      emailResult = await emailService.sendEmail({
-        to: applicant_email,
+      emailResult = await resend.emails.send({
+        from: "ProCannEdu <noreply@procannedu.com>",
+        to: [applicant_email],
         subject: "🎉 Your Dispensary Application Has Been Approved!",
         html,
-        from: "ProCannEdu <noreply@procannedu.com>",
       });
 
       // Update log
@@ -61,10 +62,10 @@ serve(async (req) => {
         await supabase
           .from('email_logs')
           .update({
-            status: emailResult.success ? 'sent' : 'failed',
-            provider_id: emailResult.messageId,
+            status: emailResult.data?.id ? 'sent' : 'failed',
+            provider_id: emailResult.data?.id,
             sent_at: new Date().toISOString(),
-            error: emailResult.error || null
+            error: emailResult.error ? JSON.stringify(emailResult.error) : null
           })
           .eq('id', logData.id);
       }
@@ -89,11 +90,11 @@ serve(async (req) => {
         .select('id')
         .single();
 
-      emailResult = await emailService.sendEmail({
-        to: applicant_email,
+      emailResult = await resend.emails.send({
+        from: "ProCannEdu <noreply@procannedu.com>",
+        to: [applicant_email],
         subject: "Application Status Update - ProCannEdu",
         html,
-        from: "ProCannEdu <noreply@procannedu.com>",
       });
 
       // Update log
@@ -101,16 +102,14 @@ serve(async (req) => {
         await supabase
           .from('email_logs')
           .update({
-            status: emailResult.success ? 'sent' : 'failed',
-            provider_id: emailResult.messageId,
+            status: emailResult.data?.id ? 'sent' : 'failed',
+            provider_id: emailResult.data?.id,
             sent_at: new Date().toISOString(),
-            error: emailResult.error || null
+            error: emailResult.error ? JSON.stringify(emailResult.error) : null
           })
           .eq('id', logData.id);
       }
     }
-
-    await emailService.close();
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

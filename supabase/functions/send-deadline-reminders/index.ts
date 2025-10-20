@@ -1,6 +1,8 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { SMTPEmailService } from "../_shared/smtp-email-service.ts";
+import { Resend } from "npm:resend@2.0.0";
+
+const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -50,7 +52,6 @@ serve(async (req) => {
                            "📅 Reminder";
 
       try {
-        const emailService = new SMTPEmailService();
         const html = `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h1 style="color: ${daysRemaining === 1 ? '#dc2626' : '#f59e0b'};">${urgencyLevel}</h1>
@@ -79,15 +80,14 @@ serve(async (req) => {
           </div>
         `;
 
-        const result = await emailService.sendEmail({
-          to: enrollment.users.email,
+        const result = await resend.emails.send({
+          from: "ProCannEdu <noreply@procannedu.com>",
+          to: [enrollment.users.email],
           subject: `${urgencyLevel}: Training Deadline in ${daysRemaining} Day${daysRemaining > 1 ? 's' : ''}`,
           html,
-          from: "ProCannEdu <noreply@procannedu.com>",
         });
-        await emailService.close();
 
-        if (result.success) {
+        if (result.data?.id) {
           sentCount++;
         } else {
           console.error(`Failed to send reminder to ${enrollment.users.email}:`, result.error);

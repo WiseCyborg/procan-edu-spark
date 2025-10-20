@@ -1,7 +1,9 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { loadEmailTemplate } from "../_shared/email-templates.ts";
-import { SMTPEmailService } from "../_shared/smtp-email-service.ts";
+import { Resend } from "npm:resend@2.0.0";
+
+const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL") ?? "",
@@ -50,14 +52,12 @@ serve(async (req) => {
       .select('id')
       .single();
 
-    const emailService = new SMTPEmailService();
-
     // Send confirmation to coordinator
-    const coordinatorResult = await emailService.sendEmail({
-      to: coordinatorEmail,
+    const coordinatorResult = await resend.emails.send({
+      from: "ProCannEdu <noreply@procannedu.com>",
+      to: [coordinatorEmail],
       subject: `✅ Seat Purchase Confirmation - ${quantity} Seats`,
       html: coordinatorHtml,
-      from: "ProCannEdu <noreply@procannedu.com>",
     });
 
     // Update coordinator email log
@@ -65,10 +65,10 @@ serve(async (req) => {
       await supabase
         .from('email_logs')
         .update({
-          status: coordinatorResult.success ? 'sent' : 'failed',
-          provider_id: coordinatorResult.messageId,
+          status: coordinatorResult.data?.id ? 'sent' : 'failed',
+          provider_id: coordinatorResult.data?.id,
           sent_at: new Date().toISOString(),
-          error: coordinatorResult.error || null
+          error: coordinatorResult.error ? JSON.stringify(coordinatorResult.error) : null
         })
         .eq('id', coordLogData.id);
     }
@@ -103,32 +103,30 @@ serve(async (req) => {
       </div>
     `;
 
-    const adminResult = await emailService.sendEmail({
-      to: "admin@procannedu.com",
+    const adminResult = await resend.emails.send({
+      from: "ProCannEdu <noreply@procannedu.com>",
+      to: ["admin@procannedu.com"],
       subject: `📊 New Seat Purchase - ${organizationName}`,
       html: adminHtml,
-      from: "ProCannEdu <noreply@procannedu.com>",
     });
-
-    await emailService.close();
 
     // Update admin email log
     if (adminLogData?.id) {
       await supabase
         .from('email_logs')
         .update({
-          status: adminResult.success ? 'sent' : 'failed',
-          provider_id: adminResult.messageId,
+          status: adminResult.data?.id ? 'sent' : 'failed',
+          provider_id: adminResult.data?.id,
           sent_at: new Date().toISOString(),
-          error: adminResult.error || null
+          error: adminResult.error ? JSON.stringify(adminResult.error) : null
         })
         .eq('id', adminLogData.id);
     }
 
     return new Response(JSON.stringify({ 
       success: true,
-      coordinatorEmailSent: coordinatorResult.success,
-      adminEmailSent: adminResult.success
+      coordinatorEmailSent: !!coordinatorResult.data?.id,
+      adminEmailSent: !!adminResult.data?.id
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
