@@ -41,9 +41,9 @@ serve(async (req) => {
     try {
       const { data: emailData, error: sendError } = await resend.emails.send({
         from: "ProCann Edu <noreply@procannedu.com>",
-        to: [originalEmail.recipient],
-        subject: originalEmail.template_data?.subject || "Message from ProCann Edu",
-        html: originalEmail.template_data?.html || "<p>Please contact support</p>",
+        to: [originalEmail.recipient_email],
+        subject: originalEmail.metadata?.subject || "Message from ProCann Edu",
+        html: originalEmail.metadata?.html || "<p>Please contact support</p>",
       });
 
       if (sendError) throw sendError;
@@ -55,7 +55,7 @@ serve(async (req) => {
           status: 'sent',
           sent_at: new Date().toISOString(),
           provider_id: emailData?.id,
-          error: null
+          error_message: null
         })
         .eq('id', email_id);
 
@@ -75,8 +75,11 @@ serve(async (req) => {
         .from('email_logs')
         .update({
           status: 'failed',
-          error: `Retry failed: ${resendError.message}`,
-          delivery_attempts: (originalEmail.delivery_attempts || 0) + 1
+          error_message: `Retry failed: ${resendError.message}`,
+          metadata: {
+            ...originalEmail.metadata,
+            retry_attempts: (originalEmail.metadata?.retry_attempts || 0) + 1
+          }
         })
         .eq('id', email_id);
 

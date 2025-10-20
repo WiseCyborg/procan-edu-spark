@@ -39,6 +39,7 @@ export const EmailTemplateManager = () => {
   const [history, setHistory] = useState<TemplateHistory[]>([]);
   const [editedContent, setEditedContent] = useState('');
   const [editedSubject, setEditedSubject] = useState('');
+  const [isMigrating, setIsMigrating] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -129,6 +130,31 @@ export const EmailTemplateManager = () => {
     }
   };
 
+  const migrateTemplates = async () => {
+    try {
+      setIsMigrating(true);
+      const { data, error } = await supabase.functions.invoke("migrate-email-templates");
+
+      if (error) throw error;
+
+      toast({
+        title: "Migration Complete",
+        description: data.message || "Templates migrated successfully",
+      });
+
+      fetchTemplates();
+    } catch (error: any) {
+      console.error("Error migrating templates:", error);
+      toast({
+        title: "Migration Error",
+        description: error.message || "Failed to migrate templates",
+        variant: "destructive",
+      });
+    } finally {
+      setIsMigrating(false);
+    }
+  };
+
   const testTemplate = async (template: EmailTemplate) => {
     try {
       toast({
@@ -190,10 +216,22 @@ export const EmailTemplateManager = () => {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-2xl font-bold">Email Templates</h2>
+          <p className="text-muted-foreground">
+            Manage and customize email templates
+          </p>
+        </div>
+        <Button onClick={migrateTemplates} disabled={isMigrating}>
+          {isMigrating ? "Migrating..." : "🔄 Migrate Templates from Files"}
+        </Button>
+      </div>
+
       <Card>
         <CardHeader>
-          <CardTitle>Email Templates</CardTitle>
-          <CardDescription>Manage all email templates used by the system</CardDescription>
+          <CardTitle>Active Templates</CardTitle>
+          <CardDescription>All email templates used by the system</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

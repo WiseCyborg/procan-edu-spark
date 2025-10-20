@@ -13,9 +13,35 @@ export async function loadEmailTemplate(
   data: TemplateData
 ): Promise<string> {
   try {
-    // Read the template file
-    const templatePath = `../../email-templates/${templateName}.html`;
-    let html = await Deno.readTextFile(new URL(templatePath, import.meta.url));
+    let html: string;
+
+    // Try to load from database first
+    try {
+      const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2.45.0");
+      const supabase = createClient(
+        Deno.env.get("SUPABASE_URL") ?? "",
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+      );
+
+      const { data: template, error } = await supabase
+        .from("email_templates")
+        .select("html_content")
+        .eq("template_name", templateName)
+        .eq("is_active", true)
+        .single();
+
+      if (!error && template) {
+        console.log(`Loaded template "${templateName}" from database`);
+        html = template.html_content;
+      } else {
+        throw new Error("Template not found in database");
+      }
+    } catch (dbError) {
+      // Fallback to filesystem
+      console.log(`Loading template "${templateName}" from filesystem (database failed)`);
+      const templatePath = `../../email-templates/${templateName}.html`;
+      html = await Deno.readTextFile(new URL(templatePath, import.meta.url));
+    }
 
     // Replace all template variables (both {{ .Variable }} and {{.Variable}} formats)
     for (const [key, value] of Object.entries(data)) {

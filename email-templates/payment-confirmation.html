@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Confirmation - ProCann Edu</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background-color: #f5f5f5;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+    }
+    .header {
+      background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+      padding: 40px 30px;
+      text-align: center;
+    }
+    .header h1 {
+      color: #ffffff;
+      margin: 0 0 10px 0;
+      font-size: 28px;
+    }
+    .header p {
+      color: rgba(255, 255, 255, 0.9);
+      margin: 0;
+      font-size: 16px;
+    }
+    .success-icon {
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+    .content {
+      padding: 40px 30px;
+    }
+    .content h2 {
+      color: #1a1a1a;
+      margin: 0 0 20px 0;
+      font-size: 24px;
+    }
+    .content p {
+      color: #4a4a4a;
+      line-height: 1.6;
+      margin: 0 0 20px 0;
+    }
+    .summary-box {
+      background-color: #f8fdf9;
+      border: 2px solid #16a34a;
+      border-radius: 8px;
+      padding: 25px;
+      margin: 25px 0;
+    }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #e5e5e5;
+    }
+    .summary-row:last-child {
+      border-bottom: none;
+      font-weight: 600;
+      font-size: 18px;
+      padding-top: 15px;
+    }
+    .summary-label {
+      color: #666666;
+    }
+    .summary-value {
+      color: #1a1a1a;
+      font-weight: 500;
+    }
+    .cta-button {
+      display: inline-block;
+      background-color: #16a34a;
+      color: #ffffff;
+      text-decoration: none;
+      padding: 14px 32px;
+      border-radius: 6px;
+      font-weight: 600;
+      margin: 20px 0;
+    }
+    .info-box {
+      background-color: #f0f9ff;
+      border-left: 4px solid #0284c7;
+      padding: 15px 20px;
+      margin: 25px 0;
+    }
+    .footer {
+      background-color: #f9f9f9;
+      padding: 30px;
+      text-align: center;
+      border-top: 1px solid #e5e5e5;
+    }
+    .footer p {
+      color: #888888;
+      font-size: 14px;
+      margin: 5px 0;
+    }
+    @media only screen and (max-width: 600px) {
+      .container {
+        width: 100% !important;
+      }
+      .header, .content, .footer {
+        padding: 20px !important;
+      }
+      .summary-row {
+        flex-direction: column;
+        gap: 5px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="success-icon">✅</div>
+      <h1>Payment Confirmed!</h1>
+      <p>Maryland Responsible Vendor Training</p>
+    </div>
+    
+    <div class="content">
+      <h2>Thank you for your payment, {{ .FirstName }}!</h2>
+      
+      <p>Your payment has been successfully processed. You now have full access to the Maryland Responsible Vendor Training course.</p>
+      
+      <div class="summary-box">
+        <h3 style="margin-top: 0; color: #16a34a;">Payment Summary</h3>
+        <div class="summary-row">
+          <span class="summary-label">Course:</span>
+          <span class="summary-value">{{ .CourseName }}</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Payment Method:</span>
+          <span class="summary-value">{{ .PaymentMethod }}</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Transaction ID:</span>
+          <span class="summary-value">{{ .TransactionId }}</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Payment Date:</span>
+          <span class="summary-value">{{ .PaymentDate }}</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Amount Paid:</span>
+          <span class="summary-value">${{ .Amount }}</span>
+        </div>
+      </div>
+      
+      <p style="text-align: center;">
+        <a href="{{ .DashboardURL }}" class="cta-button">Start Your Training</a>
+      </p>
+      
+      <div class="info-box">
+        <p style="margin: 0; color: #0369a1;"><strong>📧 Receipt:</strong> A copy of this receipt has been sent to {{ .Email }}</p>
+      </div>
+      
+      <h3 style="color: #16a34a;">What's Next?</h3>
+      <ol style="color: #4a4a4a; line-height: 1.8;">
+        <li>Access your training dashboard using the button above</li>
+        <li>Complete all 18 modules at your own pace</li>
+        <li>Pass the final exam with 80% or higher</li>
+        <li>Receive your Maryland RVT certificate</li>
+      </ol>
+      
+      <p>If you have any questions about your payment or the course, please don't hesitate to contact our support team.</p>
+    </div>
+    
+    <div class="footer">
+      <p><strong>ProCann Edu</strong></p>
+      <p>Maryland Responsible Vendor Training</p>
+      <p>Questions? Contact us at support@procannedu.com</p>
+      <p style="margin-top: 20px; font-size: 12px;">&copy; 2025 ProCann Edu. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html>

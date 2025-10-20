@@ -1,6 +1,7 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { Resend } from "npm:resend@2.0.0";
+import { SMTPEmailService } from "../_shared/smtp-email-service.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -13,110 +14,140 @@ serve(async (req) => {
   }
 
   try {
+    console.log("Testing email providers...");
+
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
     const results = {
-      resend: { status: 'offline', responseTime: 0, error: null },
-      smtp: { status: 'offline', responseTime: 0, error: null }
+      resend: { status: "offline", responseTime: 0, error: null as string | null },
+      smtp: { status: "offline", responseTime: 0, error: null as string | null },
     };
 
     // Test Resend
     try {
-      const resendStart = Date.now();
-      const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+      const resendStartTime = Date.now();
+      const resend = new Resend(Deno.env.get("RESEND_API_KEY") ?? "");
       
-      // Simple API check - doesn't send email
+      // Simple test - just verify API key works
       await resend.emails.send({
-        from: "test@procannedu.com",
-        to: ["test@example.com"],
-        subject: "Connection Test",
-        html: "Test",
-      }).catch(() => {
-        // Expected to fail - just testing connection
+        from: "ProCann Edu <noreply@procannedu.com>",
+        to: ["test@resend.dev"], // Resend test address
+        subject: "Health Check",
+        html: "<p>Provider health check test</p>",
       });
-      
-      const resendTime = Date.now() - resendStart;
-      
+
+      const resendResponseTime = Date.now() - resendStartTime;
       results.resend = {
-        status: resendTime < 1000 ? 'online' : 'degraded',
-        responseTime: resendTime,
-        error: null
+        status: resendResponseTime < 1000 ? "online" : resendResponseTime < 3000 ? "degraded" : "slow",
+        responseTime: resendResponseTime,
+        error: null,
       };
 
-      await supabase.from('email_provider_health').insert({
-        provider_name: 'resend',
-        status: results.resend.status,
-        response_time_ms: resendTime,
-        last_check_at: new Date().toISOString(),
-        last_success_at: new Date().toISOString(),
-        error_count: 0
-      });
+      // Update database
+      await supabase
+        .from("email_provider_health")
+        .upsert({
+          provider_name: "resend",
+          status: results.resend.status,
+          response_time_ms: resendResponseTime,
+          last_check_at: new Date().toISOString(),
+          last_success_at: new Date().toISOString(),
+          error_message: null,
+        }, {
+          onConflict: "provider_name",
+        });
+
+      console.log("Resend test successful:", resendResponseTime, "ms");
     } catch (error: any) {
-      results.resend = {
-        status: 'offline',
-        responseTime: 0,
-        error: error.message
-      };
+      console.error("Resend test failed:", error);
+      results.resend.error = error.message;
+      results.resend.status = "offline";
 
-      await supabase.from('email_provider_health').insert({
-        provider_name: 'resend',
-        status: 'offline',
-        response_time_ms: 0,
-        last_check_at: new Date().toISOString(),
-        error_count: 1,
-        metadata: { error: error.message }
-      });
+      await supabase
+        .from("email_provider_health")
+        .upsert({
+          provider_name: "resend",
+          status: "offline",
+          response_time_ms: 0,
+          last_check_at: new Date().toISOString(),
+          error_message: error.message,
+        }, {
+          onConflict: "provider_name",
+        });
     }
 
     // Test SMTP
     try {
-      const smtpStart = Date.now();
-      
-      // Simple SMTP connection test
-      // In real implementation, you'd test actual SMTP connection
-      const smtpTime = Date.now() - smtpStart;
-      
-      results.smtp = {
-        status: 'online',
-        responseTime: smtpTime,
-        error: null
-      };
+      const smtpStartTime = Date.now();
+      const smtpService = new SMTPEmailService();
+      const testResult = await smtpService.testConnection();
+      await smtpService.close();
 
-      await supabase.from('email_provider_health').insert({
-        provider_name: 'smtp',
-        status: 'online',
-        response_time_ms: smtpTime,
-        last_check_at: new Date().toISOString(),
-        last_success_at: new Date().toISOString(),
-        error_count: 0
-      });
+      const smtpResponseTime = testResult.latencyMs || (Date.now() - smtpStartTime);
+      
+      if (testResult.success) {
+        results.smtp = {
+          status: smtpResponseTime < 1000 ? "online" : smtpResponseTime < 3000 ? "degraded" : "slow",
+          responseTime: smtpResponseTime,
+          error: null,
+        };
+
+        await supabase
+          .from("email_provider_health")
+          .upsert({
+            provider_name: "smtp",
+            status: results.smtp.status,
+            response_time_ms: smtpResponseTime,
+            last_check_at: new Date().toISOString(),
+            last_success_at: new Date().toISOString(),
+            error_message: null,
+          }, {
+            onConflict: "provider_name",
+          });
+
+        console.log("SMTP test successful:", smtpResponseTime, "ms");
+      } else {
+        throw new Error(testResult.error || "SMTP test failed");
+      }
     } catch (error: any) {
-      results.smtp = {
-        status: 'offline',
-        responseTime: 0,
-        error: error.message
-      };
+      console.error("SMTP test failed:", error);
+      results.smtp.error = error.message;
+      results.smtp.status = "offline";
 
-      await supabase.from('email_provider_health').insert({
-        provider_name: 'smtp',
-        status: 'offline',
-        response_time_ms: 0,
-        last_check_at: new Date().toISOString(),
-        error_count: 1,
-        metadata: { error: error.message }
-      });
+      await supabase
+        .from("email_provider_health")
+        .upsert({
+          provider_name: "smtp",
+          status: "offline",
+          response_time_ms: 0,
+          last_check_at: new Date().toISOString(),
+          error_message: error.message,
+        }, {
+          onConflict: "provider_name",
+        });
     }
 
-    return new Response(JSON.stringify(results), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({
+        success: true,
+        results,
+        timestamp: new Date().toISOString(),
+      }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
   } catch (error: any) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    console.error("Provider test error:", error);
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
   }
 });
