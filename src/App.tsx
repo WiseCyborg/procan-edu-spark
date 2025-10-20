@@ -41,6 +41,13 @@ import DispensaryApplication from "./pages/DispensaryApplication";
 import GetStarted from "./pages/GetStarted";
 import TeamManagement from "./pages/TeamManagement";
 import { COMARBanner } from "./components/layout/COMARBanner";
+import StateOfficialsPage from "./pages/StateOfficialsPage";
+import AboutTeamPage from "./pages/AboutTeamPage";
+import ComplianceCurriculumMatrixPage from "./pages/ComplianceCurriculumMatrixPage";
+import ComplianceContentReviewPage from "./pages/ComplianceContentReviewPage";
+import EmployersPage from "./pages/EmployersPage";
+import ImpactDashboardPage from "./pages/ImpactDashboardPage";
+import AccessibilityPage from "./pages/AccessibilityPage";
 
 import { ProtectedCourseAccess } from "./components/ProtectedCourseAccess";
 
@@ -183,6 +190,14 @@ const App = () => (
                    <Route path="/org/apply" element={<DispensaryApplication />} />
                    
                    <Route path="/get-started" element={<GetStarted />} />
+                   
+                   <Route path="/state-officials" element={<StateOfficialsPage />} />
+                   <Route path="/about/team" element={<AboutTeamPage />} />
+                   <Route path="/compliance/curriculum-matrix" element={<ComplianceCurriculumMatrixPage />} />
+                   <Route path="/compliance/content-review" element={<ComplianceContentReviewPage />} />
+                   <Route path="/employers" element={<EmployersPage />} />
+                   <Route path="/impact" element={<ImpactDashboardPage />} />
+                   <Route path="/accessibility" element={<AccessibilityPage />} />
                    
                    <Route path="/team-management" element={
                      <ProtectedRoute>

@@ -42,8 +42,11 @@ const Index = () => {
               ProCann Edu
             </h1>
             <h2 className="text-2xl md:text-3xl text-white/95 font-medium max-w-3xl mx-auto leading-relaxed">
-              Your friendly guide to becoming a certified cannabis professional in Maryland
+              Maryland's Premier Responsible Vendor Training Program
             </h2>
+            <p className="text-xl text-white/90 mt-2">
+              Official Training Partner of Maryland Dispensaries
+            </p>
           </div>
 
           {/* Welcome Video Section */}
@@ -347,55 +350,53 @@ const Index = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-foreground text-white py-8 px-4">
+      <footer className="bg-foreground text-white py-12 px-4">
         <div className="container mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-6">
+          <div className="text-center mb-8 pb-8 border-b border-white/10">
+            <h3 className="text-2xl font-bold mb-2">ProCann Edu</h3>
+            <p className="text-xl text-white/90 mb-2">Maryland's Trusted RVT Provider</p>
+            <p className="text-white/70">Headquarters: Baltimore, Maryland</p>
+            <p className="text-white/70">Serving dispensaries across all 24 counties</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div>
-              <h4 className="text-lg font-semibold mb-4">ProCann Edu</h4>
-              <p className="text-white/70 text-sm leading-relaxed">
-                Your friendly partner in cannabis education. Made with 💚 in Maryland.
-              </p>
-            </div>
-            <div>
-              <h5 className="font-semibold mb-3">Quick Links</h5>
+              <h5 className="font-semibold mb-3">For Students</h5>
               <ul className="space-y-2 text-sm">
+                <li><a href="/auth" className="text-gray-400 hover:text-white">Get Started</a></li>
                 <li><a href="/faq" className="text-gray-400 hover:text-white">FAQ</a></li>
-                <li><a href="/verify-certificate" className="text-gray-400 hover:text-white">Verify Certificate</a></li>
-                <li><a href="/auth" className="text-gray-400 hover:text-white">Sign In</a></li>
+                <li><a href="/training-handbook" className="text-gray-400 hover:text-white">Training Handbook</a></li>
               </ul>
             </div>
             <div>
               <h5 className="font-semibold mb-3">For Organizations</h5>
               <ul className="space-y-2 text-sm">
-                <li><span className="text-gray-400">Bulk Training</span></li>
-                <li><span className="text-gray-400">Compliance Reports</span></li>
-                <li><span className="text-gray-400">Employee Management</span></li>
+                <li><a href="/org/apply" className="text-gray-400 hover:text-white">Dispensary Application</a></li>
+                <li><a href="/employers" className="text-gray-400 hover:text-white">Verify Certificates</a></li>
+                <li><a href="/purchase-seats" className="text-gray-400 hover:text-white">Purchase Training Seats</a></li>
               </ul>
             </div>
             <div>
-              <h5 className="font-semibold mb-3">Support</h5>
+              <h5 className="font-semibold mb-3">Compliance</h5>
               <ul className="space-y-2 text-sm">
-                <li><span className="text-gray-400">info@procannedu.com</span></li>
-                <li><span className="text-gray-400">Mon-Fri 9AM-6PM EST</span></li>
+                <li><a href="/state-officials" className="text-gray-400 hover:text-white">For State Officials</a></li>
+                <li><a href="/compliance/curriculum-matrix" className="text-gray-400 hover:text-white">COMAR Compliance Matrix</a></li>
+                <li><a href="/compliance/content-review" className="text-gray-400 hover:text-white">Content Review Process</a></li>
+                <li><a href="/accessibility" className="text-gray-400 hover:text-white">Accessibility Statement</a></li>
+              </ul>
+            </div>
+            <div>
+              <h5 className="font-semibold mb-3">About</h5>
+              <ul className="space-y-2 text-sm">
+                <li><a href="/about/team" className="text-gray-400 hover:text-white">Meet Our Team</a></li>
+                <li><a href="/impact" className="text-gray-400 hover:text-white">Our Impact</a></li>
+                <li><a href="/verify-certificate" className="text-gray-400 hover:text-white">Verify Certificate</a></li>
+                <li><a href="mailto:compliance@procannedu.com" className="text-gray-400 hover:text-white">compliance@procannedu.com</a></li>
               </ul>
             </div>
           </div>
-          <div className="border-t border-gray-700 pt-6 text-center">
-            <p className="text-gray-400 mb-2">
-              Aligned to{' '}
-              <a
-                href="https://cannabis.maryland.gov/pages/responsible_vendor_training.aspx"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline hover:text-white"
-              >
-                MCA Responsible Vendor Training
-              </a>
-              {' '}standards (COMAR 14.17). Last reviewed: January 2025
-            </p>
-            <p className="text-sm text-gray-500">
-              © 2025 ProCann Edu. All rights reserved.
-            </p>
+          <div className="text-center text-sm text-white/60 pt-8 border-t border-white/10">
+            <p>&copy; 2025 ProCann Edu. All rights reserved.</p>
+            <p className="mt-2">Made with 💚 in Maryland</p>
           </div>
         </div>
       </footer>
