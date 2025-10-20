@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { 
   Settings, 
   Users, 
@@ -25,10 +26,12 @@ import { EnhancedUserManagementView } from '@/components/admin/EnhancedUserManag
 import { AIFeaturesDashboard } from '@/components/admin/AIFeaturesDashboard';
 import { CommunicationManagementView } from '@/components/admin/CommunicationManagementView';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
+import { useAdminDashboardMetrics } from '@/hooks/useAdminDashboardMetrics';
 
 const EnhancedAdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [openDialog, setOpenDialog] = useState<'users' | 'ai' | 'communication' | null>(null);
+  const { metrics, loading } = useAdminDashboardMetrics();
 
   // Mock chat messages for demo
   const mockMessages = [
@@ -212,11 +215,19 @@ const EnhancedAdminDashboard = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-sm">Active Users</span>
-                    <Badge>1,247</Badge>
+                    {loading ? (
+                      <Skeleton className="h-5 w-12" />
+                    ) : (
+                      <Badge>{metrics.activeUsers}</Badge>
+                    )}
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm">Pending Verifications</span>
-                    <Badge variant="outline">23</Badge>
+                    {loading ? (
+                      <Skeleton className="h-5 w-12" />
+                    ) : (
+                      <Badge variant="outline">{metrics.pendingVerifications}</Badge>
+                    )}
                   </div>
                 </div>
               </CardContent>
@@ -238,12 +249,20 @@ const EnhancedAdminDashboard = () => {
                 </p>
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-sm">FAQ Suggestions</span>
-                    <Badge>12</Badge>
+                    <span className="text-sm">Total FAQs</span>
+                    {loading ? (
+                      <Skeleton className="h-5 w-12" />
+                    ) : (
+                      <Badge>{metrics.totalFAQs}</Badge>
+                    )}
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm">Auto-Generated</span>
-                    <Badge variant="outline">8</Badge>
+                    <span className="text-sm">AI-Generated</span>
+                    {loading ? (
+                      <Skeleton className="h-5 w-12" />
+                    ) : (
+                      <Badge variant="outline">{metrics.aiGeneratedFAQs}</Badge>
+                    )}
                   </div>
                 </div>
               </CardContent>
@@ -266,11 +285,19 @@ const EnhancedAdminDashboard = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-sm">Emails Sent</span>
-                    <Badge>345</Badge>
+                    {loading ? (
+                      <Skeleton className="h-5 w-12" />
+                    ) : (
+                      <Badge>{metrics.emailsSent}</Badge>
+                    )}
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm">Active Chats</span>
-                    <Badge variant="outline">15</Badge>
+                    {loading ? (
+                      <Skeleton className="h-5 w-12" />
+                    ) : (
+                      <Badge variant="outline">{metrics.activeChats}</Badge>
+                    )}
                   </div>
                 </div>
               </CardContent>
