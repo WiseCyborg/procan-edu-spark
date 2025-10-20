@@ -2,7 +2,9 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.0.0'
 import { loadEmailTemplate } from "../_shared/email-templates.ts";
-import { SMTPEmailService } from "../_shared/smtp-email-service.ts";
+import { Resend } from "npm:resend@2.0.0";
+
+const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 // Initialize Supabase client for logging
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!
@@ -79,31 +81,32 @@ const handler = async (req: Request): Promise<Response> => {
       DashboardURL: 'https://www.procannedu.com/dashboard',
     });
 
-    const emailService = new SMTPEmailService();
-    const emailResponse = await emailService.sendEmail({
-      to: email,
+    const emailResponse = await resend.emails.send({
+      from: "ProCann Edu <noreply@procannedu.com>",
+      to: [email],
       subject: "Welcome to ProCann Edu! 🎓",
       html,
-      from: "ProCann Edu <noreply@procannedu.com>",
     });
-    await emailService.close();
 
     // Update email log with success/failure
     if (logData?.id) {
       await supabase
         .from('email_logs')
         .update({
-          status: emailResponse.success ? 'sent' : 'failed',
-          provider_id: emailResponse.messageId,
+          status: emailResponse.data?.id ? 'sent' : 'failed',
+          provider_id: emailResponse.data?.id,
           sent_at: new Date().toISOString(),
-          error: emailResponse.error || null
+          error: emailResponse.error ? JSON.stringify(emailResponse.error) : null
         })
         .eq('id', logData.id)
     }
 
     console.log("Welcome email sent successfully:", emailResponse);
 
-    return new Response(JSON.stringify(emailResponse), {
+    return new Response(JSON.stringify({ 
+      success: true, 
+      emailId: emailResponse.data?.id 
+    }), {
       status: 200,
       headers: {
         "Content-Type": "application/json",

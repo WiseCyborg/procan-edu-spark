@@ -2,7 +2,9 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { loadEmailTemplate } from "../_shared/email-templates.ts";
-import { SMTPEmailService } from "../_shared/smtp-email-service.ts";
+import { Resend } from "npm:resend@2.0.0";
+
+const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL") ?? "",
@@ -81,14 +83,12 @@ const handler = async (req: Request): Promise<Response> => {
 
     const logId = logData?.id;
 
-    const emailService = new SMTPEmailService();
-    const emailResponse = await emailService.sendEmail({
-      to: email,
+    const emailResponse = await resend.emails.send({
+      from: "ProCann Edu <certificates@procannedu.com>",
+      to: [email],
       subject: `🎓 Your ${courseTitle} Certificate is Ready!`,
       html,
-      from: "ProCann Edu <certificates@procannedu.com>",
     });
-    await emailService.close();
 
     console.log("Certificate email sent successfully:", emailResponse);
 
@@ -97,15 +97,18 @@ const handler = async (req: Request): Promise<Response> => {
       await supabase
         .from('email_logs')
         .update({
-          status: emailResponse.success ? 'sent' : 'failed',
-          provider_id: emailResponse.messageId,
+          status: emailResponse.data?.id ? 'sent' : 'failed',
+          provider_id: emailResponse.data?.id,
           sent_at: new Date().toISOString(),
-          error: emailResponse.error || null
+          error: emailResponse.error ? JSON.stringify(emailResponse.error) : null
         })
         .eq('id', logId);
     }
 
-    return new Response(JSON.stringify(emailResponse), {
+    return new Response(JSON.stringify({ 
+      success: true, 
+      emailId: emailResponse.data?.id 
+    }), {
       status: 200,
       headers: {
         "Content-Type": "application/json",
