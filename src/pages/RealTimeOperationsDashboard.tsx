@@ -17,6 +17,8 @@ import { RealTimeMetricsGrid } from '@/components/realtime/RealTimeMetricsGrid';
 import { RealTimeAlertsFeed } from '@/components/realtime/RealTimeAlertsFeed';
 import { RealTimeUserActivity } from '@/components/realtime/RealTimeUserActivity';
 import { RealTimeSystemHealth } from '@/components/realtime/RealTimeSystemHealth';
+import { WhoIsHereWidget } from '@/components/realtime/WhoIsHereWidget';
+import { AuthActivityFeed } from '@/components/realtime/AuthActivityFeed';
 import { useRealTimeAnalytics } from '@/hooks/useRealTimeAnalytics';
 import { EnhancedDraggableChat } from '@/components/chat/EnhancedDraggableChat';
 
@@ -154,6 +156,12 @@ export default function RealTimeOperationsDashboard() {
         <TabsContent value="overview" className="space-y-6">
           {/* Real-Time Metrics Grid */}
           <RealTimeMetricsGrid />
+          
+          {/* Phase 7: Real-Time Presence & Activity */}
+          <div className="grid gap-4 md:grid-cols-2">
+            <WhoIsHereWidget />
+            <AuthActivityFeed />
+          </div>
           
           {/* Combined Overview */}
           <div className="grid gap-4 md:grid-cols-2">

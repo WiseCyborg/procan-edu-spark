@@ -25,6 +25,49 @@ export const AIFeaturesDashboard = () => {
 
   useEffect(() => {
     fetchAIMetrics();
+
+    // Phase 3: Add real-time subscriptions
+    const channels: any[] = [];
+
+    // FAQ subscription
+    const faqChannel = supabase
+      .channel('faq-realtime')
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'faq_entries' },
+        () => fetchAIMetrics()
+      )
+      .subscribe();
+
+    // Regulatory updates subscription
+    const regChannel = supabase
+      .channel('regulatory-realtime')
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'regulatory_updates' },
+        (payload: any) => {
+          const newData = payload.new as any;
+          toast({
+            title: "🚨 New Regulatory Update",
+            description: `Section ${newData?.section_number || 'unknown'} has changes`,
+          });
+          fetchAIMetrics();
+        }
+      )
+      .subscribe();
+
+    // Content review queue subscription
+    const contentChannel = supabase
+      .channel('content-review-realtime')
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'content_review_queue' },
+        () => fetchAIMetrics()
+      )
+      .subscribe();
+
+    channels.push(faqChannel, regChannel, contentChannel);
+
+    return () => {
+      channels.forEach(ch => supabase.removeChannel(ch));
+    };
   }, []);
 
   const fetchAIMetrics = async () => {

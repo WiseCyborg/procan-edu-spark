@@ -33,6 +33,9 @@ import { AdvancedEmployeeManagement } from '@/components/admin/AdvancedEmployeeM
 import { SecurityMonitoringDashboard } from '@/components/admin/SecurityMonitoringDashboard';
 import EmailMonitoringDashboard from '@/components/admin/EmailMonitoringDashboard';
 import { ProfileChangeHistoryViewer } from '@/components/admin/ProfileChangeHistoryViewer';
+import { WhoIsHereWidget } from '@/components/realtime/WhoIsHereWidget';
+import { AuthActivityFeed } from '@/components/realtime/AuthActivityFeed';
+import { RealTimeEmailDashboard } from '@/components/admin/RealTimeEmailDashboard';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -88,6 +91,58 @@ const AdminDashboard = () => {
     if (user) {
       fetchAdminData();
     }
+  }, [user]);
+
+  // Phase 2: Add real-time subscriptions
+  useEffect(() => {
+    if (!user) return;
+
+    const channels: any[] = [];
+
+    // Users subscription
+    const usersChannel = supabase
+      .channel('admin-users-realtime')
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'profiles' },
+        () => {
+          console.log('User change detected, refreshing...');
+          fetchAdminData();
+        }
+      )
+      .subscribe();
+
+    // Organizations subscription
+    const orgsChannel = supabase
+      .channel('admin-orgs-realtime')
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'organizations' },
+        () => fetchAdminData()
+      )
+      .subscribe();
+
+    // Certificates subscription
+    const certsChannel = supabase
+      .channel('admin-certs-realtime')
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'certificates' },
+        () => fetchAdminData()
+      )
+      .subscribe();
+
+    // Payments subscription
+    const paymentsChannel = supabase
+      .channel('admin-payments-realtime')
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'payments' },
+        () => fetchAdminData()
+      )
+      .subscribe();
+
+    channels.push(usersChannel, orgsChannel, certsChannel, paymentsChannel);
+
+    return () => {
+      channels.forEach(ch => supabase.removeChannel(ch));
+    };
   }, [user]);
 
   const searchUsers = async (term: string) => {
@@ -280,6 +335,12 @@ const AdminDashboard = () => {
           <p className="text-gray-600 mt-1">Platform analytics and management overview</p>
         </div>
 
+        {/* Phase 7: Real-Time Widgets */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <WhoIsHereWidget />
+          <AuthActivityFeed />
+        </div>
+
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card>
@@ -369,6 +430,7 @@ const AdminDashboard = () => {
             <TabsTrigger value="security">Security</TabsTrigger>
             <TabsTrigger value="profile-audit">👤 Profile Audit</TabsTrigger>
             <TabsTrigger value="email-monitoring">📧 Email</TabsTrigger>
+            <TabsTrigger value="email-tracking">📬 Email Tracking</TabsTrigger>
             <TabsTrigger value="revenue">Revenue</TabsTrigger>
             <TabsTrigger value="notifications">Notifications</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
@@ -684,6 +746,10 @@ const AdminDashboard = () => {
 
           <TabsContent value="analytics">
             <PredictiveAnalyticsDashboard />
+          </TabsContent>
+
+          <TabsContent value="email-tracking">
+            <RealTimeEmailDashboard />
           </TabsContent>
         </Tabs>
 

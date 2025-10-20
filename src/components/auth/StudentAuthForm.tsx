@@ -277,6 +277,19 @@ const StudentAuthForm = () => {
             if (enrollmentError) {
               console.error('Error creating enrollment:', enrollmentError);
             }
+
+            // Log verification email sent activity
+            await supabase.from('user_activity_log').insert({
+              user_id: authData.user.id,
+              activity_type: 'verification_sent',
+              email: regEmail,
+              metadata: { 
+                method: 'email', 
+                sent_at: new Date().toISOString(),
+                first_name: firstName,
+                last_name: lastName
+              }
+            });
           }
 
           // If from invitation, mark it as accepted

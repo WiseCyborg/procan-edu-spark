@@ -43,6 +43,35 @@ const DispensaryManagerDashboard = () => {
     }
   }, [user, isDispensaryManager, roleLoading]);
 
+  // Phase 6: Add real-time subscriptions
+  useEffect(() => {
+    if (!organization?.id) return;
+
+    const channels: any[] = [];
+
+    const employeesChannel = supabase
+      .channel('manager-employees-realtime')
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'profiles', filter: `organization_id=eq.${organization.id}` },
+        () => fetchOrganizationData()
+      )
+      .subscribe();
+
+    const seatsChannel = supabase
+      .channel('manager-seats-realtime')
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'rvt_seats', filter: `organization_id=eq.${organization.id}` },
+        () => fetchOrganizationData()
+      )
+      .subscribe();
+
+    channels.push(employeesChannel, seatsChannel);
+
+    return () => {
+      channels.forEach(ch => supabase.removeChannel(ch));
+    };
+  }, [organization?.id]);
+
   const fetchOrganizationData = async () => {
     try {
       // Get user's organization

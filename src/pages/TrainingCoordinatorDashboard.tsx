@@ -35,6 +35,35 @@ const TrainingCoordinatorDashboard = () => {
     }
   }, [user, isTrainingCoordinator, roleLoading]);
 
+  // Phase 6: Add real-time subscriptions
+  useEffect(() => {
+    if (!organizationId) return;
+
+    const channels: any[] = [];
+
+    const progressChannel = supabase
+      .channel('coordinator-progress-realtime')
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'user_progress' },
+        () => fetchCoordinatorData()
+      )
+      .subscribe();
+
+    const employeesChannel = supabase
+      .channel('coordinator-employees-realtime')
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'profiles', filter: `organization_id=eq.${organizationId}` },
+        () => fetchCoordinatorData()
+      )
+      .subscribe();
+
+    channels.push(progressChannel, employeesChannel);
+
+    return () => {
+      channels.forEach(ch => supabase.removeChannel(ch));
+    };
+  }, [organizationId]);
+
   const fetchCoordinatorData = async () => {
     try {
       // Get user's organization
