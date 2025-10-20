@@ -37,6 +37,31 @@ export const EnhancedUserManagementView = () => {
 
   useEffect(() => {
     fetchUsers();
+
+    // Set up real-time subscriptions for user changes
+    const channel = supabase
+      .channel('admin-user-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'profiles' },
+        () => {
+          console.log('Profile changed, refreshing users...');
+          fetchUsers();
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'user_roles' },
+        () => {
+          console.log('User roles changed, refreshing users...');
+          fetchUsers();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   useEffect(() => {
@@ -47,63 +72,42 @@ export const EnhancedUserManagementView = () => {
     try {
       setLoading(true);
       
-      // Fetch all users with their profiles, roles, and email verification status
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select(`
-          user_id,
-          first_name,
-          last_name,
-          organization_id,
-          organizations:organization_id (name)
-        `);
+      // Call the secure function that returns all user data (including auth.users info)
+      const { data: userOverview, error: overviewError } = await supabase
+        .rpc('get_admin_user_overview');
 
-      if (profilesError) throw profilesError;
+      if (overviewError) throw overviewError;
 
-      // Get emails and verification status from profiles/auth metadata
-      // Note: We can't directly access auth.users from client, so we'll get what we can
-      const userIds = profiles?.map(p => p.user_id) || [];
-      
-      // Fetch auth metadata we have access to
-      const authPromises = userIds.map(async (userId) => {
-        const { data: { user } } = await supabase.auth.admin.getUserById(userId);
-        return user;
-      });
-      
-      const authUsers = await Promise.all(authPromises);
-
-      // Fetch roles
+      // Get all user roles
       const { data: roles, error: rolesError } = await supabase
         .from('user_roles')
         .select('user_id, role');
 
       if (rolesError) throw rolesError;
 
-      // Combine data
-      const combinedUsers = profiles?.map(profile => {
-        const authUser = authUsers?.find(u => u.id === profile.user_id);
-        const userRoles = roles?.filter(r => r.user_id === profile.user_id).map(r => r.role) || [];
-        const orgName = Array.isArray(profile.organizations) 
-          ? profile.organizations[0]?.name || null
-          : (profile.organizations as any)?.name || null;
-        
-        return {
-          user_id: profile.user_id,
-          first_name: profile.first_name,
-          last_name: profile.last_name,
-          email: authUser?.email || '',
-          email_verified: !!authUser?.email_confirmed_at,
-          created_at: authUser?.created_at || '',
-          roles: userRoles,
-          organization_name: orgName,
-        };
-      }) || [];
+      // Combine the data
+      const combinedUsers = (userOverview || []).map((user: any) => ({
+        user_id: user.user_id,
+        first_name: user.first_name || '',
+        last_name: user.last_name || '',
+        email: user.email || '',
+        email_verified: !!user.email_confirmed_at,
+        created_at: user.created_at || new Date().toISOString(),
+        roles: roles?.filter(r => r.user_id === user.user_id).map(r => r.role) || [],
+        organization_name: user.organization_name,
+      }));
 
       setUsers(combinedUsers);
+      
+      toast({
+        title: "Users Loaded",
+        description: `Found ${combinedUsers.length} users in the system.`,
+      });
     } catch (error: any) {
+      console.error('Error fetching users:', error);
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Failed to load users. Please try again.",
         variant: "destructive",
       });
     } finally {

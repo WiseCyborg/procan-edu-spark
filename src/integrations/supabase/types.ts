@@ -2015,6 +2015,22 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_admin_user_overview: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          created_at: string
+          email: string
+          email_confirmed_at: string
+          first_name: string
+          last_name: string
+          last_sign_in_at: string
+          organization_id: string
+          organization_name: string
+          phone: string
+          raw_user_meta_data: Json
+          user_id: string
+        }[]
+      }
       get_database_stats: {
         Args: Record<PropertyKey, never>
         Returns: {
