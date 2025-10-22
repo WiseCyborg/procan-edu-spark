@@ -28,6 +28,8 @@ interface ProfileData {
   zip_code: string;
   emergency_contact_name: string;
   emergency_contact_phone: string;
+  organization_id?: string;
+  organization_name?: string;
 }
 
 // Critical fields that trigger admin notifications when changed
@@ -68,7 +70,12 @@ const Profile: React.FC = () => {
       try {
         const { data, error } = await supabase
           .from('profiles')
-          .select('*')
+          .select(`
+            *,
+            organizations:organization_id (
+              name
+            )
+          `)
           .eq('user_id', user.id)
           .single();
 
@@ -78,6 +85,7 @@ const Profile: React.FC = () => {
         }
 
         if (data) {
+          const orgName = data.organizations?.name || data.organization || '';
           const loadedProfile = {
             first_name: data.first_name || '',
             last_name: data.last_name || '',
@@ -91,7 +99,9 @@ const Profile: React.FC = () => {
             state: data.state || 'Maryland',
             zip_code: data.zip_code || '',
             emergency_contact_name: data.emergency_contact_name || '',
-            emergency_contact_phone: data.emergency_contact_phone || ''
+            emergency_contact_phone: data.emergency_contact_phone || '',
+            organization_id: data.organization_id || undefined,
+            organization_name: orgName
           };
           setProfile(loadedProfile);
           setOriginalProfile(loadedProfile);
@@ -392,6 +402,20 @@ const Profile: React.FC = () => {
             </div>
             
             <div>
+              <Label htmlFor="email">Email Address</Label>
+              <Input
+                id="email"
+                type="email"
+                value={user?.email || ''}
+                disabled
+                className="bg-muted"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Contact support to change your email address
+              </p>
+            </div>
+
+            <div>
               <Label htmlFor="date_of_birth">Date of Birth</Label>
               <Input
                 id="date_of_birth"
@@ -423,10 +447,17 @@ const Profile: React.FC = () => {
               <Label htmlFor="organization">Organization</Label>
               <Input
                 id="organization"
-                value={profile.organization}
+                value={profile.organization_name || profile.organization || ''}
+                disabled={!!profile.organization_id}
                 onChange={(e) => handleInputChange('organization', e.target.value)}
                 placeholder="Enter organization name"
+                className={profile.organization_id ? "bg-muted" : ""}
               />
+              {profile.organization_id && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  You are linked to this organization
+                </p>
+              )}
             </div>
 
             <div>

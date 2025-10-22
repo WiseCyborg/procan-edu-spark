@@ -23,14 +23,8 @@ const REQUIRED_FIELDS: (keyof ProfileCompletionData)[] = [
   'last_name',
   'phone',
   'date_of_birth',
-  'address',
-  'city',
-  'state',
-  'zip_code',
   'emergency_contact_name',
-  'emergency_contact_phone',
-  'organization',
-  'job_title'
+  'emergency_contact_phone'
 ];
 
 export const useProfileCompletion = () => {

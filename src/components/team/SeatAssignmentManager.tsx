@@ -16,6 +16,10 @@ interface Employee {
   certificates_count: number;
 }
 
+interface EmployeeWithProfile extends Employee {
+  profile_completion?: number;
+}
+
 interface Seat {
   id: string;
   status: string;
@@ -31,7 +35,7 @@ export const SeatAssignmentManager: React.FC<SeatAssignmentManagerProps> = ({
   organizationId,
   courseId = 'rvt-course-2024' 
 }) => {
-  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [employees, setEmployees] = useState<EmployeeWithProfile[]>([]);
   const [seats, setSeats] = useState<Seat[]>([]);
   const [loading, setLoading] = useState(true);
   const [assigning, setAssigning] = useState<string | null>(null);
@@ -50,7 +54,32 @@ export const SeatAssignmentManager: React.FC<SeatAssignmentManagerProps> = ({
         .rpc('get_organization_employees', { org_id: organizationId });
       
       if (empError) throw empError;
-      setEmployees(empData || []);
+      
+      // Calculate profile completion for each employee
+      const REQUIRED_FIELDS = ['first_name', 'last_name', 'phone', 'date_of_birth', 'emergency_contact_name', 'emergency_contact_phone'];
+      const employeesWithCompletion = await Promise.all(
+        (empData || []).map(async (emp) => {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('first_name, last_name, phone, date_of_birth, emergency_contact_name, emergency_contact_phone')
+            .eq('user_id', emp.user_id)
+            .single();
+          
+          let completedFields = 0;
+          if (profile) {
+            REQUIRED_FIELDS.forEach(field => {
+              if (profile[field]) completedFields++;
+            });
+          }
+          
+          return {
+            ...emp,
+            profile_completion: Math.round((completedFields / REQUIRED_FIELDS.length) * 100)
+          };
+        })
+      );
+      
+      setEmployees(employeesWithCompletion);
       
       // Fetch seats
       const { data: seatData, error: seatError } = await supabase
@@ -229,10 +258,24 @@ export const SeatAssignmentManager: React.FC<SeatAssignmentManagerProps> = ({
                   key={employee.user_id}
                   className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent"
                 >
-                  <div>
-                    <p className="font-medium">
-                      {employee.first_name} {employee.last_name}
-                    </p>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium">
+                        {employee.first_name} {employee.last_name}
+                      </p>
+                      <Badge 
+                        variant={
+                          (employee.profile_completion || 0) === 100 
+                            ? "default" 
+                            : (employee.profile_completion || 0) >= 50 
+                            ? "secondary" 
+                            : "destructive"
+                        }
+                        className="text-xs"
+                      >
+                        {employee.profile_completion || 0}% Profile
+                      </Badge>
+                    </div>
                     <p className="text-sm text-muted-foreground">{employee.email}</p>
                   </div>
                   <Button
@@ -280,10 +323,24 @@ export const SeatAssignmentManager: React.FC<SeatAssignmentManagerProps> = ({
                     key={employee.user_id}
                     className="flex items-center justify-between p-3 border rounded-lg"
                   >
-                    <div>
-                      <p className="font-medium">
-                        {employee.first_name} {employee.last_name}
-                      </p>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium">
+                          {employee.first_name} {employee.last_name}
+                        </p>
+                        <Badge 
+                          variant={
+                            (employee.profile_completion || 0) === 100 
+                              ? "default" 
+                              : (employee.profile_completion || 0) >= 50 
+                              ? "secondary" 
+                              : "destructive"
+                          }
+                          className="text-xs"
+                        >
+                          {employee.profile_completion || 0}% Profile
+                        </Badge>
+                      </div>
                       <p className="text-sm text-muted-foreground">{employee.email}</p>
                     </div>
                     <Badge variant={seat?.status === 'used' ? 'default' : 'secondary'}>
