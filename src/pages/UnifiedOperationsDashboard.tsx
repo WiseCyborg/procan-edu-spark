@@ -3,6 +3,8 @@ import { Badge } from "@/components/ui/badge";
 import { Activity, Users, FileText, CheckCircle } from "lucide-react";
 import { PayPalConfigurationPanel } from "@/components/admin/PayPalConfigurationPanel";
 import { GapAnalysisDashboard } from "@/components/admin/GapAnalysisDashboard";
+import { SupportQueueManager } from "@/components/admin/SupportQueueManager";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState } from "react";
 
 export default function UnifiedOperationsDashboard() {
@@ -85,50 +87,48 @@ export default function UnifiedOperationsDashboard() {
         </Card>
       </div>
 
-      {/* PayPal Configuration Panel */}
-      <PayPalConfigurationPanel onStatusChange={setPaypalStatus} />
+      {/* Tabbed Interface */}
+      <Tabs defaultValue="overview" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="gap-analysis">Gap Analysis</TabsTrigger>
+          <TabsTrigger value="support">Support Queue</TabsTrigger>
+        </TabsList>
 
-      {/* Gap Analysis Dashboard */}
-      <GapAnalysisDashboard />
+        <TabsContent value="overview" className="space-y-6">
+          {/* PayPal Configuration Panel */}
+          <PayPalConfigurationPanel onStatusChange={setPaypalStatus} />
 
-      {/* Future Components Placeholders */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="border-border bg-card border-dashed">
-          <CardHeader>
-            <CardTitle className="text-foreground">📊 Application Lifecycle Timeline</CardTitle>
-            <CardDescription className="text-muted-foreground">
-              Coming in Phase 3 - Real-time tracking of application workflows
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="text-muted-foreground text-sm">
-            This will show complete workflow from application submission → employee enrollment
-          </CardContent>
-        </Card>
+          {/* Future Components Placeholders */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card className="border-border bg-card border-dashed">
+              <CardHeader>
+                <CardTitle className="text-foreground">📊 Application Lifecycle Timeline</CardTitle>
+                <CardDescription className="text-muted-foreground">
+                  Coming in Phase 3 - Real-time tracking of application workflows
+                </CardDescription>
+              </CardHeader>
+            </Card>
 
-        <Card className="border-border bg-card border-dashed">
-          <CardHeader>
-            <CardTitle className="text-foreground">⚡ Edge Function Monitor</CardTitle>
-            <CardDescription className="text-muted-foreground">
-              Coming in Phase 5 - Real-time edge function execution logs
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="text-muted-foreground text-sm">
-            Track performance and failures of all edge functions in real-time
-          </CardContent>
-        </Card>
-      </div>
+            <Card className="border-border bg-card border-dashed">
+              <CardHeader>
+                <CardTitle className="text-foreground">🔍 Advanced Search & Filtering</CardTitle>
+                <CardDescription className="text-muted-foreground">
+                  Coming in Phase 3 - Powerful search across all entities
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </div>
+        </TabsContent>
 
-      <Card className="border-border bg-card border-dashed">
-        <CardHeader>
-          <CardTitle className="text-foreground">🔐 Authentication Activity Feed</CardTitle>
-          <CardDescription className="text-muted-foreground">
-            Coming in Phase 4 - Real-time user signups, logins, and MFA events
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="text-muted-foreground text-sm">
-          Monitor all authentication events as they happen across the platform
-        </CardContent>
-      </Card>
+        <TabsContent value="gap-analysis">
+          <GapAnalysisDashboard />
+        </TabsContent>
+
+        <TabsContent value="support">
+          <SupportQueueManager />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

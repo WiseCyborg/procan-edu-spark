@@ -1,5 +1,11 @@
 project_id = "zhmpwczrvitomsxjwpzc"
 
+[functions.openai-avatar-voice]
+verify_jwt = false
+
+[functions.chat-assistant-enhanced]
+verify_jwt = false
+
 [functions.enroll-dispensary-contact]
 verify_jwt = false
 

@@ -101,6 +101,48 @@ export type Database = {
         }
         Relationships: []
       }
+      api_console_audit: {
+        Row: {
+          api_route: string
+          command: string
+          created_at: string | null
+          error_message: string | null
+          execution_time_ms: number | null
+          id: string
+          request_params: Json | null
+          response_data: Json | null
+          success: boolean
+          user_id: string | null
+          user_role: string
+        }
+        Insert: {
+          api_route: string
+          command: string
+          created_at?: string | null
+          error_message?: string | null
+          execution_time_ms?: number | null
+          id?: string
+          request_params?: Json | null
+          response_data?: Json | null
+          success: boolean
+          user_id?: string | null
+          user_role: string
+        }
+        Update: {
+          api_route?: string
+          command?: string
+          created_at?: string | null
+          error_message?: string | null
+          execution_time_ms?: number | null
+          id?: string
+          request_params?: Json | null
+          response_data?: Json | null
+          success?: boolean
+          user_id?: string | null
+          user_role?: string
+        }
+        Relationships: []
+      }
       certificates: {
         Row: {
           certificate_number: string
@@ -157,6 +199,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      chat_intent_log: {
+        Row: {
+          chat_session_id: string | null
+          chosen_mode: string
+          confidence_score: number | null
+          created_at: string | null
+          detected_intent: string
+          id: string
+          metadata: Json | null
+          user_message: string
+        }
+        Insert: {
+          chat_session_id?: string | null
+          chosen_mode: string
+          confidence_score?: number | null
+          created_at?: string | null
+          detected_intent: string
+          id?: string
+          metadata?: Json | null
+          user_message: string
+        }
+        Update: {
+          chat_session_id?: string | null
+          chosen_mode?: string
+          confidence_score?: number | null
+          created_at?: string | null
+          detected_intent?: string
+          id?: string
+          metadata?: Json | null
+          user_message?: string
+        }
+        Relationships: []
       }
       communication_logs: {
         Row: {
@@ -2114,6 +2189,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      support_queue: {
+        Row: {
+          assigned_to: string | null
+          chat_context: Json | null
+          created_at: string | null
+          id: string
+          message: string
+          priority: string | null
+          request_type: string | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          status: string | null
+          updated_at: string | null
+          user_id: string | null
+          user_role: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          chat_context?: Json | null
+          created_at?: string | null
+          id?: string
+          message: string
+          priority?: string | null
+          request_type?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          user_role: string
+        }
+        Update: {
+          assigned_to?: string | null
+          chat_context?: Json | null
+          created_at?: string | null
+          id?: string
+          message?: string
+          priority?: string | null
+          request_type?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          user_role?: string
+        }
+        Relationships: []
       }
       system_integrity_checks: {
         Row: {

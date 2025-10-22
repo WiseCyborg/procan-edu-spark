@@ -12,6 +12,8 @@ import { useCharmAI } from '@/hooks/useCharmAI';
 import { VoiceSettingsPanel } from './VoiceSettingsPanel';
 import { useUnifiedVoice } from '@/providers/UnifiedVoiceProvider';
 import { toast } from '@/hooks/use-toast';
+import { base64ToBlob } from '@/utils/audioHelpers';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Message {
   id: string;
@@ -19,6 +21,8 @@ interface Message {
   isUser: boolean;
   timestamp: Date;
   links?: Array<{ text: string; url: string; description: string }>;
+  mode?: 'ai_assist' | 'console' | 'human_escalation';
+  audioUrl?: string;
 }
 
 interface ContextInfo {
@@ -148,11 +152,13 @@ export const EnhancedChatAssistant: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
   const [showVoiceSettings, setShowVoiceSettings] = useState(false);
+  const [showAvatar, setShowAvatar] = useState(true);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showProactiveTip, setShowProactiveTip] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [currentMode, setCurrentMode] = useState<'ai_assist' | 'console' | 'human'>('ai_assist');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout>();
 
@@ -238,18 +244,36 @@ export const EnhancedChatAssistant: React.FC = () => {
           content: response.response || response.message || "I understand your question, but I'm having trouble generating a response right now. Please contact info@procannedu.com for assistance.",
           isUser: false,
           timestamp: new Date(),
-          links: response.suggestedLinks || []
+          links: response.suggestedLinks || [],
+          mode: response.mode || 'ai_assist'
         };
 
+        // Generate voice if enabled and response is short
+        if (showAvatar && response.response && response.response.length < 300) {
+          try {
+            const { data: voiceData } = await supabase.functions.invoke('openai-avatar-voice', {
+              body: { text: response.response, voice: 'nova' }
+            });
+            
+            if (voiceData?.audio_base64) {
+              const audioBlob = base64ToBlob(voiceData.audio_base64, 'audio/mpeg');
+              assistantMessage.audioUrl = URL.createObjectURL(audioBlob);
+            }
+          } catch (error) {
+            console.error('Avatar voice error:', error);
+          }
+        }
+
         setMessages(prev => [...prev, assistantMessage]);
+        setCurrentMode(response.mode || 'ai_assist');
         
         // Update unread count if chat window is minimized or closed
         if (!isOpen || !document.hasFocus()) {
           setUnreadCount(prev => prev + 1);
         }
         
-        // Auto-speak response if voice is enabled
-        if (voiceSupported && response.response) {
+        // Auto-speak response if voice is enabled (fallback)
+        if (voiceSupported && response.response && !assistantMessage.audioUrl) {
           speak(response.response, { priority: 'low' });
         }
       } else {
@@ -360,6 +384,17 @@ export const EnhancedChatAssistant: React.FC = () => {
                   <Badge variant="outline" className="text-xs">
                     {contextInfo.securityLevel}
                   </Badge>
+                  <Badge 
+                    className={`text-xs ${
+                      currentMode === 'console' ? 'bg-blue-500' :
+                      currentMode === 'human' ? 'bg-purple-500' :
+                      'bg-green-500'
+                    }`}
+                  >
+                    {currentMode === 'console' ? '⚙️ Console' :
+                     currentMode === 'human' ? '👤 Support' :
+                     '🤖 AI'}
+                  </Badge>
                 </div>
               </div>
               <div className="flex items-center gap-1">
@@ -406,8 +441,25 @@ export const EnhancedChatAssistant: React.FC = () => {
               </div>
             )}
 
+            {/* Mode Info */}
+            {currentMode === 'console' && (
+              <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded p-2 mb-2">
+                <p className="text-xs text-blue-700 dark:text-blue-300">
+                  <strong>Console Mode:</strong> Execute commands like "check seats", "test PayPal"
+                </p>
+              </div>
+            )}
+
+            {currentMode === 'human' && (
+              <div className="bg-purple-50 dark:bg-purple-950 border border-purple-200 dark:border-purple-800 rounded p-2 mb-2">
+                <p className="text-xs text-purple-700 dark:text-purple-300">
+                  <strong>Support Queue:</strong> Your request has been sent to our team
+                </p>
+              </div>
+            )}
+
             {/* Messages */}
-            <EnhancedScrollArea 
+            <EnhancedScrollArea
               className="flex-1" 
               showUnreadCount={unreadCount}
               autoScroll={true}
@@ -424,6 +476,17 @@ export const EnhancedChatAssistant: React.FC = () => {
                         }`}
                       >
                         {message.content}
+                        {/* Audio player for avatar voice */}
+                        {message.audioUrl && (
+                          <audio 
+                            src={message.audioUrl} 
+                            autoPlay 
+                            className="hidden"
+                            onEnded={() => {
+                              URL.revokeObjectURL(message.audioUrl!);
+                            }}
+                          />
+                        )}
                       </div>
                     </div>
                     
