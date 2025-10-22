@@ -53,6 +53,7 @@ import ImpactDashboardPage from "./pages/ImpactDashboardPage";
 import AccessibilityPage from "./pages/AccessibilityPage";
 import OwnersIntelligence from "./pages/OwnersIntelligence";
 import { ProfileOnboardingWizard } from "./components/onboarding/ProfileOnboardingWizard";
+import DemoAccountsSetup from "./pages/DemoAccountsSetup";
 
 import { ProtectedCourseAccess } from "./components/ProtectedCourseAccess";
 
@@ -221,6 +222,12 @@ const App = () => (
                    <Route path="/admin/management" element={
                      <ProtectedRoute>
                        <AdminManagement />
+                     </ProtectedRoute>
+                   } />
+                   
+                   <Route path="/admin/demo-setup" element={
+                     <ProtectedRoute>
+                       <DemoAccountsSetup />
                      </ProtectedRoute>
                    } />
                    

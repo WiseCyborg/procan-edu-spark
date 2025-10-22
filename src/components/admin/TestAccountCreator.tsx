@@ -107,113 +107,30 @@ const TestAccountCreator = () => {
 
   const createFullTestSuite = async () => {
     setIsCreating(true);
+    setCreatedAccounts([]);
+    setTestOrgInfo(null);
+
     try {
-      // 1. Create test organization
-      const { data: orgData, error: orgError } = await supabase.rpc('create_test_organization', {
-        org_name: 'Test Dispensary - ProCann Edu',
-        contact_email: 'test-org@procannedu.com',
-        credits: 50
-      });
-
-      if (orgError) throw orgError;
-
-      const testOrgId = orgData[0].organization_id;
-      const testOrgAccessKey = orgData[0].access_key;
-
-      setTestOrgInfo({
-        id: testOrgId,
-        name: 'Test Dispensary - ProCann Edu',
-        accessKey: testOrgAccessKey
-      });
-
-      const accounts: CreatedAccount[] = [];
-
-      // 2. Create 1 admin (no org)
-      const adminResult = await createTestAccount({
-        role: 'admin',
-        email: 'admin@procannedu-test.com',
-        password: 'Admin123!Test',
-        firstName: 'Admin',
-        lastName: 'Tester'
-      });
-
-      if (adminResult.success && adminResult.userId) {
-        accounts.push({
-          userId: adminResult.userId,
-          email: 'admin@procannedu-test.com',
-          password: 'Admin123!Test',
-          role: 'admin'
-        });
-      }
-
-      // 3. Create 1 dispensary manager (linked to test org)
-      const managerResult = await createTestAccount({
-        role: 'dispensary_manager',
-        email: 'manager@testdispensary.com',
-        password: 'Manager123!Test',
-        firstName: 'Manager',
-        lastName: 'Tester',
-        organizationId: testOrgId
-      });
-
-      if (managerResult.success && managerResult.userId) {
-        accounts.push({
-          userId: managerResult.userId,
-          email: 'manager@testdispensary.com',
-          password: 'Manager123!Test',
-          role: 'dispensary_manager',
-          organizationName: 'Test Dispensary - ProCann Edu'
-        });
-      }
-
-      // 4. Create 1 training coordinator (linked to test org)
-      const coordResult = await createTestAccount({
-        role: 'training_coordinator',
-        email: 'coordinator@testdispensary.com',
-        password: 'Coordinator123!Test',
-        firstName: 'Coordinator',
-        lastName: 'Tester',
-        organizationId: testOrgId
-      });
-
-      if (coordResult.success && coordResult.userId) {
-        accounts.push({
-          userId: coordResult.userId,
-          email: 'coordinator@testdispensary.com',
-          password: 'Coordinator123!Test',
-          role: 'training_coordinator',
-          organizationName: 'Test Dispensary - ProCann Edu'
-        });
-      }
-
-      // 5. Create 3 employees (linked to test org)
-      for (let i = 1; i <= 3; i++) {
-        const empResult = await createTestAccount({
-          role: 'student',
-          email: `employee${i}@testdispensary.com`,
-          password: `Employee${i}23!Test`,
-          firstName: `Employee${i}`,
-          lastName: 'Tester',
-          organizationId: testOrgId
-        });
-
-        if (empResult.success && empResult.userId) {
-          accounts.push({
-            userId: empResult.userId,
-            email: `employee${i}@testdispensary.com`,
-            password: `Employee${i}23!Test`,
-            role: 'student',
-            organizationName: 'Test Dispensary - ProCann Edu'
-          });
-        }
-      }
-
-      setCreatedAccounts(accounts);
-
       toast({
-        title: "Test Suite Created",
-        description: `Created ${accounts.length} test accounts and 1 test organization with ${testOrgAccessKey}`,
+        title: "Creating Demo Accounts",
+        description: "Setting up complete demo environment...",
       });
+
+      const { data, error } = await supabase.functions.invoke('create-demo-accounts');
+
+      if (error) throw error;
+
+      if (data.success) {
+        setCreatedAccounts(data.accounts);
+        setTestOrgInfo(data.organization);
+        
+        toast({
+          title: "✅ Demo Accounts Created!",
+          description: `Created ${data.accounts.length} accounts successfully`,
+        });
+      } else {
+        throw new Error(data.error || 'Failed to create demo accounts');
+      }
     } catch (error) {
       console.error('Error creating test suite:', error);
       toast({
