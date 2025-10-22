@@ -1,5 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 
@@ -47,6 +48,56 @@ serve(async (req) => {
       throw new Error('Message and context are required');
     }
 
+    // Initialize Supabase client for regulatory content lookup
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Check if message is about regulations/compliance/COMAR
+    const isRegulationQuery = message.toLowerCase().includes('comar') || 
+                              message.toLowerCase().includes('regulation') ||
+                              message.toLowerCase().includes('law') ||
+                              message.toLowerCase().includes('compliance') ||
+                              message.toLowerCase().includes('maryland') ||
+                              message.toLowerCase().includes('mca') ||
+                              message.toLowerCase().includes('14.17');
+
+    let regulatoryContext = '';
+    
+    if (isRegulationQuery) {
+      console.log('Detected regulatory query, searching COMAR database...');
+      
+      // Search regulatory_content for relevant Maryland COMAR sections
+      const { data: regulations, error: regError } = await supabase
+        .from('regulatory_content')
+        .select('section_number, section_title, content_text')
+        .eq('state', 'Maryland')
+        .textSearch('content_text', message.replace(/[^\w\s]/g, ' '))
+        .limit(3);
+
+      if (regulations && regulations.length > 0) {
+        console.log(`Found ${regulations.length} relevant COMAR sections`);
+        
+        regulatoryContext = `\n\n=== RELEVANT MARYLAND COMAR SECTIONS ===\n`;
+        regulatoryContext += regulations
+          .map(r => `
+COMAR ${r.section_number}: ${r.section_title}
+${r.content_text.substring(0, 800)}...
+---`)
+          .join('\n');
+        
+        regulatoryContext += `\n=== END REGULATORY CONTENT ===\n
+IMPORTANT: When citing these regulations:
+- Always reference the specific COMAR section number (e.g., "COMAR 14.17.05.09")
+- Quote directly from the content above when relevant
+- Explain in plain language what the regulation means for Maryland cannabis workers
+- Link to related training modules if applicable
+`;
+      } else {
+        console.log('No COMAR sections found for query');
+      }
+    }
+
     // Determine role-specific context
     const isManager = user_roles?.includes('dispensary_manager') || false;
     const isAdmin = user_roles?.includes('admin') || false;
@@ -81,6 +132,7 @@ serve(async (req) => {
 
     // Enhanced system prompt with Baltimore personality and local cannabis industry knowledge
     const enhancedSystemPrompt = `${context.systemPrompt}
+${regulatoryContext}
 
     Additional context:
     - Current page: ${context.route}

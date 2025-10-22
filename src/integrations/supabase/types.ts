@@ -2158,6 +2158,86 @@ export type Database = {
         }
         Relationships: []
       }
+      user_learning_journey: {
+        Row: {
+          ai_recommendations: string | null
+          at_risk_flag: boolean | null
+          completion_percentage: number | null
+          created_at: string | null
+          current_stage: string | null
+          exam_attempts: number | null
+          id: string
+          intervention_types: Json | null
+          interventions_sent: number | null
+          last_activity_at: string | null
+          last_exam_score: number | null
+          last_intervention_at: string | null
+          metadata: Json | null
+          modules_completed: number | null
+          organization_id: string | null
+          predicted_completion_date: string | null
+          risk_factors: Json | null
+          stage_entered_at: string | null
+          success_probability: number | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          ai_recommendations?: string | null
+          at_risk_flag?: boolean | null
+          completion_percentage?: number | null
+          created_at?: string | null
+          current_stage?: string | null
+          exam_attempts?: number | null
+          id?: string
+          intervention_types?: Json | null
+          interventions_sent?: number | null
+          last_activity_at?: string | null
+          last_exam_score?: number | null
+          last_intervention_at?: string | null
+          metadata?: Json | null
+          modules_completed?: number | null
+          organization_id?: string | null
+          predicted_completion_date?: string | null
+          risk_factors?: Json | null
+          stage_entered_at?: string | null
+          success_probability?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          ai_recommendations?: string | null
+          at_risk_flag?: boolean | null
+          completion_percentage?: number | null
+          created_at?: string | null
+          current_stage?: string | null
+          exam_attempts?: number | null
+          id?: string
+          intervention_types?: Json | null
+          interventions_sent?: number | null
+          last_activity_at?: string | null
+          last_exam_score?: number | null
+          last_intervention_at?: string | null
+          metadata?: Json | null
+          modules_completed?: number | null
+          organization_id?: string | null
+          predicted_completion_date?: string | null
+          risk_factors?: Json | null
+          stage_entered_at?: string | null
+          success_probability?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_learning_journey_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_metadata: {
         Row: {
           created_at: string | null

@@ -5,37 +5,72 @@ The ProCann Education platform uses autonomous AI agents to monitor regulations,
 
 ## Agent Roster
 
-### 1. Regulatory Compliance Monitor
+### 1. Learning Lifecycle Agent 🎓
+**Edge Functions:** `enrollment-lifecycle-agent`  
+**Schedule:** Every 6 hours (4x daily)  
+**Purpose:** Monitors and intervenes in student learning journeys
+
+**Capabilities:**
+- Tracks user progress through 17 lifecycle stages (profile_incomplete → certificate_issued)
+- Detects stuck learners (no activity in 7+ days)
+- Sends personalized interventions at critical stages
+- Flags at-risk students for manual review
+- Monitors certificate expiration (60, 30, 7 days before expiry)
+- Generates learning journey analytics
+
+**Database Tables:** `user_learning_journey`, `ai_agent_runs`
+
+### 2. Charm AI Assistant 🤖
+**Edge Functions:** `chat-assistant`  
+**Trigger:** Real-time (user messages)  
+**Purpose:** Context-aware AI chatbot with Maryland COMAR regulatory knowledge
+
+**Enhanced Capabilities:**
+- **RAG (Retrieval-Augmented Generation)** - Searches `regulatory_content` database for relevant COMAR sections
+- **Regulatory Expert** - Can cite exact Maryland COMAR 14.17 sections with real content
+- **Context-Aware** - Adapts responses based on user role (student, manager, admin)
+- **Baltimore Personality** - Charm City character with local cannabis industry knowledge
+- **Multi-Channel** - Supports text and voice interactions
+
+**How it works:**
+1. Detects regulatory queries (mentions of "COMAR", "regulation", "compliance", "MCA")
+2. Searches Maryland COMAR database using full-text search
+3. Injects up to 3 relevant COMAR sections into AI context
+4. AI responds with exact citations and plain-language explanations
+
+**Database Tables:** `regulatory_content`, `user_learning_journey`
+
+### 3. Regulatory Compliance Monitor
 **Edge Functions:** `scrape-regulations`, `scrape-federal-regulations`  
 **Schedule:** Daily at 3 AM (Maryland), Weekly on Mondays (Federal)  
 **Purpose:** Automatically detects changes in cannabis regulations
 
-### 2. Content Freshness Guardian
+### 4. Content Freshness Guardian
 **Edge Functions:** `audit-content-freshness`  
 **Schedule:** Weekly on Sundays  
 **Purpose:** Compares course content against current regulations
 
-### 3. Revenue Intelligence Bot
+### 5. Revenue Intelligence Bot
 **Edge Functions:** `analyze-payment-patterns`  
 **Schedule:** Every 6 hours  
 **Purpose:** Analyzes payment trends, forecasts revenue
 
-### 4. Daily Digest Generator
+### 6. Daily Digest Generator
 **Edge Functions:** `generate-daily-digest`  
 **Schedule:** Daily at 8 AM  
 **Purpose:** Creates AI-powered owner intelligence reports
 
-### 5. Workflow Automation Executor
+### 7. Workflow Automation Executor
 **Edge Functions:** `execute-workflow-automations`  
 **Schedule:** Every 6 hours  
 **Purpose:** Executes scheduled notifications (certificate expiry, onboarding, compliance)
 
-### 6. Email Health Monitor
+### 8. Email Health Monitor
 **Edge Functions:** `test-email-providers`  
 **Schedule:** Hourly  
 **Purpose:** Monitors email deliverability and provider health
 
-### 7. Auto-Enrollment Agent
+### 9. Auto-Enrollment Agent
 **Edge Functions:** `enroll-dispensary-contact`  
 **Trigger:** Application approval  
 **Purpose:** Automatically creates user accounts for approved dispensary managers
@@ -46,7 +81,7 @@ The ProCann Education platform uses autonomous AI agents to monitor regulations,
 - Sends welcome email with login credentials
 - Logs enrollment in ai_agent_runs table
 
-### 8. Application Intake Agent
+### 10. Application Intake Agent
 **Database Trigger:** `on_dispensary_application_submitted`  
 **Trigger:** New application submission  
 **Purpose:** Notifies admins and sends confirmation to applicants
@@ -55,7 +90,7 @@ The ProCann Education platform uses autonomous AI agents to monitor regulations,
 - Applicant confirmation emails
 - Tracked in email_logs
 
-### 9. Security & Fraud Watchdog
+### 11. Security & Fraud Watchdog
 **Edge Functions:** (Future implementation)  
 **Purpose:** Detects suspicious activity and fraud patterns
 
@@ -74,6 +109,13 @@ SELECT * FROM cron.job;
 ## Manual Triggers
 All agents can be manually triggered from the AI Ops Center or via Supabase functions:
 ```typescript
+// Trigger regulatory scrapers to populate COMAR database
+await supabase.functions.invoke('trigger-scrapers');
+
+// Run lifecycle agent manually
+await supabase.functions.invoke('enrollment-lifecycle-agent');
+
+// Scrape Maryland COMAR
 await supabase.functions.invoke('scrape-regulations');
 ```
 
