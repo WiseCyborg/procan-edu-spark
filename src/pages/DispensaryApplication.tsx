@@ -153,6 +153,10 @@ const DispensaryApplication = () => {
         description: errorMessage,
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const canProceed = () => {
     switch (currentStep) {

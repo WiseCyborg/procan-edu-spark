@@ -52,6 +52,7 @@ import EmployersPage from "./pages/EmployersPage";
 import ImpactDashboardPage from "./pages/ImpactDashboardPage";
 import AccessibilityPage from "./pages/AccessibilityPage";
 import OwnersIntelligence from "./pages/OwnersIntelligence";
+import { ProfileOnboardingWizard } from "./components/onboarding/ProfileOnboardingWizard";
 
 import { ProtectedCourseAccess } from "./components/ProtectedCourseAccess";
 

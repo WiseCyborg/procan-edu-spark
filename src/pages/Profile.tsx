@@ -176,28 +176,38 @@ const Profile: React.FC = () => {
   const handleSave = async () => {
     if (!user) return;
 
-    setSaving(true);
+    // Validate profile data
+    const validationErrors = validateProfile();
+    if (validationErrors.length > 0) {
+      toast({
+        title: "Validation Error",
+        description: validationErrors[0],
+        variant: "destructive"
+      });
+      return;
+    }
 
+    setIsSaving(true);
     try {
-      // Prepare the profile data
+      // Prepare profile data with proper null handling
       const profileData = {
         user_id: user.id,
-        first_name: firstName || null,
-        last_name: lastName || null,
-        phone: phone || null,
-        date_of_birth: dateOfBirth || null,
-        address: address || null,
-        city: city || null,
-        state: state || null,
-        zip_code: zipCode || null,
-        emergency_contact_name: emergencyContactName || null,
-        emergency_contact_phone: emergencyContactPhone || null,
-        mca_registration_number: mcaRegistrationNumber || null,
-        job_title: jobTitle || null,
-        updated_at: new Date().toISOString()
+        first_name: profile.first_name.trim() || null,
+        last_name: profile.last_name.trim() || null,
+        phone: profile.phone.trim() || null,
+        organization: profile.organization.trim() || null,
+        job_title: profile.job_title.trim() || null,
+        mca_registration_number: profile.mca_registration_number.trim() || null,
+        date_of_birth: profile.date_of_birth || null,
+        address: profile.address.trim() || null,
+        city: profile.city.trim() || null,
+        state: profile.state.trim() || 'Maryland',
+        zip_code: profile.zip_code.trim() || null,
+        emergency_contact_name: profile.emergency_contact_name.trim() || null,
+        emergency_contact_phone: profile.emergency_contact_phone.trim() || null,
       };
 
-      // Use upsert to handle both insert and update
+      // Use UPSERT for atomic operation
       const { error } = await supabase
         .from('profiles')
         .upsert(profileData, {
@@ -206,27 +216,37 @@ const Profile: React.FC = () => {
         });
 
       if (error) {
-        console.error('Profile save error:', {
-          code: error.code,
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          user_id: user.id,
-          timestamp: new Date().toISOString()
-        });
-
-        // Log failed save to monitoring
+        console.error('Error saving profile:', error);
+        
+        // Log failure to monitoring system
         await supabase.from('user_operation_logs').insert({
           user_id: user.id,
           operation_type: 'profile_save',
           success: false,
           error_code: error.code,
           error_message: error.message,
-          error_details: { details: error.details, hint: error.hint },
-          operation_data: { fields_attempted: Object.keys(profileData) }
+          error_details: { hint: error.hint, details: error.details },
+          operation_data: { field_count: changedFields.size }
         });
-
-        throw error;
+        
+        let errorMessage = `Failed to save profile changes: ${error.message}`;
+        
+        if (error.code === '23505') {
+          errorMessage = "A profile with this information already exists";
+        } else if (error.code === '22007') {
+          errorMessage = "Invalid date format. Please check your date of birth";
+        } else if (error.code === '42501') {
+          errorMessage = "You don't have permission to update your profile.";
+        } else if (error.code === '23502') {
+          errorMessage = "Please fill in all required fields marked with *";
+        }
+        
+        toast({
+          title: "Error",
+          description: errorMessage,
+          variant: "destructive"
+        });
+        return;
       }
 
       // Log successful save
@@ -234,30 +254,27 @@ const Profile: React.FC = () => {
         user_id: user.id,
         operation_type: 'profile_save',
         success: true,
-        operation_data: { fields_saved: Object.keys(profileData).filter(k => profileData[k as keyof typeof profileData]) }
+        operation_data: { fields_changed: changedFields.size }
       });
-
-      // Clear localStorage draft
-      localStorage.removeItem('profile_draft');
 
       toast({
         title: "Success",
-        description: "Profile updated successfully",
+        description: `${changedFields.size} field(s) updated successfully`
       });
-
-      // Refresh the profile data
-      refetchProfile();
-
-    } catch (error: any) {
+      
+      // Update baseline after successful save
+      setOriginalProfile(profile);
+      setChangedFields(new Set());
+    } catch (error) {
+      console.error('Error in handleSave:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to save profile",
-        variant: "destructive",
+        description: "Failed to save profile changes",
+        variant: "destructive"
       });
     } finally {
-      setSaving(false);
+      setIsSaving(false);
     }
-  };
   };
 
   if (isLoading || rolesLoading) {
