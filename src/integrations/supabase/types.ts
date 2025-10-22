@@ -2626,6 +2626,10 @@ export type Database = {
           success: boolean
         }[]
       }
+      test_system_health: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       unlock_tier: {
         Args: { _modules_completed: number; _tier: string; _user_id: string }
         Returns: boolean
