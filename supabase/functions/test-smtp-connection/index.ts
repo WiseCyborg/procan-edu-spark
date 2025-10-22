@@ -1,4 +1,4 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { SMTPEmailService } from "../_shared/smtp-email-service.ts";
 
 const corsHeaders = {
