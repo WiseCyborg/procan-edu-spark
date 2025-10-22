@@ -141,17 +141,27 @@ export const VerificationPreferencesSetup: React.FC = () => {
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        // Friendly fallback for missing Vonage credentials
+        if (error.message?.includes('VONAGE') || error.message?.includes('credentials') || error.message?.includes('API')) {
+          toast({
+            title: "SMS Not Configured Yet",
+            description: "SMS verification is not configured. Your preference has been saved and will work once SMS is enabled.",
+          });
+          return;
+        }
+        throw error;
+      }
 
       toast({
         title: "Test Code Sent",
         description: `Verification test sent via ${preferences.preferred_method.toUpperCase()}`,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error testing verification:', error);
       toast({
         title: "Test Failed",
-        description: "Failed to send test verification",
+        description: error.message || "Failed to send test verification. Your preference has been saved.",
         variant: "destructive"
       });
     } finally {

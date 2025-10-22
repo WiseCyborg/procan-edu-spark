@@ -32,6 +32,7 @@ interface ProfileData {
   emergency_contact_phone: string;
   organization_id?: string;
   organization_name?: string;
+  profile_photo_url?: string | null;
 }
 
 // Critical fields that trigger admin notifications when changed
@@ -104,7 +105,8 @@ const Profile: React.FC = () => {
             emergency_contact_name: data.emergency_contact_name || '',
             emergency_contact_phone: data.emergency_contact_phone || '',
             organization_id: data.organization_id || undefined,
-            organization_name: orgName
+            organization_name: orgName,
+            profile_photo_url: data.profile_photo_url || null,
           };
           setProfile(loadedProfile);
           setOriginalProfile(loadedProfile);
@@ -176,6 +178,14 @@ const Profile: React.FC = () => {
   };
 
   const handleSave = async () => {
+    // Enhanced logging for debugging
+    console.log('🔍 Save Profile - Session Check:', {
+      userId: user?.id,
+      email: user?.email,
+      changedFieldsCount: changedFields.size,
+      changedFields: Array.from(changedFields)
+    });
+
     // Critical validation: Check user session
     if (!user?.id) {
       toast({
@@ -369,12 +379,12 @@ const Profile: React.FC = () => {
             <CardContent className="flex justify-center">
               <ProfilePhotoUpload
                 userId={user?.id || ''}
-                currentPhotoUrl={profile.organization_id ? null : null}
+                currentPhotoUrl={profile.profile_photo_url}
                 onPhotoUpdate={(url) => {
-                  // Photo is saved directly in ProfilePhotoUpload component
+                  setProfile(prev => ({ ...prev, profile_photo_url: url }));
                   toast({
                     title: "Photo Updated",
-                    description: "Your profile photo has been updated"
+                    description: "Your profile photo has been updated successfully"
                   });
                 }}
               />

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,11 @@ interface ProfilePhotoUploadProps {
 export const ProfilePhotoUpload = ({ userId, currentPhotoUrl, onPhotoUpdate }: ProfilePhotoUploadProps) => {
   const [uploading, setUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(currentPhotoUrl);
+
+  // Update preview when prop changes
+  useEffect(() => {
+    setPreviewUrl(currentPhotoUrl);
+  }, [currentPhotoUrl]);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
