@@ -89,3 +89,12 @@ verify_jwt = false
 
 [functions.register-with-seat-allocation]
 verify_jwt = false
+
+[functions.system-integrity-monitor]
+verify_jwt = false
+
+[functions.auto-fix-manager-accounts]
+verify_jwt = false
+
+[functions.auto-generate-join-codes]
+verify_jwt = false

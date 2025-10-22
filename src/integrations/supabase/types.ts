@@ -2115,6 +2115,122 @@ export type Database = {
           },
         ]
       }
+      system_integrity_checks: {
+        Row: {
+          affected_entity_id: string | null
+          affected_entity_type: string
+          auto_fixable: boolean | null
+          check_type: string
+          created_at: string | null
+          detected_at: string | null
+          id: string
+          issue_description: string
+          metadata: Json | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+          status: string
+          suggested_fix: string | null
+          technical_details: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          affected_entity_id?: string | null
+          affected_entity_type: string
+          auto_fixable?: boolean | null
+          check_type: string
+          created_at?: string | null
+          detected_at?: string | null
+          id?: string
+          issue_description: string
+          metadata?: Json | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity: string
+          status: string
+          suggested_fix?: string | null
+          technical_details?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          affected_entity_id?: string | null
+          affected_entity_type?: string
+          auto_fixable?: boolean | null
+          check_type?: string
+          created_at?: string | null
+          detected_at?: string | null
+          id?: string
+          issue_description?: string
+          metadata?: Json | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          status?: string
+          suggested_fix?: string | null
+          technical_details?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      system_integrity_fixes: {
+        Row: {
+          changes_made: Json | null
+          check_id: string | null
+          created_at: string | null
+          error_details: Json | null
+          executed_at: string | null
+          executed_by: string | null
+          execution_duration_ms: number | null
+          execution_mode: string
+          fix_action: string
+          fix_type: string
+          id: string
+          rollback_available: boolean | null
+          rollback_data: Json | null
+          success: boolean
+        }
+        Insert: {
+          changes_made?: Json | null
+          check_id?: string | null
+          created_at?: string | null
+          error_details?: Json | null
+          executed_at?: string | null
+          executed_by?: string | null
+          execution_duration_ms?: number | null
+          execution_mode: string
+          fix_action: string
+          fix_type: string
+          id?: string
+          rollback_available?: boolean | null
+          rollback_data?: Json | null
+          success: boolean
+        }
+        Update: {
+          changes_made?: Json | null
+          check_id?: string | null
+          created_at?: string | null
+          error_details?: Json | null
+          executed_at?: string | null
+          executed_by?: string | null
+          execution_duration_ms?: number | null
+          execution_mode?: string
+          fix_action?: string
+          fix_type?: string
+          id?: string
+          rollback_available?: boolean | null
+          rollback_data?: Json | null
+          success?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "system_integrity_fixes_check_id_fkey"
+            columns: ["check_id"]
+            isOneToOne: false
+            referencedRelation: "system_integrity_checks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tier_achievements: {
         Row: {
           created_at: string | null

@@ -2,6 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Activity, Users, FileText, CheckCircle } from "lucide-react";
 import { PayPalConfigurationPanel } from "@/components/admin/PayPalConfigurationPanel";
+import { GapAnalysisDashboard } from "@/components/admin/GapAnalysisDashboard";
 import { useState } from "react";
 
 export default function UnifiedOperationsDashboard() {
@@ -86,6 +87,9 @@ export default function UnifiedOperationsDashboard() {
 
       {/* PayPal Configuration Panel */}
       <PayPalConfigurationPanel onStatusChange={setPaypalStatus} />
+
+      {/* Gap Analysis Dashboard */}
+      <GapAnalysisDashboard />
 
       {/* Future Components Placeholders */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
