@@ -2491,10 +2491,7 @@ export type Database = {
         Args: { admin_notes?: string; target_user_ids: string[] }
         Returns: Json
       }
-      calculate_compliance_score: {
-        Args: { org_id: string }
-        Returns: number
-      }
+      calculate_compliance_score: { Args: { org_id: string }; Returns: number }
       check_rate_limit: {
         Args: {
           _action_type: string
@@ -2508,14 +2505,8 @@ export type Database = {
         Args: { course_id: string; org_id: string }
         Returns: boolean
       }
-      cleanup_performance_metrics: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      create_initial_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      cleanup_performance_metrics: { Args: never; Returns: undefined }
+      create_initial_admin: { Args: never; Returns: string }
       create_test_organization: {
         Args: { contact_email: string; credits?: number; org_name: string }
         Returns: {
@@ -2526,7 +2517,7 @@ export type Database = {
         }[]
       }
       detect_outdated_content: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           content_id: string
           content_type: string
@@ -2538,10 +2529,7 @@ export type Database = {
           urgency_score: number
         }[]
       }
-      generate_certificate_number: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      generate_certificate_number: { Args: never; Returns: string }
       generate_compliance_report: {
         Args: { org_id?: string }
         Returns: {
@@ -2555,20 +2543,11 @@ export type Database = {
           trained_employees: number
         }[]
       }
-      generate_dispensary_key: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      generate_dispensary_number: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      generate_invitation_token: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      generate_dispensary_key: { Args: never; Returns: string }
+      generate_dispensary_number: { Args: never; Returns: string }
+      generate_invitation_token: { Args: never; Returns: string }
       get_admin_user_overview: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           created_at: string
           email: string
@@ -2584,7 +2563,7 @@ export type Database = {
         }[]
       }
       get_database_stats: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           index_size: string
           row_count: number
@@ -2629,20 +2608,11 @@ export type Database = {
           old_value: string
         }[]
       }
-      get_user_organization: {
-        Args: { _user_id: string }
-        Returns: string
-      }
-      get_user_organization_id: {
-        Args: { user_uuid: string }
-        Returns: string
-      }
-      get_user_tier: {
-        Args: { _user_id: string }
-        Returns: string
-      }
+      get_user_organization: { Args: { _user_id: string }; Returns: string }
+      get_user_organization_id: { Args: { user_uuid: string }; Returns: string }
+      get_user_tier: { Args: { _user_id: string }; Returns: string }
       get_users_with_roles: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           created_at: string
           first_name: string
@@ -2706,10 +2676,7 @@ export type Database = {
           success: boolean
         }[]
       }
-      test_system_health: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
+      test_system_health: { Args: never; Returns: Json }
       unlock_tier: {
         Args: { _modules_completed: number; _tier: string; _user_id: string }
         Returns: boolean
