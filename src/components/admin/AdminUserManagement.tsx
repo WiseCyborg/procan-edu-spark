@@ -6,10 +6,11 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Users, UserPlus, Shield, Trash2, Plus } from 'lucide-react';
+import { Users, UserPlus, Shield, Trash2, Plus, Edit } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { SensitiveOperationWrapper } from '@/components/auth/SensitiveOperationWrapper';
+import { EnhancedProfileEditor } from './EnhancedProfileEditor';
 
 interface UserWithRoles {
   user_id: string;
@@ -25,6 +26,7 @@ export const AdminUserManagement: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState<string>('');
   const [newRole, setNewRole] = useState<string>('');
   const [showAddRole, setShowAddRole] = useState(false);
+  const [editingUserId, setEditingUserId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchUsersWithRoles();
@@ -204,6 +206,7 @@ export const AdminUserManagement: React.FC = () => {
               <TableHead>Name</TableHead>
               <TableHead>Roles</TableHead>
               <TableHead>Created</TableHead>
+              <TableHead>Profile</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -230,6 +233,16 @@ export const AdminUserManagement: React.FC = () => {
                   {new Date(user.created_at).toLocaleDateString()}
                 </TableCell>
                 <TableCell>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setEditingUserId(user.user_id)}
+                  >
+                    <Edit className="h-4 w-4 mr-1" />
+                    Edit Profile
+                  </Button>
+                </TableCell>
+                <TableCell>
                   <div className="flex gap-1">
                     {user.roles.map((role) => (
                       <SensitiveOperationWrapper
@@ -253,6 +266,19 @@ export const AdminUserManagement: React.FC = () => {
           </TableBody>
         </Table>
       </CardContent>
+
+      {/* Profile Editor Dialog */}
+      {editingUserId && (
+        <EnhancedProfileEditor
+          userId={editingUserId}
+          open={!!editingUserId}
+          onClose={() => setEditingUserId(null)}
+          onSaved={() => {
+            fetchUsersWithRoles();
+            setEditingUserId(null);
+          }}
+        />
+      )}
     </Card>
   );
 };

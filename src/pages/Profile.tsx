@@ -10,9 +10,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/components/ui/use-toast';
-import { User, Save, Calendar, MapPin, Phone, Settings, AlertCircle, ArrowRight } from 'lucide-react';
+import { User, Save, Calendar, MapPin, Phone, Settings, AlertCircle, ArrowRight, Camera } from 'lucide-react';
 import { VerificationPreferencesSetup } from '@/components/auth/VerificationPreferencesSetup';
 import { ProfileChangeHistoryViewer } from '@/components/admin/ProfileChangeHistoryViewer';
+import { ProfilePhotoUpload } from '@/components/profile/ProfilePhotoUpload';
 
 interface ProfileData {
   first_name: string;
@@ -206,33 +207,29 @@ const Profile: React.FC = () => {
         emergency_contact_phone: profile.emergency_contact_phone.trim() || null,
       };
 
-      // First try to update existing profile
-      const { data: existingProfile } = await supabase
+      // Use UPSERT for atomic operation (fixes race condition)
+      const { error } = await supabase
         .from('profiles')
-        .select('id')
-        .eq('user_id', user.id)
-        .single();
-
-      let error;
-      
-      if (existingProfile) {
-        // Update existing profile
-        const { error: updateError } = await supabase
-          .from('profiles')
-          .update(profileData)
-          .eq('user_id', user.id);
-        error = updateError;
-      } else {
-        // Insert new profile
-        const { error: insertError } = await supabase
-          .from('profiles')
-          .insert(profileData);
-        error = insertError;
-      }
+        .upsert(profileData, {
+          onConflict: 'user_id',
+          ignoreDuplicates: false
+        });
 
       if (error) {
         console.error('Error saving profile:', error);
         console.error('Error details:', JSON.stringify(error, null, 2));
+        
+        // Log failure to monitoring system (non-blocking)
+        supabase.from('user_operation_logs').insert({
+          user_id: user.id,
+          operation_type: 'profile_save',
+          success: false,
+          error_code: error.code,
+          error_message: error.message,
+          error_details: { hint: error.hint, details: error.details },
+          operation_data: { field_count: changedFields.size }
+        });
+        
         let errorMessage = `Failed to save profile changes: ${error.message}`;
         
         if (error.code === '23505') {
@@ -252,6 +249,14 @@ const Profile: React.FC = () => {
         });
         return;
       }
+
+      // Log successful save (non-blocking)
+      supabase.from('user_operation_logs').insert({
+        user_id: user.id,
+        operation_type: 'profile_save',
+        success: true,
+        operation_data: { fields_changed: changedFields.size }
+      });
 
       // Check if any critical fields changed and notify admins
       const criticalChanges = getCriticalFieldChanges();
@@ -370,6 +375,29 @@ const Profile: React.FC = () => {
         </TabsList>
         
         <TabsContent value="profile" className="space-y-6">
+          {/* Profile Photo Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Camera className="w-5 h-5" />
+                <span>Profile Photo</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="flex justify-center">
+              <ProfilePhotoUpload
+                userId={user?.id || ''}
+                currentPhotoUrl={profile.organization_id ? null : null}
+                onPhotoUpdate={(url) => {
+                  // Photo is saved directly in ProfilePhotoUpload component
+                  toast({
+                    title: "Photo Updated",
+                    description: "Your profile photo has been updated"
+                  });
+                }}
+              />
+            </CardContent>
+          </Card>
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Personal Information */}
         <Card>

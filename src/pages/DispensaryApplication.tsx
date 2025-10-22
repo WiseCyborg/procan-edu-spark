@@ -8,7 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Building2, FileText, Contact, Shield, Loader2, CheckCircle2 } from 'lucide-react';
+import { Building2, FileText, Contact, Shield, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { validateDateRange } from '@/utils/validation-helpers';
 
 const DispensaryApplication = () => {
   const navigate = useNavigate();
@@ -70,6 +71,19 @@ const DispensaryApplication = () => {
         variant: "destructive",
       });
       return;
+    }
+
+    // Validate date range
+    if (licenseIssueDate && licenseExpiryDate) {
+      const dateValidation = validateDateRange(licenseIssueDate, licenseExpiryDate);
+      if (!dateValidation.valid) {
+        toast({
+          title: "Invalid Date Range",
+          description: dateValidation.error,
+          variant: "destructive",
+        });
+        return;
+      }
     }
 
     // Validate schema before submission
@@ -298,6 +312,7 @@ const DispensaryApplication = () => {
                       type="date"
                       value={licenseIssueDate}
                       onChange={(e) => setLicenseIssueDate(e.target.value)}
+                      max={new Date().toISOString().split('T')[0]}
                     />
                   </div>
                   <div>
@@ -307,9 +322,19 @@ const DispensaryApplication = () => {
                       type="date"
                       value={licenseExpiryDate}
                       onChange={(e) => setLicenseExpiryDate(e.target.value)}
+                      min={licenseIssueDate || new Date().toISOString().split('T')[0]}
                     />
                   </div>
                 </div>
+                {licenseIssueDate && licenseExpiryDate && (() => {
+                  const validation = validateDateRange(licenseIssueDate, licenseExpiryDate);
+                  return !validation.valid ? (
+                    <div className="flex items-center gap-2 text-sm text-destructive mt-2">
+                      <AlertCircle className="h-4 w-4" />
+                      {validation.error}
+                    </div>
+                  ) : null;
+                })()}
               </div>
             </div>
           )}

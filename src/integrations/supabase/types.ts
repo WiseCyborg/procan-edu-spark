@@ -2197,6 +2197,45 @@ export type Database = {
         }
         Relationships: []
       }
+      user_operation_logs: {
+        Row: {
+          client_info: Json | null
+          created_at: string
+          error_code: string | null
+          error_details: Json | null
+          error_message: string | null
+          id: string
+          operation_data: Json | null
+          operation_type: string
+          success: boolean
+          user_id: string | null
+        }
+        Insert: {
+          client_info?: Json | null
+          created_at?: string
+          error_code?: string | null
+          error_details?: Json | null
+          error_message?: string | null
+          id?: string
+          operation_data?: Json | null
+          operation_type: string
+          success: boolean
+          user_id?: string | null
+        }
+        Update: {
+          client_info?: Json | null
+          created_at?: string
+          error_code?: string | null
+          error_details?: Json | null
+          error_message?: string | null
+          id?: string
+          operation_data?: Json | null
+          operation_type?: string
+          success?: boolean
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_progress: {
         Row: {
           completed_at: string | null
