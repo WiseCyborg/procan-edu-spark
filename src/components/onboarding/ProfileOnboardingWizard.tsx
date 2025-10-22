@@ -61,6 +61,17 @@ export const ProfileOnboardingWizard = () => {
   };
 
   const saveProgress = async (isComplete: boolean = false) => {
+    // Critical validation: Check user session
+    if (!user?.id) {
+      toast({
+        title: "Session Expired",
+        description: "Please log in again to save your profile",
+        variant: "destructive"
+      });
+      navigate('/auth');
+      return false;
+    }
+
     setSaving(true);
     try {
       const profileData = sanitizeProfileData({

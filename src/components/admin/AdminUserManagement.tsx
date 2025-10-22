@@ -237,22 +237,15 @@ export const AdminUserManagement: React.FC = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setEditingUserId(user.user_id)}
-                    >
-                      <Edit className="h-4 w-4 mr-1" />
-                      Edit Profile
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      size="sm"
                       onClick={() => {
                         setEditingUserId(user.user_id);
                         toast({
                           title: "Admin Mode",
-                          description: "You can complete this user's profile on their behalf.",
+                          description: "Editing profile as administrator",
                         });
                       }}
                     >
+                      <Edit className="h-4 w-4 mr-1" />
                       Complete Profile
                     </Button>
                   </div>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { supabase } from '@/integrations/supabase/client';
@@ -44,6 +45,7 @@ const CRITICAL_FIELDS: (keyof ProfileData)[] = [
 const Profile: React.FC = () => {
   const { user } = useAuth();
   const { roles, isLoading: rolesLoading } = useUserRole();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<ProfileData>({
     first_name: '',
     last_name: '',
@@ -174,7 +176,16 @@ const Profile: React.FC = () => {
   };
 
   const handleSave = async () => {
-    if (!user) return;
+    // Critical validation: Check user session
+    if (!user?.id) {
+      toast({
+        title: "Session Expired",
+        description: "Please log in again to save your profile",
+        variant: "destructive"
+      });
+      navigate('/auth');
+      return;
+    }
 
     // Validate profile data
     const validationErrors = validateProfile();

@@ -78,11 +78,31 @@ const DispensaryApplication = () => {
       const dateValidation = validateDateRange(licenseIssueDate, licenseExpiryDate);
       if (!dateValidation.valid) {
         toast({
-          title: "Invalid Date Range",
-          description: dateValidation.error,
+          title: "Invalid License",
+          description: dateValidation.error || "Please check your license dates",
           variant: "destructive",
         });
+        
+        // Log validation failure
+        await supabase.from('user_operation_logs').insert({
+          operation_type: 'dispensary_application_submit',
+          success: false,
+          error_message: 'Date validation failed: License expired',
+          error_details: { dateValidation },
+          operation_data: { licenseIssueDate, licenseExpiryDate }
+        });
+        
         return;
+      }
+
+      // Show warnings but don't block submission
+      if (dateValidation.warnings && dateValidation.warnings.length > 0) {
+        toast({
+          title: "Please Review",
+          description: dateValidation.warnings.join(' '),
+          variant: "default",
+        });
+        // Continue with submission
       }
     }
 

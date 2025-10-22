@@ -42,6 +42,7 @@ import { UserEmailHistory } from '@/components/admin/UserEmailHistory';
 import { EmailAnalyticsCharts } from '@/components/admin/EmailAnalyticsCharts';
 import { EmailProviderSettings } from '@/components/admin/EmailProviderSettings';
 import { TestEmailSender } from '@/components/admin/TestEmailSender';
+import { FormHealthMonitor } from '@/pages/OwnersIntelligence';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -425,6 +426,7 @@ const AdminDashboard = () => {
         <Tabs defaultValue="users" className="w-full">
           <TabsList className="grid w-full grid-cols-6 lg:grid-cols-13">
             <TabsTrigger value="users">Users</TabsTrigger>
+            <TabsTrigger value="form-health">🔧 Form Health</TabsTrigger>
             <TabsTrigger value="organizations">Organizations</TabsTrigger>
             <TabsTrigger value="applications">Applications</TabsTrigger>
             <TabsTrigger value="setup">Setup</TabsTrigger>
@@ -499,6 +501,10 @@ const AdminDashboard = () => {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="form-health">
+            <FormHealthMonitor />
           </TabsContent>
 
           <TabsContent value="organizations">

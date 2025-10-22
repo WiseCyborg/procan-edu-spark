@@ -66,35 +66,47 @@ export const validateDateOfBirth = (dob: string): { valid: boolean; error?: stri
 export const validateDateRange = (
   issueDate: string, 
   expiryDate: string
-): { valid: boolean; error?: string; warning?: string } => {
+): { valid: boolean; error?: string; warnings: string[] } => {
   if (!issueDate || !expiryDate) {
-    return { valid: true }; // Allow empty if optional
+    return { valid: true, warnings: [] };
   }
   
   const issue = new Date(issueDate);
   const expiry = new Date(expiryDate);
   const today = new Date();
-  
-  if (issue > today) {
-    return { valid: false, error: "Issue date cannot be in the future" };
-  }
-  
-  if (expiry <= issue) {
-    return { valid: false, error: "Expiry date must be after issue date" };
-  }
-  
-  // Soft warning if expiry is soon (less than 30 days)
-  const thirtyDaysFromNow = new Date();
-  thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
-  
-  if (expiry < thirtyDaysFromNow) {
-    return { 
-      valid: true, 
-      warning: "Note: License expires within 30 days. You may want to renew soon." 
+  today.setHours(0, 0, 0, 0);
+
+  const warnings: string[] = [];
+
+  // ONLY block if expired
+  if (expiry < today) {
+    return {
+      valid: false,
+      error: "License has expired. Please renew your license before applying.",
+      warnings: []
     };
   }
-  
-  return { valid: true };
+
+  // Issue date in future is suspicious but don't block
+  if (issue > today) {
+    warnings.push("License issue date is in the future. Please verify the date.");
+  }
+
+  // Expiry same as or before issue is unusual but don't block
+  if (expiry <= issue) {
+    warnings.push("License expiry date is same as or before issue date. This is unusual.");
+  }
+
+  // Expiring soon - warn but don't block
+  const daysUntilExpiry = Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  if (daysUntilExpiry < 30) {
+    warnings.push(`License expires in ${daysUntilExpiry} days. Consider renewing soon.`);
+  }
+
+  return {
+    valid: true,
+    warnings
+  };
 };
 
 export const sanitizeProfileData = (data: any) => {

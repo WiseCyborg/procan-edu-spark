@@ -543,3 +543,5 @@ async function resolveAlert(alertId: string) {
     .eq('id', alertId);
   window.location.reload();
 }
+
+export { FormHealthMonitor };
