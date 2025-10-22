@@ -235,9 +235,21 @@ const App = () => (
                      </ProtectedRoute>
                    } />
                    
-                   <Route path="/admin/content-review" element={
+                   <Route path="/onboarding/profile" element={
                      <ProtectedRoute>
-                       <ContentReviewDashboard />
+                       <ProfileOnboardingWizard />
+                     </ProtectedRoute>
+                   } />
+                   
+                   <Route path="/verify/certificate/:certificateId" element={<SecureCertificateVerification />} />
+                   <Route path="/admin/analytics" element={
+                     <ProtectedRoute>
+                       <AdvancedAnalytics />
+                     </ProtectedRoute>
+                   } />
+                   <Route path="/admin/intelligence" element={
+                     <ProtectedRoute>
+                       <OwnersIntelligence />
                      </ProtectedRoute>
                    } />
                    

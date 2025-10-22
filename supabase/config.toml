@@ -68,3 +68,9 @@ verify_jwt = true
 
 [functions.notify-application-status]
 verify_jwt = false
+
+[functions.monitor-profile-failures]
+verify_jwt = false
+
+[functions.monitor-form-submissions]
+verify_jwt = false

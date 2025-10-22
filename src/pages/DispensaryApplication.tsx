@@ -143,9 +143,7 @@ const DispensaryApplication = () => {
       } else if (error.code === '23502') {
         errorMessage += "Please fill in all required fields.";
       } else if (error.code === '42703') {
-        errorMessage += "Database schema error - please contact support at support@procannedu.com";
-      } else if (error.code === '23514') {
-        errorMessage += "Invalid date range - expiry date must be after issue date.";
+        errorMessage += "Database schema error - please contact support.";
       } else {
         errorMessage += error.message || "Please try again.";
       }
@@ -155,10 +153,6 @@ const DispensaryApplication = () => {
         description: errorMessage,
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const canProceed = () => {
     switch (currentStep) {

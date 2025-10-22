@@ -66,7 +66,7 @@ export const validateDateOfBirth = (dob: string): { valid: boolean; error?: stri
 export const validateDateRange = (
   issueDate: string, 
   expiryDate: string
-): { valid: boolean; error?: string } => {
+): { valid: boolean; error?: string; warning?: string } => {
   if (!issueDate || !expiryDate) {
     return { valid: true }; // Allow empty if optional
   }
@@ -83,20 +83,15 @@ export const validateDateRange = (
     return { valid: false, error: "Expiry date must be after issue date" };
   }
   
-  // Check if expiry is at least 30 days from today
+  // Soft warning if expiry is soon (less than 30 days)
   const thirtyDaysFromNow = new Date();
   thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
   
   if (expiry < thirtyDaysFromNow) {
-    return { valid: false, error: "License must be valid for at least 30 more days" };
-  }
-  
-  // Check if date range is at least 1 year
-  const oneYearLater = new Date(issue);
-  oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
-  
-  if (expiry < oneYearLater) {
-    return { valid: false, error: "License validity must be at least 1 year" };
+    return { 
+      valid: true, 
+      warning: "Note: License expires within 30 days. You may want to renew soon." 
+    };
   }
   
   return { valid: true };

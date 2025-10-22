@@ -396,17 +396,13 @@ const StudentAuthForm = () => {
       } else {
         toast({
           title: invitationData ? `Welcome to ${invitationData.organizationName}!` : `Welcome to ${organizationName}!`,
-          description: "Check your email for a confirmation link to complete your registration.",
+          description: "Check your email for a confirmation link, then complete your profile.",
         });
         
-        // Clear form
-        setFirstName('');
-        setLastName('');
-        setPhone('');
-        setJoinCode('');
-        setRegEmail('');
-        setRegPassword('');
-        setIsRegistering(false);
+        // Redirect to profile onboarding after successful registration
+        setTimeout(() => {
+          window.location.href = '/onboarding/profile';
+        }, 2000);
       }
     } catch (error) {
       toast({

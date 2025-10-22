@@ -176,38 +176,28 @@ const Profile: React.FC = () => {
   const handleSave = async () => {
     if (!user) return;
 
-    // Validate profile data
-    const validationErrors = validateProfile();
-    if (validationErrors.length > 0) {
-      toast({
-        title: "Validation Error",
-        description: validationErrors[0],
-        variant: "destructive"
-      });
-      return;
-    }
+    setSaving(true);
 
-    setIsSaving(true);
     try {
-      // Prepare profile data with proper null handling
+      // Prepare the profile data
       const profileData = {
         user_id: user.id,
-        first_name: profile.first_name.trim() || null,
-        last_name: profile.last_name.trim() || null,
-        phone: profile.phone.trim() || null,
-        organization: profile.organization.trim() || null,
-        job_title: profile.job_title.trim() || null,
-        mca_registration_number: profile.mca_registration_number.trim() || null,
-        date_of_birth: profile.date_of_birth || null,
-        address: profile.address.trim() || null,
-        city: profile.city.trim() || null,
-        state: profile.state.trim() || 'Maryland',
-        zip_code: profile.zip_code.trim() || null,
-        emergency_contact_name: profile.emergency_contact_name.trim() || null,
-        emergency_contact_phone: profile.emergency_contact_phone.trim() || null,
+        first_name: firstName || null,
+        last_name: lastName || null,
+        phone: phone || null,
+        date_of_birth: dateOfBirth || null,
+        address: address || null,
+        city: city || null,
+        state: state || null,
+        zip_code: zipCode || null,
+        emergency_contact_name: emergencyContactName || null,
+        emergency_contact_phone: emergencyContactPhone || null,
+        mca_registration_number: mcaRegistrationNumber || null,
+        job_title: jobTitle || null,
+        updated_at: new Date().toISOString()
       };
 
-      // Use UPSERT for atomic operation (fixes race condition)
+      // Use upsert to handle both insert and update
       const { error } = await supabase
         .from('profiles')
         .upsert(profileData, {
@@ -216,93 +206,58 @@ const Profile: React.FC = () => {
         });
 
       if (error) {
-        console.error('Error saving profile:', error);
-        console.error('Error details:', JSON.stringify(error, null, 2));
-        
-        // Log failure to monitoring system (non-blocking)
-        supabase.from('user_operation_logs').insert({
+        console.error('Profile save error:', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          user_id: user.id,
+          timestamp: new Date().toISOString()
+        });
+
+        // Log failed save to monitoring
+        await supabase.from('user_operation_logs').insert({
           user_id: user.id,
           operation_type: 'profile_save',
           success: false,
           error_code: error.code,
           error_message: error.message,
-          error_details: { hint: error.hint, details: error.details },
-          operation_data: { field_count: changedFields.size }
+          error_details: { details: error.details, hint: error.hint },
+          operation_data: { fields_attempted: Object.keys(profileData) }
         });
-        
-        let errorMessage = `Failed to save profile changes: ${error.message}`;
-        
-        if (error.code === '23505') {
-          errorMessage = "A profile with this information already exists";
-        } else if (error.code === '22007') {
-          errorMessage = "Invalid date format. Please check your date of birth";
-        } else if (error.code === '42501') {
-          errorMessage = "You don't have permission to update your profile. Please ensure you're properly logged in or contact support.";
-        } else if (error.code === '23502') {
-          errorMessage = "Please fill in all required fields marked with *";
-        }
-        
-        toast({
-          title: "Error",
-          description: errorMessage,
-          variant: "destructive"
-        });
-        return;
+
+        throw error;
       }
 
-      // Log successful save (non-blocking)
-      supabase.from('user_operation_logs').insert({
+      // Log successful save
+      await supabase.from('user_operation_logs').insert({
         user_id: user.id,
         operation_type: 'profile_save',
         success: true,
-        operation_data: { fields_changed: changedFields.size }
+        operation_data: { fields_saved: Object.keys(profileData).filter(k => profileData[k as keyof typeof profileData]) }
       });
 
-      // Check if any critical fields changed and notify admins
-      const criticalChanges = getCriticalFieldChanges();
-      
-      if (criticalChanges.size > 0 && originalProfile) {
-        try {
-          const { error: notifyError } = await supabase.functions.invoke(
-            'notify-profile-changes',
-            {
-              body: {
-                userId: user.id,
-                changedFields: Array.from(criticalChanges),
-                oldValues: originalProfile,
-                newValues: profile
-              }
-            }
-          );
-
-          if (notifyError) {
-            console.error('Failed to send admin notifications:', notifyError);
-            // Don't block user - just log it
-          }
-        } catch (notifyError) {
-          console.error('Error sending notifications:', notifyError);
-          // Don't show error to user - this is background work
-        }
-      }
+      // Clear localStorage draft
+      localStorage.removeItem('profile_draft');
 
       toast({
         title: "Success",
-        description: `${changedFields.size} field(s) updated successfully`
+        description: "Profile updated successfully",
       });
-      
-      // Update baseline after successful save
-      setOriginalProfile(profile);
-      setChangedFields(new Set());
-    } catch (error) {
-      console.error('Error in handleSave:', error);
+
+      // Refresh the profile data
+      refetchProfile();
+
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to save profile changes",
-        variant: "destructive"
+        description: error.message || "Failed to save profile",
+        variant: "destructive",
       });
     } finally {
-      setIsSaving(false);
+      setSaving(false);
     }
+  };
   };
 
   if (isLoading || rolesLoading) {

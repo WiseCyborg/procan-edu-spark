@@ -233,14 +233,29 @@ export const AdminUserManagement: React.FC = () => {
                   {new Date(user.created_at).toLocaleDateString()}
                 </TableCell>
                 <TableCell>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setEditingUserId(user.user_id)}
-                  >
-                    <Edit className="h-4 w-4 mr-1" />
-                    Edit Profile
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setEditingUserId(user.user_id)}
+                    >
+                      <Edit className="h-4 w-4 mr-1" />
+                      Edit Profile
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => {
+                        setEditingUserId(user.user_id);
+                        toast({
+                          title: "Admin Mode",
+                          description: "You can complete this user's profile on their behalf.",
+                        });
+                      }}
+                    >
+                      Complete Profile
+                    </Button>
+                  </div>
                 </TableCell>
                 <TableCell>
                   <div className="flex gap-1">

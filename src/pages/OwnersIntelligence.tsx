@@ -10,6 +10,81 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Progress } from '@/components/ui/progress';
 
+const FormHealthMonitor = () => {
+  const { data: formHealth } = useQuery({
+    queryKey: ['form-health-monitor'],
+    queryFn: async () => {
+      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      
+      const { data: logs } = await supabase
+        .from('user_operation_logs')
+        .select('*')
+        .in('operation_type', ['profile_save', 'profile_onboarding', 'dispensary_application'])
+        .gte('created_at', oneDayAgo);
+      
+      const byType: any = {};
+      logs?.forEach(log => {
+        if (!byType[log.operation_type]) {
+          byType[log.operation_type] = { total: 0, failures: 0 };
+        }
+        byType[log.operation_type].total++;
+        if (!log.success) byType[log.operation_type].failures++;
+      });
+      
+      return byType;
+    },
+    refetchInterval: 60000
+  });
+
+  return (
+    <Card className="mb-8">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <CheckCircle className="h-5 w-5 text-green-600" />
+          Form Submission Health (24h)
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {Object.entries(formHealth || {}).map(([type, stats]: [string, any]) => {
+            const successRate = stats.total > 0 ? ((stats.total - stats.failures) / stats.total) * 100 : 100;
+            const isHealthy = successRate >= 90;
+            
+            return (
+              <div 
+                key={type}
+                className={`p-4 border rounded-lg ${
+                  isHealthy ? 'border-green-300 bg-green-50' : 'border-red-300 bg-red-50'
+                }`}
+              >
+                <div className="text-sm font-medium mb-2 capitalize">
+                  {type.replace(/_/g, ' ')}
+                </div>
+                <div className="flex items-end justify-between">
+                  <div>
+                    <div className="text-2xl font-bold">{successRate.toFixed(1)}%</div>
+                    <div className="text-xs text-muted-foreground">
+                      {stats.total - stats.failures}/{stats.total} successful
+                    </div>
+                  </div>
+                  {!isHealthy && (
+                    <AlertTriangle className="h-5 w-5 text-red-600" />
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        {(!formHealth || Object.keys(formHealth).length === 0) && (
+          <div className="text-center py-8 text-muted-foreground">
+            No form submissions in the last 24 hours
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
 const AgentHealthMonitor = () => {
   const { data: agentHealth, refetch } = useQuery({
     queryKey: ['agent-health-monitor'],
@@ -173,6 +248,9 @@ export default function OwnersIntelligence() {
 
       {/* Agent Health Monitor */}
       <AgentHealthMonitor />
+
+      {/* Form Health Monitor */}
+      <FormHealthMonitor />
 
       {/* Platform Health Score */}
       <Card className="mb-8 border-primary shadow-lg">
