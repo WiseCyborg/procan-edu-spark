@@ -5,7 +5,9 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Users, UserPlus, Search, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { Users, UserPlus, Search, Loader2, CheckCircle, AlertCircle, AlertTriangle, ShoppingCart } from 'lucide-react';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { useNavigate } from 'react-router-dom';
 
 interface Employee {
   user_id: string;
@@ -35,6 +37,7 @@ export const SeatAssignmentManager: React.FC<SeatAssignmentManagerProps> = ({
   organizationId,
   courseId = 'rvt-course-2024' 
 }) => {
+  const navigate = useNavigate();
   const [employees, setEmployees] = useState<EmployeeWithProfile[]>([]);
   const [seats, setSeats] = useState<Seat[]>([]);
   const [loading, setLoading] = useState(true);
@@ -233,6 +236,24 @@ export const SeatAssignmentManager: React.FC<SeatAssignmentManagerProps> = ({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {availableSeats === 0 && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertTriangle className="h-5 w-5" />
+              <AlertTitle className="font-bold">No Training Seats Available</AlertTitle>
+              <AlertDescription className="space-y-2">
+                <p>You have no available training seats to assign to employees.</p>
+                <Button 
+                  onClick={() => navigate("/purchase-seats")} 
+                  variant="destructive"
+                  size="sm"
+                  className="mt-2"
+                >
+                  <ShoppingCart className="h-4 w-4 mr-2" />
+                  Purchase Seats to Continue
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
           {/* Search */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />

@@ -39,6 +39,7 @@ interface Organization {
   name: string;
   unique_access_key: string;
   course_credits: number;
+  available_seats: number;
 }
 
 export const StaffInvitationSystem = () => {
@@ -111,7 +112,45 @@ export const StaffInvitationSystem = () => {
       return;
     }
 
-    setOrganizations(data || []);
+    // Fetch available seats for each organization
+    const orgsWithSeats = await Promise.all((data || []).map(async (org) => {
+      const { data: seatData } = await supabase
+        .rpc('get_organization_seat_status', { org_id: org.id });
+      
+      const seatStatus = Array.isArray(seatData) ? seatData[0] : seatData;
+      
+      return {
+        ...org,
+        available_seats: seatStatus?.available || 0
+      };
+    }));
+
+    setOrganizations(orgsWithSeats);
+  };
+
+  const checkSeatAvailability = async (orgId: string): Promise<boolean> => {
+    const { data: seatData } = await supabase
+      .rpc('get_organization_seat_status', { org_id: orgId });
+    
+    const seatStatus = Array.isArray(seatData) ? seatData[0] : seatData;
+    
+    if (!seatStatus || seatStatus.available === 0) {
+      toast({
+        title: "No Seats Available",
+        description: "This organization has no available training seats. Purchase more seats before inviting employees.",
+        variant: "destructive",
+      });
+      return false;
+    }
+    
+    if (seatStatus.available < 3) {
+      toast({
+        title: "Low Seat Inventory",
+        description: `Only ${seatStatus.available} seats remaining. Consider purchasing more.`,
+      });
+    }
+    
+    return true;
   };
 
   const sendSingleInvitation = async () => {
@@ -121,6 +160,12 @@ export const StaffInvitationSystem = () => {
         description: "Please fill in all required fields",
         variant: "destructive"
       });
+      return;
+    }
+
+    // Check seat availability first
+    const hasSeats = await checkSeatAvailability(selectedOrganization);
+    if (!hasSeats) {
       return;
     }
 
@@ -168,6 +213,27 @@ export const StaffInvitationSystem = () => {
         title: "Error",
         description: "Please enter email addresses and select an organization",
         variant: "destructive"
+      });
+      return;
+    }
+
+    // Check seat availability first
+    const hasSeats = await checkSeatAvailability(selectedOrganization);
+    if (!hasSeats) {
+      return;
+    }
+
+    // Check if enough seats for bulk operation
+    const { data: seatData } = await supabase
+      .rpc('get_organization_seat_status', { org_id: selectedOrganization });
+
+    const seatStatus = Array.isArray(seatData) ? seatData[0] : seatData;
+
+    if (seatStatus && emails.length > seatStatus.available) {
+      toast({
+        title: "Insufficient Seats",
+        description: `You're inviting ${emails.length} employees but only have ${seatStatus.available} seats available.`,
+        variant: "destructive",
       });
       return;
     }
@@ -332,9 +398,14 @@ export const StaffInvitationSystem = () => {
                   </SelectTrigger>
                   <SelectContent>
                     {organizations.map(org => (
-                      <SelectItem key={org.id} value={org.id}>
-                        {org.name} ({org.course_credits} credits)
-                      </SelectItem>
+                <SelectItem 
+                  key={org.id} 
+                  value={org.id}
+                  disabled={org.available_seats === 0}
+                >
+                  {org.name} - {org.available_seats} seats available
+                  {org.available_seats === 0 && " (No seats - purchase more)"}
+                </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>

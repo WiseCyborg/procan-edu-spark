@@ -3,7 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
-import { ShoppingCart, Users, CheckCircle, Clock } from "lucide-react";
+import { ShoppingCart, Users, CheckCircle, Clock, AlertTriangle } from "lucide-react";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/components/ui/use-toast";
 
@@ -157,12 +158,44 @@ export function SeatManagementWidget({ organizationId }: SeatManagementWidgetPro
               </div>
             </div>
 
-            {(seatStatus?.available_seats || 0) < 5 && seatStatus && seatStatus.total_purchased > 0 && (
-              <div className="bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
-                <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                  ⚠️ Running low on seats! Consider purchasing more.
-                </p>
-              </div>
+            {seatStatus && (
+              <>
+                {seatStatus.available_seats === 0 ? (
+                  <Alert variant="destructive" className="mb-4">
+                    <AlertTriangle className="h-5 w-5" />
+                    <AlertTitle className="font-bold">🚫 No Seats Available</AlertTitle>
+                    <AlertDescription className="space-y-2">
+                      <p>You cannot invite or assign employees until you purchase more training seats.</p>
+                      <Button 
+                        onClick={() => navigate("/purchase-seats")} 
+                        variant="destructive"
+                        size="sm"
+                        className="mt-2"
+                      >
+                        <ShoppingCart className="h-4 w-4 mr-2" />
+                        Purchase Seats Now
+                      </Button>
+                    </AlertDescription>
+                  </Alert>
+                ) : seatStatus.available_seats < 5 ? (
+                  <Alert variant="default" className="mb-4 border-yellow-500 bg-yellow-50 dark:bg-yellow-950">
+                    <AlertTriangle className="h-5 w-5 text-yellow-600" />
+                    <AlertTitle className="font-bold text-yellow-800 dark:text-yellow-200">⚠️ Low Seat Inventory</AlertTitle>
+                    <AlertDescription className="space-y-2 text-yellow-800 dark:text-yellow-200">
+                      <p>Only {seatStatus.available_seats} seats remaining. Purchase more to avoid disruption.</p>
+                      <Button 
+                        onClick={() => navigate("/purchase-seats")} 
+                        variant="outline"
+                        size="sm"
+                        className="mt-2 border-yellow-600 text-yellow-800 hover:bg-yellow-100 dark:text-yellow-200 dark:hover:bg-yellow-900"
+                      >
+                        <ShoppingCart className="h-4 w-4 mr-2" />
+                        Purchase More Seats
+                      </Button>
+                    </AlertDescription>
+                  </Alert>
+                ) : null}
+              </>
             )}
           </>
         )}

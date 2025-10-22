@@ -36,10 +36,10 @@ export const useOrganizationAccess = (userId: string | undefined): OrganizationA
           return;
         }
 
-        // Check if organization has paid status and is approved
+        // Check if organization exists and is approved
         const { data: org, error: orgError } = await supabase
           .from('organizations')
-          .select('name, payment_status, admin_approved, course_credits')
+          .select('name, payment_status, admin_approved')
           .eq('id', profile.organization_id)
           .single();
 
@@ -50,14 +50,31 @@ export const useOrganizationAccess = (userId: string | undefined): OrganizationA
           return;
         }
 
+        // Check if THIS USER has an allocated or used seat
+        const { data: userSeat, error: seatError } = await supabase
+          .from('rvt_seats')
+          .select('id, status')
+          .eq('assigned_user_id', userId)
+          .eq('organization_id', profile.organization_id)
+          .in('status', ['assigned', 'used'])
+          .limit(1)
+          .maybeSingle();
+
+        if (seatError) {
+          console.error('Error checking user seat:', seatError);
+          setHasAccess(false);
+          setIsLoading(false);
+          return;
+        }
+
         const hasValidAccess = 
           org?.payment_status === 'paid' && 
           org?.admin_approved === true &&
-          (org?.course_credits ?? 0) > 0;
+          !!userSeat; // User MUST have a seat
 
         setHasAccess(hasValidAccess);
         setOrganizationName(org?.name ?? null);
-        setCreditsRemaining(org?.course_credits ?? 0);
+        setCreditsRemaining(userSeat ? 1 : 0); // Legacy field - now just indicates seat presence
       } catch (error) {
         console.error('Error in checkAccess:', error);
         setHasAccess(false);

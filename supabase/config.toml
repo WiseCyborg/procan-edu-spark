@@ -86,3 +86,6 @@ verify_jwt = false
 
 [functions.trigger-scrapers]
 verify_jwt = false
+
+[functions.register-with-seat-allocation]
+verify_jwt = false

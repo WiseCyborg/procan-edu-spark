@@ -224,186 +224,53 @@ const StudentAuthForm = () => {
         organizationName = invitationData.organizationName;
       }
 
-      // Create the user account
-      const { data: authData, error } = await supabase.auth.signUp({
-        email: regEmail,
-        password: regPassword,
-        options: {
-          emailRedirectTo: `${window.location.origin}/welcome`,
-          data: {
-            first_name: firstName,
-            last_name: lastName,
-            phone: phone,
-            join_code: joinCode,
-            organization_id: organizationId
-          }
+      // Call atomic registration edge function
+      const { data, error } = await supabase.functions.invoke('register-with-seat-allocation', {
+        body: {
+          email: regEmail,
+          password: regPassword,
+          firstName: firstName,
+          lastName: lastName,
+          phone: phone,
+          organizationId: organizationId,
+          organizationName: organizationName,
+          joinCode: !invitationData ? joinCode : undefined,
+          invitationToken: invitationData ? invitationToken : undefined
         }
       });
 
-      // If user creation successful, assign student role and update profile
-      if (!error && authData.user) {
-        try {
-          // Insert user role
-          const { error: roleError } = await supabase
-            .from('user_roles')
-            .insert({
-              user_id: authData.user.id,
-              role: 'student'
-            });
-
-          if (roleError) {
-            console.error('Error assigning user role:', roleError);
-          }
-
-          // Update profile with organization link
-          const { error: profileError } = await supabase
-            .from('profiles')
-            .update({ 
-              organization_id: organizationId,
-              phone: phone
-            })
-            .eq('user_id', authData.user.id);
-
-          if (profileError) {
-            console.error('Error updating profile:', profileError);
-          }
-
-          // Increment join code usage counter
-          if (!invitationData && joinCode) {
-            // First get current usage
-            const { data: currentJoinCode } = await supabase
-              .from('rvt_join_codes')
-              .select('current_uses')
-              .eq('code', joinCode)
-              .single();
-
-            if (currentJoinCode) {
-              await supabase
-                .from('rvt_join_codes')
-                .update({ current_uses: currentJoinCode.current_uses + 1 })
-                .eq('code', joinCode);
-            }
-          }
-
-          // Get default course (RVT-MD)
-          const { data: courseData } = await supabase
-            .from('courses')
-            .select('id')
-            .eq('is_active', true)
-            .limit(1)
-            .single();
-
-          // Call allocate_seat_to_user RPC to assign a seat
-          if (courseData) {
-            try {
-              const { data: seatId, error: seatError } = await supabase
-                .rpc('allocate_seat_to_user', {
-                  org_id: organizationId,
-                  user_id: authData.user.id,
-                  course_id: courseData.id
-                });
-
-              if (seatError) {
-                console.error('Error allocating seat:', seatError);
-                toast({
-                  title: "Seat Assignment Warning",
-                  description: "Account created but seat assignment failed. Contact your manager.",
-                  variant: "destructive",
-                });
-              } else {
-                console.log('Seat allocated:', seatId);
-              }
-            } catch (seatAllocationError) {
-              console.error('Error in seat allocation:', seatAllocationError);
-            }
-
-            // Create enrollment with 30-day deadline
-            const deadlineDate = new Date();
-            deadlineDate.setDate(deadlineDate.getDate() + 30);
-            
-            const { error: enrollmentError } = await supabase
-              .from('rvt_enrollments' as any)
-              .insert({
-                user_id: authData.user.id,
-                organization_id: organizationId,
-                course_id: courseData.id,
-                deadline_at: deadlineDate.toISOString(),
-              });
-
-            if (enrollmentError) {
-              console.error('Error creating enrollment:', enrollmentError);
-            }
-
-            // Log verification email sent activity
-            await supabase.from('user_activity_log').insert({
-              user_id: authData.user.id,
-              activity_type: 'verification_sent',
-              email: regEmail,
-              metadata: { 
-                method: 'email', 
-                sent_at: new Date().toISOString(),
-                first_name: firstName,
-                last_name: lastName
-              }
-            });
-          }
-
-          // If from invitation, mark it as accepted
-          if (invitationToken && invitationData) {
-            const { error: acceptError } = await supabase.functions.invoke('accept-invitation', {
-              body: { 
-                token: invitationToken, 
-                action: 'accept',
-                userId: authData.user.id
-              }
-            });
-
-            if (acceptError) {
-              console.error('Error accepting invitation:', acceptError);
-            }
-          }
-
-          // Send welcome email
-          try {
-            await supabase.functions.invoke('send-welcome-email', {
-              body: {
-                email: regEmail,
-                firstName: firstName,
-                lastName: lastName,
-              }
-            });
-            console.log('Welcome email sent to:', regEmail);
-          } catch (emailError) {
-            console.error('Welcome email failed:', emailError);
-            // Don't block registration if email fails
-          }
-        } catch (assignmentError) {
-          console.error('Error in post-registration setup:', assignmentError);
-        }
+      if (error) {
+        throw error;
       }
 
-
-      if (error) {
-        if (error.message.includes('already registered')) {
+      if (data.error) {
+        if (data.code === 'NO_SEATS_AVAILABLE') {
           toast({
-            title: "Account exists",
-            description: "This email is already registered. Please sign in instead.",
+            title: "No Training Seats Available",
+            description: data.error,
             variant: "destructive",
           });
         } else {
-          throw error;
+          toast({
+            title: "Registration Error",
+            description: data.error,
+            variant: "destructive",
+          });
         }
-      } else {
-        toast({
-          title: invitationData ? `Welcome to ${invitationData.organizationName}!` : `Welcome to ${organizationName}!`,
-          description: "Check your email for a confirmation link, then complete your profile.",
-        });
-        
-        // Redirect to profile onboarding after successful registration
-        setTimeout(() => {
-          window.location.href = '/onboarding/profile';
-        }, 2000);
+        setLoading(false);
+        return;
       }
+
+      // Success!
+      toast({
+        title: invitationData ? `Welcome to ${invitationData.organizationName}!` : `Welcome to ${organizationName}!`,
+        description: "Your account has been created and training seat assigned. Check your email for confirmation.",
+      });
+      
+      // Redirect to profile onboarding
+      setTimeout(() => {
+        window.location.href = '/onboarding/profile';
+      }, 2000);
     } catch (error) {
       toast({
         title: "Error",
