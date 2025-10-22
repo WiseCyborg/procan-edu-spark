@@ -21,6 +21,10 @@ interface WelcomeEmailRequest {
   email: string;
   firstName: string;
   lastName?: string;
+  tempPassword?: string;
+  organizationName?: string;
+  accessKey?: string;
+  loginUrl?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -32,7 +36,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { email, firstName, lastName }: WelcomeEmailRequest = await req.json();
+    const { email, firstName, lastName, tempPassword, organizationName, accessKey, loginUrl }: WelcomeEmailRequest = await req.json();
     console.log(`Processing welcome email for: ${email}`);
     
     // Check if welcome email was already sent in the last 24 hours
@@ -67,6 +71,12 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Sending welcome email to:", email);
 
+    // Prepare email subject and HTML based on whether this is auto-enrollment or regular welcome
+    const isAutoEnrollment = !!tempPassword;
+    const subject = isAutoEnrollment 
+      ? "Welcome to ProCann Edu - Your Account is Ready!" 
+      : "Welcome to ProCann Edu - Your Cannabis Training Journey Begins!";
+
     // Log email attempt
     const { data: logData, error: logError } = await supabase
       .from('email_logs')
@@ -74,21 +84,90 @@ const handler = async (req: Request): Promise<Response> => {
         recipient_email: email,
         email_type: 'welcome',
         status: 'sending',
-        subject: 'Welcome to ProCann Edu - Your Cannabis Training Journey Begins!'
+        subject: subject
       })
       .select('id')
       .single()
 
-    // Load and render the welcome template
-    const html = await loadEmailTemplate('welcome', {
-      FirstName: firstName,
-      DashboardURL: 'https://www.procannedu.com/dashboard',
-    });
+    let html: string;
+    
+    if (isAutoEnrollment) {
+      // Custom HTML for auto-enrolled dispensary managers
+      html = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome to ProCann Edu</title>
+  <style>
+    body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f5f5f5; }
+    .container { max-width: 600px; margin: 0 auto; background: #ffffff; }
+    .header { background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); padding: 40px 30px; text-align: center; }
+    .header h1 { color: white; margin: 0; font-size: 28px; }
+    .content { padding: 40px 30px; color: #4a4a4a; }
+    .credentials { background: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #16a34a; }
+    .credentials h3 { margin-top: 0; color: #16a34a; }
+    .button { display: inline-block; background: #16a34a; color: white !important; padding: 14px 32px; text-decoration: none; border-radius: 6px; margin: 20px 0; }
+    .footer { background: #f9fafb; padding: 20px; text-align: center; color: #6b7280; font-size: 12px; }
+    .important { background: #fef3c7; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #f59e0b; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎉 Welcome to ProCann Edu!</h1>
+    </div>
+    <div class="content">
+      <h2>Hello ${firstName}!</h2>
+      <p>Great news! Your organization <strong>${organizationName || 'your organization'}</strong> has been approved for the Responsible Vendor Training (RVT) program.</p>
+      <p>We've automatically created your account so you can get started right away!</p>
+      
+      <div class="credentials">
+        <h3>🔐 Your Login Credentials</h3>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Temporary Password:</strong> <code style="background: #e5e7eb; padding: 4px 8px; border-radius: 4px;">${tempPassword}</code></p>
+        ${accessKey ? `<p><strong>Organization Access Key:</strong> <code style="background: #e5e7eb; padding: 4px 8px; border-radius: 4px;">${accessKey}</code></p>` : ''}
+      </div>
+
+      <div class="important">
+        <strong>⚠️ Important:</strong> Please change your password immediately after your first login for security purposes.
+      </div>
+
+      <a href="${loginUrl || 'https://www.procannedu.com/auth'}" class="button">Login to Your Account</a>
+
+      <h3>What's Next?</h3>
+      <ul>
+        <li>Complete your profile setup</li>
+        <li>Review your organization's training dashboard</li>
+        <li>Invite employees to join your training program</li>
+        <li>Track team progress and certifications</li>
+      </ul>
+
+      <p>If you have any questions or need assistance, our support team is here to help!</p>
+      
+      <p>Best regards,<br>The ProCann Edu Team</p>
+    </div>
+    <div class="footer">
+      <p>© 2025 ProCann Edu. All rights reserved.</p>
+      <p>This email was sent to ${email}</p>
+    </div>
+  </div>
+</body>
+</html>
+      `;
+    } else {
+      // Load standard welcome template
+      html = await loadEmailTemplate('welcome', {
+        FirstName: firstName,
+        DashboardURL: 'https://www.procannedu.com/dashboard',
+      });
+    }
 
     const emailResponse = await resend.emails.send({
       from: "ProCann Edu <noreply@procannedu.com>",
       to: [email],
-      subject: "Welcome to ProCann Edu! 🎓",
+      subject: subject,
       html,
     });
 

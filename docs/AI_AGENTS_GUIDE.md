@@ -35,7 +35,27 @@ The ProCann Education platform uses autonomous AI agents to monitor regulations,
 **Schedule:** Hourly  
 **Purpose:** Monitors email deliverability and provider health
 
-### 7. Security & Fraud Watchdog
+### 7. Auto-Enrollment Agent
+**Edge Functions:** `enroll-dispensary-contact`  
+**Trigger:** Application approval  
+**Purpose:** Automatically creates user accounts for approved dispensary managers
+**Features:**
+- Creates auth account with temporary password
+- Assigns dispensary_manager role
+- Links user to organization
+- Sends welcome email with login credentials
+- Logs enrollment in ai_agent_runs table
+
+### 8. Application Intake Agent
+**Database Trigger:** `on_dispensary_application_submitted`  
+**Trigger:** New application submission  
+**Purpose:** Notifies admins and sends confirmation to applicants
+**Features:**
+- Instant admin notifications via notification_queue
+- Applicant confirmation emails
+- Tracked in email_logs
+
+### 9. Security & Fraud Watchdog
 **Edge Functions:** (Future implementation)  
 **Purpose:** Detects suspicious activity and fraud patterns
 
