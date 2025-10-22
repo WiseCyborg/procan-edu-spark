@@ -38,6 +38,7 @@ import DraggableVoiceAssistant from "./components/chat/DraggableVoiceAssistant";
 import PurchaseSeats from "./pages/PurchaseSeats";
 import SecureCertificateVerification from "./pages/SecureCertificateVerification";
 import AdvancedAnalytics from "./pages/AdvancedAnalytics";
+import UnifiedOperationsDashboard from "./pages/UnifiedOperationsDashboard";
 import ContentReviewDashboard from "./pages/ContentReviewDashboard";
 import TrainingHandbook from "./pages/TrainingHandbook";
 import DispensaryApplication from "./pages/DispensaryApplication";
@@ -276,6 +277,12 @@ const App = () => (
                    <Route path="/student-dashboard" element={
                      <ProtectedRoute>
                        <StudentDashboard />
+                     </ProtectedRoute>
+                   } />
+                   
+                   <Route path="/unified-operations" element={
+                     <ProtectedRoute>
+                       <UnifiedOperationsDashboard />
                      </ProtectedRoute>
                    } />
                   
