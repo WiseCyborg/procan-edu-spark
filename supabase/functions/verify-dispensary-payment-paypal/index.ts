@@ -1,4 +1,3 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
@@ -10,7 +9,7 @@ const PAYPAL_API_BASE = Deno.env.get("PAYPAL_ENVIRONMENT") === "production"
   ? "https://api-m.paypal.com"
   : "https://api-m.sandbox.paypal.com";
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -183,7 +182,31 @@ serve(async (req) => {
         event_data: { purchase_id: purchaseId, quantity }
       });
 
-      // 3. Update organization's course_credits (best effort)
+      // 3. Generate and save join code for employee enrollment
+      const joinCode = `JOIN-${organizationId.substring(0, 8).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`;
+      
+      const { error: joinCodeError } = await supabaseService
+        .from('rvt_join_codes')
+        .insert({
+          organization_id: organizationId,
+          code: joinCode,
+          is_active: true,
+          max_uses: quantity * 2, // Allow 2x uses for flexibility
+        });
+
+      if (joinCodeError) {
+        console.error('Error creating join code:', joinCodeError);
+        // Non-critical: continue even if join code creation fails
+      } else {
+        console.log('Join code created:', joinCode);
+        await supabaseService.from('payment_audit_log').insert({
+          order_id: orderId,
+          event_type: 'JOIN_CODE_CREATED',
+          event_data: { purchase_id: purchaseId, join_code: joinCode }
+        });
+      }
+
+      // 4. Update organization's course_credits (best effort)
       const { data: org } = await supabaseService
         .from('organizations')
         .select('course_credits')
@@ -199,7 +222,7 @@ serve(async (req) => {
           .eq('id', organizationId);
       }
 
-      // 4. Send confirmation email
+      // 5. Send confirmation email
       const { data: organization } = await supabaseService
         .from('organizations')
         .select('*')

@@ -32,7 +32,7 @@ const StudentAuthForm = () => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [phone, setPhone] = useState('');
-  const [dispensaryKey, setDispensaryKey] = useState('');
+  const [joinCode, setJoinCode] = useState('');
   const [regEmail, setRegEmail] = useState('');
   const [regPassword, setRegPassword] = useState('');
 
@@ -57,7 +57,7 @@ const StudentAuthForm = () => {
       if (data.success) {
         setInvitationData(data.invitation);
         setRegEmail(data.invitation.email);
-        setDispensaryKey(data.invitation.accessKey || '');
+        setJoinCode(data.invitation.accessKey || '');
         toast({
           title: "Invitation loaded!",
           description: `Welcome! You've been invited to join ${data.invitation.organizationName}`,
@@ -81,35 +81,84 @@ const StudentAuthForm = () => {
     }
   };
 
-  const validateDispensaryKey = async (key: string): Promise<boolean> => {
-    if (!key) return false;
+  const validateJoinCode = async (code: string): Promise<{ valid: boolean; organizationId?: string; organizationName?: string }> => {
+    if (!code) return { valid: false };
     
     try {
-      const { data, error } = await supabase
+      // Check if join code exists and is valid
+      const { data: joinCodeData, error: joinCodeError } = await supabase
+        .from('rvt_join_codes')
+        .select('id, organization_id, code, is_active, max_uses, current_uses')
+        .eq('code', code)
+        .eq('is_active', true)
+        .maybeSingle();
+
+      if (joinCodeError || !joinCodeData) {
+        toast({
+          title: "Invalid Join Code",
+          description: "The join code you entered is not valid. Please check and try again.",
+          variant: "destructive",
+        });
+        return { valid: false };
+      }
+
+      // Check if max uses reached
+      if (joinCodeData.max_uses && joinCodeData.current_uses >= joinCodeData.max_uses) {
+        toast({
+          title: "Join Code Limit Reached",
+          description: "This join code has reached its maximum number of uses. Please contact your manager.",
+          variant: "destructive",
+        });
+        return { valid: false };
+      }
+
+      // Get organization details
+      const { data: orgData, error: orgError } = await supabase
         .from('organizations')
-        .select('id, name, course_credits, admin_approved')
-        .eq('unique_access_key', key)
-        .eq('payment_status', 'paid')
+        .select('id, name, admin_approved')
+        .eq('id', joinCodeData.organization_id)
         .eq('admin_approved', true)
         .maybeSingle();
 
-      if (error || !data) {
-        return false;
-      }
-
-      if (data.course_credits <= 0) {
+      if (orgError || !orgData) {
         toast({
-          title: "No Credits Available",
-          description: "Your dispensary has no remaining training credits. Please contact your dispensary manager.",
+          title: "Organization Not Found",
+          description: "The organization associated with this code could not be found.",
           variant: "destructive",
         });
-        return false;
+        return { valid: false };
       }
 
-      return true;
+      // Check seat availability
+      const { data: availableSeats } = await supabase
+        .from('rvt_seats')
+        .select('id')
+        .eq('organization_id', orgData.id)
+        .eq('status', 'available')
+        .limit(1);
+
+      if (!availableSeats || availableSeats.length === 0) {
+        toast({
+          title: "No Seats Available",
+          description: "Your organization has no remaining training seats. Please contact your manager.",
+          variant: "destructive",
+        });
+        return { valid: false };
+      }
+
+      return { 
+        valid: true, 
+        organizationId: orgData.id,
+        organizationName: orgData.name
+      };
     } catch (error) {
-      console.error('Key validation error:', error);
-      return false;
+      console.error('Join code validation error:', error);
+      toast({
+        title: "Validation Error",
+        description: "An error occurred while validating your join code.",
+        variant: "destructive",
+      });
+      return { valid: false };
     }
   };
 
@@ -157,31 +206,21 @@ const StudentAuthForm = () => {
     setLoading(true);
 
     try {
-      // First validate the dispensary key (unless coming from invitation)
+      // First validate the join code (unless coming from invitation)
+      let organizationId: string;
+      let organizationName: string;
+
       if (!invitationData) {
-        const isValidKey = await validateDispensaryKey(dispensaryKey);
-        if (!isValidKey) {
-          toast({
-            title: "Invalid Access Key",
-            description: "Please check your dispensary access key and try again.",
-            variant: "destructive",
-          });
+        const validation = await validateJoinCode(joinCode);
+        if (!validation.valid || !validation.organizationId) {
           setLoading(false);
           return;
         }
-      }
-
-      // Get organization details for credit deduction
-      const { data: orgData, error: orgError } = await supabase
-        .from('organizations')
-        .select('id, course_credits')
-        .eq('unique_access_key', dispensaryKey)
-        .eq('payment_status', 'paid')
-        .eq('admin_approved', true)
-        .single();
-
-      if (orgError || !orgData) {
-        throw new Error('Invalid dispensary access key');
+        organizationId = validation.organizationId;
+        organizationName = validation.organizationName || '';
+      } else {
+        organizationId = invitationData.organizationId;
+        organizationName = invitationData.organizationName;
       }
 
       // Create the user account
@@ -194,8 +233,8 @@ const StudentAuthForm = () => {
             first_name: firstName,
             last_name: lastName,
             phone: phone,
-            dispensary_access_key: dispensaryKey,
-            organization_id: orgData.id
+            join_code: joinCode,
+            organization_id: organizationId
           }
         }
       });
@@ -219,14 +258,30 @@ const StudentAuthForm = () => {
           const { error: profileError } = await supabase
             .from('profiles')
             .update({ 
-              organization_id: orgData.id,
-              dispensary_access_key: dispensaryKey,
+              organization_id: organizationId,
               phone: phone
             })
             .eq('user_id', authData.user.id);
 
           if (profileError) {
             console.error('Error updating profile:', profileError);
+          }
+
+          // Increment join code usage counter
+          if (!invitationData && joinCode) {
+            // First get current usage
+            const { data: currentJoinCode } = await supabase
+              .from('rvt_join_codes')
+              .select('current_uses')
+              .eq('code', joinCode)
+              .single();
+
+            if (currentJoinCode) {
+              await supabase
+                .from('rvt_join_codes')
+                .update({ current_uses: currentJoinCode.current_uses + 1 })
+                .eq('code', joinCode);
+            }
           }
 
           // Get default course (RVT-MD)
@@ -242,7 +297,7 @@ const StudentAuthForm = () => {
             try {
               const { data: seatId, error: seatError } = await supabase
                 .rpc('allocate_seat_to_user', {
-                  org_id: orgData.id,
+                  org_id: organizationId,
                   user_id: authData.user.id,
                   course_id: courseData.id
                 });
@@ -269,7 +324,7 @@ const StudentAuthForm = () => {
               .from('rvt_enrollments' as any)
               .insert({
                 user_id: authData.user.id,
-                organization_id: orgData.id,
+                organization_id: organizationId,
                 course_id: courseData.id,
                 deadline_at: deadlineDate.toISOString(),
               });
@@ -311,23 +366,6 @@ const StudentAuthForm = () => {
         }
       }
 
-      // If user creation successful, deduct a credit
-      if (!error && authData.user) {
-        try {
-          const { error: creditError } = await supabase
-            .from('organizations')
-            .update({ 
-              course_credits: Math.max(0, orgData.course_credits - 1) 
-            })
-            .eq('id', orgData.id);
-
-          if (creditError) {
-            console.error('Error deducting credit:', creditError);
-          }
-        } catch (creditError) {
-          console.error('Error deducting credit:', creditError);
-        }
-      }
 
       if (error) {
         if (error.message.includes('already registered')) {
@@ -341,7 +379,7 @@ const StudentAuthForm = () => {
         }
       } else {
         toast({
-          title: invitationData ? `Welcome to ${invitationData.organizationName}!` : "Registration successful!",
+          title: invitationData ? `Welcome to ${invitationData.organizationName}!` : `Welcome to ${organizationName}!`,
           description: "Check your email for a confirmation link to complete your registration.",
         });
         
@@ -349,7 +387,7 @@ const StudentAuthForm = () => {
         setFirstName('');
         setLastName('');
         setPhone('');
-        setDispensaryKey('');
+        setJoinCode('');
         setRegEmail('');
         setRegPassword('');
         setIsRegistering(false);
@@ -471,7 +509,7 @@ const StudentAuthForm = () => {
                 <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-md">
                   <h3 className="font-semibold text-amber-800 mb-2">Employee Registration</h3>
                   <p className="text-sm text-amber-700">
-                    You need a valid dispensary access key from your employer to register.
+                    You need a valid join code from your employer to register. This code is provided after your organization purchases training seats.
                   </p>
                 </div>
               )}
@@ -521,13 +559,13 @@ const StudentAuthForm = () => {
                 {!invitationData && (
                   <div>
                     <Input
-                      placeholder="Dispensary Access Key *"
-                      value={dispensaryKey}
-                      onChange={(e) => setDispensaryKey(e.target.value)}
+                      placeholder="Join Code *"
+                      value={joinCode}
+                      onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
                       required
                     />
                     <p className="text-xs text-gray-500 mt-1">
-                      💡 <strong>Tip:</strong> Ask your manager to send you an email invitation for faster setup!
+                      💡 <strong>Example:</strong> JOIN-12345678-ABC123
                     </p>
                   </div>
                 )}
