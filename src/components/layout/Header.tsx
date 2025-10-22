@@ -11,7 +11,11 @@ import { LogOut, User, MessageSquare, BookOpen, Award, BarChart3 } from 'lucide-
 import { CommunicationHub } from '@/components/communication/CommunicationHub';
 import { IntelligentNavigation } from '@/components/navigation/IntelligentNavigation';
 
-const Header = () => {
+interface HeaderProps {
+  role?: string;
+}
+
+const Header = ({ role: headerRole }: HeaderProps = {}) => {
   const { user, signOut } = useAuth();
   const { isDispensaryManager, isAdmin, roles } = useUserRole();
   const navigate = useNavigate();
@@ -23,7 +27,7 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-white border-b shadow-sm">
+    <header className="bg-white border-b shadow-sm" role={headerRole}>
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <div className="flex items-center space-x-2">
           <Button 

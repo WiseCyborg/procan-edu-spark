@@ -14,6 +14,93 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_agent_runs: {
+        Row: {
+          actions_taken: Json | null
+          agent_name: string
+          agent_type: string
+          changes_detected: number | null
+          created_at: string
+          error_message: string | null
+          execution_duration_ms: number | null
+          execution_status: string
+          id: string
+          items_processed: number | null
+          metadata: Json | null
+        }
+        Insert: {
+          actions_taken?: Json | null
+          agent_name: string
+          agent_type: string
+          changes_detected?: number | null
+          created_at?: string
+          error_message?: string | null
+          execution_duration_ms?: number | null
+          execution_status: string
+          id?: string
+          items_processed?: number | null
+          metadata?: Json | null
+        }
+        Update: {
+          actions_taken?: Json | null
+          agent_name?: string
+          agent_type?: string
+          changes_detected?: number | null
+          created_at?: string
+          error_message?: string | null
+          execution_duration_ms?: number | null
+          execution_status?: string
+          id?: string
+          items_processed?: number | null
+          metadata?: Json | null
+        }
+        Relationships: []
+      }
+      ai_insights: {
+        Row: {
+          action_taken: boolean | null
+          action_taken_at: string | null
+          actionable: boolean | null
+          category: string
+          confidence_score: number | null
+          created_at: string
+          description: string
+          expires_at: string | null
+          id: string
+          insight_type: string
+          metadata: Json | null
+          title: string
+        }
+        Insert: {
+          action_taken?: boolean | null
+          action_taken_at?: string | null
+          actionable?: boolean | null
+          category: string
+          confidence_score?: number | null
+          created_at?: string
+          description: string
+          expires_at?: string | null
+          id?: string
+          insight_type: string
+          metadata?: Json | null
+          title: string
+        }
+        Update: {
+          action_taken?: boolean | null
+          action_taken_at?: string | null
+          actionable?: boolean | null
+          category?: string
+          confidence_score?: number | null
+          created_at?: string
+          description?: string
+          expires_at?: string | null
+          id?: string
+          insight_type?: string
+          metadata?: Json | null
+          title?: string
+        }
+        Relationships: []
+      }
       certificates: {
         Row: {
           certificate_number: string
@@ -123,6 +210,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      compliance_alerts: {
+        Row: {
+          affected_users_count: number | null
+          alert_type: string
+          created_at: string
+          description: string
+          id: string
+          metadata: Json | null
+          resolved: boolean | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+          title: string
+        }
+        Insert: {
+          affected_users_count?: number | null
+          alert_type: string
+          created_at?: string
+          description: string
+          id?: string
+          metadata?: Json | null
+          resolved?: boolean | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity: string
+          title: string
+        }
+        Update: {
+          affected_users_count?: number | null
+          alert_type?: string
+          created_at?: string
+          description?: string
+          id?: string
+          metadata?: Json | null
+          resolved?: boolean | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          title?: string
+        }
+        Relationships: []
       }
       compliance_metrics: {
         Row: {
@@ -786,6 +915,39 @@ export type Database = {
         }
         Relationships: []
       }
+      federal_regulation_tracking: {
+        Row: {
+          checked_at: string
+          content_hash: string
+          content_text: string
+          created_at: string
+          id: string
+          source_name: string
+          source_type: string
+          source_url: string
+        }
+        Insert: {
+          checked_at?: string
+          content_hash: string
+          content_text: string
+          created_at?: string
+          id?: string
+          source_name: string
+          source_type: string
+          source_url: string
+        }
+        Update: {
+          checked_at?: string
+          content_hash?: string
+          content_text?: string
+          created_at?: string
+          id?: string
+          source_name?: string
+          source_type?: string
+          source_url?: string
+        }
+        Relationships: []
+      }
       image_assets: {
         Row: {
           alt_text: string
@@ -1226,6 +1388,45 @@ export type Database = {
         }
         Relationships: []
       }
+      owner_digest_preferences: {
+        Row: {
+          created_at: string
+          delivery_days: string[] | null
+          delivery_time: string
+          email_address: string
+          enabled: boolean | null
+          id: string
+          include_sections: string[] | null
+          sms_number: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          delivery_days?: string[] | null
+          delivery_time?: string
+          email_address: string
+          enabled?: boolean | null
+          id?: string
+          include_sections?: string[] | null
+          sms_number?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          delivery_days?: string[] | null
+          delivery_time?: string
+          email_address?: string
+          enabled?: boolean | null
+          id?: string
+          include_sections?: string[] | null
+          sms_number?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       payment_audit_log: {
         Row: {
           created_at: string
@@ -1334,6 +1535,45 @@ export type Database = {
           metric_value?: number
           session_id?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      platform_health_scores: {
+        Row: {
+          calculation_metadata: Json | null
+          compliance_score: number | null
+          created_at: string
+          email_health_score: number | null
+          engagement_score: number | null
+          id: string
+          overall_score: number
+          revenue_health_score: number | null
+          score_date: string
+          security_score: number | null
+        }
+        Insert: {
+          calculation_metadata?: Json | null
+          compliance_score?: number | null
+          created_at?: string
+          email_health_score?: number | null
+          engagement_score?: number | null
+          id?: string
+          overall_score: number
+          revenue_health_score?: number | null
+          score_date: string
+          security_score?: number | null
+        }
+        Update: {
+          calculation_metadata?: Json | null
+          compliance_score?: number | null
+          created_at?: string
+          email_health_score?: number | null
+          engagement_score?: number | null
+          id?: string
+          overall_score?: number
+          revenue_health_score?: number | null
+          score_date?: string
+          security_score?: number | null
         }
         Relationships: []
       }

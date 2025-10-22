@@ -6,6 +6,9 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { UnifiedVoiceProvider } from "@/providers/UnifiedVoiceProvider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { SkipNavigation } from "@/components/layout/SkipNavigation";
+import { Footer } from "@/components/layout/Footer";
+import { LiveRegion } from "@/components/accessibility/LiveRegion";
 import Auth from "./pages/Auth";
 import Index from "./pages/Index";
 import Welcome from "./pages/Welcome";
@@ -48,6 +51,7 @@ import ComplianceContentReviewPage from "./pages/ComplianceContentReviewPage";
 import EmployersPage from "./pages/EmployersPage";
 import ImpactDashboardPage from "./pages/ImpactDashboardPage";
 import AccessibilityPage from "./pages/AccessibilityPage";
+import OwnersIntelligence from "./pages/OwnersIntelligence";
 
 import { ProtectedCourseAccess } from "./components/ProtectedCourseAccess";
 
@@ -97,13 +101,15 @@ const App = () => (
           <TooltipProvider>
           <Toaster />
           <Sonner />
+          <LiveRegion />
           <BrowserRouter>
             <div className="min-h-screen bg-background">
+              <SkipNavigation />
               <Header />
               <div className="container mx-auto px-4 py-2">
                 <COMARBanner />
               </div>
-              <main>
+              <main id="main-content" role="main">
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/welcome" element={<Welcome />} />
@@ -256,6 +262,7 @@ const App = () => (
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
+              <Footer />
             </div>
             <DraggableVoiceAssistant />
           </BrowserRouter>
