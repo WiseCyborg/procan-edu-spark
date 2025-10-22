@@ -244,6 +244,50 @@ Deno.serve(async (req) => {
         });
       }
 
+      // 6. Update application status to 'completed' (GAP #7)
+      console.log('Updating application status to completed...');
+      const { data: application } = await supabaseService
+        .from('dispensary_applications')
+        .select('id, contact_email, organization_name')
+        .eq('organization_id', organizationId)
+        .single();
+
+      if (application) {
+        await supabaseService
+          .from('dispensary_applications')
+          .update({ 
+            application_status: 'completed',
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', application.id);
+        
+        console.log('✅ Application marked as completed:', application.id);
+        
+        await supabaseService.from('payment_audit_log').insert({
+          order_id: orderId,
+          event_type: 'APPLICATION_COMPLETED',
+          event_data: { application_id: application.id }
+        });
+      } else {
+        console.warn('No application found for organization:', organizationId);
+      }
+
+      // 7. Send "Team Ready" email with join code (GAP #8)
+      if (organization && joinCode) {
+        console.log('Sending team-ready email to:', organization.contact_email);
+        await supabaseService.functions.invoke('send-team-ready-email', {
+          body: {
+            recipientEmail: organization.contact_email,
+            managerName: organization.contact_person,
+            organizationName: organization.name,
+            seatsCount: quantity,
+            joinCode: joinCode
+          }
+        }).catch(err => {
+          console.error('Error sending team-ready email:', err);
+        });
+      }
+
       await supabaseService.from('payment_audit_log').insert({
         order_id: orderId,
         event_type: 'PAYMENT_COMPLETED',

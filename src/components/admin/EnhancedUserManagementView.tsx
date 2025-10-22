@@ -22,6 +22,8 @@ interface User {
   created_at: string;
   roles: string[];
   organization_name: string | null;
+  organization_payment_status: string | null;
+  organization_seats: number;
 }
 
 export const EnhancedUserManagementView = () => {
@@ -85,17 +87,29 @@ export const EnhancedUserManagementView = () => {
 
       if (rolesError) throw rolesError;
 
+      // Get organizations data for payment status and seats (GAP #9)
+      const { data: organizations, error: orgsError } = await supabase
+        .from('organizations')
+        .select('id, payment_status, course_credits');
+
+      if (orgsError) throw orgsError;
+
       // Combine the data
-      const combinedUsers = (userOverview || []).map((user: any) => ({
-        user_id: user.user_id,
-        first_name: user.first_name || '',
-        last_name: user.last_name || '',
-        email: user.email || '',
-        email_verified: !!user.email_confirmed_at,
-        created_at: user.created_at || new Date().toISOString(),
-        roles: roles?.filter(r => r.user_id === user.user_id).map(r => r.role) || [],
-        organization_name: user.organization_name,
-      }));
+      const combinedUsers = (userOverview || []).map((user: any) => {
+        const org = organizations?.find(o => o.id === user.organization_id);
+        return {
+          user_id: user.user_id,
+          first_name: user.first_name || '',
+          last_name: user.last_name || '',
+          email: user.email || '',
+          email_verified: !!user.email_confirmed_at,
+          created_at: user.created_at || new Date().toISOString(),
+          roles: roles?.filter(r => r.user_id === user.user_id).map(r => r.role) || [],
+          organization_name: user.organization_name,
+          organization_payment_status: org?.payment_status || null,
+          organization_seats: org?.course_credits || 0,
+        };
+      });
 
       setUsers(combinedUsers);
       
@@ -373,6 +387,8 @@ export const EnhancedUserManagementView = () => {
                   <TableHead>Status</TableHead>
                   <TableHead>Roles</TableHead>
                   <TableHead>Organization</TableHead>
+                  <TableHead>Org Payment</TableHead>
+                  <TableHead>Seats</TableHead>
                   <TableHead>Created</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -414,6 +430,26 @@ export const EnhancedUserManagementView = () => {
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {user.organization_name || '-'}
+                    </TableCell>
+                    <TableCell>
+                      {user.organization_payment_status ? (
+                        user.organization_payment_status === 'paid' ? (
+                          <Badge variant="default" className="gap-1">
+                            <CheckCircle className="h-3 w-3" />
+                            Paid
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary" className="gap-1">
+                            <Clock className="h-3 w-3" />
+                            Pending
+                          </Badge>
+                        )
+                      ) : (
+                        <span className="text-muted-foreground">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-sm font-medium">
+                      {user.organization_seats > 0 ? user.organization_seats : '-'}
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {format(new Date(user.created_at), 'MMM d, yyyy')}

@@ -552,6 +552,7 @@ export type Database = {
           license_issue_date: string | null
           license_number: string | null
           license_type: string | null
+          organization_id: string | null
           organization_name: string
           preferred_start_date: string | null
           requested_credits: number | null
@@ -577,6 +578,7 @@ export type Database = {
           license_issue_date?: string | null
           license_number?: string | null
           license_type?: string | null
+          organization_id?: string | null
           organization_name: string
           preferred_start_date?: string | null
           requested_credits?: number | null
@@ -602,6 +604,7 @@ export type Database = {
           license_issue_date?: string | null
           license_number?: string | null
           license_type?: string | null
+          organization_id?: string | null
           organization_name?: string
           preferred_start_date?: string | null
           requested_credits?: number | null
@@ -609,7 +612,15 @@ export type Database = {
           reviewed_by?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "dispensary_applications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       email_logs: {
         Row: {

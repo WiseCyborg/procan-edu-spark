@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Your Team Training Seats Are Ready!</title>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
+    .content { background: #fff; padding: 30px; border: 1px solid #e0e0e0; border-top: none; }
+    .join-code-box { background: #f5f5f5; border: 2px dashed #4CAF50; padding: 20px; text-align: center; margin: 20px 0; border-radius: 8px; }
+    .join-code { font-size: 24px; font-weight: bold; color: #2E7D32; letter-spacing: 2px; }
+    .cta-button { display: inline-block; background: #4CAF50; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 10px 0; }
+    .template-box { background: #e8f5e9; border-left: 4px solid #4CAF50; padding: 15px; margin: 20px 0; }
+    .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+    .step { margin: 10px 0; padding: 10px; background: #f9f9f9; border-left: 3px solid #4CAF50; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎉 Your Team Training Seats Are Ready!</h1>
+    </div>
+    <div class="content">
+      <p>Dear {{ .ManagerName }},</p>
+      
+      <p>Great news! Your payment has been processed and <strong>{{ .SeatsCount }} training seats</strong> are now available for your team at <strong>{{ .OrganizationName }}</strong>.</p>
+
+      <div class="join-code-box">
+        <p style="margin: 0 0 10px 0; font-weight: bold; color: #666;">Your Team Join Code:</p>
+        <div class="join-code">{{ .JoinCode }}</div>
+        <p style="margin: 10px 0 0 0; font-size: 14px; color: #666;">Share this code with your employees to get started</p>
+      </div>
+
+      <h3>📋 Next Steps to Enroll Your Team:</h3>
+      <div class="step">
+        <strong>Option 1 - Email Invitations (Recommended):</strong><br>
+        Log in to your dashboard and send personalized email invitations to each employee.
+      </div>
+      <div class="step">
+        <strong>Option 2 - Share Join Code:</strong><br>
+        Forward the template email below to your employees, or share the join code via text or in-person.
+      </div>
+
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="{{ .DashboardURL }}" class="cta-button">Go to Team Management Dashboard</a>
+      </div>
+
+      <h3>📧 Template Email for Your Employees:</h3>
+      <div class="template-box">
+        <p><em>Feel free to copy and forward this to your team:</em></p>
+        <hr style="border: none; border-top: 1px solid #ccc; margin: 10px 0;">
+        <p style="font-style: italic;">
+          Hi Team,<br><br>
+          
+          We've enrolled {{ .OrganizationName }} in the Maryland Responsible Vendor Training program through ProCann Edu.<br><br>
+          
+          <strong>To complete your required training:</strong><br>
+          1. Visit: https://www.procannedu.com/auth<br>
+          2. Click "Register as Student"<br>
+          3. Enter join code: <strong>{{ .JoinCode }}</strong><br>
+          4. Complete registration and start training<br><br>
+          
+          Please complete your training within 30 days. If you have questions, contact me or reach out to ProCann Edu support.<br><br>
+          
+          Thanks!
+        </p>
+      </div>
+
+      <p><strong>Need Help?</strong><br>
+      If you have questions or need assistance enrolling your team, contact our support team at support@procannedu.com or reply to this email.</p>
+
+      <p>Best regards,<br>
+      <strong>The ProCann Edu Team</strong></p>
+    </div>
+    <div class="footer">
+      <p>© 2025 ProCann Edu | Maryland Responsible Vendor Training Program</p>
+      <p>This email was sent to {{ .ManagerEmail }}. You're receiving this because you purchased training seats for your organization.</p>
+    </div>
+  </div>
+</body>
+</html>
