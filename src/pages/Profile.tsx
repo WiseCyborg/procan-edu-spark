@@ -388,7 +388,10 @@ const Profile: React.FC = () => {
                   value={profile.first_name}
                   onChange={(e) => handleInputChange('first_name', e.target.value)}
                   placeholder="Enter first name"
+                  aria-required="true"
+                  aria-describedby="first-name-hint"
                 />
+                <span id="first-name-hint" className="sr-only">Enter your legal first name</span>
               </div>
               <div>
                 <Label htmlFor="last_name">Last Name</Label>
@@ -397,7 +400,10 @@ const Profile: React.FC = () => {
                   value={profile.last_name}
                   onChange={(e) => handleInputChange('last_name', e.target.value)}
                   placeholder="Enter last name"
+                  aria-required="true"
+                  aria-describedby="last-name-hint"
                 />
+                <span id="last-name-hint" className="sr-only">Enter your legal last name</span>
               </div>
             </div>
             

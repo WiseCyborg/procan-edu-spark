@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from '@/components/ui/use-toast';
@@ -361,6 +362,21 @@ const StudentAuthForm = () => {
               console.error('Error accepting invitation:', acceptError);
             }
           }
+
+          // Send welcome email
+          try {
+            await supabase.functions.invoke('send-welcome-email', {
+              body: {
+                email: regEmail,
+                firstName: firstName,
+                lastName: lastName,
+              }
+            });
+            console.log('Welcome email sent to:', regEmail);
+          } catch (emailError) {
+            console.error('Welcome email failed:', emailError);
+            // Don't block registration if email fails
+          }
         } catch (assignmentError) {
           console.error('Error in post-registration setup:', assignmentError);
         }
@@ -448,30 +464,45 @@ const StudentAuthForm = () => {
                 </p>
               </div>
 
-              <form onSubmit={handleStudentLogin} className="space-y-4">
+              <form onSubmit={handleStudentLogin} className="space-y-4" aria-label="Student login form">
                 <div>
+                  <Label htmlFor="login-email" className="sr-only">Email Address</Label>
                   <Input
+                    id="login-email"
                     type="email"
                     placeholder="Email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
+                    aria-required="true"
+                    aria-describedby="login-email-hint"
                   />
+                  <span id="login-email-hint" className="sr-only">
+                    Enter your email address to sign in
+                  </span>
                 </div>
                 <div>
+                  <Label htmlFor="login-password" className="sr-only">Password</Label>
                   <Input
+                    id="login-password"
                     type="password"
                     placeholder="Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
+                    aria-required="true"
+                    aria-describedby="login-password-hint"
                   />
+                  <span id="login-password-hint" className="sr-only">
+                    Enter your password
+                  </span>
                 </div>
                 
                 <Button 
                   type="submit" 
                   className="w-full bg-blue-600 hover:bg-blue-700"
                   disabled={loading}
+                  aria-busy={loading}
                 >
                   {loading ? 'Signing In...' : 'Sign In'}
                 </Button>

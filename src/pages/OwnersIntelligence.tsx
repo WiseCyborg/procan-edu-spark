@@ -10,6 +10,87 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Progress } from '@/components/ui/progress';
 
+const AgentHealthMonitor = () => {
+  const { data: agentHealth, refetch } = useQuery({
+    queryKey: ['agent-health-monitor'],
+    queryFn: async () => {
+      // Get last run for each agent type
+      const { data: runs } = await supabase
+        .from('ai_agent_runs')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      // Group by agent name, get most recent
+      const healthMap = new Map();
+      runs?.forEach(run => {
+        if (!healthMap.has(run.agent_name)) {
+          healthMap.set(run.agent_name, run);
+        }
+      });
+      
+      return Array.from(healthMap.values());
+    },
+    refetchInterval: 60000 // Refresh every minute
+  });
+
+  return (
+    <Card className="mb-8">
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle>Real-Time Agent Health</CardTitle>
+          <Button size="sm" variant="outline" onClick={() => refetch()}>
+            <RefreshCw className="h-4 w-4 mr-1" />
+            Refresh
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {agentHealth?.map(agent => {
+            const isHealthy = agent.execution_status === 'success';
+            const lastRunTime = new Date(agent.created_at);
+            const hoursSinceRun = (Date.now() - lastRunTime.getTime()) / (1000 * 60 * 60);
+            const isStale = hoursSinceRun > 24;
+            
+            return (
+              <div 
+                key={agent.id} 
+                className={`p-4 border rounded-lg ${
+                  !isHealthy ? 'border-red-300 bg-red-50' : 
+                  isStale ? 'border-yellow-300 bg-yellow-50' : 
+                  'border-green-300 bg-green-50'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium truncate" title={agent.agent_name}>
+                    {agent.agent_name}
+                  </span>
+                  <Badge 
+                    variant={isHealthy ? 'default' : 'destructive'}
+                    className="ml-2"
+                  >
+                    {isHealthy ? '✓' : '✗'}
+                  </Badge>
+                </div>
+                <div className="text-xs text-muted-foreground space-y-1">
+                  <div>Status: {agent.execution_status}</div>
+                  <div>Last run: {lastRunTime.toLocaleString()}</div>
+                  <div>Duration: {agent.execution_duration_ms}ms</div>
+                  {agent.error_message && (
+                    <div className="text-red-600 mt-2">
+                      Error: {agent.error_message.slice(0, 50)}...
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
 export default function OwnersIntelligence() {
   const { data: healthScore } = useQuery({
     queryKey: ['platform-health-score'],
@@ -90,6 +171,10 @@ export default function OwnersIntelligence() {
         </Button>
       </div>
 
+      {/* Agent Health Monitor */}
+      <AgentHealthMonitor />
+
+      {/* Platform Health Score */}
       <Card className="mb-8 border-primary shadow-lg">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">

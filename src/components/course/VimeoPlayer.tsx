@@ -69,6 +69,54 @@ export const VimeoPlayer: React.FC<VimeoPlayerProps> = ({
     };
   }, [videoUrl, onTimeUpdate, onComplete, requiredWatchPercentage, hasWatchedEnough]);
 
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (!playerRef.current) return;
+    
+    switch(e.key) {
+      case ' ':
+      case 'k':
+        e.preventDefault();
+        playerRef.current.getPaused().then(paused => {
+          if (paused) {
+            playerRef.current?.play();
+          } else {
+            playerRef.current?.pause();
+          }
+        });
+        break;
+      case 'f':
+        e.preventDefault();
+        playerRef.current.requestFullscreen();
+        break;
+      case 'm':
+        e.preventDefault();
+        playerRef.current.getVolume().then(vol => {
+          playerRef.current?.setVolume(vol > 0 ? 0 : 1);
+        });
+        break;
+      case 'ArrowLeft':
+        e.preventDefault();
+        playerRef.current.getCurrentTime().then(t => {
+          playerRef.current?.setCurrentTime(Math.max(0, t - 10));
+        });
+        break;
+      case 'ArrowRight':
+        e.preventDefault();
+        playerRef.current.getCurrentTime().then(t => {
+          playerRef.current?.setCurrentTime(t + 10);
+        });
+        break;
+    }
+  };
+
+  useEffect(() => {
+    const container = iframeRef.current?.parentElement;
+    if (container) {
+      container.addEventListener('keydown', handleKeyDown);
+      return () => container.removeEventListener('keydown', handleKeyDown);
+    }
+  }, []);
+
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
@@ -79,7 +127,12 @@ export const VimeoPlayer: React.FC<VimeoPlayerProps> = ({
 
   return (
     <Card className="overflow-hidden">
-      <div className="relative group">
+      <div 
+        className="relative group" 
+        role="region" 
+        aria-label={`Video player: ${title}`}
+        tabIndex={0}
+      >
         <div className="aspect-video bg-black">
           <iframe
             ref={iframeRef}
@@ -87,31 +140,55 @@ export const VimeoPlayer: React.FC<VimeoPlayerProps> = ({
             className="w-full h-full"
             allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
             title={title}
+            aria-describedby="video-controls-help"
           />
         </div>
 
+        {/* Keyboard shortcuts help */}
+        <div id="video-controls-help" className="sr-only">
+          Video controls: Space or K to play/pause, F for fullscreen, M to mute, 
+          Left/Right arrows to skip 10 seconds
+        </div>
+
         {/* Progress indicator */}
-        <div className="absolute top-4 right-4 bg-black/70 text-white px-3 py-1.5 rounded-md text-sm font-medium">
+        <div 
+          className="absolute top-4 right-4 bg-black/70 text-white px-3 py-1.5 rounded-md text-sm font-medium"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
           {watchedPercentage.toFixed(0)}% watched
           {hasWatchedEnough && (
-            <span className="ml-2 text-green-400">✓</span>
+            <span className="ml-2 text-green-400" aria-label="Video completed">✓</span>
           )}
         </div>
       </div>
 
-      {/* Video info */}
+      {/* Video info with transcript placeholder */}
       <div className="p-4">
         <h3 className="font-semibold text-lg mb-2">{title}</h3>
         <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <span>
+          <span aria-label={`Video progress: ${formatTime(currentTime)} of ${formatTime(duration)}`}>
             {formatTime(currentTime)} / {formatTime(duration)}
           </span>
           {hasWatchedEnough ? (
-            <span className="text-green-600 font-medium">✓ Completed</span>
+            <span className="text-green-600 font-medium" role="status">✓ Completed</span>
           ) : (
-            <span>Watch {requiredWatchPercentage}% to complete</span>
+            <span role="status">Watch {requiredWatchPercentage}% to complete</span>
           )}
         </div>
+        
+        {/* Transcript section (to be populated with actual transcript) */}
+        <details className="mt-4">
+          <summary className="cursor-pointer font-medium text-sm hover:underline">
+            Video Transcript
+          </summary>
+          <div className="mt-2 text-sm text-muted-foreground p-4 bg-muted rounded-md">
+            <p className="italic">
+              Transcript will be available here. Contact support if you need this content in text format.
+            </p>
+          </div>
+        </details>
       </div>
     </Card>
   );
