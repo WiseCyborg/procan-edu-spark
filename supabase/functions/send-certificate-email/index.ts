@@ -29,6 +29,9 @@ interface CertificateEmailRequest {
 }
 
 const handler = async (req: Request): Promise<Response> => {
+  console.log('=== Certificate Email Handler Started ===');
+  console.log('RESEND_API_KEY configured:', !!Deno.env.get("RESEND_API_KEY"));
+  
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -45,7 +48,7 @@ const handler = async (req: Request): Promise<Response> => {
       certificateUrl
     }: CertificateEmailRequest = await req.json();
 
-    console.log("Sending certificate email to:", email);
+    console.log("Processing certificate email for:", email, "- Cert#:", certificateNumber);
 
     // Calculate expiry date if not provided (2 years from issue)
     const calculatedExpiryDate = expiryDate || new Date(

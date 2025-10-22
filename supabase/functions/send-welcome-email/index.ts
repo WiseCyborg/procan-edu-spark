@@ -24,12 +24,16 @@ interface WelcomeEmailRequest {
 }
 
 const handler = async (req: Request): Promise<Response> => {
+  console.log('=== Welcome Email Handler Started ===');
+  console.log('RESEND_API_KEY configured:', !!Deno.env.get("RESEND_API_KEY"));
+  
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const { email, firstName, lastName }: WelcomeEmailRequest = await req.json();
+    console.log(`Processing welcome email for: ${email}`);
     
     // Check if welcome email was already sent in the last 24 hours
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
