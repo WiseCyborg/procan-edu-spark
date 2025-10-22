@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AdminUserManagement } from '@/components/admin/AdminUserManagement';
+import { ManualUserCreation } from '@/components/admin/ManualUserCreation';
 import { Shield, Settings, Users, BarChart3 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
@@ -94,6 +95,7 @@ const AdminManagement = () => {
 
         {/* Main Management Sections */}
         <div className="space-y-6">
+          <ManualUserCreation />
           <AdminUserManagement />
           
           {/* Additional Management Cards - Placeholder for future features */}
