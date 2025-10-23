@@ -1,7 +1,8 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AdminUserManagement } from '@/components/admin/AdminUserManagement';
 import { ManualUserCreation } from '@/components/admin/ManualUserCreation';
+import { TestProfileCreator } from '@/components/admin/TestProfileCreator';
 import { Shield, Settings, Users, BarChart3 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
@@ -95,7 +96,28 @@ const AdminManagement = () => {
 
         {/* Main Management Sections */}
         <div className="space-y-6">
-          <ManualUserCreation />
+          <Card>
+            <CardHeader>
+              <CardTitle>Test Profile Creator (UAT Workaround)</CardTitle>
+              <CardDescription>
+                Create test users while auth.users RLS is being fixed by Supabase Support
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <TestProfileCreator />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Manual User Creation</CardTitle>
+              <CardDescription>(Requires auth.users RLS fix)</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ManualUserCreation />
+            </CardContent>
+          </Card>
+
           <AdminUserManagement />
           
           {/* Additional Management Cards - Placeholder for future features */}
