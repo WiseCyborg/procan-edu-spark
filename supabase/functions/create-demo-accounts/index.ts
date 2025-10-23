@@ -133,6 +133,7 @@ serve(async (req) => {
         const userExists = existingUsers.users.some(u => u.email === account.email);
 
         let userId: string;
+        let userCreated = false;
 
         if (userExists) {
           const existingUser = existingUsers.users.find(u => u.email === account.email);
@@ -156,45 +157,73 @@ serve(async (req) => {
           }
 
           userId = newUser.user.id;
+          userCreated = true;
           console.log(`Created user: ${account.email}`);
         }
 
-        // Ensure profile exists (trigger should create it, but verify)
-        const { data: profile } = await supabase
+        // Manually create profile using service role (bypasses RLS)
+        const { data: existingProfile } = await supabase
           .from('profiles')
           .select('user_id')
           .eq('user_id', userId)
-          .single();
+          .maybeSingle();
 
-        if (!profile) {
-          // Manually create profile if trigger failed
-          await supabase.from('profiles').insert({
-            user_id: userId,
-            first_name: account.firstName,
-            last_name: account.lastName,
-            organization_id: account.organizationName ? orgId : null
-          });
-        } else if (account.organizationName) {
+        if (!existingProfile) {
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .insert({
+              user_id: userId,
+              first_name: account.firstName,
+              last_name: account.lastName,
+              organization_id: account.organizationName ? orgId : null
+            });
+
+          if (profileError) {
+            console.error(`Error creating profile for ${account.email}:`, profileError);
+            // Rollback: delete user if we just created it
+            if (userCreated) {
+              await supabase.auth.admin.deleteUser(userId);
+              console.log(`Rolled back user creation for ${account.email}`);
+            }
+            continue;
+          }
+          console.log(`Created profile for ${account.email}`);
+        } else if (account.organizationName && existingProfile.organization_id !== orgId) {
           // Update organization if needed
           await supabase
             .from('profiles')
             .update({ organization_id: orgId })
             .eq('user_id', userId);
+          console.log(`Updated organization for ${account.email}`);
         }
 
-        // Ensure role exists
+        // Manually create role using service role (bypasses RLS)
         const { data: existingRole } = await supabase
           .from('user_roles')
           .select('role')
           .eq('user_id', userId)
           .eq('role', account.role)
-          .single();
+          .maybeSingle();
 
         if (!existingRole) {
-          await supabase.from('user_roles').insert({
-            user_id: userId,
-            role: account.role
-          });
+          const { error: roleError } = await supabase
+            .from('user_roles')
+            .insert({
+              user_id: userId,
+              role: account.role
+            });
+
+          if (roleError) {
+            console.error(`Error creating role for ${account.email}:`, roleError);
+            // Rollback: delete profile and user if we just created them
+            await supabase.from('profiles').delete().eq('user_id', userId);
+            if (userCreated) {
+              await supabase.auth.admin.deleteUser(userId);
+              console.log(`Rolled back user and profile creation for ${account.email}`);
+            }
+            continue;
+          }
+          console.log(`Created role ${account.role} for ${account.email}`);
         }
 
         createdAccounts.push({
