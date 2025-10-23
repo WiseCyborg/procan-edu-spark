@@ -55,7 +55,7 @@ serve(async (req) => {
       .from('organizations')
       .select('id, unique_access_key')
       .eq('name', 'Demo Dispensary LLC')
-      .single();
+      .maybeSingle();
 
     let orgId: string;
     let accessKey: string;
@@ -71,7 +71,6 @@ serve(async (req) => {
         .from('organizations')
         .insert({
           name: 'Demo Dispensary LLC',
-          dispensary_number: 'MD-DEMO-2025-001',
           contact_person: 'Demo Manager',
           contact_email: 'manager@demo-dispensary.com',
           contact_phone: '410-555-DEMO',
