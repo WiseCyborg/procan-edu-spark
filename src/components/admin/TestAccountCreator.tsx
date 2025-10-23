@@ -443,6 +443,26 @@ const TestAccountCreator = () => {
                 </Button>
               </div>
             </div>
+            <div className="border-t border-green-200 mt-4 pt-4">
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div>
+                  <div className="text-2xl font-bold text-green-700">50</div>
+                  <div className="text-xs text-green-600">Credits Available</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-amber-700">
+                    {createdAccounts.filter(a => a.organizationName).length}
+                  </div>
+                  <div className="text-xs text-amber-600">Credits Used</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-blue-700">
+                    {50 - createdAccounts.filter(a => a.organizationName).length}
+                  </div>
+                  <div className="text-xs text-blue-600">Credits Remaining</div>
+                </div>
+              </div>
+            </div>
           </CardContent>
         </Card>
       )}
