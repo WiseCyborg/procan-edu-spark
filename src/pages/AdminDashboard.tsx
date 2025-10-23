@@ -424,24 +424,24 @@ const AdminDashboard = () => {
 
         {/* Main Content */}
         <Tabs defaultValue="users" className="w-full">
-          <TabsList className="grid w-full grid-cols-6 lg:grid-cols-13">
-            <TabsTrigger value="users">Users</TabsTrigger>
-            <TabsTrigger value="form-health">🔧 Form Health</TabsTrigger>
-            <TabsTrigger value="organizations">Organizations</TabsTrigger>
-            <TabsTrigger value="applications">Applications</TabsTrigger>
-            <TabsTrigger value="setup">Setup</TabsTrigger>
-            <TabsTrigger value="test-accounts">Test Accounts</TabsTrigger>
-            <TabsTrigger value="oversight">Oversight</TabsTrigger>
-            <TabsTrigger value="invitations">Invitations</TabsTrigger>
-            <TabsTrigger value="compliance">Compliance</TabsTrigger>
-            <TabsTrigger value="employees">Employees</TabsTrigger>
-            <TabsTrigger value="security">Security</TabsTrigger>
-            <TabsTrigger value="profile-audit">👤 Profile Audit</TabsTrigger>
-            <TabsTrigger value="email-monitoring">📧 Email</TabsTrigger>
-            <TabsTrigger value="email-tracking">📬 Email Tracking</TabsTrigger>
-            <TabsTrigger value="revenue">Revenue</TabsTrigger>
-            <TabsTrigger value="notifications">Notifications</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsList className="w-full flex overflow-x-auto gap-2 bg-card border-2 border-border p-2 h-auto">
+            <TabsTrigger value="users" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg px-4 py-3 font-semibold whitespace-nowrap flex-shrink-0">Users</TabsTrigger>
+            <TabsTrigger value="form-health" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg px-4 py-3 font-semibold whitespace-nowrap flex-shrink-0">🔧 Form Health</TabsTrigger>
+            <TabsTrigger value="organizations" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg px-4 py-3 font-semibold whitespace-nowrap flex-shrink-0">Organizations</TabsTrigger>
+            <TabsTrigger value="applications" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg px-4 py-3 font-semibold whitespace-nowrap flex-shrink-0">Applications</TabsTrigger>
+            <TabsTrigger value="setup" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg px-4 py-3 font-semibold whitespace-nowrap flex-shrink-0">Setup</TabsTrigger>
+            <TabsTrigger value="test-accounts" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg px-4 py-3 font-semibold whitespace-nowrap flex-shrink-0">Test Accounts</TabsTrigger>
+            <TabsTrigger value="oversight" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg px-4 py-3 font-semibold whitespace-nowrap flex-shrink-0">Oversight</TabsTrigger>
+            <TabsTrigger value="invitations" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg px-4 py-3 font-semibold whitespace-nowrap flex-shrink-0">Invitations</TabsTrigger>
+            <TabsTrigger value="compliance" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg px-4 py-3 font-semibold whitespace-nowrap flex-shrink-0">Compliance</TabsTrigger>
+            <TabsTrigger value="employees" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg px-4 py-3 font-semibold whitespace-nowrap flex-shrink-0">Employees</TabsTrigger>
+            <TabsTrigger value="security" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg px-4 py-3 font-semibold whitespace-nowrap flex-shrink-0">Security</TabsTrigger>
+            <TabsTrigger value="profile-audit" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg px-4 py-3 font-semibold whitespace-nowrap flex-shrink-0">👤 Profile Audit</TabsTrigger>
+            <TabsTrigger value="email-monitoring" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg px-4 py-3 font-semibold whitespace-nowrap flex-shrink-0">📧 Email</TabsTrigger>
+            <TabsTrigger value="email-tracking" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg px-4 py-3 font-semibold whitespace-nowrap flex-shrink-0">📬 Email Tracking</TabsTrigger>
+            <TabsTrigger value="revenue" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg px-4 py-3 font-semibold whitespace-nowrap flex-shrink-0">Revenue</TabsTrigger>
+            <TabsTrigger value="notifications" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg px-4 py-3 font-semibold whitespace-nowrap flex-shrink-0">Notifications</TabsTrigger>
+            <TabsTrigger value="analytics" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg px-4 py-3 font-semibold whitespace-nowrap flex-shrink-0">Analytics</TabsTrigger>
           </TabsList>
 
           <TabsContent value="users">
