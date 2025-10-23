@@ -2931,6 +2931,10 @@ export type Database = {
         Args: { _modules_completed: number; _tier: string; _user_id: string }
         Returns: boolean
       }
+      user_can_view_profile: {
+        Args: { _target_user_id: string; _viewer_id: string }
+        Returns: boolean
+      }
       verify_certificate_status: {
         Args: { cert_number: string }
         Returns: {
