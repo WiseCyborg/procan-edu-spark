@@ -150,7 +150,7 @@ const DemoAccountsSetup = () => {
           <Button variant="outline" onClick={() => navigate('/admin')}>
             Back to Admin Dashboard
           </Button>
-          <Button variant="outline" onClick={() => navigate('/admin/user-management')}>
+          <Button variant="outline" onClick={() => navigate('/admin/management')}>
             View All Users
           </Button>
         </div>
