@@ -386,11 +386,19 @@ export const ComprehensiveAdminOversight = () => {
 
       {/* Main Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">Organization Overview</TabsTrigger>
-          <TabsTrigger value="activities">Employee Activities</TabsTrigger>
-          <TabsTrigger value="credits">Credit Management</TabsTrigger>
-          <TabsTrigger value="health">System Health</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 gap-2 bg-card border-2 border-border p-2 h-auto">
+          <TabsTrigger value="overview" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg px-4 py-3 font-semibold">
+            Organization Overview
+          </TabsTrigger>
+          <TabsTrigger value="activities" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg px-4 py-3 font-semibold">
+            Employee Activities
+          </TabsTrigger>
+          <TabsTrigger value="credits" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg px-4 py-3 font-semibold">
+            Credit Management
+          </TabsTrigger>
+          <TabsTrigger value="health" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg px-4 py-3 font-semibold">
+            System Health
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
