@@ -3,14 +3,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { AdminUserManagement } from '@/components/admin/AdminUserManagement';
 import { ManualUserCreation } from '@/components/admin/ManualUserCreation';
 import { TestProfileCreator } from '@/components/admin/TestProfileCreator';
-import { Shield, Settings, Users, BarChart3 } from 'lucide-react';
+import { Shield, Settings, Users, BarChart3, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 
 const AdminManagement = () => {
   const { user } = useAuth();
-  const { isAdmin } = useUserRole();
+  const { isAdmin, isLoading } = useUserRole();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   if (!isAdmin) {
     return (
