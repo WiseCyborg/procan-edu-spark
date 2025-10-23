@@ -118,19 +118,47 @@ const TestAccountCreator = () => {
 
       const { data, error } = await supabase.functions.invoke('create-demo-accounts');
 
-      if (error) throw error;
-
-      if (data.success) {
-        setCreatedAccounts(data.accounts);
-        setTestOrgInfo(data.organization);
-        
+      if (error) {
+        console.error('Edge function invocation error:', error);
         toast({
-          title: "✅ Demo Accounts Created!",
-          description: `Created ${data.accounts.length} accounts successfully`,
+          title: "Function Error",
+          description: error.message || "Could not reach demo account creation service. Check console for details.",
+          variant: "destructive"
         });
-      } else {
-        throw new Error(data.error || 'Failed to create demo accounts');
+        setIsCreating(false);
+        return;
       }
+
+      if (!data) {
+        console.error('No data returned from edge function');
+        toast({
+          title: "No Response",
+          description: "The demo account service didn't return any data",
+          variant: "destructive"
+        });
+        setIsCreating(false);
+        return;
+      }
+
+      if (!data.success) {
+        console.error('Demo creation failed:', data);
+        toast({
+          title: "Creation Failed",
+          description: data.error || data.message || 'Failed to create demo accounts',
+          variant: "destructive"
+        });
+        setIsCreating(false);
+        return;
+      }
+
+      // Success path
+      setCreatedAccounts(data.accounts);
+      setTestOrgInfo(data.organization);
+
+      toast({
+        title: "✅ Demo Accounts Created!",
+        description: `Created ${data.accounts.length} accounts successfully`,
+      });
     } catch (error) {
       console.error('Error creating test suite:', error);
       toast({

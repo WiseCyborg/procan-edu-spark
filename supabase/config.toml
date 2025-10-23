@@ -104,3 +104,6 @@ verify_jwt = false
 
 [functions.auto-generate-join-codes]
 verify_jwt = false
+
+[functions.create-demo-accounts]
+verify_jwt = true
