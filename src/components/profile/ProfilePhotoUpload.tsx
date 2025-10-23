@@ -66,6 +66,9 @@ export const ProfilePhotoUpload = ({ userId, currentPhotoUrl, onPhotoUpdate }: P
         .from('profile-photos')
         .getPublicUrl(filePath);
 
+      // Add timestamp to force browser cache refresh
+      const cacheBustedUrl = `${publicUrl}?t=${Date.now()}`;
+
       // Update profile table
       const { error: updateError } = await supabase
         .from('profiles')
@@ -74,8 +77,8 @@ export const ProfilePhotoUpload = ({ userId, currentPhotoUrl, onPhotoUpdate }: P
 
       if (updateError) throw updateError;
 
-      setPreviewUrl(publicUrl);
-      onPhotoUpdate(publicUrl);
+      setPreviewUrl(cacheBustedUrl);
+      onPhotoUpdate(cacheBustedUrl);
 
       toast({
         title: "Success",
@@ -97,15 +100,32 @@ export const ProfilePhotoUpload = ({ userId, currentPhotoUrl, onPhotoUpdate }: P
     try {
       setUploading(true);
       
-      // Remove from storage
-      const filePath = `${userId}/avatar`;
-      await supabase.storage.from('profile-photos').remove([filePath]);
+      // List all files in the user's folder to find the avatar file with extension
+      const { data: files, error: listError } = await supabase.storage
+        .from('profile-photos')
+        .list(userId);
+
+      if (listError) throw listError;
+
+      // Find avatar file (avatar.jpg, avatar.png, avatar.webp)
+      const avatarFile = files?.find(file => file.name.startsWith('avatar.'));
+      
+      if (avatarFile) {
+        const filePath = `${userId}/${avatarFile.name}`;
+        const { error: deleteError } = await supabase.storage
+          .from('profile-photos')
+          .remove([filePath]);
+        
+        if (deleteError) throw deleteError;
+      }
 
       // Update profile table
-      await supabase
+      const { error: updateError } = await supabase
         .from('profiles')
         .update({ profile_photo_url: null })
         .eq('user_id', userId);
+
+      if (updateError) throw updateError;
 
       setPreviewUrl(null);
       onPhotoUpdate(null);
