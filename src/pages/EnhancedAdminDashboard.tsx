@@ -19,7 +19,7 @@ import {
 import { HoverCallout } from '@/components/ui/hover-callout';
 import { SimpleFAQManager } from '@/components/faq/SimpleFAQManager';
 import { EnhancedDraggableChat } from '@/components/chat/EnhancedDraggableChat';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { OutdatedContentWarning } from '@/components/admin/OutdatedContentWarning';
 import { ImageAssetManager } from '@/components/admin/ImageAssetManager';
 import { EnhancedUserManagementView } from '@/components/admin/EnhancedUserManagementView';
@@ -27,11 +27,15 @@ import { AIFeaturesDashboard } from '@/components/admin/AIFeaturesDashboard';
 import { CommunicationManagementView } from '@/components/admin/CommunicationManagementView';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { useAdminDashboardMetrics } from '@/hooks/useAdminDashboardMetrics';
+import { useRealTimeAnalytics } from '@/hooks/useRealTimeAnalytics';
+import { RealTimeAdminNavigation } from '@/components/navigation/RealTimeAdminNavigation';
 
 const EnhancedAdminDashboard = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
   const [openDialog, setOpenDialog] = useState<'users' | 'ai' | 'communication' | null>(null);
   const { metrics, loading } = useAdminDashboardMetrics();
+  const { metrics: realtimeMetrics, loading: realtimeLoading } = useRealTimeAnalytics();
 
   // Mock chat messages for demo
   const mockMessages = [
@@ -77,30 +81,22 @@ const EnhancedAdminDashboard = () => {
           </p>
         </div>
         
-        <div className="flex space-x-2">
-          <HoverCallout content="View real-time platform analytics and performance metrics">
-            <Button variant="outline" size="sm">
-              <BarChart3 className="h-4 w-4 mr-2" />
-              Analytics
-            </Button>
-          </HoverCallout>
-          
-          <HoverCallout content="Access live operations monitoring dashboard">
-            <Link to="/realtime-operations">
-              <Button variant="default" size="sm">
-                <Activity className="h-4 w-4 mr-2" />
-                Real-Time Ops
-              </Button>
-            </Link>
-          </HoverCallout>
-          
-          <HoverCallout content="Access system settings and configuration options">
-            <Button variant="outline" size="sm">
-              <Settings className="h-4 w-4 mr-2" />
-              Settings
-            </Button>
-          </HoverCallout>
-        </div>
+        <RealTimeAdminNavigation
+          metrics={realtimeMetrics}
+          loading={realtimeLoading}
+          activeTab={activeTab}
+          onTabChange={(tab) => {
+            if (tab === 'analytics') {
+              navigate('/admin/advanced-analytics');
+            } else if (tab === 'realtime') {
+              navigate('/admin/realtime-operations');
+            } else if (tab === 'demo-setup') {
+              navigate('/admin/demo-setup');
+            } else {
+              setActiveTab(tab);
+            }
+          }}
+        />
       </div>
 
       {/* Enhanced Feature Cards */}
