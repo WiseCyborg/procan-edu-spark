@@ -1,8 +1,6 @@
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.4';
-import { Resend } from "npm:resend@2.0.0";
-
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+import { EmailRouter } from "../_shared/email-router.ts";
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
@@ -57,9 +55,9 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // Send email with verification code
-    const emailResponse = await resend.emails.send({
-      from: "ProCann Edu <no-reply@procannedu.com>",
-      to: [email],
+    const router = new EmailRouter();
+    const emailResponse = await router.sendWithFailover({
+      to: email,
       subject: `Verification Code - ${purpose === 'login' ? 'Login' : 'Exam Submission'}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -76,7 +74,9 @@ const handler = async (req: Request): Promise<Response> => {
           </p>
         </div>
       `,
-    });
+      from: "ProCann Edu <no-reply@procannedu.com>",
+      metadata: { email_type: 'verification_code', purpose }
+    }, supabase);
 
     console.log('Verification email sent:', emailResponse);
 

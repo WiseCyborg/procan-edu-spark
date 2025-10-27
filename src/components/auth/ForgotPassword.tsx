@@ -15,6 +15,7 @@ export const ForgotPassword: React.FC<ForgotPasswordProps> = ({ onBack }) => {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [resending, setResending] = useState(false);
   const { toast } = useToast();
 
   const handleResetPassword = async (e: React.FormEvent) => {
@@ -62,6 +63,37 @@ export const ForgotPassword: React.FC<ForgotPasswordProps> = ({ onBack }) => {
     }
   };
 
+  const handleResendEmail = async () => {
+    setResending(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: `${window.location.origin}/auth?mode=reset`,
+      });
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to resend email. Please try again.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      toast({
+        title: "Email Resent",
+        description: "A new password reset link has been sent.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to resend email. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setResending(false);
+    }
+  };
+
   if (emailSent) {
     return (
       <Card className="w-full max-w-md">
@@ -85,6 +117,15 @@ export const ForgotPassword: React.FC<ForgotPasswordProps> = ({ onBack }) => {
           </div>
 
           <div className="space-y-2">
+            <Button
+              variant="default"
+              onClick={handleResendEmail}
+              disabled={resending}
+              className="w-full"
+            >
+              {resending ? 'Sending...' : 'Resend Email'}
+            </Button>
+
             <Button
               variant="outline"
               onClick={() => setEmailSent(false)}

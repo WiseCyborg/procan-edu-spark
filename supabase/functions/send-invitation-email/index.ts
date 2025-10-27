@@ -1,8 +1,6 @@
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
-import { Resend } from "npm:resend@2.0.0";
-
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+import { EmailRouter } from "../_shared/email-router.ts";
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -131,36 +129,27 @@ const handler = async (req: Request): Promise<Response> => {
       .select()
       .single();
 
-    // Send email via Resend
-    const emailResponse = await resend.emails.send({
-      from: "ProCann Edu <noreply@procannedu.com>",
-      to: [email],
+    // Send email via EmailRouter with failover
+    const router = new EmailRouter();
+    const emailResponse = await router.sendWithFailover({
+      to: email,
       subject: subject,
       html: htmlContent,
-    });
+      from: "ProCann Edu <noreply@procannedu.com>",
+      metadata: { email_type: 'staff_invitation', log_id: emailLog?.id }
+    }, supabase);
 
-    if (emailResponse.error) {
-      throw new Error(emailResponse.error.message || 'Failed to send email');
+    if (!emailResponse.success) {
+      throw new Error(emailResponse.error || 'Failed to send email');
     }
 
     console.log("Invitation email sent successfully:", emailResponse);
 
-    // Update email log with success status
-    if (emailLog) {
-      await supabase
-        .from('email_logs')
-        .update({
-          status: 'sent',
-          provider_id: emailResponse.data?.id,
-          sent_at: new Date().toISOString()
-        })
-        .eq('id', emailLog.id);
-    }
-
     return new Response(
       JSON.stringify({ 
         success: true, 
-        emailId: emailResponse.data?.id,
+        emailId: emailResponse.providerId,
+        provider: emailResponse.provider,
         recipient: email 
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }

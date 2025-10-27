@@ -26,6 +26,9 @@ const AuthForm = () => {
   const [activeTab, setActiveTab] = useState('signup');
   const [showWelcomeMessage, setShowWelcomeMessage] = useState(false);
   const [skipMFA, setSkipMFA] = useState(false);
+  const [showEmailSent, setShowEmailSent] = useState(false);
+  const [emailSentAddress, setEmailSentAddress] = useState('');
+  const [resendingEmail, setResendingEmail] = useState(false);
 
   // Safe email checking without side effects
   const checkEmailExists = useCallback(async (emailToCheck: string) => {
@@ -110,6 +113,8 @@ const AuthForm = () => {
           title: "Check your email",
           description: "We sent you a confirmation link to complete your registration.",
         });
+        setShowEmailSent(true);
+        setEmailSentAddress(email);
       }
     } catch (error) {
       toast({
@@ -182,6 +187,31 @@ const AuthForm = () => {
     supabase.auth.signOut();
   };
 
+  const handleResendEmail = async () => {
+    setResendingEmail(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: emailSentAddress,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Email Resent",
+        description: "A new confirmation link has been sent to your email.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : 'Failed to resend email',
+        variant: "destructive",
+      });
+    } finally {
+      setResendingEmail(false);
+    }
+  };
+
   if (showForgotPassword) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/5 p-4">
@@ -217,6 +247,26 @@ const AuthForm = () => {
           {showWelcomeMessage && (
             <div className="mb-4 p-3 bg-primary/10 border border-primary/20 rounded-md text-primary text-sm">
               Welcome back! We found your account.
+            </div>
+          )}
+
+          {showEmailSent && (
+            <div className="mb-4 p-4 bg-primary/10 border border-primary/20 rounded-md">
+              <p className="text-sm text-foreground mb-2">
+                ✅ Email sent to <strong>{emailSentAddress}</strong>
+              </p>
+              <p className="text-xs text-muted-foreground mb-3">
+                Didn't receive it? Check your spam folder.
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleResendEmail}
+                disabled={resendingEmail}
+                className="w-full"
+              >
+                {resendingEmail ? 'Sending...' : 'Resend Email'}
+              </Button>
             </div>
           )}
           

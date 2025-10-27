@@ -1,8 +1,6 @@
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.4';
-import { Resend } from "npm:resend@2.0.0";
-
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+import { EmailRouter } from "../_shared/email-router.ts";
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -76,9 +74,9 @@ const handler = async (req: Request): Promise<Response> => {
       .select('id')
       .single();
 
-    const emailResponse = await resend.emails.send({
-      from: "ProCann Edu <no-reply@procannedu.com>",
-      to: [userEmail],
+    const router = new EmailRouter();
+    const emailResponse = await router.sendWithFailover({
+      to: userEmail,
       subject: "✅ Payment Confirmed - Welcome to ProCann Edu!",
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #F9F7EE;">
@@ -165,23 +163,17 @@ const handler = async (req: Request): Promise<Response> => {
           </div>
         </div>
       `,
-    });
-
-    // Update email log with success/failure
-    if (logData?.id) {
-      await supabase
-        .from('email_logs')
-        .update({
-          status: emailResponse.data ? 'sent' : 'failed',
-          provider_id: emailResponse.data?.id,
-          sent_at: emailResponse.data ? new Date().toISOString() : null
-        })
-        .eq('id', logData.id);
-    }
+      from: "ProCann Edu <no-reply@procannedu.com>",
+      metadata: { email_type: 'payment_confirmation', log_id: logData?.id }
+    }, supabase);
 
     console.log("Payment confirmation sent successfully:", emailResponse);
 
-    return new Response(JSON.stringify(emailResponse), {
+    return new Response(JSON.stringify({ 
+      success: emailResponse.success,
+      emailId: emailResponse.providerId,
+      provider: emailResponse.provider 
+    }), {
       status: 200,
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });

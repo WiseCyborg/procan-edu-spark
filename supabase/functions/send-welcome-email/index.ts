@@ -2,9 +2,7 @@
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.0.0'
 import { loadEmailTemplate } from "../_shared/email-templates.ts";
-import { Resend } from "npm:resend@2.0.0";
-
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+import { EmailRouter } from "../_shared/email-router.ts";
 
 // Initialize Supabase client for logging
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!
@@ -164,31 +162,21 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    const emailResponse = await resend.emails.send({
-      from: "ProCann Edu <noreply@procannedu.com>",
-      to: [email],
+    const router = new EmailRouter();
+    const emailResponse = await router.sendWithFailover({
+      to: email,
       subject: subject,
       html,
-    });
-
-    // Update email log with success/failure
-    if (logData?.id) {
-      await supabase
-        .from('email_logs')
-        .update({
-          status: emailResponse.data?.id ? 'sent' : 'failed',
-          provider_id: emailResponse.data?.id,
-          sent_at: new Date().toISOString(),
-          error: emailResponse.error ? JSON.stringify(emailResponse.error) : null
-        })
-        .eq('id', logData.id)
-    }
+      from: "ProCann Edu <noreply@procannedu.com>",
+      metadata: { email_type: 'welcome', log_id: logData?.id }
+    }, supabase);
 
     console.log("Welcome email sent successfully:", emailResponse);
 
     return new Response(JSON.stringify({ 
       success: true, 
-      emailId: emailResponse.data?.id 
+      emailId: emailResponse.providerId,
+      provider: emailResponse.provider
     }), {
       status: 200,
       headers: {
