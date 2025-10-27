@@ -55,7 +55,6 @@ serve(async (req) => {
           response_time_ms: resendResponseTime,
           last_check_at: new Date().toISOString(),
           last_success_at: new Date().toISOString(),
-          error_message: null,
         }, {
           onConflict: "provider_name",
         });
@@ -73,7 +72,7 @@ serve(async (req) => {
           status: "offline",
           response_time_ms: 0,
           last_check_at: new Date().toISOString(),
-          error_message: error.message,
+          metadata: { error: error.message },
         }, {
           onConflict: "provider_name",
         });
@@ -103,7 +102,6 @@ serve(async (req) => {
             response_time_ms: smtpResponseTime,
             last_check_at: new Date().toISOString(),
             last_success_at: new Date().toISOString(),
-            error_message: null,
           }, {
             onConflict: "provider_name",
           });
@@ -124,7 +122,7 @@ serve(async (req) => {
           status: "offline",
           response_time_ms: 0,
           last_check_at: new Date().toISOString(),
-          error_message: error.message,
+          metadata: { error: error.message },
         }, {
           onConflict: "provider_name",
         });
