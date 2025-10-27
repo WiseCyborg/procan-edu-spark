@@ -427,6 +427,7 @@ const DispensaryApplication = () => {
                       type="date"
                       value={preferredStartDate}
                       onChange={(e) => setPreferredStartDate(e.target.value)}
+                      min={new Date().toISOString().split('T')[0]}
                     />
                   </div>
                 </div>
