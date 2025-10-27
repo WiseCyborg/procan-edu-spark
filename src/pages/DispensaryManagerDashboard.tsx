@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SeatManagementWidget } from '@/components/team/SeatManagementWidget';
 import { CompletionAnalyticsWidget } from '@/components/team/CompletionAnalyticsWidget';
 import { SeatAssignmentManager } from '@/components/team/SeatAssignmentManager';
-import { Building2, CreditCard, Users, FileText, Settings, ShieldCheck } from 'lucide-react';
+import { Building2, CreditCard, Users, FileText, Settings, ShieldCheck, Key, Copy } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 
@@ -30,6 +30,7 @@ const DispensaryManagerDashboard = () => {
   const [organization, setOrganization] = useState<OrganizationInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [coordinators, setCoordinators] = useState<any[]>([]);
+  const [joinCodes, setJoinCodes] = useState<any[]>([]);
 
   useEffect(() => {
     if (!roleLoading && !isDispensaryManager) {
@@ -115,6 +116,16 @@ const DispensaryManagerDashboard = () => {
         .eq('profiles.organization_id', profile.organization_id);
 
       setCoordinators(coords || []);
+
+      // Get active join codes
+      const { data: codes } = await supabase
+        .from('rvt_join_codes')
+        .select('*')
+        .eq('organization_id', profile.organization_id)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+
+      setJoinCodes(codes || []);
     } catch (error: any) {
       console.error('Error fetching organization data:', error);
       toast.error('Failed to load organization data');
@@ -213,6 +224,51 @@ const DispensaryManagerDashboard = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Join Code Display Card */}
+      {joinCodes.length > 0 && (
+        <Card className="border-2 border-primary">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Key className="h-5 w-5" />
+              Organization Join Code
+            </CardTitle>
+            <CardDescription>
+              Share this code with employees to enroll in training
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {joinCodes.map((code) => (
+              <div key={code.id} className="space-y-2">
+                <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+                  <div className="font-mono text-2xl font-bold">
+                    {code.code}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      navigator.clipboard.writeText(code.code);
+                      toast.success("Code copied to clipboard!");
+                    }}
+                  >
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copy Code
+                  </Button>
+                </div>
+                <div className="flex gap-4 text-sm text-muted-foreground">
+                  <span>
+                    Used: {code.current_uses} / {code.max_uses}
+                  </span>
+                  <span>
+                    Expires: {new Date(code.expires_at).toLocaleDateString()}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Main Content Tabs */}
       <Tabs defaultValue="overview" className="space-y-4">

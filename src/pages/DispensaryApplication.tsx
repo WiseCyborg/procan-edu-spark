@@ -39,10 +39,10 @@ const DispensaryApplication = () => {
   // Clear any cached date that's in the past on mount
   useEffect(() => {
     if (preferredStartDate) {
-      const selectedDate = new Date(preferredStartDate);
-      const tomorrow = new Date(Date.now() + 86400000);
+      const selectedDate = new Date(preferredStartDate + 'T00:00:00');
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
       tomorrow.setHours(0, 0, 0, 0);
-      selectedDate.setHours(0, 0, 0, 0);
       
       if (selectedDate < tomorrow) {
         setPreferredStartDate(''); // Clear invalid cached date
@@ -127,10 +127,10 @@ const DispensaryApplication = () => {
 
     // Validate preferred_start_date before submission
     if (preferredStartDate) {
-      const selectedDate = new Date(preferredStartDate);
-      const tomorrow = new Date(Date.now() + 86400000);
+      const selectedDate = new Date(preferredStartDate + 'T00:00:00');
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
       tomorrow.setHours(0, 0, 0, 0);
-      selectedDate.setHours(0, 0, 0, 0);
       
       if (selectedDate < tomorrow) {
         toast({
@@ -466,7 +466,11 @@ const DispensaryApplication = () => {
                       type="date"
                       value={preferredStartDate}
                       onChange={(e) => setPreferredStartDate(e.target.value)}
-                      min={new Date(Date.now() + 86400000).toISOString().split('T')[0]}
+                      min={(() => {
+                        const tomorrow = new Date();
+                        tomorrow.setDate(tomorrow.getDate() + 1);
+                        return tomorrow.toISOString().split('T')[0];
+                      })()}
                     />
                     <p className="text-xs text-muted-foreground mt-1">
                       Select a future date when you'd like training to begin. Leave blank if unsure.
