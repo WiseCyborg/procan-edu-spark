@@ -2766,6 +2766,10 @@ export type Database = {
       }
       cleanup_performance_metrics: { Args: never; Returns: undefined }
       create_initial_admin: { Args: never; Returns: string }
+      create_initial_seats_for_organization: {
+        Args: { org_id: string; purchased_by_id?: string; quantity?: number }
+        Returns: string
+      }
       create_test_organization: {
         Args: { contact_email: string; credits?: number; org_name: string }
         Returns: {

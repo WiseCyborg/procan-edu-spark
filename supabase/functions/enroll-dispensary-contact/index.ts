@@ -97,7 +97,34 @@ serve(async (req) => {
 
     console.log('Role assigned: dispensary_manager');
 
-    // 4. Send welcome email with login credentials
+    // 4. Allocate a training seat for the manager
+    console.log('Allocating training seat for manager...');
+    
+    const { data: defaultCourse, error: courseError } = await supabase
+      .from('courses')
+      .select('id')
+      .eq('is_active', true)
+      .limit(1)
+      .single();
+
+    if (courseError || !defaultCourse) {
+      console.error('No active course found for seat allocation');
+    } else {
+      const { data: seatId, error: seatError } = await supabase
+        .rpc('allocate_seat_to_user', {
+          org_id: organization_id,
+          user_id: newUser.user.id,
+          course_id: defaultCourse.id
+        });
+
+      if (seatError) {
+        console.error('Failed to allocate seat for manager:', seatError);
+      } else {
+        console.log('Seat allocated successfully:', seatId);
+      }
+    }
+
+    // 5. Send welcome email with login credentials
     const { error: emailError } = await supabase.functions.invoke('send-welcome-email', {
       body: {
         email: contact_email,
@@ -115,7 +142,7 @@ serve(async (req) => {
       // Don't throw, user is still created
     }
 
-    // 5. Log the enrollment in ai_agent_runs
+    // 6. Log the enrollment in ai_agent_runs
     const { error: logError } = await supabase
       .from('ai_agent_runs')
       .insert({
@@ -124,7 +151,7 @@ serve(async (req) => {
         execution_status: 'success',
         items_processed: 1,
         changes_detected: 1,
-        actions_taken: ['user_created', 'role_assigned', 'welcome_email_sent'],
+        actions_taken: ['user_created', 'role_assigned', 'seat_allocated', 'welcome_email_sent'],
         metadata: {
           user_id: newUser.user.id,
           organization_id: organization_id,

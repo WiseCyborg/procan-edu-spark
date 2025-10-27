@@ -70,9 +70,61 @@ serve(async (req) => {
 
       console.log('Training coordinator role assigned to existing user');
     } else {
-      // User doesn't exist, send invitation
-      console.log('User not found, would send invitation email');
-      // In production, integrate with send-employee-invitation function
+      // User doesn't exist - send invitation email
+      console.log('User not found in system, sending invitation email');
+
+      // Generate secure invitation token
+      const invitationToken = `TC-${Date.now()}-${crypto.randomUUID().split('-')[0].toUpperCase()}`;
+
+      // Get organization details
+      const { data: orgData, error: orgError } = await supabase
+        .from('organizations')
+        .select('name')
+        .eq('id', organization_id)
+        .single();
+
+      if (orgError) {
+        throw new Error(`Failed to get organization details: ${orgError.message}`);
+      }
+
+      // Create invitation record
+      const { error: inviteError } = await supabase
+        .from('staff_invitations')
+        .insert({
+          organization_id,
+          email: user_email,
+          role: 'training_coordinator',
+          invitation_token: invitationToken,
+          inviter_id: assigned_by,
+          expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+          metadata: {
+            invited_by_role: 'dispensary_manager',
+            invitation_method: 'coordinator_assignment',
+            organization_name: orgData.name
+          }
+        });
+
+      if (inviteError) {
+        throw new Error(`Failed to create invitation: ${inviteError.message}`);
+      }
+
+      // Send invitation email
+      const { error: emailError } = await supabase.functions.invoke('send-employee-invitation', {
+        body: {
+          employeeEmail: user_email,
+          organizationName: orgData.name,
+          invitationToken,
+          deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          role: 'Training Coordinator'
+        }
+      });
+
+      if (emailError) {
+        console.error('Failed to send invitation email:', emailError);
+        // Don't throw - invitation record exists, can be resent
+      }
+
+      console.log('Training coordinator invitation sent successfully to:', user_email);
     }
 
     return new Response(

@@ -90,52 +90,37 @@ const DispensaryApplicationManager = () => {
       if (result.success) {
         const dispensaryNumber = (result as any).dispensary_number || 'N/A';
         
-        // Automatically enroll the contact person
+        // MANDATORY: Enroll the manager account - approval fails if this fails
         const application = applications.find(app => app.id === applicationId);
-        if (application) {
-          console.log('Auto-enrolling contact person:', application.contact_email);
-          
-          const { data: enrollData, error: enrollError } = await supabase.functions.invoke('enroll-dispensary-contact', {
-            body: {
-              application_id: applicationId,
-              organization_id: result.organization_id,
-              access_key: result.access_key,
-              contact_email: application.contact_email,
-              contact_person: application.contact_person
-            }
-          });
-
-          if (enrollError) {
-            console.error('Error enrolling contact:', enrollError);
-            // Still send manual approval notification as fallback
-            await supabase.functions.invoke('notify-application-status', {
-              body: {
-                application_id: applicationId,
-                status: 'approved',
-                access_key: result.access_key,
-                applicant_email: application.contact_email,
-                organization_name: application.organization_name
-              }
-            });
-            
-            toast({
-              title: "Approval Successful",
-              description: `Dispensary #${dispensaryNumber} created, but auto-enrollment failed. Manual setup required. Access Key: ${result.access_key}`,
-              variant: "default"
-            });
-          } else {
-            console.log('Enrollment successful:', enrollData);
-            toast({
-              title: "Application Approved & User Enrolled",
-              description: `Dispensary #${dispensaryNumber} created! User account created for ${application.contact_email}. Welcome email sent with login credentials.`,
-            });
-          }
-        } else {
-          toast({
-            title: "Application Approved",
-            description: `Dispensary #${dispensaryNumber} created! Access key: ${result.access_key}`,
-          });
+        if (!application) {
+          throw new Error('Application not found in local state');
         }
+
+        console.log('Creating manager account for:', application.contact_email);
+        
+        const { data: enrollData, error: enrollError } = await supabase.functions.invoke('enroll-dispensary-contact', {
+          body: {
+            application_id: applicationId,
+            organization_id: result.organization_id,
+            access_key: result.access_key,
+            contact_email: application.contact_email,
+            contact_person: application.contact_person
+          }
+        });
+
+        if (enrollError || !enrollData || !enrollData.success) {
+          throw new Error(
+            `Manager account creation failed: ${enrollError?.message || enrollData?.error || 'Unknown error'}`
+          );
+        }
+
+        console.log('Manager enrolled successfully:', enrollData.user_id);
+
+        toast({
+          title: "Application Approved ✅",
+          description: `Organization "${application.organization_name}" created with ${credits} training seats. Manager account created for ${application.contact_email}.`,
+          duration: 6000,
+        });
         
         fetchApplications();
         setSelectedApplication(null);
