@@ -1,6 +1,78 @@
 <!DOCTYPE html>
-<html><head><meta charset="UTF-8"><title>Invitation</title></head>
-<body style="font-family: Arial, sans-serif;"><div style="max-width: 600px; margin: 0 auto; padding: 40px;">
-<h1>You're Invited!</h1><p>{{ .InviterName }} invited you to {{ .OrganizationName }}</p>
-<a href="{{ .AcceptInvitationURL }}" style="background: #16a34a; color: white; padding: 12px 24px; text-decoration: none;">Accept Invitation</a>
-</div></body></html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Team Invitation - ProCann Edu</title>
+  <style>
+    body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f5f5f5; }
+    .container { max-width: 600px; margin: 0 auto; background: #ffffff; }
+    .header { background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); padding: 40px 30px; text-align: center; }
+    .header h1 { color: white; margin: 0; font-size: 28px; font-weight: 600; }
+    .content { padding: 40px 30px; color: #4a4a4a; line-height: 1.6; }
+    .content h2 { color: #1f2937; font-size: 24px; margin: 0 0 20px 0; }
+    .content p { margin: 0 0 16px 0; font-size: 16px; }
+    .button { display: inline-block; background: #16a34a; color: white !important; padding: 14px 32px; text-decoration: none; border-radius: 6px; margin: 24px 0; font-weight: 600; font-size: 16px; }
+    .button:hover { background: #15803d; }
+    .invite-box { background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 2px solid #16a34a; padding: 24px; margin: 24px 0; border-radius: 8px; }
+    .invite-box p { margin: 0 0 12px 0; font-size: 16px; color: #15803d; }
+    .invite-box .org-name { font-size: 22px; font-weight: 700; color: #166534; margin: 8px 0; }
+    .notice { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px; margin: 24px 0; border-radius: 4px; }
+    .notice p { margin: 0; font-size: 14px; color: #92400e; }
+    .benefits { background: #f9fafb; padding: 20px; margin: 24px 0; border-radius: 8px; }
+    .benefits h3 { margin: 0 0 12px 0; font-size: 18px; color: #1f2937; }
+    .benefits ul { margin: 8px 0; padding-left: 24px; }
+    .benefits li { margin: 8px 0; color: #4b5563; }
+    .footer { background: #f9fafb; padding: 30px; text-align: center; color: #6b7280; font-size: 12px; line-height: 1.8; }
+    .footer a { color: #16a34a; text-decoration: none; }
+    .footer a:hover { text-decoration: underline; }
+    .divider { height: 1px; background: #e5e7eb; margin: 24px 0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🌿 ProCann Edu</h1>
+    </div>
+    <div class="content">
+      <h2>🎉 You're Invited!</h2>
+      <p><strong>{{ .InviterName }}</strong> has invited you to join their team on ProCann Edu.</p>
+      
+      <div class="invite-box">
+        <p style="font-size: 14px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">JOIN ORGANIZATION</p>
+        <div class="org-name">{{ .OrganizationName }}</div>
+        <p style="margin-top: 16px; font-size: 14px;">Start your Maryland cannabis compliance training journey with your team.</p>
+      </div>
+
+      <div style="text-align: center;">
+        <a href="{{ .AcceptInvitationURL }}" class="button">Accept Invitation</a>
+      </div>
+
+      <div class="benefits">
+        <h3>What you'll get:</h3>
+        <ul>
+          <li>✅ Access to Maryland-compliant cannabis training</li>
+          <li>📚 Comprehensive compliance education modules</li>
+          <li>🎓 Professional certification upon completion</li>
+          <li>👥 Collaborate with your team members</li>
+          <li>📊 Track your progress and achievements</li>
+        </ul>
+      </div>
+
+      <div class="notice">
+        <p><strong>⏱️ Act Soon:</strong> This invitation link will expire in 7 days. Accept now to secure your spot!</p>
+      </div>
+
+      <div class="divider"></div>
+      <p style="font-size: 14px; color: #6b7280;">If the button doesn't work, copy and paste this link into your browser:</p>
+      <p style="font-size: 12px; color: #9ca3af; word-break: break-all;">{{ .AcceptInvitationURL }}</p>
+      <p style="font-size: 14px; color: #6b7280; margin-top: 16px;"><strong>Not interested?</strong> Simply ignore this email and no action will be taken.</p>
+    </div>
+    <div class="footer">
+      <p><strong>ProCann Edu</strong> - Maryland Cannabis Compliance Training</p>
+      <p>Questions? Contact us at <a href="mailto:support@procannedu.com">support@procannedu.com</a></p>
+      <p style="margin-top: 16px;">© 2025 ProCann Edu. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html>

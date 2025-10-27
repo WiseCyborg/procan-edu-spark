@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { CheckCircle, XCircle, Zap, Settings, AlertCircle, RefreshCw, Clock } from 'lucide-react';
+import { CheckCircle, XCircle, Zap, Settings, AlertCircle, RefreshCw, Clock, RotateCw } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface ProviderStatus {
@@ -65,38 +65,33 @@ export const EmailProviderSettings = () => {
 
   const testAllProviders = async () => {
     setTesting(true);
-    
     try {
-      toast({
-        title: 'Testing Email Providers',
-        description: 'Sending test emails via Resend and SMTP...',
-      });
-
       const { data, error } = await supabase.functions.invoke('test-email-providers');
-
       if (error) throw error;
-
-      setLastTestTime(new Date());
-
-      const results = data?.results || {};
-      const resendOk = results.resend?.status !== 'offline';
-      const smtpOk = results.smtp?.status !== 'offline';
-
       toast({
-        title: resendOk && smtpOk ? 'All Providers Online ✓' : 'Provider Issues Detected',
-        description: `Resend: ${results.resend?.status || 'unknown'} (${results.resend?.responseTime || 0}ms) | SMTP: ${results.smtp?.status || 'unknown'} (${results.smtp?.responseTime || 0}ms)`,
-        variant: resendOk && smtpOk ? 'default' : 'destructive',
+        title: "✅ Tests Complete",
+        description: `Resend: ${data?.results?.resend?.responseTime || 0}ms | SMTP: ${data?.results?.smtp?.responseTime || 0}ms`,
       });
-
       await checkProviderStatus();
     } catch (error: any) {
-      toast({
-        title: 'Test Failed',
-        description: error.message || 'Could not test email providers',
-        variant: 'destructive',
-      });
+      toast({ title: "Test Failed", description: error.message, variant: "destructive" });
     } finally {
       setTesting(false);
+      setLastTestTime(new Date());
+    }
+  };
+
+  const runAutoRetry = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('auto-retry-failed-emails');
+      if (error) throw error;
+      toast({
+        title: "✅ Retry Complete",
+        description: `Retried: ${data.emails_retried} | Succeeded: ${data.emails_succeeded}`,
+      });
+      await checkProviderStatus();
+    } catch (error: any) {
+      toast({ title: "Retry Failed", description: error.message, variant: "destructive" });
     }
   };
 
@@ -175,7 +170,11 @@ export const EmailProviderSettings = () => {
               </Button>
               <Button onClick={testAllProviders} disabled={testing} size="sm">
                 <Zap className="h-4 w-4 mr-2" />
-                {testing ? 'Testing...' : 'Test Providers'}
+                {testing ? 'Testing...' : 'Test'}
+              </Button>
+              <Button onClick={runAutoRetry} variant="outline" size="sm">
+                <RotateCw className="h-4 w-4 mr-2" />
+                Retry Failed
               </Button>
             </div>
           </CardTitle>

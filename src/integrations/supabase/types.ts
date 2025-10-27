@@ -702,8 +702,11 @@ export type Database = {
           created_at: string
           delivered_at: string | null
           email_type: string
+          error_message: string | null
+          html_content: string | null
           id: string
           metadata: Json | null
+          provider: string | null
           provider_id: string | null
           recipient_email: string
           sent_at: string | null
@@ -715,8 +718,11 @@ export type Database = {
           created_at?: string
           delivered_at?: string | null
           email_type: string
+          error_message?: string | null
+          html_content?: string | null
           id?: string
           metadata?: Json | null
+          provider?: string | null
           provider_id?: string | null
           recipient_email: string
           sent_at?: string | null
@@ -728,8 +734,11 @@ export type Database = {
           created_at?: string
           delivered_at?: string | null
           email_type?: string
+          error_message?: string | null
+          html_content?: string | null
           id?: string
           metadata?: Json | null
+          provider?: string | null
           provider_id?: string | null
           recipient_email?: string
           sent_at?: string | null
