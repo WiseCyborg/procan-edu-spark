@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -35,6 +35,20 @@ const DispensaryApplication = () => {
   const [address, setAddress] = useState('');
   const [estimatedEmployees, setEstimatedEmployees] = useState('');
   const [preferredStartDate, setPreferredStartDate] = useState('');
+
+  // Clear any cached date that's in the past on mount
+  useEffect(() => {
+    if (preferredStartDate) {
+      const selectedDate = new Date(preferredStartDate);
+      const tomorrow = new Date(Date.now() + 86400000);
+      tomorrow.setHours(0, 0, 0, 0);
+      selectedDate.setHours(0, 0, 0, 0);
+      
+      if (selectedDate < tomorrow) {
+        setPreferredStartDate(''); // Clear invalid cached date
+      }
+    }
+  }, []);
 
   // Step 4: Attestations
   const [complianceAffirmation, setComplianceAffirmation] = useState(false);
@@ -111,6 +125,23 @@ const DispensaryApplication = () => {
       return;
     }
 
+    // Validate preferred_start_date before submission
+    if (preferredStartDate) {
+      const selectedDate = new Date(preferredStartDate);
+      const tomorrow = new Date(Date.now() + 86400000);
+      tomorrow.setHours(0, 0, 0, 0);
+      selectedDate.setHours(0, 0, 0, 0);
+      
+      if (selectedDate < tomorrow) {
+        toast({
+          title: "Invalid Training Start Date",
+          description: "Preferred training start date must be at least tomorrow or later.",
+          variant: "destructive",
+        });
+        return; // Stop submission
+      }
+    }
+
     setLoading(true);
     try {
       const { error } = await supabase
@@ -128,7 +159,7 @@ const DispensaryApplication = () => {
           contact_phone: contactPhone,
           address: address,
           estimated_employees: parseInt(estimatedEmployees) || null,
-          preferred_start_date: preferredStartDate || null,
+          preferred_start_date: preferredStartDate ? `${preferredStartDate}T00:00:00Z` : null,
           compliance_affirmation: true,
           application_status: 'pending',
         });
@@ -152,7 +183,15 @@ const DispensaryApplication = () => {
           contact_email: contactEmail,
           license_number: licenseNumber,
           estimated_employees: estimatedEmployees,
-          compliance_affirmation: complianceAffirmation
+          compliance_affirmation: complianceAffirmation,
+          preferred_start_date: preferredStartDate,
+          license_issue_date: licenseIssueDate,
+          license_expiry_date: licenseExpiryDate,
+          calculated_values: {
+            preferred_start_date_sent: preferredStartDate ? `${preferredStartDate}T00:00:00Z` : null,
+            current_browser_date: new Date().toISOString().split('T')[0],
+            browser_timezone_offset: new Date().getTimezoneOffset()
+          }
         }
       });
       
@@ -421,7 +460,7 @@ const DispensaryApplication = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="startDate">Preferred Training Start</Label>
+                    <Label htmlFor="startDate">Preferred Training Start (Optional)</Label>
                     <Input
                       id="startDate"
                       type="date"
@@ -429,6 +468,9 @@ const DispensaryApplication = () => {
                       onChange={(e) => setPreferredStartDate(e.target.value)}
                       min={new Date(Date.now() + 86400000).toISOString().split('T')[0]}
                     />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Select a future date when you'd like training to begin. Leave blank if unsure.
+                    </p>
                   </div>
                 </div>
               </div>
