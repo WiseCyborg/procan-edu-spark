@@ -630,6 +630,9 @@ export type Database = {
           organization_id: string | null
           organization_name: string
           preferred_start_date: string | null
+          registration_completed: boolean | null
+          registration_token: string | null
+          registration_token_expires_at: string | null
           requested_credits: number | null
           reviewed_at: string | null
           reviewed_by: string | null
@@ -656,6 +659,9 @@ export type Database = {
           organization_id?: string | null
           organization_name: string
           preferred_start_date?: string | null
+          registration_completed?: boolean | null
+          registration_token?: string | null
+          registration_token_expires_at?: string | null
           requested_credits?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -682,6 +688,9 @@ export type Database = {
           organization_id?: string | null
           organization_name?: string
           preferred_start_date?: string | null
+          registration_completed?: boolean | null
+          registration_token?: string | null
+          registration_token_expires_at?: string | null
           requested_credits?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null

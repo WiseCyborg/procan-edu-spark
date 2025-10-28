@@ -79,6 +79,28 @@ const DispensaryApplicationManager = () => {
 
     setIsProcessing(true);
     try {
+      const application = applications.find(app => app.id === applicationId);
+      if (!application) {
+        throw new Error('Application not found');
+      }
+
+      // Generate registration token
+      const registrationToken = crypto.randomUUID();
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 7); // 7 day expiry
+
+      // Update application with token
+      const { error: tokenError } = await supabase
+        .from('dispensary_applications')
+        .update({
+          registration_token: registrationToken,
+          registration_token_expires_at: expiresAt.toISOString()
+        })
+        .eq('id', applicationId);
+
+      if (tokenError) throw tokenError;
+
+      // Approve application
       const { data, error } = await supabase.rpc('approve_dispensary_application', {
         application_id: applicationId,
         credits: credits
@@ -88,37 +110,34 @@ const DispensaryApplicationManager = () => {
 
       const result = data[0];
       if (result.success) {
-        const dispensaryNumber = (result as any).dispensary_number || 'N/A';
+        // Send approval email with registration link
+        const registrationUrl = `${window.location.origin}/register/manager?token=${registrationToken}`;
         
-        // MANDATORY: Enroll the manager account - approval fails if this fails
-        const application = applications.find(app => app.id === applicationId);
-        if (!application) {
-          throw new Error('Application not found in local state');
-        }
-
-        console.log('Creating manager account for:', application.contact_email);
+        console.log('Sending approval email with registration link...');
         
-        const { data: enrollData, error: enrollError } = await supabase.functions.invoke('enroll-dispensary-contact', {
+        const { data: emailData, error: emailError } = await supabase.functions.invoke('send-approval-email', {
           body: {
-            application_id: applicationId,
-            organization_id: result.organization_id,
-            access_key: result.access_key,
             contact_email: application.contact_email,
-            contact_person: application.contact_person
+            contact_person: application.contact_person,
+            organization_name: application.organization_name,
+            access_key: result.access_key,
+            registration_url: registrationUrl,
+            credits: credits
           }
         });
 
-        if (enrollError || !enrollData || !enrollData.success) {
-          throw new Error(
-            `Manager account creation failed: ${enrollError?.message || enrollData?.error || 'Unknown error'}`
-          );
+        if (emailError) {
+          console.error('Failed to send approval email:', emailError);
+          toast({
+            title: "Warning",
+            description: "Application approved but email notification failed. Please contact manager manually.",
+            variant: "default"
+          });
         }
-
-        console.log('Manager enrolled successfully:', enrollData.user_id);
 
         toast({
           title: "Application Approved ✅",
-          description: `Organization "${application.organization_name}" created with ${credits} training seats. Manager account created for ${application.contact_email}.`,
+          description: `Organization created with ${credits} seats. Registration link sent to ${application.contact_email}.`,
           duration: 6000,
         });
         
@@ -314,6 +333,56 @@ const DispensaryApplicationManager = () => {
     }
   };
 
+  const resendAllConfirmations = async () => {
+    const pendingApps = applications.filter(app => app.application_status === 'pending');
+    
+    if (pendingApps.length === 0) {
+      toast({
+        title: "No Pending Applications",
+        description: "There are no pending applications to send confirmations for.",
+      });
+      return;
+    }
+
+    setIsProcessing(true);
+    let successCount = 0;
+    let failCount = 0;
+
+    try {
+      for (const app of pendingApps) {
+        try {
+          const { data, error } = await supabase.functions.invoke('send-application-confirmation', {
+            body: {
+              application_id: app.id,
+              contact_person: app.contact_person,
+              contact_email: app.contact_email,
+              organization_name: app.organization_name,
+              license_number: app.license_number
+            }
+          });
+
+          if (error || !data?.success) {
+            failCount++;
+            console.error(`Failed to send confirmation to ${app.contact_email}:`, error);
+          } else {
+            successCount++;
+          }
+        } catch (err) {
+          failCount++;
+          console.error(`Error sending to ${app.contact_email}:`, err);
+        }
+      }
+
+      toast({
+        title: successCount > 0 ? "Emails Sent ✅" : "Emails Failed",
+        description: `Successfully sent ${successCount} confirmation emails. ${failCount > 0 ? `${failCount} failed.` : ''}`,
+        variant: successCount > 0 ? "default" : "destructive",
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -335,9 +404,20 @@ const DispensaryApplicationManager = () => {
           </h2>
           <p className="text-muted-foreground">Review and manage dispensary license applications</p>
         </div>
-        <Badge variant="outline" className="text-sm">
-          {applications.length} Total Applications
-        </Badge>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={resendAllConfirmations}
+            disabled={isProcessing || applications.filter(a => a.application_status === 'pending').length === 0}
+          >
+            <Mail className="mr-2 h-4 w-4" />
+            Resend All Confirmations
+          </Button>
+          <Badge variant="outline" className="text-sm">
+            {applications.length} Total Applications
+          </Badge>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4">

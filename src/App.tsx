@@ -42,6 +42,7 @@ import UnifiedOperationsDashboard from "./pages/UnifiedOperationsDashboard";
 import ContentReviewDashboard from "./pages/ContentReviewDashboard";
 import TrainingHandbook from "./pages/TrainingHandbook";
 import DispensaryApplication from "./pages/DispensaryApplication";
+import ManagerRegistration from "./pages/ManagerRegistration";
 import GetStarted from "./pages/GetStarted";
 import TeamManagement from "./pages/TeamManagement";
 import { COMARBanner } from "./components/layout/COMARBanner";
@@ -197,6 +198,7 @@ const App = () => (
                    } />
                    
                    <Route path="/org/apply" element={<DispensaryApplication />} />
+                   <Route path="/register/manager" element={<ManagerRegistration />} />
                    
                    <Route path="/get-started" element={<GetStarted />} />
                    

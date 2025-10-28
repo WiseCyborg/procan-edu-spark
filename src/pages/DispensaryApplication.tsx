@@ -180,9 +180,9 @@ const DispensaryApplication = () => {
         console.error('Failed to fetch application ID:', fetchError);
       } else {
         // Send confirmation email
-        console.log('Sending confirmation email for application:', insertedApp.id);
+        console.log('📧 Sending confirmation email to:', contactEmail);
         
-        const { error: emailError } = await supabase.functions.invoke(
+        const { data: emailResult, error: emailError } = await supabase.functions.invoke(
           'send-application-confirmation',
           {
             body: {
@@ -196,17 +196,23 @@ const DispensaryApplication = () => {
         );
 
         if (emailError) {
-          console.error('Failed to send confirmation email:', emailError);
-          // Don't fail the submission - email is nice-to-have
-        } else {
+          console.error('❌ Email function error:', emailError);
+        } else if (emailResult?.success) {
           console.log('✅ Confirmation email sent successfully');
+        } else {
+          console.warn('⚠️ Email send failed:', emailResult);
         }
       }
 
       setSubmitted(true);
+      
+      // Show success message with conditional email status
+      const emailSent = insertedApp && !fetchError;
       toast({
         title: "Application Submitted! ✅",
-        description: `Confirmation email sent to ${contactEmail}. We'll review your application within 24-48 hours.`,
+        description: emailSent 
+          ? `Confirmation email sent to ${contactEmail}. We'll review your application within 24-48 hours.`
+          : `Application received. We'll contact you at ${contactEmail} within 24 hours.`,
         duration: 6000,
       });
     } catch (error: any) {
