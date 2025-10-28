@@ -107,3 +107,6 @@ verify_jwt = false
 
 [functions.create-demo-accounts]
 verify_jwt = true
+
+[functions.send-application-confirmation]
+verify_jwt = false
