@@ -166,10 +166,48 @@ const DispensaryApplication = () => {
 
       if (error) throw error;
 
+      // Get the inserted application ID
+      const { data: insertedApp, error: fetchError } = await supabase
+        .from('dispensary_applications')
+        .select('id')
+        .eq('contact_email', contactEmail)
+        .eq('organization_name', organizationName)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (fetchError) {
+        console.error('Failed to fetch application ID:', fetchError);
+      } else {
+        // Send confirmation email
+        console.log('Sending confirmation email for application:', insertedApp.id);
+        
+        const { error: emailError } = await supabase.functions.invoke(
+          'send-application-confirmation',
+          {
+            body: {
+              application_id: insertedApp.id,
+              contact_person: contactPerson,
+              contact_email: contactEmail,
+              organization_name: organizationName,
+              license_number: licenseNumber
+            }
+          }
+        );
+
+        if (emailError) {
+          console.error('Failed to send confirmation email:', emailError);
+          // Don't fail the submission - email is nice-to-have
+        } else {
+          console.log('✅ Confirmation email sent successfully');
+        }
+      }
+
       setSubmitted(true);
       toast({
-        title: "Application Submitted!",
-        description: "We'll review your application and contact you within 24-48 hours.",
+        title: "Application Submitted! ✅",
+        description: `Confirmation email sent to ${contactEmail}. We'll review your application within 24-48 hours.`,
+        duration: 6000,
       });
     } catch (error: any) {
       console.error('❌ Application submission failed:', {
