@@ -110,3 +110,6 @@ verify_jwt = true
 
 [functions.send-application-confirmation]
 verify_jwt = false
+
+[functions.send-test-emails]
+verify_jwt = false

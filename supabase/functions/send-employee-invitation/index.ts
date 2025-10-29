@@ -1,7 +1,6 @@
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
-import { Resend } from "npm:resend@2.0.0";
-
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.4';
+import { EmailRouter } from "../_shared/email-router.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -21,11 +20,16 @@ serve(async (req) => {
       deadline 
     } = await req.json();
 
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+
     const registrationUrl = `${Deno.env.get("SUPABASE_URL")?.replace('.supabase.co', '.lovable.app')}/auth?invite=${invitationToken}`;
 
-    const emailResult = await resend.emails.send({
-      from: "ProCannEdu <noreply@procannedu.com>",
-      to: [employeeEmail],
+    const router = new EmailRouter();
+    const emailResult = await router.sendWithFailover({
+      to: employeeEmail,
       subject: `🎓 You're Invited to Complete Responsible Vendor Training`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -58,11 +62,14 @@ serve(async (req) => {
           </p>
         </div>
       `,
-    });
+      from: "ProCannEdu <noreply@procannedu.com>",
+      metadata: { email_type: 'employee_invitation', organization_name: organizationName }
+    }, supabase);
 
     return new Response(JSON.stringify({ 
       success: true,
-      emailId: emailResult.data?.id
+      emailId: emailResult.providerId,
+      provider: emailResult.provider
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
