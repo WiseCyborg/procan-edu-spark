@@ -12,12 +12,14 @@ import { Users, Mail, AlertTriangle, TrendingUp, Bell } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 
+import { useOrganization } from '@/hooks/useOrganization';
+
 const TrainingCoordinatorDashboard = () => {
   const { user } = useAuth();
   const { isTrainingCoordinator, isLoading: roleLoading } = useUserRole();
+  const { organization, organizationId, isLoading: orgLoading } = useOrganization();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [organizationId, setOrganizationId] = useState<string | null>(null);
   const [employees, setEmployees] = useState<any[]>([]);
   const [atRiskStudents, setAtRiskStudents] = useState<any[]>([]);
   const [inviteEmail, setInviteEmail] = useState('');
@@ -30,10 +32,10 @@ const TrainingCoordinatorDashboard = () => {
       return;
     }
 
-    if (user && isTrainingCoordinator) {
+    if (user && isTrainingCoordinator && organizationId) {
       fetchCoordinatorData();
     }
-  }, [user, isTrainingCoordinator, roleLoading]);
+  }, [user, isTrainingCoordinator, roleLoading, organizationId]);
 
   // Phase 6: Add real-time subscriptions
   useEffect(() => {
@@ -65,31 +67,19 @@ const TrainingCoordinatorDashboard = () => {
   }, [organizationId]);
 
   const fetchCoordinatorData = async () => {
+    if (!organizationId) return;
+    
     try {
-      // Get user's organization
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('organization_id')
-        .eq('user_id', user!.id)
-        .single();
-
-      if (!profile?.organization_id) {
-        toast.error('No organization found');
-        return;
-      }
-
-      setOrganizationId(profile.organization_id);
-
       // Get employees with real data using RPC
       const { data: empData, error: empError } = await supabase
-        .rpc('get_organization_employees', { org_id: profile.organization_id });
+        .rpc('get_organization_employees', { org_id: organizationId });
 
       if (empError) throw empError;
       setEmployees(empData || []);
 
       // Get at-risk students
       const { data: atRisk } = await supabase
-        .rpc('get_at_risk_students' as any, { org_id: profile.organization_id });
+        .rpc('get_at_risk_students' as any, { org_id: organizationId });
 
       setAtRiskStudents(atRisk || []);
     } catch (error: any) {
@@ -126,7 +116,7 @@ const TrainingCoordinatorDashboard = () => {
     }
   };
 
-  if (loading || roleLoading) {
+  if (loading || roleLoading || orgLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />

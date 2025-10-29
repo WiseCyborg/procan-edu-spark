@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { UnifiedVoiceProvider } from "@/providers/UnifiedVoiceProvider";
+import { OrganizationProvider } from "@/contexts/OrganizationContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { SkipNavigation } from "@/components/layout/SkipNavigation";
 import { Footer } from "@/components/layout/Footer";
@@ -56,6 +57,8 @@ import AccessibilityPage from "./pages/AccessibilityPage";
 import OwnersIntelligence from "./pages/OwnersIntelligence";
 import { ProfileOnboardingWizard } from "./components/onboarding/ProfileOnboardingWizard";
 import DemoAccountsSetup from "./pages/DemoAccountsSetup";
+import SystemHealthDashboard from "./pages/SystemHealthDashboard";
+import AcceptInvitation from "./pages/AcceptInvitation";
 
 import { ProtectedCourseAccess } from "./components/ProtectedCourseAccess";
 
@@ -102,7 +105,8 @@ const App = () => (
     <QueryClientProvider client={queryClient}>
       <UnifiedVoiceProvider>
         <AuthProvider>
-          <TooltipProvider>
+          <OrganizationProvider>
+            <TooltipProvider>
           <Toaster />
           <Sonner />
           <LiveRegion />
@@ -282,13 +286,21 @@ const App = () => (
                      </ProtectedRoute>
                    } />
                    
-                   <Route path="/unified-operations" element={
-                     <ProtectedRoute>
-                       <UnifiedOperationsDashboard />
-                     </ProtectedRoute>
-                   } />
-                  
-                  <Route path="*" element={<NotFound />} />
+                    <Route path="/unified-operations" element={
+                      <ProtectedRoute>
+                        <UnifiedOperationsDashboard />
+                      </ProtectedRoute>
+                    } />
+                    
+                    <Route path="/system-health" element={
+                      <ProtectedRoute>
+                        <SystemHealthDashboard />
+                      </ProtectedRoute>
+                    } />
+                    
+                    <Route path="/accept-invitation" element={<AcceptInvitation />} />
+                   
+                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
               <Footer />
@@ -296,6 +308,7 @@ const App = () => (
             <DraggableVoiceAssistant />
           </BrowserRouter>
           </TooltipProvider>
+        </OrganizationProvider>
         </AuthProvider>
       </UnifiedVoiceProvider>
     </QueryClientProvider>

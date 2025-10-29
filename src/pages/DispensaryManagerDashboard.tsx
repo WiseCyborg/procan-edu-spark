@@ -23,11 +23,13 @@ interface OrganizationInfo {
   course_credits: number;
 }
 
+import { useOrganization } from '@/hooks/useOrganization';
+
 const DispensaryManagerDashboard = () => {
   const { user } = useAuth();
   const { isDispensaryManager, isLoading: roleLoading } = useUserRole();
+  const { organization, isLoading: orgLoading, refreshOrganization } = useOrganization();
   const navigate = useNavigate();
-  const [organization, setOrganization] = useState<OrganizationInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [coordinators, setCoordinators] = useState<any[]>([]);
   const [joinCodes, setJoinCodes] = useState<any[]>([]);
@@ -39,10 +41,10 @@ const DispensaryManagerDashboard = () => {
       return;
     }
 
-    if (user && isDispensaryManager) {
-      fetchOrganizationData();
+    if (user && isDispensaryManager && organization?.id) {
+      fetchCoordinators();
     }
-  }, [user, isDispensaryManager, roleLoading]);
+  }, [user, isDispensaryManager, roleLoading, organization?.id]);
 
   // Phase 6: Add real-time subscriptions
   useEffect(() => {
@@ -54,7 +56,7 @@ const DispensaryManagerDashboard = () => {
       .channel('manager-employees-realtime')
       .on('postgres_changes',
         { event: '*', schema: 'public', table: 'profiles', filter: `organization_id=eq.${organization.id}` },
-        () => fetchOrganizationData()
+        () => refreshOrganization()
       )
       .subscribe();
 
@@ -62,7 +64,7 @@ const DispensaryManagerDashboard = () => {
       .channel('manager-seats-realtime')
       .on('postgres_changes',
         { event: '*', schema: 'public', table: 'rvt_seats', filter: `organization_id=eq.${organization.id}` },
-        () => fetchOrganizationData()
+        () => refreshOrganization()
       )
       .subscribe();
 
@@ -73,38 +75,10 @@ const DispensaryManagerDashboard = () => {
     };
   }, [organization?.id]);
 
-  const fetchOrganizationData = async () => {
+  const fetchCoordinators = async () => {
+    if (!organization?.id) return;
+
     try {
-      // Get user's organization
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('organization_id')
-        .eq('user_id', user!.id)
-        .single();
-
-      if (!profile?.organization_id) {
-        toast.error('No organization found');
-        return;
-      }
-
-      // Get organization details
-      const { data: org, error: orgError } = await supabase
-        .from('organizations')
-        .select('*')
-        .eq('id', profile.organization_id)
-        .single();
-
-      if (orgError) throw orgError;
-      setOrganization(org as any);
-
-      // Get employees using the RPC function
-      const { data: empData, error: empError } = await supabase
-        .rpc('get_organization_employees', { org_id: profile.organization_id });
-
-      if (empError) {
-        console.error('Error fetching employees:', empError);
-      }
-
       // Get training coordinators
       const { data: coords } = await supabase
         .from('user_roles')
@@ -113,7 +87,7 @@ const DispensaryManagerDashboard = () => {
           profiles!inner(first_name, last_name, email, organization_id)
         `)
         .eq('role', 'training_coordinator')
-        .eq('profiles.organization_id', profile.organization_id);
+        .eq('profiles.organization_id', organization.id);
 
       setCoordinators(coords || []);
 
@@ -121,20 +95,19 @@ const DispensaryManagerDashboard = () => {
       const { data: codes } = await supabase
         .from('rvt_join_codes')
         .select('*')
-        .eq('organization_id', profile.organization_id)
+        .eq('organization_id', organization.id)
         .eq('is_active', true)
         .order('created_at', { ascending: false });
 
       setJoinCodes(codes || []);
     } catch (error: any) {
-      console.error('Error fetching organization data:', error);
-      toast.error('Failed to load organization data');
+      console.error('Error fetching coordinators:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading || roleLoading) {
+  if (loading || roleLoading || orgLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />

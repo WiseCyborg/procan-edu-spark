@@ -116,3 +116,24 @@ verify_jwt = false
 
 [functions.staff-invitation-manager]
 verify_jwt = false
+
+[functions.send-invitation-email]
+verify_jwt = false
+
+[functions.send-welcome-email]
+verify_jwt = false
+
+[functions.allocate-seats-on-payment]
+verify_jwt = false
+
+[functions.validate-invitation]
+verify_jwt = false
+
+[functions.analyze-at-risk-students]
+verify_jwt = false
+
+[functions.track-certificate-verification]
+verify_jwt = false
+
+[functions.generate-compliance-report]
+verify_jwt = false
