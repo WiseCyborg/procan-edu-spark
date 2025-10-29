@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Activity, Database, Zap, AlertTriangle, CheckCircle, RefreshCw, Users, UserX } from 'lucide-react';
+import { Activity, Database, Zap, AlertTriangle, CheckCircle, RefreshCw, Users, UserX, Shield, ExternalLink } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { EmailFlowDiagram } from '@/components/admin/EmailFlowDiagram';
@@ -12,6 +12,7 @@ const SystemHealthDashboard = () => {
   const [healthData, setHealthData] = useState<any>(null);
   const [orphanedManagers, setOrphanedManagers] = useState<any[]>([]);
   const [emailFlowSteps, setEmailFlowSteps] = useState<any[]>([]);
+  const [securityStatus, setSecurityStatus] = useState<any>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -66,6 +67,14 @@ const SystemHealthDashboard = () => {
           { id: 'invitations', label: 'Staff Invitations', status: orphaned?.some(a => a.id === recentApp.id) ? 'pending' as const : 'completed' as const }
         ]);
       }
+
+      // Security status - Phase 1 completed, Phase 3 pending
+      setSecurityStatus({
+        functionsSecured: true, // Phase 1 completed via migration
+        extensionWarning: true, // Phase 2 cannot fix (pg_net limitation)
+        postgresUpgraded: false, // Phase 3 requires manual upgrade
+        overallStatus: 'partial'
+      });
     } catch (error: any) {
       toast({ title: "Health Check Failed", description: error.message, variant: "destructive" });
     } finally {
@@ -88,7 +97,7 @@ const SystemHealthDashboard = () => {
         </Button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -130,6 +139,52 @@ const SystemHealthDashboard = () => {
                 ))}
               </div>
             )}
+          </CardContent>
+        </Card>
+
+        <Card className={securityStatus?.postgresUpgraded ? 'border-green-500' : 'border-yellow-500'}>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className={securityStatus?.postgresUpgraded ? "h-5 w-5 text-green-600" : "h-5 w-5 text-yellow-600"} />
+              Security Status
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Function Search Paths</span>
+                {securityStatus?.functionsSecured ? (
+                  <Badge variant="default" className="bg-green-600">✅ Fixed</Badge>
+                ) : (
+                  <Badge variant="destructive">❌ Pending</Badge>
+                )}
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Extension Schema</span>
+                <Badge variant="secondary" className="bg-yellow-600 text-white">⚠️ Acceptable</Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Postgres Upgrade</span>
+                {securityStatus?.postgresUpgraded ? (
+                  <Badge variant="default" className="bg-green-600">✅ Done</Badge>
+                ) : (
+                  <Badge variant="destructive">❌ Required</Badge>
+                )}
+              </div>
+              <div className="pt-2 border-t">
+                <a 
+                  href="https://supabase.com/dashboard/project/zhmpwczrvitomsxjwpzc/settings/infrastructure"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-primary hover:underline flex items-center gap-1"
+                >
+                  Upgrade Postgres <ExternalLink className="h-3 w-3" />
+                </a>
+                <p className="text-xs text-muted-foreground mt-1">
+                  See docs/SECURITY_FIX_IMPLEMENTATION.md
+                </p>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
