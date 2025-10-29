@@ -1,213 +1,425 @@
-import React from 'react';
-import { OnboardingWizard } from './OnboardingWizard';
-import { Building2, CreditCard, Users, BarChart, MessageSquare } from 'lucide-react';
-
-const steps = [
-  {
-    id: 'portal-overview',
-    title: 'Welcome to Your Portal',
-    description: 'Manage your organization\'s training and compliance',
-    content: (
-      <div className="space-y-4">
-        <div className="bg-primary/10 p-6 rounded-lg">
-          <Building2 className="h-12 w-12 text-primary mb-4" />
-          <h3 className="font-semibold text-lg mb-2">Your Dispensary Command Center</h3>
-          <p className="text-muted-foreground">
-            As a Dispensary Manager, you oversee training for your entire organization. 
-            Purchase seats, monitor employee progress, and ensure compliance.
-          </p>
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <div className="p-3 border rounded-lg">
-            <CreditCard className="h-5 w-5 text-primary mb-2" />
-            <h4 className="font-semibold text-sm">Purchase Seats</h4>
-            <p className="text-xs text-muted-foreground">Buy training licenses</p>
-          </div>
-          <div className="p-3 border rounded-lg">
-            <Users className="h-5 w-5 text-primary mb-2" />
-            <h4 className="font-semibold text-sm">View Employees</h4>
-            <p className="text-xs text-muted-foreground">Track team progress</p>
-          </div>
-          <div className="p-3 border rounded-lg">
-            <BarChart className="h-5 w-5 text-primary mb-2" />
-            <h4 className="font-semibold text-sm">Analytics</h4>
-            <p className="text-xs text-muted-foreground">Compliance reports</p>
-          </div>
-          <div className="p-3 border rounded-lg">
-            <MessageSquare className="h-5 w-5 text-primary mb-2" />
-            <h4 className="font-semibold text-sm">Communication</h4>
-            <p className="text-xs text-muted-foreground">Message your team</p>
-          </div>
-        </div>
-      </div>
-    )
-  },
-  {
-    id: 'viewing-employees',
-    title: 'Monitoring Your Team',
-    description: 'Track employee training progress',
-    content: (
-      <div className="space-y-4">
-        <p className="text-muted-foreground">
-          The Employee Overview shows all staff members, their progress through the 
-          18-module course, and their compliance status.
-        </p>
-        <div className="bg-muted p-4 rounded-lg space-y-2">
-          <h4 className="font-semibold">What You'll See:</h4>
-          <ul className="list-disc list-inside space-y-1 text-sm">
-            <li><strong>Progress Bars:</strong> Visual completion percentage (0-100%)</li>
-            <li><strong>Tier Badges:</strong> Green, Yellow, Red tier achievements</li>
-            <li><strong>Last Activity:</strong> When they last accessed training</li>
-            <li><strong>Certificate Status:</strong> Completed vs. in progress</li>
-            <li><strong>At-Risk Indicators:</strong> Employees falling behind</li>
-          </ul>
-        </div>
-        <div className="border-l-4 border-blue-500 bg-blue-50 p-4 rounded">
-          <p className="text-sm font-semibold text-blue-800">💡 Pro Tip</p>
-          <p className="text-sm text-blue-700">
-            Click on any employee's name to see detailed module-by-module progress 
-            and quiz scores.
-          </p>
-        </div>
-      </div>
-    )
-  },
-  {
-    id: 'downloading-reports',
-    title: 'Compliance Reports',
-    description: 'Export data for audits and reviews',
-    content: (
-      <div className="space-y-4">
-        <p className="text-muted-foreground">
-          Generate reports to track your organization's training compliance, 
-          perfect for regulatory audits or internal reviews.
-        </p>
-        <div className="space-y-3">
-          <div className="p-3 bg-muted rounded-lg">
-            <h5 className="font-semibold text-sm mb-1">📊 Progress Report</h5>
-            <p className="text-xs text-muted-foreground">
-              Shows each employee's completion percentage, current tier, and last activity date
-            </p>
-          </div>
-          <div className="p-3 bg-muted rounded-lg">
-            <h5 className="font-semibold text-sm mb-1">🎓 Certificate Report</h5>
-            <p className="text-xs text-muted-foreground">
-              Lists all issued certificates with numbers, dates, and expiration info
-            </p>
-          </div>
-          <div className="p-3 bg-muted rounded-lg">
-            <h5 className="font-semibold text-sm mb-1">💺 Seat Utilization Report</h5>
-            <p className="text-xs text-muted-foreground">
-              Tracks purchased, available, assigned, and used training seats
-            </p>
-          </div>
-        </div>
-        <div className="bg-green-50 p-4 rounded-lg">
-          <p className="text-sm text-green-700">
-            <strong>How to Download:</strong> Navigate to the Analytics tab, 
-            select your report type, choose date range, and click "Download Report". 
-            Files are exported as CSV for easy spreadsheet analysis.
-          </p>
-        </div>
-      </div>
-    )
-  },
-  {
-    id: 'communication',
-    title: 'Team Communication',
-    description: 'Stay connected with your staff',
-    content: (
-      <div className="space-y-4">
-        <div className="flex items-start gap-3">
-          <MessageSquare className="h-8 w-8 text-primary mt-1" />
-          <div>
-            <h4 className="font-semibold mb-2">Built-In Messaging</h4>
-            <p className="text-muted-foreground text-sm">
-              Use the Communication Hub to send messages to your Training Coordinator 
-              or individual employees. All conversations are tracked and searchable.
-            </p>
-          </div>
-        </div>
-        <div className="bg-muted p-4 rounded-lg space-y-2">
-          <h4 className="font-semibold text-sm">Common Messages:</h4>
-          <ul className="space-y-1 text-sm text-muted-foreground">
-            <li>• Send reminders to employees behind schedule</li>
-            <li>• Congratulate employees on tier completions</li>
-            <li>• Coordinate with your Training Coordinator</li>
-            <li>• Answer questions about course content or deadlines</li>
-            <li>• Share organizational updates</li>
-          </ul>
-        </div>
-        <div className="border-l-4 border-purple-500 bg-purple-50 p-4 rounded">
-          <p className="text-sm font-semibold text-purple-800">📧 Email Notifications</p>
-          <p className="text-sm text-purple-700">
-            You'll receive automatic alerts when: employees complete the course, 
-            fail the final exam, or when training seats are running low.
-          </p>
-        </div>
-      </div>
-    )
-  },
-  {
-    id: 'support-resources',
-    title: 'Getting Help',
-    description: 'Support resources available to you',
-    content: (
-      <div className="space-y-4">
-        <p className="text-muted-foreground">
-          You're not alone! We provide comprehensive support to ensure your success 
-          as a Dispensary Manager.
-        </p>
-        <div className="grid gap-3">
-          <div className="p-4 border rounded-lg">
-            <h5 className="font-semibold mb-1">📚 Dispensary Manager Guide</h5>
-            <p className="text-sm text-muted-foreground">
-              Complete documentation with step-by-step instructions for all tasks
-            </p>
-          </div>
-          <div className="p-4 border rounded-lg">
-            <h5 className="font-semibold mb-1">🎥 Video Tutorials</h5>
-            <p className="text-sm text-muted-foreground">
-              Watch walkthroughs of common workflows like purchasing seats and viewing reports
-            </p>
-          </div>
-          <div className="p-4 border rounded-lg">
-            <h5 className="font-semibold mb-1">❓ FAQ & Help Center</h5>
-            <p className="text-sm text-muted-foreground">
-              Searchable knowledge base with answers to frequently asked questions
-            </p>
-          </div>
-          <div className="p-4 border rounded-lg">
-            <h5 className="font-semibold mb-1">✉️ Email Support</h5>
-            <p className="text-sm text-muted-foreground">
-              Contact support@procannedu.com for technical assistance (24hr response)
-            </p>
-          </div>
-        </div>
-        <div className="bg-primary/10 p-4 rounded-lg text-center">
-          <p className="text-sm font-semibold mb-1">🎉 Ready to Get Started!</p>
-          <p className="text-sm text-muted-foreground">
-            You now have everything you need to manage your organization's training effectively. 
-            Click "Complete" to begin!
-          </p>
-        </div>
-      </div>
-    )
-  }
-];
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { useOrganization } from '@/hooks/useOrganization';
+import { Loader2, Users, Mail, CheckCircle, ArrowRight, ArrowLeft } from 'lucide-react';
 
 interface ManagerOnboardingProps {
-  onComplete: () => void;
-  onSkip: () => void;
+  onComplete?: () => void;
+  onSkip?: () => void;
 }
 
-export const ManagerOnboarding: React.FC<ManagerOnboardingProps> = ({ onComplete, onSkip }) => {
+export const ManagerOnboarding = ({ onComplete, onSkip }: ManagerOnboardingProps) => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { organizationId } = useOrganization();
+  
+  const [currentStep, setCurrentStep] = useState(1);
+  const [loading, setLoading] = useState(false);
+  
+  // Form states
+  const [isCoordinator, setIsCoordinator] = useState<string>('');
+  const [coordinatorEmail, setCoordinatorEmail] = useState('');
+  const [employeeEmails, setEmployeeEmails] = useState('');
+  const [customMessage, setCustomMessage] = useState('');
+
+  const totalSteps = 3;
+  const progress = (currentStep / totalSteps) * 100;
+
+  const handleCoordinatorSetup = async () => {
+    if (!user?.id || !organizationId) {
+      toast({
+        title: "Error",
+        description: "Missing user or organization information",
+        variant: "destructive"
+      });
+      return false;
+    }
+
+    if (isCoordinator === 'yes') {
+      // Create coordinator role for current user
+      try {
+        const { error } = await supabase
+          .from('user_roles')
+          .insert({
+            user_id: user.id,
+            role: 'training_coordinator'
+          });
+
+        if (error && !error.message.includes('duplicate')) {
+          console.error('Failed to assign coordinator role:', error);
+          toast({
+            title: "Warning",
+            description: "Could not assign coordinator role. Please contact support.",
+          });
+        }
+      } catch (error) {
+        console.error('Coordinator setup error:', error);
+      }
+    } else if (coordinatorEmail) {
+      // Send coordinator invitation
+      try {
+        const { error } = await supabase.functions.invoke('staff-invitation-manager', {
+          body: {
+            action: 'invite_single',
+            organizationId,
+            inviterId: user.id,
+            email: coordinatorEmail,
+            role: 'training_coordinator',
+            customMessage: customMessage || undefined
+          }
+        });
+
+        if (error) {
+          console.error("Coordinator invitation error:", error);
+          toast({
+            title: "Invitation Failed",
+            description: "Failed to send coordinator invitation. You can invite them later from Team Management.",
+          });
+          return false;
+        }
+
+        toast({
+          title: "Coordinator Invited",
+          description: `Invitation sent to ${coordinatorEmail}`,
+        });
+      } catch (error) {
+        console.error("Coordinator invitation exception:", error);
+        return false;
+      }
+    }
+
+    return true;
+  };
+
+  const handleEmployeeInvitations = async () => {
+    const emails = employeeEmails
+      .split('\n')
+      .map(e => e.trim())
+      .filter(e => e && e.includes('@'));
+
+    if (emails.length === 0) {
+      return true; // No emails to send, skip
+    }
+
+    if (!user?.id || !organizationId) {
+      toast({
+        title: "Error",
+        description: "Missing user or organization information",
+        variant: "destructive"
+      });
+      return false;
+    }
+
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('staff-invitation-manager', {
+        body: {
+          action: 'invite_bulk',
+          organizationId,
+          inviterId: user.id,
+          emails,
+          role: 'student',
+          customMessage: customMessage || undefined
+        }
+      });
+
+      if (error) {
+        console.error("Employee invitation error:", error);
+        toast({
+          title: "Invitation Failed",
+          description: "Some invitations failed. You can retry from Team Management.",
+        });
+        return false;
+      }
+
+      toast({
+        title: "Invitations Sent!",
+        description: `Successfully invited ${data.invitations_sent || emails.length} employees`,
+      });
+
+      return true;
+    } catch (error) {
+      console.error("Employee invitation exception:", error);
+      toast({
+        title: "Error",
+        description: "Failed to send invitations. You can retry from Team Management.",
+      });
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleNext = async () => {
+    if (currentStep === 1) {
+      if (!isCoordinator) {
+        toast({
+          title: "Selection Required",
+          description: "Please select whether you'll be the coordinator",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (isCoordinator === 'no' && !coordinatorEmail) {
+        toast({
+          title: "Email Required",
+          description: "Please enter the coordinator's email",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      setLoading(true);
+      const success = await handleCoordinatorSetup();
+      setLoading(false);
+
+      if (success) {
+        setCurrentStep(2);
+      }
+    } else if (currentStep === 2) {
+      setCurrentStep(3);
+    }
+  };
+
+  const handleFinish = async () => {
+    setLoading(true);
+    const success = await handleEmployeeInvitations();
+    setLoading(false);
+
+    if (success || employeeEmails.trim() === '') {
+      toast({
+        title: "Setup Complete! 🎉",
+        description: "Your team is ready to get started",
+      });
+
+      if (onComplete) {
+        onComplete();
+      } else {
+        navigate('/dashboard');
+      }
+    }
+  };
+
+  const handleSkip = () => {
+    if (onSkip) {
+      onSkip();
+    } else {
+      navigate('/dashboard');
+    }
+  };
+
   return (
-    <OnboardingWizard
-      steps={steps}
-      onComplete={onComplete}
-      onSkip={onSkip}
-      storageKey="onboarding_completed_manager"
-    />
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted flex items-center justify-center p-4">
+      <Card className="w-full max-w-2xl">
+        <CardHeader>
+          <div className="flex items-center justify-between mb-4">
+            <Badge variant="outline" className="text-sm">
+              Step {currentStep} of {totalSteps}
+            </Badge>
+            <Button variant="ghost" size="sm" onClick={handleSkip}>
+              Skip for now
+            </Button>
+          </div>
+          <Progress value={progress} className="mb-4" />
+          <CardTitle className="text-2xl">Set Up Your Team</CardTitle>
+          <CardDescription>
+            Let's get your organization ready for training
+          </CardDescription>
+        </CardHeader>
+
+        <CardContent className="space-y-6">
+          {/* Step 1: Coordinator Setup */}
+          {currentStep === 1 && (
+            <div className="space-y-6">
+              <div className="flex items-start gap-4 p-4 bg-primary/10 rounded-lg">
+                <Users className="h-6 w-6 text-primary mt-1" />
+                <div>
+                  <h3 className="font-semibold mb-2">Training Coordinator</h3>
+                  <p className="text-sm text-muted-foreground">
+                    This person will manage employee training progress, send invitations,
+                    and track completion rates.
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <Label className="text-base">Will you be the Training Coordinator?</Label>
+                <RadioGroup value={isCoordinator} onValueChange={setIsCoordinator}>
+                  <div className="flex items-center space-x-2 p-4 border rounded-lg hover:bg-accent cursor-pointer">
+                    <RadioGroupItem value="yes" id="coordinator-yes" />
+                    <Label htmlFor="coordinator-yes" className="cursor-pointer flex-1">
+                      <div className="font-medium">Yes, I'll coordinate training</div>
+                      <div className="text-sm text-muted-foreground">
+                        You'll manage employee invitations and track progress
+                      </div>
+                    </Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2 p-4 border rounded-lg hover:bg-accent cursor-pointer">
+                    <RadioGroupItem value="no" id="coordinator-no" />
+                    <Label htmlFor="coordinator-no" className="cursor-pointer flex-1">
+                      <div className="font-medium">No, someone else will coordinate</div>
+                      <div className="text-sm text-muted-foreground">
+                        We'll send them an invitation to join
+                      </div>
+                    </Label>
+                  </div>
+                </RadioGroup>
+
+                {isCoordinator === 'no' && (
+                  <div className="space-y-2 pl-4 border-l-2 border-primary">
+                    <Label htmlFor="coordinator-email">Coordinator's Email</Label>
+                    <Input
+                      id="coordinator-email"
+                      type="email"
+                      placeholder="coordinator@example.com"
+                      value={coordinatorEmail}
+                      onChange={(e) => setCoordinatorEmail(e.target.value)}
+                    />
+                  </div>
+                )}
+              </div>
+
+              <Button 
+                onClick={handleNext} 
+                className="w-full" 
+                size="lg"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Setting up...
+                  </>
+                ) : (
+                  <>
+                    Continue
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
+
+          {/* Step 2: Custom Message */}
+          {currentStep === 2 && (
+            <div className="space-y-6">
+              <div className="flex items-start gap-4 p-4 bg-primary/10 rounded-lg">
+                <Mail className="h-6 w-6 text-primary mt-1" />
+                <div>
+                  <h3 className="font-semibold mb-2">Personalize Your Invitations</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Add a custom message that will be included in invitation emails (optional)
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="custom-message">Custom Message</Label>
+                <Textarea
+                  id="custom-message"
+                  placeholder="e.g., Welcome to our team! We're excited to have you complete this important training..."
+                  value={customMessage}
+                  onChange={(e) => setCustomMessage(e.target.value)}
+                  rows={5}
+                />
+                <p className="text-xs text-muted-foreground">
+                  This message will be included in all invitation emails
+                </p>
+              </div>
+
+              <div className="flex gap-3">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setCurrentStep(1)}
+                  className="flex-1"
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back
+                </Button>
+                <Button 
+                  onClick={handleNext} 
+                  className="flex-1"
+                >
+                  Continue
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Step 3: Employee Invitations */}
+          {currentStep === 3 && (
+            <div className="space-y-6">
+              <div className="flex items-start gap-4 p-4 bg-primary/10 rounded-lg">
+                <Users className="h-6 w-6 text-primary mt-1" />
+                <div>
+                  <h3 className="font-semibold mb-2">Invite Your Employees</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Enter employee email addresses (one per line) to send invitations.
+                    You can also do this later from Team Management.
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="employee-emails">Employee Email Addresses</Label>
+                <Textarea
+                  id="employee-emails"
+                  placeholder="employee1@example.com&#10;employee2@example.com&#10;employee3@example.com"
+                  value={employeeEmails}
+                  onChange={(e) => setEmployeeEmails(e.target.value)}
+                  rows={8}
+                  className="font-mono text-sm"
+                />
+                <p className="text-xs text-muted-foreground">
+                  {employeeEmails.split('\n').filter(e => e.trim() && e.includes('@')).length} valid email addresses
+                </p>
+              </div>
+
+              <div className="flex gap-3">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setCurrentStep(2)}
+                  className="flex-1"
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back
+                </Button>
+                <Button 
+                  onClick={handleFinish} 
+                  className="flex-1"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Sending Invitations...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="mr-2 h-4 w-4" />
+                      Finish Setup
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 };

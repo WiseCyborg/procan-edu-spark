@@ -123,14 +123,14 @@ export default function ManagerRegistration() {
 
       toast({
         title: "Registration Successful! 🎉",
-        description: "Your dispensary manager account has been created. Please check your email to verify your account.",
-        duration: 8000,
+        description: "Let's set up your team now!",
+        duration: 3000,
       });
 
-      // Redirect to login after 2 seconds
+      // Redirect to onboarding wizard after 1.5 seconds
       setTimeout(() => {
-        navigate('/auth?mode=login');
-      }, 2000);
+        navigate('/onboarding/setup-team?first_login=true');
+      }, 1500);
 
     } catch (error: any) {
       console.error('Registration error:', error);

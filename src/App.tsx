@@ -59,6 +59,7 @@ import { ProfileOnboardingWizard } from "./components/onboarding/ProfileOnboardi
 import DemoAccountsSetup from "./pages/DemoAccountsSetup";
 import SystemHealthDashboard from "./pages/SystemHealthDashboard";
 import AcceptInvitation from "./pages/AcceptInvitation";
+import { ManagerOnboarding } from "./components/onboarding/ManagerOnboarding";
 
 import { ProtectedCourseAccess } from "./components/ProtectedCourseAccess";
 
@@ -256,8 +257,20 @@ const App = () => (
                      </ProtectedRoute>
                    } />
                    
-                   <Route path="/verify/certificate/:certificateId" element={<SecureCertificateVerification />} />
-                    <Route path="/admin/advanced-analytics" element={
+                    <Route path="/verify/certificate/:certificateId" element={<SecureCertificateVerification />} />
+                    
+                    <Route path="/onboarding/setup-team" element={
+                      <ProtectedRoute>
+                        <OrganizationProvider>
+                          <ManagerOnboarding />
+                        </OrganizationProvider>
+                      </ProtectedRoute>
+                    } />
+                    
+                    <Route path="/accept-invitation" element={<AcceptInvitation />} />
+                    <Route path="/system-health" element={<SystemHealthDashboard />} />
+                    
+                     <Route path="/admin/advanced-analytics" element={
                       <ProtectedRoute>
                         <AdvancedAnalytics />
                       </ProtectedRoute>

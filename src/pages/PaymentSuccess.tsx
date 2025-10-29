@@ -1,10 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { CheckCircle, Award, ArrowRight, Mail, Users, Copy, Check } from 'lucide-react';
+import { CheckCircle, Award, ArrowRight, Mail, Users, Copy, Check, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 import Confetti from 'react-confetti';
 
 interface SeatPurchaseData {
@@ -16,9 +21,13 @@ interface SeatPurchaseData {
 const PaymentSuccess: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { user } = useAuth();
   const [showConfetti, setShowConfetti] = useState(false);
   const [seatPurchaseData, setSeatPurchaseData] = useState<SeatPurchaseData | null>(null);
   const [copied, setCopied] = useState(false);
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
+  const [inviteEmails, setInviteEmails] = useState('');
+  const [inviteLoading, setInviteLoading] = useState(false);
 
   useEffect(() => {
     const verifyPayment = async () => {
@@ -118,6 +127,84 @@ const PaymentSuccess: React.FC = () => {
     }
   };
 
+  const handleSendInvitations = async () => {
+    const emails = inviteEmails
+      .split('\n')
+      .map(e => e.trim())
+      .filter(e => e && e.includes('@'));
+
+    if (emails.length === 0) {
+      toast({
+        title: "No Emails",
+        description: "Please enter at least one email address",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!user?.id) {
+      toast({
+        title: "Error",
+        description: "User information not found",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Get organization_id from user's profile
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('organization_id')
+      .eq('user_id', user.id)
+      .single();
+
+    if (!profile?.organization_id) {
+      toast({
+        title: "Error",
+        description: "Organization not found",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setInviteLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('staff-invitation-manager', {
+        body: {
+          action: 'invite_bulk',
+          organizationId: profile.organization_id,
+          inviterId: user.id,
+          emails,
+          role: 'student'
+        }
+      });
+
+      if (error) {
+        console.error("Invitation error:", error);
+        toast({
+          title: "Partial Success",
+          description: "Some invitations may have failed. You can retry from Team Management.",
+        });
+      } else {
+        toast({
+          title: "Invitations Sent!",
+          description: `Successfully invited ${data.invitations_sent || emails.length} employees`,
+        });
+        setInviteModalOpen(false);
+        setInviteEmails('');
+      }
+    } catch (error) {
+      console.error("Invitation exception:", error);
+      toast({
+        title: "Error",
+        description: "Failed to send invitations. You can retry from Team Management.",
+        variant: "destructive"
+      });
+    } finally {
+      setInviteLoading(false);
+    }
+  };
+
   // Seat purchase success view
   if (seatPurchaseData) {
     return (
@@ -171,12 +258,12 @@ const PaymentSuccess: React.FC = () => {
             {/* Quick Actions */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Button 
-                onClick={() => navigate('/team-management?tab=invitations')}
+                onClick={() => setInviteModalOpen(true)}
                 size="lg"
                 className="bg-blue-600 hover:bg-blue-700"
               >
                 <Mail className="mr-2 h-5 w-5" />
-                Invite Employees
+                Invite Employees Now
               </Button>
               <Button 
                 variant="outline"
@@ -187,6 +274,50 @@ const PaymentSuccess: React.FC = () => {
                 Manage Seats
               </Button>
             </div>
+
+            {/* Invitation Modal */}
+            <Dialog open={inviteModalOpen} onOpenChange={setInviteModalOpen}>
+              <DialogContent className="max-w-lg">
+                <DialogHeader>
+                  <DialogTitle>Invite Your Team</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="invite-emails">Employee Email Addresses</Label>
+                    <Textarea
+                      id="invite-emails"
+                      placeholder="employee1@example.com&#10;employee2@example.com&#10;employee3@example.com"
+                      value={inviteEmails}
+                      onChange={(e) => setInviteEmails(e.target.value)}
+                      rows={6}
+                      className="font-mono text-sm"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      {inviteEmails.split('\n').filter(e => e.trim() && e.includes('@')).length} valid emails
+                    </p>
+                  </div>
+
+                  <Button 
+                    onClick={handleSendInvitations}
+                    disabled={inviteLoading}
+                    className="w-full"
+                    size="lg"
+                  >
+                    {inviteLoading ? (
+                      <>
+                        <Send className="mr-2 h-4 w-4 animate-spin" />
+                        Sending...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="mr-2 h-4 w-4" />
+                        Send Invitations
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
 
             {/* What's Next */}
             <div className="bg-green-50 p-6 rounded-lg">
