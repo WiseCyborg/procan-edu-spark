@@ -58,6 +58,7 @@ import OwnersIntelligence from "./pages/OwnersIntelligence";
 import { ProfileOnboardingWizard } from "./components/onboarding/ProfileOnboardingWizard";
 import DemoAccountsSetup from "./pages/DemoAccountsSetup";
 import SystemHealthDashboard from "./pages/SystemHealthDashboard";
+import UnifiedHealthReport from "./pages/UnifiedHealthReport";
 import AcceptInvitation from "./pages/AcceptInvitation";
 import { ManagerOnboarding } from "./components/onboarding/ManagerOnboarding";
 
@@ -305,13 +306,19 @@ const App = () => (
                       </ProtectedRoute>
                     } />
                     
-                    <Route path="/system-health" element={
-                      <ProtectedRoute>
-                        <SystemHealthDashboard />
-                      </ProtectedRoute>
-                    } />
-                    
-                    <Route path="/accept-invitation" element={<AcceptInvitation />} />
+                     <Route path="/system-health" element={
+                       <ProtectedRoute>
+                         <SystemHealthDashboard />
+                       </ProtectedRoute>
+                     } />
+                     
+                     <Route path="/admin/health-report" element={
+                       <ProtectedRoute>
+                         <UnifiedHealthReport />
+                       </ProtectedRoute>
+                     } />
+                     
+                     <Route path="/accept-invitation" element={<AcceptInvitation />} />
                    
                    <Route path="*" element={<NotFound />} />
                 </Routes>

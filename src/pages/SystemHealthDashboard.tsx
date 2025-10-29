@@ -2,10 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Activity, Database, Zap, AlertTriangle, CheckCircle, RefreshCw, Users, UserX, Shield, ExternalLink } from 'lucide-react';
+import { Activity, Database, Zap, AlertTriangle, CheckCircle, RefreshCw, Users, UserX, Shield, ExternalLink, BarChart3 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { EmailFlowDiagram } from '@/components/admin/EmailFlowDiagram';
+import { EdgeFunctionsStatus } from '@/components/admin/EdgeFunctionsStatus';
+import { IntegrationHealthMonitor } from '@/components/admin/IntegrationHealthMonitor';
 
 const SystemHealthDashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -14,6 +17,7 @@ const SystemHealthDashboard = () => {
   const [emailFlowSteps, setEmailFlowSteps] = useState<any[]>([]);
   const [securityStatus, setSecurityStatus] = useState<any>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchHealthData();
@@ -91,10 +95,16 @@ const SystemHealthDashboard = () => {
           <h1 className="text-3xl font-bold">System Health Dashboard</h1>
           <p className="text-muted-foreground">Monitor platform performance</p>
         </div>
-        <Button onClick={fetchHealthData} variant="outline">
-          <RefreshCw className="h-4 w-4 mr-2" />
-          Refresh
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={() => navigate('/admin/health-report')} variant="default">
+            <BarChart3 className="h-4 w-4 mr-2" />
+            Full Health Report
+          </Button>
+          <Button onClick={fetchHealthData} variant="outline">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -190,6 +200,12 @@ const SystemHealthDashboard = () => {
       </div>
 
       {emailFlowSteps.length > 0 && <EmailFlowDiagram steps={emailFlowSteps} />}
+      
+      {/* Edge Functions Status */}
+      <EdgeFunctionsStatus />
+      
+      {/* Integration Health Monitor */}
+      <IntegrationHealthMonitor />
     </div>
   );
 };

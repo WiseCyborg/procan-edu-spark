@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.12 (cd3cf9e)"
+    PostgrestVersion: "13.0.5"
   }
   public: {
     Tables: {
@@ -140,6 +140,36 @@ export type Database = {
           success?: boolean
           user_id?: string | null
           user_role?: string
+        }
+        Relationships: []
+      }
+      automated_test_results: {
+        Row: {
+          duration_ms: number | null
+          error_message: string | null
+          id: string
+          metadata: Json | null
+          status: string
+          test_date: string
+          test_name: string
+        }
+        Insert: {
+          duration_ms?: number | null
+          error_message?: string | null
+          id?: string
+          metadata?: Json | null
+          status: string
+          test_date?: string
+          test_name: string
+        }
+        Update: {
+          duration_ms?: number | null
+          error_message?: string | null
+          id?: string
+          metadata?: Json | null
+          status?: string
+          test_date?: string
+          test_name?: string
         }
         Relationships: []
       }
@@ -706,6 +736,39 @@ export type Database = {
           },
         ]
       }
+      edge_function_status: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          function_name: string
+          id: string
+          is_deployed: boolean
+          last_check: string
+          response_time_ms: number | null
+          status_code: number | null
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          function_name: string
+          id?: string
+          is_deployed?: boolean
+          last_check?: string
+          response_time_ms?: number | null
+          status_code?: number | null
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          function_name?: string
+          id?: string
+          is_deployed?: boolean
+          last_check?: string
+          response_time_ms?: number | null
+          status_code?: number | null
+        }
+        Relationships: []
+      }
       email_logs: {
         Row: {
           created_at: string
@@ -1094,6 +1157,78 @@ export type Database = {
           updated_at?: string | null
           uploaded_by?: string | null
           usage_locations?: string[] | null
+        }
+        Relationships: []
+      }
+      integration_health: {
+        Row: {
+          created_at: string
+          details: Json | null
+          error_count: number | null
+          id: string
+          integration_name: string
+          last_check: string
+          response_time_ms: number | null
+          status: string
+          success_rate: number | null
+        }
+        Insert: {
+          created_at?: string
+          details?: Json | null
+          error_count?: number | null
+          id?: string
+          integration_name: string
+          last_check?: string
+          response_time_ms?: number | null
+          status: string
+          success_rate?: number | null
+        }
+        Update: {
+          created_at?: string
+          details?: Json | null
+          error_count?: number | null
+          id?: string
+          integration_name?: string
+          last_check?: string
+          response_time_ms?: number | null
+          status?: string
+          success_rate?: number | null
+        }
+        Relationships: []
+      }
+      lighthouse_scores: {
+        Row: {
+          accessibility_score: number | null
+          best_practices_score: number | null
+          created_at: string
+          environment: string
+          id: string
+          page_url: string
+          performance_score: number | null
+          seo_score: number | null
+          test_date: string
+        }
+        Insert: {
+          accessibility_score?: number | null
+          best_practices_score?: number | null
+          created_at?: string
+          environment?: string
+          id?: string
+          page_url: string
+          performance_score?: number | null
+          seo_score?: number | null
+          test_date?: string
+        }
+        Update: {
+          accessibility_score?: number | null
+          best_practices_score?: number | null
+          created_at?: string
+          environment?: string
+          id?: string
+          page_url?: string
+          performance_score?: number | null
+          seo_score?: number | null
+          test_date?: string
         }
         Relationships: []
       }
@@ -2253,6 +2388,36 @@ export type Database = {
           updated_at?: string | null
           user_id?: string | null
           user_role?: string
+        }
+        Relationships: []
+      }
+      system_health_snapshots: {
+        Row: {
+          component_scores: Json
+          created_at: string
+          gaps: Json | null
+          id: string
+          overall_health_score: number | null
+          snapshot_date: string
+          test_results: Json | null
+        }
+        Insert: {
+          component_scores?: Json
+          created_at?: string
+          gaps?: Json | null
+          id?: string
+          overall_health_score?: number | null
+          snapshot_date?: string
+          test_results?: Json | null
+        }
+        Update: {
+          component_scores?: Json
+          created_at?: string
+          gaps?: Json | null
+          id?: string
+          overall_health_score?: number | null
+          snapshot_date?: string
+          test_results?: Json | null
         }
         Relationships: []
       }
