@@ -113,3 +113,6 @@ verify_jwt = false
 
 [functions.send-test-emails]
 verify_jwt = false
+
+[functions.staff-invitation-manager]
+verify_jwt = false

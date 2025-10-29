@@ -182,7 +182,18 @@ export const StaffInvitationSystem = () => {
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Staff invitation error:", error);
+        toast({
+          title: "Invitation Failed",
+          description: error.message?.includes('404') || error.message?.includes('FunctionsHttpError')
+            ? "Email service temporarily unavailable. Please contact support."
+            : `Failed to send invitation: ${error.message}`,
+          variant: "destructive"
+        });
+        setLoading(false);
+        return;
+      }
 
       toast({
         title: "Invitation Sent",
@@ -195,6 +206,7 @@ export const StaffInvitationSystem = () => {
       setInviteDialogOpen(false);
       fetchInvitations();
     } catch (error: any) {
+      console.error("Staff invitation exception:", error);
       toast({
         title: "Error",
         description: `Failed to send invitation: ${error.message}`,
