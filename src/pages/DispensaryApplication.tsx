@@ -143,8 +143,10 @@ const DispensaryApplication = () => {
     }
 
     setLoading(true);
+    
     try {
-      const { error } = await supabase
+      // PHASE 1: Save application to database (CRITICAL - must succeed)
+      const { data: insertedApp, error: dbError } = await supabase
         .from('dispensary_applications')
         .insert({
           organization_name: organizationName,
@@ -162,25 +164,21 @@ const DispensaryApplication = () => {
           preferred_start_date: preferredStartDate ? `${preferredStartDate}T00:00:00Z` : null,
           compliance_affirmation: true,
           application_status: 'pending',
-        });
-
-      if (error) throw error;
-
-      // Get the inserted application ID
-      const { data: insertedApp, error: fetchError } = await supabase
-        .from('dispensary_applications')
+        })
         .select('id')
-        .eq('contact_email', contactEmail)
-        .eq('organization_name', organizationName)
-        .order('created_at', { ascending: false })
-        .limit(1)
         .single();
 
-      if (fetchError) {
-        console.error('Failed to fetch application ID:', fetchError);
-      } else {
-        // Send confirmation email
-        console.log('📧 Sending confirmation email to:', contactEmail);
+      // ❌ Database failed - this IS a real error
+      if (dbError) throw dbError;
+
+      // ✅ Application saved successfully!
+      console.log('✅ Application saved to database:', insertedApp.id);
+      setSubmitted(true);
+
+      // PHASE 2: Send confirmation email (NON-BLOCKING - nice to have)
+      let emailDelivered = false;
+      try {
+        console.log('📧 Attempting to send confirmation email to:', contactEmail);
         
         const { data: emailResult, error: emailError } = await supabase.functions.invoke(
           'send-application-confirmation',
@@ -196,25 +194,33 @@ const DispensaryApplication = () => {
         );
 
         if (emailError) {
-          console.error('❌ Email function error:', emailError);
+          console.warn('⚠️ Email function error (non-critical):', emailError);
         } else if (emailResult?.success) {
-          console.log('✅ Confirmation email sent successfully');
+          console.log('✅ Confirmation email sent successfully via', emailResult.provider);
+          emailDelivered = true;
         } else {
-          console.warn('⚠️ Email send failed:', emailResult);
+          console.warn('⚠️ Email send failed (non-critical):', emailResult);
         }
+      } catch (emailException) {
+        // Email completely failed but application is saved - this is OK
+        console.warn('⚠️ Email sending exception (non-critical):', emailException);
       }
 
-      setSubmitted(true);
-      
-      // Show success message with conditional email status
-      const emailSent = insertedApp && !fetchError;
-      toast({
-        title: "Application Submitted! ✅",
-        description: emailSent 
-          ? `Confirmation email sent to ${contactEmail}. We'll review your application within 24-48 hours.`
-          : `Application received. We'll contact you at ${contactEmail} within 24 hours.`,
-        duration: 6000,
-      });
+      // Show appropriate success message based on email delivery
+      if (emailDelivered) {
+        toast({
+          title: "Application Submitted! ✅",
+          description: `Confirmation email sent to ${contactEmail}. We'll review your application within 24-48 hours.`,
+          duration: 6000,
+        });
+      } else {
+        toast({
+          title: "Application Submitted! ✅",
+          description: `Your application has been received. We'll contact you at ${contactEmail} within 24 hours.`,
+          variant: "default",
+          duration: 6000,
+        });
+      }
     } catch (error: any) {
       console.error('❌ Application submission failed:', {
         message: error.message,
