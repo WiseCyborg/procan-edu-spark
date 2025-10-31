@@ -21,8 +21,14 @@ import {
   Mail,
   Phone,
   MapPin,
-  Plus
+  Plus,
+  Copy,
+  AlertCircle,
+  AlertTriangle,
+  RefreshCw
 } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { EmailDeliveryStatus } from './EmailDeliveryStatus';
 
 interface DispensaryApplication {
   id: string;
@@ -47,6 +53,13 @@ const DispensaryApplicationManager = () => {
   const [selectedApplication, setSelectedApplication] = useState<DispensaryApplication | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [adminNotes, setAdminNotes] = useState('');
+  const [approvalStep, setApprovalStep] = useState<string>('');
+  const [approvalData, setApprovalData] = useState<{
+    registrationLink: string;
+    accessKey: string;
+    emailSent: boolean;
+    emailError: string | null;
+  } | null>(null);
   const { performSecurityCheck } = useSecurityMonitoring();
 
   useEffect(() => {
@@ -78,12 +91,17 @@ const DispensaryApplicationManager = () => {
     if (!await performSecurityCheck('dispensary_approval')) return;
 
     setIsProcessing(true);
+    setApprovalData(null);
+    
     try {
       const application = applications.find(app => app.id === applicationId);
       if (!application) {
         throw new Error('Application not found');
       }
 
+      // Step 1: Creating organization
+      setApprovalStep('Creating organization...');
+      
       // Generate registration token
       const registrationToken = crypto.randomUUID();
       const expiresAt = new Date();
@@ -109,12 +127,21 @@ const DispensaryApplicationManager = () => {
       if (error) throw error;
 
       const result = data[0];
-      if (result.success) {
-        // Send approval email with registration link
-        const registrationUrl = `${window.location.origin}/register/manager?token=${registrationToken}`;
-        
-        console.log('Sending approval email with registration link...');
-        
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to approve application');
+      }
+
+      // Step 2: Generating registration link
+      setApprovalStep('Generating registration link...');
+      const registrationUrl = `${window.location.origin}/register/manager?token=${registrationToken}`;
+
+      // Step 3: Sending approval email
+      setApprovalStep('Sending approval email...');
+      
+      let emailSent = false;
+      let emailError = null;
+      
+      try {
         const emailResult = await supabase.functions.invoke('send-approval-email', {
           body: {
             contact_email: application.contact_email,
@@ -127,43 +154,112 @@ const DispensaryApplicationManager = () => {
         });
 
         if (emailResult.error) {
+          emailError = emailResult.error.message || 'Failed to send email';
           console.error('Failed to send approval email:', emailResult.error);
-          toast({
-            title: "Warning ⚠️",
-            description: "Application approved but email notification failed. Registration link copied to clipboard.",
-            variant: "default"
-          });
-          // Copy registration link to clipboard as fallback
+          // Copy to clipboard as fallback
           navigator.clipboard.writeText(registrationUrl);
         } else {
+          emailSent = true;
           console.log('Approval email sent successfully:', emailResult.data);
         }
-
-        toast({
-          title: "Application Approved ✅",
-          description: `Organization created with ${credits} seats. Registration link sent to ${application.contact_email}.`,
-          duration: 6000,
-        });
-        
-        fetchApplications();
-        setSelectedApplication(null);
-        setAdminNotes('');
-      } else {
-        toast({
-          title: "Error",
-          description: result.message,
-          variant: "destructive"
-        });
+      } catch (emailErr) {
+        emailError = emailErr instanceof Error ? emailErr.message : 'Email sending failed';
+        console.error('Error sending email:', emailErr);
+        navigator.clipboard.writeText(registrationUrl);
       }
+
+      // Store approval data for success card
+      setApprovalData({
+        registrationLink: registrationUrl,
+        accessKey: result.access_key,
+        emailSent,
+        emailError
+      });
+
+      setApprovalStep('');
+      
+      toast({
+        title: emailSent ? "Application Approved ✅" : "Application Approved ⚠️",
+        description: emailSent 
+          ? `Organization created with ${credits} seats. Approval email sent to ${application.contact_email}.`
+          : `Organization created with ${credits} seats. Email failed - please resend manually.`,
+        duration: emailSent ? 6000 : 10000,
+      });
+      
+      fetchApplications();
     } catch (error) {
       console.error('Error approving application:', error);
+      setApprovalStep('');
+      setApprovalData(null);
       toast({
         title: "Error",
-        description: "Failed to approve application",
+        description: error instanceof Error ? error.message : "Failed to approve application",
         variant: "destructive"
       });
     } finally {
       setIsProcessing(false);
+    }
+  };
+
+  const resendApprovalEmail = async (application: DispensaryApplication) => {
+    setIsProcessing(true);
+    setApprovalStep('Resending approval email...');
+    
+    try {
+      // Get registration token from database
+      const { data: appData } = await supabase
+        .from('dispensary_applications')
+        .select('registration_token')
+        .eq('id', application.id)
+        .single();
+      
+      if (!appData?.registration_token) {
+        throw new Error('Registration token not found');
+      }
+
+      // Get organization details
+      const { data: orgData } = await supabase
+        .from('organizations')
+        .select('unique_access_key')
+        .eq('name', application.organization_name)
+        .single();
+      
+      if (!orgData?.unique_access_key) {
+        throw new Error('Organization access key not found');
+      }
+
+      const registrationUrl = `${window.location.origin}/register/manager?token=${appData.registration_token}`;
+      
+      const { data, error } = await supabase.functions.invoke('send-approval-email', {
+        body: {
+          contact_email: application.contact_email,
+          contact_person: application.contact_person,
+          organization_name: application.organization_name,
+          access_key: orgData.unique_access_key,
+          registration_url: registrationUrl,
+          credits: 10
+        }
+      });
+
+      if (error) throw error;
+
+      // Update approval data state
+      setApprovalData(prev => prev ? { ...prev, emailSent: true, emailError: null } : null);
+      
+      toast({
+        title: "Email Resent ✅",
+        description: `Approval email resent to ${application.contact_email}`,
+      });
+    } catch (error) {
+      console.error('Error resending email:', error);
+      toast({
+        title: "Resend Failed",
+        description: error instanceof Error ? error.message : 'Failed to resend email',
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessing(false);
+      setApprovalStep('');
     }
   };
 
@@ -496,6 +592,141 @@ const DispensaryApplicationManager = () => {
                       </DialogHeader>
                       
                       <div className="space-y-4">
+                        {/* Progress Indicator */}
+                        {isProcessing && approvalStep && (
+                          <Card className="border-blue-500 bg-blue-50">
+                            <CardContent className="p-4">
+                              <div className="flex items-center gap-3">
+                                <RefreshCw className="h-5 w-5 animate-spin text-blue-600" />
+                                <span className="text-sm font-medium text-blue-800">
+                                  {approvalStep}
+                                </span>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        )}
+
+                        {/* Success Card */}
+                        {approvalData && (
+                          <Card className="border-green-500 bg-green-50">
+                            <CardContent className="p-6 space-y-4">
+                              <h4 className="font-semibold text-green-800 flex items-center gap-2">
+                                <CheckCircle className="h-5 w-5" />
+                                Application Approved Successfully
+                              </h4>
+                              
+                              {/* Status Checklist */}
+                              <div className="space-y-2">
+                                <div className="flex items-center gap-2 text-sm">
+                                  <CheckCircle className="h-4 w-4 text-green-600" />
+                                  <span>Organization "{application.organization_name}" created</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-sm">
+                                  <CheckCircle className="h-4 w-4 text-green-600" />
+                                  <span>10 training seats allocated</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-sm">
+                                  {approvalData.emailSent ? (
+                                    <>
+                                      <CheckCircle className="h-4 w-4 text-green-600" />
+                                      <span>Approval email sent to: {application.contact_email}</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <AlertCircle className="h-4 w-4 text-yellow-600" />
+                                      <span>Email delivery failed - see details below</span>
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Registration Link */}
+                              <div className="p-3 bg-white rounded border border-green-200">
+                                <Label className="text-xs text-muted-foreground">
+                                  Registration Link (expires in 7 days)
+                                </Label>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <code className="text-xs flex-1 truncate bg-gray-50 p-2 rounded">
+                                    {approvalData.registrationLink}
+                                  </code>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                      navigator.clipboard.writeText(approvalData.registrationLink);
+                                      toast({ title: "Copied!", description: "Registration link copied to clipboard" });
+                                    }}
+                                  >
+                                    <Copy className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              </div>
+
+                              {/* Access Key */}
+                              <div className="p-3 bg-white rounded border border-green-200">
+                                <Label className="text-xs text-muted-foreground">
+                                  Organization Access Key
+                                </Label>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <code className="text-xs font-mono font-bold text-green-700 bg-gray-50 p-2 rounded">
+                                    {approvalData.accessKey}
+                                  </code>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                      navigator.clipboard.writeText(approvalData.accessKey);
+                                      toast({ title: "Copied!", description: "Access key copied to clipboard" });
+                                    }}
+                                  >
+                                    <Copy className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              </div>
+
+                              {/* Email Error Alert */}
+                              {approvalData.emailError && (
+                                <Alert variant="destructive">
+                                  <AlertTriangle className="h-4 w-4" />
+                                  <AlertDescription className="text-xs">
+                                    {approvalData.emailError}
+                                  </AlertDescription>
+                                </Alert>
+                              )}
+
+                              {/* Action Buttons */}
+                              <div className="flex gap-2 pt-2">
+                                <Dialog>
+                                  <DialogTrigger asChild>
+                                    <Button variant="outline" size="sm">
+                                      <Mail className="h-3 w-3 mr-1" />
+                                      View Email Status
+                                    </Button>
+                                  </DialogTrigger>
+                                  <DialogContent className="max-w-2xl">
+                                    <DialogHeader>
+                                      <DialogTitle>Email Delivery Status</DialogTitle>
+                                    </DialogHeader>
+                                    <EmailDeliveryStatus recipientEmail={application.contact_email} />
+                                  </DialogContent>
+                                </Dialog>
+
+                                {!approvalData.emailSent && (
+                                  <Button
+                                    size="sm"
+                                    onClick={() => resendApprovalEmail(application)}
+                                    disabled={isProcessing}
+                                  >
+                                    <RefreshCw className="h-3 w-3 mr-1" />
+                                    Resend Email
+                                  </Button>
+                                )}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        )}
+
+                        {/* Application Details */}
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <Label className="text-sm font-medium">Organization Name</Label>
