@@ -120,7 +120,7 @@ const DispensaryApplicationManager = () => {
 
       if (tokenError) throw tokenError;
 
-      // Approve application
+      // Approve application with RPC (now returns join_code)
       const { data, error } = await supabase.rpc('approve_dispensary_application', {
         application_id: applicationId,
         credits: credits
@@ -128,24 +128,17 @@ const DispensaryApplicationManager = () => {
 
       if (error) throw error;
 
-      const result = data[0];
+      const result = data[0] as { success: boolean; message: string; organization_id: string; access_key: string; join_code: string; purchase_id: string };
       if (!result.success) {
         throw new Error(result.message || 'Failed to approve application');
       }
 
-      // Step 2: Generating registration link and fetching credentials
+      // Step 2: Generating registration link (join_code returned from RPC)
       setApprovalStep('Generating registration link...');
       const registrationUrl = `${window.location.origin}/register/manager?token=${registrationToken}`;
-
-      // Fetch join code
-      const { data: joinCodeData } = await supabase
-        .from('rvt_join_codes')
-        .select('code')
-        .eq('organization_id', result.organization_id)
-        .eq('is_active', true)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
+      
+      // Join code is now returned directly from RPC - no separate query needed
+      const joinCode = result.join_code;
 
       // Step 3: Sending approval email
       setApprovalStep('Sending approval email...');
@@ -162,7 +155,7 @@ const DispensaryApplicationManager = () => {
             access_key: result.access_key,
             registration_url: registrationUrl,
             credits: credits,
-            join_code: joinCodeData?.code
+            join_code: joinCode
           }
         });
 
@@ -171,6 +164,22 @@ const DispensaryApplicationManager = () => {
           console.error('Failed to send approval email:', emailResult.error);
           // Copy to clipboard as fallback
           navigator.clipboard.writeText(registrationUrl);
+          
+          // Log failed email attempt
+          await supabase
+            .from('email_logs')
+            .insert({
+              email_type: 'application_approved',
+              recipient_email: application.contact_email,
+              subject: '🎉 Your Dispensary Application Has Been Approved!',
+              status: 'failed',
+              error_message: emailError,
+              metadata: {
+                organization_id: result.organization_id,
+                application_id: applicationId,
+                manual_intervention_required: true
+              }
+            });
         } else {
           emailSent = true;
           console.log('Approval email sent successfully:', emailResult.data);
@@ -179,13 +188,29 @@ const DispensaryApplicationManager = () => {
         emailError = emailErr instanceof Error ? emailErr.message : 'Email sending failed';
         console.error('Error sending email:', emailErr);
         navigator.clipboard.writeText(registrationUrl);
+        
+        // Log exception
+        await supabase
+          .from('email_logs')
+          .insert({
+            email_type: 'application_approved',
+            recipient_email: application.contact_email,
+            subject: '🎉 Your Dispensary Application Has Been Approved!',
+            status: 'failed',
+            error_message: emailError,
+            metadata: {
+              organization_id: result.organization_id,
+              application_id: applicationId,
+              exception: true
+            }
+          });
       }
 
       // Store approval data for success card
       setApprovalData({
         registrationLink: registrationUrl,
         accessKey: result.access_key,
-        joinCode: joinCodeData?.code || 'N/A',
+        joinCode: joinCode || 'N/A',
         emailSent,
         emailError
       });
@@ -255,7 +280,24 @@ const DispensaryApplicationManager = () => {
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        // Log failed resend attempt
+        await supabase
+          .from('email_logs')
+          .insert({
+            email_type: 'application_approved',
+            recipient_email: application.contact_email,
+            subject: '🎉 Your Dispensary Application Has Been Approved!',
+            status: 'failed',
+            error_message: error.message || 'Resend failed',
+            metadata: {
+              application_id: application.id,
+              organization_name: application.organization_name,
+              is_resend: true
+            }
+          });
+        throw error;
+      }
 
       // Update approval data state
       setApprovalData(prev => prev ? { ...prev, emailSent: true, emailError: null } : null);
@@ -292,15 +334,53 @@ const DispensaryApplicationManager = () => {
       const result = data[0];
       if (result.success) {
         // Send rejection notification
-        await supabase.functions.invoke('notify-application-status', {
-          body: {
-            application_id: applicationId,
-            status: 'rejected',
-            rejection_reason: reason,
-            applicant_email: selectedApplication.contact_email,
-            organization_name: selectedApplication.organization_name
+        try {
+          const notifyResult = await supabase.functions.invoke('notify-application-status', {
+            body: {
+              application_id: applicationId,
+              status: 'rejected',
+              rejection_reason: reason,
+              applicant_email: selectedApplication.contact_email,
+              organization_name: selectedApplication.organization_name
+            }
+          });
+
+          if (notifyResult.error) {
+            console.error('Failed to send rejection notification:', notifyResult.error);
+            // Log failed rejection email
+            await supabase
+              .from('email_logs')
+              .insert({
+                email_type: 'application_rejected',
+                recipient_email: selectedApplication.contact_email,
+                subject: 'Dispensary Application Status Update',
+                status: 'failed',
+                error_message: notifyResult.error.message || 'Failed to send rejection email',
+                metadata: {
+                  application_id: applicationId,
+                  organization_name: selectedApplication.organization_name,
+                  rejection_reason: reason
+                }
+              });
           }
-        });
+        } catch (emailErr) {
+          console.error('Error sending rejection notification:', emailErr);
+          // Log exception but don't block rejection
+          await supabase
+            .from('email_logs')
+            .insert({
+              email_type: 'application_rejected',
+              recipient_email: selectedApplication.contact_email,
+              subject: 'Dispensary Application Status Update',
+              status: 'failed',
+              error_message: emailErr instanceof Error ? emailErr.message : 'Exception sending rejection email',
+              metadata: {
+                application_id: applicationId,
+                organization_name: selectedApplication.organization_name,
+                exception: true
+              }
+            });
+        }
         
         toast({
           title: "Application Rejected",
