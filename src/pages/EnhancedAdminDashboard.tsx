@@ -14,7 +14,8 @@ import {
   Zap,
   Eye,
   Activity,
-  Sparkles
+  Sparkles,
+  Building2
 } from 'lucide-react';
 import { HoverCallout } from '@/components/ui/hover-callout';
 import { SimpleFAQManager } from '@/components/faq/SimpleFAQManager';
@@ -25,6 +26,7 @@ import { ImageAssetManager } from '@/components/admin/ImageAssetManager';
 import { EnhancedUserManagementView } from '@/components/admin/EnhancedUserManagementView';
 import { AIFeaturesDashboard } from '@/components/admin/AIFeaturesDashboard';
 import { CommunicationManagementView } from '@/components/admin/CommunicationManagementView';
+import DispensaryApplicationManager from '@/components/admin/DispensaryApplicationManager';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { useAdminDashboardMetrics } from '@/hooks/useAdminDashboardMetrics';
 import { useRealTimeAnalytics } from '@/hooks/useRealTimeAnalytics';
@@ -33,7 +35,7 @@ import { RealTimeAdminNavigation } from '@/components/navigation/RealTimeAdminNa
 const EnhancedAdminDashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
-  const [openDialog, setOpenDialog] = useState<'users' | 'ai' | 'communication' | null>(null);
+  const [openDialog, setOpenDialog] = useState<'users' | 'ai' | 'communication' | 'dispensary' | null>(null);
   const { metrics, loading } = useAdminDashboardMetrics();
   const { metrics: realtimeMetrics, loading: realtimeLoading } = useRealTimeAnalytics();
 
@@ -193,7 +195,7 @@ const EnhancedAdminDashboard = () => {
             <ImageAssetManager />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Card 
               className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-[1.02]"
               onClick={() => setOpenDialog('users')}
@@ -224,6 +226,33 @@ const EnhancedAdminDashboard = () => {
                     ) : (
                       <Badge variant="outline">{metrics.pendingVerifications}</Badge>
                     )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card 
+              className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-[1.02]"
+              onClick={() => setOpenDialog('dispensary')}
+            >
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Building2 className="h-5 w-5" />
+                  <span>Dispensary Applications</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Click to review and approve William's application
+                </p>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm">Pending</span>
+                    <Badge variant="secondary">1</Badge>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm">Status</span>
+                    <Badge variant="outline">Ready to Approve</Badge>
                   </div>
                 </div>
               </CardContent>
@@ -414,6 +443,19 @@ const EnhancedAdminDashboard = () => {
           </SheetHeader>
           <div className="mt-6">
             <CommunicationManagementView />
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* Dispensary Applications Sheet */}
+      <Sheet open={openDialog === 'dispensary'} onOpenChange={(open) => !open && setOpenDialog(null)}>
+        <SheetContent side="right" className="w-full sm:max-w-6xl overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>Dispensary Applications</SheetTitle>
+            <SheetDescription>Review and approve dispensary applications including William's Flame Co edu</SheetDescription>
+          </SheetHeader>
+          <div className="mt-6">
+            <DispensaryApplicationManager />
           </div>
         </SheetContent>
       </Sheet>
