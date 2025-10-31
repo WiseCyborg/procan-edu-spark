@@ -47,13 +47,18 @@ export const ComplianceReportingDashboard = () => {
     try {
       setLoading(true);
       
-      // Fetch compliance reports
-      const { data: reports, error: reportsError } = await supabase
+      // Fetch compliance reports (exclude test organizations)
+      const { data: allReports, error: reportsError } = await supabase
         .rpc('generate_compliance_report');
       
       if (reportsError) throw reportsError;
 
-      // Fetch compliance metrics
+      // Filter out test organizations
+      const reports = allReports?.filter((report: any) => {
+        return !report.organization_name.includes('Test') && !report.organization_name.includes('E2E');
+      });
+
+      // Fetch compliance metrics (exclude test organizations)
       const { data: metrics, error: metricsError } = await supabase
         .from('compliance_metrics')
         .select('*')

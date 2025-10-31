@@ -1573,6 +1573,7 @@ export type Database = {
           contact_phone: string | null
           course_credits: number | null
           created_at: string
+          expires_at: string | null
           id: string
           is_active: boolean | null
           license_number: string | null
@@ -1593,6 +1594,7 @@ export type Database = {
           contact_phone?: string | null
           course_credits?: number | null
           created_at?: string
+          expires_at?: string | null
           id?: string
           is_active?: boolean | null
           license_number?: string | null
@@ -1613,6 +1615,7 @@ export type Database = {
           contact_phone?: string | null
           course_credits?: number | null
           created_at?: string
+          expires_at?: string | null
           id?: string
           is_active?: boolean | null
           license_number?: string | null
@@ -2301,37 +2304,49 @@ export type Database = {
           accepted_at: string | null
           created_at: string
           email: string
+          error_message: string | null
           expires_at: string
           id: string
           invitation_token: string
           inviter_id: string | null
           metadata: Json | null
           organization_id: string | null
+          resend_count: number | null
           role: string
+          sent_at: string | null
+          status: string | null
         }
         Insert: {
           accepted_at?: string | null
           created_at?: string
           email: string
+          error_message?: string | null
           expires_at?: string
           id?: string
           invitation_token: string
           inviter_id?: string | null
           metadata?: Json | null
           organization_id?: string | null
+          resend_count?: number | null
           role?: string
+          sent_at?: string | null
+          status?: string | null
         }
         Update: {
           accepted_at?: string | null
           created_at?: string
           email?: string
+          error_message?: string | null
           expires_at?: string
           id?: string
           invitation_token?: string
           inviter_id?: string | null
           metadata?: Json | null
           organization_id?: string | null
+          resend_count?: number | null
           role?: string
+          sent_at?: string | null
+          status?: string | null
         }
         Relationships: [
           {
@@ -2969,6 +2984,7 @@ export type Database = {
           urgency_score: number
         }[]
       }
+      expire_test_organizations: { Args: never; Returns: undefined }
       generate_certificate_number: { Args: never; Returns: string }
       generate_compliance_report: {
         Args: { org_id?: string }

@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Users, UserPlus, Search, Loader2, CheckCircle, AlertCircle, AlertTriangle, ShoppingCart } from 'lucide-react';
+import { Users, UserPlus, Search, Loader2, CheckCircle, AlertCircle, AlertTriangle, ShoppingCart, Mail, RefreshCw } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { useNavigate } from 'react-router-dom';
 
@@ -16,6 +16,8 @@ interface Employee {
   email: string;
   progress_percentage: number;
   certificates_count: number;
+  invitation_status?: 'pending' | 'sent' | 'failed' | null;
+  invitation_sent_at?: string | null;
 }
 
 interface EmployeeWithProfile extends Employee {
@@ -43,6 +45,8 @@ export const SeatAssignmentManager: React.FC<SeatAssignmentManagerProps> = ({
   const [loading, setLoading] = useState(true);
   const [assigning, setAssigning] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [resending, setResending] = useState<string | null>(null);
+  const [filterStatus, setFilterStatus] = useState<'all' | 'invited' | 'not_invited' | 'failed'>('all');
 
   useEffect(() => {
     fetchData();
@@ -52,11 +56,17 @@ export const SeatAssignmentManager: React.FC<SeatAssignmentManagerProps> = ({
     try {
       setLoading(true);
       
-      // Fetch employees
+      // Fetch employees with invitation status
       const { data: empData, error: empError } = await supabase
         .rpc('get_organization_employees', { org_id: organizationId });
       
       if (empError) throw empError;
+
+      // Fetch invitation status for each employee
+      const { data: invitations } = await supabase
+        .from('staff_invitations')
+        .select('email, status, sent_at')
+        .eq('organization_id', organizationId);
       
       // Calculate profile completion for each employee
       const REQUIRED_FIELDS = ['first_name', 'last_name', 'phone', 'date_of_birth', 'emergency_contact_name', 'emergency_contact_phone'];
@@ -74,10 +84,15 @@ export const SeatAssignmentManager: React.FC<SeatAssignmentManagerProps> = ({
               if (profile[field]) completedFields++;
             });
           }
+
+          // Find invitation status for this employee
+          const invitation = invitations?.find(inv => inv.email === emp.email);
           
           return {
             ...emp,
-            profile_completion: Math.round((completedFields / REQUIRED_FIELDS.length) * 100)
+            profile_completion: Math.round((completedFields / REQUIRED_FIELDS.length) * 100),
+            invitation_status: (invitation?.status as 'pending' | 'sent' | 'failed' | null) || null,
+            invitation_sent_at: invitation?.sent_at || null
           };
         })
       );
@@ -138,9 +153,58 @@ export const SeatAssignmentManager: React.FC<SeatAssignmentManagerProps> = ({
     !seats.some(seat => seat.assigned_user_id === emp.user_id)
   );
 
-  const filteredUnassignedEmployees = employeesWithoutSeats.filter(emp =>
-    `${emp.first_name} ${emp.last_name} ${emp.email}`.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const resendInvitation = async (email: string) => {
+    setResending(email);
+    try {
+      const { error } = await supabase.functions.invoke('send-employee-invitation', {
+        body: {
+          employeeEmail: email,
+          organizationName: 'Your Organization',
+          invitationToken: crypto.randomUUID(),
+          deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+        }
+      });
+
+      if (error) throw error;
+
+      // Get current resend count and increment
+      const { data: currentInvite } = await supabase
+        .from('staff_invitations')
+        .select('resend_count')
+        .eq('email', email)
+        .eq('organization_id', organizationId)
+        .single();
+
+      await supabase
+        .from('staff_invitations')
+        .update({
+          status: 'sent',
+          sent_at: new Date().toISOString(),
+          resend_count: (currentInvite?.resend_count || 0) + 1
+        })
+        .eq('email', email)
+        .eq('organization_id', organizationId);
+
+      toast.success('Invitation resent successfully');
+      fetchData();
+    } catch (error: any) {
+      console.error('Error resending invitation:', error);
+      toast.error('Failed to resend invitation');
+    } finally {
+      setResending(null);
+    }
+  };
+
+  const filteredUnassignedEmployees = employeesWithoutSeats.filter(emp => {
+    const matchesSearch = `${emp.first_name} ${emp.last_name} ${emp.email}`.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    if (filterStatus === 'all') return matchesSearch;
+    if (filterStatus === 'invited') return matchesSearch && emp.invitation_status === 'sent';
+    if (filterStatus === 'not_invited') return matchesSearch && !emp.invitation_status;
+    if (filterStatus === 'failed') return matchesSearch && emp.invitation_status === 'failed';
+    
+    return matchesSearch;
+  });
 
   if (loading) {
     return (
@@ -254,15 +318,28 @@ export const SeatAssignmentManager: React.FC<SeatAssignmentManagerProps> = ({
               </AlertDescription>
             </Alert>
           )}
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input
-              placeholder="Search employees..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
+          
+          {/* Filter and Search */}
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Input
+                placeholder="Search employees..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value as any)}
+              className="px-3 py-2 border rounded-md bg-background"
+            >
+              <option value="all">All</option>
+              <option value="invited">Invited</option>
+              <option value="not_invited">Not Invited</option>
+              <option value="failed">Failed</option>
+            </select>
           </div>
 
           {/* Employee List */}
@@ -296,26 +373,59 @@ export const SeatAssignmentManager: React.FC<SeatAssignmentManagerProps> = ({
                       >
                         {employee.profile_completion || 0}% Profile
                       </Badge>
+                      {employee.invitation_status && (
+                        <Badge 
+                          variant={employee.invitation_status === 'sent' ? 'default' : 'destructive'}
+                          className="text-xs"
+                        >
+                          <Mail className="h-3 w-3 mr-1" />
+                          {employee.invitation_status === 'sent' ? 'Invited' : 'Failed'}
+                        </Badge>
+                      )}
                     </div>
                     <p className="text-sm text-muted-foreground">{employee.email}</p>
-                  </div>
-                  <Button
-                    onClick={() => assignSeatToEmployee(employee.user_id)}
-                    disabled={assigning === employee.user_id || availableSeats === 0}
-                    size="sm"
-                  >
-                    {assigning === employee.user_id ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Assigning...
-                      </>
-                    ) : (
-                      <>
-                        <UserPlus className="mr-2 h-4 w-4" />
-                        Assign Seat
-                      </>
+                    {employee.invitation_sent_at && (
+                      <p className="text-xs text-muted-foreground">
+                        Invited: {new Date(employee.invitation_sent_at).toLocaleDateString()}
+                      </p>
                     )}
-                  </Button>
+                  </div>
+                  <div className="flex gap-2">
+                    {employee.invitation_status === 'failed' && (
+                      <Button
+                        onClick={() => resendInvitation(employee.email)}
+                        disabled={resending === employee.email}
+                        size="sm"
+                        variant="outline"
+                      >
+                        {resending === employee.email ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <>
+                            <RefreshCw className="mr-2 h-4 w-4" />
+                            Resend
+                          </>
+                        )}
+                      </Button>
+                    )}
+                    <Button
+                      onClick={() => assignSeatToEmployee(employee.user_id)}
+                      disabled={assigning === employee.user_id || availableSeats === 0}
+                      size="sm"
+                    >
+                      {assigning === employee.user_id ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Assigning...
+                        </>
+                      ) : (
+                        <>
+                          <UserPlus className="mr-2 h-4 w-4" />
+                          Assign Seat
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </div>
               ))
             )}

@@ -56,18 +56,20 @@ export const DispensaryPipelineMonitor = () => {
     try {
       setLoading(true);
 
-      // Fetch applications data
+      // Fetch applications data (exclude test applications)
       const { data: applications, error: appError } = await supabase
         .from('dispensary_applications')
         .select('*')
+        .neq('application_status', 'test')
         .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
 
       if (appError) throw appError;
 
-      // Fetch organizations
+      // Fetch organizations (exclude test organizations)
       const { data: organizations, error: orgError } = await supabase
         .from('organizations')
         .select('*, dispensary_applications(id)')
+        .neq('payment_status', 'test')
         .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
 
       if (orgError) throw orgError;
