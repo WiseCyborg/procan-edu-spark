@@ -2,16 +2,84 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { RefreshCw } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { RefreshCw, Activity, AlertTriangle } from 'lucide-react';
 import { useOperationsMetrics } from '@/hooks/useOperationsMetrics';
 import { EmailAnalyticsCharts } from '@/components/admin/EmailAnalyticsCharts';
 import { TestEmailSender } from '@/components/admin/TestEmailSender';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { formatDistanceToNow } from 'date-fns';
 
 export function EmailTab() {
   const { metrics, refreshMetrics } = useOperationsMetrics();
 
+  const { data: emailHealth, refetch: refetchHealth } = useQuery({
+    queryKey: ['email-health'],
+    queryFn: async () => {
+      const { data, error } = await supabase.functions.invoke('email-health-check');
+      if (error) throw error;
+      return data;
+    },
+    refetchInterval: 60000, // Check every minute
+  });
+
   return (
     <div className="space-y-6 py-6">
+      {/* Email System Health Widget */}
+      <Card className="border-l-4 border-l-green-500">
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <span className="flex items-center gap-2">
+              <Activity className="h-5 w-5" />
+              Email System Health
+            </span>
+            <div className="flex items-center gap-2">
+              <Badge variant={emailHealth?.status === 'HEALTHY' ? 'default' : 'destructive'}>
+                {emailHealth?.status || 'CHECKING...'}
+              </Badge>
+              <Button variant="ghost" size="sm" onClick={() => refetchHealth()}>
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+            </div>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm text-muted-foreground">Last Hour</p>
+              <p className="text-2xl font-bold">{emailHealth?.metrics?.emails_last_hour || 0}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Success Rate</p>
+              <p className="text-2xl font-bold text-green-600">
+                {emailHealth?.metrics?.success_rate || '0%'}
+              </p>
+            </div>
+          </div>
+          
+          {emailHealth?.errors && emailHealth.errors.length > 0 && (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Issues Detected</AlertTitle>
+              <AlertDescription>
+                <ul className="list-disc pl-4 mt-2">
+                  {emailHealth.errors.map((error: string, i: number) => (
+                    <li key={i} className="text-sm">{error}</li>
+                  ))}
+                </ul>
+              </AlertDescription>
+            </Alert>
+          )}
+          
+          <p className="text-xs text-muted-foreground">
+            Last checked: {emailHealth?.timestamp 
+              ? formatDistanceToNow(new Date(emailHealth.timestamp), { addSuffix: true })
+              : 'Never'}
+          </p>
+        </CardContent>
+      </Card>
+
       {/* Provider Status */}
       <Card>
         <CardHeader>

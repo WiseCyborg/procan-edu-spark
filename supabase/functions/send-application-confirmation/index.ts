@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { loadEmailTemplate } from "../_shared/email-templates.ts";
 import { EmailRouter } from "../_shared/email-router.ts";
+import { log } from "../_shared/logger.ts";
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL") ?? "",
@@ -38,9 +39,11 @@ serve(async (req) => {
       ApplicationId: application_id
     });
 
-    console.log('📧 [APPLICATION-CONFIRMATION] Template loaded, preparing to send');
-    console.log('📧 [APPLICATION-CONFIRMATION] Recipient:', contact_email);
-    console.log('📧 [APPLICATION-CONFIRMATION] Organization:', organization_name);
+    log('info', 'email.application_confirmation.attempt', {
+      recipient: contact_email,
+      organization: organization_name,
+      application_id,
+    });
 
     // Log email attempt
     const { data: logData } = await supabase
@@ -75,11 +78,11 @@ serve(async (req) => {
       supabase
     );
 
-    console.log('📧 [APPLICATION-CONFIRMATION] Send result:', {
-      success: result.success,
+    log('info', 'email.application_confirmation.success', {
       provider: result.provider,
       providerId: result.providerId,
-      responseTime: result.responseTime
+      responseTime: result.responseTime,
+      recipient: contact_email,
     });
 
     // Update log with result

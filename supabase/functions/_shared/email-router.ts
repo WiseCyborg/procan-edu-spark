@@ -17,6 +17,16 @@ export interface EmailResult {
   responseTime: number;
 }
 
+// Simple HTML to text converter for fallback
+function extractTextFromHtml(html: string): string {
+  return html
+    .replace(/<style[^>]*>.*?<\/style>/gi, '')
+    .replace(/<script[^>]*>.*?<\/script>/gi, '')
+    .replace(/<[^>]+>/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 export class EmailRouter {
   private resend: Resend;
   
@@ -61,6 +71,13 @@ export class EmailRouter {
         to: [options.to],
         subject: options.subject,
         html: options.html,
+        text: extractTextFromHtml(options.html),
+        reply_to: "support@procannedu.com",
+        headers: {
+          "List-Unsubscribe": "<mailto:unsubscribe@procannedu.com>",
+          "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+          "X-Entity-Ref-ID": crypto.randomUUID(),
+        }
       });
       
       const responseTime = Date.now() - startTime;

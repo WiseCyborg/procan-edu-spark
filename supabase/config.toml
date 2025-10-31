@@ -140,3 +140,6 @@ verify_jwt = false
 
 [functions._diagnostic-email]
 verify_jwt = false
+
+[functions.email-health-check]
+verify_jwt = false
