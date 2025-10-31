@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
+import { getActivePayPalEnv, resolvePayPalCreds } from "../_shared/paypal-config.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -14,37 +15,18 @@ serve(async (req) => {
   try {
     console.log("=== PayPal Connection Test Starting ===");
     
-    // Step 1: Read environment variables
-    const clientId = Deno.env.get("PAYPAL_CLIENT_ID");
-    const clientSecret = Deno.env.get("PAYPAL_CLIENT_SECRET");
-    const environment = Deno.env.get("PAYPAL_ENVIRONMENT") || "sandbox";
+    // Step 1: Get active environment from database
+    const environment = await getActivePayPalEnv();
+    console.log("Active PayPal environment:", environment);
 
-    console.log("Environment variables check:");
-    console.log("- PAYPAL_CLIENT_ID present:", !!clientId, clientId ? `(length: ${clientId.length})` : "");
-    console.log("- PAYPAL_CLIENT_SECRET present:", !!clientSecret, clientSecret ? `(length: ${clientSecret.length})` : "");
-    console.log("- PAYPAL_ENVIRONMENT:", environment);
+    // Step 2: Resolve credentials for this environment
+    const { id: clientId, secret: clientSecret, baseUrl: apiBase } = resolvePayPalCreds(environment);
 
-    if (!clientId || !clientSecret) {
-      return new Response(JSON.stringify({
-        success: false,
-        error: "Missing credentials",
-        details: {
-          hasClientId: !!clientId,
-          hasClientSecret: !!clientSecret,
-          environment: environment
-        }
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 400,
-      });
-    }
-
-    // Step 2: Determine API URL
-    const apiBase = environment === "production" 
-      ? "https://api-m.paypal.com"
-      : "https://api-m.sandbox.paypal.com";
-
-    console.log("Using PayPal API Base:", apiBase);
+    console.log("Credentials check:");
+    console.log("- Environment:", environment);
+    console.log("- API Base:", apiBase);
+    console.log("- Client ID length:", clientId.length);
+    console.log("- Client Secret present:", !!clientSecret);
 
     // Step 3: Create authorization header
     const auth = btoa(`${clientId}:${clientSecret}`);

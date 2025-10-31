@@ -1,14 +1,11 @@
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { getPayPalEnvForOrg, resolvePayPalCreds } from "../_shared/paypal-config.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
-
-const PAYPAL_API_BASE = Deno.env.get("PAYPAL_ENVIRONMENT") === "production" 
-  ? "https://api-m.paypal.com"
-  : "https://api-m.sandbox.paypal.com";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -99,6 +96,13 @@ serve(async (req) => {
       throw new Error("Organization missing dispensary number");
     }
 
+    // Get PayPal environment for this organization (test orgs always use sandbox)
+    const paypalEnv = await getPayPalEnvForOrg(organization.id);
+    const { id: PAYPAL_CLIENT_ID, secret: PAYPAL_CLIENT_SECRET, baseUrl: PAYPAL_API_BASE } = 
+      resolvePayPalCreds(paypalEnv);
+
+    console.log(`Using PayPal ${paypalEnv} mode for organization ${organization.id}`);
+
     // Calculate amount
     const unitAmount = 49.99;
     const totalAmount = (quantity * unitAmount).toFixed(2);
@@ -130,7 +134,7 @@ serve(async (req) => {
     console.log("Created purchase record:", purchase.id);
 
     // Get PayPal access token
-    const paypalAuth = btoa(`${Deno.env.get("PAYPAL_CLIENT_ID")}:${Deno.env.get("PAYPAL_CLIENT_SECRET")}`);
+    const paypalAuth = btoa(`${PAYPAL_CLIENT_ID}:${PAYPAL_CLIENT_SECRET}`);
     
     const tokenResponse = await fetch(`${PAYPAL_API_BASE}/v1/oauth2/token`, {
       method: "POST",

@@ -2,10 +2,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FastTrackTestPanel } from '@/components/admin/FastTrackTestPanel';
 import { TestEmailSender } from '@/components/admin/TestEmailSender';
 import TestAccountCreator from '@/components/admin/TestAccountCreator';
+import { PayPalModeToggle } from '@/components/admin/PayPalModeToggle';
 
 export function TestingTab() {
   return (
     <div className="space-y-6 py-6">
+      {/* PayPal Mode Toggle - Critical for safe testing */}
+      <PayPalModeToggle />
+      
       <FastTrackTestPanel />
       
       <Card>

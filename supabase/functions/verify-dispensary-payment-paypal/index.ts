@@ -1,13 +1,10 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { getPayPalEnvForOrg, resolvePayPalCreds } from "../_shared/paypal-config.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
-
-const PAYPAL_API_BASE = Deno.env.get("PAYPAL_ENVIRONMENT") === "production" 
-  ? "https://api-m.paypal.com"
-  : "https://api-m.sandbox.paypal.com";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -34,10 +31,20 @@ Deno.serve(async (req) => {
       event_data: { timestamp: new Date().toISOString() }
     });
 
-    // Get PayPal access token
-    const paypalAuth = btoa(`${Deno.env.get("PAYPAL_CLIENT_ID")}:${Deno.env.get("PAYPAL_CLIENT_SECRET")}`);
+    // Determine organization from order to get correct PayPal environment
+    // We'll fetch this from the purchase record after getting order details
+    // For now, use default environment - will be corrected below
+    let paypalEnv = "sandbox";
+    let PAYPAL_CLIENT_ID = "";
+    let PAYPAL_CLIENT_SECRET = "";
+    let PAYPAL_API_BASE = "";
+
+    // First pass: use environment variable or default to get order details
+    const tempEnv = (Deno.env.get("PAYPAL_ENVIRONMENT") || "sandbox") as "sandbox" | "production";
+    const tempCreds = resolvePayPalCreds(tempEnv);
+    const paypalAuth = btoa(`${tempCreds.id}:${tempCreds.secret}`);
     
-    const tokenResponse = await fetch(`${PAYPAL_API_BASE}/v1/oauth2/token`, {
+    const tokenResponse = await fetch(`${tempCreds.baseUrl}/v1/oauth2/token`, {
       method: "POST",
       headers: {
         "Authorization": `Basic ${paypalAuth}`,
@@ -50,7 +57,7 @@ Deno.serve(async (req) => {
     const accessToken = tokenData.access_token;
 
     // Get PayPal order details
-    const orderResponse = await fetch(`${PAYPAL_API_BASE}/v2/checkout/orders/${orderId}`, {
+    const orderResponse = await fetch(`${tempCreds.baseUrl}/v2/checkout/orders/${orderId}`, {
       headers: {
         "Authorization": `Bearer ${accessToken}`,
         "Content-Type": "application/json",
@@ -84,6 +91,15 @@ Deno.serve(async (req) => {
       }
 
       console.log("Parsed:", { purchaseId, organizationId, quantity });
+
+      // NOW get the correct PayPal environment for this organization
+      paypalEnv = await getPayPalEnvForOrg(organizationId) as "sandbox" | "production";
+      const correctCreds = resolvePayPalCreds(paypalEnv);
+      PAYPAL_CLIENT_ID = correctCreds.id;
+      PAYPAL_CLIENT_SECRET = correctCreds.secret;
+      PAYPAL_API_BASE = correctCreds.baseUrl;
+
+      console.log(`Verified: Using ${paypalEnv} mode for organization ${organizationId}`);
 
       // Check if already processed (idempotency)
       const { data: existingPurchase } = await supabaseService

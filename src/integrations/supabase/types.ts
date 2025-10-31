@@ -1750,6 +1750,30 @@ export type Database = {
           },
         ]
       }
+      paypal_configuration: {
+        Row: {
+          created_at: string
+          environment: string
+          id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          environment: string
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          environment?: string
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       performance_metrics: {
         Row: {
           created_at: string

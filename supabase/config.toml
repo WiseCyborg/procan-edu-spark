@@ -143,3 +143,6 @@ verify_jwt = false
 
 [functions.email-health-check]
 verify_jwt = false
+
+[functions.update-paypal-environment]
+verify_jwt = true
