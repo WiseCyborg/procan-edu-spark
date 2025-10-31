@@ -142,6 +142,26 @@ const DispensaryApplication = () => {
       }
     }
 
+    // Validate estimated_employees
+    if (estimatedEmployees && parseInt(estimatedEmployees) <= 0) {
+      toast({
+        title: "Invalid Employee Count",
+        description: "Number of employees must be greater than 0.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate license_type if provided
+    if (licenseType && !['Adult Use', 'Medical', 'Dual License'].includes(licenseType)) {
+      toast({
+        title: "Invalid License Type",
+        description: "Please select a valid license type.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     
     try {
@@ -161,7 +181,7 @@ const DispensaryApplication = () => {
           contact_phone: contactPhone,
           address: address,
           estimated_employees: parseInt(estimatedEmployees) || null,
-          preferred_start_date: preferredStartDate ? `${preferredStartDate}T00:00:00Z` : null,
+          preferred_start_date: preferredStartDate || null,
           compliance_affirmation: true,
           application_status: 'pending',
         })
@@ -251,6 +271,16 @@ const DispensaryApplication = () => {
         errorMessage += "This license number is already registered.";
       } else if (error.code === '23502') {
         errorMessage += "Please fill in all required fields.";
+      } else if (error.code === '23514') { // CHECK constraint violation
+        errorMessage += "Invalid data: " + (error.message || "Please verify all fields meet requirements.");
+        
+        // Log the specific constraint that failed
+        console.error('CHECK constraint failed:', {
+          hint: error.hint,
+          detail: error.detail
+        });
+      } else if (error.message?.includes('row-level security')) {
+        errorMessage += "Access denied. This may be a data validation issue.";
       } else if (error.code === '42703') {
         errorMessage += "Database schema error - please contact support.";
       } else {
