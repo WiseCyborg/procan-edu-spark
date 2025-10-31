@@ -38,11 +38,15 @@ serve(async (req) => {
       ApplicationId: application_id
     });
 
+    console.log('📧 [APPLICATION-CONFIRMATION] Template loaded, preparing to send');
+    console.log('📧 [APPLICATION-CONFIRMATION] Recipient:', contact_email);
+    console.log('📧 [APPLICATION-CONFIRMATION] Organization:', organization_name);
+
     // Log email attempt
     const { data: logData } = await supabase
       .from('email_logs')
       .insert({
-        recipient: contact_email,
+        recipient_email: contact_email,
         email_type: 'application_confirmation',
         status: 'sending',
         template_name: 'application-received',
@@ -71,6 +75,13 @@ serve(async (req) => {
       supabase
     );
 
+    console.log('📧 [APPLICATION-CONFIRMATION] Send result:', {
+      success: result.success,
+      provider: result.provider,
+      providerId: result.providerId,
+      responseTime: result.responseTime
+    });
+
     // Update log with result
     if (logData?.id) {
       await supabase
@@ -79,7 +90,7 @@ serve(async (req) => {
           status: result.success ? 'sent' : 'failed',
           provider: result.provider,
           sent_at: new Date().toISOString(),
-          error: result.error ? JSON.stringify(result.error) : null
+          error_message: result.error ? JSON.stringify(result.error) : null
         })
         .eq('id', logData.id);
     }

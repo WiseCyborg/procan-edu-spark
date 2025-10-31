@@ -137,3 +137,6 @@ verify_jwt = false
 
 [functions.generate-compliance-report]
 verify_jwt = false
+
+[functions._diagnostic-email]
+verify_jwt = false

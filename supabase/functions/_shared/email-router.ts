@@ -51,6 +51,11 @@ export class EmailRouter {
     
     // Try Resend first (faster, better tracking)
     try {
+      console.log(`📤 [EMAIL-ROUTER] Attempting Resend send`);
+      console.log(`📤 [EMAIL-ROUTER] To: ${options.to}`);
+      console.log(`📤 [EMAIL-ROUTER] Subject: ${options.subject}`);
+      console.log(`📤 [EMAIL-ROUTER] From: ${options.from || "ProCann Edu <noreply@procannedu.com>"}`);
+      
       const result = await this.resend.emails.send({
         from: options.from || "ProCann Edu <noreply@procannedu.com>",
         to: [options.to],
@@ -59,6 +64,16 @@ export class EmailRouter {
       });
       
       const responseTime = Date.now() - startTime;
+      
+      // CRITICAL: Verify result structure
+      if (!result.data) {
+        console.error(`❌ [EMAIL-ROUTER] Resend returned no data:`, JSON.stringify(result));
+        throw new Error(`Resend API returned no data. Full response: ${JSON.stringify(result)}`);
+      }
+      
+      console.log(`✅ [EMAIL-ROUTER] Resend SUCCESS in ${responseTime}ms`);
+      console.log(`✅ [EMAIL-ROUTER] Provider ID: ${result.data.id}`);
+      console.log(`✅ [EMAIL-ROUTER] Full result:`, JSON.stringify(result, null, 2));
       console.log(`✅ Email sent via Resend in ${responseTime}ms:`, result.data?.id);
       
       // Update log with success
@@ -79,7 +94,14 @@ export class EmailRouter {
         responseTime,
       };
     } catch (resendError: any) {
-      console.warn(`⚠️ Resend failed: ${resendError.message}, trying SMTP fallback...`);
+      const responseTime = Date.now() - startTime;
+      console.error(`❌ [EMAIL-ROUTER] Resend FAILED after ${responseTime}ms`);
+      console.error(`❌ [EMAIL-ROUTER] Error message: ${resendError.message}`);
+      console.error(`❌ [EMAIL-ROUTER] Error name: ${resendError.name}`);
+      console.error(`❌ [EMAIL-ROUTER] Status code: ${resendError.statusCode}`);
+      console.error(`❌ [EMAIL-ROUTER] Full error:`, JSON.stringify(resendError, null, 2));
+      console.error(`❌ [EMAIL-ROUTER] Error stack:`, resendError.stack);
+      console.warn(`⚠️ Attempting SMTP fallback...`);
       
       // Fallback to SMTP
       try {
