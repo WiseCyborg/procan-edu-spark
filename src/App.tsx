@@ -61,6 +61,7 @@ import SystemHealthDashboard from "./pages/SystemHealthDashboard";
 import UnifiedHealthReport from "./pages/UnifiedHealthReport";
 import AcceptInvitation from "./pages/AcceptInvitation";
 import { ManagerOnboarding } from "./components/onboarding/ManagerOnboarding";
+import OperationsCommandCenter from "./pages/OperationsCommandCenter";
 
 import { ProtectedCourseAccess } from "./components/ProtectedCourseAccess";
 
@@ -229,10 +230,16 @@ const App = () => (
                    } />
                    
                    <Route path="/admin/management" element={
-                     <ProtectedRoute>
-                       <AdminManagement />
-                     </ProtectedRoute>
-                   } />
+                      <ProtectedRoute>
+                        <AdminManagement />
+                      </ProtectedRoute>
+                    } />
+                    
+                    <Route path="/admin/operations" element={
+                      <ProtectedRoute>
+                        <OperationsCommandCenter />
+                      </ProtectedRoute>
+                    } />
                    
                    <Route path="/admin/demo-setup" element={
                      <ProtectedRoute>
