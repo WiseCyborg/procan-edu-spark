@@ -15,6 +15,7 @@ interface ApprovalEmailRequest {
   access_key: string;
   registration_url: string;
   credits: number;
+  join_code?: string;
 }
 
 serve(async (req) => {
@@ -37,7 +38,8 @@ serve(async (req) => {
       OrganizationName: payload.organization_name,
       AccessKey: payload.access_key,
       RegistrationURL: payload.registration_url,
-      Credits: payload.credits.toString()
+      Credits: payload.credits.toString(),
+      JoinCode: payload.join_code || ''
     });
 
     // Create email log entry

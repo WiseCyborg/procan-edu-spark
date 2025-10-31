@@ -25,7 +25,8 @@ import {
   Copy,
   AlertCircle,
   AlertTriangle,
-  RefreshCw
+  RefreshCw,
+  Hash
 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { EmailDeliveryStatus } from './EmailDeliveryStatus';
@@ -57,6 +58,7 @@ const DispensaryApplicationManager = () => {
   const [approvalData, setApprovalData] = useState<{
     registrationLink: string;
     accessKey: string;
+    joinCode: string;
     emailSent: boolean;
     emailError: string | null;
   } | null>(null);
@@ -131,9 +133,19 @@ const DispensaryApplicationManager = () => {
         throw new Error(result.message || 'Failed to approve application');
       }
 
-      // Step 2: Generating registration link
+      // Step 2: Generating registration link and fetching credentials
       setApprovalStep('Generating registration link...');
       const registrationUrl = `${window.location.origin}/register/manager?token=${registrationToken}`;
+
+      // Fetch join code
+      const { data: joinCodeData } = await supabase
+        .from('rvt_join_codes')
+        .select('code')
+        .eq('organization_id', result.organization_id)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
 
       // Step 3: Sending approval email
       setApprovalStep('Sending approval email...');
@@ -149,7 +161,8 @@ const DispensaryApplicationManager = () => {
             organization_name: application.organization_name,
             access_key: result.access_key,
             registration_url: registrationUrl,
-            credits: credits
+            credits: credits,
+            join_code: joinCodeData?.code
           }
         });
 
@@ -172,6 +185,7 @@ const DispensaryApplicationManager = () => {
       setApprovalData({
         registrationLink: registrationUrl,
         accessKey: result.access_key,
+        joinCode: joinCodeData?.code || 'N/A',
         emailSent,
         emailError
       });
@@ -682,6 +696,32 @@ const DispensaryApplicationManager = () => {
                                     <Copy className="h-3 w-3" />
                                   </Button>
                                 </div>
+                              </div>
+
+                              {/* Join Code */}
+                              <div className="p-3 bg-blue-50 rounded border border-blue-200">
+                                <Label className="text-xs text-muted-foreground flex items-center gap-1">
+                                  <Hash className="h-3 w-3" />
+                                  Employee Join Code
+                                </Label>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <code className="text-xs font-mono font-bold text-blue-700 bg-white p-2 rounded">
+                                    {approvalData.joinCode}
+                                  </code>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                      navigator.clipboard.writeText(approvalData.joinCode);
+                                      toast({ title: "Copied!", description: "Join code copied to clipboard" });
+                                    }}
+                                  >
+                                    <Copy className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  Manager will use this code to invite employees to the organization
+                                </p>
                               </div>
 
                               {/* Email Error Alert */}

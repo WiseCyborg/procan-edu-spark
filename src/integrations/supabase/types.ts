@@ -2948,8 +2948,11 @@ export type Database = {
         Args: { contact_email: string; credits?: number; org_name: string }
         Returns: {
           access_key: string
+          join_code: string
           message: string
           organization_id: string
+          registration_token: string
+          registration_url: string
           success: boolean
         }[]
       }
