@@ -115,7 +115,7 @@ const DispensaryApplicationManager = () => {
         
         console.log('Sending approval email with registration link...');
         
-        const { data: emailData, error: emailError } = await supabase.functions.invoke('send-approval-email', {
+        const emailResult = await supabase.functions.invoke('send-approval-email', {
           body: {
             contact_email: application.contact_email,
             contact_person: application.contact_person,
@@ -126,13 +126,17 @@ const DispensaryApplicationManager = () => {
           }
         });
 
-        if (emailError) {
-          console.error('Failed to send approval email:', emailError);
+        if (emailResult.error) {
+          console.error('Failed to send approval email:', emailResult.error);
           toast({
-            title: "Warning",
-            description: "Application approved but email notification failed. Please contact manager manually.",
+            title: "Warning ⚠️",
+            description: "Application approved but email notification failed. Registration link copied to clipboard.",
             variant: "default"
           });
+          // Copy registration link to clipboard as fallback
+          navigator.clipboard.writeText(registrationUrl);
+        } else {
+          console.log('Approval email sent successfully:', emailResult.data);
         }
 
         toast({
