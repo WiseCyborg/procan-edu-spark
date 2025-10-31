@@ -3,7 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { AdminUserManagement } from '@/components/admin/AdminUserManagement';
 import { ManualUserCreation } from '@/components/admin/ManualUserCreation';
 import { TestProfileCreator } from '@/components/admin/TestProfileCreator';
-import { Shield, Settings, Users, BarChart3, Loader2 } from 'lucide-react';
+import DispensaryApplicationManager from '@/components/admin/DispensaryApplicationManager';
+import { Shield, Settings, Users, BarChart3, Loader2, Building2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
@@ -104,6 +105,21 @@ const AdminManagement = () => {
 
         {/* Main Management Sections */}
         <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Building2 className="h-5 w-5" />
+                Dispensary Applications
+              </CardTitle>
+              <CardDescription>
+                Review and approve dispensary license applications
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <DispensaryApplicationManager />
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>Test Profile Creator (UAT Workaround)</CardTitle>
