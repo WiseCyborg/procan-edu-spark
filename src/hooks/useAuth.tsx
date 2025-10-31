@@ -7,6 +7,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  error: Error | null;
   signOut: () => Promise<void>;
 }
 
@@ -16,34 +17,89 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.email);
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
+    let mounted = true;
+    
+    const initAuth = async () => {
+      try {
+        console.log('[AuthProvider] Initializing auth...');
+        
+        // Get initial session
+        const { data: { session: initialSession }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error('[AuthProvider] Session error:', sessionError);
+          setError(sessionError);
+        }
+        
+        if (mounted) {
+          setSession(initialSession);
+          setUser(initialSession?.user ?? null);
+          console.log('[AuthProvider] Initial session loaded:', initialSession?.user?.email || 'no user');
+        }
+        
+        // Set up auth state listener
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+          (event, session) => {
+            console.log('[AuthProvider] Auth state changed:', event, session?.user?.email || 'no user');
+            if (mounted) {
+              setSession(session);
+              setUser(session?.user ?? null);
+            }
+          }
+        );
+        
+        if (mounted) {
+          setLoading(false);
+        }
+
+        return () => {
+          mounted = false;
+          subscription.unsubscribe();
+        };
+        
+      } catch (err) {
+        console.error('[AuthProvider] Fatal error:', err);
+        if (mounted) {
+          setError(err instanceof Error ? err : new Error(String(err)));
+          setLoading(false);
+        }
       }
-    );
+    };
 
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
+    initAuth();
   }, []);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+    } catch (err) {
+      console.error('[AuthProvider] Sign out error:', err);
+      setError(err instanceof Error ? err : new Error(String(err)));
+    }
   };
 
+  // If there's a fatal error, show it
+  if (error && !user && !loading) {
+    console.error('[AuthProvider] Rendering error state');
+    return (
+      <div style={{ padding: '40px', textAlign: 'center', fontFamily: 'system-ui' }}>
+        <h2 style={{ color: '#dc2626', marginBottom: '16px' }}>Authentication Error</h2>
+        <p style={{ marginBottom: '24px', color: '#6b7280' }}>{error.message}</p>
+        <button 
+          onClick={() => window.location.reload()}
+          style={{ padding: '10px 20px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
+        >
+          Reload Page
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <AuthContext.Provider value={{ user, session, loading, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, error, signOut }}>
       {children}
     </AuthContext.Provider>
   );

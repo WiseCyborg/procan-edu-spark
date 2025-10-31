@@ -5,7 +5,28 @@ import type { Database } from './types';
 const SUPABASE_URL = "https://zhmpwczrvitomsxjwpzc.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpobXB3Y3pydml0b21zeGp3cHpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUxNzUyNTcsImV4cCI6MjA2MDc1MTI1N30.Fuy8xXz3g9hyDNSMO2GmKPDIOnm5tGZsF7H_jmwtoVA";
 
+// Validate environment configuration
+if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+  console.error('[Supabase] Missing environment variables:', {
+    url: SUPABASE_URL ? '✓ Present' : '✗ Missing',
+    key: SUPABASE_PUBLISHABLE_KEY ? '✓ Present' : '✗ Missing'
+  });
+  throw new Error(
+    'Missing Supabase environment variables. Please check your configuration.'
+  );
+}
+
+console.log('[Supabase] Initializing client with URL:', SUPABASE_URL);
+
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true
+  }
+});
+
+console.log('[Supabase] Client initialized successfully');
