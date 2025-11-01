@@ -90,7 +90,20 @@ const DispensaryApplicationManager = () => {
   };
 
   const approveApplication = async (applicationId: string, credits: number = 10) => {
-    if (!await performSecurityCheck('dispensary_approval')) return;
+    console.log('[APPROVAL] Starting approval process', { applicationId, credits, timestamp: new Date().toISOString() });
+    
+    const securityCheckPassed = await performSecurityCheck('dispensary_approval');
+    console.log('[APPROVAL] Security check result:', securityCheckPassed);
+    
+    if (!securityCheckPassed) {
+      console.error('[APPROVAL] Security check FAILED - operation blocked by rate limiting');
+      toast({
+        title: "Rate Limit Exceeded",
+        description: "Too many approval attempts. Please wait 10 minutes and try again.",
+        variant: "destructive"
+      });
+      return;
+    }
 
     setIsProcessing(true);
     setApprovalData(null);
@@ -103,11 +116,16 @@ const DispensaryApplicationManager = () => {
 
       // Step 1: Creating organization
       setApprovalStep('Creating organization...');
+      console.log('[APPROVAL] Step 1: Creating organization');
       
       // Generate registration token
       const registrationToken = crypto.randomUUID();
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + 7); // 7 day expiry
+      console.log('[APPROVAL] Generated registration token', { 
+        token: registrationToken.substring(0, 8) + '...', 
+        expires: expiresAt.toISOString() 
+      });
 
       // Update application with token
       const { error: tokenError } = await supabase
@@ -118,35 +136,73 @@ const DispensaryApplicationManager = () => {
         })
         .eq('id', applicationId);
 
-      if (tokenError) throw tokenError;
+      if (tokenError) {
+        console.error('[APPROVAL] Failed to save registration token:', tokenError);
+        throw tokenError;
+      }
+      console.log('[APPROVAL] Registration token saved successfully');
 
       // Approve application with RPC (now returns join_code)
+      console.log('[APPROVAL] Calling approve_dispensary_application RPC', { application_id: applicationId, credits });
       const { data, error } = await supabase.rpc('approve_dispensary_application', {
         application_id: applicationId,
         credits: credits
       });
+      console.log('[APPROVAL] RPC response:', { 
+        hasData: !!data, 
+        dataLength: Array.isArray(data) ? data.length : 0,
+        hasError: !!error,
+        error 
+      });
 
-      if (error) throw error;
+      if (error) {
+        console.error('[APPROVAL] RPC error:', error);
+        throw error;
+      }
+
+      if (!data || !Array.isArray(data) || data.length === 0) {
+        console.error('[APPROVAL] CRITICAL: Invalid RPC response - no data returned', { data });
+        throw new Error('Invalid response from approval function - no data returned');
+      }
 
       const result = data[0] as { success: boolean; message: string; organization_id: string; access_key: string; join_code: string; purchase_id: string };
+      console.log('[APPROVAL] Parsed result:', { 
+        success: result.success, 
+        hasOrgId: !!result.organization_id,
+        hasAccessKey: !!result.access_key,
+        hasJoinCode: !!result.join_code,
+        hasPurchaseId: !!result.purchase_id
+      });
+      
       if (!result.success) {
+        console.error('[APPROVAL] Approval failed:', result.message);
         throw new Error(result.message || 'Failed to approve application');
+      }
+
+      if (!result.join_code) {
+        console.error('[APPROVAL] CRITICAL: join_code missing from RPC response!', result);
+        throw new Error('Join code was not generated - database function may need update. Contact support.');
       }
 
       // Step 2: Generating registration link (join_code returned from RPC)
       setApprovalStep('Generating registration link...');
+      console.log('[APPROVAL] Step 2: Generating registration link');
       const registrationUrl = `${window.location.origin}/register/manager?token=${registrationToken}`;
+      console.log('[APPROVAL] Registration URL generated:', registrationUrl.substring(0, 50) + '...');
       
       // Join code is now returned directly from RPC - no separate query needed
       const joinCode = result.join_code;
+      console.log('[APPROVAL] Join code from RPC:', joinCode);
 
       // Step 3: Sending approval email
       setApprovalStep('Sending approval email...');
+      console.log('[APPROVAL] Step 3: Sending approval email to', application.contact_email);
       
       let emailSent = false;
       let emailError = null;
       
       try {
+        console.log('[APPROVAL] Invoking send-approval-email function');
         const emailResult = await supabase.functions.invoke('send-approval-email', {
           body: {
             contact_email: application.contact_email,
@@ -158,10 +214,15 @@ const DispensaryApplicationManager = () => {
             join_code: joinCode
           }
         });
+        console.log('[APPROVAL] Email function response:', { 
+          hasError: !!emailResult.error, 
+          error: emailResult.error,
+          data: emailResult.data 
+        });
 
         if (emailResult.error) {
           emailError = emailResult.error.message || 'Failed to send email';
-          console.error('Failed to send approval email:', emailResult.error);
+          console.error('[APPROVAL] Email send FAILED:', emailResult.error);
           // Copy to clipboard as fallback
           navigator.clipboard.writeText(registrationUrl);
           
@@ -182,11 +243,11 @@ const DispensaryApplicationManager = () => {
             });
         } else {
           emailSent = true;
-          console.log('Approval email sent successfully:', emailResult.data);
+          console.log('[APPROVAL] Email sent SUCCESSFULLY:', emailResult.data);
         }
       } catch (emailErr) {
         emailError = emailErr instanceof Error ? emailErr.message : 'Email sending failed';
-        console.error('Error sending email:', emailErr);
+        console.error('[APPROVAL] Email exception:', emailErr);
         navigator.clipboard.writeText(registrationUrl);
         
         // Log exception
@@ -216,6 +277,12 @@ const DispensaryApplicationManager = () => {
       });
 
       setApprovalStep('');
+      console.log('[APPROVAL] Process COMPLETE', { 
+        organizationId: result.organization_id,
+        purchaseId: result.purchase_id,
+        emailSent,
+        hasError: !!emailError
+      });
       
       toast({
         title: emailSent ? "Application Approved ✅" : "Application Approved ⚠️",
@@ -225,18 +292,26 @@ const DispensaryApplicationManager = () => {
         duration: emailSent ? 6000 : 10000,
       });
       
-      fetchApplications();
+      await fetchApplications();
+      console.log('[APPROVAL] Applications list refreshed');
+      
     } catch (error) {
-      console.error('Error approving application:', error);
+      console.error('[APPROVAL] ❌ ERROR during approval process:', error);
+      console.error('[APPROVAL] Error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        step: approvalStep
+      });
       setApprovalStep('');
       setApprovalData(null);
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to approve application",
+        title: "Approval Failed",
+        description: error instanceof Error ? error.message : "Failed to approve application. Check browser console for details.",
         variant: "destructive"
       });
     } finally {
       setIsProcessing(false);
+      console.log('[APPROVAL] Process finished', { isProcessing: false, step: approvalStep });
     }
   };
 

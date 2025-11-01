@@ -2954,8 +2954,10 @@ export type Database = {
         Args: { application_id: string; credits?: number }
         Returns: {
           access_key: string
+          join_code: string
           message: string
           organization_id: string
+          purchase_id: string
           success: boolean
         }[]
       }
