@@ -1942,6 +1942,7 @@ export type Database = {
           id: string
           request_count: number
           user_id: string
+          window_minutes: number
           window_start: string
         }
         Insert: {
@@ -1950,6 +1951,7 @@ export type Database = {
           id?: string
           request_count?: number
           user_id: string
+          window_minutes?: number
           window_start?: string
         }
         Update: {
@@ -1958,6 +1960,7 @@ export type Database = {
           id?: string
           request_count?: number
           user_id?: string
+          window_minutes?: number
           window_start?: string
         }
         Relationships: []
