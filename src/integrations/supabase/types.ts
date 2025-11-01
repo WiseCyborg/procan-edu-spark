@@ -2980,6 +2980,10 @@ export type Database = {
         Returns: boolean
       }
       cleanup_performance_metrics: { Args: never; Returns: undefined }
+      clear_user_rate_limits: {
+        Args: { _action_type?: string; _user_id?: string }
+        Returns: number
+      }
       create_initial_admin: { Args: never; Returns: string }
       create_initial_seats_for_organization: {
         Args: { org_id: string; purchased_by_id?: string; quantity?: number }
@@ -3028,6 +3032,20 @@ export type Database = {
       generate_dispensary_key: { Args: never; Returns: string }
       generate_dispensary_number: { Args: never; Returns: string }
       generate_invitation_token: { Args: never; Returns: string }
+      get_active_rate_limits: {
+        Args: never
+        Returns: {
+          action_type: string
+          created_at: string
+          id: string
+          request_count: number
+          time_remaining_minutes: number
+          user_email: string
+          user_id: string
+          window_minutes: number
+          window_start: string
+        }[]
+      }
       get_admin_user_overview: {
         Args: never
         Returns: {

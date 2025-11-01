@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Activity, Mail, GitBranch, DollarSign, Heart, Wrench, Users } from 'lucide-react';
+import { Activity, Mail, GitBranch, DollarSign, Heart, Shield, Wrench, Users } from 'lucide-react';
 import { useOperationsMetrics } from '@/hooks/useOperationsMetrics';
 import { OverviewTab } from '@/components/admin/operations/OverviewTab';
 import { EmailTab } from '@/components/admin/operations/EmailTab';
 import { PipelineTab } from '@/components/admin/operations/PipelineTab';
 import { PaymentsTab } from '@/components/admin/operations/PaymentsTab';
 import { HealthTab } from '@/components/admin/operations/HealthTab';
+import { SecurityTab } from '@/components/admin/operations/SecurityTab';
 import { TestingTab } from '@/components/admin/operations/TestingTab';
 import { UsersTab } from '@/components/admin/operations/UsersTab';
 
@@ -60,7 +61,7 @@ export default function OperationsCommandCenter() {
 
         {/* Tabs Navigation */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-7 gap-2 bg-card border-2 p-2 h-auto">
+          <TabsList className="grid grid-cols-8 gap-2 bg-card border-2 p-2 h-auto">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <Activity className="h-4 w-4" />
               Overview
@@ -84,6 +85,10 @@ export default function OperationsCommandCenter() {
               <Heart className="h-4 w-4" />
               Health
             </TabsTrigger>
+            <TabsTrigger value="security" className="flex items-center gap-2">
+              <Shield className="h-4 w-4" />
+              Security
+            </TabsTrigger>
             <TabsTrigger value="testing" className="flex items-center gap-2">
               <Wrench className="h-4 w-4" />
               Testing
@@ -100,6 +105,7 @@ export default function OperationsCommandCenter() {
           <TabsContent value="pipeline"><PipelineTab /></TabsContent>
           <TabsContent value="payments"><PaymentsTab /></TabsContent>
           <TabsContent value="health"><HealthTab /></TabsContent>
+          <TabsContent value="security"><SecurityTab /></TabsContent>
           <TabsContent value="testing"><TestingTab /></TabsContent>
           <TabsContent value="users"><UsersTab /></TabsContent>
         </Tabs>
