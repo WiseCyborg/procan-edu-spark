@@ -28,7 +28,7 @@ serve(async (req) => {
       license_number 
     } = await req.json();
 
-    console.log('📧 Sending application confirmation email to:', contact_email);
+    console.log('📧 [v1.1] Sending application confirmation email to:', contact_email); // Redeployment trigger
 
     // Load email template
     const html = await loadEmailTemplate('application-received', {

@@ -30,7 +30,7 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const payload: ApprovalEmailRequest = await req.json();
-    console.log('Sending approval email to:', payload.contact_email);
+    console.log('📧 [v1.1] Sending approval email to:', payload.contact_email); // Redeployment trigger
 
     // Load and render template
     const htmlContent = await loadEmailTemplate('application-approved', {

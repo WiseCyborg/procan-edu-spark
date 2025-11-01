@@ -92,6 +92,7 @@ const DispensaryApplicationManager = () => {
   const approveApplication = async (applicationId: string, credits: number = 10) => {
     console.log('[APPROVAL] Starting approval process', { applicationId, credits, timestamp: new Date().toISOString() });
     
+    // Relaxed rate limit for bulk admin operations: 50 approvals per hour
     const securityCheckPassed = await performSecurityCheck('dispensary_approval');
     console.log('[APPROVAL] Security check result:', securityCheckPassed);
     
@@ -99,7 +100,7 @@ const DispensaryApplicationManager = () => {
       console.error('[APPROVAL] Security check FAILED - operation blocked by rate limiting');
       toast({
         title: "Rate Limit Exceeded",
-        description: "Too many approval attempts. Please wait 10 minutes and try again.",
+        description: "Too many approval attempts. Please wait and try again, or clear rate limits in Security tab.",
         variant: "destructive"
       });
       return;
