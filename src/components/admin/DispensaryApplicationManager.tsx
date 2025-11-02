@@ -115,19 +115,89 @@ const DispensaryApplicationManager = () => {
         throw new Error('Application not found');
       }
 
-      // Step 1: Creating organization
-      setApprovalStep('Creating organization...');
-      console.log('[APPROVAL] Step 1: Creating organization');
+      // Check session first
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
-      // Generate registration token
-      const registrationToken = crypto.randomUUID();
-      const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 7); // 7 day expiry
-      console.log('[APPROVAL] Generated registration token', { 
-        token: registrationToken.substring(0, 8) + '...', 
-        expires: expiresAt.toISOString() 
+      if (sessionError || !session) {
+        console.error('[APPROVAL] Session error:', sessionError);
+        toast({
+          title: "Session Expired",
+          description: "Please log in again to continue.",
+          variant: "destructive"
+        });
+        window.location.href = '/auth?redirect=/admin/operations';
+        return;
+      }
+
+      console.log('[APPROVAL] Session valid, calling edge function');
+
+      // Step 1: Creating organization via edge function
+      setApprovalStep('Creating organization...');
+      console.log('[APPROVAL] Step 1: Calling approve-application edge function');
+
+      // Call edge function instead of RPC directly
+      const { data, error } = await supabase.functions.invoke('approve-application', {
+        body: {
+          application_id: applicationId,
+          credits
+        }
       });
 
+      console.log('[APPROVAL] Edge function response:', { data, error });
+
+      if (error) {
+        console.error('[APPROVAL] Edge function error:', error);
+        
+        // Handle specific error codes
+        if (error.message?.includes('SESSION_EXPIRED')) {
+          toast({
+            title: "Session Expired",
+            description: "Please log in again to continue.",
+            variant: "destructive"
+          });
+          window.location.href = '/auth?redirect=/admin/operations';
+          return;
+        }
+        
+        if (error.message?.includes('UNAUTHORIZED_NOT_ADMIN')) {
+          toast({
+            title: "Authorization Error",
+            description: "You don't have admin permissions. Please contact support.",
+            variant: "destructive"
+          });
+          return;
+        }
+        
+        throw error;
+      }
+
+      // Check response format
+      if (!data || !data.success) {
+        const errorMessage = data?.message || 'Unknown error occurred';
+        console.error('[APPROVAL] Edge function returned failure:', errorMessage);
+        
+        toast({
+          title: "Approval Failed",
+          description: errorMessage,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const result = data.data;
+      console.log('[APPROVAL] ✅ Approval successful:', result);
+
+      if (!result.join_code) {
+        console.error('[APPROVAL] CRITICAL: join_code missing from response!', result);
+        throw new Error('Join code was not generated - database function may need update. Contact support.');
+      }
+
+      // Step 2: Generate registration link
+      setApprovalStep('Generating registration link...');
+      const registrationToken = crypto.randomUUID();
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 7);
+      
       // Update application with token
       const { error: tokenError } = await supabase
         .from('dispensary_applications')
@@ -139,63 +209,12 @@ const DispensaryApplicationManager = () => {
 
       if (tokenError) {
         console.error('[APPROVAL] Failed to save registration token:', tokenError);
-        throw tokenError;
       }
-      console.log('[APPROVAL] Registration token saved successfully');
-
-      // Approve application with RPC (now returns join_code)
-      console.log('[APPROVAL] Calling approve_dispensary_application RPC', { application_id: applicationId, credits });
-      const { data, error } = await supabase.rpc('approve_dispensary_application', {
-        application_id: applicationId,
-        credits: credits
-      });
-      console.log('[APPROVAL] RPC response:', { 
-        hasData: !!data, 
-        dataLength: Array.isArray(data) ? data.length : 0,
-        hasError: !!error,
-        error 
-      });
-
-      if (error) {
-        console.error('[APPROVAL] RPC error:', error);
-        throw error;
-      }
-
-      if (!data || !Array.isArray(data) || data.length === 0) {
-        console.error('[APPROVAL] CRITICAL: Invalid RPC response - no data returned', { data });
-        throw new Error('Invalid response from approval function - no data returned');
-      }
-
-      const result = data[0] as { success: boolean; message: string; organization_id: string; access_key: string; join_code: string; purchase_id: string };
-      console.log('[APPROVAL] Parsed result:', { 
-        success: result.success, 
-        hasOrgId: !!result.organization_id,
-        hasAccessKey: !!result.access_key,
-        hasJoinCode: !!result.join_code,
-        hasPurchaseId: !!result.purchase_id
-      });
       
-      if (!result.success) {
-        console.error('[APPROVAL] Approval failed:', result.message);
-        throw new Error(result.message || 'Failed to approve application');
-      }
-
-      if (!result.join_code) {
-        console.error('[APPROVAL] CRITICAL: join_code missing from RPC response!', result);
-        throw new Error('Join code was not generated - database function may need update. Contact support.');
-      }
-
-      // Step 2: Generating registration link (join_code returned from RPC)
-      setApprovalStep('Generating registration link...');
-      console.log('[APPROVAL] Step 2: Generating registration link');
       const registrationUrl = `${window.location.origin}/register/manager?token=${registrationToken}`;
-      console.log('[APPROVAL] Registration URL generated:', registrationUrl.substring(0, 50) + '...');
-      
-      // Join code is now returned directly from RPC - no separate query needed
-      const joinCode = result.join_code;
-      console.log('[APPROVAL] Join code from RPC:', joinCode);
+      console.log('[APPROVAL] Registration URL generated');
 
-      // Step 3: Sending approval email
+      // Step 3: Send approval email
       setApprovalStep('Sending approval email...');
       console.log('[APPROVAL] Step 3: Sending approval email to', application.contact_email);
       
@@ -212,22 +231,15 @@ const DispensaryApplicationManager = () => {
             access_key: result.access_key,
             registration_url: registrationUrl,
             credits: credits,
-            join_code: joinCode
+            join_code: result.join_code
           }
         });
-        console.log('[APPROVAL] Email function response:', { 
-          hasError: !!emailResult.error, 
-          error: emailResult.error,
-          data: emailResult.data 
-        });
-
+        
         if (emailResult.error) {
           emailError = emailResult.error.message || 'Failed to send email';
           console.error('[APPROVAL] Email send FAILED:', emailResult.error);
-          // Copy to clipboard as fallback
           navigator.clipboard.writeText(registrationUrl);
           
-          // Log failed email attempt
           await supabase
             .from('email_logs')
             .insert({
@@ -251,7 +263,6 @@ const DispensaryApplicationManager = () => {
         console.error('[APPROVAL] Email exception:', emailErr);
         navigator.clipboard.writeText(registrationUrl);
         
-        // Log exception
         await supabase
           .from('email_logs')
           .insert({
@@ -272,7 +283,7 @@ const DispensaryApplicationManager = () => {
       setApprovalData({
         registrationLink: registrationUrl,
         accessKey: result.access_key,
-        joinCode: joinCode || 'N/A',
+        joinCode: result.join_code || 'N/A',
         emailSent,
         emailError
       });
