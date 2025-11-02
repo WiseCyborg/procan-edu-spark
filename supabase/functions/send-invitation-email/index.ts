@@ -39,7 +39,7 @@ const handler = async (req: Request): Promise<Response> => {
       isReminder 
     }: InvitationEmailRequest = await req.json();
 
-    console.log(`Sending invitation email to ${email}`, { organizationName, role, isReminder });
+    console.log(`📧 [v1.2] Sending invitation email to ${email}`, { organizationName, role, isReminder });
 
     // Build the acceptance URL - points to student auth with invitation token
     const baseUrl = supabaseUrl.includes('zhmpwczrvitomsxjwpzc')

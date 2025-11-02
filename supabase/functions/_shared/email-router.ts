@@ -39,12 +39,15 @@ export class EmailRouter {
   }
   
   /**
-   * Send email with automatic failover from Resend to SMTP
+   * Send email via Resend (SMTP fallback disabled)
    * Logs the attempt to email_logs table
    */
   async sendWithFailover(options: EmailOptions, supabaseClient?: any): Promise<EmailResult> {
     const startTime = Date.now();
     const emailLogId = crypto.randomUUID();
+    
+    // SMTP fallback temporarily disabled - Resend-only mode
+    const SMTP_FALLBACK_ENABLED = false;
     
     // Log initial attempt if supabase client provided
     if (supabaseClient) {
@@ -59,9 +62,10 @@ export class EmailRouter {
       });
     }
     
-    // Try Resend first (faster, better tracking)
+    // Try Resend (primary and only provider in current config)
     try {
-      console.log(`📤 [EMAIL-ROUTER] Attempting Resend send`);
+      console.log(`📤 [EMAIL-ROUTER v1.2] Resend-only mode: ${!SMTP_FALLBACK_ENABLED ? 'ENABLED' : 'DISABLED'}`);
+      console.log(`📤 [EMAIL-ROUTER v1.2] Attempting Resend send`);
       console.log(`📤 [EMAIL-ROUTER] To: ${options.to}`);
       console.log(`📤 [EMAIL-ROUTER] Subject: ${options.subject}`);
       console.log(`📤 [EMAIL-ROUTER] From: ${options.from || "ProCann Edu <noreply@procannedu.com>"}`);
@@ -88,9 +92,8 @@ export class EmailRouter {
         throw new Error(`Resend API returned no data. Full response: ${JSON.stringify(result)}`);
       }
       
-      console.log(`✅ [EMAIL-ROUTER] Resend SUCCESS in ${responseTime}ms`);
+      console.log(`✅ [EMAIL-ROUTER v1.2] Resend SUCCESS in ${responseTime}ms`);
       console.log(`✅ [EMAIL-ROUTER] Provider ID: ${result.data.id}`);
-      console.log(`✅ [EMAIL-ROUTER] Full result:`, JSON.stringify(result, null, 2));
       console.log(`✅ Email sent via Resend in ${responseTime}ms:`, result.data?.id);
       
       // Update log with success
@@ -112,79 +115,32 @@ export class EmailRouter {
       };
     } catch (resendError: any) {
       const responseTime = Date.now() - startTime;
-      console.error(`❌ [EMAIL-ROUTER] Resend FAILED after ${responseTime}ms`);
+      console.error(`❌ [EMAIL-ROUTER v1.2] Resend FAILED after ${responseTime}ms`);
       console.error(`❌ [EMAIL-ROUTER] Error message: ${resendError.message}`);
       console.error(`❌ [EMAIL-ROUTER] Error name: ${resendError.name}`);
       console.error(`❌ [EMAIL-ROUTER] Status code: ${resendError.statusCode}`);
-      console.error(`❌ [EMAIL-ROUTER] Full error:`, JSON.stringify(resendError, null, 2));
-      console.error(`❌ [EMAIL-ROUTER] Error stack:`, resendError.stack);
-      console.warn(`⚠️ Attempting SMTP fallback...`);
+      console.error(`❌ [EMAIL-ROUTER] SMTP fallback DISABLED - failing fast`);
       
-      // Fallback to SMTP
-      try {
-        const smtpService = new SMTPEmailService();
-        const smtpResult = await smtpService.sendEmail({
-          to: options.to,
-          subject: options.subject,
-          html: options.html,
-          from: options.from,
-        });
-        await smtpService.close();
-        
-        if (smtpResult.success) {
-          const responseTime = Date.now() - startTime;
-          console.log(`✅ Email sent via SMTP fallback in ${responseTime}ms`);
-          
-          // Update log with success
-          if (supabaseClient) {
-            await supabaseClient.from("email_logs").update({
-              status: 'sent',
-              provider: 'smtp',
-              provider_id: smtpResult.messageId,
-              sent_at: new Date().toISOString(),
-              metadata: { 
-                ...options.metadata, 
-                response_time_ms: responseTime,
-                failover_from: 'resend',
-                resend_error: resendError.message,
-              },
-            }).eq('id', emailLogId);
-          }
-          
-          return {
-            success: true,
-            provider: 'smtp',
-            providerId: smtpResult.messageId,
-            responseTime,
-          };
-        }
-        throw new Error(smtpResult.error || "SMTP send failed");
-      } catch (smtpError: any) {
-        const responseTime = Date.now() - startTime;
-        const errorMessage = `Both providers failed - Resend: ${resendError.message}, SMTP: ${smtpError.message}`;
-        console.error(`❌ ${errorMessage}`);
-        
-        // Update log with failure
-        if (supabaseClient) {
-          await supabaseClient.from("email_logs").update({
-            status: 'failed',
-            error_message: errorMessage,
-            metadata: { 
-              ...options.metadata, 
-              response_time_ms: responseTime,
-              resend_error: resendError.message,
-              smtp_error: smtpError.message,
-            },
-          }).eq('id', emailLogId);
-        }
-        
-        return {
-          success: false,
-          provider: 'both_failed',
-          error: errorMessage,
-          responseTime,
-        };
+      // Update log with failure
+      if (supabaseClient) {
+        await supabaseClient.from("email_logs").update({
+          status: 'failed',
+          error_message: `Resend failed: ${resendError.message}. SMTP fallback disabled.`,
+          metadata: { 
+            ...options.metadata, 
+            response_time_ms: responseTime,
+            resend_error: resendError.message,
+            smtp_fallback_disabled: true,
+          },
+        }).eq('id', emailLogId);
       }
+      
+      return {
+        success: false,
+        provider: 'both_failed',
+        error: `Email send failed: ${resendError.message}`,
+        responseTime,
+      };
     }
   }
   
