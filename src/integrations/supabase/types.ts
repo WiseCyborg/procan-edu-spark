@@ -2953,17 +2953,33 @@ export type Database = {
         Args: { course_id: string; org_id: string; user_id: string }
         Returns: string
       }
-      approve_dispensary_application: {
-        Args: { application_id: string; credits?: number }
-        Returns: {
-          access_key: string
-          join_code: string
-          message: string
-          organization_id: string
-          purchase_id: string
-          success: boolean
-        }[]
-      }
+      approve_dispensary_application:
+        | {
+            Args: {
+              application_id: string
+              calling_user_id?: string
+              credits?: number
+            }
+            Returns: {
+              access_key: string
+              join_code: string
+              message: string
+              organization_id: string
+              purchase_id: string
+              success: boolean
+            }[]
+          }
+        | {
+            Args: { application_id: string; credits?: number }
+            Returns: {
+              access_key: string
+              join_code: string
+              message: string
+              organization_id: string
+              purchase_id: string
+              success: boolean
+            }[]
+          }
       bulk_verify_users: {
         Args: { admin_notes?: string; target_user_ids: string[] }
         Returns: Json

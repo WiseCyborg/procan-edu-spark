@@ -113,12 +113,13 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Call RPC with service role
+    // Call RPC with service role, passing verified admin user ID
     const { data, error: rpcError } = await serviceClient.rpc(
       'approve_dispensary_application',
       {
         application_id,
-        credits
+        credits,
+        calling_user_id: user.id  // Pass verified admin user ID explicitly
       }
     );
 
