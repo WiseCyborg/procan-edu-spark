@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useSecurityMonitoring } from '@/hooks/useSecurityMonitoring';
+import { v4 as uuidv4 } from 'uuid';
 import { 
   FileText, 
   Eye, 
@@ -135,11 +136,16 @@ const DispensaryApplicationManager = () => {
       setApprovalStep('Creating organization...');
       console.log('[APPROVAL] Step 1: Calling approve-application edge function');
 
+      // Generate idempotency key for this approval request
+      const idempotencyKey = uuidv4();
+      console.log('[APPROVAL] Using idempotency key:', idempotencyKey);
+
       // Call edge function instead of RPC directly
       const { data, error } = await supabase.functions.invoke('approve-application', {
         body: {
           application_id: applicationId,
-          credits
+          credits,
+          idempotency_key: idempotencyKey
         }
       });
 

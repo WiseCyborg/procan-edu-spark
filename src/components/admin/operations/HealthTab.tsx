@@ -4,6 +4,7 @@ import { TrendingDown } from 'lucide-react';
 import { useOperationsMetrics } from '@/hooks/useOperationsMetrics';
 import { EdgeFunctionsStatus } from '@/components/admin/EdgeFunctionsStatus';
 import { IntegrationHealthMonitor } from '@/components/admin/IntegrationHealthMonitor';
+import { SLODashboard } from '@/components/admin/SLODashboard';
 
 export function HealthTab() {
   const { metrics } = useOperationsMetrics();
@@ -16,6 +17,9 @@ export function HealthTab() {
 
   return (
     <div className="space-y-6 py-6">
+      {/* SLO Dashboard */}
+      <SLODashboard />
+
       {/* Overall Health Score */}
       <Card>
         <CardHeader>

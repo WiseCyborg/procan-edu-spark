@@ -143,6 +143,39 @@ export type Database = {
         }
         Relationships: []
       }
+      api_requests: {
+        Row: {
+          api_route: string
+          created_at: string
+          id: string
+          idempotency_key: string
+          request_params: Json | null
+          response_data: Json | null
+          success: boolean
+          user_id: string | null
+        }
+        Insert: {
+          api_route: string
+          created_at?: string
+          id?: string
+          idempotency_key: string
+          request_params?: Json | null
+          response_data?: Json | null
+          success: boolean
+          user_id?: string | null
+        }
+        Update: {
+          api_route?: string
+          created_at?: string
+          id?: string
+          idempotency_key?: string
+          request_params?: Json | null
+          response_data?: Json | null
+          success?: boolean
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       automated_test_results: {
         Row: {
           duration_ms: number | null
@@ -772,6 +805,42 @@ export type Database = {
         }
         Relationships: []
       }
+      email_circuit_breaker: {
+        Row: {
+          circuit_state: string
+          closed_at: string | null
+          failure_count: number
+          half_open_at: string | null
+          id: string
+          last_failure_at: string | null
+          metadata: Json | null
+          opened_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          circuit_state?: string
+          closed_at?: string | null
+          failure_count?: number
+          half_open_at?: string | null
+          id?: string
+          last_failure_at?: string | null
+          metadata?: Json | null
+          opened_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          circuit_state?: string
+          closed_at?: string | null
+          failure_count?: number
+          half_open_at?: string | null
+          id?: string
+          last_failure_at?: string | null
+          metadata?: Json | null
+          opened_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       email_logs: {
         Row: {
           created_at: string
@@ -1084,6 +1153,42 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           question?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      feature_flags: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          flag_key: string
+          flag_value: boolean
+          id: string
+          scope: string
+          scope_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          flag_key: string
+          flag_value?: boolean
+          id?: string
+          scope?: string
+          scope_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          flag_key?: string
+          flag_value?: boolean
+          id?: string
+          scope?: string
+          scope_id?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -2332,6 +2437,45 @@ export type Database = {
           },
         ]
       }
+      slo_metrics: {
+        Row: {
+          created_at: string
+          id: string
+          metadata: Json | null
+          metric_name: string
+          metric_value: number
+          period_end: string
+          period_start: string
+          status: string
+          target_value: number
+          unit: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          metric_name: string
+          metric_value: number
+          period_end: string
+          period_start: string
+          status: string
+          target_value: number
+          unit: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          metric_name?: string
+          metric_value?: number
+          period_end?: string
+          period_start?: string
+          status?: string
+          target_value?: number
+          unit?: string
+        }
+        Relationships: []
+      }
       staff_invitations: {
         Row: {
           accepted_at: string | null
@@ -2584,6 +2728,104 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      system_jobs: {
+        Row: {
+          completed_at: string | null
+          created_by: string | null
+          id: string
+          idempotency_key: string | null
+          job_type: string
+          last_error: string | null
+          max_retries: number
+          metadata: Json | null
+          next_retry_at: string | null
+          organization_id: string | null
+          payload: Json
+          queued_at: string
+          retry_count: number
+          started_at: string | null
+          status: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_by?: string | null
+          id?: string
+          idempotency_key?: string | null
+          job_type: string
+          last_error?: string | null
+          max_retries?: number
+          metadata?: Json | null
+          next_retry_at?: string | null
+          organization_id?: string | null
+          payload: Json
+          queued_at?: string
+          retry_count?: number
+          started_at?: string | null
+          status?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_by?: string | null
+          id?: string
+          idempotency_key?: string | null
+          job_type?: string
+          last_error?: string | null
+          max_retries?: number
+          metadata?: Json | null
+          next_retry_at?: string | null
+          organization_id?: string | null
+          payload?: Json
+          queued_at?: string
+          retry_count?: number
+          started_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "system_jobs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      system_jobs_deadletter: {
+        Row: {
+          failure_reason: string
+          id: string
+          job_type: string
+          last_error: string | null
+          metadata: Json | null
+          moved_to_dlq_at: string
+          original_queued_at: string
+          payload: Json
+          retry_count: number
+        }
+        Insert: {
+          failure_reason: string
+          id: string
+          job_type: string
+          last_error?: string | null
+          metadata?: Json | null
+          moved_to_dlq_at?: string
+          original_queued_at: string
+          payload: Json
+          retry_count: number
+        }
+        Update: {
+          failure_reason?: string
+          id?: string
+          job_type?: string
+          last_error?: string | null
+          metadata?: Json | null
+          moved_to_dlq_at?: string
+          original_queued_at?: string
+          payload?: Json
+          retry_count?: number
+        }
+        Relationships: []
       }
       tier_achievements: {
         Row: {
@@ -2979,6 +3221,15 @@ export type Database = {
         Returns: Json
       }
       calculate_compliance_score: { Args: { org_id: string }; Returns: number }
+      calculate_slo_metrics: { Args: never; Returns: undefined }
+      check_email_circuit: {
+        Args: never
+        Returns: {
+          failure_count: number
+          is_open: boolean
+          state: string
+        }[]
+      }
       check_rate_limit: {
         Args: {
           _action_type: string
@@ -2992,6 +3243,7 @@ export type Database = {
         Args: { course_id: string; org_id: string }
         Returns: boolean
       }
+      cleanup_old_api_requests: { Args: never; Returns: undefined }
       cleanup_performance_metrics: { Args: never; Returns: undefined }
       clear_user_rate_limits: {
         Args: { _action_type?: string; _user_id?: string }
@@ -3160,6 +3412,14 @@ export type Database = {
         Args: { _conversation_id: string; _user_id: string }
         Returns: boolean
       }
+      is_feature_enabled: {
+        Args: {
+          p_flag_key: string
+          p_organization_id?: string
+          p_user_id?: string
+        }
+        Returns: boolean
+      }
       is_own_profile: {
         Args: { _profile_user_id: string; _user_id: string }
         Returns: boolean
@@ -3183,6 +3443,18 @@ export type Database = {
         Args: { admin_notes?: string; target_user_id: string }
         Returns: Json
       }
+      move_to_deadletter: { Args: { p_job_id: string }; Returns: undefined }
+      queue_job: {
+        Args: {
+          p_idempotency_key?: string
+          p_job_type: string
+          p_max_retries?: number
+          p_organization_id?: string
+          p_payload: Json
+        }
+        Returns: string
+      }
+      record_email_result: { Args: { p_success: boolean }; Returns: undefined }
       reject_dispensary_application: {
         Args: { application_id: string; rejection_reason: string }
         Returns: {

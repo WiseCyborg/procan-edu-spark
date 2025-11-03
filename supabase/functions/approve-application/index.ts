@@ -89,7 +89,7 @@ serve(async (req) => {
     console.log('[APPROVE-APPLICATION] Admin verified:', user.email);
 
     // Parse request body
-    const { application_id, credits = 10 } = await req.json();
+    const { application_id, credits = 10, idempotency_key } = await req.json();
 
     if (!application_id) {
       return new Response(
@@ -105,13 +105,44 @@ serve(async (req) => {
       );
     }
 
-    console.log('[APPROVE-APPLICATION] Calling RPC with service role for application:', application_id);
+    if (!idempotency_key) {
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'MISSING_IDEMPOTENCY_KEY',
+          message: 'idempotency_key is required' 
+        }), 
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
-    // Create service role client (bypasses RLS and auth.uid() checks)
+    // Create service role client
     const serviceClient = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
+
+    // Check for existing request (idempotency)
+    const { data: existingRequest } = await serviceClient
+      .from('api_requests')
+      .select('*')
+      .eq('idempotency_key', idempotency_key)
+      .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+      .maybeSingle();
+
+    if (existingRequest) {
+      console.log('[APPROVE-APPLICATION] Idempotency check: returning cached result');
+      return new Response(
+        JSON.stringify({
+          success: true,
+          data: existingRequest.response_data,
+          cached: true
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log('[APPROVE-APPLICATION] Calling RPC with service role for application:', application_id);
 
     // Call RPC with service role, passing verified admin user ID
     const { data, error: rpcError } = await serviceClient.rpc(
@@ -175,6 +206,16 @@ serve(async (req) => {
     }
 
     console.log('[APPROVE-APPLICATION] ✅ Approval successful for:', result.organization_id);
+
+    // Cache the result for idempotency
+    await serviceClient.from('api_requests').insert({
+      idempotency_key,
+      api_route: 'approve-application',
+      user_id: user.id,
+      request_params: { application_id, credits },
+      response_data: result,
+      success: true
+    });
 
     // Return success
     return new Response(
