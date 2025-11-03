@@ -240,18 +240,31 @@ serve(async (req) => {
       });
     }
 
-    // STEP 10: Send welcome email (non-blocking)
+    // STEP 10: Queue welcome email (non-blocking, with idempotency)
+    const welcomeJobIdempotencyKey = `welcome_${authData.user.id}_${Date.now()}`;
     try {
-      await supabaseClient.functions.invoke('send-welcome-email', {
-        body: {
+      const { data: jobData, error: jobError } = await supabaseClient.rpc('queue_job', {
+        p_job_type: 'send_welcome_email',
+        p_payload: {
           email: email,
           firstName: firstName,
           lastName: lastName,
-        }
+          userId: authData.user.id,
+          organizationName: organizationName
+        },
+        p_idempotency_key: welcomeJobIdempotencyKey,
+        p_organization_id: organizationId,
+        p_max_retries: 3
       });
+
+      if (jobError) {
+        console.error('[ATOMIC REGISTRATION] Failed to queue welcome email:', jobError);
+      } else {
+        console.log('[ATOMIC REGISTRATION] Welcome email queued with job ID:', jobData);
+      }
     } catch (emailError) {
-      console.error('[ATOMIC REGISTRATION] Welcome email failed:', emailError);
-      // Don't fail registration if email fails
+      console.error('[ATOMIC REGISTRATION] Welcome email queue error:', emailError);
+      // Don't fail registration if email queueing fails
     }
 
     // STEP 11: Create learning journey tracking
