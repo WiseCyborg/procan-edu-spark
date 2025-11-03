@@ -183,6 +183,7 @@ export type Database = {
           id: string
           is_revoked: boolean | null
           issue_date: string
+          metadata: Json | null
           pdf_url: string | null
           tier_badge: string | null
           user_id: string
@@ -196,6 +197,7 @@ export type Database = {
           id?: string
           is_revoked?: boolean | null
           issue_date?: string
+          metadata?: Json | null
           pdf_url?: string | null
           tier_badge?: string | null
           user_id: string
@@ -209,6 +211,7 @@ export type Database = {
           id?: string
           is_revoked?: boolean | null
           issue_date?: string
+          metadata?: Json | null
           pdf_url?: string | null
           tier_badge?: string | null
           user_id?: string
@@ -999,6 +1002,7 @@ export type Database = {
           id: string
           ip_address: string | null
           is_passed: boolean | null
+          metadata: Json | null
           passing_score: number | null
           photo_verification_url: string | null
           started_at: string | null
@@ -1014,6 +1018,7 @@ export type Database = {
           id?: string
           ip_address?: string | null
           is_passed?: boolean | null
+          metadata?: Json | null
           passing_score?: number | null
           photo_verification_url?: string | null
           started_at?: string | null
@@ -1029,6 +1034,7 @@ export type Database = {
           id?: string
           ip_address?: string | null
           is_passed?: boolean | null
+          metadata?: Json | null
           passing_score?: number | null
           photo_verification_url?: string | null
           started_at?: string | null
@@ -3008,6 +3014,7 @@ export type Database = {
           success: boolean
         }[]
       }
+      deallocate_seat: { Args: { seat_id_param: string }; Returns: boolean }
       detect_outdated_content: {
         Args: never
         Returns: {

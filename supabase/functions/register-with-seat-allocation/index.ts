@@ -112,33 +112,55 @@ serve(async (req) => {
 
     console.log('[ATOMIC REGISTRATION] Seat allocated successfully:', seatId);
 
-    // STEP 3: Create user account (only after seat is secured)
-    const { data: authData, error: authError } = await supabaseClient.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true, // Auto-confirm email
-      user_metadata: {
-        first_name: firstName,
-        last_name: lastName,
-        phone: phone,
-        organization_id: organizationId
-      }
-    });
+    // STEP 3: Create user account with retry logic (Gate 7 fix)
+    let authData = null;
+    let authError = null;
+    const maxRetries = 3;
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      console.log(`[ATOMIC REGISTRATION] Auth attempt ${attempt}/${maxRetries}`);
+      
+      const result = await supabaseClient.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: {
+          first_name: firstName,
+          last_name: lastName,
+          phone: phone,
+          organization_id: organizationId
+        }
+      });
 
-    if (authError || !authData.user) {
-      console.error('[ATOMIC REGISTRATION] Account creation failed:', authError);
+      if (result.data?.user) {
+        authData = result.data;
+        authError = null;
+        break;
+      }
+
+      authError = result.error;
+      console.error(`[ATOMIC REGISTRATION] Auth attempt ${attempt} failed:`, authError);
       
-      // ROLLBACK: Release the seat we allocated
-      await supabaseClient
-        .from('rvt_seats')
-        .update({ 
-          status: 'available', 
-          assigned_user_id: null,
-          assigned_at: null 
-        })
-        .eq('id', seatId);
+      // Wait before retry (exponential backoff)
+      if (attempt < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+      }
+    }
+
+    if (authError || !authData?.user) {
+      console.error('[ATOMIC REGISTRATION] All auth attempts failed:', authError);
       
-      throw new Error(`Account creation failed: ${authError?.message}`);
+      // ROLLBACK: Release seat using proper RPC
+      const { error: deallocError } = await supabaseClient
+        .rpc('deallocate_seat', { seat_id_param: seatId });
+      
+      if (deallocError) {
+        console.error('[ATOMIC REGISTRATION] Seat deallocation failed:', deallocError);
+      } else {
+        console.log('[ATOMIC REGISTRATION] Seat deallocated successfully');
+      }
+      
+      throw new Error(`Account creation failed after ${maxRetries} attempts: ${authError?.message}`);
     }
 
     console.log('[ATOMIC REGISTRATION] User account created:', authData.user.id);

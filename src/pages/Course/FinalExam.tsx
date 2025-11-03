@@ -56,6 +56,8 @@ const FinalExam: React.FC = () => {
   const [showInstructions, setShowInstructions] = useState(false);
   const [showCameraUnavailable, setShowCameraUnavailable] = useState(false);
   const [cameraError, setCameraError] = useState<'no-camera' | 'permission-denied' | 'https-required' | 'in-use' | 'unknown'>('unknown');
+  const [skipPhotoVerification, setSkipPhotoVerification] = useState(false);
+  const [bypassReason, setBypassReason] = useState('');
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -302,10 +304,31 @@ const FinalExam: React.FC = () => {
     return 'unknown';
   };
 
+  const skipPhotoAndProceed = () => {
+    if (!bypassReason.trim()) {
+      toast.error("Please provide a reason for skipping photo verification");
+      return;
+    }
+    
+    setUserData(prev => ({ 
+      ...prev, 
+      photo: undefined 
+    }));
+    
+    setExamStage('ready');
+    toast.info('Photo verification skipped. Proceeding to exam.');
+  };
+
   const startPhotoVerification = async () => {
     // Validate form
     if (!userData.name || !userData.phone || !userData.email) {
       toast.error("Please fill in all fields");
+      return;
+    }
+
+    // Gate 9: Allow skip option if checkbox is checked
+    if (skipPhotoVerification) {
+      skipPhotoAndProceed();
       return;
     }
 
@@ -488,7 +511,7 @@ const FinalExam: React.FC = () => {
 
   const generateCertificate = async () => {
     try {
-      // First record the exam attempt in the database
+      // First record the exam attempt in the database (Gate 9 & 10 metadata)
       const { data: examData, error: examError } = await supabase
         .from('exam_attempts')
         .insert({
@@ -500,7 +523,12 @@ const FinalExam: React.FC = () => {
           time_taken: 5400 - totalTimeLeft,
           photo_verification_url: userData.photo,
           ip_address: userData.ip,
-          completed_at: new Date().toISOString()
+          completed_at: new Date().toISOString(),
+          metadata: skipPhotoVerification ? {
+            photo_verification_skipped: true,
+            bypass_reason: bypassReason,
+            bypass_timestamp: new Date().toISOString()
+          } : {}
         })
         .select()
         .single();
@@ -527,7 +555,21 @@ const FinalExam: React.FC = () => {
 
       if (certError) {
         console.error('Error generating certificate:', certError);
-        toast.error('Failed to generate certificate');
+        toast.error('Failed to generate certificate. You can retry from your dashboard.');
+        
+        // Update exam_attempts with certificate failure
+        const currentMetadata = (examData.metadata as Record<string, any>) || {};
+        await supabase
+          .from('exam_attempts')
+          .update({
+            metadata: {
+              ...currentMetadata,
+              certificate_generation_failed: true,
+              failure_reason: certError.message,
+              failure_timestamp: new Date().toISOString()
+            } as any
+          })
+          .eq('id', examData.id);
         return;
       }
 
@@ -768,8 +810,41 @@ const FinalExam: React.FC = () => {
               />
             </div>
             
+            {/* Gate 9: Camera bypass option */}
+            <div className="border-t pt-4">
+              <label className="flex items-start space-x-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={skipPhotoVerification}
+                  onChange={(e) => setSkipPhotoVerification(e.target.checked)}
+                  className="mt-1"
+                />
+                <span className="text-sm text-gray-600">
+                  Skip photo verification (camera unavailable or technical issues)
+                </span>
+              </label>
+              
+              {skipPhotoVerification && (
+                <div className="mt-3">
+                  <label htmlFor="bypassReason" className="block text-sm font-medium text-gray-700 mb-1">
+                    Reason for skipping <span className="text-red-600">*</span>
+                  </label>
+                  <Input
+                    id="bypassReason"
+                    value={bypassReason}
+                    onChange={(e) => setBypassReason(e.target.value)}
+                    placeholder="e.g., Camera not working, iOS issue, etc."
+                    required
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    This will be recorded for compliance purposes
+                  </p>
+                </div>
+              )}
+            </div>
+            
             <Button className="w-full" onClick={startPhotoVerification}>
-              Start Photo Verification
+              {skipPhotoVerification ? 'Proceed to Exam' : 'Start Photo Verification'}
             </Button>
           </div>
         </div>
