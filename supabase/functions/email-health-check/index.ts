@@ -56,14 +56,41 @@ serve(async (req) => {
       errors.push(`Email logs query failed: ${logsError.message}`);
     }
 
-    // 3. Calculate success rate
+    // 3. Calculate success rate and send alert if below threshold
     const totalEmails = recentLogs?.length || 0;
     const sentEmails = recentLogs?.filter(log => log.status === 'sent').length || 0;
+    const failedEmails = recentLogs?.filter(log => log.status === 'failed').length || 0;
     const successRate = totalEmails > 0 ? (sentEmails / totalEmails) * 100 : 100;
+    const failureRate = totalEmails > 0 ? (failedEmails / totalEmails) * 100 : 0;
     checks.success_rate_healthy = successRate >= 95;
     
     if (successRate < 95) {
       errors.push(`Success rate below 95%: ${successRate.toFixed(1)}%`);
+    }
+
+    // Alert if failure rate > 10%
+    if (failureRate > 10 && totalEmails >= 10) {
+      console.error(`🚨 HIGH FAILURE RATE: ${failureRate.toFixed(1)}% (${failedEmails}/${totalEmails} emails failed)`);
+      
+      // Send alert to notification queue
+      await supabase
+        .from('notification_queue')
+        .insert({
+          notification_type: 'email_health_alert',
+          priority: 'critical',
+          title: '🚨 High Email Failure Rate Detected',
+          message: `Email system health degraded: ${failureRate.toFixed(1)}% failure rate in last hour (${failedEmails}/${totalEmails} failed)`,
+          target_users: ['admin'],
+          action_url: '/admin/operations?tab=email',
+          metadata: {
+            failure_rate: failureRate,
+            failed_count: failedEmails,
+            total_count: totalEmails,
+            timestamp: new Date().toISOString()
+          }
+        });
+      
+      errors.push(`🚨 CRITICAL: Failure rate ${failureRate.toFixed(1)}% exceeds 10% threshold`);
     }
 
     // 4. Check for stuck emails (queued/sending > 15 min)

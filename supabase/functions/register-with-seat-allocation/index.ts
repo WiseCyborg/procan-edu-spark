@@ -44,6 +44,35 @@ serve(async (req) => {
 
     console.log('[ATOMIC REGISTRATION] Starting registration for:', email);
 
+    // VALIDATE: Check join code has available seats (if using join code)
+    if (joinCode) {
+      console.log('[ATOMIC REGISTRATION] Validating join code has available seats:', joinCode);
+      
+      const { data: hasSeats, error: validateError } = await supabaseClient
+        .rpc('validate_join_code_has_seats', { p_join_code: joinCode });
+
+      if (validateError) {
+        console.error('[ATOMIC REGISTRATION] Join code validation error:', validateError);
+        throw new Error('Failed to validate join code');
+      }
+
+      if (!hasSeats) {
+        console.error('[ATOMIC REGISTRATION] Join code has no available seats');
+        return new Response(
+          JSON.stringify({ 
+            error: 'This join code has reached its maximum usage limit or no seats are available. Please contact your manager to purchase more seats.',
+            code: 'JOIN_CODE_EXHAUSTED'
+          }),
+          { 
+            status: 400, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
+      }
+
+      console.log('[ATOMIC REGISTRATION] Join code validated - seats available');
+    }
+
     // STEP 1: Get default course ID
     const { data: courseData, error: courseError } = await supabaseClient
       .from('courses')

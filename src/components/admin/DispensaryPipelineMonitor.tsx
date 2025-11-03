@@ -14,7 +14,8 @@ import {
   Play,
   RefreshCw,
   TrendingUp,
-  TrendingDown
+  TrendingDown,
+  KeyRound
 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
@@ -39,6 +40,60 @@ interface PipelineMetrics {
   certificatesGenerated: number;
   lastUpdated: string;
 }
+
+// Token expiry indicator component
+const TokenExpiryIndicator = () => {
+  const [tokenStats, setTokenStats] = useState({ expiring: 0, expired: 0 });
+  
+  useEffect(() => {
+    const fetchTokenStats = async () => {
+      const now = new Date();
+      const twoDaysFromNow = new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000);
+      
+      const { data: expiringSoon } = await supabase
+        .from('dispensary_applications')
+        .select('id')
+        .eq('application_status', 'approved')
+        .eq('registration_completed', false)
+        .gte('registration_token_expires_at', now.toISOString())
+        .lte('registration_token_expires_at', twoDaysFromNow.toISOString());
+      
+      const { data: expired } = await supabase
+        .from('dispensary_applications')
+        .select('id')
+        .eq('application_status', 'approved')
+        .eq('registration_completed', false)
+        .lt('registration_token_expires_at', now.toISOString());
+      
+      setTokenStats({
+        expiring: expiringSoon?.length || 0,
+        expired: expired?.length || 0
+      });
+    };
+    
+    fetchTokenStats();
+  }, []);
+  
+  if (tokenStats.expired > 0) {
+    return (
+      <Badge variant="destructive" className="gap-1">
+        <KeyRound className="h-3 w-3" />
+        {tokenStats.expired} Expired
+      </Badge>
+    );
+  }
+  
+  if (tokenStats.expiring > 0) {
+    return (
+      <Badge variant="secondary" className="gap-1 bg-amber-100 text-amber-800">
+        <KeyRound className="h-3 w-3" />
+        {tokenStats.expiring} Expiring Soon
+      </Badge>
+    );
+  }
+  
+  return null;
+};
 
 export const DispensaryPipelineMonitor = () => {
   const [metrics, setMetrics] = useState<PipelineMetrics | null>(null);
@@ -362,7 +417,13 @@ export const DispensaryPipelineMonitor = () => {
                     <div className="flex-1">
                       <div className="flex items-center justify-between">
                         <h4 className="font-medium">{step.name}</h4>
-                        {getStatusBadge(step.status)}
+                        <div className="flex items-center gap-2">
+                          {getStatusBadge(step.status)}
+                          {/* Show token status for registration step */}
+                          {step.id === 'registration' && index > 0 && (
+                            <TokenExpiryIndicator />
+                          )}
+                        </div>
                       </div>
                       <p className="text-sm text-muted-foreground">{step.description}</p>
                     </div>

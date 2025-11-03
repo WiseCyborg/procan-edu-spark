@@ -173,11 +173,66 @@ const EmailMonitoringDashboard = () => {
     setFilteredLogs(filtered);
   };
 
-  const retryFailedEmail = async (emailId: string) => {
-    toast({
-      title: "Retry Not Implemented",
-      description: "Email retry functionality is not yet available",
-    });
+  const retryFailedEmail = async (emailLog: EmailLog) => {
+    try {
+      console.log('[EMAIL RESEND] Attempting to resend email:', emailLog.id);
+      
+      // Map email type to appropriate edge function
+      const emailFunctionMap: Record<string, string> = {
+        'application_approved': 'send-approval-email',
+        'staff_invitation': 'send-employee-invitation',
+        'welcome': 'send-welcome-email',
+        'certificate': 'send-certificate-email',
+        'payment_confirmation': 'send-payment-confirmation',
+        'seat_purchase': 'send-seat-purchase-confirmation'
+      };
+
+      const functionName = emailFunctionMap[emailLog.email_type];
+      
+      if (!functionName) {
+        toast({
+          title: "Cannot Resend",
+          description: `Email type '${emailLog.email_type}' does not have a resend handler`,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Get metadata from original email
+      const { data: fullLog } = await supabase
+        .from('email_logs')
+        .select('metadata')
+        .eq('id', emailLog.id)
+        .single();
+
+      const metadata = (fullLog?.metadata && typeof fullLog.metadata === 'object') ? fullLog.metadata : {};
+
+      // Call appropriate edge function with original data
+      const { data, error } = await supabase.functions.invoke(functionName, {
+        body: {
+          email: emailLog.recipient_email,
+          ...(metadata as Record<string, any>) // Pass original metadata
+        }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Email Resent Successfully ✅",
+        description: `Resent ${emailLog.email_type} email to ${emailLog.recipient_email}`,
+      });
+
+      // Refresh logs to show new attempt
+      await fetchEmailLogs();
+      
+    } catch (error) {
+      console.error('[EMAIL RESEND] Error:', error);
+      toast({
+        title: "Resend Failed",
+        description: error instanceof Error ? error.message : "Failed to resend email",
+        variant: "destructive"
+      });
+    }
   };
 
   const sendTestEmail = async () => {
@@ -615,7 +670,7 @@ const EmailMonitoringDashboard = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => retryFailedEmail(log.id)}
+                            onClick={() => retryFailedEmail(log)}
                           >
                             <RefreshCw className="w-4 h-4 mr-2" />
                             Retry
@@ -678,7 +733,7 @@ const EmailMonitoringDashboard = () => {
               </div>
               {selectedEmail.status === 'failed' && (
                 <div className="flex justify-end">
-                  <Button onClick={() => retryFailedEmail(selectedEmail.id)}>
+                  <Button onClick={() => retryFailedEmail(selectedEmail)}>
                     <RefreshCw className="w-4 h-4 mr-2" />
                     Retry Email
                   </Button>

@@ -393,16 +393,49 @@ const DispensaryApplicationManager = () => {
         title: "Email Resent ✅",
         description: `Approval email resent to ${application.contact_email}`,
       });
+      
+      await fetchApplications();
+      
     } catch (error) {
-      console.error('Error resending email:', error);
+      console.error('[EMAIL RESEND] Error:', error);
       toast({
         title: "Resend Failed",
-        description: error instanceof Error ? error.message : 'Failed to resend email',
+        description: error instanceof Error ? error.message : "Failed to resend email",
         variant: "destructive"
       });
     } finally {
       setIsProcessing(false);
       setApprovalStep('');
+    }
+  };
+
+  const regenerateManagerToken = async (application: DispensaryApplication) => {
+    setIsProcessing(true);
+    try {
+      const { data, error } = await supabase.rpc('regenerate_manager_token' as any, {
+        application_id: application.id
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Token Regenerated ✅",
+        description: `New registration link generated (expires in 7 days)`,
+      });
+
+      // Optionally resend email with new token
+      await resendApprovalEmail(application);
+      
+      await fetchApplications();
+    } catch (error) {
+      console.error('Error regenerating token:', error);
+      toast({
+        title: "Regeneration Failed",
+        description: error instanceof Error ? error.message : 'Failed to regenerate token',
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -1002,14 +1035,24 @@ const DispensaryApplicationManager = () => {
                           )}
                           
                           {application.application_status === 'approved' && (
-                            <Button
-                              onClick={() => createOrganizationFromApplication(application)}
-                              disabled={isProcessing}
-                              className="bg-blue-600 hover:bg-blue-700"
-                            >
-                              <CreditCard className="h-4 w-4 mr-1" />
-                              Create Payment Link
-                            </Button>
+                            <>
+                              <Button
+                                onClick={() => regenerateManagerToken(application)}
+                                disabled={isProcessing}
+                                variant="outline"
+                              >
+                                <RefreshCw className="h-4 w-4 mr-1" />
+                                Regenerate Token & Resend
+                              </Button>
+                              <Button
+                                onClick={() => createOrganizationFromApplication(application)}
+                                disabled={isProcessing}
+                                className="bg-blue-600 hover:bg-blue-700"
+                              >
+                                <CreditCard className="h-4 w-4 mr-1" />
+                                Create Payment Link
+                              </Button>
+                            </>
                           )}
                         </div>
                       </div>

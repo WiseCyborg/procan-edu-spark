@@ -160,6 +160,26 @@ export function SeatManagementWidget({ organizationId }: SeatManagementWidgetPro
 
             {seatStatus && (
               <>
+                {/* Warning when join code approaching limit */}
+                {seatStatus.available_seats > 0 && seatStatus.available_seats < 5 && (
+                  <Alert variant="default" className="mb-4 border-amber-500 bg-amber-50 dark:bg-amber-950">
+                    <AlertTriangle className="h-5 w-5 text-amber-600" />
+                    <AlertTitle className="font-bold text-amber-800 dark:text-amber-200">⚠️ Join Code Approaching Limit</AlertTitle>
+                    <AlertDescription className="space-y-2 text-amber-800 dark:text-amber-200">
+                      <p>Only {seatStatus.available_seats} seats remaining. Join code will stop working when seats are exhausted.</p>
+                      <Button 
+                        onClick={() => navigate("/purchase-seats")} 
+                        variant="outline"
+                        size="sm"
+                        className="mt-2 border-amber-600 text-amber-800 hover:bg-amber-100 dark:text-amber-200 dark:hover:bg-amber-900"
+                      >
+                        <ShoppingCart className="h-4 w-4 mr-2" />
+                        Purchase More Seats
+                      </Button>
+                    </AlertDescription>
+                  </Alert>
+                )}
+
                 {seatStatus.available_seats === 0 ? (
                   <Alert variant="destructive" className="mb-4">
                     <AlertTriangle className="h-5 w-5" />
