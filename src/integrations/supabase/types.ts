@@ -3194,6 +3194,15 @@ export type Database = {
       }
     }
     Views: {
+      v_paypal_runtime: {
+        Row: {
+          env: string | null
+          id: string | null
+          mode: string | null
+          updated_at: string | null
+        }
+        Relationships: []
+      }
       v_processor_pulse: {
         Row: {
           avg_processing_seconds: number | null

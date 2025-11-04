@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Edit, Eye, Save, X, FileText, AlertCircle, CheckCircle, History } from 'lucide-react';
+import { sanitizeHtml } from '@/utils/sanitize-html';
 
 interface EmailTemplate {
   id: string;
@@ -41,6 +42,12 @@ export const EmailTemplateManager = () => {
   const [editedSubject, setEditedSubject] = useState('');
   const [isMigrating, setIsMigrating] = useState(false);
   const { toast } = useToast();
+
+  // Sanitize preview content
+  const sanitizedPreview = useMemo(
+    () => selectedTemplate?.html_content ? sanitizeHtml(selectedTemplate.html_content) : '',
+    [selectedTemplate?.html_content]
+  );
 
   useEffect(() => {
     fetchTemplates();
@@ -357,7 +364,7 @@ export const EmailTemplateManager = () => {
             <DialogDescription>{selectedTemplate?.subject_line}</DialogDescription>
           </DialogHeader>
           <div className="border rounded-lg p-4 overflow-y-auto max-h-[70vh]">
-            <div dangerouslySetInnerHTML={{ __html: selectedTemplate?.html_content || '' }} />
+            <div dangerouslySetInnerHTML={{ __html: sanitizedPreview }} />
           </div>
         </DialogContent>
       </Dialog>

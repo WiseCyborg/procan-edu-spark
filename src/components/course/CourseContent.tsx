@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Clock, Target } from 'lucide-react';
+import { sanitizeHtml } from '@/utils/sanitize-html';
 
 interface CourseContentProps {
   content: string;
@@ -18,6 +19,9 @@ const CourseContent: React.FC<CourseContentProps> = ({
   tier,
   onComplete
 }) => {
+  // Sanitize content once on mount/update
+  const sanitizedContent = useMemo(() => sanitizeHtml(content), [content]);
+
   const getTierColor = (tier?: string) => {
     switch (tier) {
       case 'green': return 'bg-green-100 text-green-800 border-green-300';
@@ -62,12 +66,12 @@ const CourseContent: React.FC<CourseContentProps> = ({
         </CardContent>
       </Card>
 
-      {/* Main Content */}
+      {/* Main Content - NOW SANITIZED */}
       <Card>
         <CardContent className="pt-6">
           <div 
             className="prose prose-sm max-w-none dark:prose-invert"
-            dangerouslySetInnerHTML={{ __html: content }}
+            dangerouslySetInnerHTML={{ __html: sanitizedContent }}
           />
         </CardContent>
       </Card>
