@@ -3358,6 +3358,32 @@ export type Database = {
           total_size: string
         }[]
       }
+      get_jobs_to_process: {
+        Args: { batch_size?: number }
+        Returns: {
+          completed_at: string | null
+          created_by: string | null
+          id: string
+          idempotency_key: string | null
+          job_type: string
+          last_error: string | null
+          max_retries: number
+          metadata: Json | null
+          next_retry_at: string | null
+          organization_id: string | null
+          payload: Json
+          queued_at: string
+          retry_count: number
+          started_at: string | null
+          status: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "system_jobs"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_organization_employees: {
         Args: { org_id: string }
         Returns: {
