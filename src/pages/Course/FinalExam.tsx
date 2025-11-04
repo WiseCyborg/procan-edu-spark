@@ -9,6 +9,10 @@ import { CertificateAchievement } from '@/components/certificates/CertificateAch
 import { CameraUnavailableDialog } from '@/components/exam/CameraUnavailableDialog';
 import { ProtectedCourseAccess } from '@/components/ProtectedCourseAccess';
 import { RemedialRecommendations } from '@/components/exam/RemedialRecommendations';
+import { ExamAttemptHistory } from '@/components/exam/ExamAttemptHistory';
+import { useExamAttempts } from '@/hooks/useExamAttempts';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Clock, History } from 'lucide-react';
 
 interface QuizQuestion {
   q: string;
@@ -47,6 +51,19 @@ interface TopicScore {
 
 const FinalExam: React.FC = () => {
   const navigate = useNavigate();
+  const [showHistory, setShowHistory] = useState(false);
+  
+  // Use exam attempts hook for cooldown and history
+  const {
+    attempts,
+    attemptsLoading,
+    stats,
+    canRetakeNow,
+    timeUntilRetakeFormatted,
+    refetchAttempts,
+    refetchStats
+  } = useExamAttempts();
+  
   const [userData, setUserData] = useState<UserData>({
     name: '',
     phone: '',
@@ -363,6 +380,14 @@ const FinalExam: React.FC = () => {
       return;
     }
 
+    // Check cooldown before allowing exam start
+    if (!canRetakeNow) {
+      toast.error(
+        `You must wait ${timeUntilRetakeFormatted} before retaking the exam. Use this time to review your weak topics.`
+      );
+      return;
+    }
+
     // Gate 9: Allow skip option if checkbox is checked
     if (skipPhotoVerification) {
       skipPhotoAndProceed();
@@ -619,6 +644,10 @@ const FinalExam: React.FC = () => {
         await supabase
           .from('exam_topic_scores')
           .insert(topicScoreInserts);
+          
+        // Refetch attempt history and stats
+        refetchAttempts();
+        refetchStats();
       }
     } catch (error) {
       console.error('Error storing topic scores:', error);
@@ -888,6 +917,32 @@ const FinalExam: React.FC = () => {
           <br />
           <span className="text-xl font-normal">Final Exam</span>
         </h1>
+
+        {/* History Toggle Button - Show on verification stage */}
+        {examStage === 'verification' && attempts && attempts.length > 0 && (
+          <div className="max-w-md mx-auto mb-4">
+            <Button
+              variant="outline"
+              onClick={() => setShowHistory(!showHistory)}
+              className="w-full"
+            >
+              <History className="h-4 w-4 mr-2" />
+              {showHistory ? 'Hide' : 'View'} Attempt History ({attempts.length})
+            </Button>
+          </div>
+        )}
+
+        {/* Show Attempt History */}
+        {showHistory && examStage === 'verification' && (
+          <div className="max-w-4xl mx-auto mb-6">
+            <ExamAttemptHistory
+              attempts={attempts || []}
+              stats={stats}
+              timeUntilRetakeFormatted={timeUntilRetakeFormatted}
+              canRetakeNow={canRetakeNow}
+            />
+          </div>
+        )}
       
       {/* Timer display - only shown during exam */}
       {examStage === 'exam' && (
@@ -904,9 +959,20 @@ const FinalExam: React.FC = () => {
       )}
       
       {/* Photo Verification Stage */}
-      {examStage === 'verification' && (
+      {examStage === 'verification' && !showHistory && (
         <div className="bg-white p-6 rounded-lg shadow-md max-w-md mx-auto">
           <h2 className="text-xl font-semibold mb-4">Photo Verification</h2>
+          
+          {/* Cooldown Warning */}
+          {!canRetakeNow && timeUntilRetakeFormatted && (
+            <Alert className="mb-4 border-yellow-500/50 bg-yellow-500/10">
+              <Clock className="h-4 w-4 text-yellow-600" />
+              <AlertDescription className="text-yellow-700 dark:text-yellow-400">
+                <strong>Cooldown Active:</strong> You must wait {timeUntilRetakeFormatted} before retaking the exam.
+              </AlertDescription>
+            </Alert>
+          )}
+          
           <p className="mb-4">Please provide your information and verify your identity with a photo before starting the exam.</p>
           
           <div className="space-y-4">
@@ -984,9 +1050,15 @@ const FinalExam: React.FC = () => {
               )}
             </div>
             
-            <Button className="w-full" onClick={startPhotoVerification}>
+            <Button className="w-full" onClick={startPhotoVerification} disabled={!canRetakeNow || attemptsLoading}>
               {skipPhotoVerification ? 'Proceed to Exam' : 'Start Photo Verification'}
             </Button>
+            
+            {!canRetakeNow && (
+              <p className="text-sm text-muted-foreground text-center mt-2">
+                Button will be enabled when cooldown expires
+              </p>
+            )}
           </div>
         </div>
       )}

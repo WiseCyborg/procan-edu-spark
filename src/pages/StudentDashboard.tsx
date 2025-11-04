@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { DeadlineCountdown } from '@/components/course/DeadlineCountdown';
 import { ProfileCompletionBanner } from '@/components/ProfileCompletionBanner';
+import { ExamStatusCard } from '@/components/exam/ExamStatusCard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Award, BookOpen, Target, TrendingUp, AlertTriangle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -281,6 +282,9 @@ const StudentDashboard = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Exam Status Card */}
+      <ExamStatusCard />
 
       {/* Achievements - Only show if there are any */}
       {completedModules > 0 && (

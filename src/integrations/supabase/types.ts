@@ -1104,6 +1104,7 @@ export type Database = {
       exam_attempts: {
         Row: {
           attempt_number: number | null
+          can_retake_at: string | null
           completed_at: string | null
           course_id: string
           created_at: string
@@ -1113,6 +1114,7 @@ export type Database = {
           metadata: Json | null
           passing_score: number | null
           photo_verification_url: string | null
+          retake_cooldown_hours: number | null
           started_at: string | null
           time_taken: number | null
           topic_scores: Json | null
@@ -1121,6 +1123,7 @@ export type Database = {
         }
         Insert: {
           attempt_number?: number | null
+          can_retake_at?: string | null
           completed_at?: string | null
           course_id: string
           created_at?: string
@@ -1130,6 +1133,7 @@ export type Database = {
           metadata?: Json | null
           passing_score?: number | null
           photo_verification_url?: string | null
+          retake_cooldown_hours?: number | null
           started_at?: string | null
           time_taken?: number | null
           topic_scores?: Json | null
@@ -1138,6 +1142,7 @@ export type Database = {
         }
         Update: {
           attempt_number?: number | null
+          can_retake_at?: string | null
           completed_at?: string | null
           course_id?: string
           created_at?: string
@@ -1147,6 +1152,7 @@ export type Database = {
           metadata?: Json | null
           passing_score?: number | null
           photo_verification_url?: string | null
+          retake_cooldown_hours?: number | null
           started_at?: string | null
           time_taken?: number | null
           topic_scores?: Json | null
@@ -3322,6 +3328,30 @@ export type Database = {
       }
     }
     Views: {
+      user_exam_stats: {
+        Row: {
+          average_score: number | null
+          best_score: number | null
+          can_retake_now: boolean | null
+          course_id: string | null
+          failed_attempts: number | null
+          first_attempt_date: string | null
+          last_attempt_date: string | null
+          next_retake_available: string | null
+          passed_attempts: number | null
+          total_attempts: number | null
+          user_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_attempts_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_paypal_runtime: {
         Row: {
           env: string | null
@@ -3378,6 +3408,14 @@ export type Database = {
         Returns: Json
       }
       calculate_compliance_score: { Args: { org_id: string }; Returns: number }
+      calculate_next_retake_time: {
+        Args: {
+          p_cooldown_hours?: number
+          p_course_id: string
+          p_user_id: string
+        }
+        Returns: string
+      }
       calculate_slo_metrics: { Args: never; Returns: undefined }
       check_email_circuit: {
         Args: never
