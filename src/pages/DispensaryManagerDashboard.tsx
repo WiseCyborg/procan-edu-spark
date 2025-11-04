@@ -13,7 +13,8 @@ import { EmployeeInvitationForm } from '@/components/team/EmployeeInvitationForm
 import { SeatRequestManager } from '@/components/team/SeatRequestManager';
 import { PurchaseSeatsDialog } from '@/components/team/PurchaseSeatsDialog';
 import { EmployeeRosterWidget } from '@/components/team/EmployeeRosterWidget';
-import { Building2, CreditCard, Users, FileText, Settings, ShieldCheck, Key, Copy, ShoppingCart, PartyPopper, X } from 'lucide-react';
+import { Building2, CreditCard, Users, FileText, Settings, ShieldCheck, Key, Copy, ShoppingCart, PartyPopper, X, RefreshCw } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -114,6 +115,23 @@ const DispensaryManagerDashboard = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRestartOnboarding = () => {
+    if (!user) return;
+
+    // Clear localStorage
+    localStorage.removeItem(`onboarding_complete_${user.id}`);
+    
+    // Show success toast
+    toast.success('Setup wizard reset! Redirecting...', {
+      description: 'You will be redirected to the onboarding wizard.',
+    });
+
+    // Redirect after short delay
+    setTimeout(() => {
+      navigate('/onboarding/setup-team?first_login=true');
+    }, 1000);
   };
 
   if (loading || roleLoading || orgLoading) {
@@ -420,6 +438,40 @@ const DispensaryManagerDashboard = () => {
                 <Settings className="w-4 h-4 mr-2" />
                 Edit Organization Details
               </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Help & Support</CardTitle>
+              <CardDescription>Access setup tools and documentation</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-3">
+                <div>
+                  <h4 className="text-sm font-medium mb-1">Setup Wizard</h4>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Re-run the initial setup wizard to configure training coordinators and invite employees.
+                  </p>
+                  <Button variant="outline" onClick={handleRestartOnboarding} className="w-full">
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Restart Setup Wizard
+                  </Button>
+                </div>
+
+                <Separator />
+
+                <div>
+                  <h4 className="text-sm font-medium mb-1">Documentation</h4>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Access comprehensive guides and best practices for managing your team.
+                  </p>
+                  <Button variant="outline" className="w-full" onClick={() => navigate('/training-handbook')}>
+                    <FileText className="w-4 h-4 mr-2" />
+                    View User Guide
+                  </Button>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
