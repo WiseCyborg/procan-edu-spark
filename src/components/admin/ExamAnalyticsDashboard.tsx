@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { useExamAnalytics } from '@/hooks/useExamAnalytics';
 import { format } from 'date-fns';
+import { AIContentOptimizer } from './AIContentOptimizer';
 
 const getDifficultyColor = (level: string) => {
   switch (level) {
@@ -172,11 +173,12 @@ export const ExamAnalyticsDashboard: React.FC = () => {
 
       {/* Tabs for different analytics views */}
       <Tabs defaultValue="topics" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="topics">Topic Performance</TabsTrigger>
           <TabsTrigger value="difficulty">Difficulty Analysis</TabsTrigger>
           <TabsTrigger value="struggling">Struggling Sections</TabsTrigger>
           <TabsTrigger value="trends">Trends</TabsTrigger>
+          <TabsTrigger value="optimizer">AI Optimizer</TabsTrigger>
         </TabsList>
 
         {/* Topic Performance Tab */}
@@ -467,6 +469,11 @@ export const ExamAnalyticsDashboard: React.FC = () => {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* AI Optimizer Tab */}
+        <TabsContent value="optimizer">
+          <AIContentOptimizer />
         </TabsContent>
       </Tabs>
     </div>

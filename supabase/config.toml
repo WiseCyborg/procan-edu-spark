@@ -149,3 +149,6 @@ verify_jwt = false
 
 [functions.update-paypal-environment]
 verify_jwt = true
+
+[functions.ai-content-optimizer]
+verify_jwt = true
