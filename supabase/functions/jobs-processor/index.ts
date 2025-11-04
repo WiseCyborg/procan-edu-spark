@@ -130,14 +130,36 @@ serve(async (req) => {
     );
 
     const batchSize = 10;
+    let jobs: Job[] = [];
 
-    // Phase 3A Fix (CRIT-002): Use RPC for server-side filtering
-    // PostgREST doesn't support column-to-column comparison (retry_count < max_retries)
-    const { data: jobs, error: fetchError } = await supabase
+    // Try RPC first (optimal server-side filtering)
+    const { data: rpcJobs, error: rpcError } = await supabase
       .rpc('get_jobs_to_process', { batch_size: batchSize });
 
-    if (fetchError) {
-      throw fetchError;
+    if (rpcError) {
+      // Fallback: Direct SQL query if PostgREST schema cache hasn't picked up RPC
+      console.log('[JOBS-PROCESSOR] RPC failed, using fallback query:', rpcError.code);
+      
+      const { data: fallbackJobs, error: fallbackError } = await supabase
+        .from('system_jobs')
+        .select('*')
+        .or('status.eq.queued,status.eq.failed')
+        .order('queued_at', { ascending: true })
+        .limit(batchSize * 2); // Fetch more since we'll filter client-side
+
+      if (fallbackError) {
+        throw fallbackError;
+      }
+
+      // Client-side filtering for retry logic
+      jobs = (fallbackJobs || []).filter((job: Job) => 
+        job.status === 'queued' || 
+        (job.status === 'failed' && 
+         (!job.metadata?.next_retry_at || new Date(job.metadata.next_retry_at) < new Date()) && 
+         job.retry_count < job.max_retries)
+      ).slice(0, batchSize);
+    } else {
+      jobs = rpcJobs || [];
     }
 
     if (!jobs || jobs.length === 0) {
