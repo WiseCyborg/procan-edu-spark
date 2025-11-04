@@ -11,6 +11,9 @@ import { HoverCallout } from '@/components/ui/hover-callout';
 import { WelcomeVideoSection } from '@/components/WelcomeVideoSection';
 import { LiveCOMARBadge } from '@/components/LiveCOMARBadge';
 import { ROIHighlightCard } from '@/components/ROIHighlightCard';
+import { LiveActivityTicker } from '@/components/LiveActivityTicker';
+import { MarylandCountyHeatmap } from '@/components/MarylandCountyHeatmap';
+import { StickyMobileCTA } from '@/components/StickyMobileCTA';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -163,6 +166,9 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Live Activity Ticker */}
+      <LiveActivityTicker />
+
       {/* Maryland First Section */}
       <section className="py-16 px-4 bg-gradient-to-br from-primary/5 to-accent/10">
         <div className="container mx-auto text-center">
@@ -285,6 +291,9 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* Maryland County Heatmap */}
+      <MarylandCountyHeatmap />
 
       {/* Course Overview */}
       <section className="py-16 px-4 bg-white">
@@ -410,6 +419,9 @@ const Index = () => {
           </div>
         </div>
       </footer>
+
+      {/* Sticky Mobile CTA */}
+      <StickyMobileCTA />
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Shield, Users, Award, CheckCircle, Star } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -7,31 +7,66 @@ interface CounterProps {
   end: number;
   duration?: number;
   suffix?: string;
+  prefix?: string;
+  decimals?: number;
+  color?: string;
+  triggerOnView?: boolean;
 }
 
-const AnimatedCounter: React.FC<CounterProps> = ({ end, duration = 2000, suffix = '' }) => {
+export const AnimatedCounter: React.FC<CounterProps> = ({ 
+  end, 
+  duration = 2000, 
+  suffix = '',
+  prefix = '',
+  decimals = 0,
+  color = 'inherit',
+  triggerOnView = false
+}) => {
   const [count, setCount] = useState(0);
+  const [hasStarted, setHasStarted] = useState(!triggerOnView);
+  const ref = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
+    if (triggerOnView && ref.current) {
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting && !hasStarted) {
+            setHasStarted(true);
+          }
+        },
+        { threshold: 0.5 }
+      );
+      
+      observer.observe(ref.current);
+      return () => observer.disconnect();
+    }
+  }, [triggerOnView, hasStarted]);
+
+  useEffect(() => {
+    if (!hasStarted) return;
+
     let startTime: number;
     const animate = (currentTime: number) => {
       if (!startTime) startTime = currentTime;
       const progress = Math.min((currentTime - startTime) / duration, 1);
-      setCount(Math.floor(progress * end));
+      const value = progress * end;
+      setCount(decimals > 0 ? parseFloat(value.toFixed(decimals)) : Math.floor(value));
       
       if (progress < 1) {
         requestAnimationFrame(animate);
       }
     };
     
-    const timer = setTimeout(() => {
-      requestAnimationFrame(animate);
-    }, 500);
-    
-    return () => clearTimeout(timer);
-  }, [end, duration]);
+    requestAnimationFrame(animate);
+  }, [end, duration, decimals, hasStarted]);
 
-  return <span className="trust-counter">{count}{suffix}</span>;
+  const formattedCount = decimals > 0 ? count.toFixed(decimals) : count.toLocaleString();
+
+  return (
+    <span ref={ref} className="trust-counter" style={{ color }}>
+      {prefix}{formattedCount}{suffix}
+    </span>
+  );
 };
 
 export const TrustStats = () => {
