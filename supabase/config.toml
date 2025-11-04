@@ -158,3 +158,9 @@ verify_jwt = false
 
 [functions.calculate-recommendation-impact]
 verify_jwt = false
+
+[functions.monitor-comar-updates]
+verify_jwt = false
+
+[functions.forecast-recommendation-roi]
+verify_jwt = false

@@ -23,6 +23,7 @@ import { format } from 'date-fns';
 import { AIContentOptimizer } from './AIContentOptimizer';
 import { ROICalculator } from './ROICalculator';
 import { ImpactTimeline } from './ImpactTimeline';
+import { PredictiveAnalyticsDashboard } from './PredictiveAnalyticsDashboard';
 
 const getDifficultyColor = (level: string) => {
   switch (level) {
@@ -175,13 +176,14 @@ export const ExamAnalyticsDashboard: React.FC = () => {
 
       {/* Tabs for different analytics views */}
       <Tabs defaultValue="topics" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="topics">Topic Performance</TabsTrigger>
           <TabsTrigger value="difficulty">Difficulty Analysis</TabsTrigger>
           <TabsTrigger value="struggling">Struggling Sections</TabsTrigger>
           <TabsTrigger value="trends">Trends</TabsTrigger>
           <TabsTrigger value="optimizer">AI Optimizer</TabsTrigger>
           <TabsTrigger value="roi">ROI Calculator</TabsTrigger>
+          <TabsTrigger value="predictive">MD Intelligence</TabsTrigger>
         </TabsList>
 
         {/* Topic Performance Tab */}
@@ -483,6 +485,11 @@ export const ExamAnalyticsDashboard: React.FC = () => {
         <TabsContent value="roi" className="space-y-6">
           <ROICalculator />
           <ImpactTimeline />
+        </TabsContent>
+
+        {/* Maryland Intelligence Tab */}
+        <TabsContent value="predictive" className="space-y-6">
+          <PredictiveAnalyticsDashboard />
         </TabsContent>
       </Tabs>
     </div>

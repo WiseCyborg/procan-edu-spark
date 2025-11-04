@@ -302,6 +302,50 @@ export type Database = {
         }
         Relationships: []
       }
+      comar_versions: {
+        Row: {
+          change_summary: string | null
+          content: string | null
+          created_at: string
+          effective_date: string
+          id: string
+          section_reference: string
+          supersedes: string | null
+          updated_at: string
+          version_number: string
+        }
+        Insert: {
+          change_summary?: string | null
+          content?: string | null
+          created_at?: string
+          effective_date: string
+          id?: string
+          section_reference: string
+          supersedes?: string | null
+          updated_at?: string
+          version_number: string
+        }
+        Update: {
+          change_summary?: string | null
+          content?: string | null
+          created_at?: string
+          effective_date?: string
+          id?: string
+          section_reference?: string
+          supersedes?: string | null
+          updated_at?: string
+          version_number?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comar_versions_supersedes_fkey"
+            columns: ["supersedes"]
+            isOneToOne: false
+            referencedRelation: "comar_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       communication_logs: {
         Row: {
           clicked_at: string | null
@@ -584,7 +628,9 @@ export type Database = {
       }
       course_modules: {
         Row: {
+          comar_compliance_status: string | null
           comar_reference: string | null
+          comar_version_id: string | null
           content: string | null
           course_id: string
           created_at: string
@@ -593,6 +639,7 @@ export type Database = {
           id: string
           is_active: boolean | null
           is_manager_only: boolean | null
+          last_comar_review_date: string | null
           learning_objectives: Json | null
           module_number: number
           quiz_questions: Json | null
@@ -602,7 +649,9 @@ export type Database = {
           video_url: string | null
         }
         Insert: {
+          comar_compliance_status?: string | null
           comar_reference?: string | null
+          comar_version_id?: string | null
           content?: string | null
           course_id: string
           created_at?: string
@@ -611,6 +660,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_manager_only?: boolean | null
+          last_comar_review_date?: string | null
           learning_objectives?: Json | null
           module_number: number
           quiz_questions?: Json | null
@@ -620,7 +670,9 @@ export type Database = {
           video_url?: string | null
         }
         Update: {
+          comar_compliance_status?: string | null
           comar_reference?: string | null
+          comar_version_id?: string | null
           content?: string | null
           course_id?: string
           created_at?: string
@@ -629,6 +681,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_manager_only?: boolean | null
+          last_comar_review_date?: string | null
           learning_objectives?: Json | null
           module_number?: number
           quiz_questions?: Json | null
@@ -638,6 +691,13 @@ export type Database = {
           video_url?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "course_modules_comar_version_id_fkey"
+            columns: ["comar_version_id"]
+            isOneToOne: false
+            referencedRelation: "comar_versions"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "course_modules_course_id_fkey"
             columns: ["course_id"]
@@ -1177,17 +1237,21 @@ export type Database = {
           completed_at: string | null
           course_id: string
           created_at: string
+          days_since_last_attempt: number | null
           id: string
           ip_address: string | null
           is_passed: boolean | null
           metadata: Json | null
           passing_score: number | null
           photo_verification_url: string | null
+          previous_attempt_count: number | null
           retake_cooldown_hours: number | null
+          session_metadata: Json | null
           started_at: string | null
           time_taken: number | null
           topic_scores: Json | null
           total_score: number | null
+          user_demographics: Json | null
           user_id: string
         }
         Insert: {
@@ -1196,17 +1260,21 @@ export type Database = {
           completed_at?: string | null
           course_id: string
           created_at?: string
+          days_since_last_attempt?: number | null
           id?: string
           ip_address?: string | null
           is_passed?: boolean | null
           metadata?: Json | null
           passing_score?: number | null
           photo_verification_url?: string | null
+          previous_attempt_count?: number | null
           retake_cooldown_hours?: number | null
+          session_metadata?: Json | null
           started_at?: string | null
           time_taken?: number | null
           topic_scores?: Json | null
           total_score?: number | null
+          user_demographics?: Json | null
           user_id: string
         }
         Update: {
@@ -1215,17 +1283,21 @@ export type Database = {
           completed_at?: string | null
           course_id?: string
           created_at?: string
+          days_since_last_attempt?: number | null
           id?: string
           ip_address?: string | null
           is_passed?: boolean | null
           metadata?: Json | null
           passing_score?: number | null
           photo_verification_url?: string | null
+          previous_attempt_count?: number | null
           retake_cooldown_hours?: number | null
+          session_metadata?: Json | null
           started_at?: string | null
           time_taken?: number | null
           topic_scores?: Json | null
           total_score?: number | null
+          user_demographics?: Json | null
           user_id?: string
         }
         Relationships: [
@@ -1623,6 +1695,42 @@ export type Database = {
           title?: string
           updated_at?: string | null
           zoom_link?: string | null
+        }
+        Relationships: []
+      }
+      maryland_county_analytics: {
+        Row: {
+          active_dispensaries: number | null
+          average_score: number | null
+          compliance_score: number | null
+          county_name: string
+          created_at: string
+          id: string
+          month: string
+          pass_rate: number | null
+          total_students: number | null
+        }
+        Insert: {
+          active_dispensaries?: number | null
+          average_score?: number | null
+          compliance_score?: number | null
+          county_name: string
+          created_at?: string
+          id?: string
+          month: string
+          pass_rate?: number | null
+          total_students?: number | null
+        }
+        Update: {
+          active_dispensaries?: number | null
+          average_score?: number | null
+          compliance_score?: number | null
+          county_name?: string
+          created_at?: string
+          id?: string
+          month?: string
+          pass_rate?: number | null
+          total_students?: number | null
         }
         Relationships: []
       }
@@ -2157,6 +2265,98 @@ export type Database = {
         }
         Relationships: []
       }
+      prediction_models: {
+        Row: {
+          created_at: string
+          features: Json | null
+          id: string
+          is_active: boolean | null
+          model_name: string
+          model_type: string
+          performance_metrics: Json | null
+          training_data_end: string | null
+          training_data_start: string | null
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          created_at?: string
+          features?: Json | null
+          id?: string
+          is_active?: boolean | null
+          model_name: string
+          model_type: string
+          performance_metrics?: Json | null
+          training_data_end?: string | null
+          training_data_start?: string | null
+          updated_at?: string
+          version: string
+        }
+        Update: {
+          created_at?: string
+          features?: Json | null
+          id?: string
+          is_active?: boolean | null
+          model_name?: string
+          model_type?: string
+          performance_metrics?: Json | null
+          training_data_end?: string | null
+          training_data_start?: string | null
+          updated_at?: string
+          version?: string
+        }
+        Relationships: []
+      }
+      prediction_results: {
+        Row: {
+          actual_value: number | null
+          confidence_score: number | null
+          created_at: string
+          entity_id: string
+          entity_type: string
+          feature_values: Json | null
+          id: string
+          model_id: string | null
+          predicted_value: number | null
+          prediction_date: string
+          variance_percentage: number | null
+        }
+        Insert: {
+          actual_value?: number | null
+          confidence_score?: number | null
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          feature_values?: Json | null
+          id?: string
+          model_id?: string | null
+          predicted_value?: number | null
+          prediction_date?: string
+          variance_percentage?: number | null
+        }
+        Update: {
+          actual_value?: number | null
+          confidence_score?: number | null
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          feature_values?: Json | null
+          id?: string
+          model_id?: string | null
+          predicted_value?: number | null
+          prediction_date?: string
+          variance_percentage?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prediction_results_model_id_fkey"
+            columns: ["model_id"]
+            isOneToOne: false
+            referencedRelation: "prediction_models"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           address: string | null
@@ -2278,6 +2478,53 @@ export type Database = {
           window_start?: string
         }
         Relationships: []
+      }
+      recommendation_feedback: {
+        Row: {
+          actual_implementation_date: string | null
+          actual_roi: number | null
+          created_at: string
+          id: string
+          lessons_learned: string | null
+          predicted_roi: number | null
+          recommendation_id: string | null
+          updated_at: string
+          variance_percentage: number | null
+          would_recommend_again: boolean | null
+        }
+        Insert: {
+          actual_implementation_date?: string | null
+          actual_roi?: number | null
+          created_at?: string
+          id?: string
+          lessons_learned?: string | null
+          predicted_roi?: number | null
+          recommendation_id?: string | null
+          updated_at?: string
+          variance_percentage?: number | null
+          would_recommend_again?: boolean | null
+        }
+        Update: {
+          actual_implementation_date?: string | null
+          actual_roi?: number | null
+          created_at?: string
+          id?: string
+          lessons_learned?: string | null
+          predicted_roi?: number | null
+          recommendation_id?: string | null
+          updated_at?: string
+          variance_percentage?: number | null
+          would_recommend_again?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recommendation_feedback_recommendation_id_fkey"
+            columns: ["recommendation_id"]
+            isOneToOne: false
+            referencedRelation: "curriculum_recommendations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       recommendation_impact_tracking: {
         Row: {
@@ -2475,6 +2722,59 @@ export type Database = {
           section_number?: string
         }
         Relationships: []
+      }
+      roi_forecasts: {
+        Row: {
+          comparable_implementations: Json | null
+          confidence_interval_lower: number | null
+          confidence_interval_upper: number | null
+          created_at: string
+          expected_pass_rate_improvement: number | null
+          forecast_date: string
+          id: string
+          model_version: string | null
+          payback_period_months: number | null
+          predicted_roi_percentage: number | null
+          recommendation_id: string | null
+          risk_factors: Json | null
+        }
+        Insert: {
+          comparable_implementations?: Json | null
+          confidence_interval_lower?: number | null
+          confidence_interval_upper?: number | null
+          created_at?: string
+          expected_pass_rate_improvement?: number | null
+          forecast_date?: string
+          id?: string
+          model_version?: string | null
+          payback_period_months?: number | null
+          predicted_roi_percentage?: number | null
+          recommendation_id?: string | null
+          risk_factors?: Json | null
+        }
+        Update: {
+          comparable_implementations?: Json | null
+          confidence_interval_lower?: number | null
+          confidence_interval_upper?: number | null
+          created_at?: string
+          expected_pass_rate_improvement?: number | null
+          forecast_date?: string
+          id?: string
+          model_version?: string | null
+          payback_period_months?: number | null
+          predicted_roi_percentage?: number | null
+          recommendation_id?: string | null
+          risk_factors?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "roi_forecasts_recommendation_id_fkey"
+            columns: ["recommendation_id"]
+            isOneToOne: false
+            referencedRelation: "curriculum_recommendations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       role_permissions: {
         Row: {

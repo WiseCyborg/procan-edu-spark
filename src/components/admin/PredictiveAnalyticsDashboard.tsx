@@ -1,52 +1,46 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   TrendingUp, 
   TrendingDown, 
   AlertTriangle, 
-  Target, 
-  Brain,
-  LineChart,
-  BarChart3,
-  Activity,
-  Calendar,
+  CheckCircle2, 
+  Clock,
+  DollarSign,
   Users,
-  DollarSign
+  Target,
+  Brain,
+  MapPin,
+  Shield,
+  Sparkles
 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart } from 'recharts';
+import { COMARBanner } from '@/components/layout/COMARBanner';
 
 interface PredictiveMetric {
-  id: string;
-  name: string;
-  current_value: number;
-  predicted_value: number;
+  label: string;
+  value: number;
+  trend: 'up' | 'down' | 'neutral';
   confidence: number;
-  trend: 'up' | 'down' | 'stable';
-  impact: 'high' | 'medium' | 'low';
-  category: 'completion' | 'revenue' | 'compliance' | 'engagement';
+  forecast: number[];
 }
 
 interface RiskAssessment {
-  organization_id: string;
-  organization_name: string;
-  risk_score: number;
-  risk_level: 'low' | 'medium' | 'high';
+  organization: string;
+  risk_level: 'low' | 'medium' | 'high' | 'critical';
   factors: string[];
-  recommendations: string[];
-  compliance_status: number;
-  completion_rate: number;
-  expiring_certificates: number;
+  recommended_action: string;
 }
 
 interface RevenueProjection {
   month: string;
-  actual_revenue: number;
-  projected_revenue: number;
-  confidence_interval: [number, number];
-  growth_rate: number;
+  actual?: number;
+  forecast: number;
+  confidence_range: [number, number];
 }
 
 export const PredictiveAnalyticsDashboard = () => {
@@ -60,404 +54,327 @@ export const PredictiveAnalyticsDashboard = () => {
   }, []);
 
   const fetchPredictiveData = async () => {
-    try {
-      // Simulate predictive analytics data
-      const mockMetrics: PredictiveMetric[] = [
+    setLoading(true);
+    
+    // Simulated predictive data - in production, this would call edge functions
+    setTimeout(() => {
+      setMetrics([
         {
-          id: '1',
-          name: 'Course Completion Rate',
-          current_value: 78,
-          predicted_value: 85,
-          confidence: 89,
+          label: 'Course Completion Rate',
+          value: 78,
           trend: 'up',
-          impact: 'high',
-          category: 'completion'
+          confidence: 0.92,
+          forecast: [75, 76, 77, 78, 79, 81, 82]
         },
         {
-          id: '2',
-          name: 'Revenue Growth',
-          current_value: 12.5,
-          predicted_value: 18.3,
-          confidence: 76,
+          label: 'Revenue Growth (Next Quarter)',
+          value: 23,
           trend: 'up',
-          impact: 'high',
-          category: 'revenue'
+          confidence: 0.85,
+          forecast: [18, 19, 21, 23, 24, 25, 26]
         },
         {
-          id: '3',
-          name: 'Compliance Risk',
-          current_value: 15,
-          predicted_value: 8,
-          confidence: 82,
+          label: 'Student Churn Risk',
+          value: 8,
           trend: 'down',
-          impact: 'medium',
-          category: 'compliance'
+          confidence: 0.88,
+          forecast: [12, 11, 10, 8, 7, 6, 5]
         },
         {
-          id: '4',
-          name: 'User Engagement',
-          current_value: 68,
-          predicted_value: 73,
-          confidence: 71,
+          label: 'ROI from AI Optimizations',
+          value: 340,
           trend: 'up',
-          impact: 'medium',
-          category: 'engagement'
+          confidence: 0.90,
+          forecast: [200, 240, 280, 340, 380, 420, 460]
         }
-      ];
+      ]);
 
-      const mockRiskAssessments: RiskAssessment[] = [
+      setRiskAssessments([
         {
-          organization_id: '1',
-          organization_name: 'Green Valley Dispensary',
-          risk_score: 85,
+          organization: 'Green Leaf Dispensary',
           risk_level: 'high',
-          factors: ['Low completion rate (45%)', '12 expiring certificates', 'Overdue payments'],
-          recommendations: ['Send immediate reminders', 'Schedule training sessions', 'Contact for payment'],
-          compliance_status: 45,
-          completion_rate: 45,
-          expiring_certificates: 12
+          factors: ['3 students overdue', 'Low engagement scores', 'Certificate expiring soon'],
+          recommended_action: 'Schedule intervention call with training coordinator'
         },
         {
-          organization_id: '2',
-          organization_name: 'Cannabis Care Collective',
-          risk_score: 35,
+          organization: 'Capital Cannabis Co.',
           risk_level: 'medium',
-          factors: ['3 expiring certificates', 'Average engagement'],
-          recommendations: ['Monitor closely', 'Send renewal reminders'],
-          compliance_status: 78,
-          completion_rate: 78,
-          expiring_certificates: 3
+          factors: ['2 failed exam attempts', 'Module completion at 65%'],
+          recommended_action: 'Offer remedial training modules'
         },
         {
-          organization_id: '3',
-          organization_name: 'Herbal Wellness Center',
-          risk_score: 15,
+          organization: 'Harbor Health & Wellness',
           risk_level: 'low',
-          factors: ['High completion rate', 'Up-to-date certificates'],
-          recommendations: ['Maintain current practices'],
-          compliance_status: 95,
-          completion_rate: 95,
-          expiring_certificates: 0
+          factors: ['On track', '95% completion rate'],
+          recommended_action: 'Continue monitoring'
         }
-      ];
+      ]);
 
-      const mockRevenueProjections: RevenueProjection[] = [
-        { month: 'Jan 2025', actual_revenue: 25000, projected_revenue: 28000, confidence_interval: [26000, 30000], growth_rate: 12 },
-        { month: 'Feb 2025', actual_revenue: 0, projected_revenue: 31000, confidence_interval: [29000, 33000], growth_rate: 11 },
-        { month: 'Mar 2025', actual_revenue: 0, projected_revenue: 34000, confidence_interval: [32000, 36000], growth_rate: 10 },
-        { month: 'Apr 2025', actual_revenue: 0, projected_revenue: 37000, confidence_interval: [35000, 39000], growth_rate: 9 },
-        { month: 'May 2025', actual_revenue: 0, projected_revenue: 40000, confidence_interval: [38000, 42000], growth_rate: 8 },
-        { month: 'Jun 2025', actual_revenue: 0, projected_revenue: 43000, confidence_interval: [41000, 45000], growth_rate: 7.5 }
-      ];
+      setRevenueProjections([
+        { month: 'Jan', actual: 45000, forecast: 45000, confidence_range: [43000, 47000] },
+        { month: 'Feb', actual: 48000, forecast: 48000, confidence_range: [46000, 50000] },
+        { month: 'Mar', actual: 52000, forecast: 52000, confidence_range: [49000, 55000] },
+        { month: 'Apr', forecast: 58000, confidence_range: [54000, 62000] },
+        { month: 'May', forecast: 63000, confidence_range: [58000, 68000] },
+        { month: 'Jun', forecast: 67000, confidence_range: [62000, 72000] },
+      ]);
 
-      setMetrics(mockMetrics);
-      setRiskAssessments(mockRiskAssessments);
-      setRevenueProjections(mockRevenueProjections);
-    } catch (error) {
-      console.error('Error fetching predictive data:', error);
-    } finally {
       setLoading(false);
-    }
+    }, 1000);
   };
 
-  const getTrendIcon = (trend: string) => {
-    switch (trend) {
-      case 'up': return <TrendingUp className="h-4 w-4 text-green-600" />;
-      case 'down': return <TrendingDown className="h-4 w-4 text-red-600" />;
-      default: return <Activity className="h-4 w-4 text-blue-600" />;
-    }
+  const getTrendIcon = (trend: 'up' | 'down' | 'neutral') => {
+    if (trend === 'up') return <TrendingUp className="h-4 w-4 text-green-600" />;
+    if (trend === 'down') return <TrendingDown className="h-4 w-4 text-red-600" />;
+    return <div className="h-4 w-4" />;
   };
 
   const getRiskColor = (level: string) => {
-    switch (level) {
-      case 'high': return 'bg-red-100 text-red-800 border-red-200';
-      case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'low': return 'bg-green-100 text-green-800 border-green-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
-  };
-
-  const getImpactColor = (impact: string) => {
-    switch (impact) {
-      case 'high': return 'text-red-600';
-      case 'medium': return 'text-yellow-600';
-      case 'low': return 'text-green-600';
-      default: return 'text-gray-600';
-    }
-  };
-
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
-      case 'completion': return <Target className="h-4 w-4" />;
-      case 'revenue': return <DollarSign className="h-4 w-4" />;
-      case 'compliance': return <AlertTriangle className="h-4 w-4" />;
-      case 'engagement': return <Users className="h-4 w-4" />;
-      default: return <BarChart3 className="h-4 w-4" />;
+    switch(level) {
+      case 'critical': return 'destructive';
+      case 'high': return 'destructive';
+      case 'medium': return 'default';
+      case 'low': return 'secondary';
+      default: return 'default';
     }
   };
 
   if (loading) {
-    return <div className="flex justify-center p-8">Loading predictive analytics...</div>;
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading predictive analytics...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-foreground flex items-center">
-          <Brain className="h-6 w-6 mr-2" />
-          Predictive Analytics Dashboard
-        </h2>
-        <Badge className="bg-primary text-primary-foreground">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">Maryland RVT Intelligence Dashboard</h2>
+          <p className="text-muted-foreground mt-1">
+            AI-powered insights for sustainable cannabis education
+          </p>
+        </div>
+        <Badge variant="secondary" className="gap-2">
+          <Brain className="h-4 w-4" />
           AI-Powered Insights
         </Badge>
       </div>
 
+      <COMARBanner />
+
       {/* Key Predictive Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {metrics.map(metric => (
-          <Card key={metric.id}>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center space-x-2">
-                  {getCategoryIcon(metric.category)}
-                  <span className="text-sm font-medium">{metric.name}</span>
-                </div>
-                {getTrendIcon(metric.trend)}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {metrics.map((metric, idx) => (
+          <Card key={idx}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">{metric.label}</CardTitle>
+              {getTrendIcon(metric.trend)}
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {metric.value}
+                {metric.label.includes('Rate') || metric.label.includes('Growth') ? '%' : ''}
               </div>
-              
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-2xl font-bold">{metric.current_value}</span>
-                  <span className="text-lg text-muted-foreground">→ {metric.predicted_value}</span>
-                </div>
-                
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Confidence</span>
-                  <span className="font-medium">{metric.confidence}%</span>
-                </div>
-                <Progress value={metric.confidence} className="h-1" />
-                
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-muted-foreground">Impact</span>
-                  <Badge variant="outline" className={getImpactColor(metric.impact)}>
-                    {metric.impact}
-                  </Badge>
-                </div>
-              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {metric.confidence * 100}% confidence
+              </p>
+              <Progress value={metric.confidence * 100} className="mt-2 h-1" />
             </CardContent>
           </Card>
         ))}
       </div>
 
-      <Tabs defaultValue="risk" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+      <Tabs defaultValue="risk" className="space-y-4">
+        <TabsList>
           <TabsTrigger value="risk">Risk Assessment</TabsTrigger>
           <TabsTrigger value="revenue">Revenue Forecasting</TabsTrigger>
           <TabsTrigger value="insights">AI Insights</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="risk">
+        <TabsContent value="risk" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <AlertTriangle className="h-5 w-5 mr-2" />
-                Organization Risk Assessment
-              </CardTitle>
+              <CardTitle>Organization Risk Assessment</CardTitle>
+              <CardDescription>
+                Predictive analysis of training completion risks
+              </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {riskAssessments.map(assessment => (
-                  <div key={assessment.organization_id} className="border rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <h3 className="font-semibold text-lg">{assessment.organization_name}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Risk Score: {assessment.risk_score}/100
-                        </p>
-                      </div>
-                      <Badge className={`${getRiskColor(assessment.risk_level)} px-3 py-1`}>
-                        {assessment.risk_level.toUpperCase()} RISK
+            <CardContent className="space-y-4">
+              {riskAssessments.map((assessment, idx) => (
+                <div key={idx} className="flex items-start gap-4 p-4 border rounded-lg">
+                  <AlertTriangle className={`h-5 w-5 mt-1 ${
+                    assessment.risk_level === 'high' || assessment.risk_level === 'critical'
+                      ? 'text-red-600'
+                      : assessment.risk_level === 'medium'
+                      ? 'text-yellow-600'
+                      : 'text-green-600'
+                  }`} />
+                  <div className="flex-1 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-semibold">{assessment.organization}</h4>
+                      <Badge variant={getRiskColor(assessment.risk_level)}>
+                        {assessment.risk_level.toUpperCase()}
                       </Badge>
                     </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className="text-sm">Compliance Status</span>
-                          <span className="text-sm font-medium">{assessment.compliance_status}%</span>
-                        </div>
-                        <Progress value={assessment.compliance_status} className="h-2" />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className="text-sm">Completion Rate</span>
-                          <span className="text-sm font-medium">{assessment.completion_rate}%</span>
-                        </div>
-                        <Progress value={assessment.completion_rate} className="h-2" />
-                      </div>
-                      
-                      <div className="text-center">
-                        <p className="text-2xl font-bold text-orange-600">{assessment.expiring_certificates}</p>
-                        <p className="text-sm text-muted-foreground">Expiring Certificates</p>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <h4 className="font-medium mb-2 text-red-700">Risk Factors</h4>
-                        <ul className="text-sm space-y-1">
-                          {assessment.factors.map((factor, index) => (
-                            <li key={index} className="flex items-center">
-                              <AlertTriangle className="h-3 w-3 mr-2 text-red-500" />
-                              {factor}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      
-                      <div>
-                        <h4 className="font-medium mb-2 text-blue-700">Recommendations</h4>
-                        <ul className="text-sm space-y-1">
-                          {assessment.recommendations.map((rec, index) => (
-                            <li key={index} className="flex items-center">
-                              <Target className="h-3 w-3 mr-2 text-blue-500" />
-                              {rec}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
+                    <ul className="text-sm text-muted-foreground space-y-1">
+                      {assessment.factors.map((factor, i) => (
+                        <li key={i}>• {factor}</li>
+                      ))}
+                    </ul>
+                    <div className="flex items-center gap-2 pt-2">
+                      <CheckCircle2 className="h-4 w-4 text-primary" />
+                      <span className="text-sm font-medium">{assessment.recommended_action}</span>
                     </div>
                   </div>
-                ))}
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="revenue" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Revenue Growth Forecast</CardTitle>
+              <CardDescription>
+                6-month projection based on historical trends and market analysis
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={350}>
+                <AreaChart data={revenueProjections}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip 
+                    formatter={(value: number) => `$${value.toLocaleString()}`}
+                    contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }}
+                  />
+                  <Legend />
+                  <Area 
+                    type="monotone" 
+                    dataKey="actual" 
+                    stroke="hsl(var(--primary))" 
+                    fill="hsl(var(--primary))"
+                    fillOpacity={0.6}
+                    name="Actual Revenue"
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="forecast" 
+                    stroke="hsl(var(--chart-2))" 
+                    fill="hsl(var(--chart-2))"
+                    fillOpacity={0.3}
+                    strokeDasharray="5 5"
+                    name="Forecasted Revenue"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+              
+              <div className="grid gap-4 md:grid-cols-3 mt-6">
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium flex items-center gap-2">
+                      <DollarSign className="h-4 w-4" />
+                      Expected Q2 Revenue
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-2xl font-bold">$188K</p>
+                    <p className="text-xs text-muted-foreground">+23% vs Q1</p>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4" />
+                      Growth Rate
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-2xl font-bold">15.3%</p>
+                    <p className="text-xs text-muted-foreground">Monthly average</p>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium flex items-center gap-2">
+                      <Target className="h-4 w-4" />
+                      Confidence Level
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-2xl font-bold">85%</p>
+                    <p className="text-xs text-muted-foreground">High reliability</p>
+                  </CardContent>
+                </Card>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="revenue">
+        <TabsContent value="insights" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <LineChart className="h-5 w-5 mr-2" />
-                Revenue Forecasting
-              </CardTitle>
+              <CardTitle>AI-Generated Business Insights</CardTitle>
+              <CardDescription>
+                Strategic recommendations for sustainable growth
+              </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Card>
-                    <CardContent className="pt-6 text-center">
-                      <DollarSign className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                      <h3 className="font-semibold">Projected Growth</h3>
-                      <p className="text-2xl font-bold text-green-600">+72%</p>
-                      <p className="text-sm text-muted-foreground">Next 6 months</p>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card>
-                    <CardContent className="pt-6 text-center">
-                      <Calendar className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-                      <h3 className="font-semibold">Best Month</h3>
-                      <p className="text-2xl font-bold text-blue-600">June</p>
-                      <p className="text-sm text-muted-foreground">$43,000 projected</p>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card>
-                    <CardContent className="pt-6 text-center">
-                      <Activity className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-                      <h3 className="font-semibold">Confidence</h3>
-                      <p className="text-2xl font-bold text-purple-600">87%</p>
-                      <p className="text-sm text-muted-foreground">Prediction accuracy</p>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                <div className="space-y-4">
-                  <h4 className="font-semibold">Monthly Revenue Projections</h4>
-                  {revenueProjections.map((projection, index) => (
-                    <div key={index} className="border rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-medium">{projection.month}</span>
-                        <div className="flex items-center space-x-4">
-                          {projection.actual_revenue > 0 && (
-                            <span className="text-sm text-muted-foreground">
-                              Actual: ${projection.actual_revenue.toLocaleString()}
-                            </span>
-                          )}
-                          <span className="font-semibold">
-                            Projected: ${projection.projected_revenue.toLocaleString()}
-                          </span>
-                          <Badge variant={projection.growth_rate > 10 ? "default" : "secondary"}>
-                            +{projection.growth_rate}%
-                          </Badge>
-                        </div>
-                      </div>
-                      
-                      <div className="flex justify-between text-sm text-muted-foreground">
-                        <span>
-                          Range: ${projection.confidence_interval[0].toLocaleString()} - ${projection.confidence_interval[1].toLocaleString()}
-                        </span>
-                        <span>Growth: +{projection.growth_rate}%</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+            <CardContent className="space-y-4">
+              <div className="p-4 border-l-4 border-green-500 bg-green-50 dark:bg-green-950 rounded">
+                <h4 className="font-semibold flex items-center gap-2 mb-2">
+                  <CheckCircle2 className="h-5 w-5 text-green-600" />
+                  High-Impact Opportunity Detected
+                </h4>
+                <p className="text-sm text-muted-foreground">
+                  Baltimore County dispensaries show 18% higher engagement with interactive COMAR modules. 
+                  Expanding this format to all Maryland counties could increase completion rates by 12-15% 
+                  and generate an estimated <strong>$18,000 in additional annual revenue</strong> through 
+                  reduced retake costs.
+                </p>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
 
-        <TabsContent value="insights">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Brain className="h-5 w-5 mr-2" />
-                AI-Generated Insights
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                <div className="border-l-4 border-blue-500 pl-4">
-                  <h4 className="font-semibold text-blue-700 mb-2">Completion Rate Optimization</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Analysis shows that sending reminders 3 days before module deadlines increases completion rates by 23%. 
-                    Organizations with manager check-ins have 31% higher completion rates.
-                  </p>
-                </div>
+              <div className="p-4 border-l-4 border-blue-500 bg-blue-50 dark:bg-blue-950 rounded">
+                <h4 className="font-semibold flex items-center gap-2 mb-2">
+                  <MapPin className="h-5 w-5 text-blue-600" />
+                  Maryland Market Intelligence
+                </h4>
+                <p className="text-sm text-muted-foreground">
+                  MCA license renewals peak in Q3. Historical data suggests a <strong>40% surge in training demand</strong> 
+                  starting June. Recommend proactive outreach to 23 dispensaries with expiring certifications.
+                </p>
+              </div>
 
-                <div className="border-l-4 border-green-500 pl-4">
-                  <h4 className="font-semibold text-green-700 mb-2">Revenue Opportunity</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Implementing tiered pricing for organizations with 50+ employees could increase revenue by $15,000/month. 
-                    Consider offering bulk discounts to encourage larger enrollments.
-                  </p>
-                </div>
+              <div className="p-4 border-l-4 border-orange-500 bg-orange-50 dark:bg-orange-950 rounded">
+                <h4 className="font-semibold flex items-center gap-2 mb-2">
+                  <Clock className="h-5 w-5 text-orange-600" />
+                  Predictive Risk Alert
+                </h4>
+                <p className="text-sm text-muted-foreground">
+                  5 students are predicted to fail the final exam (72% confidence) based on Module 12-14 
+                  quiz performance. Early intervention now could prevent <strong>$250 in retake costs</strong> and 
+                  improve student satisfaction scores.
+                </p>
+              </div>
 
-                <div className="border-l-4 border-orange-500 pl-4">
-                  <h4 className="font-semibold text-orange-700 mb-2">Compliance Risk Alert</h4>
-                  <p className="text-sm text-muted-foreground">
-                    3 organizations are at high risk of compliance violations due to certificate expirations. 
-                    Immediate intervention recommended to prevent regulatory issues.
-                  </p>
-                </div>
-
-                <div className="border-l-4 border-purple-500 pl-4">
-                  <h4 className="font-semibold text-purple-700 mb-2">Engagement Pattern</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Users who complete modules within 7 days of enrollment have 45% higher final exam scores. 
-                    Consider implementing early engagement incentives.
-                  </p>
-                </div>
-
-                <div className="border-l-4 border-red-500 pl-4">
-                  <h4 className="font-semibold text-red-700 mb-2">Churn Prevention</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Organizations that haven't logged in for 14+ days have 67% probability of churning. 
-                    Automated re-engagement campaigns could reduce churn by 28%.
-                  </p>
-                </div>
+              <div className="p-4 border-l-4 border-purple-500 bg-purple-50 dark:bg-purple-950 rounded">
+                <h4 className="font-semibold flex items-center gap-2 mb-2">
+                  <Brain className="h-5 w-5 text-purple-600" />
+                  COMAR Compliance Optimization
+                </h4>
+                <p className="text-sm text-muted-foreground">
+                  Recent COMAR 14.17.05.02(A)(3) updates detected. <strong>7 course modules</strong> flagged 
+                  for review. AI-suggested content updates predict <strong>95% MCA audit readiness</strong> if 
+                  implemented within 14 days.
+                </p>
               </div>
             </CardContent>
           </Card>
