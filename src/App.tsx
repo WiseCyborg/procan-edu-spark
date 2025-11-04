@@ -62,6 +62,7 @@ import DemoAccountsSetup from "./pages/DemoAccountsSetup";
 import SystemHealthDashboard from "./pages/SystemHealthDashboard";
 import UnifiedHealthReport from "./pages/UnifiedHealthReport";
 import AcceptInvitation from "./pages/AcceptInvitation";
+import RoleSelectionDashboard from "./pages/RoleSelectionDashboard";
 import OnboardingSetup from "./pages/OnboardingSetup";
 import OperationsCommandCenter from "./pages/OperationsCommandCenter";
 
@@ -224,10 +225,16 @@ const App = () => (
                    <Route path="/accessibility" element={<AccessibilityPage />} />
                    
                    <Route path="/team-management" element={
-                     <ProtectedRoute>
-                       <TeamManagement />
-                     </ProtectedRoute>
-                   } />
+                      <ProtectedRoute>
+                        <TeamManagement />
+                      </ProtectedRoute>
+                    } />
+                    
+                    <Route path="/role-selection" element={
+                      <ProtectedRoute>
+                        <RoleSelectionDashboard />
+                      </ProtectedRoute>
+                    } />
                    
                     <Route path="/admin" element={
                      <ProtectedRoute>

@@ -54,6 +54,13 @@ export const useUserRole = () => {
     return rolesToCheck.some(role => roles.includes(role));
   };
 
+  // Calculate management role count for multi-role scenarios
+  const managementRoles = roles.filter(r => 
+    ['dispensary_manager', 'training_coordinator', 'admin'].includes(r)
+  );
+  const managementRoleCount = managementRoles.length;
+  const hasMultipleManagementRoles = managementRoleCount > 1;
+
   return {
     roles,
     hasRole,
@@ -63,6 +70,9 @@ export const useUserRole = () => {
     isTrainingCoordinator,
     isAdmin,
     canManageOrganization,
-    isLoading
+    isLoading,
+    managementRoleCount,
+    hasMultipleManagementRoles,
+    managementRoles,
   };
 };

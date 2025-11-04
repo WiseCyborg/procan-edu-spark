@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useOrganization } from '@/hooks/useOrganization';
+import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import { useNavigate } from 'react-router-dom';
 import { LogOut, User, MessageSquare, BookOpen, Award, BarChart3, Users, Mail, Building2, CreditCard, ShoppingCart } from 'lucide-react';
 import { CommunicationHub } from '@/components/communication/CommunicationHub';
@@ -19,16 +20,26 @@ interface HeaderProps {
 
 const Header = ({ role: headerRole }: HeaderProps = {}) => {
   const { user, signOut } = useAuth();
-  const { isDispensaryManager, isTrainingCoordinator, isAdmin, roles } = useUserRole();
+  const { isDispensaryManager, isTrainingCoordinator, isAdmin, roles, hasMultipleManagementRoles, managementRoles } = useUserRole();
   const { organization } = useOrganization();
   const navigate = useNavigate();
   const [showCommunicationHub, setShowCommunicationHub] = useState(false);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+  const [currentRoleView, setCurrentRoleView] = useState<string>('');
+
+  const { flags } = useFeatureFlags();
 
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
   };
+
+  React.useEffect(() => {
+    if (managementRoles.length > 0) {
+      const saved = sessionStorage.getItem('selected_role_view');
+      setCurrentRoleView(saved || managementRoles[0].replace('_', ' '));
+    }
+  }, [managementRoles]);
 
   return (
     <header className="bg-white border-b shadow-sm" role={headerRole}>
@@ -126,14 +137,25 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                  </DialogContent>
                </Dialog>
                
-               <div className="flex items-center space-x-3">
-                 <div className="flex space-x-1">
-                   {roles.map(role => (
-                     <Badge key={role} variant="secondary" className="text-xs">
-                       {role.replace('_', ' ').toUpperCase()}
-                     </Badge>
-                   ))}
-                 </div>
+                <div className="flex items-center space-x-3">
+                  <div className="flex space-x-1">
+                    {roles.map(role => (
+                      <Badge key={role} variant="secondary" className="text-xs">
+                        {role.replace('_', ' ').toUpperCase()}
+                      </Badge>
+                    ))}
+                  </div>
+                  
+                  {/* Multi-Role Selector */}
+                  {flags.multi_role_selector && hasMultipleManagementRoles && (
+                    <Badge 
+                      variant="outline" 
+                      className="cursor-pointer text-xs hover:bg-accent"
+                      onClick={() => navigate('/role-selection')}
+                    >
+                      Viewing as: {currentRoleView} ↕️
+                    </Badge>
+                  )}
                 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>

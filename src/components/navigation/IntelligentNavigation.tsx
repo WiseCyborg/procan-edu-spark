@@ -2,6 +2,8 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useOrganization } from '@/hooks/useOrganization';
+import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import { 
   BookOpen, 
   Award, 
@@ -23,12 +25,15 @@ interface NavigationItem {
   roles: string[];
   description: string;
   isActive?: boolean;
+  requiresOrganization?: boolean;
 }
 
 export const IntelligentNavigation: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { roles, isStudent, isDispensaryManager, isTrainingCoordinator, isAdmin } = useUserRole();
+  const { organizationId } = useOrganization();
+  const { flags } = useFeatureFlags();
 
   const navigationConfig: NavigationItem[] = [
     {
@@ -61,7 +66,8 @@ export const IntelligentNavigation: React.FC = () => {
       path: '/team-management',
       icon: BarChart3,
       roles: ['dispensary_manager', 'training_coordinator', 'admin'],
-      description: 'Manage your team training, view compliance reports, and track employee progress'
+      description: 'Manage your team training, view compliance reports, and track employee progress',
+      requiresOrganization: true
     },
     {
       id: 'admin-dashboard',
@@ -82,9 +88,13 @@ export const IntelligentNavigation: React.FC = () => {
   ];
 
   const getVisibleItems = (): NavigationItem[] => {
-    return navigationConfig.filter(item => 
-      item.roles.some(role => roles.includes(role as any))
-    ).map(item => ({
+    return navigationConfig.filter(item => {
+      const hasRequiredRole = item.roles.some(role => roles.includes(role as any));
+      const meetsOrgRequirement = !flags.org_nav_guard || 
+                                   !item.requiresOrganization || 
+                                   !!organizationId;
+      return hasRequiredRole && meetsOrgRequirement;
+    }).map(item => ({
       ...item,
       isActive: location.pathname === item.path
     }));
