@@ -34,9 +34,9 @@ export const OrganizationsManagementView = () => {
   const { data: organizations, isLoading, refetch } = useQuery({
     queryKey: ['approved-organizations'],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_approved_organizations');
+      const { data, error } = await supabase.rpc('get_approved_organizations' as any);
       if (error) throw error;
-      return data;
+      return data as any[];
     },
   });
 
@@ -44,11 +44,11 @@ export const OrganizationsManagementView = () => {
     queryKey: ['org-employees', selectedOrg],
     queryFn: async () => {
       if (!selectedOrg) return null;
-      const { data, error } = await supabase.rpc('get_organization_employees', {
+      const { data, error } = await supabase.rpc('get_organization_employees' as any, {
         org_id: selectedOrg
       });
       if (error) throw error;
-      return data;
+      return data as any[];
     },
     enabled: !!selectedOrg,
   });

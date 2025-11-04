@@ -15,12 +15,12 @@ const RVTIntelligence = () => {
     queryKey: ['rvt-compliance-status'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('rvt_compliance_tracking')
+        .from('rvt_compliance_tracking' as any)
         .select('*')
         .order('created_at', { ascending: false })
         .limit(10);
       if (error) throw error;
-      return data;
+      return data as any[];
     },
   });
 
@@ -28,12 +28,12 @@ const RVTIntelligence = () => {
     queryKey: ['competitor-snapshots'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('competitor_snapshots')
+        .from('competitor_snapshots' as any)
         .select('*')
         .order('snapshot_date', { ascending: false })
         .limit(10);
       if (error) throw error;
-      return data;
+      return data as any[];
     },
   });
 
@@ -41,11 +41,11 @@ const RVTIntelligence = () => {
     queryKey: ['rvt-renewal-tracking'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('rvt_renewal_tracking')
+        .from('rvt_renewal_tracking' as any)
         .select('*')
         .order('risk_level');
       if (error) throw error;
-      return data;
+      return data as any[];
     },
   });
 
@@ -53,25 +53,25 @@ const RVTIntelligence = () => {
     queryKey: ['curriculum-recommendations'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('curriculum_recommendations')
+        .from('curriculum_recommendations' as any)
         .select('*')
         .eq('status', 'pending')
         .order('priority', { ascending: false })
         .limit(5);
       if (error) throw error;
-      return data;
+      return data as any[];
     },
   });
 
-  const alignedCount = complianceStatus?.filter(c => c.our_curriculum_aligned).length || 0;
+  const alignedCount = complianceStatus?.filter((c: any) => c.our_curriculum_aligned).length || 0;
   const totalCompliance = complianceStatus?.length || 1;
   const alignmentPercentage = (alignedCount / totalCompliance) * 100;
 
   const renewalStats = {
     total: renewalTracking?.length || 0,
-    critical: renewalTracking?.filter(r => r.risk_level === 'critical').length || 0,
-    high: renewalTracking?.filter(r => r.risk_level === 'high').length || 0,
-    onTrack: renewalTracking?.filter(r => r.risk_level === 'low').length || 0,
+    critical: renewalTracking?.filter((r: any) => r.risk_level === 'critical').length || 0,
+    high: renewalTracking?.filter((r: any) => r.risk_level === 'high').length || 0,
+    onTrack: renewalTracking?.filter((r: any) => r.risk_level === 'low').length || 0,
   };
 
   if (loadingCompliance || loadingCompetitors || loadingRenewal || loadingRecommendations) {
@@ -189,7 +189,7 @@ const RVTIntelligence = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {complianceStatus?.map((item) => (
+                {complianceStatus?.map((item: any) => (
                   <div
                     key={item.id}
                     className="flex items-start justify-between p-4 border rounded-lg"
@@ -243,7 +243,7 @@ const RVTIntelligence = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {competitorData?.map((competitor) => (
+                {competitorData?.map((competitor: any) => (
                   <div
                     key={competitor.id}
                     className="p-4 border rounded-lg space-y-2"
@@ -318,7 +318,7 @@ const RVTIntelligence = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {recommendations?.map((rec) => (
+                {recommendations?.map((rec: any) => (
                   <div
                     key={rec.id}
                     className="p-4 border rounded-lg space-y-2"

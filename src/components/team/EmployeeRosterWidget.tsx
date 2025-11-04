@@ -31,11 +31,11 @@ export const EmployeeRosterWidget = ({ organizationId }: EmployeeRosterWidgetPro
   const { data: employees, isLoading, refetch } = useQuery({
     queryKey: ['organization-employees', organizationId],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_organization_employees', {
+      const { data, error } = await supabase.rpc('get_organization_employees' as any, {
         org_id: organizationId
       });
       if (error) throw error;
-      return data;
+      return data as any[];
     },
   });
 
