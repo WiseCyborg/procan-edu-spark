@@ -130,15 +130,11 @@ serve(async (req) => {
     );
 
     const batchSize = 10;
-    const now = new Date().toISOString();
 
-    // Fetch jobs to process (queued + failed with retry time passed)
+    // Phase 3A Fix (CRIT-002): Use RPC for server-side filtering
+    // PostgREST doesn't support column-to-column comparison (retry_count < max_retries)
     const { data: jobs, error: fetchError } = await supabase
-      .from('system_jobs')
-      .select('*')
-      .or(`status.eq.queued,and(status.eq.failed,next_retry_at.lt.${now},retry_count.lt.max_retries)`)
-      .order('queued_at', { ascending: true })
-      .limit(batchSize);
+      .rpc('get_jobs_to_process', { batch_size: batchSize });
 
     if (fetchError) {
       throw fetchError;
