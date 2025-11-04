@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
 import { Sparkles, CheckCircle, XCircle, Clock, TrendingUp, AlertCircle, Loader2 } from 'lucide-react';
+import { OptimizerScheduleCard } from './OptimizerScheduleCard';
 
 interface Recommendation {
   id: string;
@@ -113,6 +114,8 @@ export const AIContentOptimizer: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      <OptimizerScheduleCard />
+      
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">

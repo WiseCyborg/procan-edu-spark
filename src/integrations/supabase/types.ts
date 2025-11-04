@@ -3780,6 +3780,7 @@ export type Database = {
         Returns: number
       }
       test_system_health: { Args: never; Returns: Json }
+      trigger_optimizer_now: { Args: never; Returns: Json }
       unassign_seat: { Args: { seat_id_param: string }; Returns: boolean }
       unlock_tier: {
         Args: { _modules_completed: number; _tier: string; _user_id: string }

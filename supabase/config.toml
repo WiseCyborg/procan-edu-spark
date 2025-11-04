@@ -152,3 +152,6 @@ verify_jwt = true
 
 [functions.ai-content-optimizer]
 verify_jwt = true
+
+[functions.send-optimizer-digest]
+verify_jwt = false

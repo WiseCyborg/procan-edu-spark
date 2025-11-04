@@ -204,6 +204,24 @@ Focus on:
 
     console.log(`Content optimization complete. Saved ${savedCount} recommendations.`);
 
+    // Trigger digest email if this was a scheduled run (check if invoked without user context)
+    const authHeader = req.headers.get('authorization');
+    const isScheduledRun = !authHeader || authHeader.includes('service_role');
+    
+    if (isScheduledRun && savedCount > 0) {
+      console.log('Triggering digest email for scheduled run...');
+      try {
+        const { error: emailError } = await supabase.functions.invoke('send-optimizer-digest');
+        if (emailError) {
+          console.error('Failed to send digest email:', emailError);
+        } else {
+          console.log('Digest email triggered successfully');
+        }
+      } catch (emailErr) {
+        console.error('Error triggering digest email:', emailErr);
+      }
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
