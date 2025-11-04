@@ -3196,21 +3196,22 @@ export type Database = {
     Views: {
       v_processor_pulse: {
         Row: {
-          deadletter: number | null
+          avg_processing_seconds: number | null
+          completed: number | null
           failed: number | null
-          last_activity: string | null
-          observed_at: string | null
-          queued: number | null
+          job_type: string | null
+          total_jobs: number | null
         }
         Relationships: []
       }
       v_queue_health: {
         Row: {
-          ct: number | null
-          job_type: string | null
-          newest_queued_at: string | null
-          oldest_queued_at: string | null
-          status: string | null
+          completed_count: number | null
+          failed_count: number | null
+          last_job_queued_at: string | null
+          oldest_queued_age_seconds: number | null
+          processing_count: number | null
+          queued_count: number | null
         }
         Relationships: []
       }
