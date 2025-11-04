@@ -699,6 +699,8 @@ export type Database = {
           estimated_effort: string | null
           id: string
           impact: string | null
+          impact_summary: Json | null
+          implementation_date: string | null
           priority: string
           rationale: string | null
           related_module_ids: string[] | null
@@ -707,6 +709,7 @@ export type Database = {
           reviewed_by: string | null
           status: string
           title: string
+          tracked_impact: boolean | null
           updated_at: string
         }
         Insert: {
@@ -718,6 +721,8 @@ export type Database = {
           estimated_effort?: string | null
           id?: string
           impact?: string | null
+          impact_summary?: Json | null
+          implementation_date?: string | null
           priority: string
           rationale?: string | null
           related_module_ids?: string[] | null
@@ -726,6 +731,7 @@ export type Database = {
           reviewed_by?: string | null
           status?: string
           title: string
+          tracked_impact?: boolean | null
           updated_at?: string
         }
         Update: {
@@ -737,6 +743,8 @@ export type Database = {
           estimated_effort?: string | null
           id?: string
           impact?: string | null
+          impact_summary?: Json | null
+          implementation_date?: string | null
           priority?: string
           rationale?: string | null
           related_module_ids?: string[] | null
@@ -745,6 +753,7 @@ export type Database = {
           reviewed_by?: string | null
           status?: string
           title?: string
+          tracked_impact?: boolean | null
           updated_at?: string
         }
         Relationships: []
@@ -2270,6 +2279,113 @@ export type Database = {
         }
         Relationships: []
       }
+      recommendation_impact_tracking: {
+        Row: {
+          annual_savings_usd: number | null
+          baseline_avg_attempts: number | null
+          baseline_avg_score: number | null
+          baseline_pass_rate: number | null
+          baseline_period_end: string
+          baseline_period_start: string
+          baseline_remediation_rate: number | null
+          baseline_sample_size: number | null
+          created_at: string
+          estimated_cost_per_retake: number | null
+          estimated_hours_saved_annually: number | null
+          hours_spent_implementing: number | null
+          id: string
+          implementation_date: string
+          improvement_avg_score: number | null
+          improvement_pass_rate: number | null
+          is_active: boolean | null
+          measurement_period_end: string | null
+          measurement_period_start: string
+          notes: string | null
+          post_avg_attempts: number | null
+          post_avg_score: number | null
+          post_pass_rate: number | null
+          post_remediation_rate: number | null
+          post_sample_size: number | null
+          recommendation_id: string | null
+          reduction_retake_rate: number | null
+          retakes_prevented_annually: number | null
+          roi_percentage: number | null
+          updated_at: string
+        }
+        Insert: {
+          annual_savings_usd?: number | null
+          baseline_avg_attempts?: number | null
+          baseline_avg_score?: number | null
+          baseline_pass_rate?: number | null
+          baseline_period_end: string
+          baseline_period_start: string
+          baseline_remediation_rate?: number | null
+          baseline_sample_size?: number | null
+          created_at?: string
+          estimated_cost_per_retake?: number | null
+          estimated_hours_saved_annually?: number | null
+          hours_spent_implementing?: number | null
+          id?: string
+          implementation_date: string
+          improvement_avg_score?: number | null
+          improvement_pass_rate?: number | null
+          is_active?: boolean | null
+          measurement_period_end?: string | null
+          measurement_period_start: string
+          notes?: string | null
+          post_avg_attempts?: number | null
+          post_avg_score?: number | null
+          post_pass_rate?: number | null
+          post_remediation_rate?: number | null
+          post_sample_size?: number | null
+          recommendation_id?: string | null
+          reduction_retake_rate?: number | null
+          retakes_prevented_annually?: number | null
+          roi_percentage?: number | null
+          updated_at?: string
+        }
+        Update: {
+          annual_savings_usd?: number | null
+          baseline_avg_attempts?: number | null
+          baseline_avg_score?: number | null
+          baseline_pass_rate?: number | null
+          baseline_period_end?: string
+          baseline_period_start?: string
+          baseline_remediation_rate?: number | null
+          baseline_sample_size?: number | null
+          created_at?: string
+          estimated_cost_per_retake?: number | null
+          estimated_hours_saved_annually?: number | null
+          hours_spent_implementing?: number | null
+          id?: string
+          implementation_date?: string
+          improvement_avg_score?: number | null
+          improvement_pass_rate?: number | null
+          is_active?: boolean | null
+          measurement_period_end?: string | null
+          measurement_period_start?: string
+          notes?: string | null
+          post_avg_attempts?: number | null
+          post_avg_score?: number | null
+          post_pass_rate?: number | null
+          post_remediation_rate?: number | null
+          post_sample_size?: number | null
+          recommendation_id?: string | null
+          reduction_retake_rate?: number | null
+          retakes_prevented_annually?: number | null
+          roi_percentage?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recommendation_impact_tracking_recommendation_id_fkey"
+            columns: ["recommendation_id"]
+            isOneToOne: false
+            referencedRelation: "curriculum_recommendations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       regulatory_content: {
         Row: {
           content_html: string | null
@@ -3388,6 +3504,77 @@ export type Database = {
       }
     }
     Views: {
+      exam_analytics_overview: {
+        Row: {
+          average_failing_score: number | null
+          average_passing_score: number | null
+          average_score: number | null
+          failed_attempts: number | null
+          first_attempt_date: string | null
+          most_recent_attempt_date: string | null
+          overall_pass_rate: number | null
+          passed_attempts: number | null
+          total_attempts: number | null
+          unique_test_takers: number | null
+        }
+        Relationships: []
+      }
+      exam_difficulty_analysis: {
+        Row: {
+          average_performance: number | null
+          comar_section: string | null
+          difficulty_level: string | null
+          failure_rate: number | null
+          sample_size: number | null
+          section_number: number | null
+          section_title: string | null
+        }
+        Relationships: []
+      }
+      exam_monthly_trends: {
+        Row: {
+          avg_score: number | null
+          failed: number | null
+          month: string | null
+          pass_rate: number | null
+          passed: number | null
+          total_attempts: number | null
+        }
+        Relationships: []
+      }
+      exam_struggling_sections: {
+        Row: {
+          average_score: number | null
+          avg_struggling_score: number | null
+          comar_section: string | null
+          section_number: number | null
+          section_title: string | null
+          struggle_rate: number | null
+          students_struggling: number | null
+          topic_area: string | null
+          total_attempts: number | null
+        }
+        Relationships: []
+      }
+      exam_topic_analytics: {
+        Row: {
+          average_score: number | null
+          comar_section: string | null
+          failed_count: number | null
+          max_score: number | null
+          median_score: number | null
+          min_score: number | null
+          pass_rate: number | null
+          passed_count: number | null
+          remediation_required_count: number | null
+          score_std_dev: number | null
+          section_number: number | null
+          section_title: string | null
+          topic_area: string | null
+          total_attempts: number | null
+        }
+        Relationships: []
+      }
       user_exam_stats: {
         Row: {
           average_score: number | null

@@ -21,6 +21,8 @@ import {
 import { useExamAnalytics } from '@/hooks/useExamAnalytics';
 import { format } from 'date-fns';
 import { AIContentOptimizer } from './AIContentOptimizer';
+import { ROICalculator } from './ROICalculator';
+import { ImpactTimeline } from './ImpactTimeline';
 
 const getDifficultyColor = (level: string) => {
   switch (level) {
@@ -173,12 +175,13 @@ export const ExamAnalyticsDashboard: React.FC = () => {
 
       {/* Tabs for different analytics views */}
       <Tabs defaultValue="topics" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="topics">Topic Performance</TabsTrigger>
           <TabsTrigger value="difficulty">Difficulty Analysis</TabsTrigger>
           <TabsTrigger value="struggling">Struggling Sections</TabsTrigger>
           <TabsTrigger value="trends">Trends</TabsTrigger>
           <TabsTrigger value="optimizer">AI Optimizer</TabsTrigger>
+          <TabsTrigger value="roi">ROI Calculator</TabsTrigger>
         </TabsList>
 
         {/* Topic Performance Tab */}
@@ -474,6 +477,12 @@ export const ExamAnalyticsDashboard: React.FC = () => {
         {/* AI Optimizer Tab */}
         <TabsContent value="optimizer">
           <AIContentOptimizer />
+        </TabsContent>
+
+        {/* ROI Calculator Tab */}
+        <TabsContent value="roi" className="space-y-6">
+          <ROICalculator />
+          <ImpactTimeline />
         </TabsContent>
       </Tabs>
     </div>
