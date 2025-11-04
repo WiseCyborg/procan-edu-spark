@@ -18,6 +18,7 @@ import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 interface OrganizationInfo {
   id: string;
@@ -43,6 +44,7 @@ const DispensaryManagerDashboard = () => {
   const [coordinators, setCoordinators] = useState<any[]>([]);
   const [joinCodes, setJoinCodes] = useState<any[]>([]);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+  const [showRestartDialog, setShowRestartDialog] = useState(false);
 
   useEffect(() => {
     if (!roleLoading && !isDispensaryManager) {
@@ -122,6 +124,9 @@ const DispensaryManagerDashboard = () => {
 
     // Clear localStorage
     localStorage.removeItem(`onboarding_complete_${user.id}`);
+    
+    // Close dialog
+    setShowRestartDialog(false);
     
     // Show success toast
     toast.success('Setup wizard reset! Redirecting...', {
@@ -453,7 +458,7 @@ const DispensaryManagerDashboard = () => {
                   <p className="text-sm text-muted-foreground mb-3">
                     Re-run the initial setup wizard to configure training coordinators and invite employees.
                   </p>
-                  <Button variant="outline" onClick={handleRestartOnboarding} className="w-full">
+                  <Button variant="outline" onClick={() => setShowRestartDialog(true)} className="w-full">
                     <RefreshCw className="w-4 h-4 mr-2" />
                     Restart Setup Wizard
                   </Button>
@@ -483,6 +488,23 @@ const DispensaryManagerDashboard = () => {
         onOpenChange={setShowPurchaseModal}
         onPurchaseComplete={refreshOrganization}
       />
+
+      <AlertDialog open={showRestartDialog} onOpenChange={setShowRestartDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Restart Setup Wizard?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will take you back to the initial setup wizard. You can reconfigure training coordinators and invite employees again. Your existing data will not be affected.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleRestartOnboarding}>
+              Continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
