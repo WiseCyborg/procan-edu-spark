@@ -24,6 +24,7 @@ interface ModuleData {
   title: string;
   description: string | null;
   comar_reference: string | null;
+  estimated_minutes: number | null;
 }
 
 const CourseLayout: React.FC = () => {
@@ -54,7 +55,7 @@ const CourseLayout: React.FC = () => {
     const fetchModules = async () => {
       const { data, error } = await supabase
         .from('course_modules')
-        .select('module_number, title, description, comar_reference')
+        .select('module_number, title, description, comar_reference, estimated_minutes')
         .eq('course_id', COURSE_ID)
         .eq('is_active', true)
         .order('module_number');
@@ -123,7 +124,7 @@ const CourseLayout: React.FC = () => {
   // Grant access for: ADMIN_ACCESS, ORG_EMPLOYEE_ACCESS, INDIVIDUAL_PAID
 
   return (
-    <ProtectedCourseAccess>
+    <ProtectedCourseAccess requiresCompleteProfile={false}>
       <div className="container mx-auto p-6 space-y-6">
       <Breadcrumbs />
       <Card>
@@ -140,11 +141,17 @@ const CourseLayout: React.FC = () => {
             </p>
           )}
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <div className="text-center">
             <Badge variant="secondary" className="text-lg px-4 py-2">
               {updateProgress()}
             </Badge>
+          </div>
+          <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+            <p className="text-sm text-blue-800 dark:text-blue-300 text-center">
+              <span className="font-semibold">Note:</span> Green, Yellow, and Red tier levels are for progress tracking and motivation. 
+              All 18 modules are required for Maryland RVT certification compliance.
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -155,15 +162,18 @@ const CourseLayout: React.FC = () => {
           const tierColor = module.module_number <= 6 ? 'text-green-600' : 
                            module.module_number <= 12 ? 'text-yellow-600' : 
                            'text-red-600';
+          const tierBg = module.module_number <= 6 ? 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800' : 
+                        module.module_number <= 12 ? 'bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-800' : 
+                        'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800';
           
           return (
-            <Card key={moduleId} className="hover:shadow-md transition-shadow">
+            <Card key={moduleId} className={`hover:shadow-md transition-shadow ${tierBg}`}>
               <CardContent className="p-4">
                 <Link 
                   to={`/course/${moduleId}`} 
-                  className="block"
+                  className="block space-y-2"
                 >
-                  <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <BookOpen className={`w-5 h-5 ${tierColor}`} />
                       <span className="font-medium">Module {module.module_number}</span>
@@ -175,13 +185,20 @@ const CourseLayout: React.FC = () => {
                       {isModuleCompleted(moduleId) ? 'Completed' : 'Available'}
                     </Badge>
                   </div>
-                  <h3 className="font-semibold text-sm mb-1">{module.title}</h3>
-                  <p className="text-xs text-muted-foreground mb-2">{module.description}</p>
-                  {module.comar_reference && (
-                    <Badge variant="outline" className="text-xs">
-                      {module.comar_reference}
-                    </Badge>
-                  )}
+                  <h3 className="font-semibold text-sm">{module.title}</h3>
+                  <p className="text-xs text-muted-foreground">{module.description}</p>
+                  <div className="flex items-center justify-between pt-2">
+                    {module.comar_reference && (
+                      <Badge variant="outline" className="text-xs">
+                        {module.comar_reference}
+                      </Badge>
+                    )}
+                    {module.estimated_minutes && (
+                      <span className="text-xs text-muted-foreground">
+                        ~{module.estimated_minutes} min
+                      </span>
+                    )}
+                  </div>
                 </Link>
               </CardContent>
             </Card>

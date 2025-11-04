@@ -7,6 +7,7 @@ import { toast } from '@/components/ui/sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { CertificateAchievement } from '@/components/certificates/CertificateAchievement';
 import { CameraUnavailableDialog } from '@/components/exam/CameraUnavailableDialog';
+import { ProtectedCourseAccess } from '@/components/ProtectedCourseAccess';
 
 interface QuizQuestion {
   q: string;
@@ -741,12 +742,13 @@ const FinalExam: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-center text-green-700 mb-6">
-        Maryland Responsible Vendor Training (RVT)
-        <br />
-        <span className="text-xl font-normal">Final Exam</span>
-      </h1>
+    <ProtectedCourseAccess requiresCompleteProfile={true}>
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold text-center text-green-700 mb-6">
+          Maryland Responsible Vendor Training (RVT)
+          <br />
+          <span className="text-xl font-normal">Final Exam</span>
+        </h1>
       
       {/* Timer display - only shown during exam */}
       {examStage === 'exam' && (
@@ -942,7 +944,6 @@ const FinalExam: React.FC = () => {
         </div>
       )}
 
-      {/* Camera Unavailable Dialog */}
       <CameraUnavailableDialog
         open={showCameraUnavailable}
         onClose={() => setShowCameraUnavailable(false)}
@@ -950,6 +951,7 @@ const FinalExam: React.FC = () => {
         errorType={cameraError}
       />
     </div>
+    </ProtectedCourseAccess>
   );
 };
 

@@ -22,6 +22,7 @@ interface ModuleData {
   module_number: number;
   title: string;
   description: string;
+  estimated_minutes: number | null;
 }
 
 const StudentDashboard = () => {
@@ -53,7 +54,7 @@ const StudentDashboard = () => {
           .single(),
         supabase
           .from('course_modules')
-          .select('module_number, title, description')
+          .select('module_number, title, description, estimated_minutes')
           .eq('course_id', COURSE_ID)
           .eq('is_active', true)
           .order('module_number')
@@ -136,6 +137,16 @@ const StudentDashboard = () => {
 
       <DeadlineCountdown />
 
+      {/* Tier System Disclaimer */}
+      <Card className="bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800">
+        <CardContent className="p-4">
+          <p className="text-sm text-blue-800 dark:text-blue-300 text-center">
+            <span className="font-semibold">Progress Tiers:</span> Green, Yellow, and Red levels help you track your progress. 
+            All 18 modules are required for Maryland RVT certification.
+          </p>
+        </CardContent>
+      </Card>
+
       {/* Progress Overview */}
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
@@ -210,6 +221,11 @@ const StudentDashboard = () => {
                 {nextModule?.description && (
                   <p className="text-sm text-muted-foreground mt-1">
                     {nextModule.description}
+                  </p>
+                )}
+                {nextModule?.estimated_minutes && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Estimated time: ~{nextModule.estimated_minutes} minutes
                   </p>
                 )}
               </div>
