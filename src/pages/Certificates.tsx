@@ -16,6 +16,7 @@ interface Certificate {
   expiry_date: string;
   is_revoked: boolean;
   tier_badge?: string;
+  certification_level?: 'agent' | 'manager';
   courses: {
     title: string;
     description: string;
@@ -49,7 +50,7 @@ export default function Certificates() {
         .order('issue_date', { ascending: false });
 
       if (error) throw error;
-      setCertificates(data || []);
+      setCertificates((data || []) as Certificate[]);
     } catch (error: any) {
       console.error('Error fetching certificates:', error);
       toast({
@@ -173,7 +174,12 @@ export default function Certificates() {
                           Certificate #{certificate.certificate_number}
                         </p>
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 flex-wrap">
+                        {certificate.certification_level === 'manager' && (
+                          <Badge className="bg-purple-600 text-white">
+                            👔 MANAGER LEVEL
+                          </Badge>
+                        )}
                         {certificate.tier_badge && (
                           <Badge 
                             className={`
@@ -270,6 +276,8 @@ export default function Certificates() {
           <ul className="text-sm text-blue-800 space-y-1">
             <li>• All certificates are digitally verified and tamper-proof</li>
             <li>• Certificates meet Maryland Cannabis Administration requirements</li>
+            <li>• <strong>Agent-Level:</strong> Covers all 18 required RVT modules</li>
+            <li>• <strong>Manager-Level:</strong> Includes 5 additional management modules (23 total)</li>
             <li>• Download certificates for your records or employer verification</li>
             <li>• Valid certificates are recognized throughout Maryland's cannabis industry</li>
           </ul>

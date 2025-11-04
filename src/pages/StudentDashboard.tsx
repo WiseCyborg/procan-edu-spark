@@ -23,11 +23,12 @@ interface ModuleData {
   title: string;
   description: string;
   estimated_minutes: number | null;
+  is_manager_only: boolean | null;
 }
 
 const StudentDashboard = () => {
   const { user } = useAuth();
-  const { isStudent } = useUserRole();
+  const { isStudent, isDispensaryManager, isTrainingCoordinator, isAdmin } = useUserRole();
   const { completionPercentage, isProfileComplete } = useProfileCompletion();
   const { getCompletedModulesCount, getTotalScore, isLoading: progressLoading } = useUserProgress(COURSE_ID);
   const { currentTier, getNextTier, getModulesNeededForNextTier } = useTierProgress();
@@ -35,6 +36,10 @@ const StudentDashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [organizationInfo, setOrganizationInfo] = useState<{name: string, coordinator: string} | null>(null);
   const [modules, setModules] = useState<ModuleData[]>([]);
+  
+  const isManagerRole = isDispensaryManager || isTrainingCoordinator || isAdmin;
+  const agentModules = modules.filter(m => !m.is_manager_only);
+  const managerModules = modules.filter(m => m.is_manager_only);
 
   useEffect(() => {
     if (!progressLoading) {
@@ -54,7 +59,7 @@ const StudentDashboard = () => {
           .single(),
         supabase
           .from('course_modules')
-          .select('module_number, title, description, estimated_minutes')
+          .select('module_number, title, description, estimated_minutes, is_manager_only')
           .eq('course_id', COURSE_ID)
           .eq('is_active', true)
           .order('module_number')
@@ -147,6 +152,33 @@ const StudentDashboard = () => {
         </CardContent>
       </Card>
 
+      {/* Manager Track Info */}
+      {isManagerRole && managerModules.length > 0 && (
+        <Card className="bg-purple-50 dark:bg-purple-950/30 border-purple-200 dark:border-purple-800">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Award className="h-5 w-5 text-purple-600" />
+              Manager Track Available
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-purple-800 dark:text-purple-300 mb-2">
+              You have access to <strong>{managerModules.length} additional manager-level modules</strong> covering:
+            </p>
+            <ul className="text-sm text-purple-700 dark:text-purple-400 space-y-1 ml-4 list-disc">
+              <li>Supervising Compliance Operations</li>
+              <li>Regulatory Reporting & Oversight</li>
+              <li>Team Training Coordination</li>
+              <li>Incident Documentation</li>
+              <li>Advanced Diversion Prevention</li>
+            </ul>
+            <p className="text-sm text-purple-800 dark:text-purple-300 mt-3">
+              Complete these for <strong>Manager-Level RVT Certification</strong>.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Progress Overview */}
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
@@ -182,8 +214,13 @@ const StudentDashboard = () => {
             <BookOpen className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{completedModules} / {TOTAL_MODULES}</div>
-            <Progress value={(completedModules / TOTAL_MODULES) * 100} className="mt-2" />
+            <div className="text-2xl font-bold">{completedModules} / {agentModules.length || TOTAL_MODULES}</div>
+            <Progress value={(completedModules / (agentModules.length || TOTAL_MODULES)) * 100} className="mt-2" />
+            {isManagerRole && managerModules.length > 0 && (
+              <p className="text-xs text-muted-foreground mt-2">
+                +{managerModules.length} manager modules available
+              </p>
+            )}
           </CardContent>
         </Card>
 

@@ -209,6 +209,7 @@ export type Database = {
       certificates: {
         Row: {
           certificate_number: string
+          certification_level: string | null
           course_id: string
           created_at: string
           exam_attempt_id: string
@@ -223,6 +224,7 @@ export type Database = {
         }
         Insert: {
           certificate_number: string
+          certification_level?: string | null
           course_id: string
           created_at?: string
           exam_attempt_id: string
@@ -237,6 +239,7 @@ export type Database = {
         }
         Update: {
           certificate_number?: string
+          certification_level?: string | null
           course_id?: string
           created_at?: string
           exam_attempt_id?: string
@@ -589,6 +592,7 @@ export type Database = {
           estimated_minutes: number | null
           id: string
           is_active: boolean | null
+          is_manager_only: boolean | null
           learning_objectives: Json | null
           module_number: number
           quiz_questions: Json | null
@@ -606,6 +610,7 @@ export type Database = {
           estimated_minutes?: number | null
           id?: string
           is_active?: boolean | null
+          is_manager_only?: boolean | null
           learning_objectives?: Json | null
           module_number: number
           quiz_questions?: Json | null
@@ -623,6 +628,7 @@ export type Database = {
           estimated_minutes?: number | null
           id?: string
           is_active?: boolean | null
+          is_manager_only?: boolean | null
           learning_objectives?: Json | null
           module_number?: number
           quiz_questions?: Json | null

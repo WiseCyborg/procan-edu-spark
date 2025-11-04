@@ -25,6 +25,7 @@ interface ModuleData {
   description: string | null;
   comar_reference: string | null;
   estimated_minutes: number | null;
+  is_manager_only: boolean | null;
 }
 
 const CourseLayout: React.FC = () => {
@@ -55,7 +56,7 @@ const CourseLayout: React.FC = () => {
     const fetchModules = async () => {
       const { data, error } = await supabase
         .from('course_modules')
-        .select('module_number, title, description, comar_reference, estimated_minutes')
+        .select('module_number, title, description, comar_reference, estimated_minutes, is_manager_only')
         .eq('course_id', COURSE_ID)
         .eq('is_active', true)
         .order('module_number');
@@ -86,10 +87,14 @@ const CourseLayout: React.FC = () => {
   const updateProgress = () => {
     const completedCount = getCompletedModulesCount();
     const averageScore = getTotalScore();
-    return `${completedCount}/${TOTAL_MODULES} modules completed${averageScore > 0 ? ` • Average score: ${averageScore}%` : ''}`;
+    const totalRequired = modules.filter(m => !m.is_manager_only).length || TOTAL_MODULES;
+    return `${completedCount}/${totalRequired} modules completed${averageScore > 0 ? ` • Average score: ${averageScore}%` : ''}`;
   };
 
   const isExamEnabled = getCompletedModulesCount() === TOTAL_MODULES;
+  const isManagerRole = isDispensaryManager || isAdmin;
+  const managerModules = modules.filter(m => m.is_manager_only);
+  const agentModules = modules.filter(m => !m.is_manager_only);
 
   // Show loading state
   if (isLoading || paymentLoading || rolesLoading || orgLoading) {
@@ -131,6 +136,11 @@ const CourseLayout: React.FC = () => {
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-bold text-primary">
             Maryland Responsible Vendor Training (RVT) Course
+            {isManagerRole && managerModules.length > 0 && (
+              <Badge variant="default" className="ml-3 bg-purple-600 text-white">
+                Manager Track
+              </Badge>
+            )}
           </CardTitle>
           <p className="text-muted-foreground">
             Complete all modules to unlock the final exam and earn your certificate
@@ -153,58 +163,123 @@ const CourseLayout: React.FC = () => {
               All 18 modules are required for Maryland RVT certification compliance.
             </p>
           </div>
+          {isManagerRole && managerModules.length > 0 && (
+            <div className="bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800 rounded-lg p-4">
+              <p className="text-sm text-purple-800 dark:text-purple-300 text-center">
+                <span className="font-semibold">Manager Track:</span> You have access to {managerModules.length} additional manager-level modules. 
+                Complete these for <strong>Manager-Level RVT Certification</strong>.
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {modules.map((module) => {
-          const moduleId = `part${module.module_number}`;
-          const tierColor = module.module_number <= 6 ? 'text-green-600' : 
-                           module.module_number <= 12 ? 'text-yellow-600' : 
-                           'text-red-600';
-          const tierBg = module.module_number <= 6 ? 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800' : 
-                        module.module_number <= 12 ? 'bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-800' : 
-                        'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800';
-          
-          return (
-            <Card key={moduleId} className={`hover:shadow-md transition-shadow ${tierBg}`}>
-              <CardContent className="p-4">
-                <Link 
-                  to={`/course/${moduleId}`} 
-                  className="block space-y-2"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <BookOpen className={`w-5 h-5 ${tierColor}`} />
-                      <span className="font-medium">Module {module.module_number}</span>
-                      {isModuleCompleted(moduleId) && (
-                        <CheckCircle className="w-5 h-5 text-green-600" />
+      {/* Agent-Level Modules (1-18) */}
+      <div className="space-y-4">
+        <h2 className="text-2xl font-bold text-foreground">Agent-Level Training (Required)</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          {agentModules.map((module) => {
+            const moduleId = `part${module.module_number}`;
+            const tierColor = module.module_number <= 6 ? 'text-green-600' : 
+                             module.module_number <= 12 ? 'text-yellow-600' : 
+                             'text-red-600';
+            const tierBg = module.module_number <= 6 ? 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800' : 
+                          module.module_number <= 12 ? 'bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-800' : 
+                          'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800';
+            
+            return (
+              <Card key={moduleId} className={`hover:shadow-md transition-shadow ${tierBg}`}>
+                <CardContent className="p-4">
+                  <Link 
+                    to={`/course/${moduleId}`} 
+                    className="block space-y-2"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <BookOpen className={`w-5 h-5 ${tierColor}`} />
+                        <span className="font-medium">Module {module.module_number}</span>
+                        {isModuleCompleted(moduleId) && (
+                          <CheckCircle className="w-5 h-5 text-green-600" />
+                        )}
+                      </div>
+                      <Badge variant={isModuleCompleted(moduleId) ? "default" : "secondary"}>
+                        {isModuleCompleted(moduleId) ? 'Completed' : 'Available'}
+                      </Badge>
+                    </div>
+                    <h3 className="font-semibold text-sm">{module.title}</h3>
+                    <p className="text-xs text-muted-foreground">{module.description}</p>
+                    <div className="flex items-center justify-between pt-2">
+                      {module.comar_reference && (
+                        <Badge variant="outline" className="text-xs">
+                          {module.comar_reference}
+                        </Badge>
+                      )}
+                      {module.estimated_minutes && (
+                        <span className="text-xs text-muted-foreground">
+                          ~{module.estimated_minutes} min
+                        </span>
                       )}
                     </div>
-                    <Badge variant={isModuleCompleted(moduleId) ? "default" : "secondary"}>
-                      {isModuleCompleted(moduleId) ? 'Completed' : 'Available'}
-                    </Badge>
-                  </div>
-                  <h3 className="font-semibold text-sm">{module.title}</h3>
-                  <p className="text-xs text-muted-foreground">{module.description}</p>
-                  <div className="flex items-center justify-between pt-2">
-                    {module.comar_reference && (
-                      <Badge variant="outline" className="text-xs">
-                        {module.comar_reference}
-                      </Badge>
-                    )}
-                    {module.estimated_minutes && (
-                      <span className="text-xs text-muted-foreground">
-                        ~{module.estimated_minutes} min
-                      </span>
-                    )}
-                  </div>
-                </Link>
-              </CardContent>
-            </Card>
-          );
-        })}
+                  </Link>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
       </div>
+
+      {/* Manager-Level Modules (19-23) - Only visible to managers */}
+      {isManagerRole && managerModules.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <h2 className="text-2xl font-bold text-foreground">Manager-Level Training (Optional)</h2>
+            <Badge className="bg-purple-600 text-white">Manager Track</Badge>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {managerModules.map((module) => {
+              const moduleId = `part${module.module_number}`;
+              
+              return (
+                <Card key={moduleId} className="hover:shadow-md transition-shadow bg-purple-50 dark:bg-purple-950/30 border-purple-200 dark:border-purple-800">
+                  <CardContent className="p-4">
+                    <Link 
+                      to={`/course/${moduleId}`} 
+                      className="block space-y-2"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <BookOpen className="w-5 h-5 text-purple-600" />
+                          <span className="font-medium">Module {module.module_number}</span>
+                          {isModuleCompleted(moduleId) && (
+                            <CheckCircle className="w-5 h-5 text-green-600" />
+                          )}
+                        </div>
+                        <Badge variant={isModuleCompleted(moduleId) ? "default" : "secondary"}>
+                          {isModuleCompleted(moduleId) ? 'Completed' : 'Available'}
+                        </Badge>
+                      </div>
+                      <h3 className="font-semibold text-sm">{module.title}</h3>
+                      <p className="text-xs text-muted-foreground">{module.description}</p>
+                      <div className="flex items-center justify-between pt-2">
+                        {module.comar_reference && (
+                          <Badge variant="outline" className="text-xs">
+                            {module.comar_reference}
+                          </Badge>
+                        )}
+                        {module.estimated_minutes && (
+                          <span className="text-xs text-muted-foreground">
+                            ~{module.estimated_minutes} min
+                          </span>
+                        )}
+                      </div>
+                    </Link>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       <Card className={`${isExamEnabled ? 'border-primary' : 'border-muted'}`}>
         <CardContent className="p-6">

@@ -13,6 +13,7 @@ interface CertificateAchievementProps {
   userPhoto?: string;
   onDownload: () => void;
   onShare: () => void;
+  certificationLevel?: 'agent' | 'manager';
 }
 
 export const CertificateAchievement: React.FC<CertificateAchievementProps> = ({
@@ -22,7 +23,8 @@ export const CertificateAchievement: React.FC<CertificateAchievementProps> = ({
   tierStatus,
   userPhoto,
   onDownload,
-  onShare
+  onShare,
+  certificationLevel = 'agent'
 }) => {
   const [showConfetti, setShowConfetti] = useState(true);
 
@@ -38,6 +40,7 @@ export const CertificateAchievement: React.FC<CertificateAchievementProps> = ({
   };
 
   const tier = tierColors[tierStatus];
+  const isManagerCertification = certificationLevel === 'manager';
 
   return (
     <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-stoplight-cream to-white p-4">
@@ -93,21 +96,31 @@ export const CertificateAchievement: React.FC<CertificateAchievementProps> = ({
           )}
 
           <div className="text-center space-y-4 pr-40">
-            <Badge className={`${tier.bg} text-white text-lg px-4 py-2`}>
-              {tier.emoji} {tierStatus.toUpperCase()} TIER CERTIFIED
-            </Badge>
+            <div className="flex items-center justify-center gap-2 flex-wrap">
+              <Badge className={`${tier.bg} text-white text-lg px-4 py-2`}>
+                {tier.emoji} {tierStatus.toUpperCase()} TIER CERTIFIED
+              </Badge>
+              {isManagerCertification && (
+                <Badge className="bg-purple-600 text-white text-lg px-4 py-2">
+                  👔 MANAGER LEVEL
+                </Badge>
+              )}
+            </div>
             
             <h2 className="text-3xl font-bold text-stoplight-charcoal font-playfair italic">
               {userName}
             </h2>
             
             <p className="text-gray-600 font-inter">
-              has successfully completed all 18 modules of responsible cannabis education 
+              has successfully completed all {isManagerCertification ? '23' : '18'} modules of responsible cannabis education 
+              {isManagerCertification && ' including advanced manager-level training '}
               and is now part of Maryland's community of certified professionals.
             </p>
             
             <div className="border-t-2 border-b-2 border-stoplight-green/20 py-4 my-4">
-              <p className="text-sm text-gray-500 mb-1">Certificate Number</p>
+              <p className="text-sm text-gray-500 mb-1">
+                {isManagerCertification ? 'Manager-Level ' : ''}Certificate Number
+              </p>
               <p className="text-xl font-bold text-stoplight-charcoal font-mono">
                 {certificateNumber}
               </p>
