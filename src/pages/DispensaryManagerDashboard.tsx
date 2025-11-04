@@ -13,9 +13,10 @@ import { EmployeeInvitationForm } from '@/components/team/EmployeeInvitationForm
 import { SeatRequestManager } from '@/components/team/SeatRequestManager';
 import { PurchaseSeatsDialog } from '@/components/team/PurchaseSeatsDialog';
 import { EmployeeRosterWidget } from '@/components/team/EmployeeRosterWidget';
-import { Building2, CreditCard, Users, FileText, Settings, ShieldCheck, Key, Copy, ShoppingCart } from 'lucide-react';
+import { Building2, CreditCard, Users, FileText, Settings, ShieldCheck, Key, Copy, ShoppingCart, PartyPopper, X } from 'lucide-react';
 import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 interface OrganizationInfo {
   id: string;
@@ -34,6 +35,9 @@ const DispensaryManagerDashboard = () => {
   const { isDispensaryManager, isLoading: roleLoading } = useUserRole();
   const { organization, isLoading: orgLoading, refreshOrganization } = useOrganization();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const showWelcome = searchParams.get('welcome') === 'true';
+  const [welcomeDismissed, setWelcomeDismissed] = useState(false);
   const [loading, setLoading] = useState(true);
   const [coordinators, setCoordinators] = useState<any[]>([]);
   const [joinCodes, setJoinCodes] = useState<any[]>([]);
@@ -252,6 +256,32 @@ const DispensaryManagerDashboard = () => {
             ))}
           </CardContent>
         </Card>
+      )}
+
+      {/* Welcome Banner */}
+      {showWelcome && !welcomeDismissed && (
+        <Alert className="bg-green-50 border-green-200 relative">
+          <PartyPopper className="h-5 w-5 text-green-600" />
+          <AlertTitle className="text-green-800 font-semibold">
+            Welcome to ProCann Edu! 🎉
+          </AlertTitle>
+          <AlertDescription className="text-green-700">
+            Your team management dashboard is ready. You can now invite employees, 
+            track their progress, and manage training seats.
+          </AlertDescription>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute top-2 right-2"
+            onClick={() => {
+              setWelcomeDismissed(true);
+              searchParams.delete('welcome');
+              setSearchParams(searchParams);
+            }}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </Alert>
       )}
 
       {/* Main Content Tabs */}

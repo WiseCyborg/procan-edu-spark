@@ -62,7 +62,7 @@ import DemoAccountsSetup from "./pages/DemoAccountsSetup";
 import SystemHealthDashboard from "./pages/SystemHealthDashboard";
 import UnifiedHealthReport from "./pages/UnifiedHealthReport";
 import AcceptInvitation from "./pages/AcceptInvitation";
-import { ManagerOnboarding } from "./components/onboarding/ManagerOnboarding";
+import OnboardingSetup from "./pages/OnboardingSetup";
 import OperationsCommandCenter from "./pages/OperationsCommandCenter";
 
 import { ProtectedCourseAccess } from "./components/ProtectedCourseAccess";
@@ -273,13 +273,11 @@ const App = () => (
                    
                     <Route path="/verify/certificate/:certificateId" element={<SecureCertificateVerification />} />
                     
-                    <Route path="/onboarding/setup-team" element={
-                      <ProtectedRoute>
-                        <OrganizationProvider>
-                          <ManagerOnboarding />
-                        </OrganizationProvider>
-                      </ProtectedRoute>
-                    } />
+                     <Route path="/onboarding/setup-team" element={
+                       <ProtectedRoute>
+                         <OnboardingSetup />
+                       </ProtectedRoute>
+                     } />
                     
                     <Route path="/accept-invitation" element={<AcceptInvitation />} />
                     <Route path="/system-health" element={<SystemHealthDashboard />} />

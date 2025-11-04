@@ -6,10 +6,12 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useOrganization } from '@/hooks/useOrganization';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, User, MessageSquare, BookOpen, Award, BarChart3 } from 'lucide-react';
+import { LogOut, User, MessageSquare, BookOpen, Award, BarChart3, Users, Mail, Building2, CreditCard, ShoppingCart } from 'lucide-react';
 import { CommunicationHub } from '@/components/communication/CommunicationHub';
 import { IntelligentNavigation } from '@/components/navigation/IntelligentNavigation';
+import { PurchaseSeatsDialog } from '@/components/team/PurchaseSeatsDialog';
 
 interface HeaderProps {
   role?: string;
@@ -17,9 +19,11 @@ interface HeaderProps {
 
 const Header = ({ role: headerRole }: HeaderProps = {}) => {
   const { user, signOut } = useAuth();
-  const { isDispensaryManager, isAdmin, roles } = useUserRole();
+  const { isDispensaryManager, isTrainingCoordinator, isAdmin, roles } = useUserRole();
+  const { organization } = useOrganization();
   const navigate = useNavigate();
   const [showCommunicationHub, setShowCommunicationHub] = useState(false);
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
@@ -78,6 +82,31 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
           {user && (
             <div className="flex items-center space-x-4">
                 <IntelligentNavigation />
+                
+                {/* Manager Quick Actions */}
+                {(isDispensaryManager || isTrainingCoordinator) && (
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate('/dispensary-manager-dashboard?tab=employees')}
+                      className="hidden md:flex items-center space-x-1"
+                    >
+                      <Users className="w-4 h-4" />
+                      <span>My Team</span>
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate('/dispensary-manager-dashboard?tab=invite')}
+                      className="hidden lg:flex items-center space-x-1"
+                    >
+                      <Mail className="w-4 h-4" />
+                      <span>Invite</span>
+                    </Button>
+                  </div>
+                )}
                
                {/* Communication Hub Button */}
                <Dialog open={showCommunicationHub} onOpenChange={setShowCommunicationHub}>
@@ -130,12 +159,39 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                        <Award className="w-4 h-4 mr-2" />
                        My Certificates
                      </DropdownMenuItem>
-                     {(isDispensaryManager || isAdmin) && (
-                       <DropdownMenuItem onClick={() => navigate('/dispensary-portal')}>
-                         <BarChart3 className="w-4 h-4 mr-2" />
-                         Dispensary Portal
-                       </DropdownMenuItem>
+                     
+                     {isDispensaryManager && (
+                       <>
+                         <DropdownMenuSeparator />
+                         <DropdownMenuItem onClick={() => navigate('/dispensary-manager-dashboard')}>
+                           <Building2 className="w-4 h-4 mr-2" />
+                           Team Dashboard
+                         </DropdownMenuItem>
+                         <DropdownMenuItem onClick={() => navigate('/dispensary-manager-dashboard?tab=employees')}>
+                           <Users className="w-4 h-4 mr-2" />
+                           View All Employees
+                         </DropdownMenuItem>
+                         <DropdownMenuItem onClick={() => navigate('/dispensary-manager-dashboard?tab=seats')}>
+                           <CreditCard className="w-4 h-4 mr-2" />
+                           Manage Seats
+                         </DropdownMenuItem>
+                         <DropdownMenuItem onClick={() => setShowPurchaseModal(true)}>
+                           <ShoppingCart className="w-4 h-4 mr-2" />
+                           Purchase Seats
+                         </DropdownMenuItem>
+                       </>
                      )}
+                     
+                     {isTrainingCoordinator && !isDispensaryManager && (
+                       <>
+                         <DropdownMenuSeparator />
+                         <DropdownMenuItem onClick={() => navigate('/training-coordinator-dashboard')}>
+                           <BarChart3 className="w-4 h-4 mr-2" />
+                           Coordinator Dashboard
+                         </DropdownMenuItem>
+                       </>
+                     )}
+                     
                      <DropdownMenuSeparator />
                      <DropdownMenuItem onClick={handleSignOut}>
                        <LogOut className="w-4 h-4 mr-2" />
@@ -148,6 +204,15 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
           )}
         </div>
       </div>
+      
+      {/* Purchase Seats Modal */}
+      {showPurchaseModal && organization && (
+        <PurchaseSeatsDialog
+          open={showPurchaseModal}
+          onOpenChange={setShowPurchaseModal}
+          organizationId={organization.id}
+        />
+      )}
     </header>
   );
 };
