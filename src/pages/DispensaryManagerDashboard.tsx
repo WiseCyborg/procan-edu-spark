@@ -10,7 +10,9 @@ import { SeatManagementWidget } from '@/components/team/SeatManagementWidget';
 import { CompletionAnalyticsWidget } from '@/components/team/CompletionAnalyticsWidget';
 import { SeatAssignmentManager } from '@/components/team/SeatAssignmentManager';
 import { EmployeeInvitationForm } from '@/components/team/EmployeeInvitationForm';
-import { Building2, CreditCard, Users, FileText, Settings, ShieldCheck, Key, Copy } from 'lucide-react';
+import { SeatRequestManager } from '@/components/team/SeatRequestManager';
+import { PurchaseSeatsDialog } from '@/components/team/PurchaseSeatsDialog';
+import { Building2, CreditCard, Users, FileText, Settings, ShieldCheck, Key, Copy, ShoppingCart } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 
@@ -34,6 +36,7 @@ const DispensaryManagerDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [coordinators, setCoordinators] = useState<any[]>([]);
   const [joinCodes, setJoinCodes] = useState<any[]>([]);
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
 
   useEffect(() => {
     if (!roleLoading && !isDispensaryManager) {
@@ -136,10 +139,16 @@ const DispensaryManagerDashboard = () => {
           <h1 className="text-3xl font-bold text-foreground">Dispensary Manager Portal</h1>
           <p className="text-muted-foreground">Manage your organization and training programs</p>
         </div>
-        <Badge variant="outline" className="text-lg px-4 py-2">
-          <Building2 className="w-4 h-4 mr-2" />
-          {organization.dispensary_number}
-        </Badge>
+        <div className="flex gap-2 items-center">
+          <Badge variant="outline" className="text-lg px-4 py-2">
+            <Building2 className="w-4 h-4 mr-2" />
+            {organization.dispensary_number}
+          </Badge>
+          <Button size="lg" onClick={() => setShowPurchaseModal(true)}>
+            <ShoppingCart className="mr-2 h-4 w-4" />
+            Buy More Seats
+          </Button>
+        </div>
       </div>
 
       {/* Organization Overview */}
@@ -249,6 +258,7 @@ const DispensaryManagerDashboard = () => {
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="seats">Seat Management</TabsTrigger>
+          <TabsTrigger value="seat-requests">Seat Requests</TabsTrigger>
           <TabsTrigger value="invite">Invite Employees</TabsTrigger>
           <TabsTrigger value="coordinators">Team Management</TabsTrigger>
           <TabsTrigger value="compliance">Compliance Reports</TabsTrigger>
@@ -264,6 +274,18 @@ const DispensaryManagerDashboard = () => {
         
         <TabsContent value="seats" className="space-y-4">
           <SeatAssignmentManager organizationId={organization.id} />
+        </TabsContent>
+
+        <TabsContent value="seat-requests" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Pending Seat Requests</CardTitle>
+              <CardDescription>Review and approve seat requests from training coordinators</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <SeatRequestManager organizationId={organization.id} />
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="invite" className="space-y-4">
@@ -363,6 +385,13 @@ const DispensaryManagerDashboard = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <PurchaseSeatsDialog
+        organizationId={organization.id}
+        open={showPurchaseModal}
+        onOpenChange={setShowPurchaseModal}
+        onPurchaseComplete={refreshOrganization}
+      />
     </div>
   );
 };

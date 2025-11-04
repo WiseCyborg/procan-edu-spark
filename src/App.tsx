@@ -56,6 +56,7 @@ import EmployersPage from "./pages/EmployersPage";
 import ImpactDashboardPage from "./pages/ImpactDashboardPage";
 import AccessibilityPage from "./pages/AccessibilityPage";
 import OwnersIntelligence from "./pages/OwnersIntelligence";
+import CompetitiveIntelligence from "./pages/CompetitiveIntelligence";
 import { ProfileOnboardingWizard } from "./components/onboarding/ProfileOnboardingWizard";
 import DemoAccountsSetup from "./pages/DemoAccountsSetup";
 import SystemHealthDashboard from "./pages/SystemHealthDashboard";
@@ -201,11 +202,7 @@ const App = () => (
                     </ProtectedRoute>
                   } />
                   
-                   <Route path="/dispensary-portal" element={
-                     <ProtectedRoute>
-                       <EnhancedDispensaryPortal />
-                     </ProtectedRoute>
-                   } />
+                   <Route path="/dispensary-portal" element={<Navigate to="/dispensary-manager-dashboard" replace />} />
                    
                    <Route path="/purchase-seats" element={
                      <ProtectedRoute>
@@ -295,6 +292,12 @@ const App = () => (
                    <Route path="/admin/intelligence" element={
                      <ProtectedRoute>
                        <OwnersIntelligence />
+                     </ProtectedRoute>
+                   } />
+                   
+                   <Route path="/admin/competitive-intelligence" element={
+                     <ProtectedRoute>
+                       <CompetitiveIntelligence />
                      </ProtectedRoute>
                    } />
                    
