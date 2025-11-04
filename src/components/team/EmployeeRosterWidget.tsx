@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { 
   Users, Search, Calendar, Mail, Download, 
-  CheckCircle, AlertCircle, Clock, Loader2, Filter 
+  CheckCircle, AlertCircle, Clock, Loader2, Filter,
+  User, Send, Award, MoreVertical
 } from 'lucide-react';
 import {
   Table,
@@ -17,6 +18,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
@@ -27,6 +35,11 @@ interface EmployeeRosterWidgetProps {
 export const EmployeeRosterWidget = ({ organizationId }: EmployeeRosterWidgetProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
+  const [showProfileDialog, setShowProfileDialog] = useState(false);
+  const [showDeadlineDialog, setShowDeadlineDialog] = useState(false);
+  const [selectedDeadline, setSelectedDeadline] = useState<Date | undefined>(undefined);
+  const [isSendingReminder, setIsSendingReminder] = useState(false);
 
   const { data: employees, isLoading, refetch } = useQuery({
     queryKey: ['organization-employees', organizationId],
@@ -96,6 +109,69 @@ export const EmployeeRosterWidget = ({ organizationId }: EmployeeRosterWidgetPro
     a.click();
     
     toast.success('Employee roster exported');
+  };
+
+  const handleViewProfile = (employee: any) => {
+    setSelectedEmployee(employee);
+    setShowProfileDialog(true);
+  };
+
+  const handleSendReminder = async (employee: any) => {
+    setIsSendingReminder(true);
+    try {
+      const { error } = await supabase.functions.invoke('send-deadline-reminders', {
+        body: { 
+          userIds: [employee.user_id],
+          organizationId 
+        }
+      });
+
+      if (error) throw error;
+      
+      toast.success(`Reminder sent to ${employee.first_name} ${employee.last_name}`);
+    } catch (error: any) {
+      console.error('Error sending reminder:', error);
+      toast.error('Failed to send reminder');
+    } finally {
+      setIsSendingReminder(false);
+    }
+  };
+
+  const handleSetDeadline = (employee: any) => {
+    setSelectedEmployee(employee);
+    setSelectedDeadline(employee.training_deadline ? new Date(employee.training_deadline) : undefined);
+    setShowDeadlineDialog(true);
+  };
+
+  const handleSaveDeadline = async () => {
+    if (!selectedEmployee || !selectedDeadline) return;
+
+    try {
+      const { error } = await supabase
+        .from('enrollment_deadlines')
+        .upsert({
+          user_id: selectedEmployee.user_id,
+          deadline: selectedDeadline.toISOString(),
+          updated_at: new Date().toISOString()
+        });
+
+      if (error) throw error;
+
+      toast.success('Deadline updated successfully');
+      setShowDeadlineDialog(false);
+      refetch();
+    } catch (error: any) {
+      console.error('Error setting deadline:', error);
+      toast.error('Failed to set deadline');
+    }
+  };
+
+  const handleViewCertificate = (employee: any) => {
+    if (employee.certificate_url) {
+      window.open(employee.certificate_url, '_blank');
+    } else {
+      toast.info('No certificate available yet');
+    }
   };
 
   const getStatusBadge = (employee: any) => {
@@ -216,12 +292,13 @@ export const EmployeeRosterWidget = ({ organizationId }: EmployeeRosterWidgetPro
                 <TableHead>Status</TableHead>
                 <TableHead>Deadline</TableHead>
                 <TableHead>Last Login</TableHead>
+                <TableHead className="w-[100px]">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredEmployees?.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                     {searchTerm || statusFilter !== 'all' 
                       ? 'No employees match your filters' 
                       : 'No employees found'}
@@ -277,6 +354,53 @@ export const EmployeeRosterWidget = ({ organizationId }: EmployeeRosterWidgetPro
                         <span className="text-xs text-muted-foreground">Never</span>
                       )}
                     </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => handleViewProfile(employee)}
+                          title="View Profile"
+                        >
+                          <User className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => handleSendReminder(employee)}
+                          disabled={isSendingReminder}
+                          title="Send Reminder"
+                        >
+                          {isSendingReminder ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Send className="h-4 w-4" />
+                          )}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => handleSetDeadline(employee)}
+                          title="Set Deadline"
+                        >
+                          <Calendar className="h-4 w-4" />
+                        </Button>
+                        {employee.certificate_status === 'valid' && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => handleViewCertificate(employee)}
+                            title="View Certificate"
+                          >
+                            <Award className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
                   </TableRow>
                 ))
               )}
@@ -284,6 +408,118 @@ export const EmployeeRosterWidget = ({ organizationId }: EmployeeRosterWidgetPro
           </Table>
         </div>
       </CardContent>
+
+      {/* Profile Dialog */}
+      <Dialog open={showProfileDialog} onOpenChange={setShowProfileDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Employee Profile</DialogTitle>
+            <DialogDescription>
+              Detailed information about {selectedEmployee?.first_name} {selectedEmployee?.last_name}
+            </DialogDescription>
+          </DialogHeader>
+          {selectedEmployee && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Full Name</label>
+                  <p className="text-sm mt-1">{selectedEmployee.first_name} {selectedEmployee.last_name}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Email</label>
+                  <p className="text-sm mt-1">{selectedEmployee.email}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Role</label>
+                  <p className="text-sm mt-1 capitalize">{selectedEmployee.role?.replace('_', ' ') || 'Student'}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Progress</label>
+                  <p className="text-sm mt-1">{selectedEmployee.progress_percentage || 0}%</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Current Tier</label>
+                  <Badge variant="secondary" className="mt-1">
+                    {selectedEmployee.current_tier || 'Green'}
+                  </Badge>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Certificate Status</label>
+                  <div className="mt-1">
+                    {getStatusBadge(selectedEmployee)}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Training Deadline</label>
+                  <p className="text-sm mt-1">
+                    {selectedEmployee.training_deadline 
+                      ? format(new Date(selectedEmployee.training_deadline), 'MMMM dd, yyyy')
+                      : 'Not set'}
+                  </p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Last Login</label>
+                  <p className="text-sm mt-1">
+                    {selectedEmployee.last_login 
+                      ? format(new Date(selectedEmployee.last_login), 'MMMM dd, yyyy')
+                      : 'Never'}
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => handleSendReminder(selectedEmployee)}
+                  disabled={isSendingReminder}
+                >
+                  <Mail className="h-4 w-4 mr-2" />
+                  Send Reminder
+                </Button>
+                {selectedEmployee.certificate_status === 'valid' && (
+                  <Button
+                    variant="outline"
+                    onClick={() => handleViewCertificate(selectedEmployee)}
+                  >
+                    <Award className="h-4 w-4 mr-2" />
+                    View Certificate
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Deadline Dialog */}
+      <Dialog open={showDeadlineDialog} onOpenChange={setShowDeadlineDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Set Training Deadline</DialogTitle>
+            <DialogDescription>
+              Set a deadline for {selectedEmployee?.first_name} {selectedEmployee?.last_name} to complete training
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">Select Deadline Date</label>
+              <Input
+                type="date"
+                value={selectedDeadline ? format(selectedDeadline, 'yyyy-MM-dd') : ''}
+                onChange={(e) => setSelectedDeadline(e.target.value ? new Date(e.target.value) : undefined)}
+                min={format(new Date(), 'yyyy-MM-dd')}
+              />
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setShowDeadlineDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSaveDeadline} disabled={!selectedDeadline}>
+                Save Deadline
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };
