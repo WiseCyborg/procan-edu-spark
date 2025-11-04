@@ -13,7 +13,7 @@ import { EmployeeInvitationForm } from '@/components/team/EmployeeInvitationForm
 import { SeatRequestManager } from '@/components/team/SeatRequestManager';
 import { PurchaseSeatsDialog } from '@/components/team/PurchaseSeatsDialog';
 import { EmployeeRosterWidget } from '@/components/team/EmployeeRosterWidget';
-import { Building2, CreditCard, Users, FileText, Settings, ShieldCheck, Key, Copy, ShoppingCart, PartyPopper, X, RefreshCw } from 'lucide-react';
+import { Building2, CreditCard, Users, FileText, Settings, ShieldCheck, Key, Copy, ShoppingCart, PartyPopper, X, RefreshCw, Check, Circle } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -138,6 +138,33 @@ const DispensaryManagerDashboard = () => {
       navigate('/onboarding/setup-team?first_login=true');
     }, 1000);
   };
+
+  // Calculate onboarding progress
+  const onboardingSteps = [
+    {
+      title: 'Organization Setup',
+      description: 'Complete your organization profile',
+      completed: !!organization?.name && !!organization?.dispensary_number
+    },
+    {
+      title: 'Training Coordinator Assignment',
+      description: 'Assign at least one training coordinator',
+      completed: coordinators.length > 0
+    },
+    {
+      title: 'Employee Invitations',
+      description: 'Invite your first employees',
+      completed: joinCodes.length > 0 && joinCodes.some(code => code.current_uses > 0)
+    },
+    {
+      title: 'First Seat Purchase',
+      description: 'Purchase training seats for your team',
+      completed: (organization?.course_credits || 0) > 0
+    }
+  ];
+
+  const completedSteps = onboardingSteps.filter(step => step.completed).length;
+  const progressPercentage = (completedSteps / onboardingSteps.length) * 100;
 
   if (loading || roleLoading || orgLoading) {
     return (
@@ -324,6 +351,70 @@ const DispensaryManagerDashboard = () => {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
+          {/* Onboarding Progress Indicator */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span>Setup Progress</span>
+                <span className="text-sm font-normal text-muted-foreground">
+                  {completedSteps} of {onboardingSteps.length} completed
+                </span>
+              </CardTitle>
+              <CardDescription>
+                Complete these steps to get your team started
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="font-medium">Overall Progress</span>
+                  <span className="text-muted-foreground">{Math.round(progressPercentage)}%</span>
+                </div>
+                <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-primary transition-all duration-500"
+                    style={{ width: `${progressPercentage}%` }}
+                  />
+                </div>
+              </div>
+              
+              <div className="grid gap-3 sm:grid-cols-2">
+                {onboardingSteps.map((step, index) => (
+                  <div 
+                    key={index}
+                    className={`flex items-start gap-3 p-3 rounded-lg border transition-colors ${
+                      step.completed 
+                        ? 'bg-primary/5 border-primary/20' 
+                        : 'bg-muted/50 border-border'
+                    }`}
+                  >
+                    <div className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center mt-0.5 ${
+                      step.completed 
+                        ? 'bg-primary text-primary-foreground' 
+                        : 'bg-muted text-muted-foreground'
+                    }`}>
+                      {step.completed ? (
+                        <Check className="w-3 h-3" />
+                      ) : (
+                        <Circle className="w-2 h-2" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-sm font-medium ${
+                        step.completed ? 'text-foreground' : 'text-muted-foreground'
+                      }`}>
+                        {step.title}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {step.description}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
           <div className="grid gap-4 md:grid-cols-2">
             <SeatManagementWidget organizationId={organization.id} />
             <CompletionAnalyticsWidget organizationId={organization.id} />
