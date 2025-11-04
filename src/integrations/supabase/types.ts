@@ -3194,7 +3194,26 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      v_processor_pulse: {
+        Row: {
+          deadletter: number | null
+          failed: number | null
+          last_activity: string | null
+          observed_at: string | null
+          queued: number | null
+        }
+        Relationships: []
+      }
+      v_queue_health: {
+        Row: {
+          ct: number | null
+          job_type: string | null
+          newest_queued_at: string | null
+          oldest_queued_at: string | null
+          status: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       allocate_seat_to_user: {
@@ -3461,6 +3480,10 @@ export type Database = {
           message: string
           success: boolean
         }[]
+      }
+      schedule_if_missing: {
+        Args: { p_jobname: string; p_spec: string; p_sql: string }
+        Returns: undefined
       }
       test_system_health: { Args: never; Returns: Json }
       unlock_tier: {

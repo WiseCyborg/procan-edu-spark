@@ -5,6 +5,7 @@ import { useOperationsMetrics } from '@/hooks/useOperationsMetrics';
 import { EdgeFunctionsStatus } from '@/components/admin/EdgeFunctionsStatus';
 import { IntegrationHealthMonitor } from '@/components/admin/IntegrationHealthMonitor';
 import { SLODashboard } from '@/components/admin/SLODashboard';
+import QueueAndCronPulse from '@/components/admin/QueueAndCronPulse';
 
 export function HealthTab() {
   const { metrics } = useOperationsMetrics();
@@ -17,6 +18,9 @@ export function HealthTab() {
 
   return (
     <div className="space-y-6 py-6">
+      {/* Queue & Cron Monitoring */}
+      <QueueAndCronPulse />
+
       {/* SLO Dashboard */}
       <SLODashboard />
 
