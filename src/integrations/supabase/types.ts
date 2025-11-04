@@ -1062,6 +1062,30 @@ export type Database = {
         }
         Relationships: []
       }
+      enrollment_deadlines: {
+        Row: {
+          created_at: string | null
+          deadline: string
+          id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          deadline: string
+          id?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          deadline?: string
+          id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       exam_attempts: {
         Row: {
           attempt_number: number | null
@@ -3393,6 +3417,21 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      get_organization_certificates: {
+        Args: { org_id: string }
+        Returns: {
+          certificate_id: string
+          certificate_number: string
+          email: string
+          expiry_date: string
+          first_name: string
+          is_revoked: boolean
+          issued_at: string
+          last_name: string
+          user_id: string
+          verification_count: number
+        }[]
+      }
       get_organization_employees: {
         Args: { org_id: string }
         Returns: {
@@ -3530,9 +3569,22 @@ export type Database = {
         Args: { p_jobname: string; p_spec: string; p_sql: string }
         Returns: undefined
       }
+      send_bulk_reminders: {
+        Args: {
+          coordinator_id: string
+          message_template: string
+          user_ids: string[]
+        }
+        Returns: number
+      }
       test_system_health: { Args: never; Returns: Json }
+      unassign_seat: { Args: { seat_id_param: string }; Returns: boolean }
       unlock_tier: {
         Args: { _modules_completed: number; _tier: string; _user_id: string }
+        Returns: boolean
+      }
+      update_enrollment_deadline: {
+        Args: { deadline_date: string; user_id_param: string }
         Returns: boolean
       }
       user_can_view_profile: {

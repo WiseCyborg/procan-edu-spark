@@ -69,7 +69,7 @@ serve(async (req) => {
           <ul>
             ${critical.map((item: any) => `<li>${item.location} - ${item.relevant_regulatory_updates} regulation changes</li>`).join('')}
           </ul>
-          <a href="https://zhmpwczrvitomsxjwpzc.supabase.co/admin/content-review?filter=critical" 
+          <a href="https://www.procannedu.com/admin/content-review?filter=critical" 
              style="display: inline-block; padding: 10px 20px; background: #c00; color: white; text-decoration: none; border-radius: 5px; margin-top: 10px;">
             Review Critical Items
           </a>
@@ -89,7 +89,7 @@ serve(async (req) => {
       </div>
 
       <p style="margin-top: 30px;">
-        <a href="https://zhmpwczrvitomsxjwpzc.supabase.co/admin/content-review" 
+        <a href="https://www.procannedu.com/admin/content-review" 
            style="display: inline-block; padding: 12px 25px; background: #2e7d32; color: white; text-decoration: none; border-radius: 5px;">
           View Full Content Review Dashboard
         </a>

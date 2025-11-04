@@ -8,7 +8,13 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SeatManagementWidget } from '@/components/team/SeatManagementWidget';
 import { CompletionAnalyticsWidget } from '@/components/team/CompletionAnalyticsWidget';
-import { Users, Mail, AlertTriangle, TrendingUp, Bell } from 'lucide-react';
+import { Users, Mail, AlertTriangle, TrendingUp, Bell, Calendar, ShoppingCart, BarChart, CheckCircle, Search } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { CertificateVerificationWidget } from '@/components/team/CertificateVerificationWidget';
+import { DeadlineManager } from '@/components/team/DeadlineManager';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 
@@ -24,6 +30,8 @@ const TrainingCoordinatorDashboard = () => {
   const [atRiskStudents, setAtRiskStudents] = useState<any[]>([]);
   const [inviteEmail, setInviteEmail] = useState('');
   const [sending, setSending] = useState(false);
+  const [certificates, setCertificates] = useState<any[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
 
   useEffect(() => {
     if (!roleLoading && !isTrainingCoordinator) {
@@ -82,11 +90,38 @@ const TrainingCoordinatorDashboard = () => {
         .rpc('get_at_risk_students' as any, { org_id: organizationId });
 
       setAtRiskStudents(atRisk || []);
+
+      // Get certificates
+      const { data: certs } = await supabase
+        .rpc('get_organization_certificates' as any, { org_id: organizationId });
+      setCertificates((certs as any) || []);
     } catch (error: any) {
       console.error('Error fetching coordinator data:', error);
       toast.error('Failed to load data');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSendBulkReminders = async () => {
+    if (selectedUsers.length === 0) {
+      toast.error('Please select employees first');
+      return;
+    }
+    
+    try {
+      const { data, error } = await supabase.rpc('send_bulk_reminders' as any, {
+        user_ids: selectedUsers,
+        message_template: 'Please complete your training by the deadline',
+        coordinator_id: user!.id
+      });
+      
+      if (error) throw error;
+      toast.success(`Sent ${data} reminder emails`);
+      setSelectedUsers([]);
+    } catch (error) {
+      console.error('Error sending bulk reminders:', error);
+      toast.error('Failed to send reminders');
     }
   };
 
@@ -186,6 +221,8 @@ const TrainingCoordinatorDashboard = () => {
         <TabsList>
           <TabsTrigger value="employees">Employee Management</TabsTrigger>
           <TabsTrigger value="analytics">Analytics & Reports</TabsTrigger>
+          <TabsTrigger value="seats">Seat Management</TabsTrigger>
+          <TabsTrigger value="certificates">Certificates</TabsTrigger>
           <TabsTrigger value="invite">Invite Employees</TabsTrigger>
         </TabsList>
 
@@ -238,20 +275,74 @@ const TrainingCoordinatorDashboard = () => {
                 </p>
               ) : (
                 <div className="space-y-2">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        checked={selectedUsers.length === employees.length}
+                        onCheckedChange={(checked) => {
+                          setSelectedUsers(checked ? employees.map(e => e.user_id) : []);
+                        }}
+                      />
+                      <Label>Select All</Label>
+                    </div>
+                    {selectedUsers.length > 0 && (
+                      <Button size="sm" onClick={handleSendBulkReminders}>
+                        <Mail className="w-4 h-4 mr-2" />
+                        Send Reminder ({selectedUsers.length})
+                      </Button>
+                    )}
+                  </div>
+                  
                   {employees.map((emp) => (
                     <div
                       key={emp.user_id}
                       className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent"
                     >
-                      <div>
-                        <p className="font-medium">
-                          {emp.first_name} {emp.last_name}
-                        </p>
-                        <p className="text-sm text-muted-foreground">{emp.email}</p>
+                      <div className="flex items-center gap-3 flex-1">
+                        <Checkbox
+                          checked={selectedUsers.includes(emp.user_id)}
+                          onCheckedChange={(checked) => {
+                            setSelectedUsers(prev =>
+                              checked
+                                ? [...prev, emp.user_id]
+                                : prev.filter(id => id !== emp.user_id)
+                            );
+                          }}
+                        />
+                        <div className="flex-1">
+                          <p className="font-medium">
+                            {emp.first_name} {emp.last_name}
+                          </p>
+                          <p className="text-sm text-muted-foreground">{emp.email}</p>
+                          <div className="flex items-center gap-4 mt-1">
+                            <span className="text-xs text-muted-foreground">
+                              Progress: {emp.progress_percentage}%
+                            </span>
+                            <Badge variant={emp.current_tier === 'red' ? 'destructive' : 'default'}>
+                              {emp.current_tier} tier
+                            </Badge>
+                          </div>
+                        </div>
                       </div>
-                      <Button size="sm" variant="ghost">
-                        View Progress
-                      </Button>
+                      <div className="flex gap-2">
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button size="sm" variant="outline">
+                              <Calendar className="h-4 w-4 mr-1" />
+                              Set Deadline
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Set Training Deadline</DialogTitle>
+                            </DialogHeader>
+                            <DeadlineManager userId={emp.user_id} currentDeadline={emp.deadline} />
+                          </DialogContent>
+                        </Dialog>
+                        <Button size="sm" variant="ghost" onClick={() => navigate(`/profile/${emp.user_id}`)}>
+                          View Details
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -269,6 +360,53 @@ const TrainingCoordinatorDashboard = () => {
               </>
             )}
           </div>
+        </TabsContent>
+
+        <TabsContent value="seats" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Training Seat Management</CardTitle>
+              <CardDescription>
+                Monitor and manage training seat allocations for your organization
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {organizationId && <SeatManagementWidget organizationId={organizationId} />}
+              
+              <div className="mt-6 space-y-4">
+                <h3 className="font-semibold">Available Actions</h3>
+                <div className="grid gap-2">
+                  <Button variant="outline" onClick={() => {
+                    toast.info('Contact your manager to purchase additional training seats');
+                  }}>
+                    <ShoppingCart className="w-4 h-4 mr-2" />
+                    Request More Seats
+                  </Button>
+                  
+                  <Button variant="outline" onClick={() => {
+                    navigate('/team-management');
+                  }}>
+                    <BarChart className="w-4 h-4 mr-2" />
+                    View Utilization Report
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="certificates" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Employee Certificates</CardTitle>
+              <CardDescription>
+                View and verify employee training certificates
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {organizationId && <CertificateVerificationWidget organizationId={organizationId} />}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="invite" className="space-y-4">

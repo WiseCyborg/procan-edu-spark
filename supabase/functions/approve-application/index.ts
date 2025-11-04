@@ -89,7 +89,7 @@ serve(async (req) => {
     console.log('[APPROVE-APPLICATION] Admin verified:', user.email);
 
     // Parse request body
-    const { application_id, credits = 10, idempotency_key } = await req.json();
+    const { application_id, idempotency_key } = await req.json();
 
     if (!application_id) {
       return new Response(
@@ -121,6 +121,35 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
+
+    // Fetch application to get estimated_employees
+    const { data: appData, error: fetchError } = await serviceClient
+      .from('dispensary_applications')
+      .select('estimated_employees, requested_credits')
+      .eq('id', application_id)
+      .single();
+
+    if (fetchError) {
+      console.error('[APPROVE-APPLICATION] Failed to fetch application:', fetchError);
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'FETCH_ERROR',
+          message: 'Could not retrieve application details' 
+        }), 
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Use estimated_employees if available, fallback to requested_credits, then 10
+    const credits = appData?.estimated_employees || appData?.requested_credits || 10;
+
+    console.log('[APPROVE-APPLICATION] Allocating credits:', {
+      application_id,
+      estimated_employees: appData?.estimated_employees,
+      requested_credits: appData?.requested_credits,
+      final_credits: credits
+    });
 
     // Check for existing request (idempotency)
     const { data: existingRequest } = await serviceClient
