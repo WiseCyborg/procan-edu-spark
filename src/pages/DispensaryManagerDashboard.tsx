@@ -12,6 +12,7 @@ import { SeatAssignmentManager } from '@/components/team/SeatAssignmentManager';
 import { EmployeeInvitationForm } from '@/components/team/EmployeeInvitationForm';
 import { SeatRequestManager } from '@/components/team/SeatRequestManager';
 import { PurchaseSeatsDialog } from '@/components/team/PurchaseSeatsDialog';
+import { EmployeeRosterWidget } from '@/components/team/EmployeeRosterWidget';
 import { Building2, CreditCard, Users, FileText, Settings, ShieldCheck, Key, Copy, ShoppingCart } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
@@ -257,6 +258,10 @@ const DispensaryManagerDashboard = () => {
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="employees">
+            <Users className="w-4 h-4 mr-2" />
+            Employees
+          </TabsTrigger>
           <TabsTrigger value="seats">Seat Management</TabsTrigger>
           <TabsTrigger value="seat-requests">Seat Requests</TabsTrigger>
           <TabsTrigger value="invite">Invite Employees</TabsTrigger>
@@ -270,6 +275,10 @@ const DispensaryManagerDashboard = () => {
             <SeatManagementWidget organizationId={organization.id} />
             <CompletionAnalyticsWidget organizationId={organization.id} />
           </div>
+        </TabsContent>
+
+        <TabsContent value="employees" className="space-y-4">
+          <EmployeeRosterWidget organizationId={organization.id} />
         </TabsContent>
         
         <TabsContent value="seats" className="space-y-4">
