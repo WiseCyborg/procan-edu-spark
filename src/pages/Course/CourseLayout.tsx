@@ -14,9 +14,17 @@ import { CoursePaymentGate } from '@/components/CoursePaymentGate';
 import { ProtectedCourseAccess } from '@/components/ProtectedCourseAccess';
 import { EmployeeAccessMessage } from '@/components/EmployeeAccessMessage';
 import { Breadcrumbs } from '@/components/navigation/Breadcrumbs';
+import { supabase } from '@/integrations/supabase/client';
 
-const TOTAL_MODULES = 18; // Main course modules (not including Module 0)
+const TOTAL_MODULES = 18;
 const COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
+
+interface ModuleData {
+  module_number: number;
+  title: string;
+  description: string | null;
+  comar_reference: string | null;
+}
 
 const CourseLayout: React.FC = () => {
   const { user } = useAuth();
@@ -29,6 +37,7 @@ const CourseLayout: React.FC = () => {
     currency: 'usd',
     payment_required: true
   });
+  const [modules, setModules] = useState<ModuleData[]>([]);
 
   const { hasPaid, isLoading: paymentLoading } = usePaymentStatus(COURSE_ID);
   const { hasAccess: hasOrgAccess, isLoading: orgLoading, organizationName } = useOrganizationAccess(user?.id);
@@ -40,6 +49,23 @@ const CourseLayout: React.FC = () => {
     migrateFromLocalStorage,
     isLoading
   } = useUserProgress(COURSE_ID);
+
+  useEffect(() => {
+    const fetchModules = async () => {
+      const { data, error } = await supabase
+        .from('course_modules')
+        .select('module_number, title, description, comar_reference')
+        .eq('course_id', COURSE_ID)
+        .eq('is_active', true)
+        .order('module_number');
+
+      if (data && !error) {
+        setModules(data);
+      }
+    };
+
+    fetchModules();
+  }, []);
 
   // Determine user's access type
   const accessType = useMemo(() => {
@@ -63,19 +89,6 @@ const CourseLayout: React.FC = () => {
   };
 
   const isExamEnabled = getCompletedModulesCount() === TOTAL_MODULES;
-
-  const moduleList = [
-    {
-      id: 'part0',
-      title: 'Module 0: Welcome & Orientation',
-      description: 'Introduction to MCA training program and course structure'
-    },
-    ...Array.from({ length: TOTAL_MODULES }, (_, i) => ({
-      id: `part${i + 1}`,
-      title: `Part ${i + 1}`,
-      description: `Module ${i + 1} content`
-    }))
-  ];
 
   // Show loading state
   if (isLoading || paymentLoading || rolesLoading || orgLoading) {
@@ -137,30 +150,43 @@ const CourseLayout: React.FC = () => {
       </Card>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {moduleList.map((module) => (
-          <Card key={module.id} className="hover:shadow-md transition-shadow">
-            <CardContent className="p-4">
-              <Link 
-                to={`/course/${module.id}`} 
-                className="block"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center space-x-2">
-                    <BookOpen className="w-5 h-5 text-primary" />
-                    <span className="font-medium">{module.title}</span>
-                    {isModuleCompleted(module.id) && (
-                      <CheckCircle className="w-5 h-5 text-green-600" />
-                    )}
+        {modules.map((module) => {
+          const moduleId = `part${module.module_number}`;
+          const tierColor = module.module_number <= 6 ? 'text-green-600' : 
+                           module.module_number <= 12 ? 'text-yellow-600' : 
+                           'text-red-600';
+          
+          return (
+            <Card key={moduleId} className="hover:shadow-md transition-shadow">
+              <CardContent className="p-4">
+                <Link 
+                  to={`/course/${moduleId}`} 
+                  className="block"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center space-x-2">
+                      <BookOpen className={`w-5 h-5 ${tierColor}`} />
+                      <span className="font-medium">Module {module.module_number}</span>
+                      {isModuleCompleted(moduleId) && (
+                        <CheckCircle className="w-5 h-5 text-green-600" />
+                      )}
+                    </div>
+                    <Badge variant={isModuleCompleted(moduleId) ? "default" : "secondary"}>
+                      {isModuleCompleted(moduleId) ? 'Completed' : 'Available'}
+                    </Badge>
                   </div>
-                  <Badge variant={isModuleCompleted(module.id) ? "default" : "secondary"}>
-                    {isModuleCompleted(module.id) ? 'Completed' : 'Available'}
-                  </Badge>
-                </div>
-                <p className="text-sm text-muted-foreground">{module.description}</p>
-              </Link>
-            </CardContent>
-          </Card>
-        ))}
+                  <h3 className="font-semibold text-sm mb-1">{module.title}</h3>
+                  <p className="text-xs text-muted-foreground mb-2">{module.description}</p>
+                  {module.comar_reference && (
+                    <Badge variant="outline" className="text-xs">
+                      {module.comar_reference}
+                    </Badge>
+                  )}
+                </Link>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       <Card className={`${isExamEnabled ? 'border-primary' : 'border-muted'}`}>

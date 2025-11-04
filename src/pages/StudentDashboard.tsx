@@ -18,6 +18,12 @@ import { supabase } from '@/integrations/supabase/client';
 const COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
 const TOTAL_MODULES = 18;
 
+interface ModuleData {
+  module_number: number;
+  title: string;
+  description: string;
+}
+
 const StudentDashboard = () => {
   const { user } = useAuth();
   const { isStudent } = useUserRole();
@@ -27,6 +33,7 @@ const StudentDashboard = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [organizationInfo, setOrganizationInfo] = useState<{name: string, coordinator: string} | null>(null);
+  const [modules, setModules] = useState<ModuleData[]>([]);
 
   useEffect(() => {
     if (!progressLoading) {
@@ -38,20 +45,32 @@ const StudentDashboard = () => {
     if (!user) return;
     
     try {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('organization_id, organizations(name)')
-        .eq('user_id', user.id)
-        .single();
+      const [profileResponse, modulesResponse] = await Promise.all([
+        supabase
+          .from('profiles')
+          .select('organization_id, organizations(name)')
+          .eq('user_id', user.id)
+          .single(),
+        supabase
+          .from('course_modules')
+          .select('module_number, title, description')
+          .eq('course_id', COURSE_ID)
+          .eq('is_active', true)
+          .order('module_number')
+      ]);
 
-      if (profile?.organization_id) {
+      if (profileResponse.data?.organization_id) {
         setOrganizationInfo({
-          name: (profile.organizations as any)?.name || 'Your Organization',
+          name: (profileResponse.data.organizations as any)?.name || 'Your Organization',
           coordinator: 'Training Coordinator'
         });
       }
+
+      if (modulesResponse.data) {
+        setModules(modulesResponse.data);
+      }
     } catch (error) {
-      console.error('Error fetching organization:', error);
+      console.error('Error fetching data:', error);
     } finally {
       setIsLoading(false);
     }
@@ -81,6 +100,7 @@ const StudentDashboard = () => {
   const nextTier = getNextTier();
   const modulesForNextTier = getModulesNeededForNextTier();
   const nextModuleNumber = completedModules + 1;
+  const nextModule = modules.find(m => m.module_number === nextModuleNumber);
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -179,31 +199,19 @@ const StudentDashboard = () => {
         <CardContent>
           {completedModules < TOTAL_MODULES ? (
             <div className="flex items-center justify-between p-4 border rounded-lg bg-accent/50">
-              <div>
+              <div className="flex-1">
                 <h3 className="font-semibold">
                   {nextModuleNumber <= 6 ? 'Green Tier' : nextModuleNumber <= 12 ? 'Yellow Tier' : 'Red Tier'} - 
                   Module {nextModuleNumber}
                 </h3>
-                <p className="text-sm text-muted-foreground">
-                  {nextModuleNumber === 1 && 'Welcome & Course Orientation'}
-                  {nextModuleNumber === 2 && 'Legal and Regulatory Foundations'}
-                  {nextModuleNumber === 3 && 'Operational and Safety Procedures'}
-                  {nextModuleNumber === 4 && 'Cannabis Products & Forms'}
-                  {nextModuleNumber === 5 && 'Customer Service Excellence'}
-                  {nextModuleNumber === 6 && 'Inventory Management & Security'}
-                  {nextModuleNumber === 7 && 'Cannabis Pharmacology and Therapeutics'}
-                  {nextModuleNumber === 8 && 'Medical Cannabis Fundamentals'}
-                  {nextModuleNumber === 9 && 'Dosing & Product Selection'}
-                  {nextModuleNumber === 10 && 'Effects & Adverse Reactions'}
-                  {nextModuleNumber === 11 && 'Record Keeping & Documentation'}
-                  {nextModuleNumber === 12 && 'Quality Assurance & Testing'}
-                  {nextModuleNumber === 13 && 'Packaging & Labeling Compliance'}
-                  {nextModuleNumber === 14 && 'Compliance Inspections & Audits'}
-                  {nextModuleNumber === 15 && 'Emergency Procedures & Incident Response'}
-                  {nextModuleNumber === 16 && 'Substance Use and Customer Safety'}
-                  {nextModuleNumber === 17 && 'Ethics & Professional Conduct'}
-                  {nextModuleNumber === 18 && 'Responsible Vendor Training Program'}
+                <p className="text-sm font-medium text-foreground mt-1">
+                  {nextModule?.title || 'Loading...'}
                 </p>
+                {nextModule?.description && (
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {nextModule.description}
+                  </p>
+                )}
               </div>
               <Button onClick={() => navigate('/course')}>Continue</Button>
             </div>
