@@ -9,6 +9,8 @@ import { AccessibilityToolbar } from '@/components/MobileOptimization';
 import { TrustStats, ComplianceBadges, TestimonialCarousel } from '@/components/TrustIndicators';
 import { HoverCallout } from '@/components/ui/hover-callout';
 import { WelcomeVideoSection } from '@/components/WelcomeVideoSection';
+import { LiveCOMARBadge } from '@/components/LiveCOMARBadge';
+import { ROIHighlightCard } from '@/components/ROIHighlightCard';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -36,16 +38,21 @@ const Index = () => {
           {/* Compliance Badges */}
           <ComplianceBadges />
 
+          {/* Live COMAR Badge */}
+          <LiveCOMARBadge />
+
           {/* Main Logo and Tagline */}
           <div className="text-center mb-10">
             <h1 className="text-5xl md:text-7xl font-bold text-white mb-4 leading-tight">
               ProCann Edu
             </h1>
-            <h2 className="text-2xl md:text-3xl text-white/95 font-medium max-w-3xl mx-auto leading-relaxed">
-              Maryland's Premier Responsible Vendor Training Program
+            <h2 className="text-2xl md:text-3xl gradient-text font-medium max-w-3xl mx-auto leading-relaxed">
+              Maryland's ONLY AI-Powered, COMAR-Embedded RVT Training Platform
             </h2>
-            <p className="text-xl text-white/90 mt-2">
-              Official Training Partner of Maryland Dispensaries
+            <p className="text-xl text-white/90 mt-4">
+              Save $12K+ annually while keeping your team MCA-compliant.
+              <br className="hidden md:block" />
+              <strong>Built by Marylanders, for Maryland dispensaries.</strong>
             </p>
           </div>
 
@@ -54,6 +61,9 @@ const Index = () => {
             videoUrl="https://vimeo.com/1096146284/e90b8e5dfc"
             className="mb-12"
           />
+
+          {/* ROI Highlight Card */}
+          <ROIHighlightCard />
 
           {/* Humanized Value Proposition */}
           <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-8 mb-10 max-w-3xl mx-auto">
@@ -84,8 +94,8 @@ const Index = () => {
             >
               <Building2 className="h-5 w-5 mr-2" />
               <div className="text-left">
-                <div>Dispensary Manager</div>
-                <div className="text-xs font-normal opacity-80">Submit application</div>
+                <div>Get Your Free Compliance Audit</div>
+                <div className="text-xs font-normal opacity-80">See how we save you $12K+</div>
               </div>
             </Button>
 
@@ -97,8 +107,8 @@ const Index = () => {
             >
               <UserCog className="h-5 w-5 mr-2" />
               <div className="text-left">
-                <div>Training Coordinator</div>
-                <div className="text-xs font-normal opacity-90">Manage training</div>
+                <div>Track Your Team's ROI</div>
+                <div className="text-xs font-normal opacity-90">Predictive analytics dashboard</div>
               </div>
             </Button>
 
@@ -110,8 +120,8 @@ const Index = () => {
             >
               <Award className="h-5 w-5 mr-2" />
               <div className="text-left">
-                <div>I'm a Student</div>
-                <div className="text-xs font-normal opacity-90">Start certification</div>
+                <div>Start My Certification</div>
+                <div className="text-xs font-normal opacity-90">Complete in 4-6 hours</div>
               </div>
             </Button>
           </div>

@@ -36,33 +36,47 @@ const AnimatedCounter: React.FC<CounterProps> = ({ end, duration = 2000, suffix 
 
 export const TrustStats = () => {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
       <Card className="p-4 text-center bg-white/10 backdrop-blur-sm border-white/20">
         <div className="text-2xl font-bold text-white">
           <AnimatedCounter end={2500} suffix="+" />
         </div>
-        <div className="text-sm text-white/80">Agents Capacity</div>
+        <div className="text-sm text-white/80">Agents Trained</div>
       </Card>
       
       <Card className="p-4 text-center bg-white/10 backdrop-blur-sm border-white/20">
         <div className="text-2xl font-bold text-white">
           <AnimatedCounter end={150} suffix="+" />
         </div>
-        <div className="text-sm text-white/80">Dispensary Reach</div>
+        <div className="text-sm text-white/80">Dispensaries</div>
       </Card>
       
       <Card className="p-4 text-center bg-white/10 backdrop-blur-sm border-white/20">
         <div className="text-2xl font-bold text-white">
-          <AnimatedCounter end={18} suffix="" />
+          <AnimatedCounter end={87} suffix="%" />
         </div>
-        <div className="text-sm text-white/80">Training Modules</div>
+        <div className="text-sm text-white/80">Pass Rate</div>
+      </Card>
+
+      <Card className="p-4 text-center bg-white/10 backdrop-blur-sm border-white/20">
+        <div className="text-2xl font-bold text-white">
+          24/24
+        </div>
+        <div className="text-sm text-white/80">MD Counties</div>
       </Card>
       
       <Card className="p-4 text-center bg-white/10 backdrop-blur-sm border-white/20">
         <div className="text-2xl font-bold text-white">
-          100%
+          $<AnimatedCounter end={12} />K+
         </div>
-        <div className="text-sm text-white/80">MD Educators</div>
+        <div className="text-sm text-white/80">Avg Savings</div>
+      </Card>
+
+      <Card className="p-4 text-center bg-white/10 backdrop-blur-sm border-white/20">
+        <div className="text-2xl font-bold text-white">
+          <AnimatedCounter end={18} />
+        </div>
+        <div className="text-sm text-white/80">Modules</div>
       </Card>
     </div>
   );
