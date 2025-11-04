@@ -581,12 +581,15 @@ export type Database = {
       }
       course_modules: {
         Row: {
+          comar_reference: string | null
           content: string | null
           course_id: string
           created_at: string
           description: string | null
+          estimated_minutes: number | null
           id: string
           is_active: boolean | null
+          learning_objectives: Json | null
           module_number: number
           quiz_questions: Json | null
           stoplight_tier: string | null
@@ -595,12 +598,15 @@ export type Database = {
           video_url: string | null
         }
         Insert: {
+          comar_reference?: string | null
           content?: string | null
           course_id: string
           created_at?: string
           description?: string | null
+          estimated_minutes?: number | null
           id?: string
           is_active?: boolean | null
+          learning_objectives?: Json | null
           module_number: number
           quiz_questions?: Json | null
           stoplight_tier?: string | null
@@ -609,12 +615,15 @@ export type Database = {
           video_url?: string | null
         }
         Update: {
+          comar_reference?: string | null
           content?: string | null
           course_id?: string
           created_at?: string
           description?: string | null
+          estimated_minutes?: number | null
           id?: string
           is_active?: boolean | null
+          learning_objectives?: Json | null
           module_number?: number
           quiz_questions?: Json | null
           stoplight_tier?: string | null

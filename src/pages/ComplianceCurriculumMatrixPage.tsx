@@ -7,26 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Download, FileCheck, CheckCircle } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 
-const comarMapping: { [key: number]: { reference: string; requirement: string } } = {
-  0: { reference: "COMAR 14.17.05.02(A)", requirement: "Course Introduction and Overview" },
-  1: { reference: "COMAR 14.17.05.02(A)(1)", requirement: "Cannabis terminology, pharmacology, and effects" },
-  2: { reference: "COMAR 14.17.05.02(A)(2)", requirement: "State laws, licensing requirements, and regulations" },
-  3: { reference: "COMAR 14.17.05.02(A)(3)", requirement: "Responsible vendor obligations and compliance" },
-  4: { reference: "COMAR 14.17.05.02(A)(4)", requirement: "Patient verification and MMCC ID cards" },
-  5: { reference: "COMAR 14.17.05.02(A)(5)", requirement: "Product knowledge and cannabinoid science" },
-  6: { reference: "COMAR 14.17.05.02(A)(6)", requirement: "Safe dispensing practices" },
-  7: { reference: "COMAR 14.17.05.02(A)(7)", requirement: "Patient education and communication" },
-  8: { reference: "COMAR 14.17.05.02(A)(8)", requirement: "Inventory management and tracking" },
-  9: { reference: "COMAR 14.17.05.02(A)(9)", requirement: "Security protocols and requirements" },
-  10: { reference: "COMAR 14.17.05.02(A)(10)", requirement: "Record keeping and documentation" },
-  11: { reference: "COMAR 14.17.05.02(A)(11)", requirement: "Quality assurance and testing standards" },
-  12: { reference: "COMAR 14.17.05.02(A)(12)", requirement: "Preventing diversion and abuse" },
-  13: { reference: "COMAR 14.17.05.02(A)(13)", requirement: "Emergency procedures and incident response" },
-  14: { reference: "COMAR 14.17.05.02(A)(14)", requirement: "Workplace safety and employee training" },
-  15: { reference: "COMAR 14.17.05.02(A)(15)", requirement: "Professional ethics and standards" },
-  16: { reference: "COMAR 14.17.05.02(A)(16)", requirement: "Continuing education requirements" },
-  17: { reference: "COMAR 14.17.05.02(B)", requirement: "Final assessment and certification" }
-};
+// COMAR mapping is now stored in the database - no hardcoded mapping needed
 
 export default function ComplianceCurriculumMatrixPage() {
   const { data: modules, isLoading } = useQuery({
@@ -34,7 +15,7 @@ export default function ComplianceCurriculumMatrixPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('course_modules')
-        .select('*')
+        .select('module_number, title, description, comar_reference, estimated_minutes, updated_at')
         .order('module_number');
       
       if (error) throw error;
@@ -98,7 +79,10 @@ export default function ComplianceCurriculumMatrixPage() {
       <Card>
         <CardHeader>
           <CardTitle>Curriculum Compliance Mapping</CardTitle>
-          <p className="text-sm text-muted-foreground">All 18 modules mapped to COMAR 14.17.05 requirements</p>
+          <p className="text-sm text-muted-foreground">
+            All 18 modules mapped to COMAR 14.17.05 requirements, including Drug-Free Workplace (COMAR 21.11.08.03), 
+            Diversion Prevention, and Standard Operating Procedures
+          </p>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -111,32 +95,33 @@ export default function ComplianceCurriculumMatrixPage() {
                     <th className="text-left py-3 px-4">Module #</th>
                     <th className="text-left py-3 px-4">Module Title</th>
                     <th className="text-left py-3 px-4">COMAR Reference</th>
-                    <th className="text-left py-3 px-4">Requirement</th>
+                    <th className="text-left py-3 px-4">Description</th>
+                    <th className="text-center py-3 px-4">Duration</th>
                     <th className="text-center py-3 px-4">Status</th>
                     <th className="text-left py-3 px-4">Last Updated</th>
                   </tr>
                 </thead>
                 <tbody>
                   {modules?.map((module) => {
-                    const mapping = comarMapping[module.module_number] || { 
-                      reference: "COMAR 14.17.05", 
-                      requirement: "General compliance" 
-                    };
-                    
                     return (
-                      <tr key={module.id} className="border-b hover:bg-muted/50">
+                      <tr key={module.module_number} className="border-b hover:bg-muted/50">
                         <td className="py-3 px-4 font-semibold">{module.module_number}</td>
-                        <td className="py-3 px-4">{module.title}</td>
+                        <td className="py-3 px-4 font-medium">{module.title}</td>
                         <td className="py-3 px-4">
-                          <Badge variant="outline">{mapping.reference}</Badge>
+                          <Badge variant="outline" className="whitespace-nowrap">
+                            {module.comar_reference || 'COMAR 14.17.05'}
+                          </Badge>
                         </td>
-                        <td className="py-3 px-4 text-sm text-muted-foreground">
-                          {mapping.requirement}
+                        <td className="py-3 px-4 text-sm text-muted-foreground max-w-md">
+                          {module.description}
+                        </td>
+                        <td className="py-3 px-4 text-center text-sm">
+                          {module.estimated_minutes} min
                         </td>
                         <td className="py-3 px-4 text-center">
                           <CheckCircle className="h-5 w-5 text-green-600 mx-auto" />
                         </td>
-                        <td className="py-3 px-4 text-sm">
+                        <td className="py-3 px-4 text-sm whitespace-nowrap">
                           {new Date(module.updated_at).toLocaleDateString('en-US', { 
                             year: 'numeric', 
                             month: 'short', 

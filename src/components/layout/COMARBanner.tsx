@@ -16,7 +16,8 @@ export const COMARBanner = () => {
         >
           MCA Responsible Vendor Training
         </a>{' '}
-        standards (COMAR 14.17). Last reviewed: January 2025
+        standards (COMAR 14.17.05). Includes Drug-Free Workplace Policy (COMAR 21.11.08.03), 
+        Diversion Prevention, and Standard Operating Procedures. Last reviewed: January 2025
       </AlertDescription>
     </Alert>
   );
