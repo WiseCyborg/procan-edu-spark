@@ -65,6 +65,7 @@ import AcceptInvitation from "./pages/AcceptInvitation";
 import RoleSelectionDashboard from "./pages/RoleSelectionDashboard";
 import OnboardingSetup from "./pages/OnboardingSetup";
 import OperationsCommandCenter from "./pages/OperationsCommandCenter";
+import ExamAnalyticsPage from "./pages/ExamAnalyticsPage";
 
 import { ProtectedCourseAccess } from "./components/ProtectedCourseAccess";
 
@@ -292,6 +293,12 @@ const App = () => (
                      <Route path="/admin/advanced-analytics" element={
                       <ProtectedRoute>
                         <AdvancedAnalytics />
+                      </ProtectedRoute>
+                    } />
+                    
+                    <Route path="/admin/exam-analytics" element={
+                      <ProtectedRoute>
+                        <ExamAnalyticsPage />
                       </ProtectedRoute>
                     } />
                    <Route path="/admin/intelligence" element={
