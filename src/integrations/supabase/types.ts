@@ -3510,6 +3510,15 @@ export type Database = {
         Returns: string
       }
       record_email_result: { Args: { p_success: boolean }; Returns: undefined }
+      regenerate_manager_token: {
+        Args: { application_id: string }
+        Returns: {
+          expires_at: string
+          message: string
+          new_token: string
+          success: boolean
+        }[]
+      }
       reject_dispensary_application: {
         Args: { application_id: string; rejection_reason: string }
         Returns: {

@@ -27,7 +27,8 @@ import {
   AlertCircle,
   AlertTriangle,
   RefreshCw,
-  Hash
+  Hash,
+  Info
 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { EmailDeliveryStatus } from './EmailDeliveryStatus';
@@ -860,6 +861,17 @@ const DispensaryApplicationManager = () => {
                                 </div>
                               </div>
 
+                              {/* Info Alert */}
+                              <Alert className="bg-blue-50 border-blue-200">
+                                <Info className="h-4 w-4 text-blue-600" />
+                                <AlertDescription className="text-sm text-blue-800">
+                                  <strong>Next Steps:</strong><br/>
+                                  • Manager will receive registration link via email<br/>
+                                  • After registering, they can access their 10 free training seats<br/>
+                                  • Additional seats can be purchased directly from the dispensary portal
+                                </AlertDescription>
+                              </Alert>
+
                               {/* Registration Link */}
                               <div className="p-3 bg-white rounded border border-green-200">
                                 <Label className="text-xs text-muted-foreground">
@@ -1049,14 +1061,6 @@ const DispensaryApplicationManager = () => {
                               >
                                 <RefreshCw className="h-4 w-4 mr-1" />
                                 Regenerate Token & Resend
-                              </Button>
-                              <Button
-                                onClick={() => createOrganizationFromApplication(application)}
-                                disabled={isProcessing}
-                                className="bg-blue-600 hover:bg-blue-700"
-                              >
-                                <CreditCard className="h-4 w-4 mr-1" />
-                                Create Payment Link
                               </Button>
                             </>
                           )}
