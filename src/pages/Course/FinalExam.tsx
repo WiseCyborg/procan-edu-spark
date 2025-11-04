@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { CertificateAchievement } from '@/components/certificates/CertificateAchievement';
 import { CameraUnavailableDialog } from '@/components/exam/CameraUnavailableDialog';
 import { ProtectedCourseAccess } from '@/components/ProtectedCourseAccess';
+import { RemedialRecommendations } from '@/components/exam/RemedialRecommendations';
 
 interface QuizQuestion {
   q: string;
@@ -33,6 +34,17 @@ interface ExamResult {
   }>;
 }
 
+interface TopicScore {
+  section_number: number;
+  section_title: string;
+  comar_section: string;
+  topic_area: string;
+  questions_correct: number;
+  questions_total: number;
+  score_percentage: number;
+  needs_remediation: boolean;
+}
+
 const FinalExam: React.FC = () => {
   const navigate = useNavigate();
   const [userData, setUserData] = useState<UserData>({
@@ -48,6 +60,8 @@ const FinalExam: React.FC = () => {
   const [totalScore, setTotalScore] = useState(0);
   const [submittedSections, setSubmittedSections] = useState<Set<number>>(new Set());
   const [results, setResults] = useState<ExamResult>({});
+  const [topicScores, setTopicScores] = useState<TopicScore[]>([]);
+  const [examAttemptId, setExamAttemptId] = useState<string | null>(null);
   const [sectionTimeLeft, setSectionTimeLeft] = useState(300); // 5 minutes
   const [totalTimeLeft, setTotalTimeLeft] = useState(5400); // 90 minutes
   const [isPaused, setIsPaused] = useState(false);
@@ -160,6 +174,28 @@ const FinalExam: React.FC = () => {
     16: "Emergency Procedures",
     17: "Training Requirements",
     18: "Ethical Standards"
+  };
+
+  // COMAR section mapping for exam blueprint
+  const comarSections: {[key: number]: { comar: string; topic: string }} = {
+    1: { comar: "COMAR 10.62.01", topic: "Legal Framework" },
+    2: { comar: "COMAR 10.62.03", topic: "Operational Compliance" },
+    3: { comar: "COMAR 10.62.04", topic: "Inventory Control" },
+    4: { comar: "COMAR 10.62.05", topic: "Sales & Transactions" },
+    5: { comar: "COMAR 10.62.06", topic: "Workplace Safety" },
+    6: { comar: "COMAR 10.62.07", topic: "Medical Knowledge" },
+    7: { comar: "COMAR 10.62.08", topic: "Documentation" },
+    8: { comar: "COMAR 10.62.09", topic: "Security & Loss Prevention" },
+    9: { comar: "COMAR 10.62.10", topic: "Regulatory Compliance" },
+    10: { comar: "COMAR 10.62.11", topic: "Product Packaging" },
+    11: { comar: "COMAR 10.62.12", topic: "Product Labeling" },
+    12: { comar: "COMAR 10.62.13", topic: "Transport & Distribution" },
+    13: { comar: "COMAR 10.62.14", topic: "Disposal & Waste" },
+    14: { comar: "COMAR 10.62.15", topic: "Quality Assurance" },
+    15: { comar: "COMAR 10.62.16", topic: "Patient Education" },
+    16: { comar: "COMAR 10.62.17", topic: "Emergency Response" },
+    17: { comar: "COMAR 10.62.18", topic: "Agent Training" },
+    18: { comar: "COMAR 10.62.19", topic: "Professional Ethics" }
   };
 
   // Check if all modules are completed before allowing exam access
@@ -503,53 +539,117 @@ const FinalExam: React.FC = () => {
     }
   };
 
-  const showFinalResults = () => {
+  const showFinalResults = async () => {
     if (totalTimerRef.current) clearInterval(totalTimerRef.current);
     if (sectionTimerRef.current) clearInterval(sectionTimerRef.current);
     
-    setExamStage('results');
-  };
-
-  const generateCertificate = async () => {
+    // Calculate topic-level scores
+    const calculatedTopicScores: TopicScore[] = [];
+    
+    for (let section = 1; section <= 18; section++) {
+      const sectionResults = results[section] || [];
+      const questionsCorrect = sectionResults.filter(r => r.isCorrect).length;
+      const questionsTotal = sectionResults.length;
+      const scorePercentage = questionsTotal > 0 ? Math.round((questionsCorrect / questionsTotal) * 100) : 0;
+      
+      calculatedTopicScores.push({
+        section_number: section,
+        section_title: sectionTitles[section],
+        comar_section: comarSections[section].comar,
+        topic_area: comarSections[section].topic,
+        questions_correct: questionsCorrect,
+        questions_total: questionsTotal,
+        score_percentage: scorePercentage,
+        needs_remediation: scorePercentage < 80
+      });
+    }
+    
+    setTopicScores(calculatedTopicScores);
+    
+    // Record exam attempt with topic scores
     try {
-      // First record the exam attempt in the database (Gate 9 & 10 metadata)
+      const { data: authData } = await supabase.auth.getUser();
+      const userId = authData.user?.id;
+      
+      if (!userId) {
+        console.error('User not authenticated');
+        setExamStage('results');
+        return;
+      }
+
       const { data: examData, error: examError } = await supabase
         .from('exam_attempts')
         .insert({
-          user_id: (await supabase.auth.getUser()).data.user?.id,
-          course_id: 'default-course-id', // You might want to get this dynamically
+          user_id: userId,
+          course_id: 'default-course-id',
           total_score: totalScore,
           passing_score: 80,
-          is_passed: true,
+          is_passed: false, // Will update if they pass
           time_taken: 5400 - totalTimeLeft,
           photo_verification_url: userData.photo,
           ip_address: userData.ip,
           completed_at: new Date().toISOString(),
+          topic_scores: calculatedTopicScores as any,
           metadata: skipPhotoVerification ? {
             photo_verification_skipped: true,
             bypass_reason: bypassReason,
             bypass_timestamp: new Date().toISOString()
-          } : {}
+          } as any : {} as any
         })
         .select()
         .single();
 
       if (examError) {
         console.error('Error recording exam attempt:', examError);
-        toast.error('Failed to record exam attempt');
-        return;
+      } else if (examData) {
+        setExamAttemptId(examData.id);
+        
+        // Store individual topic scores in exam_topic_scores table
+        const topicScoreInserts = calculatedTopicScores.map(ts => ({
+          exam_attempt_id: examData.id,
+          section_number: ts.section_number,
+          comar_section: ts.comar_section,
+          topic_area: ts.topic_area,
+          questions_correct: ts.questions_correct,
+          questions_total: ts.questions_total,
+          score_percentage: ts.score_percentage,
+          needs_remediation: ts.needs_remediation
+        }));
+        
+        await supabase
+          .from('exam_topic_scores')
+          .insert(topicScoreInserts);
+      }
+    } catch (error) {
+      console.error('Error storing topic scores:', error);
+    }
+    
+    setExamStage('results');
+  };
+
+  const generateCertificate = async () => {
+    try {
+      // Update existing exam attempt to mark as passed
+      if (examAttemptId) {
+        await supabase
+          .from('exam_attempts')
+          .update({
+            is_passed: true
+          })
+          .eq('id', examAttemptId);
       }
 
       // Generate certificate using secure edge function
       const { data: certData, error: certError } = await supabase.functions.invoke('generate-certificate', {
         body: {
-          exam_attempt_id: examData.id,
+          exam_attempt_id: examAttemptId,
           user_data: userData,
           exam_results: {
             total_score: totalScore,
             total_questions: Object.values(quizzes).reduce((sum, section) => sum + section.length, 0),
             time_taken: 5400 - totalTimeLeft,
-            passing_score: 80
+            passing_score: 80,
+            topic_scores: topicScores
           }
         }
       });
@@ -558,19 +658,27 @@ const FinalExam: React.FC = () => {
         console.error('Error generating certificate:', certError);
         toast.error('Failed to generate certificate. You can retry from your dashboard.');
         
-        // Update exam_attempts with certificate failure
-        const currentMetadata = (examData.metadata as Record<string, any>) || {};
-        await supabase
-          .from('exam_attempts')
-          .update({
-            metadata: {
-              ...currentMetadata,
-              certificate_generation_failed: true,
-              failure_reason: certError.message,
-              failure_timestamp: new Date().toISOString()
-            } as any
-          })
-          .eq('id', examData.id);
+        if (examAttemptId) {
+          // Update exam_attempts with certificate failure
+          const { data: existingAttempt } = await supabase
+            .from('exam_attempts')
+            .select('metadata')
+            .eq('id', examAttemptId)
+            .single();
+            
+          const currentMetadata = (existingAttempt?.metadata as Record<string, any>) || {};
+          await supabase
+            .from('exam_attempts')
+            .update({
+              metadata: {
+                ...currentMetadata,
+                certificate_generation_failed: true,
+                failure_reason: certError.message,
+                failure_timestamp: new Date().toISOString()
+              } as any
+            })
+            .eq('id', examAttemptId);
+        }
         return;
       }
 
@@ -676,7 +784,7 @@ const FinalExam: React.FC = () => {
     );
   };
 
-  // Render results screen
+  // Render results screen with topic-level scoring
   const renderResults = () => {
     const totalQuestions = Object.values(quizzes).reduce((sum, section) => sum + section.length, 0);
     const percentage = (totalScore / totalQuestions) * 100;
@@ -684,34 +792,65 @@ const FinalExam: React.FC = () => {
     const elapsedTime = 5400 - totalTimeLeft;
     
     return (
-      <div className="bg-white p-6 rounded-lg shadow-md text-center">
-        <h2 className="text-2xl font-bold mb-4">
-          {passed ? 'Congratulations!' : 'Exam Results'}
-        </h2>
+      <div className="space-y-6">
+        {/* Topic-Level Scoring and Remedial Recommendations */}
+        <RemedialRecommendations
+          topicScores={topicScores}
+          overallPassed={passed}
+          overallScore={Math.round(percentage)}
+        />
         
-        <p className="text-xl mb-4">
-          You scored {totalScore}/{totalQuestions} ({percentage.toFixed(2)}%)
-        </p>
-        
-        <p className="mb-6">
-          {passed 
-            ? `You've completed the Responsible Vendor Training! You're part of Maryland's growing community of responsible cannabis professionals. Keep your certificate safe — and your standards even higher.`
-            : 'A minimum score of 80% is required to pass. Please review the materials and try again.'}
-        </p>
-        
-        <p className="mb-4">
-          Total Time: {formatTime(elapsedTime)}
-        </p>
-        
-        {passed ? (
-          <Button size="lg" onClick={generateCertificate}>
-            Generate Certificate
-          </Button>
-        ) : (
-          <Button size="lg" onClick={() => navigate('/course')}>
-            Return to Course
-          </Button>
-        )}
+        {/* Detailed Section Results */}
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h3 className="text-xl font-bold mb-4">Detailed Results by Section</h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            Total Time: {formatTime(elapsedTime)}
+          </p>
+          
+          <div className="space-y-2">
+            {Object.keys(results).map(sectionKey => {
+              const section = parseInt(sectionKey);
+              const sectionResults = results[section];
+              const sectionScore = sectionResults.filter(r => r.isCorrect).length;
+              const sectionTotal = sectionResults.length;
+              const sectionPercentage = Math.round((sectionScore / sectionTotal) * 100);
+              
+              return (
+                <div 
+                  key={section} 
+                  className={`p-3 rounded-lg border ${
+                    sectionPercentage >= 80 
+                      ? 'border-green-500/30 bg-green-500/5' 
+                      : 'border-destructive/30 bg-destructive/5'
+                  }`}
+                >
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-sm">
+                      Section {section}: {sectionTitles[section]}
+                    </span>
+                    <span className={`font-bold ${
+                      sectionPercentage >= 80 ? 'text-green-600' : 'text-destructive'
+                    }`}>
+                      {sectionScore}/{sectionTotal} ({sectionPercentage}%)
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          
+          <div className="mt-6 flex justify-center">
+            {passed ? (
+              <Button size="lg" onClick={generateCertificate}>
+                Generate Certificate
+              </Button>
+            ) : (
+              <Button size="lg" onClick={() => navigate('/course')}>
+                Return to Course
+              </Button>
+            )}
+          </div>
+        </div>
       </div>
     );
   };

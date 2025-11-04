@@ -1115,6 +1115,7 @@ export type Database = {
           photo_verification_url: string | null
           started_at: string | null
           time_taken: number | null
+          topic_scores: Json | null
           total_score: number | null
           user_id: string
         }
@@ -1131,6 +1132,7 @@ export type Database = {
           photo_verification_url?: string | null
           started_at?: string | null
           time_taken?: number | null
+          topic_scores?: Json | null
           total_score?: number | null
           user_id: string
         }
@@ -1147,6 +1149,7 @@ export type Database = {
           photo_verification_url?: string | null
           started_at?: string | null
           time_taken?: number | null
+          topic_scores?: Json | null
           total_score?: number | null
           user_id?: string
         }
@@ -1156,6 +1159,92 @@ export type Database = {
             columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exam_blueprint: {
+        Row: {
+          comar_section: string
+          created_at: string
+          id: string
+          passing_threshold: number
+          questions_count: number
+          related_module_ids: string[] | null
+          section_number: number
+          section_title: string
+          topic_area: string
+          updated_at: string
+        }
+        Insert: {
+          comar_section: string
+          created_at?: string
+          id?: string
+          passing_threshold?: number
+          questions_count?: number
+          related_module_ids?: string[] | null
+          section_number: number
+          section_title: string
+          topic_area: string
+          updated_at?: string
+        }
+        Update: {
+          comar_section?: string
+          created_at?: string
+          id?: string
+          passing_threshold?: number
+          questions_count?: number
+          related_module_ids?: string[] | null
+          section_number?: number
+          section_title?: string
+          topic_area?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      exam_topic_scores: {
+        Row: {
+          comar_section: string
+          created_at: string
+          exam_attempt_id: string
+          id: string
+          needs_remediation: boolean
+          questions_correct: number
+          questions_total: number
+          score_percentage: number
+          section_number: number
+          topic_area: string
+        }
+        Insert: {
+          comar_section: string
+          created_at?: string
+          exam_attempt_id: string
+          id?: string
+          needs_remediation?: boolean
+          questions_correct?: number
+          questions_total?: number
+          score_percentage: number
+          section_number: number
+          topic_area: string
+        }
+        Update: {
+          comar_section?: string
+          created_at?: string
+          exam_attempt_id?: string
+          id?: string
+          needs_remediation?: boolean
+          questions_correct?: number
+          questions_total?: number
+          score_percentage?: number
+          section_number?: number
+          topic_area?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_topic_scores_exam_attempt_id_fkey"
+            columns: ["exam_attempt_id"]
+            isOneToOne: false
+            referencedRelation: "exam_attempts"
             referencedColumns: ["id"]
           },
         ]
