@@ -70,6 +70,7 @@ import CompetitorComparison from "./pages/CompetitorComparison";
 import ROICalculatorPublic from "./pages/ROICalculatorPublic";
 import SuccessStories from "./pages/SuccessStories";
 import MCAComplianceReview from "./pages/MCAComplianceReview";
+import RegulatoryExplorerPage from "./pages/RegulatoryExplorerPage";
 import PipelineMonitor from "./pages/admin/PipelineMonitor";
 
 import { ProtectedCourseAccess } from "./components/ProtectedCourseAccess";
@@ -233,6 +234,7 @@ const App = () => (
             <Route path="/roi-calculator-public" element={<ROICalculatorPublic />} />
             <Route path="/success-stories" element={<SuccessStories />} />
             <Route path="/mca-compliance-review" element={<MCAComplianceReview />} />
+            <Route path="/regulatory-explorer" element={<RegulatoryExplorerPage />} />
                    
                    <Route path="/team-management" element={
                       <ProtectedRoute>

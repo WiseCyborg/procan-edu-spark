@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Clock, Target } from 'lucide-react';
 import { sanitizeHtml } from '@/utils/sanitize-html';
+import { RegulatorySidebar } from '@/components/regulatory/RegulatorySidebar';
 
 interface CourseContentProps {
   content: string;
@@ -10,6 +11,9 @@ interface CourseContentProps {
   estimatedTime: number;
   tier?: 'green' | 'yellow' | 'red';
   onComplete?: () => void;
+  moduleNumber?: number;
+  comarReference?: string;
+  showRegulatorySidebar?: boolean;
 }
 
 const CourseContent: React.FC<CourseContentProps> = ({
@@ -17,7 +21,10 @@ const CourseContent: React.FC<CourseContentProps> = ({
   learningObjectives,
   estimatedTime,
   tier,
-  onComplete
+  onComplete,
+  moduleNumber,
+  comarReference,
+  showRegulatorySidebar = true
 }) => {
   // Sanitize content once on mount/update
   const sanitizedContent = useMemo(() => sanitizeHtml(content), [content]);
@@ -32,49 +39,61 @@ const CourseContent: React.FC<CourseContentProps> = ({
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header Info */}
-      <div className="flex items-center gap-4 flex-wrap">
-        {tier && (
-          <Badge className={getTierColor(tier)} variant="outline">
-            {tier.toUpperCase()} TIER
-          </Badge>
-        )}
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Clock className="h-4 w-4" />
-          <span>{estimatedTime} minutes</span>
+    <div className={showRegulatorySidebar ? "grid grid-cols-1 lg:grid-cols-3 gap-6" : "space-y-6"}>
+      <div className={showRegulatorySidebar ? "lg:col-span-2 space-y-6" : "space-y-6"}>
+        {/* Header Info */}
+        <div className="flex items-center gap-4 flex-wrap">
+          {tier && (
+            <Badge className={getTierColor(tier)} variant="outline">
+              {tier.toUpperCase()} TIER
+            </Badge>
+          )}
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Clock className="h-4 w-4" />
+            <span>{estimatedTime} minutes</span>
+          </div>
         </div>
+
+        {/* Learning Objectives */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Target className="h-5 w-5" />
+              Learning Objectives
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-2">
+              {learningObjectives.map((objective, index) => (
+                <li key={index} className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-primary mt-1 flex-shrink-0" />
+                  <span className="text-sm">{objective}</span>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+
+        {/* Main Content - NOW SANITIZED */}
+        <Card>
+          <CardContent className="pt-6">
+            <div 
+              className="prose prose-sm max-w-none dark:prose-invert"
+              dangerouslySetInnerHTML={{ __html: sanitizedContent }}
+            />
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Learning Objectives */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Target className="h-5 w-5" />
-            Learning Objectives
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ul className="space-y-2">
-            {learningObjectives.map((objective, index) => (
-              <li key={index} className="flex items-start gap-2">
-                <CheckCircle className="h-4 w-4 text-primary mt-1 flex-shrink-0" />
-                <span className="text-sm">{objective}</span>
-              </li>
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
-
-      {/* Main Content - NOW SANITIZED */}
-      <Card>
-        <CardContent className="pt-6">
-          <div 
-            className="prose prose-sm max-w-none dark:prose-invert"
-            dangerouslySetInnerHTML={{ __html: sanitizedContent }}
+      {/* Regulatory Sidebar */}
+      {showRegulatorySidebar && moduleNumber && (
+        <div className="lg:col-span-1">
+          <RegulatorySidebar 
+            sectionNumber={moduleNumber.toString()}
+            comarReference={comarReference}
           />
-        </CardContent>
-      </Card>
+        </div>
+      )}
     </div>
   );
 };

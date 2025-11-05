@@ -8,6 +8,7 @@ import { CheckCircle, XCircle, BookOpen, ArrowLeft, ArrowRight } from 'lucide-re
 import { toast } from '@/components/ui/use-toast';
 import { useUserProgress } from '@/hooks/useUserProgress';
 import { supabase } from '@/integrations/supabase/client';
+import { RegulatorySidebar } from '@/components/regulatory/RegulatorySidebar';
 
 interface QuizQuestion {
   question: string;
@@ -23,6 +24,7 @@ interface ModuleData {
   content: string;
   quiz_questions: QuizQuestion[];
   module_number: number;
+  comar_reference?: string;
 }
 
 const COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
@@ -71,7 +73,8 @@ const EnhancedCourseModule: React.FC = () => {
             description: data.description,
             content: data.content,
             quiz_questions: (data.quiz_questions as unknown as QuizQuestion[]) || [],
-            module_number: data.module_number
+            module_number: data.module_number,
+            comar_reference: data.comar_reference
           });
         }
       } catch (error) {
@@ -221,31 +224,41 @@ const EnhancedCourseModule: React.FC = () => {
         </Button>
       </div>
 
-      {/* Content Section */}
+      {/* Content Section with Regulatory Sidebar */}
       {currentSection === 'content' && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <BookOpen className="w-5 h-5" />
-              <span>Module Content</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="prose max-w-none">
-              {moduleData.content.split('\n').map((paragraph, index) => (
-                <p key={index} className="mb-4 text-foreground leading-relaxed">
-                  {paragraph}
-                </p>
-              ))}
-            </div>
-            <div className="flex justify-end">
-              <Button onClick={() => setCurrentSection('quiz')}>
-                Continue to Quiz
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <BookOpen className="w-5 h-5" />
+                  <span>Module Content</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="prose max-w-none">
+                  {moduleData.content.split('\n').map((paragraph, index) => (
+                    <p key={index} className="mb-4 text-foreground leading-relaxed">
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
+                <div className="flex justify-end">
+                  <Button onClick={() => setCurrentSection('quiz')}>
+                    Continue to Quiz
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          <div className="lg:col-span-1">
+            <RegulatorySidebar 
+              sectionNumber={moduleData.module_number?.toString()}
+              comarReference={moduleData.comar_reference}
+            />
+          </div>
+        </div>
       )}
 
       {/* Quiz Section */}
