@@ -15,9 +15,34 @@ import { LiveActivityTicker } from '@/components/LiveActivityTicker';
 import { MarylandCountyHeatmap } from '@/components/MarylandCountyHeatmap';
 import { StickyMobileCTA } from '@/components/StickyMobileCTA';
 import { PredictiveAnalyticsPreview } from '@/components/PredictiveAnalyticsPreview';
+import { ExitIntentModal } from '@/components/ExitIntentModal';
+import { AIFAQChat } from '@/components/AIFAQChat';
+import { useABTest } from '@/hooks/useABTest';
 
 const Index = () => {
   const navigate = useNavigate();
+  
+  // A/B Test for hero headline
+  const { variant: heroMessage } = useABTest({
+    testName: 'hero_headline',
+    variants: [
+      {
+        id: 'ai_maryland_focus',
+        value: "Maryland's ONLY AI-Powered, COMAR-Embedded RVT Training Platform",
+        weight: 1,
+      },
+      {
+        id: 'roi_savings_focus',
+        value: "Save $12K+ Annually with Maryland's Most Advanced RVT Training",
+        weight: 1,
+      },
+      {
+        id: 'compliance_speed_focus',
+        value: "Get COMAR-Certified in 4-6 Hours with 87% Pass Rate Guarantee",
+        weight: 1,
+      },
+    ],
+  });
 
   return (
     <div className="min-h-screen">
@@ -51,7 +76,7 @@ const Index = () => {
               ProCann Edu
             </h1>
             <h2 className="text-2xl md:text-3xl gradient-text font-medium max-w-3xl mx-auto leading-relaxed">
-              Maryland's ONLY AI-Powered, COMAR-Embedded RVT Training Platform
+              {heroMessage}
             </h2>
             <p className="text-xl text-white/90 mt-4">
               Save $12K+ annually while keeping your team MCA-compliant.
@@ -466,6 +491,8 @@ const Index = () => {
 
       {/* Sticky Mobile CTA */}
       <StickyMobileCTA />
+      <ExitIntentModal />
+      <AIFAQChat />
     </div>
   );
 };
