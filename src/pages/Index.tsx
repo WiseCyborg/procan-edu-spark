@@ -21,9 +21,12 @@ import { useABTest } from '@/hooks/useABTest';
 import { RoleSelectorModal } from '@/components/RoleSelectorModal';
 import { InvestmentValueCard } from '@/components/InvestmentValueCard';
 import { ComplianceDisclaimer } from '@/components/ComplianceDisclaimer';
+import { SwipeUpIndicator } from '@/components/SwipeUpIndicator';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Index = () => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   
   const [isRoleSelectorOpen, setIsRoleSelectorOpen] = React.useState(false);
 
@@ -58,8 +61,8 @@ const Index = () => {
     <div className="min-h-screen">
       <AccessibilityToolbar />
       
-      {/* Humanized Hero Section with Welcome Video */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden py-16">
+      {/* Mobile-First Optimized Hero Section */}
+      <section className={`relative flex items-center justify-center overflow-hidden ${isMobile ? 'min-h-[85vh] py-8' : 'min-h-screen py-16'}`}>
         {/* Gradient Background */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/90 to-accent"></div>
         
@@ -67,76 +70,88 @@ const Index = () => {
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDEzNEgxNHYtMjBoMjJ2MjB6bS0yMi0yMEgwdjIwaDE0di0yMHptMCAyMEgwdjE0aDE0di0xNHptMjIgMEgxNHYxNGgyMnYtMTR6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-10"></div>
 
         <div className="relative z-10 container mx-auto px-4">
-          {/* Live COMAR Badge */}
-          <LiveCOMARBadge />
+          {/* Live COMAR Badge - Collapsed on Mobile */}
+          <div className={`flex justify-center ${isMobile ? 'mb-4 scale-75' : 'mb-8'}`}>
+            <LiveCOMARBadge />
+          </div>
 
-          {/* Main Logo and Tagline - Simplified Hero */}
-          <div className="text-center mb-10">
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-4 leading-tight">
+          {/* Main Logo and Tagline - Compact on Mobile */}
+          <div className={`text-center ${isMobile ? 'mb-6' : 'mb-10'}`}>
+            <h1 className={`font-bold text-white leading-tight ${isMobile ? 'text-4xl mb-3' : 'text-5xl md:text-7xl mb-4'}`}>
               ProCann Edu
             </h1>
-            <h2 className="text-2xl md:text-3xl gradient-text font-medium max-w-3xl mx-auto leading-relaxed">
-              {heroMessage}
+            <h2 className={`gradient-text font-medium mx-auto leading-relaxed ${isMobile ? 'text-lg max-w-sm' : 'text-2xl md:text-3xl max-w-3xl'}`}>
+              {isMobile ? "Maryland's AI-Powered RVT Certification" : heroMessage}
             </h2>
-            <p className="text-lg text-white/90 mt-4 max-w-2xl mx-auto">
-              Complete Maryland RVT certification in 4-6 hours • 87% pass rate • $49.99
-            </p>
+            {!isMobile && (
+              <p className="text-lg text-white/90 mt-4 max-w-2xl mx-auto">
+                Complete Maryland RVT certification in 4-6 hours • 87% pass rate • $49.99
+              </p>
+            )}
           </div>
 
-          {/* Welcome Video Section */}
+          {/* Welcome Video Section - Compact on Mobile */}
           <WelcomeVideoSection 
             videoUrl="https://vimeo.com/1096146284/e90b8e5dfc"
-            className="mb-12"
+            className={isMobile ? 'mb-6' : 'mb-12'}
           />
 
-          {/* Single Primary CTA */}
-          <div className="text-center mb-8">
+          {/* Single Primary CTA - Full Width on Mobile */}
+          <div className={`text-center ${isMobile ? 'mb-4' : 'mb-8'}`}>
             <Button 
               onClick={() => setIsRoleSelectorOpen(true)}
-              size="lg"
-              className="bg-white text-primary hover:bg-white/90 px-8 py-6 text-lg font-semibold rounded-xl shadow-xl hover:shadow-2xl transition-all hover:scale-105"
+              size={isMobile ? 'default' : 'lg'}
+              className={`bg-white text-primary hover:bg-white/90 font-semibold rounded-xl shadow-xl hover:shadow-2xl transition-all hover:scale-105 ${
+                isMobile ? 'w-full px-6 py-6 text-base h-auto' : 'px-8 py-6 text-lg'
+              }`}
             >
-              Start Your Maryland RVT Certification - $49.99
+              {isMobile ? 'Get Certified - $49.99' : 'Start Your Maryland RVT Certification - $49.99'}
             </Button>
-            <p className="text-white/70 text-sm mt-3">
-              Choose your path: Student • Team Manager • Dispensary Owner
+            <p className={`text-white/70 mt-3 ${isMobile ? 'text-xs' : 'text-sm'}`}>
+              {isMobile ? '✓ 4-6 hrs ✓ AI tracking ✓ Lifetime access' : 'Choose your path: Student • Team Manager • Dispensary Owner'}
             </p>
           </div>
 
-          {/* Or see all options link */}
-          <div className="text-center mb-4">
-            <Button
-              variant="link"
-              onClick={() => navigate('/get-started')}
-              className="text-white/90 hover:text-white underline"
-            >
-              Not sure? See all registration options →
-            </Button>
-          </div>
+          {/* Quick Links - Collapsed on Mobile */}
+          {!isMobile && (
+            <>
+              <div className="text-center mb-4">
+                <Button
+                  variant="link"
+                  onClick={() => navigate('/get-started')}
+                  className="text-white/90 hover:text-white underline"
+                >
+                  Not sure? See all registration options →
+                </Button>
+              </div>
 
-          {/* Quick Links */}
-          <div className="flex flex-wrap justify-center gap-4 text-white/80 text-sm">
-            <button 
-              onClick={() => navigate('/faq')}
-              className="hover:text-white transition-colors underline"
-            >
-              Questions? Check our FAQ
-            </button>
-            <span>•</span>
-            <button 
-              onClick={() => navigate('/verify-certificate')}
-              className="hover:text-white transition-colors underline"
-            >
-              Verify a Certificate
-            </button>
-            <span>•</span>
-            <a 
-              href="mailto:info@procannedu.com"
-              className="hover:text-white transition-colors underline"
-            >
-              Chat with us
-            </a>
-          </div>
+              <div className="flex flex-wrap justify-center gap-4 text-white/80 text-sm">
+                <button 
+                  onClick={() => navigate('/faq')}
+                  className="hover:text-white transition-colors underline"
+                >
+                  Questions? Check our FAQ
+                </button>
+                <span>•</span>
+                <button 
+                  onClick={() => navigate('/verify-certificate')}
+                  className="hover:text-white transition-colors underline"
+                >
+                  Verify a Certificate
+                </button>
+                <span>•</span>
+                <a 
+                  href="mailto:info@procannedu.com"
+                  className="hover:text-white transition-colors underline"
+                >
+                  Chat with us
+                </a>
+              </div>
+            </>
+          )}
+
+          {/* Swipe Up Indicator - Mobile Only */}
+          <SwipeUpIndicator />
         </div>
       </section>
 
