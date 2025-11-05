@@ -70,6 +70,7 @@ import CompetitorComparison from "./pages/CompetitorComparison";
 import ROICalculatorPublic from "./pages/ROICalculatorPublic";
 import SuccessStories from "./pages/SuccessStories";
 import MCAComplianceReview from "./pages/MCAComplianceReview";
+import PipelineMonitor from "./pages/admin/PipelineMonitor";
 
 import { ProtectedCourseAccess } from "./components/ProtectedCourseAccess";
 
@@ -260,6 +261,12 @@ const App = () => (
                     <Route path="/admin/operations" element={
                       <ProtectedRoute>
                         <OperationsCommandCenter />
+                      </ProtectedRoute>
+                    } />
+                    
+                    <Route path="/admin/pipeline-monitor" element={
+                      <ProtectedRoute>
+                        <PipelineMonitor />
                       </ProtectedRoute>
                     } />
                    
