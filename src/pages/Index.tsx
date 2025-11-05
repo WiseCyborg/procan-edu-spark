@@ -1,13 +1,11 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, Award, Shield, CheckCircle, Building2, Waves, Users, Leaf, UserCog } from 'lucide-react';
+import { CheckCircle } from 'lucide-react';
 import { CoursePreviewSystem } from '@/components/EnhancedCoursePreview';
 import { AccessibilityToolbar } from '@/components/MobileOptimization';
-import { TrustStats, ComplianceBadges, TestimonialCarousel } from '@/components/TrustIndicators';
-import { HoverCallout } from '@/components/ui/hover-callout';
+import { TrustStats } from '@/components/TrustIndicators';
 import { WelcomeVideoSection } from '@/components/WelcomeVideoSection';
 import { LiveCOMARBadge } from '@/components/LiveCOMARBadge';
 import { ROIHighlightCard } from '@/components/ROIHighlightCard';
@@ -61,8 +59,8 @@ const Index = () => {
     <div className="min-h-screen">
       <AccessibilityToolbar />
       
-      {/* Mobile-First Optimized Hero Section */}
-      <section className={`relative flex items-center justify-center overflow-hidden ${isMobile ? 'min-h-[85vh] py-8' : 'min-h-screen py-16'}`}>
+      {/* Mobile-First Optimized Hero Section - Above Fold */}
+      <section className={`relative flex items-center justify-center overflow-hidden ${isMobile ? 'min-h-[75vh] py-4' : 'min-h-screen py-16'}`}>
         {/* Gradient Background */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/90 to-accent"></div>
         
@@ -70,17 +68,17 @@ const Index = () => {
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDEzNEgxNHYtMjBoMjJ2MjB6bS0yMi0yMEgwdjIwaDE0di0yMHptMCAyMEgwdjE0aDE0di0xNHptMjIgMEgxNHYxNGgyMnYtMTR6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-10"></div>
 
         <div className="relative z-10 container mx-auto px-4">
-          {/* Live COMAR Badge - Collapsed on Mobile */}
-          <div className={`flex justify-center ${isMobile ? 'mb-4 scale-75' : 'mb-8'}`}>
+          {/* Live COMAR Badge - Subtle Placement */}
+          <div className={`flex justify-center ${isMobile ? 'mb-3 scale-75' : 'mb-6'}`}>
             <LiveCOMARBadge />
           </div>
 
-          {/* Main Logo and Tagline - Compact on Mobile */}
-          <div className={`text-center ${isMobile ? 'mb-6' : 'mb-10'}`}>
-            <h1 className={`font-bold text-white leading-tight ${isMobile ? 'text-4xl mb-3' : 'text-5xl md:text-7xl mb-4'}`}>
+          {/* Main Logo and Tagline - Level 1 Typography */}
+          <div className={`text-center ${isMobile ? 'mb-3' : 'mb-8'}`}>
+            <h1 className={`font-bold text-white leading-tight ${isMobile ? 'text-4xl mb-2' : 'text-5xl md:text-7xl mb-4'}`}>
               ProCann Edu
             </h1>
-            <h2 className={`gradient-text font-medium mx-auto leading-relaxed ${isMobile ? 'text-lg max-w-sm' : 'text-2xl md:text-3xl max-w-3xl'}`}>
+            <h2 className={`gradient-text font-medium mx-auto leading-relaxed ${isMobile ? 'text-base max-w-sm px-2' : 'text-2xl md:text-3xl max-w-3xl'}`}>
               {isMobile ? "Maryland's AI-Powered RVT Certification" : heroMessage}
             </h2>
             {!isMobile && (
@@ -90,14 +88,14 @@ const Index = () => {
             )}
           </div>
 
-          {/* Welcome Video Section - Compact on Mobile */}
+          {/* Welcome Video Section */}
           <WelcomeVideoSection 
             videoUrl="https://vimeo.com/1096146284/e90b8e5dfc"
-            className={isMobile ? 'mb-6' : 'mb-12'}
+            className={isMobile ? 'mb-3' : 'mb-8'}
           />
 
-          {/* Single Primary CTA - Full Width on Mobile */}
-          <div className={`text-center ${isMobile ? 'mb-4' : 'mb-8'}`}>
+          {/* Single Primary CTA */}
+          <div className={`text-center ${isMobile ? 'mb-2' : 'mb-6'}`}>
             <Button 
               onClick={() => setIsRoleSelectorOpen(true)}
               size={isMobile ? 'default' : 'lg'}
@@ -112,14 +110,14 @@ const Index = () => {
             </p>
           </div>
 
-          {/* Quick Links - Collapsed on Mobile */}
+          {/* Quick Links - Desktop Only */}
           {!isMobile && (
             <>
               <div className="text-center mb-4">
                 <Button
                   variant="link"
                   onClick={() => navigate('/get-started')}
-                  className="text-white/90 hover:text-white underline"
+                  className="text-white/90 hover:text-white underline text-sm"
                 >
                   Not sure? See all registration options →
                 </Button>
@@ -155,15 +153,15 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Social Proof Section - First Scroll */}
-      <section className="py-12 px-4 bg-white dark:bg-background">
+      {/* First Scroll - Social Proof & Value */}
+      <section className={`bg-white dark:bg-background ${isMobile ? 'py-8 px-4' : 'py-16 px-4'}`}>
         <div className="container mx-auto">
           <TrustStats />
         </div>
       </section>
 
       {/* Investment Value Section */}
-      <section className="py-12 px-4 bg-gradient-to-br from-primary/5 to-accent/10">
+      <section className={`bg-gradient-to-br from-primary/5 to-accent/10 ${isMobile ? 'py-8 px-4' : 'py-16 px-4'}`}>
         <div className="container mx-auto">
           <InvestmentValueCard />
         </div>
@@ -172,218 +170,49 @@ const Index = () => {
       {/* Live Activity Ticker */}
       <LiveActivityTicker />
 
-      {/* ROI Outcomes Section */}
-      <section className="py-12 px-4 bg-white dark:bg-background">
+      {/* Second Scroll - ROI Outcomes */}
+      <section className={`bg-white dark:bg-background ${isMobile ? 'py-8 px-4' : 'py-16 px-4'}`}>
         <div className="container mx-auto">
           <ROIHighlightCard />
         </div>
       </section>
 
-      {/* Maryland First Section */}
-      <section className="py-16 px-4 bg-gradient-to-br from-primary/5 to-accent/10">
-        <div className="container mx-auto text-center">
-          <h3 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
-            Built in Maryland, for Maryland
-          </h3>
-          <div className="max-w-4xl mx-auto mb-8">
-            <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
-              Created by local educators, cannabis professionals, and community advocates who know and love our state. 
-              We understand Maryland because <strong>we are Maryland</strong>.
-            </p>
-            
-            {/* Maryland Icon Cards Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Card className="relative overflow-hidden group hover:scale-105 transition-transform duration-300 h-48 flex items-center justify-center bg-gradient-to-br from-red-600 to-red-700 border-none shadow-lg hover:shadow-xl">
-                <CardContent className="p-6 text-center">
-                  <Building2 className="h-16 w-16 text-white mx-auto mb-3" />
-                  <p className="text-white text-sm font-medium">State House Heritage</p>
-                </CardContent>
-              </Card>
-
-              <Card className="relative overflow-hidden group hover:scale-105 transition-transform duration-300 h-48 flex items-center justify-center bg-gradient-to-br from-amber-500 to-yellow-600 border-none shadow-lg hover:shadow-xl">
-                <CardContent className="p-6 text-center">
-                  <Waves className="h-16 w-16 text-white mx-auto mb-3" />
-                  <p className="text-white text-sm font-medium">Chesapeake Bay</p>
-                </CardContent>
-              </Card>
-
-              <Card className="relative overflow-hidden group hover:scale-105 transition-transform duration-300 h-48 flex items-center justify-center bg-gradient-to-br from-green-600 to-emerald-700 border-none shadow-lg hover:shadow-xl">
-                <CardContent className="p-6 text-center">
-                  <Users className="h-16 w-16 text-white mx-auto mb-3" />
-                  <p className="text-white text-sm font-medium">Community Focused</p>
-                </CardContent>
-              </Card>
-
-              <Card className="relative overflow-hidden group hover:scale-105 transition-transform duration-300 h-48 flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900 border-none shadow-lg hover:shadow-xl">
-                <CardContent className="p-6 text-center">
-                  <Leaf className="h-16 w-16 text-white mx-auto mb-3" />
-                  <p className="text-white text-sm font-medium">Cannabis Expertise</p>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-          
-          <Button 
-            size="lg" 
-            onClick={() => navigate('/stoplight-standard')}
-            className="bg-stoplight-green hover:bg-stoplight-green/90 text-white font-poppins"
-          >
-            Learn the Stoplight Standard™
-          </Button>
-        </div>
-      </section>
-
-      {/* Maryland Partnership Section */}
-      <section className="py-16 px-4 bg-gradient-to-br from-blue-50 to-green-50 dark:from-blue-950/20 dark:to-green-950/20">
-        <div className="container mx-auto">
-          <div className="text-center mb-12">
-            <h3 className="text-3xl font-bold text-foreground mb-4">
-              Trusted by Maryland's Cannabis Community
-            </h3>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Official partnerships and endorsements from Maryland's cannabis industry leaders
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 items-center justify-items-center max-w-4xl mx-auto">
-            <Card className="p-6 text-center hover:shadow-lg transition-shadow w-full">
-              <Shield className="h-12 md:h-16 w-12 md:w-16 text-green-600 mx-auto mb-3" />
-              <p className="font-semibold text-sm md:text-base">MCA Approved</p>
-              <p className="text-xs text-muted-foreground mt-1">Maryland Cannabis Administration</p>
-            </Card>
-
-            <Card className="p-6 text-center hover:shadow-lg transition-shadow w-full">
-              <Building2 className="h-12 md:h-16 w-12 md:w-16 text-blue-600 mx-auto mb-3" />
-              <p className="font-semibold text-sm md:text-base">24 Counties</p>
-              <p className="text-xs text-muted-foreground mt-1">Statewide Coverage</p>
-            </Card>
-
-            <Card className="p-6 text-center hover:shadow-lg transition-shadow w-full">
-              <Users className="h-12 md:h-16 w-12 md:w-16 text-purple-600 mx-auto mb-3" />
-              <p className="font-semibold text-sm md:text-base">150+ Dispensaries</p>
-              <p className="text-xs text-muted-foreground mt-1">Active Partners</p>
-            </Card>
-
-            <Card className="p-6 text-center hover:shadow-lg transition-shadow w-full">
-              <Award className="h-12 md:h-16 w-12 md:w-16 text-yellow-600 mx-auto mb-3" />
-              <p className="font-semibold text-sm md:text-base">2,500+ Certified</p>
-              <p className="text-xs text-muted-foreground mt-1">Maryland Agents</p>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="py-16 px-4 bg-white dark:bg-background">
-        <div className="container mx-auto">
-          <h3 className="text-3xl md:text-4xl font-bold text-center text-foreground mb-4">
-            What Makes Us Different?
-          </h3>
-          <p className="text-center text-muted-foreground text-lg mb-12 max-w-2xl mx-auto">
-            We're not just another training platform. We're your partners in success. 🤝
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <HoverCallout content="Our training program is aligned to Maryland Cannabis Administration RVT standards under COMAR 14.17 and is regularly updated to reflect the latest compliance requirements.">
-              <Card className="text-center hover:shadow-lg transition-shadow cursor-help">
-                <CardHeader>
-                  <Shield className="h-12 w-12 text-green-600 mx-auto mb-4" />
-                  <CardTitle className="text-lg">Aligned to MCA Standards</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600">
-                    Built to Maryland Cannabis Administration RVT requirements (COMAR 14.17)
-                  </p>
-                </CardContent>
-              </Card>
-            </HoverCallout>
-
-            <HoverCallout content="Our comprehensive curriculum includes 18 detailed modules covering cannabis laws, safety protocols, patient care, inventory management, and quality control standards.">
-              <Card className="text-center hover:shadow-lg transition-shadow cursor-help">
-                <CardHeader>
-                  <BookOpen className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-                  <CardTitle className="text-lg">Comprehensive Training</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600">
-                    18 modules covering all aspects of cannabis regulations and operations
-                  </p>
-                </CardContent>
-              </Card>
-            </HoverCallout>
-
-            <HoverCallout content="Upon successful completion of the course and final exam, you'll receive an official certificate that meets Maryland RVT training standards under COMAR 14.17.">
-              <Card className="text-center hover:shadow-lg transition-shadow cursor-help">
-                <CardHeader>
-                  <Award className="h-12 w-12 text-yellow-600 mx-auto mb-4" />
-                  <CardTitle className="text-lg">Official Certificates</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600">
-                    Earn recognized certificates upon successful course completion
-                  </p>
-                </CardContent>
-              </Card>
-            </HoverCallout>
-
-            <HoverCallout content="Access your training materials anytime, anywhere. Our platform is mobile-friendly and allows you to study at your own pace with automatic progress saving.">
-              <Card className="text-center hover:shadow-lg transition-shadow cursor-help">
-                <CardHeader>
-                  <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-4" />
-                  <CardTitle className="text-lg">Easy Online Access</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600">
-                    Study at your own pace with 24/7 online access
-                  </p>
-                </CardContent>
-              </Card>
-            </HoverCallout>
-          </div>
-        </div>
-      </section>
-
-      {/* Maryland County Heatmap */}
-      <MarylandCountyHeatmap />
-
-      {/* Predictive Analytics Preview Section */}
-      <PredictiveAnalyticsPreview />
-
-      {/* Course Overview */}
-      <section className="py-16 px-4 bg-white">
+      {/* Course Overview - Level 2 Typography */}
+      <section className={`bg-gradient-to-br from-primary/5 to-accent/10 ${isMobile ? 'py-8 px-4' : 'py-16 px-4'}`}>
         <div className="container mx-auto">
           <div className="max-w-4xl mx-auto">
-            <h3 className="text-3xl font-bold text-center text-gray-800 mb-8">
+            <h3 className={`font-bold text-center text-foreground ${isMobile ? 'text-2xl mb-6' : 'text-3xl md:text-4xl mb-8'}`}>
               Maryland Responsible Vendor Training (RVT)
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
-                <h4 className="text-xl font-semibold text-green-700 mb-4">What You'll Learn</h4>
-                <ul className="space-y-2 text-gray-600">
+                <h4 className={`font-semibold text-primary ${isMobile ? 'text-lg mb-3' : 'text-xl mb-4'}`}>What You'll Learn</h4>
+                <ul className="space-y-2 text-muted-foreground">
                   <li className="flex items-center">
-                    <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                    Maryland cannabis laws and regulations
+                    <CheckCircle className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
+                    <span>Maryland cannabis laws and regulations</span>
                   </li>
                   <li className="flex items-center">
-                    <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                    Responsible vendor practices
+                    <CheckCircle className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
+                    <span>Responsible vendor practices</span>
                   </li>
                   <li className="flex items-center">
-                    <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                    Patient safety and compliance
+                    <CheckCircle className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
+                    <span>Patient safety and compliance</span>
                   </li>
                   <li className="flex items-center">
-                    <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                    Security and inventory management
+                    <CheckCircle className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
+                    <span>Security and inventory management</span>
                   </li>
                   <li className="flex items-center">
-                    <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                    Quality control standards
+                    <CheckCircle className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
+                    <span>Quality control standards</span>
                   </li>
                 </ul>
               </div>
               <div>
-                <h4 className="text-xl font-semibold text-green-700 mb-4">Course Details</h4>
-                <ul className="space-y-2 text-gray-600">
+                <h4 className={`font-semibold text-primary ${isMobile ? 'text-lg mb-3' : 'text-xl mb-4'}`}>Course Details</h4>
+                <ul className="space-y-2 text-muted-foreground">
                   <li><strong>Duration:</strong> Self-paced (typically 4-6 hours)</li>
                   <li><strong>Modules:</strong> 18 comprehensive modules</li>
                   <li><strong>Exam:</strong> Final certification exam</li>
@@ -396,39 +225,24 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Enhanced Course Preview */}
-      <section className="py-16 px-4 bg-gray-50">
+      {/* Course Preview System */}
+      <section className={`bg-white dark:bg-background ${isMobile ? 'py-8 px-4' : 'py-16 px-4'}`}>
         <CoursePreviewSystem />
       </section>
 
-      {/* CTA Section */}
-      <section className="py-16 px-4 bg-gradient-to-r from-primary to-accent">
-        <div className="container mx-auto text-center">
-          <h3 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            You've Got This! 🎉
-          </h3>
-          <p className="text-xl text-white/95 mb-8 max-w-2xl mx-auto leading-relaxed">
-            Join our community of cannabis professionals who started right where you are. 
-            We'll be with you every step of the way.
-          </p>
-          <Button 
-            onClick={() => navigate('/auth')}
-            size="lg"
-            className="bg-white text-primary hover:bg-white/90 px-8 py-6 text-lg font-semibold rounded-xl shadow-xl hover:shadow-2xl transition-all hover:scale-105"
-          >
-            Start Your Journey Today
-          </Button>
-        </div>
-      </section>
+      {/* Third Scroll - Geographic & Technology Proof */}
+      <MarylandCountyHeatmap />
 
-      {/* Footer */}
-      <footer className="bg-foreground text-white py-12 px-4">
+      <PredictiveAnalyticsPreview />
+
+      {/* Footer with Compliance */}
+      <footer className={`bg-foreground text-white ${isMobile ? 'py-8 px-4' : 'py-12 px-4'}`}>
         <div className="container mx-auto">
           <div className="text-center mb-8 pb-8 border-b border-white/10">
-            <h3 className="text-2xl font-bold mb-2">ProCann Edu</h3>
-            <p className="text-xl text-white/90 mb-2">Maryland's Trusted RVT Provider</p>
-            <p className="text-white/70">Headquarters: Baltimore, Maryland</p>
-            <p className="text-white/70">Serving dispensaries across all 24 counties</p>
+            <h3 className={`font-bold mb-2 ${isMobile ? 'text-xl' : 'text-2xl'}`}>ProCann Edu</h3>
+            <p className={`text-white/90 mb-2 ${isMobile ? 'text-base' : 'text-xl'}`}>Maryland's Trusted RVT Provider</p>
+            <p className={`text-white/70 ${isMobile ? 'text-sm' : 'text-base'}`}>Headquarters: Baltimore, Maryland</p>
+            <p className={`text-white/70 ${isMobile ? 'text-sm' : 'text-base'}`}>Serving dispensaries across all 24 counties</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div>
