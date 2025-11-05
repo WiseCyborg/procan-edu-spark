@@ -457,15 +457,31 @@ const AdminDashboard = () => {
         )}
 
           <Tabs defaultValue="dispensaries" className="w-full">
-            <TabsList className="mb-4">
-              <TabsTrigger value="dispensaries">🏢 Dispensaries</TabsTrigger>
-              <TabsTrigger value="users">👥 Users</TabsTrigger>
-              <TabsTrigger value="certificates">🎓 Certificates</TabsTrigger>
-              <TabsTrigger value="applications">📋 Applications</TabsTrigger>
-              <TabsTrigger value="setup">⚙️ Setup</TabsTrigger>
-              <TabsTrigger value="security">🔒 Security</TabsTrigger>
-              <TabsTrigger value="analytics">📊 Analytics</TabsTrigger>
-            </TabsList>
+            <div className="overflow-x-auto pb-2 mb-4">
+              <TabsList className="inline-flex min-w-max">
+                <TabsTrigger value="dispensaries">🏢 Dispensaries</TabsTrigger>
+                <TabsTrigger value="users">👥 Users</TabsTrigger>
+                <TabsTrigger value="certificates">🎓 Certificates</TabsTrigger>
+                <TabsTrigger value="applications">📋 Applications</TabsTrigger>
+                <TabsTrigger value="setup">⚙️ Setup</TabsTrigger>
+                <TabsTrigger value="invitations">✉️ Invitations</TabsTrigger>
+                <TabsTrigger value="test-accounts">🧪 Test Accounts</TabsTrigger>
+                <TabsTrigger value="analytics">📊 Analytics</TabsTrigger>
+                <TabsTrigger value="security">🔒 Security</TabsTrigger>
+                <TabsTrigger value="compliance">📈 Compliance</TabsTrigger>
+                <TabsTrigger value="profile-audit">👤 Profile Audit</TabsTrigger>
+                <TabsTrigger value="employees">👥 Employees</TabsTrigger>
+                <TabsTrigger value="oversight">🔍 Oversight</TabsTrigger>
+                <TabsTrigger value="form-health">🔧 Form Health</TabsTrigger>
+                <TabsTrigger value="email-monitoring">📬 Email Monitor</TabsTrigger>
+                <TabsTrigger value="email-tracking">📧 Email Tracking</TabsTrigger>
+                <TabsTrigger value="email-health">📨 Email Health</TabsTrigger>
+                <TabsTrigger value="revenue">💰 Revenue</TabsTrigger>
+                <TabsTrigger value="reports">📄 Reports</TabsTrigger>
+                <TabsTrigger value="notifications">🔔 Notifications</TabsTrigger>
+                <TabsTrigger value="bulk">⚡ Bulk Ops</TabsTrigger>
+              </TabsList>
+            </div>
 
             <TabsContent value="dispensaries">
               <Card>
@@ -556,47 +572,6 @@ const AdminDashboard = () => {
             <FormHealthMonitor />
           </TabsContent>
 
-          <TabsContent value="organizations">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center text-green-700">
-                  <Building2 className="mr-2 h-5 w-5" />
-                  Organization Performance
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {organizations.map((org, index) => (
-                    <div key={index} className="border rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-4">
-                        <div>
-                          <h3 className="font-semibold text-lg">{org.name}</h3>
-                          <p className="text-sm text-gray-600">
-                            {org.employeeCount} employees
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-semibold text-green-600">
-                            {formatCurrency(org.totalSpent)}
-                          </p>
-                          <p className="text-sm text-gray-600">Total spent</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600">Completion Rate</span>
-                        <span className="text-sm font-medium">{org.completionRate}%</span>
-                      </div>
-                      <Progress value={org.completionRate} className="mt-2" />
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="applications">
-            <DispensaryApplicationManager />
-          </TabsContent>
 
           <TabsContent value="setup">
             <DispensaryManagerSetup />

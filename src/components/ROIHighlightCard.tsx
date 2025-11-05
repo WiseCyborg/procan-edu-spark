@@ -33,7 +33,7 @@ export const ROIHighlightCard = () => {
   });
 
   return (
-    <Card className="bg-gradient-to-br from-green-500/10 via-blue-500/10 to-purple-500/10 border-2 border-green-500/30 mb-10 max-w-4xl mx-auto">
+    <Card className="bg-gradient-to-br from-green-500/30 via-blue-500/30 to-purple-500/30 border-2 border-green-500/50 mb-10 max-w-4xl mx-auto">
       <CardContent className="p-8">
         <div className="flex items-center gap-4 mb-6">
           <Brain className="h-12 w-12 text-green-400" />
