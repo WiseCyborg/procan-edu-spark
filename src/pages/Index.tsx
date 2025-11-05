@@ -18,10 +18,15 @@ import { PredictiveAnalyticsPreview } from '@/components/PredictiveAnalyticsPrev
 import { ExitIntentModal } from '@/components/ExitIntentModal';
 import { AIFAQChat } from '@/components/AIFAQChat';
 import { useABTest } from '@/hooks/useABTest';
+import { RoleSelectorModal } from '@/components/RoleSelectorModal';
+import { InvestmentValueCard } from '@/components/InvestmentValueCard';
+import { ComplianceDisclaimer } from '@/components/ComplianceDisclaimer';
 
 const Index = () => {
   const navigate = useNavigate();
   
+  const [isRoleSelectorOpen, setIsRoleSelectorOpen] = React.useState(false);
+
   // A/B Test for hero headline
   const { variant: heroMessage } = useABTest({
     testName: 'hero_headline',
@@ -41,6 +46,11 @@ const Index = () => {
         value: "Get COMAR-Certified in 4-6 Hours with 87% Pass Rate Guarantee",
         weight: 1,
       },
+      {
+        id: 'mca_professional_aligned',
+        value: "MCA-Aligned Maryland RVT Training with Real-Time Regulatory Updates",
+        weight: 1,
+      },
     ],
   });
 
@@ -57,20 +67,10 @@ const Index = () => {
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDEzNEgxNHYtMjBoMjJ2MjB6bS0yMi0yMEgwdjIwaDE0di0yMHptMCAyMEgwdjE0aDE0di0xNHptMjIgMEgxNHYxNGgyMnYtMTR6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-10"></div>
 
         <div className="relative z-10 container mx-auto px-4">
-          {/* Top welcome message */}
-          <div className="text-center mb-8">
-            <p className="text-white/90 text-lg font-medium">
-              Welcome! Let's get you certified. 👋
-            </p>
-          </div>
-
-          {/* Compliance Badges */}
-          <ComplianceBadges />
-
           {/* Live COMAR Badge */}
           <LiveCOMARBadge />
 
-          {/* Main Logo and Tagline */}
+          {/* Main Logo and Tagline - Simplified Hero */}
           <div className="text-center mb-10">
             <h1 className="text-5xl md:text-7xl font-bold text-white mb-4 leading-tight">
               ProCann Edu
@@ -78,10 +78,8 @@ const Index = () => {
             <h2 className="text-2xl md:text-3xl gradient-text font-medium max-w-3xl mx-auto leading-relaxed">
               {heroMessage}
             </h2>
-            <p className="text-xl text-white/90 mt-4">
-              Save $12K+ annually while keeping your team MCA-compliant.
-              <br className="hidden md:block" />
-              <strong>Built by Marylanders, for Maryland dispensaries.</strong>
+            <p className="text-lg text-white/90 mt-4 max-w-2xl mx-auto">
+              Complete Maryland RVT certification in 4-6 hours • 87% pass rate • $49.99
             </p>
           </div>
 
@@ -91,68 +89,18 @@ const Index = () => {
             className="mb-12"
           />
 
-          {/* ROI Highlight Card */}
-          <ROIHighlightCard />
-
-          {/* Humanized Value Proposition */}
-          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-8 mb-10 max-w-3xl mx-auto">
-            <p className="text-xl text-white/95 leading-relaxed text-center">
-              Join <strong>2,500+ fellow Marylanders</strong> on the path to cannabis certification. 
-              <br className="hidden md:block" />
-              We're in this together! 🌱
+          {/* Single Primary CTA */}
+          <div className="text-center mb-8">
+            <Button 
+              onClick={() => setIsRoleSelectorOpen(true)}
+              size="lg"
+              className="bg-white text-primary hover:bg-white/90 px-8 py-6 text-lg font-semibold rounded-xl shadow-xl hover:shadow-2xl transition-all hover:scale-105"
+            >
+              Start Your Maryland RVT Certification - $49.99
+            </Button>
+            <p className="text-white/70 text-sm mt-3">
+              Choose your path: Student • Team Manager • Dispensary Owner
             </p>
-            <p className="text-white/80 mt-4 text-center">
-              No question is too small. We're here to help you succeed, not just check boxes.
-            </p>
-          </div>
-
-          {/* Trust Statistics */}
-          <TrustStats />
-
-          {/* Testimonial */}
-          <div className="mb-10">
-            <TestimonialCarousel />
-          </div>
-          
-          {/* Humanized CTA Buttons */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto mb-8">
-            <Button 
-              onClick={() => navigate('/org/apply')}
-              size="lg"
-              className="bg-white text-primary hover:bg-white/90 px-6 py-4 h-auto text-base font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105"
-            >
-              <Building2 className="h-5 w-5 mr-2" />
-              <div className="text-left">
-                <div>Get Your Free Compliance Audit</div>
-                <div className="text-xs font-normal opacity-80">See how we save you $12K+</div>
-              </div>
-            </Button>
-
-            <Button 
-              onClick={() => navigate('/auth?role=training_coordinator')}
-              variant="outline"
-              size="lg"
-              className="border-2 border-white/60 text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm px-6 py-4 h-auto text-base font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105"
-            >
-              <UserCog className="h-5 w-5 mr-2" />
-              <div className="text-left">
-                <div>Track Your Team's ROI</div>
-                <div className="text-xs font-normal opacity-90">Predictive analytics dashboard</div>
-              </div>
-            </Button>
-
-            <Button 
-              onClick={() => navigate('/auth?role=student')}
-              variant="outline"
-              size="lg"
-              className="border-2 border-white/60 text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm px-6 py-4 h-auto text-base font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105"
-            >
-              <Award className="h-5 w-5 mr-2" />
-              <div className="text-left">
-                <div>Start My Certification</div>
-                <div className="text-xs font-normal opacity-90">Complete in 4-6 hours</div>
-              </div>
-            </Button>
           </div>
 
           {/* Or see all options link */}
@@ -192,8 +140,29 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Social Proof Section - First Scroll */}
+      <section className="py-12 px-4 bg-white dark:bg-background">
+        <div className="container mx-auto">
+          <TrustStats />
+        </div>
+      </section>
+
+      {/* Investment Value Section */}
+      <section className="py-12 px-4 bg-gradient-to-br from-primary/5 to-accent/10">
+        <div className="container mx-auto">
+          <InvestmentValueCard />
+        </div>
+      </section>
+
       {/* Live Activity Ticker */}
       <LiveActivityTicker />
+
+      {/* ROI Outcomes Section */}
+      <section className="py-12 px-4 bg-white dark:bg-background">
+        <div className="container mx-auto">
+          <ROIHighlightCard />
+        </div>
+      </section>
 
       {/* Maryland First Section */}
       <section className="py-16 px-4 bg-gradient-to-br from-primary/5 to-accent/10">
@@ -485,9 +454,29 @@ const Index = () => {
           <div className="text-center text-sm text-white/60 pt-8 border-t border-white/10">
             <p>&copy; 2025 ProCann Edu. All rights reserved.</p>
             <p className="mt-2">Made with 💚 in Maryland</p>
+            <div className="mt-6">
+              <a 
+                href="/mca-compliance-review"
+                className="text-white/80 hover:text-white underline text-xs"
+              >
+                For MCA Officials: View Compliance Documentation
+              </a>
+            </div>
+          </div>
+          
+          {/* Compliance Disclaimers */}
+          <div className="mt-8 pt-8 border-t border-white/10 max-w-4xl mx-auto">
+            <h4 className="text-white font-semibold mb-4 text-center">Regulatory Compliance & Data Substantiation</h4>
+            <ComplianceDisclaimer />
           </div>
         </div>
       </footer>
+
+      {/* Role Selector Modal */}
+      <RoleSelectorModal 
+        open={isRoleSelectorOpen}
+        onOpenChange={setIsRoleSelectorOpen}
+      />
 
       {/* Sticky Mobile CTA */}
       <StickyMobileCTA />
