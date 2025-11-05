@@ -1,6 +1,7 @@
 import React from 'react';
 import { Play } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface WelcomeVideoSectionProps {
   videoUrl: string;
@@ -12,6 +13,7 @@ export const WelcomeVideoSection: React.FC<WelcomeVideoSectionProps> = ({
   className = '' 
 }) => {
   const [isPlaying, setIsPlaying] = React.useState(false);
+  const isMobile = useIsMobile();
 
   // Extract Vimeo video ID from URL
   const getVimeoId = (url: string) => {
@@ -26,34 +28,48 @@ export const WelcomeVideoSection: React.FC<WelcomeVideoSectionProps> = ({
   const embedUrl = `https://player.vimeo.com/video/${videoId}${videoHash ? `?h=${videoHash}` : ''}`;
 
   return (
-    <div className={`max-w-4xl mx-auto ${className}`}>
-      {/* Video Context */}
-      <div className="text-center mb-6">
-        <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-          Welcome to Your Journey 👋
+    <div className={`mx-auto ${isMobile ? 'max-w-md' : 'max-w-4xl'} ${className}`}>
+      {/* Video Context - Compact on Mobile */}
+      <div className={`text-center ${isMobile ? 'mb-3' : 'mb-6'}`}>
+        <h2 className={`font-bold text-white ${isMobile ? 'text-xl mb-2' : 'text-3xl md:text-4xl mb-4'}`}>
+          {isMobile ? 'Welcome 👋' : 'Welcome to Your Journey 👋'}
         </h2>
-        <p className="text-xl text-white/90 leading-relaxed max-w-2xl mx-auto">
-          We've partnered with the Maryland Cannabis Administration to deliver top-tier education for dispensary employees, 
-          ensuring Maryland leads as the <strong>Cannabis Education State</strong>.
-        </p>
+        {!isMobile && (
+          <p className="text-xl text-white/90 leading-relaxed max-w-2xl mx-auto">
+            We've partnered with the Maryland Cannabis Administration to deliver top-tier education for dispensary employees, 
+            ensuring Maryland leads as the <strong>Cannabis Education State</strong>.
+          </p>
+        )}
       </div>
 
-      {/* Vimeo Video Embed */}
-      <Card className="overflow-hidden shadow-2xl border-2 border-white/20 bg-black/30 backdrop-blur-sm">
+      {/* Vimeo Video Embed - Optimized for Mobile */}
+      <Card className={`overflow-hidden shadow-2xl border-white/20 bg-black/30 backdrop-blur-sm ${isMobile ? 'border rounded-lg' : 'border-2'}`}>
         <CardContent className="p-0">
           <div className="relative aspect-video">
             {!isPlaying ? (
               <div 
-                className="absolute inset-0 bg-gradient-to-br from-primary/80 to-accent/80 flex items-center justify-center cursor-pointer group"
+                className="absolute inset-0 bg-gradient-to-br from-primary/80 to-accent/80 flex items-center justify-center cursor-pointer active:scale-95 transition-transform"
                 onClick={() => setIsPlaying(true)}
               >
                 <div className="text-center">
-                  <div className="bg-white/20 backdrop-blur-md rounded-full p-8 group-hover:bg-white/30 transition-all group-hover:scale-110">
-                    <Play className="h-16 w-16 text-white" />
+                  {/* Tap-Friendly Play Button */}
+                  <div className={`bg-white/20 backdrop-blur-md rounded-full transition-all active:bg-white/40 ${
+                    isMobile 
+                      ? 'p-6 min-w-[80px] min-h-[80px] flex items-center justify-center' 
+                      : 'p-8 group-hover:bg-white/30 group-hover:scale-110'
+                  }`}>
+                    <Play className={`text-white ${isMobile ? 'h-10 w-10' : 'h-16 w-16'}`} />
                   </div>
-                  <p className="text-white text-lg font-semibold mt-4">
-                    Watch Welcome Message
-                  </p>
+                  {!isMobile && (
+                    <p className="text-white text-lg font-semibold mt-4">
+                      Watch Welcome Message
+                    </p>
+                  )}
+                  {isMobile && (
+                    <p className="text-white text-sm font-semibold mt-2">
+                      Tap to play • 2 min
+                    </p>
+                  )}
                 </div>
               </div>
             ) : (
@@ -70,14 +86,16 @@ export const WelcomeVideoSection: React.FC<WelcomeVideoSectionProps> = ({
         </CardContent>
       </Card>
 
-      {/* Message from instructors */}
-      <div className="mt-6 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 text-center">
-        <p className="text-white/95 text-lg leading-relaxed">
-          In this video, you'll meet your instructors and learn what makes this program special. 
-          <br />
-          <strong className="text-white">We're here to support you every step of the way.</strong> ✨
-        </p>
-      </div>
+      {/* Message from instructors - Hidden on Mobile to Save Space */}
+      {!isMobile && (
+        <div className="mt-6 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 text-center">
+          <p className="text-white/95 text-lg leading-relaxed">
+            In this video, you'll meet your instructors and learn what makes this program special. 
+            <br />
+            <strong className="text-white">We're here to support you every step of the way.</strong> ✨
+          </p>
+        </div>
+      )}
     </div>
   );
 };
