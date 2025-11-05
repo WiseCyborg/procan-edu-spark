@@ -2633,41 +2633,92 @@ export type Database = {
           },
         ]
       }
+      regulatory_change_notifications: {
+        Row: {
+          acknowledged_at: string | null
+          change_summary: string
+          change_type: string
+          comar_section: string
+          created_at: string | null
+          id: string
+          notification_sent_at: string | null
+          requires_recertification: boolean | null
+          user_id: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          change_summary: string
+          change_type: string
+          comar_section: string
+          created_at?: string | null
+          id?: string
+          notification_sent_at?: string | null
+          requires_recertification?: boolean | null
+          user_id: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          change_summary?: string
+          change_type?: string
+          comar_section?: string
+          created_at?: string | null
+          id?: string
+          notification_sent_at?: string | null
+          requires_recertification?: boolean | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       regulatory_content: {
         Row: {
+          change_impact_level: string | null
+          compliance_tips: Json | null
           content_html: string | null
           content_text: string
           created_at: string | null
           effective_date: string | null
           id: string
           last_checked_at: string | null
+          last_mca_review_date: string | null
           last_modified_at: string | null
+          plain_language_summary: string | null
+          related_case_studies: string[] | null
           section_number: string
           section_title: string
           source_url: string
           version_hash: string
         }
         Insert: {
+          change_impact_level?: string | null
+          compliance_tips?: Json | null
           content_html?: string | null
           content_text: string
           created_at?: string | null
           effective_date?: string | null
           id?: string
           last_checked_at?: string | null
+          last_mca_review_date?: string | null
           last_modified_at?: string | null
+          plain_language_summary?: string | null
+          related_case_studies?: string[] | null
           section_number: string
           section_title: string
           source_url: string
           version_hash: string
         }
         Update: {
+          change_impact_level?: string | null
+          compliance_tips?: Json | null
           content_html?: string | null
           content_text?: string
           created_at?: string | null
           effective_date?: string | null
           id?: string
           last_checked_at?: string | null
+          last_mca_review_date?: string | null
           last_modified_at?: string | null
+          plain_language_summary?: string | null
+          related_case_studies?: string[] | null
           section_number?: string
           section_title?: string
           source_url?: string
@@ -3141,6 +3192,47 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      student_certification_versions: {
+        Row: {
+          certified_at: string
+          comar_version_hash: string
+          created_at: string | null
+          id: string
+          module_id: string
+          requires_update: boolean | null
+          update_reason: string | null
+          user_id: string
+        }
+        Insert: {
+          certified_at: string
+          comar_version_hash: string
+          created_at?: string | null
+          id?: string
+          module_id: string
+          requires_update?: boolean | null
+          update_reason?: string | null
+          user_id: string
+        }
+        Update: {
+          certified_at?: string
+          comar_version_hash?: string
+          created_at?: string | null
+          id?: string
+          module_id?: string
+          requires_update?: boolean | null
+          update_reason?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_certification_versions_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "course_modules"
             referencedColumns: ["id"]
           },
         ]
