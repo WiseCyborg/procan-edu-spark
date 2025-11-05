@@ -7,8 +7,10 @@ import {
   useStuckApplications,
   useRunPipelineHealthCheck 
 } from '@/hooks/usePipelineHealth';
-import { AlertTriangle, CheckCircle, XCircle, RefreshCw, Clock, AlertCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle, XCircle, RefreshCw, Clock, AlertCircle, Settings } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { AlertRecipientManager } from '@/components/admin/AlertRecipientManager';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export function PipelineHealthTab() {
   const { data: healthHistory } = usePipelineHealth();
@@ -43,9 +45,18 @@ export function PipelineHealthTab() {
   };
 
   return (
-    <div className="space-y-6 py-6">
-      {/* Current Status */}
-      <Card>
+    <Tabs defaultValue="status" className="space-y-6">
+      <TabsList>
+        <TabsTrigger value="status">Health Status</TabsTrigger>
+        <TabsTrigger value="settings">
+          <Settings className="h-4 w-4 mr-2" />
+          Alert Settings
+        </TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="status" className="space-y-6">
+        {/* Current Status */}
+        <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
@@ -185,6 +196,11 @@ export function PipelineHealthTab() {
           </div>
         </CardContent>
       </Card>
-    </div>
+    </TabsContent>
+
+    <TabsContent value="settings">
+      <AlertRecipientManager />
+    </TabsContent>
+  </Tabs>
   );
 }

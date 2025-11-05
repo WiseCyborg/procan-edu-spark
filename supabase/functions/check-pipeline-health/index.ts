@@ -98,21 +98,35 @@ serve(async (req) => {
       });
     }
 
-    // Send admin alert if critical
-    if (status === 'critical') {
-      await supabase.from('notification_queue').insert({
-        notification_type: 'admin_alert',
-        recipient_email: 'admin@procannedu.com',
-        subject: '🚨 CRITICAL: Pipeline Health Issues Detected',
-        priority: 'urgent',
-        metadata: {
-          status,
-          checks,
-          issues: issues.map(i => ({ type: i.type, count: i.count, severity: i.severity })),
-          timestamp: new Date().toISOString()
-        },
-        scheduled_for: new Date().toISOString()
-      });
+    // Send admin alerts if critical
+    if (status === 'critical' || status === 'degraded') {
+      // Get alert recipients from settings
+      const { data: settings } = await supabase
+        .from('admin_settings')
+        .select('setting_value')
+        .eq('setting_key', 'pipeline_alert_recipients')
+        .single();
+
+      const recipients = settings?.setting_value as string[] || ['admin@procannedu.com'];
+      
+      // Queue alert for each recipient
+      for (const email of recipients) {
+        await supabase.from('notification_queue').insert({
+          notification_type: 'admin_alert',
+          recipient_email: email,
+          subject: status === 'critical' 
+            ? '🚨 CRITICAL: Pipeline Health Issues Detected'
+            : '⚠️ WARNING: Pipeline Performance Degraded',
+          priority: status === 'critical' ? 'urgent' : 'high',
+          metadata: {
+            status,
+            checks,
+            issues: issues.map(i => ({ type: i.type, count: i.count, severity: i.severity })),
+            timestamp: new Date().toISOString()
+          },
+          scheduled_for: new Date().toISOString()
+        });
+      }
     }
 
     return new Response(
