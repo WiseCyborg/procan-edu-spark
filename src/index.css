@@ -169,4 +169,25 @@
   .animate-slide-in-up {
     animation: slide-in-up 0.3s ease-out;
   }
+
+  /* Maryland Bay Flow Animation - Chesapeake Bay inspired gradient movement */
+  @keyframes maryland-bay-flow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .animate-maryland-bay-flow {
+    animation: maryland-bay-flow 20s ease infinite;
+  }
+
+  /* Shimmer pass animation - subtle shine effect */
+  @keyframes shimmer-pass {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(200%); }
+  }
+
+  .animate-shimmer-pass {
+    animation: shimmer-pass 10s ease-in-out infinite;
+  }
 }

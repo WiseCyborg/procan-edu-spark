@@ -61,11 +61,19 @@ const Index = () => {
       
       {/* Mobile-First Optimized Hero Section - Above Fold */}
       <section className={`relative flex items-center justify-center overflow-hidden ${isMobile ? 'min-h-[75vh] py-4' : 'min-h-screen py-16'}`}>
-        {/* Gradient Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/90 to-accent"></div>
+        {/* Animated Maryland Bay Gradient Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary via-[hsl(174,76%,36%)] to-accent animate-maryland-bay-flow" style={{ backgroundSize: '200% 200%' }}></div>
+        
+        {/* Maryland Flag Color Accent Stripes */}
+        <div className="absolute inset-0 bg-gradient-to-br from-red-900/5 via-transparent to-amber-500/5" style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255,215,0,0.03) 35px, rgba(255,215,0,0.03) 70px)' }}></div>
         
         {/* Decorative overlay */}
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDEzNEgxNHYtMjBoMjJ2MjB6bS0yMi0yMEgwdjIwaDE0di0yMHptMCAyMEgwdjE0aDE0di0xNHptMjIgMEgxNHYxNGgyMnYtMTR6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-10"></div>
+        
+        {/* 24 Counties Badge */}
+        <div className={`absolute ${isMobile ? 'top-4 right-4 text-xs px-3 py-1.5' : 'top-8 right-8 px-4 py-2 text-sm'} bg-white/10 backdrop-blur-md rounded-full text-white font-medium animate-float`}>
+          🗺️ Serving All 24 Maryland Counties
+        </div>
 
         <div className="relative z-10 container mx-auto px-4">
           {/* Live COMAR Badge - Subtle Placement */}
