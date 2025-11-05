@@ -839,6 +839,11 @@ export type Database = {
           license_type: string | null
           organization_id: string | null
           organization_name: string
+          payment_amount: number | null
+          payment_date: string | null
+          payment_provider: string | null
+          payment_status: string | null
+          payment_transaction_id: string | null
           preferred_start_date: string | null
           registration_completed: boolean | null
           registration_token: string | null
@@ -868,6 +873,11 @@ export type Database = {
           license_type?: string | null
           organization_id?: string | null
           organization_name: string
+          payment_amount?: number | null
+          payment_date?: string | null
+          payment_provider?: string | null
+          payment_status?: string | null
+          payment_transaction_id?: string | null
           preferred_start_date?: string | null
           registration_completed?: boolean | null
           registration_token?: string | null
@@ -897,6 +907,11 @@ export type Database = {
           license_type?: string | null
           organization_id?: string | null
           organization_name?: string
+          payment_amount?: number | null
+          payment_date?: string | null
+          payment_provider?: string | null
+          payment_status?: string | null
+          payment_transaction_id?: string | null
           preferred_start_date?: string | null
           registration_completed?: boolean | null
           registration_token?: string | null
@@ -2223,6 +2238,42 @@ export type Database = {
           metric_value?: number
           session_id?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      pipeline_health_log: {
+        Row: {
+          check_type: string
+          checked_at: string | null
+          created_at: string | null
+          error_count: number | null
+          id: string
+          last_error_message: string | null
+          metadata: Json | null
+          status: string
+          success_count: number | null
+        }
+        Insert: {
+          check_type: string
+          checked_at?: string | null
+          created_at?: string | null
+          error_count?: number | null
+          id?: string
+          last_error_message?: string | null
+          metadata?: Json | null
+          status: string
+          success_count?: number | null
+        }
+        Update: {
+          check_type?: string
+          checked_at?: string | null
+          created_at?: string | null
+          error_count?: number | null
+          id?: string
+          last_error_message?: string | null
+          metadata?: Json | null
+          status?: string
+          success_count?: number | null
         }
         Relationships: []
       }
@@ -4077,6 +4128,17 @@ export type Database = {
         Args: { course_id: string; org_id: string }
         Returns: boolean
       }
+      check_stuck_applications: {
+        Args: never
+        Returns: {
+          application_id: string
+          contact_email: string
+          hours_stuck: number
+          last_updated: string
+          organization_name: string
+          status: string
+        }[]
+      }
       cleanup_old_api_requests: { Args: never; Returns: undefined }
       cleanup_performance_metrics: { Args: never; Returns: undefined }
       clear_user_rate_limits: {
@@ -4346,6 +4408,7 @@ export type Database = {
           success: boolean
         }[]
       }
+      run_pipeline_health_check: { Args: never; Returns: Json }
       schedule_if_missing: {
         Args: { p_jobname: string; p_spec: string; p_sql: string }
         Returns: undefined
@@ -4372,6 +4435,17 @@ export type Database = {
       user_can_view_profile: {
         Args: { _target_user_id: string; _viewer_id: string }
         Returns: boolean
+      }
+      validate_registration_token: {
+        Args: { token_value: string }
+        Returns: {
+          application_id: string
+          error_message: string
+          expires_at: string
+          is_valid: boolean
+          organization_id: string
+          organization_name: string
+        }[]
       }
       verify_certificate_status: {
         Args: { cert_number: string }

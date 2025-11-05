@@ -1,8 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useOperationsMetrics } from '@/hooks/useOperationsMetrics';
 import DispensaryApplicationManager from '@/components/admin/DispensaryApplicationManager';
+import { PipelineHealthTab } from './PipelineHealthTab';
 
 export function PipelineTab() {
   const { metrics } = useOperationsMetrics();
@@ -32,9 +34,15 @@ export function PipelineTab() {
   ];
 
   return (
-    <div className="space-y-6 py-6">
-      {/* Conversion Funnel */}
-      <Card>
+    <Tabs defaultValue="funnel" className="space-y-6">
+      <TabsList>
+        <TabsTrigger value="funnel">Application Funnel</TabsTrigger>
+        <TabsTrigger value="health">Pipeline Health</TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="funnel" className="space-y-6">
+        {/* Conversion Funnel */}
+        <Card>
         <CardHeader>
           <CardTitle>Application Pipeline Funnel</CardTitle>
         </CardHeader>
@@ -67,15 +75,20 @@ export function PipelineTab() {
         </CardContent>
       </Card>
 
-      {/* Application Queue */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Pending Applications</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <DispensaryApplicationManager />
-        </CardContent>
-      </Card>
-    </div>
+        {/* Application Queue */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Pending Applications</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <DispensaryApplicationManager />
+          </CardContent>
+        </Card>
+      </TabsContent>
+
+      <TabsContent value="health">
+        <PipelineHealthTab />
+      </TabsContent>
+    </Tabs>
   );
 }

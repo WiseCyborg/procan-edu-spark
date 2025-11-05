@@ -20,6 +20,23 @@ serve(async (req) => {
   }
 
   try {
+    // PHASE 3: Check email circuit breaker before proceeding
+    const { data: circuitData } = await supabase.rpc('check_email_circuit');
+    if (circuitData && circuitData[0]?.is_open) {
+      log('warn', 'email.circuit_breaker.open', {
+        message: 'Email circuit breaker is OPEN - service temporarily unavailable'
+      });
+      
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Email service temporarily unavailable. Notification queued for retry.',
+          circuitOpen: true 
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 503 }
+      );
+    }
+
     const { 
       application_id, 
       contact_person, 
@@ -28,7 +45,7 @@ serve(async (req) => {
       license_number 
     } = await req.json();
 
-    console.log('📧 [v1.1] Sending application confirmation email to:', contact_email); // Redeployment trigger
+    console.log('📧 [v1.2] Sending application confirmation email to:', contact_email);
 
     // Load email template
     const html = await loadEmailTemplate('application-received', {
@@ -99,8 +116,13 @@ serve(async (req) => {
     }
 
     if (!result.success) {
+      // PHASE 3: Record email failure in circuit breaker
+      await supabase.rpc('record_email_result', { p_success: false });
       throw new Error(`Email sending failed: ${result.error}`);
     }
+
+    // PHASE 3: Record email success in circuit breaker
+    await supabase.rpc('record_email_result', { p_success: true });
 
     console.log('✅ Application confirmation email sent successfully via', result.provider);
 
@@ -117,6 +139,14 @@ serve(async (req) => {
     );
   } catch (error) {
     console.error("❌ Error sending application confirmation:", error);
+    
+    // Record failure in circuit breaker
+    try {
+      await supabase.rpc('record_email_result', { p_success: false });
+    } catch (cbError) {
+      console.error("Failed to record circuit breaker result:", cbError);
+    }
+    
     return new Response(
       JSON.stringify({ 
         success: false, 

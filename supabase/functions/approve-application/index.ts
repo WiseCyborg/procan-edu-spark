@@ -173,7 +173,7 @@ serve(async (req) => {
 
     console.log('[APPROVE-APPLICATION] Calling RPC with service role for application:', application_id);
 
-    // Call RPC with service role, passing verified admin user ID
+    // PHASE 4: Call RPC with service role (atomic transaction)
     const { data, error: rpcError } = await serviceClient.rpc(
       'approve_dispensary_application',
       {
@@ -185,6 +185,21 @@ serve(async (req) => {
 
     if (rpcError) {
       console.error('[APPROVE-APPLICATION] RPC error:', rpcError);
+      
+      // PHASE 4: Log approval failure for monitoring
+      await serviceClient.from('pipeline_health_log').insert({
+        check_type: 'approval_failure',
+        status: 'critical',
+        error_count: 1,
+        last_error_message: rpcError.message,
+        metadata: {
+          application_id,
+          credits,
+          admin_user_id: user.id,
+          error: rpcError.message
+        }
+      });
+      
       return new Response(
         JSON.stringify({ 
           success: false, 
@@ -221,6 +236,20 @@ serve(async (req) => {
 
     if (!result.success) {
       console.error('[APPROVE-APPLICATION] Approval failed:', result.message);
+      
+      // PHASE 4: Log partial failure
+      await serviceClient.from('pipeline_health_log').insert({
+        check_type: 'approval_partial_failure',
+        status: 'degraded',
+        error_count: 1,
+        last_error_message: result.message,
+        metadata: {
+          application_id,
+          credits,
+          result
+        }
+      });
+      
       return new Response(
         JSON.stringify({ 
           success: false, 
@@ -235,6 +264,40 @@ serve(async (req) => {
     }
 
     console.log('[APPROVE-APPLICATION] ✅ Approval successful for:', result.organization_id);
+
+    // PHASE 4: Verify organization was created
+    const { data: orgVerification } = await serviceClient
+      .from('organizations')
+      .select('id, name')
+      .eq('id', result.organization_id)
+      .single();
+
+    if (!orgVerification) {
+      console.error('[APPROVE-APPLICATION] Organization verification failed - organization not found');
+      await serviceClient.from('pipeline_health_log').insert({
+        check_type: 'approval_verification_failure',
+        status: 'critical',
+        error_count: 1,
+        last_error_message: 'Organization not found after approval',
+        metadata: {
+          application_id,
+          expected_org_id: result.organization_id
+        }
+      });
+    }
+
+    // PHASE 4: Log successful approval
+    await serviceClient.from('pipeline_health_log').insert({
+      check_type: 'approval_success',
+      status: 'healthy',
+      success_count: 1,
+      metadata: {
+        application_id,
+        organization_id: result.organization_id,
+        credits,
+        admin_user_id: user.id
+      }
+    });
 
     // Cache the result for idempotency
     await serviceClient.from('api_requests').insert({
