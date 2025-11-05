@@ -1,15 +1,19 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { MessageCircle, Send, X, HelpCircle } from 'lucide-react';
+import { MessageCircle, Send, X, HelpCircle, Lock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
+import { usePaymentStatus } from '@/hooks/usePaymentStatus';
+import { useOrganizationAccess } from '@/hooks/useOrganizationAccess';
 import { toast } from '@/components/ui/use-toast';
+
+const COURSE_ID = '76524ea8-a00f-47b3-8e29-a0aa12c23a60';
 
 interface Message {
   id: string;
@@ -147,7 +151,9 @@ const getContextInfo = (pathname: string): ContextInfo => {
 export const ChatAssistant: React.FC = () => {
   const location = useLocation();
   const { user } = useAuth();
-  const { roles } = useUserRole();
+  const { roles, isAdmin, isDispensaryManager, isStudent } = useUserRole();
+  const { hasPaid, isLoading: paymentLoading } = usePaymentStatus(COURSE_ID);
+  const { hasAccess: hasOrgAccess, isLoading: orgLoading } = useOrganizationAccess(user?.id);
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
@@ -158,6 +164,20 @@ export const ChatAssistant: React.FC = () => {
 
   const contextInfo = getContextInfo(location.pathname);
   const isChatDisabled = contextInfo.route === 'final-exam';
+
+  // Access control for training-related routes
+  const accessType = useMemo(() => {
+    if (!user) return 'NEEDS_AUTH';
+    if (isAdmin || isDispensaryManager) return 'ADMIN_ACCESS';
+    if (isStudent && hasOrgAccess) return 'ORG_EMPLOYEE_ACCESS';
+    if (hasPaid) return 'INDIVIDUAL_PAID';
+    return 'NEEDS_PAYMENT';
+  }, [user, isAdmin, isDispensaryManager, isStudent, hasOrgAccess, hasPaid]);
+
+  // Restrict chat on training routes if user doesn't have access
+  const isTrainingRoute = location.pathname.startsWith('/course') || location.pathname === '/training-handbook';
+  const isChatRestricted = isTrainingRoute && !paymentLoading && !orgLoading && 
+    (accessType === 'NEEDS_PAYMENT' || accessType === 'NEEDS_AUTH');
 
   // Scroll to bottom of messages
   const scrollToBottom = () => {
@@ -265,6 +285,26 @@ export const ChatAssistant: React.FC = () => {
             <p className="text-sm text-muted-foreground">
               Chat assistance is disabled during the final exam to maintain exam integrity.
             </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Restricted chat for training routes without payment
+  if (isChatRestricted) {
+    return (
+      <div className="fixed bottom-4 right-4 z-50">
+        <Card className="w-80 bg-muted border-border">
+          <CardContent className="p-4 text-center">
+            <Lock className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+            <h3 className="font-semibold text-foreground mb-1">Training Chat Locked</h3>
+            <p className="text-sm text-muted-foreground mb-3">
+              Chat assistance for training content requires course enrollment.
+            </p>
+            <Button size="sm" variant="outline" onClick={() => window.location.href = '/course'}>
+              Enroll Now
+            </Button>
           </CardContent>
         </Card>
       </div>

@@ -20,7 +20,8 @@ import {
   Settings,
   Search,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  X
 } from 'lucide-react';
 import { QuickLookupPanel } from '@/components/admin/QuickLookupPanel';
 import { CallContextSelector, CallerType } from '@/components/admin/CallContextSelector';
@@ -852,7 +853,23 @@ const AdminDashboard = () => {
 
         {/* Enhanced Search Filter - Always Available */}
         <EnhancedSearchFilter />
-      </div>
+        </div>
+      </main>
+
+      {/* RIGHT PANEL - Context Info */}
+      {showRightPanel && selectedItem && (
+        <aside className="w-96 border-l bg-card overflow-y-auto">
+          <div className="p-4 border-b flex items-center justify-between">
+            <h2 className="text-lg font-bold">Context Info</h2>
+            <Button variant="ghost" size="sm" onClick={() => setShowRightPanel(false)}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="p-4">
+            <ContextInfoPanel selectedItem={selectedItem} />
+          </div>
+        </aside>
+      )}
     </div>
   );
 };

@@ -1,13 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Download, FileText, BookOpen, Shield, Award, Users } from 'lucide-react';
+import { Download, FileText, BookOpen, Shield, Award, Users, Lock, LogIn } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
+import { useUserRole } from '@/hooks/useUserRole';
+import { usePaymentStatus } from '@/hooks/usePaymentStatus';
+import { useOrganizationAccess } from '@/hooks/useOrganizationAccess';
+import { CoursePaymentGate } from '@/components/CoursePaymentGate';
+import { EmployeeAccessMessage } from '@/components/EmployeeAccessMessage';
+
+const COURSE_ID = '76524ea8-a00f-47b3-8e29-a0aa12c23a60';
 
 const TrainingHandbook = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { isAdmin, isDispensaryManager, isStudent, isLoading: rolesLoading } = useUserRole();
+  const { hasPaid, isLoading: paymentLoading } = usePaymentStatus(COURSE_ID);
+  const { hasAccess: hasOrgAccess, isLoading: orgLoading } = useOrganizationAccess(user?.id);
   const [activeSection, setActiveSection] = useState<string>('section1');
 
   const sections = [
@@ -30,6 +42,71 @@ const TrainingHandbook = () => {
     }
   };
 
+  const accessType = useMemo(() => {
+    if (!user) return 'NEEDS_AUTH';
+    if (isAdmin || isDispensaryManager) return 'ADMIN_ACCESS';
+    if (isStudent && hasOrgAccess) return 'ORG_EMPLOYEE_ACCESS';
+    if (isStudent && !hasOrgAccess) return 'NEEDS_ACCESS_KEY';
+    if (hasPaid) return 'INDIVIDUAL_PAID';
+    return 'NEEDS_PAYMENT';
+  }, [user, isAdmin, isDispensaryManager, isStudent, hasOrgAccess, hasPaid]);
+
+  const isLoading = rolesLoading || paymentLoading || orgLoading;
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  // Auth gate
+  if (accessType === 'NEEDS_AUTH') {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <Card className="max-w-md w-full">
+          <CardHeader className="text-center">
+            <Lock className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+            <CardTitle>Sign In Required</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-muted-foreground text-center">
+              The Training Handbook is available to enrolled students. Please sign in to access this resource.
+            </p>
+            <Button onClick={() => navigate('/auth')} className="w-full">
+              <LogIn className="h-4 w-4 mr-2" />
+              Sign In
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Access key gate for students without organization
+  if (accessType === 'NEEDS_ACCESS_KEY') {
+    return <EmployeeAccessMessage />;
+  }
+
+  // Payment gate for individual students
+  if (accessType === 'NEEDS_PAYMENT') {
+    return (
+      <CoursePaymentGate
+        course={{
+          id: COURSE_ID,
+          title: 'MCA Dispensary Agent Training',
+          description: 'Complete Maryland Cannabis Administration training with access to the Training Handbook',
+          price_cents: 4999,
+          currency: 'USD',
+          payment_required: true
+        }}
+        onPaymentSuccess={() => window.location.reload()}
+      />
+    );
+  }
+
+  // Full access for: ADMIN_ACCESS, ORG_EMPLOYEE_ACCESS, INDIVIDUAL_PAID
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
