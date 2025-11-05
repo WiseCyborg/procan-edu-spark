@@ -66,6 +66,8 @@ import RoleSelectionDashboard from "./pages/RoleSelectionDashboard";
 import OnboardingSetup from "./pages/OnboardingSetup";
 import OperationsCommandCenter from "./pages/OperationsCommandCenter";
 import ExamAnalyticsPage from "./pages/ExamAnalyticsPage";
+import CompetitorComparison from "./pages/CompetitorComparison";
+import ROICalculatorPublic from "./pages/ROICalculatorPublic";
 
 import { ProtectedCourseAccess } from "./components/ProtectedCourseAccess";
 
@@ -224,6 +226,8 @@ const App = () => (
                    <Route path="/employers" element={<EmployersPage />} />
                    <Route path="/impact" element={<ImpactDashboardPage />} />
                    <Route path="/accessibility" element={<AccessibilityPage />} />
+                   <Route path="/why-procann" element={<CompetitorComparison />} />
+                   <Route path="/roi-calculator-public" element={<ROICalculatorPublic />} />
                    
                    <Route path="/team-management" element={
                       <ProtectedRoute>

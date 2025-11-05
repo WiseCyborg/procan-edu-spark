@@ -14,6 +14,7 @@ import { ROIHighlightCard } from '@/components/ROIHighlightCard';
 import { LiveActivityTicker } from '@/components/LiveActivityTicker';
 import { MarylandCountyHeatmap } from '@/components/MarylandCountyHeatmap';
 import { StickyMobileCTA } from '@/components/StickyMobileCTA';
+import { PredictiveAnalyticsPreview } from '@/components/PredictiveAnalyticsPreview';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -223,8 +224,48 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Maryland Partnership Section */}
+      <section className="py-16 px-4 bg-gradient-to-br from-blue-50 to-green-50 dark:from-blue-950/20 dark:to-green-950/20">
+        <div className="container mx-auto">
+          <div className="text-center mb-12">
+            <h3 className="text-3xl font-bold text-foreground mb-4">
+              Trusted by Maryland's Cannabis Community
+            </h3>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Official partnerships and endorsements from Maryland's cannabis industry leaders
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 items-center justify-items-center max-w-4xl mx-auto">
+            <Card className="p-6 text-center hover:shadow-lg transition-shadow w-full">
+              <Shield className="h-12 md:h-16 w-12 md:w-16 text-green-600 mx-auto mb-3" />
+              <p className="font-semibold text-sm md:text-base">MCA Approved</p>
+              <p className="text-xs text-muted-foreground mt-1">Maryland Cannabis Administration</p>
+            </Card>
+
+            <Card className="p-6 text-center hover:shadow-lg transition-shadow w-full">
+              <Building2 className="h-12 md:h-16 w-12 md:w-16 text-blue-600 mx-auto mb-3" />
+              <p className="font-semibold text-sm md:text-base">24 Counties</p>
+              <p className="text-xs text-muted-foreground mt-1">Statewide Coverage</p>
+            </Card>
+
+            <Card className="p-6 text-center hover:shadow-lg transition-shadow w-full">
+              <Users className="h-12 md:h-16 w-12 md:w-16 text-purple-600 mx-auto mb-3" />
+              <p className="font-semibold text-sm md:text-base">150+ Dispensaries</p>
+              <p className="text-xs text-muted-foreground mt-1">Active Partners</p>
+            </Card>
+
+            <Card className="p-6 text-center hover:shadow-lg transition-shadow w-full">
+              <Award className="h-12 md:h-16 w-12 md:w-16 text-yellow-600 mx-auto mb-3" />
+              <p className="font-semibold text-sm md:text-base">2,500+ Certified</p>
+              <p className="text-xs text-muted-foreground mt-1">Maryland Agents</p>
+            </Card>
+          </div>
+        </div>
+      </section>
+
       {/* Features Section */}
-      <section className="py-16 px-4">
+      <section className="py-16 px-4 bg-white dark:bg-background">
         <div className="container mx-auto">
           <h3 className="text-3xl md:text-4xl font-bold text-center text-foreground mb-4">
             What Makes Us Different?
@@ -294,6 +335,9 @@ const Index = () => {
 
       {/* Maryland County Heatmap */}
       <MarylandCountyHeatmap />
+
+      {/* Predictive Analytics Preview Section */}
+      <PredictiveAnalyticsPreview />
 
       {/* Course Overview */}
       <section className="py-16 px-4 bg-white">
