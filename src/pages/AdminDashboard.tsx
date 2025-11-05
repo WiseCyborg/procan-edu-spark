@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -457,30 +458,61 @@ const AdminDashboard = () => {
         )}
 
           <Tabs defaultValue="dispensaries" className="w-full">
-            <div className="overflow-x-auto pb-2 mb-4">
-              <TabsList className="inline-flex min-w-max">
-                <TabsTrigger value="dispensaries">🏢 Dispensaries</TabsTrigger>
-                <TabsTrigger value="users">👥 Users</TabsTrigger>
-                <TabsTrigger value="certificates">🎓 Certificates</TabsTrigger>
-                <TabsTrigger value="applications">📋 Applications</TabsTrigger>
-                <TabsTrigger value="setup">⚙️ Setup</TabsTrigger>
-                <TabsTrigger value="invitations">✉️ Invitations</TabsTrigger>
-                <TabsTrigger value="test-accounts">🧪 Test Accounts</TabsTrigger>
-                <TabsTrigger value="analytics">📊 Analytics</TabsTrigger>
-                <TabsTrigger value="security">🔒 Security</TabsTrigger>
-                <TabsTrigger value="compliance">📈 Compliance</TabsTrigger>
-                <TabsTrigger value="profile-audit">👤 Profile Audit</TabsTrigger>
-                <TabsTrigger value="employees">👥 Employees</TabsTrigger>
-                <TabsTrigger value="oversight">🔍 Oversight</TabsTrigger>
-                <TabsTrigger value="form-health">🔧 Form Health</TabsTrigger>
-                <TabsTrigger value="email-monitoring">📬 Email Monitor</TabsTrigger>
-                <TabsTrigger value="email-tracking">📧 Email Tracking</TabsTrigger>
-                <TabsTrigger value="email-health">📨 Email Health</TabsTrigger>
-                <TabsTrigger value="revenue">💰 Revenue</TabsTrigger>
-                <TabsTrigger value="reports">📄 Reports</TabsTrigger>
-                <TabsTrigger value="notifications">🔔 Notifications</TabsTrigger>
-                <TabsTrigger value="bulk">⚡ Bulk Ops</TabsTrigger>
-              </TabsList>
+            <div className="mb-4">
+              <Accordion type="multiple" defaultValue={["core", "applications", "monitoring", "system"]} className="w-full">
+                <AccordionItem value="core">
+                  <AccordionTrigger className="text-sm font-semibold">Core Operations</AccordionTrigger>
+                  <AccordionContent>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2">
+                      <TabsTrigger value="dispensaries" className="justify-start">🏢 Dispensaries</TabsTrigger>
+                      <TabsTrigger value="users" className="justify-start">👥 Users</TabsTrigger>
+                      <TabsTrigger value="certificates" className="justify-start">🎓 Certificates</TabsTrigger>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="applications">
+                  <AccordionTrigger className="text-sm font-semibold">Applications & Onboarding</AccordionTrigger>
+                  <AccordionContent>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2">
+                      <TabsTrigger value="applications" className="justify-start">📋 Applications</TabsTrigger>
+                      <TabsTrigger value="setup" className="justify-start">⚙️ Setup</TabsTrigger>
+                      <TabsTrigger value="invitations" className="justify-start">✉️ Invitations</TabsTrigger>
+                      <TabsTrigger value="test-accounts" className="justify-start">🧪 Test Accounts</TabsTrigger>
+                      <TabsTrigger value="employees" className="justify-start">👥 Employees</TabsTrigger>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="monitoring">
+                  <AccordionTrigger className="text-sm font-semibold">Monitoring & Reporting</AccordionTrigger>
+                  <AccordionContent>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2">
+                      <TabsTrigger value="analytics" className="justify-start">📊 Analytics</TabsTrigger>
+                      <TabsTrigger value="security" className="justify-start">🔒 Security</TabsTrigger>
+                      <TabsTrigger value="compliance" className="justify-start">📈 Compliance</TabsTrigger>
+                      <TabsTrigger value="profile-audit" className="justify-start">👤 Profile Audit</TabsTrigger>
+                      <TabsTrigger value="oversight" className="justify-start">🔍 Oversight</TabsTrigger>
+                      <TabsTrigger value="reports" className="justify-start">📄 Reports</TabsTrigger>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="system">
+                  <AccordionTrigger className="text-sm font-semibold">System Health & Tools</AccordionTrigger>
+                  <AccordionContent>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2">
+                      <TabsTrigger value="form-health" className="justify-start">🔧 Form Health</TabsTrigger>
+                      <TabsTrigger value="email-monitoring" className="justify-start">📬 Email Monitor</TabsTrigger>
+                      <TabsTrigger value="email-tracking" className="justify-start">📧 Email Tracking</TabsTrigger>
+                      <TabsTrigger value="email-health" className="justify-start">📨 Email Health</TabsTrigger>
+                      <TabsTrigger value="revenue" className="justify-start">💰 Revenue</TabsTrigger>
+                      <TabsTrigger value="notifications" className="justify-start">🔔 Notifications</TabsTrigger>
+                      <TabsTrigger value="bulk" className="justify-start">⚡ Bulk Ops</TabsTrigger>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
             </div>
 
             <TabsContent value="dispensaries">
