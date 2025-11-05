@@ -70,6 +70,17 @@ const Index = () => {
         {/* Decorative overlay */}
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDEzNEgxNHYtMjBoMjJ2MjB6bS0yMi0yMEgwdjIwaDE0di0yMHptMCAyMEgwdjE0aDE0di0xNHptMjIgMEgxNHYxNGgyMnYtMTR6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-10"></div>
         
+        {/* Shimmer Effect - passes every 10 seconds */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div 
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer-pass" 
+            style={{ 
+              width: '50%',
+              transform: 'translateX(-100%) skewX(-15deg)' 
+            }}
+          />
+        </div>
+        
         {/* 24 Counties Badge */}
         <div className={`absolute ${isMobile ? 'top-4 right-4 text-xs px-3 py-1.5' : 'top-8 right-8 px-4 py-2 text-sm'} bg-white/10 backdrop-blur-md rounded-full text-white font-medium animate-float`}>
           🗺️ Serving All 24 Maryland Counties

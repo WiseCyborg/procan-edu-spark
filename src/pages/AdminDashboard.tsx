@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 import { 
   Users, 
   TrendingUp, 
@@ -17,8 +18,16 @@ import {
   Building2,
   BarChart3,
   Settings,
-  Search
+  Search,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
+import { QuickLookupPanel } from '@/components/admin/QuickLookupPanel';
+import { CallContextSelector, CallerType } from '@/components/admin/CallContextSelector';
+import { QuickActionsPanel } from '@/components/admin/QuickActionsPanel';
+import { ContextInfoPanel } from '@/components/admin/ContextInfoPanel';
+import { CertificatesTab } from '@/components/admin/operations/CertificatesTab';
+import { QuickSearchResult } from '@/hooks/useQuickSearch';
 import { SmartNotificationSystem } from '@/components/admin/SmartNotificationSystem';
 import { BulkOperationsManager } from '@/components/admin/BulkOperationsManager';
 import { PredictiveAnalyticsDashboard } from '@/components/admin/PredictiveAnalyticsDashboard';
@@ -93,6 +102,9 @@ const AdminDashboard = () => {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string>('');
   const [searchLoading, setSearchLoading] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<QuickSearchResult | null>(null);
+  const [callerType, setCallerType] = useState<CallerType>(null);
+  const [showRightPanel, setShowRightPanel] = useState(true);
 
   useEffect(() => {
     if (user) {
@@ -329,18 +341,39 @@ const AdminDashboard = () => {
     );
   }
 
+  const handleQuickAction = (action: string) => {
+    toast({ title: 'Quick Action', description: `Executing: ${action}` });
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
-      <div className="container mx-auto px-4 py-8">
-        <Breadcrumbs />
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-green-700 flex items-center">
-            <Settings className="mr-3 h-8 w-8" />
-            Admin Dashboard
-          </h1>
-          <p className="text-gray-600 mt-1">Platform analytics and management overview</p>
+    <div className="flex h-screen bg-background overflow-hidden">
+      {/* LEFT SIDEBAR - Quick Lookup */}
+      <aside className="w-80 border-r bg-card overflow-y-auto">
+        <div className="p-4 border-b">
+          <h2 className="text-lg font-bold flex items-center gap-2">
+            <Settings className="h-5 w-5" />
+            Admin Command Center
+          </h2>
         </div>
+        <div className="p-4 space-y-6">
+          <QuickLookupPanel onSelectResult={setSelectedItem} />
+          <div className="border-t pt-6">
+            <CallContextSelector onSelect={setCallerType} />
+          </div>
+          <div className="border-t pt-6">
+            <QuickActionsPanel callerType={callerType} onAction={handleQuickAction} />
+          </div>
+        </div>
+      </aside>
+
+      {/* MAIN CONTENT */}
+      <main className="flex-1 overflow-y-auto">
+        <div className="p-6">
+          <Breadcrumbs />
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold">Phone Support Dashboard</h1>
+            <p className="text-muted-foreground">Quick access to dispensaries, users, and certificates</p>
+          </div>
 
         {/* Phase 7: Real-Time Widgets */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
@@ -422,27 +455,42 @@ const AdminDashboard = () => {
           </Card>
         )}
 
-        {/* Main Content */}
-        <Tabs defaultValue="users" className="w-full">
-          <TabsList className="w-full flex overflow-x-auto gap-2 bg-card border-2 border-border p-2 h-auto">
-            <TabsTrigger value="users" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg px-4 py-3 font-semibold whitespace-nowrap flex-shrink-0">Users</TabsTrigger>
-            <TabsTrigger value="form-health" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg px-4 py-3 font-semibold whitespace-nowrap flex-shrink-0">🔧 Form Health</TabsTrigger>
-            <TabsTrigger value="organizations" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg px-4 py-3 font-semibold whitespace-nowrap flex-shrink-0">Organizations</TabsTrigger>
-            <TabsTrigger value="applications" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg px-4 py-3 font-semibold whitespace-nowrap flex-shrink-0">Applications</TabsTrigger>
-            <TabsTrigger value="setup" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg px-4 py-3 font-semibold whitespace-nowrap flex-shrink-0">Setup</TabsTrigger>
-            <TabsTrigger value="test-accounts" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg px-4 py-3 font-semibold whitespace-nowrap flex-shrink-0">Test Accounts</TabsTrigger>
-            <TabsTrigger value="oversight" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg px-4 py-3 font-semibold whitespace-nowrap flex-shrink-0">Oversight</TabsTrigger>
-            <TabsTrigger value="invitations" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg px-4 py-3 font-semibold whitespace-nowrap flex-shrink-0">Invitations</TabsTrigger>
-            <TabsTrigger value="compliance" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg px-4 py-3 font-semibold whitespace-nowrap flex-shrink-0">Compliance</TabsTrigger>
-            <TabsTrigger value="employees" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg px-4 py-3 font-semibold whitespace-nowrap flex-shrink-0">Employees</TabsTrigger>
-            <TabsTrigger value="security" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg px-4 py-3 font-semibold whitespace-nowrap flex-shrink-0">Security</TabsTrigger>
-            <TabsTrigger value="profile-audit" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg px-4 py-3 font-semibold whitespace-nowrap flex-shrink-0">👤 Profile Audit</TabsTrigger>
-            <TabsTrigger value="email-monitoring" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg px-4 py-3 font-semibold whitespace-nowrap flex-shrink-0">📧 Email</TabsTrigger>
-            <TabsTrigger value="email-tracking" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg px-4 py-3 font-semibold whitespace-nowrap flex-shrink-0">📬 Email Tracking</TabsTrigger>
-            <TabsTrigger value="revenue" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg px-4 py-3 font-semibold whitespace-nowrap flex-shrink-0">Revenue</TabsTrigger>
-            <TabsTrigger value="notifications" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg px-4 py-3 font-semibold whitespace-nowrap flex-shrink-0">Notifications</TabsTrigger>
-            <TabsTrigger value="analytics" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg px-4 py-3 font-semibold whitespace-nowrap flex-shrink-0">Analytics</TabsTrigger>
-          </TabsList>
+          <Tabs defaultValue="dispensaries" className="w-full">
+            <TabsList className="mb-4">
+              <TabsTrigger value="dispensaries">🏢 Dispensaries</TabsTrigger>
+              <TabsTrigger value="users">👥 Users</TabsTrigger>
+              <TabsTrigger value="certificates">🎓 Certificates</TabsTrigger>
+              <TabsTrigger value="applications">📋 Applications</TabsTrigger>
+              <TabsTrigger value="setup">⚙️ Setup</TabsTrigger>
+              <TabsTrigger value="security">🔒 Security</TabsTrigger>
+              <TabsTrigger value="analytics">📊 Analytics</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="dispensaries">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Organizations</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {organizations.map((org, index) => (
+                      <div key={index} className="border rounded-lg p-4 cursor-pointer hover:bg-accent" onClick={() => setSelectedItem({ id: String(index), type: 'organization', primary_text: org.name, secondary_text: `${org.employeeCount} employees`, status: 'active' })}>
+                        <h3 className="font-semibold">{org.name}</h3>
+                        <p className="text-sm text-muted-foreground">{org.employeeCount} employees • {org.completionRate}% complete</p>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="certificates">
+              <CertificatesTab />
+            </TabsContent>
+
+            <TabsContent value="applications">
+              <DispensaryApplicationManager />
+            </TabsContent>
 
           <TabsContent value="users">
             <Card>
