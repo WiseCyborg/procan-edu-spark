@@ -336,7 +336,7 @@ const EnhancedDispensaryPortal: React.FC = () => {
                       </div>
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm">
-                          <span>Progress: {employee.completed_modules}/18 modules</span>
+                          <span>Progress: {employee.completed_modules}/23 modules</span>
                           <span>Average Score: {employee.total_score}%</span>
                         </div>
                         <Progress value={(employee.completed_modules / 18) * 100} />

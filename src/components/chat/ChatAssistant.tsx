@@ -65,7 +65,7 @@ const getContextInfo = (pathname: string): ContextInfo => {
       ],
       systemPrompt: `You are a helpful assistant for ProCann Edu's dashboard. Help users navigate their training progress and courses. Key points:
       - Users can see available courses, progress, and certificates here
-      - Maryland cannabis training includes 18 modules covering compliance
+      - Maryland cannabis training includes 23 modules covering compliance
       - Certificates are available after passing the final exam with 80%+
       - Support contact: info@procannedu.com
       - Encourage completion of training for career advancement

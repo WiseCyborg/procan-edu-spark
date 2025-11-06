@@ -119,7 +119,7 @@ const steps = [
           <div>
             <h4 className="font-semibold mb-2">Earning Your Certificate</h4>
             <p className="text-muted-foreground text-sm">
-              After completing all 18 modules, you'll take a comprehensive final exam 
+              After completing all 23 modules, you'll take a comprehensive final exam 
               covering key concepts from across the entire course.
             </p>
           </div>

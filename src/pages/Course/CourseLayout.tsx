@@ -160,7 +160,7 @@ const CourseLayout: React.FC = () => {
           <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
             <p className="text-sm text-blue-800 dark:text-blue-300 text-center">
               <span className="font-semibold">Note:</span> Green, Yellow, and Red tier levels are for progress tracking and motivation. 
-              All 18 modules are required for Maryland RVT certification compliance.
+              All 23 modules are required for Maryland RVT certification compliance.
             </p>
           </div>
           {isManagerRole && managerModules.length > 0 && (

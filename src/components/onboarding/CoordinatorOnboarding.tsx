@@ -21,7 +21,7 @@ const steps = [
           <h4 className="font-semibold">Your Key Responsibilities:</h4>
           <ul className="list-disc list-inside space-y-1 text-sm">
             <li>Invite new employees and assign training seats</li>
-            <li>Monitor progress through all 18 modules</li>
+            <li>Monitor progress through all 23 modules</li>
             <li>Send reminders to keep employees on track</li>
             <li>Generate compliance reports for management</li>
             <li>Answer training-related questions</li>

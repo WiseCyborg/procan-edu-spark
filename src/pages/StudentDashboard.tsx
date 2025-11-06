@@ -148,7 +148,7 @@ const StudentDashboard = () => {
         <CardContent className="p-4">
           <p className="text-sm text-blue-800 dark:text-blue-300 text-center">
             <span className="font-semibold">Progress Tiers:</span> Green, Yellow, and Red levels help you track your progress. 
-            All 18 modules are required for Maryland RVT certification.
+            All 23 modules are required for Maryland RVT certification.
           </p>
         </CardContent>
       </Card>

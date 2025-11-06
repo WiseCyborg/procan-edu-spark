@@ -329,7 +329,7 @@ const PaymentSuccess: React.FC = () => {
                 <li>• Send email invitations to your team members</li>
                 <li>• Or share the join code for quick enrollment</li>
                 <li>• Track employee progress in the Team Dashboard</li>
-                <li>• Employees complete 18 modules + certification exam</li>
+                <li>• Employees complete 23 modules + certification exam</li>
               </ul>
             </div>
 
@@ -368,7 +368,7 @@ const PaymentSuccess: React.FC = () => {
             </h3>
             <ul className="text-green-700 space-y-2">
               <li>• Start learning immediately with full course access</li>
-              <li>• Complete all 18 modules at your own pace</li>
+              <li>• Complete all 23 modules at your own pace</li>
               <li>• Take the final certification exam when ready</li>
               <li>• Receive your official Maryland Cannabis certificate</li>
             </ul>

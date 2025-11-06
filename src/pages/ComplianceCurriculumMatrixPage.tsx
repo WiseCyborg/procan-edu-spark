@@ -80,7 +80,7 @@ export default function ComplianceCurriculumMatrixPage() {
         <CardHeader>
           <CardTitle>Curriculum Compliance Mapping</CardTitle>
           <p className="text-sm text-muted-foreground">
-            All 18 modules mapped to COMAR 14.17.05 requirements, including Drug-Free Workplace (COMAR 21.11.08.03), 
+            All 23 modules mapped to COMAR 14.17.05 requirements, including Drug-Free Workplace (COMAR 21.11.08.03), 
             Diversion Prevention, and Standard Operating Procedures
           </p>
         </CardHeader>

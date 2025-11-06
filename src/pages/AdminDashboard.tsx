@@ -55,6 +55,7 @@ import { EmailProviderSettings } from '@/components/admin/EmailProviderSettings'
 import { TestEmailSender } from '@/components/admin/TestEmailSender';
 import { FormHealthMonitor } from '@/pages/OwnersIntelligence';
 import { DatabaseIntegrityTab } from '@/components/admin/operations/DatabaseIntegrityTab';
+import { MCAReadinessTab } from '@/components/admin/operations/MCAReadinessTab';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -503,6 +504,7 @@ const AdminDashboard = () => {
                   <AccordionTrigger className="text-sm font-semibold">System Health & Tools</AccordionTrigger>
                   <AccordionContent>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2">
+                      <TabsTrigger value="mca-readiness" className="justify-start">🎯 MCA Readiness</TabsTrigger>
                       <TabsTrigger value="db-integrity" className="justify-start">🔍 DB Integrity</TabsTrigger>
                       <TabsTrigger value="form-health" className="justify-start">🔧 Form Health</TabsTrigger>
                       <TabsTrigger value="email-monitoring" className="justify-start">📬 Email Monitor</TabsTrigger>
@@ -600,6 +602,10 @@ const AdminDashboard = () => {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="mca-readiness">
+            <MCAReadinessTab />
           </TabsContent>
 
           <TabsContent value="db-integrity">

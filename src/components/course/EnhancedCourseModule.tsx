@@ -72,7 +72,7 @@ const moduleContent: {[key: string]: ModuleContent} = {
       </ul>
       
       <h4>Course Structure</h4>
-      <p>The training is organized into 18 modules using the ProCann Stoplight Standard:</p>
+      <p>The training is organized into 23 modules using the ProCann Stoplight Standard:</p>
       <ul>
         <li><strong>🟢 Green Tier (Modules 1-6):</strong> Foundational knowledge and compliance basics</li>
         <li><strong>🟡 Yellow Tier (Modules 7-12):</strong> Intermediate operations and product knowledge</li>
@@ -82,7 +82,7 @@ const moduleContent: {[key: string]: ModuleContent} = {
       <h4>Certification Requirements</h4>
       <p>To earn your MCA Dispensary Agent Certificate, you must:</p>
       <ul>
-        <li>Complete all 18 modules with 80% or higher on each quiz</li>
+        <li>Complete all 23 modules with 80% or higher on each quiz</li>
         <li>Pass the comprehensive final exam (36 questions, 80% required)</li>
         <li>Complete photo verification and identity confirmation</li>
         <li>Maintain compliance with all MCA training requirements</li>
@@ -100,9 +100,9 @@ const moduleContent: {[key: string]: ModuleContent} = {
       {
         id: 'q2',
         question: 'How many modules must be completed before taking the final exam?',
-        options: ['12 modules', '15 modules', '18 modules', 'Any 10 modules'],
-        correctAnswer: '18 modules',
-        explanation: 'All 18 modules must be completed successfully before you can access the comprehensive final exam.',
+        options: ['12 modules', '15 modules', '23 modules', 'Any 10 modules'],
+        correctAnswer: '23 modules',
+        explanation: 'All 23 modules must be completed successfully before you can access the comprehensive final exam.',
         points: 10
       }
     ],
@@ -1227,7 +1227,7 @@ const moduleContent: {[key: string]: ModuleContent} = {
         <li>36 multiple-choice questions (2 from each module)</li>
         <li>80% passing score required (29 correct answers)</li>
         <li>90 minutes time limit</li>
-        <li>Open upon completion of all 18 modules</li>
+        <li>Open upon completion of all 23 modules</li>
         <li>Photo verification required before starting</li>
       </ul>
       

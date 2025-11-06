@@ -151,7 +151,7 @@ const Welcome = () => {
                 <div className="text-center">
                   <BookOpen className="h-12 w-12 text-blue-600 mx-auto mb-4" />
                   <h3 className="font-semibold mb-2">Course Access</h3>
-                  <p className="text-sm text-gray-600">18 modules now available</p>
+                  <p className="text-sm text-gray-600">23 modules now available</p>
                 </div>
                 <div className="text-center">
                   <Award className="h-12 w-12 text-yellow-600 mx-auto mb-4" />
