@@ -173,3 +173,12 @@ verify_jwt = false
 
 [functions.notify-regulatory-changes]
 verify_jwt = false
+
+[functions.database-integrity-check]
+verify_jwt = false
+
+[functions.database-integrity-fix]
+verify_jwt = true
+
+[functions.populate-comar-content]
+verify_jwt = true

@@ -45,7 +45,12 @@ export function DatabaseIntegrityTab() {
 
   const runFixesMutation = useMutation({
     mutationFn: async () => {
-      const { data, error } = await supabase.functions.invoke('database-integrity-fix');
+      const { data: { session } } = await supabase.auth.getSession();
+      const { data, error } = await supabase.functions.invoke('database-integrity-fix', {
+        headers: session ? {
+          Authorization: `Bearer ${session.access_token}`
+        } : {}
+      });
       if (error) throw error;
       return data;
     },
