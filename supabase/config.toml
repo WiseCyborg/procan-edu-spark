@@ -182,3 +182,6 @@ verify_jwt = true
 
 [functions.populate-comar-content]
 verify_jwt = true
+
+[functions.lookup-access-key]
+verify_jwt = false

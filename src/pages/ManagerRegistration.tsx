@@ -5,8 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { toast } from '@/hooks/use-toast';
-import { Loader2, CheckCircle2, XCircle } from 'lucide-react';
+import { Loader2, CheckCircle2, XCircle, Key, ChevronDown } from 'lucide-react';
 
 export default function ManagerRegistration() {
   const [searchParams] = useSearchParams();
@@ -21,6 +22,11 @@ export default function ManagerRegistration() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  
+  // Access key fallback
+  const [showAccessKeyFallback, setShowAccessKeyFallback] = useState(false);
+  const [accessKey, setAccessKey] = useState('');
+  const [lookupLoading, setLookupLoading] = useState(false);
 
   useEffect(() => {
     validateToken();
@@ -144,6 +150,63 @@ export default function ManagerRegistration() {
     }
   };
 
+  const handleAccessKeyLookup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!accessKey.trim()) {
+      toast({
+        title: "Access Key Required",
+        description: "Please enter your access key from the approval email.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setLookupLoading(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('lookup-access-key', {
+        body: { access_key: accessKey.trim() }
+      });
+
+      if (error) throw error;
+
+      if (!data.success) {
+        if (data.error === 'ALREADY_REGISTERED') {
+          toast({
+            title: "Already Registered",
+            description: data.message,
+          });
+          setTimeout(() => navigate('/auth?mode=login'), 2000);
+          return;
+        }
+        
+        throw new Error(data.error);
+      }
+
+      toast({
+        title: "Access Key Valid! ✓",
+        description: `Redirecting to registration for ${data.organization_name}...`,
+      });
+
+      // Redirect with the token
+      setTimeout(() => {
+        navigate(`/register/manager?token=${data.token}`);
+        window.location.reload();
+      }, 1500);
+
+    } catch (error: any) {
+      console.error('Access key lookup error:', error);
+      toast({
+        title: "Lookup Failed",
+        description: error.message || "Failed to validate access key. Please check and try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setLookupLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted">
@@ -159,7 +222,7 @@ export default function ManagerRegistration() {
 
   if (validationStatus === 'invalid') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4">
         <Card className="w-full max-w-md border-destructive">
           <CardHeader>
             <div className="flex items-center gap-2 text-destructive">
@@ -170,10 +233,58 @@ export default function ManagerRegistration() {
               This registration link is not valid. Please contact support or request a new approval email.
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
             <Button onClick={() => navigate('/org/apply')} className="w-full">
               Submit New Application
             </Button>
+            
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">Or</span>
+              </div>
+            </div>
+
+            <Collapsible open={showAccessKeyFallback} onOpenChange={setShowAccessKeyFallback}>
+              <CollapsibleTrigger asChild>
+                <Button variant="outline" className="w-full justify-between">
+                  <span className="flex items-center gap-2">
+                    <Key className="h-4 w-4" />
+                    Use Access Key Instead
+                  </span>
+                  <ChevronDown className={`h-4 w-4 transition-transform ${showAccessKeyFallback ? 'rotate-180' : ''}`} />
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="mt-4">
+                <form onSubmit={handleAccessKeyLookup} className="space-y-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="accessKey">Access Key</Label>
+                    <Input
+                      id="accessKey"
+                      value={accessKey}
+                      onChange={(e) => setAccessKey(e.target.value)}
+                      placeholder="DISP-2025-XXXXXXXX"
+                      className="font-mono"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Find this in your approval email under "Access Key"
+                    </p>
+                  </div>
+                  <Button type="submit" className="w-full" disabled={lookupLoading}>
+                    {lookupLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Validating...
+                      </>
+                    ) : (
+                      'Continue with Access Key'
+                    )}
+                  </Button>
+                </form>
+              </CollapsibleContent>
+            </Collapsible>
           </CardContent>
         </Card>
       </div>
@@ -182,7 +293,7 @@ export default function ManagerRegistration() {
 
   if (validationStatus === 'expired') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4">
         <Card className="w-full max-w-md border-destructive">
           <CardHeader>
             <div className="flex items-center gap-2 text-destructive">
@@ -190,13 +301,61 @@ export default function ManagerRegistration() {
               <CardTitle>Registration Link Expired</CardTitle>
             </div>
             <CardDescription>
-              This registration link has expired (valid for 7 days). Please contact support to receive a new registration link.
+              This registration link has expired (valid for 7 days). You can use your access key to get a new link.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-2 text-sm text-muted-foreground">
-              <p>📧 Email: support@procannedu.com</p>
-              <p>📞 Phone: 1-800-PROCANN</p>
+          <CardContent className="space-y-4">
+            <Collapsible open={showAccessKeyFallback} onOpenChange={setShowAccessKeyFallback}>
+              <CollapsibleTrigger asChild>
+                <Button variant="outline" className="w-full justify-between">
+                  <span className="flex items-center gap-2">
+                    <Key className="h-4 w-4" />
+                    Get New Link with Access Key
+                  </span>
+                  <ChevronDown className={`h-4 w-4 transition-transform ${showAccessKeyFallback ? 'rotate-180' : ''}`} />
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="mt-4">
+                <form onSubmit={handleAccessKeyLookup} className="space-y-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="accessKey">Access Key</Label>
+                    <Input
+                      id="accessKey"
+                      value={accessKey}
+                      onChange={(e) => setAccessKey(e.target.value)}
+                      placeholder="DISP-2025-XXXXXXXX"
+                      className="font-mono"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Find this in your approval email under "Access Key"
+                    </p>
+                  </div>
+                  <Button type="submit" className="w-full" disabled={lookupLoading}>
+                    {lookupLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Generating New Link...
+                      </>
+                    ) : (
+                      'Generate New Registration Link'
+                    )}
+                  </Button>
+                </form>
+              </CollapsibleContent>
+            </Collapsible>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">Or contact support</span>
+              </div>
+            </div>
+
+            <div className="space-y-2 text-sm text-muted-foreground text-center">
+              <p>📧 support@procannedu.com</p>
+              <p>📞 1-800-PROCANN</p>
             </div>
           </CardContent>
         </Card>
