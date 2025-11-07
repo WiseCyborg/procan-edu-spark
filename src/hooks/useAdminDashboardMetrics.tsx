@@ -9,6 +9,8 @@ interface DashboardMetrics {
   aiGeneratedFAQs: number;
   emailsSent: number;
   activeChats: number;
+  aiLeanSessions: number;
+  aiLeanActiveManagers: number;
 }
 
 export const useAdminDashboardMetrics = () => {
@@ -19,6 +21,8 @@ export const useAdminDashboardMetrics = () => {
     aiGeneratedFAQs: 0,
     emailsSent: 0,
     activeChats: 0,
+    aiLeanSessions: 0,
+    aiLeanActiveManagers: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -56,6 +60,18 @@ export const useAdminDashboardMetrics = () => {
         .from('conversations')
         .select('*', { count: 'exact', head: true });
 
+      // Fetch AiLean sessions count
+      const { count: aiLeanCount } = await supabase
+        .from('ailean_sessions')
+        .select('*', { count: 'exact', head: true });
+
+      // Fetch distinct AiLean users
+      const { data: aiLeanUsers } = await supabase
+        .from('ailean_sessions')
+        .select('user_id');
+      
+      const uniqueManagers = new Set(aiLeanUsers?.map(s => s.user_id)).size;
+
       setMetrics({
         activeUsers: usersCount || 0,
         pendingVerifications: pendingCount,
@@ -63,6 +79,8 @@ export const useAdminDashboardMetrics = () => {
         aiGeneratedFAQs: aiGeneratedCount || 0,
         emailsSent: emailsCount || 0,
         activeChats: chatsCount || 0,
+        aiLeanSessions: aiLeanCount || 0,
+        aiLeanActiveManagers: uniqueManagers,
       });
     } catch (error) {
       console.error('Error fetching dashboard metrics:', error);

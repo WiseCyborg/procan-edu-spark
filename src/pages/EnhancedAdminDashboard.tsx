@@ -27,6 +27,7 @@ import { EnhancedUserManagementView } from '@/components/admin/EnhancedUserManag
 import { AIFeaturesDashboard } from '@/components/admin/AIFeaturesDashboard';
 import { CommunicationManagementView } from '@/components/admin/CommunicationManagementView';
 import DispensaryApplicationManager from '@/components/admin/DispensaryApplicationManager';
+import { AiLeanAnalyticsDashboard } from '@/components/admin/AiLeanAnalyticsDashboard';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { useAdminDashboardMetrics } from '@/hooks/useAdminDashboardMetrics';
 import { useRealTimeAnalytics } from '@/hooks/useRealTimeAnalytics';
@@ -166,7 +167,7 @@ const EnhancedAdminDashboard = () => {
 
       {/* Enhanced Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview">
             <HoverCallout content="Platform overview with key metrics and status indicators">
               <span>Overview</span>
@@ -185,6 +186,11 @@ const EnhancedAdminDashboard = () => {
           <TabsTrigger value="features">
             <HoverCallout content="Showcase of enhanced platform features and capabilities">
               <span>Features</span>
+            </HoverCallout>
+          </TabsTrigger>
+          <TabsTrigger value="ailean">
+            <HoverCallout content="AiLean coaching analytics and session management">
+              <span>🎙️ AiLean</span>
             </HoverCallout>
           </TabsTrigger>
         </TabsList>
@@ -405,6 +411,10 @@ const EnhancedAdminDashboard = () => {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="ailean" className="space-y-4">
+          <AiLeanAnalyticsDashboard />
         </TabsContent>
       </Tabs>
 
