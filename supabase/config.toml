@@ -157,7 +157,7 @@ verify_jwt = true
 verify_jwt = false
 
 [functions.trigger-curriculum-optimizer]
-verify_jwt = true
+verify_jwt = false
 
 [functions.manage-competitor]
 verify_jwt = true

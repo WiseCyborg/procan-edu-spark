@@ -74,6 +74,8 @@ import SuccessStories from "./pages/SuccessStories";
 import MCAComplianceReview from "./pages/MCAComplianceReview";
 import RegulatoryExplorerPage from "./pages/RegulatoryExplorerPage";
 import PipelineMonitor from "./pages/admin/PipelineMonitor";
+import RVTIntelligence from "./pages/RVTIntelligence";
+import GapAnalysisPage from "./pages/GapAnalysisPage";
 
 import { ProtectedCourseAccess } from "./components/ProtectedCourseAccess";
 
@@ -335,6 +337,18 @@ const App = () => (
                    <Route path="/admin/competitive-intelligence" element={
                      <ProtectedRoute>
                        <CompetitiveIntelligence />
+                     </ProtectedRoute>
+                   } />
+                   
+                   <Route path="/admin/rvt-intelligence" element={
+                     <ProtectedRoute>
+                       <RVTIntelligence />
+                     </ProtectedRoute>
+                   } />
+                   
+                   <Route path="/admin/gap-analysis" element={
+                     <ProtectedRoute>
+                       <GapAnalysisPage />
                      </ProtectedRoute>
                    } />
                    
