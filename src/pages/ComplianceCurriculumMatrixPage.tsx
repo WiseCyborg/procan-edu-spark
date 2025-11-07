@@ -4,10 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Download, FileCheck, CheckCircle, ChevronDown, ChevronRight, Clock } from 'lucide-react';
+import { Download, FileCheck, CheckCircle, ChevronDown, ChevronRight, Clock, AlertTriangle } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ComplianceTimeline } from '@/components/compliance/ComplianceTimeline';
+import { detectComplianceGaps } from '@/services/gapDetectionService';
+import { GapBadge } from '@/components/admin/gaps/GapBadge';
 
 // COMAR mapping is now stored in the database - no hardcoded mapping needed
 
@@ -26,6 +28,22 @@ export default function ComplianceCurriculumMatrixPage() {
       return data;
     }
   });
+
+  const { data: complianceGaps } = useQuery({
+    queryKey: ['compliance-gaps'],
+    queryFn: detectComplianceGaps,
+    refetchInterval: 120000,
+  });
+
+  const getModuleGaps = (moduleNumber: number) => {
+    return complianceGaps?.filter(gap => 
+      gap.affected_entity_id === moduleNumber.toString()
+    ) || [];
+  };
+
+  const totalGaps = complianceGaps?.length || 0;
+  const criticalGaps = complianceGaps?.filter(g => g.severity === 'critical').length || 0;
+  const coveragePercentage = modules ? Math.round(((modules.length - totalGaps) / modules.length) * 100) : 100;
 
   const toggleModule = (moduleNumber: number) => {
     setExpandedModules(prev => {
@@ -83,6 +101,31 @@ export default function ComplianceCurriculumMatrixPage() {
         </CardContent>
       </Card>
 
+      {/* Gap Alert */}
+      {totalGaps > 0 && (
+        <Card className="mb-8 border-destructive">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <AlertTriangle className="h-8 w-8 text-destructive" />
+                <div>
+                  <h3 className="text-lg font-bold">Compliance Gaps Detected</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {totalGaps} {totalGaps === 1 ? 'issue' : 'issues'} found across modules
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <GapBadge severity="critical" count={criticalGaps} />
+                <Badge variant="outline" className="text-lg px-4 py-2">
+                  {coveragePercentage}% Coverage
+                </Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Download Button */}
       <div className="text-center mb-8">
         <Button onClick={handleDownloadPDF} size="lg">
@@ -120,10 +163,14 @@ export default function ComplianceCurriculumMatrixPage() {
                 <TableBody>
                   {modules?.map((module) => {
                     const isExpanded = expandedModules.has(module.module_number);
+                    const moduleGaps = getModuleGaps(module.module_number);
+                    const hasGaps = moduleGaps.length > 0;
+                    const hasHighSeverity = moduleGaps.some(g => g.severity === 'critical' || g.severity === 'high');
+                    
                     return (
                       <React.Fragment key={module.module_number}>
                         <TableRow 
-                          className="cursor-pointer hover:bg-muted/50 transition-colors"
+                          className={`cursor-pointer hover:bg-muted/50 transition-colors ${hasHighSeverity ? 'border-l-4 border-l-destructive' : hasGaps ? 'border-l-4 border-l-orange-400' : ''}`}
                           onClick={() => toggleModule(module.module_number)}
                         >
                           <TableCell className="text-center">
@@ -137,7 +184,12 @@ export default function ComplianceCurriculumMatrixPage() {
                             {module.module_number}
                           </TableCell>
                           <TableCell className="font-semibold">
-                            {module.title}
+                            <div className="flex items-center gap-2">
+                              {module.title}
+                              {hasGaps && (
+                                <AlertTriangle className="h-4 w-4 text-destructive" />
+                              )}
+                            </div>
                           </TableCell>
                           <TableCell>
                             <Badge variant="outline" className="whitespace-nowrap font-mono text-xs">
@@ -150,7 +202,14 @@ export default function ComplianceCurriculumMatrixPage() {
                             </Badge>
                           </TableCell>
                           <TableCell className="text-center">
-                            <CheckCircle className="h-5 w-5 text-green-600 mx-auto" />
+                            {hasGaps ? (
+                              <div className="flex flex-col items-center gap-1">
+                                <AlertTriangle className="h-5 w-5 text-orange-600 mx-auto" />
+                                <span className="text-xs text-muted-foreground">{moduleGaps.length} {moduleGaps.length === 1 ? 'gap' : 'gaps'}</span>
+                              </div>
+                            ) : (
+                              <CheckCircle className="h-5 w-5 text-green-600 mx-auto" />
+                            )}
                           </TableCell>
                           <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
                             {new Date(module.updated_at).toLocaleDateString('en-US', { 
@@ -163,6 +222,30 @@ export default function ComplianceCurriculumMatrixPage() {
                         {isExpanded && (
                           <TableRow className="bg-muted/30 border-l-4 border-l-primary">
                             <TableCell colSpan={7} className="p-6">
+                              {/* Gap Alerts */}
+                              {moduleGaps.length > 0 && (
+                                <div className="mb-6 p-4 bg-destructive/10 border border-destructive rounded-lg">
+                                  <h4 className="text-sm font-bold text-destructive mb-3 flex items-center gap-2">
+                                    <AlertTriangle className="h-4 w-4" />
+                                    Detected Issues ({moduleGaps.length})
+                                  </h4>
+                                  <div className="space-y-2">
+                                    {moduleGaps.map(gap => (
+                                      <div key={gap.id} className="text-sm">
+                                        <div className="flex items-center gap-2 mb-1">
+                                          <GapBadge severity={gap.severity} showIcon={false} />
+                                          <span className="font-semibold">{gap.title}</span>
+                                        </div>
+                                        <p className="text-muted-foreground ml-6">{gap.description}</p>
+                                        <p className="text-xs text-muted-foreground ml-6 mt-1">
+                                          <strong>Action:</strong> {gap.suggested_action}
+                                        </p>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                              
                               <div className="space-y-6">
                                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                                   {/* Module Description */}

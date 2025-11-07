@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAiLeanAnalytics } from '@/hooks/useAiLeanAnalytics';
-import { MessageSquare, Users, Clock, MessageCircle, TrendingUp, Calendar } from 'lucide-react';
+import { MessageSquare, Users, Clock, MessageCircle, TrendingUp, Calendar, AlertTriangle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -9,11 +9,32 @@ import { useState } from 'react';
 import { AiLeanSessionViewer } from './AiLeanSessionViewer';
 import { formatDistanceToNow } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useQuery } from '@tanstack/react-query';
+import { detectEngagementGaps } from '@/services/gapDetectionService';
+import { GapAlert } from './gaps/GapAlert';
 
 export const AiLeanAnalyticsDashboard = () => {
   const { analytics, loading } = useAiLeanAnalytics();
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
+  
+  const { data: engagementGaps } = useQuery({
+    queryKey: ['engagement-gaps'],
+    queryFn: detectEngagementGaps,
+    refetchInterval: 120000,
+  });
+
+  const abandonedSessions = engagementGaps?.filter(g => g.title.includes('Abandoned')) || [];
+  const inactiveManagers = engagementGaps?.filter(g => g.title.includes('Inactive')) || [];
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+
+  const { data: engagementGaps } = useQuery({
+    queryKey: ['engagement-gaps'],
+    queryFn: detectEngagementGaps,
+    refetchInterval: 120000,
+  });
+
+  const abandonedSessions = engagementGaps?.filter(g => g.title.includes('Abandoned')) || [];
+  const inactiveManagers = engagementGaps?.filter(g => g.title.includes('Inactive')) || [];
 
   if (loading) {
     return (
