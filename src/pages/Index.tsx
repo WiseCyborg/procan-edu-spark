@@ -278,6 +278,7 @@ const Index = () => {
                 <li><a href="/org/apply" className="text-gray-400 hover:text-white">Dispensary Application</a></li>
                 <li><a href="/employers" className="text-gray-400 hover:text-white">Verify Certificates</a></li>
                 <li><a href="/purchase-seats" className="text-gray-400 hover:text-white">Purchase Training Seats</a></li>
+                <li><a href="/ailean-info" className="text-gray-400 hover:text-white">✋ AiLean AI Coach</a></li>
               </ul>
             </div>
             <div>

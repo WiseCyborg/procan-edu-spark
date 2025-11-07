@@ -48,6 +48,8 @@ import ManagerRegistration from "./pages/ManagerRegistration";
 import GetStarted from "./pages/GetStarted";
 import TeamManagement from "./pages/TeamManagement";
 import { COMARBanner } from "./components/layout/COMARBanner";
+import ActivateAiLean from "./pages/ActivateAiLean";
+import AiLeanInfo from "./pages/AiLeanInfo";
 import StateOfficialsPage from "./pages/StateOfficialsPage";
 import AboutTeamPage from "./pages/AboutTeamPage";
 import ComplianceCurriculumMatrixPage from "./pages/ComplianceCurriculumMatrixPage";
@@ -308,8 +310,10 @@ const App = () => (
                        </ProtectedRoute>
                      } />
                     
-                    <Route path="/accept-invitation" element={<AcceptInvitation />} />
+                   <Route path="/accept-invitation" element={<AcceptInvitation />} />
                     <Route path="/system-health" element={<SystemHealthDashboard />} />
+                    <Route path="/activate-ailean" element={<ActivateAiLean />} />
+                    <Route path="/ailean-info" element={<AiLeanInfo />} />
                     
                      <Route path="/admin/advanced-analytics" element={
                       <ProtectedRoute>

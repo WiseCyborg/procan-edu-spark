@@ -4,11 +4,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { Mic, MicOff, Send, X, Sparkles, Users, Calendar, AlertCircle, TrendingUp, ExternalLink, HelpCircle } from 'lucide-react';
+import { Mic, MicOff, Send, X, Sparkles, Users, Calendar, AlertCircle, TrendingUp, ExternalLink, HelpCircle, History, Plus, Trash2 } from 'lucide-react';
 import { useUserRole } from '@/hooks/useUserRole';
 import { supabase } from '@/integrations/supabase/client';
 import { useUnifiedVoice } from '@/providers/UnifiedVoiceProvider';
 import { toast } from 'sonner';
+import { useAiLeanPersistence } from '@/hooks/useAiLeanPersistence';
 import {
   Dialog,
   DialogContent,
@@ -59,9 +60,23 @@ export function AiLeanCoach() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [showHelpDialog, setShowHelpDialog] = useState(false);
+  const [showSessionHistory, setShowSessionHistory] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  
+  // Session persistence
+  const {
+    sessions,
+    currentSessionId,
+    loading: sessionsLoading,
+    createSession,
+    saveMessage,
+    loadSession,
+    deleteSession,
+    setCurrentSessionId,
+    refreshSessions
+  } = useAiLeanPersistence();
 
   // Only show to managers and coordinators
   if (roleLoading || (!isDispensaryManager && !isTrainingCoordinator)) {
@@ -149,6 +164,18 @@ export function AiLeanCoach() {
     const userMessage: Message = { role: 'user', content: text };
     setMessages(prev => [...prev, userMessage]);
     setInputMessage('');
+
+    // Create new session if this is the first message
+    if (messages.length === 0 && !currentSessionId) {
+      const sessionId = await createSession(text);
+      if (sessionId) {
+        setCurrentSessionId(sessionId);
+        await saveMessage(sessionId, { ...userMessage, timestamp: new Date() });
+      }
+    } else if (currentSessionId) {
+      await saveMessage(currentSessionId, { ...userMessage, timestamp: new Date() });
+    }
+    setInputMessage('');
     setIsLoading(true);
 
     try {
@@ -170,6 +197,11 @@ export function AiLeanCoach() {
       };
       setMessages(prev => [...prev, assistantMessage]);
 
+      // Save assistant message to session
+      if (currentSessionId) {
+        await saveMessage(currentSessionId, { ...assistantMessage, timestamp: new Date() });
+      }
+
       // Speak response
       speak(data.reply);
     } catch (error) {
@@ -180,9 +212,43 @@ export function AiLeanCoach() {
     }
   };
 
-  const handleScenarioClick = (prompt: string) => {
+  const handleScenarioClick = async (prompt: string, scenarioType?: string) => {
     setInputMessage(prompt);
     if (!isOpen) setIsOpen(true);
+    
+    // Create new session with scenario type
+    if (messages.length === 0) {
+      const sessionId = await createSession(prompt, scenarioType);
+      if (sessionId) {
+        setCurrentSessionId(sessionId);
+      }
+    }
+  };
+
+  const startNewConversation = () => {
+    setMessages([]);
+    setCurrentSessionId(null);
+    toast.success('Started new conversation');
+  };
+
+  const handleLoadSession = async (sessionId: string) => {
+    const session = await loadSession(sessionId);
+    if (session) {
+      setCurrentSessionId(sessionId);
+      setMessages(session.messages.map(msg => ({
+        role: msg.role,
+        content: msg.content
+      })));
+      toast.success('Session loaded');
+    }
+  };
+
+  const handleDeleteSession = async (sessionId: string) => {
+    await deleteSession(sessionId);
+    if (sessionId === currentSessionId) {
+      startNewConversation();
+    }
+    toast.success('Session deleted');
   };
 
   const toggleVoiceRecording = () => {
@@ -208,14 +274,14 @@ export function AiLeanCoach() {
           {COACHING_SCENARIOS.map((scenario, idx) => (
             <Button
               key={idx}
-              onClick={() => handleScenarioClick(scenario.prompt)}
+              onClick={() => handleScenarioClick(scenario.prompt, scenario.title)}
               variant="outline"
               size="sm"
               className={`${scenario.color} justify-start gap-2 text-xs opacity-0 animate-in slide-in-from-right-5`}
               style={{ animationDelay: `${idx * 100}ms`, animationFillMode: 'forwards' }}
             >
               <scenario.icon className="w-3 h-3" />
-              {scenario.title}
+              ✋ {scenario.title}
             </Button>
           ))}
         </div>
@@ -227,7 +293,7 @@ export function AiLeanCoach() {
           className="shadow-lg hover:shadow-xl transition-all bg-gradient-to-r from-primary to-primary/80 gap-2"
         >
           <Sparkles className="w-5 h-5" />
-          Talk to AiLean
+          ✋ Talk to the Hand
         </Button>
       </div>
     );
@@ -247,6 +313,24 @@ export function AiLeanCoach() {
             </div>
           </div>
           <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={startNewConversation}
+              className="text-primary-foreground hover:bg-primary-foreground/20"
+              title="New Conversation"
+            >
+              <Plus className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowSessionHistory(!showSessionHistory)}
+              className="text-primary-foreground hover:bg-primary-foreground/20"
+              title="Session History"
+            >
+              <History className="w-4 h-4" />
+            </Button>
             <Dialog open={showHelpDialog} onOpenChange={setShowHelpDialog}>
               <DialogTrigger asChild>
                 <Button
@@ -309,6 +393,43 @@ export function AiLeanCoach() {
             </Button>
           </div>
         </div>
+        
+        {/* Session History Sidebar */}
+        {showSessionHistory && sessions.length > 0 && (
+          <div className="absolute top-full left-0 right-0 mt-2 bg-background border rounded-lg shadow-lg p-4 max-h-64 overflow-y-auto z-50">
+            <h4 className="font-semibold mb-2 text-sm">Previous Sessions</h4>
+            <div className="space-y-2">
+              {sessions.map((session) => (
+                <div
+                  key={session.id}
+                  className={`p-2 border rounded cursor-pointer hover:bg-accent transition-colors ${
+                    currentSessionId === session.id ? 'border-primary bg-accent' : ''
+                  }`}
+                  onClick={() => handleLoadSession(session.id)}
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{session.title}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(session.updated_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteSession(session.id);
+                      }}
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         
         {/* Scenario badges */}
         <div className="flex flex-wrap gap-1 mt-3">

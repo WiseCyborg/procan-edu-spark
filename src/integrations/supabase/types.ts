@@ -128,6 +128,74 @@ export type Database = {
         }
         Relationships: []
       }
+      ailean_activation_tokens: {
+        Row: {
+          created_at: string
+          created_by: string
+          expires_at: string
+          id: string
+          organization_id: string
+          token: string
+          uses_remaining: number
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          expires_at: string
+          id?: string
+          organization_id: string
+          token?: string
+          uses_remaining?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          expires_at?: string
+          id?: string
+          organization_id?: string
+          token?: string
+          uses_remaining?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ailean_activation_tokens_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ailean_sessions: {
+        Row: {
+          created_at: string
+          id: string
+          messages: Json
+          scenario_type: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          messages?: Json
+          scenario_type?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          messages?: Json
+          scenario_type?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       api_console_audit: {
         Row: {
           api_route: string
