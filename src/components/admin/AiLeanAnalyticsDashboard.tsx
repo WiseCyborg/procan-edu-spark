@@ -27,15 +27,6 @@ export const AiLeanAnalyticsDashboard = () => {
   const inactiveManagers = engagementGaps?.filter(g => g.title.includes('Inactive')) || [];
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
-  const { data: engagementGaps } = useQuery({
-    queryKey: ['engagement-gaps'],
-    queryFn: detectEngagementGaps,
-    refetchInterval: 120000,
-  });
-
-  const abandonedSessions = engagementGaps?.filter(g => g.title.includes('Abandoned')) || [];
-  const inactiveManagers = engagementGaps?.filter(g => g.title.includes('Inactive')) || [];
-
   if (loading) {
     return (
       <div className="space-y-6">
