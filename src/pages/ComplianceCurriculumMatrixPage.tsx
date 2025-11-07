@@ -4,9 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Download, FileCheck, CheckCircle, ChevronDown, ChevronRight } from 'lucide-react';
+import { Download, FileCheck, CheckCircle, ChevronDown, ChevronRight, Clock } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { ComplianceTimeline } from '@/components/compliance/ComplianceTimeline';
 
 // COMAR mapping is now stored in the database - no hardcoded mapping needed
 
@@ -162,16 +163,25 @@ export default function ComplianceCurriculumMatrixPage() {
                         {isExpanded && (
                           <TableRow className="bg-muted/30 border-l-4 border-l-primary">
                             <TableCell colSpan={7} className="p-6">
-                              <div className="space-y-4">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                  <div>
-                                    <h4 className="text-sm font-bold text-primary mb-2">Module Description</h4>
+                              <div className="space-y-6">
+                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                  {/* Module Description */}
+                                  <div className="lg:col-span-1">
+                                    <h4 className="text-sm font-bold text-primary mb-3 flex items-center gap-2">
+                                      <FileCheck className="h-4 w-4" />
+                                      Module Description
+                                    </h4>
                                     <p className="text-sm leading-relaxed text-foreground">
                                       {module.description}
                                     </p>
                                   </div>
-                                  <div>
-                                    <h4 className="text-sm font-bold text-primary mb-2">Regulatory Compliance</h4>
+
+                                  {/* Regulatory Compliance */}
+                                  <div className="lg:col-span-1">
+                                    <h4 className="text-sm font-bold text-primary mb-3 flex items-center gap-2">
+                                      <CheckCircle className="h-4 w-4" />
+                                      Regulatory Compliance
+                                    </h4>
                                     <div className="space-y-2">
                                       <div className="bg-white rounded-lg p-3 border border-primary/20 shadow-sm">
                                         <p className="text-xs font-semibold text-muted-foreground mb-1">Primary Reference</p>
@@ -187,29 +197,39 @@ export default function ComplianceCurriculumMatrixPage() {
                                         </div>
                                       </div>
                                       <div className="bg-white rounded-lg p-3 border border-primary/20 shadow-sm">
-                                        <p className="text-xs font-semibold text-muted-foreground mb-1">Last Reviewed</p>
-                                        <span className="text-sm text-foreground">
-                                          {new Date(module.updated_at).toLocaleDateString('en-US', { 
-                                            year: 'numeric', 
-                                            month: 'long', 
-                                            day: 'numeric' 
-                                          })}
-                                        </span>
+                                        <p className="text-xs font-semibold text-muted-foreground mb-1">Training Duration</p>
+                                        <Badge variant="secondary">
+                                          {module.estimated_minutes} minutes
+                                        </Badge>
                                       </div>
                                     </div>
                                   </div>
+
+                                  {/* Compliance Timeline */}
+                                  <div className="lg:col-span-1">
+                                    <h4 className="text-sm font-bold text-primary mb-3 flex items-center gap-2">
+                                      <Clock className="h-4 w-4" />
+                                      Review Timeline
+                                    </h4>
+                                    <ComplianceTimeline lastUpdated={module.updated_at} />
+                                  </div>
                                 </div>
-                                <div className="pt-2 border-t border-border">
-                                  <h4 className="text-sm font-bold text-primary mb-2">Training Duration & Format</h4>
+
+                                {/* Training Format Tags */}
+                                <div className="pt-4 border-t border-border">
+                                  <h4 className="text-sm font-bold text-primary mb-2">Training Format</h4>
                                   <div className="flex flex-wrap gap-2">
-                                    <Badge variant="secondary">
-                                      {module.estimated_minutes} minutes
-                                    </Badge>
                                     <Badge variant="secondary">
                                       Online Self-Paced
                                     </Badge>
                                     <Badge variant="secondary">
                                       Maryland State Approved
+                                    </Badge>
+                                    <Badge variant="secondary">
+                                      Interactive Content
+                                    </Badge>
+                                    <Badge variant="secondary">
+                                      Certificate Upon Completion
                                     </Badge>
                                   </div>
                                 </div>
