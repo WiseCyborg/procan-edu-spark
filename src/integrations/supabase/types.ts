@@ -494,6 +494,148 @@ export type Database = {
           },
         ]
       }
+      competitive_alerts: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          action_taken: string | null
+          alert_type: string
+          competitor_id: string | null
+          created_at: string
+          description: string
+          detected_at: string
+          id: string
+          metadata: Json | null
+          severity: string
+          title: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          action_taken?: string | null
+          alert_type: string
+          competitor_id?: string | null
+          created_at?: string
+          description: string
+          detected_at?: string
+          id?: string
+          metadata?: Json | null
+          severity?: string
+          title: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          action_taken?: string | null
+          alert_type?: string
+          competitor_id?: string | null
+          created_at?: string
+          description?: string
+          detected_at?: string
+          id?: string
+          metadata?: Json | null
+          severity?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competitive_alerts_competitor_id_fkey"
+            columns: ["competitor_id"]
+            isOneToOne: false
+            referencedRelation: "competitor_snapshots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      competitor_analysis_history: {
+        Row: {
+          ai_agent_run_id: string | null
+          analysis_date: string
+          competitors_analyzed: number
+          created_at: string
+          id: string
+          key_findings: string[] | null
+          market_summary: string | null
+          metadata: Json | null
+          recommendations_generated: number
+        }
+        Insert: {
+          ai_agent_run_id?: string | null
+          analysis_date?: string
+          competitors_analyzed?: number
+          created_at?: string
+          id?: string
+          key_findings?: string[] | null
+          market_summary?: string | null
+          metadata?: Json | null
+          recommendations_generated?: number
+        }
+        Update: {
+          ai_agent_run_id?: string | null
+          analysis_date?: string
+          competitors_analyzed?: number
+          created_at?: string
+          id?: string
+          key_findings?: string[] | null
+          market_summary?: string | null
+          metadata?: Json | null
+          recommendations_generated?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competitor_analysis_history_ai_agent_run_id_fkey"
+            columns: ["ai_agent_run_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agent_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      competitor_snapshots: {
+        Row: {
+          competitor_name: string
+          created_at: string
+          features_detected: string[] | null
+          id: string
+          market_position: string | null
+          metadata: Json | null
+          notes: string | null
+          price_per_student: number | null
+          pricing_model: string | null
+          snapshot_date: string
+          updated_at: string
+          website_url: string | null
+        }
+        Insert: {
+          competitor_name: string
+          created_at?: string
+          features_detected?: string[] | null
+          id?: string
+          market_position?: string | null
+          metadata?: Json | null
+          notes?: string | null
+          price_per_student?: number | null
+          pricing_model?: string | null
+          snapshot_date?: string
+          updated_at?: string
+          website_url?: string | null
+        }
+        Update: {
+          competitor_name?: string
+          created_at?: string
+          features_detected?: string[] | null
+          id?: string
+          market_position?: string | null
+          metadata?: Json | null
+          notes?: string | null
+          price_per_student?: number | null
+          pricing_model?: string | null
+          snapshot_date?: string
+          updated_at?: string
+          website_url?: string | null
+        }
+        Relationships: []
+      }
       compliance_alerts: {
         Row: {
           affected_users_count: number | null

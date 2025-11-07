@@ -156,6 +156,12 @@ verify_jwt = true
 [functions.send-optimizer-digest]
 verify_jwt = false
 
+[functions.trigger-curriculum-optimizer]
+verify_jwt = true
+
+[functions.manage-competitor]
+verify_jwt = true
+
 [functions.calculate-recommendation-impact]
 verify_jwt = false
 
