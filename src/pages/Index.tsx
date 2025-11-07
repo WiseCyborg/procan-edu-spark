@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
@@ -21,64 +20,58 @@ import { InvestmentValueCard } from '@/components/InvestmentValueCard';
 import { ComplianceDisclaimer } from '@/components/ComplianceDisclaimer';
 import { SwipeUpIndicator } from '@/components/SwipeUpIndicator';
 import { useIsMobile } from '@/hooks/use-mobile';
-
 const Index = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  
   const [isRoleSelectorOpen, setIsRoleSelectorOpen] = React.useState(false);
 
   // A/B Test for hero headline
-  const { variant: heroMessage } = useABTest({
+  const {
+    variant: heroMessage
+  } = useABTest({
     testName: 'hero_headline',
-    variants: [
-      {
-        id: 'ai_maryland_focus',
-        value: "Maryland's ONLY AI-Powered, COMAR-Embedded RVT Training Platform",
-        weight: 1,
-      },
-      {
-        id: 'roi_savings_focus',
-        value: "Save $12K+ Annually with Maryland's Most Advanced RVT Training",
-        weight: 1,
-      },
-      {
-        id: 'compliance_speed_focus',
-        value: "Get COMAR-Certified in 4-6 Hours with 87% Pass Rate Guarantee",
-        weight: 1,
-      },
-      {
-        id: 'mca_professional_aligned',
-        value: "MCA-Aligned Maryland RVT Training with Real-Time Regulatory Updates",
-        weight: 1,
-      },
-    ],
+    variants: [{
+      id: 'ai_maryland_focus',
+      value: "Maryland's ONLY AI-Powered, COMAR-Embedded RVT Training Platform",
+      weight: 1
+    }, {
+      id: 'roi_savings_focus',
+      value: "Save $12K+ Annually with Maryland's Most Advanced RVT Training",
+      weight: 1
+    }, {
+      id: 'compliance_speed_focus',
+      value: "Get COMAR-Certified in 4-6 Hours with 87% Pass Rate Guarantee",
+      weight: 1
+    }, {
+      id: 'mca_professional_aligned',
+      value: "MCA-Aligned Maryland RVT Training with Real-Time Regulatory Updates",
+      weight: 1
+    }]
   });
-
-  return (
-    <div className="min-h-screen">
+  return <div className="min-h-screen">
       <AccessibilityToolbar />
       
       {/* Mobile-First Optimized Hero Section - Above Fold */}
       <section className={`relative flex items-center justify-center overflow-hidden ${isMobile ? 'min-h-[75vh] py-4' : 'min-h-screen py-16'}`}>
         {/* Animated Maryland Bay Gradient Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary via-[hsl(174,76%,36%)] to-accent animate-maryland-bay-flow" style={{ backgroundSize: '200% 200%' }}></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-primary via-[hsl(174,76%,36%)] to-accent animate-maryland-bay-flow" style={{
+        backgroundSize: '200% 200%'
+      }}></div>
         
         {/* Maryland Flag Color Accent Stripes */}
-        <div className="absolute inset-0 bg-gradient-to-br from-red-900/5 via-transparent to-amber-500/5" style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255,215,0,0.03) 35px, rgba(255,215,0,0.03) 70px)' }}></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-red-900/5 via-transparent to-amber-500/5" style={{
+        backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255,215,0,0.03) 35px, rgba(255,215,0,0.03) 70px)'
+      }}></div>
         
         {/* Decorative overlay */}
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDEzNEgxNHYtMjBoMjJ2MjB6bS0yMi0yMEgwdjIwaDE0di0yMHptMCAyMEgwdjE0aDE0di0xNHptMjIgMEgxNHYxNGgyMnYtMTR6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-10"></div>
         
         {/* Shimmer Effect - passes every 10 seconds */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div 
-            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer-pass" 
-            style={{ 
-              width: '50%',
-              transform: 'translateX(-100%) skewX(-15deg)' 
-            }}
-          />
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer-pass" style={{
+          width: '50%',
+          transform: 'translateX(-100%) skewX(-15deg)'
+        }} />
         </div>
         
         {/* 24 Counties Badge */}
@@ -100,28 +93,17 @@ const Index = () => {
             <h2 className={`gradient-text font-medium mx-auto leading-relaxed ${isMobile ? 'text-base max-w-sm px-2' : 'text-2xl md:text-3xl max-w-3xl'}`}>
               {isMobile ? "Maryland's AI-Powered RVT Certification" : heroMessage}
             </h2>
-            {!isMobile && (
-              <p className="text-lg text-white/90 mt-4 max-w-2xl mx-auto">
+            {!isMobile && <p className="text-lg text-white/90 mt-4 max-w-2xl mx-auto">
                 Complete Maryland RVT certification in 4-6 hours • 87% pass rate • $49.99
-              </p>
-            )}
+              </p>}
           </div>
 
           {/* Welcome Video Section */}
-          <WelcomeVideoSection 
-            videoUrl="https://vimeo.com/1096146284/e90b8e5dfc"
-            className={isMobile ? 'mb-3' : 'mb-8'}
-          />
+          <WelcomeVideoSection videoUrl="https://vimeo.com/1096146284/e90b8e5dfc" className={isMobile ? 'mb-3' : 'mb-8'} />
 
           {/* Single Primary CTA */}
           <div className={`text-center ${isMobile ? 'mb-2' : 'mb-6'}`}>
-            <Button 
-              onClick={() => setIsRoleSelectorOpen(true)}
-              size={isMobile ? 'default' : 'lg'}
-              className={`bg-white text-primary hover:bg-white/90 font-semibold rounded-xl shadow-xl hover:shadow-2xl transition-all hover:scale-105 ${
-                isMobile ? 'w-full px-6 py-6 text-base h-auto' : 'px-8 py-6 text-lg'
-              }`}
-            >
+            <Button onClick={() => setIsRoleSelectorOpen(true)} size={isMobile ? 'default' : 'lg'} className={`bg-white text-primary hover:bg-white/90 font-semibold rounded-xl shadow-xl hover:shadow-2xl transition-all hover:scale-105 ${isMobile ? 'w-full px-6 py-6 text-base h-auto' : 'px-8 py-6 text-lg'}`}>
               {isMobile ? 'Get Certified - $49.99' : 'Start Your Maryland RVT Certification - $49.99'}
             </Button>
             <p className={`text-white/70 mt-3 ${isMobile ? 'text-xs' : 'text-sm'}`}>
@@ -130,42 +112,27 @@ const Index = () => {
           </div>
 
           {/* Quick Links - Desktop Only */}
-          {!isMobile && (
-            <>
+          {!isMobile && <>
               <div className="text-center mb-4">
-                <Button
-                  variant="link"
-                  onClick={() => navigate('/get-started')}
-                  className="text-white/90 hover:text-white underline text-sm"
-                >
+                <Button variant="link" onClick={() => navigate('/get-started')} className="text-white/90 hover:text-white underline text-sm">
                   Not sure? See all registration options →
                 </Button>
               </div>
 
               <div className="flex flex-wrap justify-center gap-4 text-white/80 text-sm">
-                <button 
-                  onClick={() => navigate('/faq')}
-                  className="hover:text-white transition-colors underline"
-                >
+                <button onClick={() => navigate('/faq')} className="hover:text-white transition-colors underline">
                   Questions? Check our FAQ
                 </button>
                 <span>•</span>
-                <button 
-                  onClick={() => navigate('/verify-certificate')}
-                  className="hover:text-white transition-colors underline"
-                >
+                <button onClick={() => navigate('/verify-certificate')} className="hover:text-white transition-colors underline">
                   Verify a Certificate
                 </button>
                 <span>•</span>
-                <a 
-                  href="mailto:info@procannedu.com"
-                  className="hover:text-white transition-colors underline"
-                >
+                <a href="mailto:info@procannedu.com" className="hover:text-white transition-colors underline">
                   Chat with us
                 </a>
               </div>
-            </>
-          )}
+            </>}
 
           {/* Swipe Up Indicator - Mobile Only */}
           <SwipeUpIndicator />
@@ -190,11 +157,7 @@ const Index = () => {
       <LiveActivityTicker />
 
       {/* Second Scroll - ROI Outcomes */}
-      <section className={`bg-white dark:bg-background ${isMobile ? 'py-8 px-4' : 'py-16 px-4'}`}>
-        <div className="container mx-auto">
-          <ROIHighlightCard />
-        </div>
-      </section>
+      
 
       {/* Course Overview - Level 2 Typography */}
       <section className={`bg-gradient-to-br from-primary/5 to-accent/10 ${isMobile ? 'py-8 px-4' : 'py-16 px-4'}`}>
@@ -304,10 +267,7 @@ const Index = () => {
             <p>&copy; 2025 ProCann Edu. All rights reserved.</p>
             <p className="mt-2">Made with 💚 in Maryland</p>
             <div className="mt-6">
-              <a 
-                href="/mca-compliance-review"
-                className="text-white/80 hover:text-white underline text-xs"
-              >
+              <a href="/mca-compliance-review" className="text-white/80 hover:text-white underline text-xs">
                 For MCA Officials: View Compliance Documentation
               </a>
             </div>
@@ -322,17 +282,12 @@ const Index = () => {
       </footer>
 
       {/* Role Selector Modal */}
-      <RoleSelectorModal 
-        open={isRoleSelectorOpen}
-        onOpenChange={setIsRoleSelectorOpen}
-      />
+      <RoleSelectorModal open={isRoleSelectorOpen} onOpenChange={setIsRoleSelectorOpen} />
 
       {/* Sticky Mobile CTA */}
       <StickyMobileCTA />
       <ExitIntentModal />
       <AIFAQChat />
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
