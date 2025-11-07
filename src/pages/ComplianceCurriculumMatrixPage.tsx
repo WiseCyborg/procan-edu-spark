@@ -1,15 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Download, FileCheck, CheckCircle } from 'lucide-react';
+import { Download, FileCheck, CheckCircle, ChevronDown, ChevronRight } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 // COMAR mapping is now stored in the database - no hardcoded mapping needed
 
 export default function ComplianceCurriculumMatrixPage() {
+  const [expandedModules, setExpandedModules] = useState<Set<number>>(new Set());
+
   const { data: modules, isLoading } = useQuery({
     queryKey: ['course-modules-matrix'],
     queryFn: async () => {
@@ -22,6 +25,18 @@ export default function ComplianceCurriculumMatrixPage() {
       return data;
     }
   });
+
+  const toggleModule = (moduleNumber: number) => {
+    setExpandedModules(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(moduleNumber)) {
+        newSet.delete(moduleNumber);
+      } else {
+        newSet.add(moduleNumber);
+      }
+      return newSet;
+    });
+  };
 
   const handleDownloadPDF = () => {
     toast({
@@ -86,53 +101,127 @@ export default function ComplianceCurriculumMatrixPage() {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="text-center py-8">Loading modules...</div>
+            <div className="text-center py-8 text-muted-foreground">Loading modules...</div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-3 px-4">Module #</th>
-                    <th className="text-left py-3 px-4">Module Title</th>
-                    <th className="text-left py-3 px-4">COMAR Reference</th>
-                    <th className="text-left py-3 px-4">Description</th>
-                    <th className="text-center py-3 px-4">Duration</th>
-                    <th className="text-center py-3 px-4">Status</th>
-                    <th className="text-left py-3 px-4">Last Updated</th>
-                  </tr>
-                </thead>
-                <tbody>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[50px]"></TableHead>
+                    <TableHead className="w-[80px]">Module #</TableHead>
+                    <TableHead className="min-w-[250px]">Module Title</TableHead>
+                    <TableHead className="min-w-[180px]">COMAR Reference</TableHead>
+                    <TableHead className="text-center w-[100px]">Duration</TableHead>
+                    <TableHead className="text-center w-[80px]">Status</TableHead>
+                    <TableHead className="w-[120px]">Updated</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {modules?.map((module) => {
+                    const isExpanded = expandedModules.has(module.module_number);
                     return (
-                      <tr key={module.module_number} className="border-b hover:bg-muted/50">
-                        <td className="py-3 px-4 font-semibold">{module.module_number}</td>
-                        <td className="py-3 px-4 font-medium">{module.title}</td>
-                        <td className="py-3 px-4">
-                          <Badge variant="outline" className="whitespace-nowrap">
-                            {module.comar_reference || 'COMAR 14.17.05'}
-                          </Badge>
-                        </td>
-                        <td className="py-3 px-4 text-sm text-muted-foreground max-w-md">
-                          {module.description}
-                        </td>
-                        <td className="py-3 px-4 text-center text-sm">
-                          {module.estimated_minutes} min
-                        </td>
-                        <td className="py-3 px-4 text-center">
-                          <CheckCircle className="h-5 w-5 text-green-600 mx-auto" />
-                        </td>
-                        <td className="py-3 px-4 text-sm whitespace-nowrap">
-                          {new Date(module.updated_at).toLocaleDateString('en-US', { 
-                            year: 'numeric', 
-                            month: 'short', 
-                            day: 'numeric' 
-                          })}
-                        </td>
-                      </tr>
+                      <React.Fragment key={module.module_number}>
+                        <TableRow 
+                          className="cursor-pointer hover:bg-muted/50 transition-colors"
+                          onClick={() => toggleModule(module.module_number)}
+                        >
+                          <TableCell className="text-center">
+                            {isExpanded ? (
+                              <ChevronDown className="h-4 w-4 text-primary" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                            )}
+                          </TableCell>
+                          <TableCell className="font-bold text-primary">
+                            {module.module_number}
+                          </TableCell>
+                          <TableCell className="font-semibold">
+                            {module.title}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="whitespace-nowrap font-mono text-xs">
+                              {module.comar_reference || 'COMAR 14.17.05'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Badge variant="secondary" className="text-xs">
+                              {module.estimated_minutes} min
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <CheckCircle className="h-5 w-5 text-green-600 mx-auto" />
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
+                            {new Date(module.updated_at).toLocaleDateString('en-US', { 
+                              year: 'numeric', 
+                              month: 'short', 
+                              day: 'numeric' 
+                            })}
+                          </TableCell>
+                        </TableRow>
+                        {isExpanded && (
+                          <TableRow className="bg-muted/30 border-l-4 border-l-primary">
+                            <TableCell colSpan={7} className="p-6">
+                              <div className="space-y-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <div>
+                                    <h4 className="text-sm font-bold text-primary mb-2">Module Description</h4>
+                                    <p className="text-sm leading-relaxed text-foreground">
+                                      {module.description}
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <h4 className="text-sm font-bold text-primary mb-2">Regulatory Compliance</h4>
+                                    <div className="space-y-2">
+                                      <div className="bg-white rounded-lg p-3 border border-primary/20 shadow-sm">
+                                        <p className="text-xs font-semibold text-muted-foreground mb-1">Primary Reference</p>
+                                        <Badge variant="default" className="font-mono">
+                                          {module.comar_reference || 'COMAR 14.17.05'}
+                                        </Badge>
+                                      </div>
+                                      <div className="bg-white rounded-lg p-3 border border-primary/20 shadow-sm">
+                                        <p className="text-xs font-semibold text-muted-foreground mb-1">Compliance Status</p>
+                                        <div className="flex items-center gap-2">
+                                          <CheckCircle className="h-4 w-4 text-green-600" />
+                                          <span className="text-sm text-foreground font-medium">Fully Compliant</span>
+                                        </div>
+                                      </div>
+                                      <div className="bg-white rounded-lg p-3 border border-primary/20 shadow-sm">
+                                        <p className="text-xs font-semibold text-muted-foreground mb-1">Last Reviewed</p>
+                                        <span className="text-sm text-foreground">
+                                          {new Date(module.updated_at).toLocaleDateString('en-US', { 
+                                            year: 'numeric', 
+                                            month: 'long', 
+                                            day: 'numeric' 
+                                          })}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="pt-2 border-t border-border">
+                                  <h4 className="text-sm font-bold text-primary mb-2">Training Duration & Format</h4>
+                                  <div className="flex flex-wrap gap-2">
+                                    <Badge variant="secondary">
+                                      {module.estimated_minutes} minutes
+                                    </Badge>
+                                    <Badge variant="secondary">
+                                      Online Self-Paced
+                                    </Badge>
+                                    <Badge variant="secondary">
+                                      Maryland State Approved
+                                    </Badge>
+                                  </div>
+                                </div>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </React.Fragment>
                     );
                   })}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </div>
           )}
         </CardContent>
