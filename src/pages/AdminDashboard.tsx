@@ -56,6 +56,7 @@ import { TestEmailSender } from '@/components/admin/TestEmailSender';
 import { FormHealthMonitor } from '@/pages/OwnersIntelligence';
 import { DatabaseIntegrityTab } from '@/components/admin/operations/DatabaseIntegrityTab';
 import { MCAReadinessTab } from '@/components/admin/operations/MCAReadinessTab';
+import { ComplianceMonitoringTab } from '@/components/admin/operations/ComplianceMonitoringTab';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -505,6 +506,7 @@ const AdminDashboard = () => {
                   <AccordionContent>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2">
                       <TabsTrigger value="mca-readiness" className="justify-start">🎯 MCA Readiness</TabsTrigger>
+                      <TabsTrigger value="compliance-monitoring" className="justify-start">🛡️ COMAR Monitor</TabsTrigger>
                       <TabsTrigger value="db-integrity" className="justify-start">🔍 DB Integrity</TabsTrigger>
                       <TabsTrigger value="form-health" className="justify-start">🔧 Form Health</TabsTrigger>
                       <TabsTrigger value="email-monitoring" className="justify-start">📬 Email Monitor</TabsTrigger>
@@ -606,6 +608,10 @@ const AdminDashboard = () => {
 
           <TabsContent value="mca-readiness">
             <MCAReadinessTab />
+          </TabsContent>
+
+          <TabsContent value="compliance-monitoring">
+            <ComplianceMonitoringTab />
           </TabsContent>
 
           <TabsContent value="db-integrity">

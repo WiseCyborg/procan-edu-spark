@@ -185,3 +185,6 @@ verify_jwt = true
 
 [functions.lookup-access-key]
 verify_jwt = false
+
+[functions.check-comar-compliance]
+verify_jwt = false

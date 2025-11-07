@@ -1820,6 +1820,57 @@ export type Database = {
           },
         ]
       }
+      module_compliance_reviews: {
+        Row: {
+          comar_version_id: string | null
+          compliance_status: string
+          created_at: string
+          id: string
+          module_id: string
+          next_review_due: string
+          review_notes: string | null
+          reviewed_at: string
+          reviewed_by: string | null
+        }
+        Insert: {
+          comar_version_id?: string | null
+          compliance_status?: string
+          created_at?: string
+          id?: string
+          module_id: string
+          next_review_due?: string
+          review_notes?: string | null
+          reviewed_at?: string
+          reviewed_by?: string | null
+        }
+        Update: {
+          comar_version_id?: string | null
+          compliance_status?: string
+          created_at?: string
+          id?: string
+          module_id?: string
+          next_review_due?: string
+          review_notes?: string | null
+          reviewed_at?: string
+          reviewed_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_compliance_reviews_comar_version_id_fkey"
+            columns: ["comar_version_id"]
+            isOneToOne: false
+            referencedRelation: "comar_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "module_compliance_reviews_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "course_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_preferences: {
         Row: {
           created_at: string
@@ -4287,6 +4338,17 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      get_modules_needing_review: {
+        Args: never
+        Returns: {
+          comar_reference: string
+          days_overdue: number
+          last_reviewed_at: string
+          module_id: string
+          module_number: number
+          module_title: string
+        }[]
+      }
       get_organization_certificates: {
         Args: { org_id: string }
         Returns: {
@@ -4406,6 +4468,14 @@ export type Database = {
       manually_verify_user: {
         Args: { admin_notes?: string; target_user_id: string }
         Returns: Json
+      }
+      mark_module_reviewed: {
+        Args: {
+          p_compliance_status?: string
+          p_module_id: string
+          p_review_notes?: string
+        }
+        Returns: string
       }
       move_to_deadletter: { Args: { p_job_id: string }; Returns: undefined }
       queue_job: {
