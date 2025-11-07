@@ -19,6 +19,7 @@ import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 
 import { useOrganization } from '@/hooks/useOrganization';
+import { AiLeanCoach } from '@/components/ailean/AiLeanCoach';
 
 const TrainingCoordinatorDashboard = () => {
   const { user } = useAuth();
@@ -437,6 +438,9 @@ const TrainingCoordinatorDashboard = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* AiLean Coach */}
+      <AiLeanCoach />
     </div>
   );
 };

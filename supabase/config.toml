@@ -188,3 +188,6 @@ verify_jwt = false
 
 [functions.check-comar-compliance]
 verify_jwt = false
+
+[functions.ailean-coach]
+verify_jwt = false

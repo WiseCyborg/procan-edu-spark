@@ -31,6 +31,7 @@ interface OrganizationInfo {
 }
 
 import { useOrganization } from '@/hooks/useOrganization';
+import { AiLeanCoach } from '@/components/ailean/AiLeanCoach';
 
 const DispensaryManagerDashboard = () => {
   const { user } = useAuth();
@@ -596,6 +597,9 @@ const DispensaryManagerDashboard = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* AiLean Coach */}
+      <AiLeanCoach />
     </div>
   );
 };
