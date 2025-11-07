@@ -104,16 +104,16 @@ const MCAComplianceReview = () => {
 
         {/* Data Substantiation */}
         <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-6 w-6 text-blue-600" />
-              Data Substantiation & Methodology
+          <CardHeader className="bg-gradient-to-r from-primary/10 to-primary/5 border-b-2 border-primary/20 p-6">
+            <CardTitle className="flex items-center gap-2 text-foreground font-bold">
+              <FileText className="h-6 w-6 text-primary" />
+              Regulatory Compliance & Data Substantiation
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-foreground/80">
               Supporting documentation for platform claims
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             <ComplianceDisclaimer />
           </CardContent>
         </Card>
