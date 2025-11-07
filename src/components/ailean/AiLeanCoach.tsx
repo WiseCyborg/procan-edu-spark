@@ -4,11 +4,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { Mic, MicOff, Send, X, Sparkles, Users, Calendar, AlertCircle, TrendingUp } from 'lucide-react';
+import { Mic, MicOff, Send, X, Sparkles, Users, Calendar, AlertCircle, TrendingUp, ExternalLink, HelpCircle } from 'lucide-react';
 import { useUserRole } from '@/hooks/useUserRole';
 import { supabase } from '@/integrations/supabase/client';
 import { useUnifiedVoice } from '@/providers/UnifiedVoiceProvider';
 import { toast } from 'sonner';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -50,6 +58,7 @@ export function AiLeanCoach() {
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
+  const [showHelpDialog, setShowHelpDialog] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -237,14 +246,68 @@ export function AiLeanCoach() {
               </CardDescription>
             </div>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsOpen(false)}
-            className="text-primary-foreground hover:bg-primary-foreground/20"
-          >
-            <X className="w-4 h-4" />
-          </Button>
+          <div className="flex items-center gap-1">
+            <Dialog open={showHelpDialog} onOpenChange={setShowHelpDialog}>
+              <DialogTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-primary-foreground hover:bg-primary-foreground/20"
+                  title="Help"
+                >
+                  <HelpCircle className="w-4 h-4" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>AiLean Coaching Options</DialogTitle>
+                  <DialogDescription className="space-y-4 pt-4 text-left">
+                    <div>
+                      <h4 className="font-semibold text-foreground mb-2">In-App AiLean (This Version)</h4>
+                      <ul className="text-sm space-y-1 list-disc pl-4">
+                        <li>Secure, role-gated access</li>
+                        <li>Voice interaction with organization context</li>
+                        <li>Integrated with your ProCannEdu data</li>
+                        <li>Best for sensitive HR or performance topics</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-foreground mb-2">ChatGPT AiLean</h4>
+                      <ul className="text-sm space-y-1 list-disc pl-4">
+                        <li>General management guidance</li>
+                        <li>No login required</li>
+                        <li>Great for demos and quick reference</li>
+                        <li>Cannabis retail best practices</li>
+                      </ul>
+                    </div>
+                  </DialogDescription>
+                </DialogHeader>
+              </DialogContent>
+            </Dialog>
+            <Button
+              variant="ghost"
+              size="sm"
+              asChild
+              className="text-primary-foreground hover:bg-primary-foreground/20"
+              title="More Help in ChatGPT"
+            >
+              <a
+                href="https://chatgpt.com/g/g-690d46d786fc81918e9193318d1c9e55-ailean"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <ExternalLink className="w-4 h-4" />
+              </a>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsOpen(false)}
+              className="text-primary-foreground hover:bg-primary-foreground/20"
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
         
         {/* Scenario badges */}

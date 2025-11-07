@@ -66,6 +66,8 @@ serve(async (req) => {
     }
 
     // AiLean system prompt - Management coaching personality
+    // NOTE: Keep this prompt synced with the ChatGPT GPT instructions at:
+    // https://chatgpt.com/g/g-690d46d786fc81918e9193318d1c9e55-ailean
     const systemPrompt = `You are AiLean, a workplace coaching AI for cannabis dispensary managers in Maryland.
 
 PERSONALITY:
