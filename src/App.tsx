@@ -79,6 +79,7 @@ import GapAnalysisPage from "./pages/GapAnalysisPage";
 import ConsumerEducation from "./pages/ConsumerEducation";
 import ConsumerCourse from "./pages/ConsumerCourse";
 import ConsumerCertificates from "./pages/ConsumerCertificates";
+import EmailDomainVerification from "./pages/admin/EmailDomainVerification";
 
 import { ProtectedCourseAccess } from "./components/ProtectedCourseAccess";
 
@@ -277,6 +278,12 @@ const App = () => (
                     <Route path="/admin/operations" element={
                       <ProtectedRoute>
                         <OperationsCommandCenter />
+                      </ProtectedRoute>
+                    } />
+                    
+                    <Route path="/admin/email-domain" element={
+                      <ProtectedRoute>
+                        <EmailDomainVerification />
                       </ProtectedRoute>
                     } />
                     

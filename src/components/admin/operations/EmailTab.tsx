@@ -3,16 +3,18 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { RefreshCw, Activity, AlertTriangle } from 'lucide-react';
+import { RefreshCw, Activity, AlertTriangle, ExternalLink } from 'lucide-react';
 import { useOperationsMetrics } from '@/hooks/useOperationsMetrics';
 import { EmailAnalyticsCharts } from '@/components/admin/EmailAnalyticsCharts';
 import { TestEmailSender } from '@/components/admin/TestEmailSender';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { formatDistanceToNow } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
 
 export function EmailTab() {
   const { metrics, refreshMetrics } = useOperationsMetrics();
+  const navigate = useNavigate();
 
   const { data: emailHealth, refetch: refetchHealth } = useQuery({
     queryKey: ['email-health'],
@@ -24,8 +26,35 @@ export function EmailTab() {
     refetchInterval: 60000, // Check every minute
   });
 
+  // Check if domain verification error exists
+  const hasDomainError = emailHealth?.errors?.some((error: string) => 
+    error.includes('domain') || error.includes('verified') || error.includes('procannedu.com')
+  );
+
   return (
     <div className="space-y-6 py-6">
+      {/* Critical Domain Verification Alert */}
+      {hasDomainError && (
+        <Alert variant="destructive" className="border-2">
+          <AlertTriangle className="h-5 w-5" />
+          <AlertTitle className="text-lg font-bold">🚨 URGENT: Email Domain Not Verified</AlertTitle>
+          <AlertDescription className="mt-2 space-y-3">
+            <p>
+              All emails from <code className="px-2 py-1 bg-destructive/20 rounded">procannedu.com</code> are failing 
+              because the domain is not verified with Resend.
+            </p>
+            <Button 
+              onClick={() => navigate('/admin/email-domain')}
+              variant="default"
+              className="mt-2"
+            >
+              <ExternalLink className="h-4 w-4 mr-2" />
+              Fix Domain Verification Now
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Email System Health Widget */}
       <Card className="border-l-4 border-l-green-500">
         <CardHeader>
