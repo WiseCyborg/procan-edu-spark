@@ -60,6 +60,7 @@ import AccessibilityPage from "./pages/AccessibilityPage";
 import OwnersIntelligence from "./pages/OwnersIntelligence";
 import CompetitiveIntelligence from "./pages/CompetitiveIntelligence";
 import { ProfileOnboardingWizard } from "./components/onboarding/ProfileOnboardingWizard";
+import ForgotPassword from "./pages/ForgotPassword";
 import DemoAccountsSetup from "./pages/DemoAccountsSetup";
 import SystemHealthDashboard from "./pages/SystemHealthDashboard";
 import UnifiedHealthReport from "./pages/UnifiedHealthReport";
@@ -174,6 +175,12 @@ const App = () => (
                   <Route path="/auth" element={
                     <PublicRoute>
                       <Auth />
+                    </PublicRoute>
+                  } />
+                  
+                  <Route path="/forgot-password" element={
+                    <PublicRoute>
+                      <ForgotPassword />
                     </PublicRoute>
                   } />
                   

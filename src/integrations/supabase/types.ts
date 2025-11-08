@@ -1347,6 +1347,42 @@ export type Database = {
         }
         Relationships: []
       }
+      email_preferences: {
+        Row: {
+          created_at: string | null
+          frequency: string | null
+          id: string
+          receive_achievements: boolean | null
+          receive_deadlines: boolean | null
+          receive_marketing: boolean | null
+          receive_reminders: boolean | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          frequency?: string | null
+          id?: string
+          receive_achievements?: boolean | null
+          receive_deadlines?: boolean | null
+          receive_marketing?: boolean | null
+          receive_reminders?: boolean | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          frequency?: string | null
+          id?: string
+          receive_achievements?: boolean | null
+          receive_deadlines?: boolean | null
+          receive_marketing?: boolean | null
+          receive_reminders?: boolean | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       email_provider_health: {
         Row: {
           created_at: string | null
@@ -1537,6 +1573,39 @@ export type Database = {
           deadline?: string
           id?: string
           updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      escalation_log: {
+        Row: {
+          created_at: string | null
+          escalation_level: number | null
+          escalation_type: string
+          id: string
+          last_escalation_at: string | null
+          notified_admin: boolean | null
+          notified_manager: boolean | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          escalation_level?: number | null
+          escalation_type: string
+          id?: string
+          last_escalation_at?: string | null
+          notified_admin?: boolean | null
+          notified_manager?: boolean | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          escalation_level?: number | null
+          escalation_type?: string
+          id?: string
+          last_escalation_at?: string | null
+          notified_admin?: boolean | null
+          notified_manager?: boolean | null
           user_id?: string
         }
         Relationships: []
@@ -2449,6 +2518,33 @@ export type Database = {
           include_sections?: string[] | null
           sms_number?: string | null
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      password_reset_tokens: {
+        Row: {
+          created_at: string | null
+          expires_at: string
+          id: string
+          token: string
+          used_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at: string
+          id?: string
+          token: string
+          used_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          token?: string
+          used_at?: string | null
           user_id?: string
         }
         Relationships: []
@@ -4461,6 +4557,10 @@ export type Database = {
           is_open: boolean
           state: string
         }[]
+      }
+      check_email_preference: {
+        Args: { p_email_type: string; p_user_id: string }
+        Returns: boolean
       }
       check_rate_limit: {
         Args: {

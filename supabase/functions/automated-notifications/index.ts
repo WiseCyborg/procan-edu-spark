@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import { EmailRouter } from "../_shared/email-router.ts";
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -405,11 +406,22 @@ async function sendBulkNotifications(advanceDays?: number[]): Promise<Response> 
         continue;
       }
 
-      // Use Supabase's built-in email service
+      // Send email using EmailRouter with failover
       console.log(`Sending notification to ${notification.recipient_email}: ${notification.subject}`);
-      const emailResponse = { error: null, data: { success: true } }; // Placeholder - notifications will be handled differently
+      
+      const router = new EmailRouter();
+      const emailResponse = await router.sendWithFailover({
+        to: notification.recipient_email,
+        subject: notification.subject,
+        html: notification.message,
+        from: "ProCann Edu <noreply@procannedu.com>",
+        metadata: {
+          notification_id: notification.id,
+          notification_type: notification.notification_type
+        }
+      }, supabase);
 
-      if (emailResponse.error) {
+      if (!emailResponse.success) {
         console.error(`Failed to send notification ${notification.id}:`, emailResponse.error);
         
         // Mark as failed
