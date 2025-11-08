@@ -175,13 +175,13 @@ verify_jwt = true
 verify_jwt = false
 
 [functions.monitor-comar-updates]
-verify_jwt = false
+verify_jwt = true
 
 [functions.forecast-recommendation-roi]
 verify_jwt = false
 
 [functions.check-pipeline-health]
-verify_jwt = false
+verify_jwt = true
 
 [functions.validate-manager-registration]
 verify_jwt = false
@@ -190,7 +190,7 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.database-integrity-check]
-verify_jwt = false
+verify_jwt = true
 
 [functions.database-integrity-fix]
 verify_jwt = true
