@@ -1,46 +1,16 @@
-import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { DollarSign, RefreshCw, TrendingUp } from 'lucide-react';
+import { TrendingUp } from 'lucide-react';
 import { useOperationsMetrics } from '@/hooks/useOperationsMetrics';
-import { PayPalConfigurationPanel } from '@/components/admin/PayPalConfigurationPanel';
+import { PayPalManagementPanel } from '@/components/admin/PayPalManagementPanel';
 
 export function PaymentsTab() {
   const { metrics } = useOperationsMetrics();
-  const [paypalStatus, setPaypalStatus] = useState<'connected' | 'error' | 'testing'>('connected');
 
   return (
     <div className="space-y-6 py-6">
-      {/* PayPal Status */}
-      <Card>
-        <CardHeader>
-          <CardTitle>PayPal Integration Status</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between p-4 border rounded-lg">
-            <div className="flex items-center gap-4">
-              <div className={`h-12 w-12 rounded-full flex items-center justify-center ${
-                paypalStatus === 'connected' ? 'bg-green-100' : 'bg-red-100'
-              }`}>
-                <DollarSign className={`h-6 w-6 ${
-                  paypalStatus === 'connected' ? 'text-green-600' : 'text-red-600'
-                }`} />
-              </div>
-              <div>
-                <p className="font-medium">PayPal Sandbox</p>
-                <p className="text-sm text-muted-foreground">
-                  {paypalStatus === 'connected' ? 'Connected and operational' : 'Connection issue detected'}
-                </p>
-              </div>
-            </div>
-            <Badge variant={paypalStatus === 'connected' ? 'default' : 'destructive'}>
-              {paypalStatus === 'connected' ? 'Healthy' : 'Error'}
-            </Badge>
-          </div>
-        </CardContent>
-      </Card>
+      {/* PayPal Management - Unified Panel */}
+      <PayPalManagementPanel />
 
       {/* Revenue Dashboard */}
       <div className="grid grid-cols-3 gap-4">
@@ -107,9 +77,6 @@ export function PaymentsTab() {
           </div>
         </CardContent>
       </Card>
-
-      {/* PayPal Configuration */}
-      <PayPalConfigurationPanel onStatusChange={setPaypalStatus} />
     </div>
   );
 }

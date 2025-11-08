@@ -2,11 +2,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FastTrackTestPanel } from '@/components/admin/FastTrackTestPanel';
 import { TestEmailSender } from '@/components/admin/TestEmailSender';
 import TestAccountCreator from '@/components/admin/TestAccountCreator';
-import { PayPalModeToggle } from '@/components/admin/PayPalModeToggle';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/sonner';
 import { useState } from 'react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Info } from 'lucide-react';
 
 export function TestingTab() {
   const [isRetrying, setIsRetrying] = useState(false);
@@ -33,8 +34,12 @@ export function TestingTab() {
 
   return (
     <div className="space-y-6 py-6">
-      {/* PayPal Mode Toggle - Critical for safe testing */}
-      <PayPalModeToggle />
+      <Alert>
+        <Info className="h-4 w-4" />
+        <AlertDescription>
+          PayPal configuration moved to <strong>Payments</strong> tab for easier management
+        </AlertDescription>
+      </Alert>
       
       <FastTrackTestPanel />
       
