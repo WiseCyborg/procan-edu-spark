@@ -725,6 +725,53 @@ export type Database = {
           },
         ]
       }
+      consumer_enrollments: {
+        Row: {
+          completed_at: string | null
+          course_id: string
+          created_at: string | null
+          email: string | null
+          id: string
+          metadata: Json | null
+          session_id: string | null
+          started_at: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          course_id: string
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          metadata?: Json | null
+          session_id?: string | null
+          started_at?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          course_id?: string
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          metadata?: Json | null
+          session_id?: string | null
+          started_at?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consumer_enrollments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       content_review_queue: {
         Row: {
           ai_suggested_change: string | null
@@ -946,41 +993,53 @@ export type Database = {
       }
       courses: {
         Row: {
+          completion_badge_name: string | null
+          course_type: string | null
           created_at: string
           currency: string | null
           description: string | null
           id: string
           is_active: boolean | null
+          is_public: boolean | null
           module_count: number | null
           passing_score: number | null
           payment_required: boolean | null
           price_cents: number | null
+          target_audience: string | null
           title: string
           updated_at: string
         }
         Insert: {
+          completion_badge_name?: string | null
+          course_type?: string | null
           created_at?: string
           currency?: string | null
           description?: string | null
           id?: string
           is_active?: boolean | null
+          is_public?: boolean | null
           module_count?: number | null
           passing_score?: number | null
           payment_required?: boolean | null
           price_cents?: number | null
+          target_audience?: string | null
           title: string
           updated_at?: string
         }
         Update: {
+          completion_badge_name?: string | null
+          course_type?: string | null
           created_at?: string
           currency?: string | null
           description?: string | null
           id?: string
           is_active?: boolean | null
+          is_public?: boolean | null
           module_count?: number | null
           passing_score?: number | null
           payment_required?: boolean | null
           price_cents?: number | null
+          target_audience?: string | null
           title?: string
           updated_at?: string
         }
@@ -4792,6 +4851,7 @@ export type Database = {
         | "dispensary_manager"
         | "admin"
         | "training_coordinator"
+        | "consumer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -4946,6 +5006,7 @@ export const Constants = {
         "dispensary_manager",
         "admin",
         "training_coordinator",
+        "consumer",
       ],
     },
   },
