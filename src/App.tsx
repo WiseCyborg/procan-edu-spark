@@ -76,6 +76,9 @@ import RegulatoryExplorerPage from "./pages/RegulatoryExplorerPage";
 import PipelineMonitor from "./pages/admin/PipelineMonitor";
 import RVTIntelligence from "./pages/RVTIntelligence";
 import GapAnalysisPage from "./pages/GapAnalysisPage";
+import ConsumerEducation from "./pages/ConsumerEducation";
+import ConsumerCourse from "./pages/ConsumerCourse";
+import ConsumerCertificates from "./pages/ConsumerCertificates";
 
 import { ProtectedCourseAccess } from "./components/ProtectedCourseAccess";
 
@@ -147,6 +150,9 @@ const App = () => (
                   <Route path="/" element={<Index />} />
                   <Route path="/welcome" element={<Welcome />} />
                   <Route path="/faq" element={<FAQ />} />
+                  <Route path="/consumer-education" element={<ConsumerEducation />} />
+                  <Route path="/consumer-education/:courseId" element={<ConsumerCourse />} />
+                  <Route path="/consumer-certificates" element={<ConsumerCertificates />} />
 <Route path="/training-handbook" element={
   <ProtectedRoute>
     <TrainingHandbook />

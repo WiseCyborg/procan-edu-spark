@@ -13,7 +13,8 @@ import {
   Shield,
   Users,
   Settings,
-  Home
+  Home,
+  GraduationCap
 } from 'lucide-react';
 import { HoverCallout } from '@/components/ui/hover-callout';
 
@@ -76,6 +77,14 @@ export const IntelligentNavigation: React.FC = () => {
       icon: Shield,
       roles: ['admin'],
       description: 'Enhanced system administration with intelligent features and AI-powered tools'
+    },
+    {
+      id: 'consumer-education',
+      label: 'Free Courses',
+      path: '/consumer-education',
+      icon: GraduationCap,
+      roles: ['student', 'dispensary_manager', 'training_coordinator', 'admin', 'consumer'],
+      description: '100% free cannabis education for Maryland consumers'
     },
     {
       id: 'faq',
