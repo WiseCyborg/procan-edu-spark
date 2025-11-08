@@ -157,9 +157,18 @@ verify_jwt = true
 verify_jwt = false
 
 [functions.trigger-curriculum-optimizer]
-verify_jwt = false
+verify_jwt = true
 
 [functions.manage-competitor]
+verify_jwt = true
+
+[functions.system-integrity-monitor]
+verify_jwt = true
+
+[functions.auto-fix-manager-accounts]
+verify_jwt = true
+
+[functions.database-integrity-fix]
 verify_jwt = true
 
 [functions.calculate-recommendation-impact]

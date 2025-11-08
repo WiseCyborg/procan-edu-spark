@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.4';
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -10,6 +11,13 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+const VerifyStartSchema = z.object({
+  email: z.string().email().max(255),
+  phone: z.string().regex(/^\+?[1-9]\d{1,14}$/).max(20).optional(),
+  delivery_method: z.enum(['email', 'sms', 'whatsapp']),
+  purpose: z.enum(['login', 'exam_submission'])
+});
 
 interface VerifyStartRequest {
   email: string;
@@ -25,7 +33,11 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    const { email, phone, delivery_method, purpose }: VerifyStartRequest = await req.json();
+    const body = await req.json();
+    
+    // Validate input
+    const validated = VerifyStartSchema.parse(body);
+    const { email, phone, delivery_method, purpose } = validated;
 
     console.log(`Starting ${delivery_method} verification for ${email} (${purpose})`);
 

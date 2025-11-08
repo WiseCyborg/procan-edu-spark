@@ -1,10 +1,15 @@
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+const JoinCodeSchema = z.object({
+  code: z.string().trim().min(3).max(50).regex(/^[A-Z0-9-]+$/i, 'Invalid join code format')
+});
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -12,11 +17,11 @@ serve(async (req) => {
   }
 
   try {
-    const { code } = await req.json();
+    const body = await req.json();
     
-    if (!code) {
-      throw new Error("Join code is required");
-    }
+    // Validate input
+    const validated = JoinCodeSchema.parse(body);
+    const { code } = validated;
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
