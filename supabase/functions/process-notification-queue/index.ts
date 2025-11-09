@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { EmailRouter } from "../_shared/email-router.ts";
+import { EmailService } from "../_shared/email-service.ts";
+import { loadEmailTemplate } from "../_shared/email-templates.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -15,141 +16,132 @@ serve(async (req) => {
   try {
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-      { auth: { persistSession: false } }
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
+
+    const emailService = new EmailService();
 
     console.log("Processing notification queue...");
 
-    // Get pending notifications scheduled for now or earlier
-    const { data: notifications, error } = await supabase
+    // Get pending notifications that are scheduled to be sent
+    const { data: notifications, error: fetchError } = await supabase
       .from("notification_queue")
       .select("*")
       .eq("status", "pending")
       .lte("scheduled_for", new Date().toISOString())
       .order("priority", { ascending: false })
-      .order("scheduled_for", { ascending: true })
       .limit(50);
 
-    if (error) {
-      console.error("Error fetching notifications:", error);
-      throw error;
+    if (fetchError) throw fetchError;
+
+    if (!notifications || notifications.length === 0) {
+      return new Response(
+        JSON.stringify({ message: "No pending notifications" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
-    console.log(`Found ${notifications?.length || 0} notifications to process`);
+    console.log(`Processing ${notifications.length} notifications`);
 
     let sentCount = 0;
     let failedCount = 0;
 
-    const router = new EmailRouter();
-
-    for (const notification of notifications || []) {
+    for (const notification of notifications) {
       try {
-        // Update status to sending
+        // Mark as processing
         await supabase
           .from("notification_queue")
-          .update({ status: "sending" })
+          .update({ status: "processing" })
           .eq("id", notification.id);
 
-        // Convert plain text message to HTML
-        const htmlMessage = `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${notification.subject}</title>
-  <style>
-    body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f5f5f5; }
-    .container { max-width: 600px; margin: 0 auto; background: #ffffff; }
-    .header { background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); padding: 40px 30px; text-align: center; }
-    .header h1 { color: white; margin: 0; font-size: 28px; }
-    .content { padding: 40px 30px; color: #4a4a4a; line-height: 1.6; white-space: pre-line; }
-    .footer { background: #f9fafb; padding: 20px; text-align: center; color: #6b7280; font-size: 12px; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1>🌿 ProCann Edu</h1>
-    </div>
-    <div class="content">
-      ${notification.message}
-    </div>
-    <div class="footer">
-      <p><strong>ProCann Edu</strong> - Maryland Cannabis Compliance Training</p>
-      <p>Questions? Contact us at <a href="mailto:support@procannedu.com">support@procannedu.com</a></p>
-      <p>© 2025 ProCann Edu. All rights reserved.</p>
-    </div>
-  </div>
-</body>
-</html>
-        `;
+        let html = notification.message;
 
-        // Send email using router with failover
-        const result = await router.sendWithFailover(
-          {
-            to: notification.recipient_email,
+        // If metadata contains template name, load template
+        if (notification.metadata?.template) {
+          try {
+            html = await loadEmailTemplate(
+              notification.metadata.template,
+              notification.metadata
+            );
+          } catch (templateError) {
+            console.error(`Template load error for ${notification.metadata.template}:`, templateError);
+            // Fall back to plain message
+          }
+        }
+
+        // Send email
+        const result = await emailService.send({
+          to: notification.recipient_email,
+          subject: notification.subject,
+          html,
+        });
+
+        if (result.success) {
+          await supabase
+            .from("notification_queue")
+            .update({
+              status: "sent",
+              sent_at: new Date().toISOString(),
+            })
+            .eq("id", notification.id);
+
+          // Log to email_logs
+          await supabase.from("email_logs").insert({
+            recipient_email: notification.recipient_email,
             subject: notification.subject,
-            html: htmlMessage,
-            from: "ProCann Edu <noreply@procannedu.com>",
-            metadata: {
-              notification_id: notification.id,
-              priority: notification.priority,
-              ...(notification.metadata || {}),
-            },
-          },
-          supabase
-        );
+            email_type: notification.metadata?.template || "notification",
+            delivery_status: "sent",
+            metadata: notification.metadata,
+          });
 
-        // Update status to sent
+          sentCount++;
+        } else {
+          throw new Error("Email send failed");
+        }
+      } catch (error: any) {
+        console.error(`Failed to send notification ${notification.id}:`, error);
+
+        // Mark as failed and increment retry count
         await supabase
           .from("notification_queue")
           .update({
-            status: "sent",
-            sent_at: new Date().toISOString(),
-            attempts: (notification.attempts || 0) + 1,
+            status: notification.retry_count >= 3 ? "failed" : "pending",
+            retry_count: (notification.retry_count || 0) + 1,
+            last_error: error.message,
           })
           .eq("id", notification.id);
 
-        sentCount++;
-        console.log(`✓ Sent notification ${notification.id} to ${notification.recipient_email}`);
-      } catch (emailError) {
-        console.error(`Failed to send notification ${notification.id}:`, emailError);
-
-        const attempts = (notification.attempts || 0) + 1;
-        const maxAttempts = 3;
-
-        // Update status to failed or retry
-        await supabase
-          .from("notification_queue")
-          .update({
-            status: attempts >= maxAttempts ? "failed" : "pending",
-            attempts: attempts,
-            error_message: emailError.message,
-          })
-          .eq("id", notification.id);
+        // Log failure
+        await supabase.from("email_logs").insert({
+          recipient_email: notification.recipient_email,
+          subject: notification.subject,
+          email_type: notification.metadata?.template || "notification",
+          delivery_status: "failed",
+          error_message: error.message,
+          metadata: notification.metadata,
+        });
 
         failedCount++;
       }
     }
 
-    console.log(`Notification queue processed: ${sentCount} sent, ${failedCount} failed`);
-
     return new Response(
       JSON.stringify({
         success: true,
-        processed: notifications?.length || 0,
+        processed: notifications.length,
         sent: sentCount,
         failed: failedCount,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-  } catch (error) {
-    console.error("Error in process-notification-queue:", error);
+  } catch (error: any) {
+    console.error("Error processing notification queue:", error);
     return new Response(
       JSON.stringify({ error: error.message }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
     );
   }
 });

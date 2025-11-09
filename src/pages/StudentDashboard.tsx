@@ -15,6 +15,7 @@ import { Award, BookOpen, Target, TrendingUp, AlertTriangle } from 'lucide-react
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
+import { MobileBottomNav } from '@/components/navigation/MobileBottomNav';
 
 const COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
 const TOTAL_MODULES = 18;
@@ -376,6 +377,8 @@ const StudentDashboard = () => {
           </CardContent>
         </Card>
       )}
+      
+      <MobileBottomNav />
     </div>
   );
 };

@@ -53,6 +53,7 @@ import { UserEmailHistory } from '@/components/admin/UserEmailHistory';
 import { EmailAnalyticsCharts } from '@/components/admin/EmailAnalyticsCharts';
 import { EmailProviderSettings } from '@/components/admin/EmailProviderSettings';
 import { TestEmailSender } from '@/components/admin/TestEmailSender';
+import { EmailAnalyticsDashboard } from '@/components/admin/EmailAnalyticsDashboard';
 import { FormHealthMonitor } from '@/pages/OwnersIntelligence';
 import { DatabaseIntegrityTab } from '@/components/admin/operations/DatabaseIntegrityTab';
 import { MCAReadinessTab } from '@/components/admin/operations/MCAReadinessTab';
@@ -846,6 +847,7 @@ const AdminDashboard = () => {
                 <TabsTrigger value="test">Test</TabsTrigger>
                 <TabsTrigger value="search">Search</TabsTrigger>
                 <TabsTrigger value="analytics">Analytics</TabsTrigger>
+                <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
                 <TabsTrigger value="settings">Settings</TabsTrigger>
               </TabsList>
 
@@ -869,6 +871,10 @@ const AdminDashboard = () => {
                 <EmailAnalyticsCharts />
               </TabsContent>
 
+              <TabsContent value="dashboard">
+                <EmailAnalyticsDashboard />
+              </TabsContent>
+              
               <TabsContent value="settings">
                 <EmailProviderSettings />
               </TabsContent>

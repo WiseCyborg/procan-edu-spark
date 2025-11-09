@@ -1045,6 +1045,33 @@ export type Database = {
         }
         Relationships: []
       }
+      cron_job_executions: {
+        Row: {
+          error_message: string | null
+          executed_at: string | null
+          execution_time_ms: number | null
+          id: string
+          job_name: string
+          status: string | null
+        }
+        Insert: {
+          error_message?: string | null
+          executed_at?: string | null
+          execution_time_ms?: number | null
+          id?: string
+          job_name: string
+          status?: string | null
+        }
+        Update: {
+          error_message?: string | null
+          executed_at?: string | null
+          execution_time_ms?: number | null
+          id?: string
+          job_name?: string
+          status?: string | null
+        }
+        Relationships: []
+      }
       curriculum_recommendations: {
         Row: {
           category: string
