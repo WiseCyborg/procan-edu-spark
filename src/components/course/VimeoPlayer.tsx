@@ -128,7 +128,7 @@ export const VimeoPlayer: React.FC<VimeoPlayerProps> = ({
   return (
     <Card className="overflow-hidden">
       <div 
-        className="relative group" 
+        className="relative group touch-none" 
         role="region" 
         aria-label={`Video player: ${title}`}
         tabIndex={0}
@@ -141,33 +141,34 @@ export const VimeoPlayer: React.FC<VimeoPlayerProps> = ({
             allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
             title={title}
             aria-describedby="video-controls-help"
+            allowFullScreen
           />
         </div>
 
         {/* Keyboard shortcuts help */}
         <div id="video-controls-help" className="sr-only">
           Video controls: Space or K to play/pause, F for fullscreen, M to mute, 
-          Left/Right arrows to skip 10 seconds
+          Left/Right arrows to skip 10 seconds. Double-tap left/right on mobile to skip.
         </div>
 
-        {/* Progress indicator */}
+        {/* Progress indicator - Mobile optimized */}
         <div 
-          className="absolute top-4 right-4 bg-black/70 text-white px-3 py-1.5 rounded-md text-sm font-medium"
+          className="absolute top-2 md:top-4 right-2 md:right-4 bg-black/80 text-white px-2 md:px-3 py-1 md:py-1.5 rounded-md text-xs md:text-sm font-medium"
           role="status"
           aria-live="polite"
           aria-atomic="true"
         >
           {watchedPercentage.toFixed(0)}% watched
           {hasWatchedEnough && (
-            <span className="ml-2 text-green-400" aria-label="Video completed">✓</span>
+            <span className="ml-1 md:ml-2 text-green-400" aria-label="Video completed">✓</span>
           )}
         </div>
       </div>
 
-      {/* Video info with transcript placeholder */}
-      <div className="p-4">
-        <h3 className="font-semibold text-lg mb-2">{title}</h3>
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
+      {/* Video info with transcript - Mobile optimized */}
+      <div className="p-3 md:p-4">
+        <h3 className="font-semibold text-base md:text-lg mb-2">{title}</h3>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs md:text-sm text-muted-foreground">
           <span aria-label={`Video progress: ${formatTime(currentTime)} of ${formatTime(duration)}`}>
             {formatTime(currentTime)} / {formatTime(duration)}
           </span>
@@ -178,12 +179,12 @@ export const VimeoPlayer: React.FC<VimeoPlayerProps> = ({
           )}
         </div>
         
-        {/* Transcript section (to be populated with actual transcript) */}
-        <details className="mt-4">
-          <summary className="cursor-pointer font-medium text-sm hover:underline">
+        {/* Transcript section - Mobile optimized */}
+        <details className="mt-3 md:mt-4">
+          <summary className="cursor-pointer font-medium text-sm md:text-base hover:underline touch-manipulation min-h-[44px] flex items-center">
             Video Transcript
           </summary>
-          <div className="mt-2 text-sm text-muted-foreground p-4 bg-muted rounded-md">
+          <div className="mt-2 text-xs md:text-sm text-muted-foreground p-3 md:p-4 bg-muted rounded-md">
             <p className="italic">
               Transcript will be available here. Contact support if you need this content in text format.
             </p>

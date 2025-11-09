@@ -156,7 +156,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
   return (
     <Card className="overflow-hidden">
-      <div className="relative group">
+      <div className="relative group touch-none">
         <video
           ref={videoRef}
           src={videoUrl}
@@ -164,45 +164,47 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           onClick={togglePlay}
           onPlay={() => setIsPlaying(true)}
           onPause={() => setIsPlaying(false)}
+          playsInline
+          controlsList="nodownload"
         />
         
-        {/* Progress indicator */}
-        <div className="absolute top-4 right-4 bg-black/70 text-white px-2 py-1 rounded text-sm">
+        {/* Progress indicator - Mobile optimized */}
+        <div className="absolute top-2 md:top-4 right-2 md:right-4 bg-black/80 text-white px-2 md:px-3 py-1 md:py-1.5 rounded text-xs md:text-sm font-medium">
           {watchedPercentage.toFixed(0)}% watched
           {hasWatchedEnough && (
-            <span className="ml-2 text-green-400">✓</span>
+            <span className="ml-1 md:ml-2 text-green-400">✓</span>
           )}
         </div>
 
-        {/* Video controls overlay */}
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity">
-          {/* Progress bar */}
-          <div className="mb-4">
+        {/* Video controls overlay - Touch optimized */}
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3 md:p-4 opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity">
+          {/* Progress bar - Larger touch target */}
+          <div className="mb-3 md:mb-4">
             <Slider
               value={[duration > 0 ? (currentTime / duration) * 100 : 0]}
               onValueChange={handleSeek}
               max={100}
               step={0.1}
-              className="w-full"
+              className="w-full h-8 md:h-auto"
             />
           </div>
 
-          {/* Control buttons */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+          {/* Control buttons - Mobile optimized */}
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center space-x-2 md:space-x-4">
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon"
                 onClick={togglePlay}
-                className="text-white hover:bg-white/20"
+                className="text-white hover:bg-white/20 h-10 w-10 md:h-9 md:w-9"
               >
-                {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+                {isPlaying ? <Pause className="w-5 h-5 md:w-6 md:h-6" /> : <Play className="w-5 h-5 md:w-6 md:h-6" />}
               </Button>
 
-              <div className="flex items-center space-x-2">
+              <div className="hidden md:flex items-center space-x-2">
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size="icon"
                   onClick={toggleMute}
                   className="text-white hover:bg-white/20"
                 >
@@ -217,39 +219,48 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                 </div>
               </div>
 
-              <span className="text-white text-sm">
+              <span className="text-white text-xs md:text-sm">
                 {formatTime(currentTime)} / {formatTime(duration)}
               </span>
             </div>
 
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1 md:space-x-2">
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon"
                 onClick={changePlaybackRate}
-                className="text-white hover:bg-white/20"
+                className="text-white hover:bg-white/20 h-10 w-10 md:h-9 md:w-9 text-xs md:text-sm"
               >
-                <Settings className="w-4 h-4 mr-1" />
                 {playbackRate}x
               </Button>
 
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon"
                 onClick={toggleFullscreen}
-                className="text-white hover:bg-white/20"
+                className="text-white hover:bg-white/20 h-10 w-10 md:h-9 md:w-9"
               >
-                <Maximize className="w-5 h-5" />
+                <Maximize className="w-5 h-5 md:w-6 md:h-6" />
               </Button>
             </div>
           </div>
         </div>
+
+        {/* Mobile volume control (tap to toggle mute) */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleMute}
+          className="md:hidden absolute bottom-20 left-3 text-white bg-black/50 hover:bg-black/70 h-10 w-10"
+        >
+          {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+        </Button>
       </div>
 
-      {/* Video title and progress */}
-      <div className="p-4">
-        <h3 className="font-semibold text-lg mb-2">{title}</h3>
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
+      {/* Video title and progress - Mobile optimized */}
+      <div className="p-3 md:p-4">
+        <h3 className="font-semibold text-base md:text-lg mb-2">{title}</h3>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs md:text-sm text-muted-foreground">
           <span>Watch progress: {watchedPercentage.toFixed(0)}%</span>
           {hasWatchedEnough ? (
             <span className="text-green-600 font-medium">✓ Completed</span>

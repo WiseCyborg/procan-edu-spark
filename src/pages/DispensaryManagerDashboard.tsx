@@ -188,35 +188,39 @@ const DispensaryManagerDashboard = () => {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-4 md:p-6 space-y-4 md:space-y-6 pb-20 md:pb-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Dispensary Manager Portal</h1>
-          <p className="text-muted-foreground">Manage your organization and training programs</p>
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="flex-1">
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground">Dispensary Manager Portal</h1>
+          <p className="text-sm md:text-base text-muted-foreground">Manage your organization and training programs</p>
         </div>
-        <div className="flex gap-2 items-center">
-          <Badge variant="outline" className="text-lg px-4 py-2">
-            <Building2 className="w-4 h-4 mr-2" />
-            {organization.dispensary_number}
+        <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center w-full md:w-auto">
+          <Badge variant="outline" className="text-base md:text-lg px-3 md:px-4 py-2 justify-center">
+            <Building2 className="w-4 h-4 mr-2 flex-shrink-0" />
+            <span className="truncate">{organization.dispensary_number}</span>
           </Badge>
-          <Button size="lg" onClick={() => setShowPurchaseModal(true)}>
-            <ShoppingCart className="mr-2 h-4 w-4" />
+          <Button 
+            size="lg" 
+            onClick={() => setShowPurchaseModal(true)}
+            className="w-full sm:w-auto h-11 md:h-10"
+          >
+            <ShoppingCart className="mr-2 h-4 w-4 flex-shrink-0" />
             Buy More Seats
           </Button>
         </div>
       </div>
 
       {/* Organization Overview */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Organization</CardTitle>
-            <Building2 className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 md:p-6">
+            <CardTitle className="text-sm md:text-base font-medium">Organization</CardTitle>
+            <Building2 className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground flex-shrink-0" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{organization.name}</div>
-            <p className="text-xs text-muted-foreground mt-1">
+          <CardContent className="p-4 md:p-6 pt-0 md:pt-0">
+            <div className="text-lg md:text-2xl font-bold truncate">{organization.name}</div>
+            <p className="text-xs md:text-sm text-muted-foreground mt-1 truncate">
               License: {organization.license_number}
             </p>
           </CardContent>

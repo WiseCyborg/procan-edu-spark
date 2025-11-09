@@ -729,18 +729,18 @@ const FinalExam: React.FC = () => {
     toast.success('Certificate would be emailed to ' + userData.email);
   };
 
-  // Render navigation menu
+  // Render navigation menu - Mobile optimized
   const renderNavMenu = () => {
     return (
-      <div className="bg-gray-800 text-white p-4 rounded-lg mb-6">
-        <h3 className="font-semibold mb-3">Exam Progress</h3>
-        <div className="grid grid-cols-6 gap-2">
+      <div className="bg-gray-800 text-white p-3 md:p-4 rounded-lg mb-4 md:mb-6">
+        <h3 className="font-semibold text-sm md:text-base mb-2 md:mb-3">Exam Progress</h3>
+        <div className="grid grid-cols-6 md:grid-cols-9 gap-1 md:gap-2">
           {Array.from({ length: 18 }, (_, i) => i + 1).map((section) => (
             <button
               key={section}
               onClick={() => submittedSections.has(section) && setCurrentSection(section)}
               disabled={!submittedSections.has(section) && section !== currentSection}
-              className={`p-2 rounded text-sm font-medium transition-colors ${
+              className={`p-2 md:p-3 rounded text-xs md:text-sm font-medium transition-colors min-h-[44px] md:min-h-0 ${
                 section === currentSection
                   ? 'bg-primary text-white'
                   : submittedSections.has(section)
@@ -754,57 +754,72 @@ const FinalExam: React.FC = () => {
             </button>
           ))}
         </div>
-        <p className="text-sm text-gray-300 mt-2">
+        <p className="text-xs md:text-sm text-gray-300 mt-2">
           Completed: {submittedSections.size}/18 sections
         </p>
       </div>
     );
   };
 
-  // Render exam section content based on current section
+  // Render exam section content based on current section - Mobile optimized
   const renderExamSection = () => {
     const section = currentSection;
     
     return (
-      <div className="space-y-6">
+      <div className="space-y-4 md:space-y-6">
         {renderNavMenu()}
         
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-2xl font-semibold mb-2">
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow-md">
+          <h2 className="text-xl md:text-2xl font-semibold mb-2">
             Part {section}: {sectionTitles[section]}
           </h2>
-          <p className="text-gray-600 mb-6">Test your knowledge of {sectionTitles[section].toLowerCase()}.</p>
+          <p className="text-sm md:text-base text-gray-600 mb-4 md:mb-6">Test your knowledge of {sectionTitles[section].toLowerCase()}.</p>
           
           {(quizzes[section] || []).map((question, index) => (
-            <div key={index} className="mb-6 p-4 bg-gray-50 rounded-lg">
-              <p className="font-medium mb-3 text-lg">{index + 1}. {question.q}</p>
+            <div key={index} className="mb-4 md:mb-6 p-3 md:p-4 bg-gray-50 rounded-lg">
+              <p className="font-medium mb-3 text-base md:text-lg">{index + 1}. {question.q}</p>
               {shuffleArray(question.options).map((option, i) => (
-                <label key={i} className="block mb-2 p-3 border-2 rounded-lg hover:bg-white hover:border-primary transition-all cursor-pointer">
+                <label key={i} className="block mb-2 p-3 md:p-4 border-2 rounded-lg hover:bg-white hover:border-primary transition-all cursor-pointer min-h-[48px] flex items-center">
                   <input 
                     type="radio" 
                     name={`q${section}${index}`} 
                     value={option} 
-                    className="mr-3" 
+                    className="mr-3 h-4 w-4 md:h-5 md:w-5 flex-shrink-0" 
                   />
-                  {option}
+                  <span className="text-sm md:text-base">{option}</span>
                 </label>
               ))}
             </div>
           ))}
           
-          <div className="flex flex-wrap gap-3 mt-6 pt-6 border-t">
+          <div className="flex flex-col sm:flex-row flex-wrap gap-2 md:gap-3 mt-4 md:mt-6 pt-4 md:pt-6 border-t">
             {section > 1 && (
-              <Button variant="outline" onClick={() => setCurrentSection(section - 1)}>
+              <Button 
+                variant="outline" 
+                onClick={() => setCurrentSection(section - 1)}
+                className="w-full sm:w-auto h-11 md:h-10 text-base md:text-sm"
+              >
                 Go Back
               </Button>
             )}
-            <Button variant="outline" onClick={pauseTimer}>
+            <Button 
+              variant="outline" 
+              onClick={pauseTimer}
+              className="w-full sm:w-auto h-11 md:h-10 text-base md:text-sm"
+            >
               {isPaused ? 'Resume' : 'Pause'}
             </Button>
-            <Button variant="outline" onClick={restartSectionTimer}>
+            <Button 
+              variant="outline" 
+              onClick={restartSectionTimer}
+              className="w-full sm:w-auto h-11 md:h-10 text-base md:text-sm"
+            >
               Restart Timer
             </Button>
-            <Button onClick={submitSection} className="bg-primary hover:bg-primary/90">
+            <Button 
+              onClick={submitSection} 
+              className="w-full sm:w-auto bg-primary hover:bg-primary/90 h-11 md:h-10 text-base md:text-sm"
+            >
               Submit Section
             </Button>
           </div>
@@ -944,38 +959,38 @@ const FinalExam: React.FC = () => {
           </div>
         )}
       
-      {/* Timer display - only shown during exam */}
+      {/* Timer display - only shown during exam - Mobile optimized */}
       {examStage === 'exam' && (
-        <div className="grid grid-cols-2 gap-4 max-w-2xl mx-auto mb-6">
-          <div className="bg-primary text-white p-4 rounded-lg text-center">
-            <div className="text-sm mb-1">Total Time Remaining</div>
-            <div className="text-3xl font-bold font-mono">{formatTime(totalTimeLeft)}</div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 max-w-2xl mx-auto mb-4 md:mb-6">
+          <div className="bg-primary text-white p-3 md:p-4 rounded-lg text-center">
+            <div className="text-xs md:text-sm mb-1">Total Time Remaining</div>
+            <div className="text-2xl md:text-3xl font-bold font-mono">{formatTime(totalTimeLeft)}</div>
           </div>
-          <div className="bg-accent text-white p-4 rounded-lg text-center">
-            <div className="text-sm mb-1">Section Time Remaining</div>
-            <div className="text-3xl font-bold font-mono">{formatTime(sectionTimeLeft)}</div>
+          <div className="bg-accent text-white p-3 md:p-4 rounded-lg text-center">
+            <div className="text-xs md:text-sm mb-1">Section Time Remaining</div>
+            <div className="text-2xl md:text-3xl font-bold font-mono">{formatTime(sectionTimeLeft)}</div>
           </div>
         </div>
       )}
       
-      {/* Photo Verification Stage */}
+      {/* Photo Verification Stage - Mobile optimized */}
       {examStage === 'verification' && !showHistory && (
-        <div className="bg-white p-6 rounded-lg shadow-md max-w-md mx-auto">
-          <h2 className="text-xl font-semibold mb-4">Photo Verification</h2>
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow-md max-w-md mx-auto">
+          <h2 className="text-lg md:text-xl font-semibold mb-3 md:mb-4">Photo Verification</h2>
           
           {/* Cooldown Warning */}
           {!canRetakeNow && timeUntilRetakeFormatted && (
             <Alert className="mb-4 border-yellow-500/50 bg-yellow-500/10">
-              <Clock className="h-4 w-4 text-yellow-600" />
-              <AlertDescription className="text-yellow-700 dark:text-yellow-400">
+              <Clock className="h-4 w-4 text-yellow-600 flex-shrink-0" />
+              <AlertDescription className="text-sm md:text-base text-yellow-700 dark:text-yellow-400">
                 <strong>Cooldown Active:</strong> You must wait {timeUntilRetakeFormatted} before retaking the exam.
               </AlertDescription>
             </Alert>
           )}
           
-          <p className="mb-4">Please provide your information and verify your identity with a photo before starting the exam.</p>
+          <p className="mb-4 text-sm md:text-base">Please provide your information and verify your identity with a photo before starting the exam.</p>
           
-          <div className="space-y-4">
+          <div className="space-y-3 md:space-y-4">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
                 Full Name
@@ -985,7 +1000,9 @@ const FinalExam: React.FC = () => {
                 name="name" 
                 value={userData.name} 
                 onChange={handleUserDataChange} 
-                required 
+                required
+                className="h-11 md:h-10 text-base md:text-sm"
+                autoComplete="name"
               />
             </div>
             
@@ -999,7 +1016,10 @@ const FinalExam: React.FC = () => {
                 type="tel" 
                 value={userData.phone} 
                 onChange={handleUserDataChange} 
-                required 
+                required
+                className="h-11 md:h-10 text-base md:text-sm"
+                autoComplete="tel"
+                inputMode="tel"
               />
             </div>
             
@@ -1013,18 +1033,21 @@ const FinalExam: React.FC = () => {
                 type="email" 
                 value={userData.email} 
                 onChange={handleUserDataChange} 
-                required 
+                required
+                className="h-11 md:h-10 text-base md:text-sm"
+                autoComplete="email"
+                inputMode="email"
               />
             </div>
             
-            {/* Gate 9: Camera bypass option */}
-            <div className="border-t pt-4">
-              <label className="flex items-start space-x-2 cursor-pointer">
+            {/* Gate 9: Camera bypass option - Mobile optimized */}
+            <div className="border-t pt-3 md:pt-4">
+              <label className="flex items-start space-x-2 cursor-pointer min-h-[44px]">
                 <input
                   type="checkbox"
                   checked={skipPhotoVerification}
                   onChange={(e) => setSkipPhotoVerification(e.target.checked)}
-                  className="mt-1"
+                  className="mt-1 h-4 w-4 md:h-5 md:w-5 flex-shrink-0"
                 />
                 <span className="text-sm text-gray-600">
                   Skip photo verification (camera unavailable or technical issues)
@@ -1042,6 +1065,7 @@ const FinalExam: React.FC = () => {
                     onChange={(e) => setBypassReason(e.target.value)}
                     placeholder="e.g., Camera not working, iOS issue, etc."
                     required
+                    className="h-11 md:h-10 text-base md:text-sm"
                   />
                   <p className="text-xs text-gray-500 mt-1">
                     This will be recorded for compliance purposes

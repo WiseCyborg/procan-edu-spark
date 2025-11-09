@@ -186,65 +186,78 @@ const EnhancedCourseModule: React.FC = () => {
     : 0;
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <Button variant="outline" size="sm" onClick={() => navigate('/course')}>
+    <div className="container mx-auto p-4 md:p-6 space-y-4 md:space-y-6 pb-20 md:pb-6">
+      {/* Header - Mobile optimized */}
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-0">
+        <div className="flex flex-col space-y-2 w-full">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => navigate('/course')}
+            className="self-start h-10 md:h-9"
+          >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Course
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-foreground">{moduleData.title}</h1>
-            <p className="text-muted-foreground">{moduleData.description}</p>
+            <h1 className="text-xl md:text-3xl font-bold text-foreground">{moduleData.title}</h1>
+            <p className="text-sm md:text-base text-muted-foreground mt-1">{moduleData.description}</p>
           </div>
         </div>
-        <Badge variant={isModuleCompleted(moduleId!) ? "default" : "secondary"}>
+        <Badge 
+          variant={isModuleCompleted(moduleId!) ? "default" : "secondary"}
+          className="self-start md:self-center px-3 py-1 md:px-4 md:py-2 text-sm md:text-base whitespace-nowrap"
+        >
           {isModuleCompleted(moduleId!) ? 'Completed' : 'In Progress'}
         </Badge>
       </div>
 
-      {/* Navigation Tabs */}
-      <div className="flex space-x-2">
+      {/* Navigation Tabs - Mobile optimized */}
+      <div className="flex gap-2 w-full">
         <Button 
           variant={currentSection === 'content' ? 'default' : 'outline'}
           onClick={() => setCurrentSection('content')}
-          className="flex items-center space-x-2"
+          className="flex-1 md:flex-none h-11 md:h-10 text-sm md:text-base"
         >
-          <BookOpen className="w-4 h-4" />
-          <span>Learning Content</span>
+          <BookOpen className="w-4 h-4 md:mr-2" />
+          <span className="hidden sm:inline ml-2">Learning Content</span>
+          <span className="sm:hidden ml-2">Content</span>
         </Button>
         <Button 
           variant={currentSection === 'quiz' ? 'default' : 'outline'}
           onClick={() => setCurrentSection('quiz')}
-          className="flex items-center space-x-2"
+          className="flex-1 md:flex-none h-11 md:h-10 text-sm md:text-base"
         >
-          <CheckCircle className="w-4 h-4" />
-          <span>Quiz ({moduleData.quiz_questions.length} questions)</span>
+          <CheckCircle className="w-4 h-4 md:mr-2" />
+          <span className="hidden sm:inline ml-2">Quiz ({moduleData.quiz_questions.length} questions)</span>
+          <span className="sm:hidden ml-2">Quiz ({moduleData.quiz_questions.length})</span>
         </Button>
       </div>
 
-      {/* Content Section with Regulatory Sidebar */}
+      {/* Content Section with Regulatory Sidebar - Mobile optimized */}
       {currentSection === 'content' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
           <div className="lg:col-span-2">
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <BookOpen className="w-5 h-5" />
+              <CardHeader className="p-4 md:p-6">
+                <CardTitle className="flex items-center space-x-2 text-lg md:text-xl">
+                  <BookOpen className="w-5 h-5 flex-shrink-0" />
                   <span>Module Content</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="prose max-w-none">
+              <CardContent className="space-y-4 p-4 md:p-6">
+                <div className="prose prose-sm md:prose-base max-w-none">
                   {moduleData.content.split('\n').map((paragraph, index) => (
-                    <p key={index} className="mb-4 text-foreground leading-relaxed">
+                    <p key={index} className="mb-3 md:mb-4 text-base md:text-lg text-foreground leading-relaxed">
                       {paragraph}
                     </p>
                   ))}
                 </div>
-                <div className="flex justify-end">
-                  <Button onClick={() => setCurrentSection('quiz')}>
+                <div className="flex justify-end pt-4">
+                  <Button 
+                    onClick={() => setCurrentSection('quiz')}
+                    className="w-full md:w-auto h-11 md:h-10"
+                  >
                     Continue to Quiz
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
@@ -253,10 +266,12 @@ const EnhancedCourseModule: React.FC = () => {
             </Card>
           </div>
           <div className="lg:col-span-1">
-            <RegulatorySidebar 
-              sectionNumber={moduleData.module_number?.toString()}
-              comarReference={moduleData.comar_reference}
-            />
+            <div className="lg:sticky lg:top-6">
+              <RegulatorySidebar 
+                sectionNumber={moduleData.module_number?.toString()}
+                comarReference={moduleData.comar_reference}
+              />
+            </div>
           </div>
         </div>
       )}

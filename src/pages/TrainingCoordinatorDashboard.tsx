@@ -161,22 +161,22 @@ const TrainingCoordinatorDashboard = () => {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-4 md:p-6 space-y-4 md:space-y-6 pb-20 md:pb-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Training Coordinator Portal</h1>
-        <p className="text-muted-foreground">Manage employee training and progress</p>
+        <h1 className="text-2xl md:text-3xl font-bold text-foreground">Training Coordinator Portal</h1>
+        <p className="text-sm md:text-base text-muted-foreground">Manage employee training and progress</p>
       </div>
 
       {/* Quick Stats */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Employees</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 md:p-6">
+            <CardTitle className="text-sm md:text-base font-medium">Total Employees</CardTitle>
+            <Users className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground flex-shrink-0" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{employees.length}</div>
+          <CardContent className="p-4 md:p-6 pt-0 md:pt-0">
+            <div className="text-2xl md:text-3xl font-bold">{employees.length}</div>
           </CardContent>
         </Card>
 

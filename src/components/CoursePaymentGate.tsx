@@ -112,35 +112,35 @@ export const CoursePaymentGate: React.FC<CoursePaymentGateProps> = ({
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-6 md:py-8">
       <Card className="max-w-2xl mx-auto">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <Lock className="h-16 w-16 text-blue-500" />
+        <CardHeader className="text-center p-4 md:p-6">
+          <div className="flex justify-center mb-3 md:mb-4">
+            <Lock className="h-12 w-12 md:h-16 md:w-16 text-blue-500" />
           </div>
-          <CardTitle className="text-2xl text-blue-700">
+          <CardTitle className="text-xl md:text-2xl text-blue-700">
             Course Payment Required
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="bg-blue-50 p-6 rounded-lg">
-            <h3 className="text-xl font-semibold text-blue-800 mb-2">
+        <CardContent className="space-y-4 md:space-y-6 p-4 md:p-6">
+          <div className="bg-blue-50 p-4 md:p-6 rounded-lg">
+            <h3 className="text-lg md:text-xl font-semibold text-blue-800 mb-2">
               {course.title}
             </h3>
-            <p className="text-blue-700 mb-4">
+            <p className="text-sm md:text-base text-blue-700 mb-4">
               {course.description}
             </p>
-            <div className="text-3xl font-bold text-blue-900">
+            <div className="text-2xl md:text-3xl font-bold text-blue-900">
               {formatPrice(course.price_cents, course.currency)}
             </div>
           </div>
 
           <div className="bg-green-50 p-4 rounded-lg">
-            <h4 className="font-semibold text-green-800 mb-2 flex items-center">
-              <Check className="h-5 w-5 mr-2" />
+            <h4 className="font-semibold text-sm md:text-base text-green-800 mb-2 flex items-center">
+              <Check className="h-4 w-4 md:h-5 md:w-5 mr-2 flex-shrink-0" />
               What's Included:
             </h4>
-            <ul className="text-sm text-green-700 space-y-1">
+            <ul className="text-xs md:text-sm text-green-700 space-y-1">
               <li>• Complete access to all course modules</li>
               <li>• Interactive learning materials</li>
               <li>• Final certification exam</li>
@@ -155,14 +155,16 @@ export const CoursePaymentGate: React.FC<CoursePaymentGateProps> = ({
               onClick={handlePayment}
               disabled={isProcessing}
               size="lg"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8"
+              className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 md:px-8 h-12 md:h-11 text-base md:text-lg"
             >
-              <CreditCard className="h-5 w-5 mr-2" />
-              {isProcessing ? 'Processing...' : `Pay ${formatPrice(course.price_cents, course.currency)}`}
+              <CreditCard className="h-5 w-5 mr-2 flex-shrink-0" />
+              <span className="truncate">
+                {isProcessing ? 'Processing...' : `Pay ${formatPrice(course.price_cents, course.currency)}`}
+              </span>
             </Button>
           </div>
 
-          <div className="text-center text-sm text-gray-500">
+          <div className="text-center text-xs md:text-sm text-gray-500 space-y-1">
             <p>Secure payment powered by PayPal</p>
             <p>Your payment information is encrypted and secure</p>
           </div>

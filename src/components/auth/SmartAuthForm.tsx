@@ -248,16 +248,16 @@ const SmartAuthForm = () => {
   const isAdmin = userRoles.includes('admin');
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/5 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/5 p-3 md:p-4">
       <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-primary">
+        <CardHeader className="text-center p-4 md:p-6">
+          <CardTitle className="text-xl md:text-2xl font-bold text-primary">
             ProCann Edu
           </CardTitle>
-          <p className="text-muted-foreground">Maryland Cannabis Training Platform</p>
+          <p className="text-sm md:text-base text-muted-foreground">Maryland Cannabis Training Platform</p>
           
           {emailExists && userRoles.length > 0 && (
-            <div className="flex justify-center gap-1 mt-2">
+            <div className="flex justify-center gap-1 flex-wrap mt-2">
               {userRoles.map(role => (
                 <Badge key={role} variant={role === 'admin' ? 'default' : 'secondary'} className="text-xs">
                   {role.replace('_', ' ').toUpperCase()}
@@ -266,11 +266,11 @@ const SmartAuthForm = () => {
             </div>
           )}
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 md:p-6">
           {isAdmin && hasPreferences && (
             <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-md">
               <div className="flex items-center gap-2 text-emerald-700 text-sm">
-                <Zap className="w-4 h-4" />
+                <Zap className="w-4 h-4 flex-shrink-0" />
                 <span className="font-medium">Quick Entry Available</span>
               </div>
               <p className="text-emerald-600 text-xs mt-1">
@@ -280,19 +280,19 @@ const SmartAuthForm = () => {
           )}
           
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin" disabled={emailExists === false}>
+            <TabsList className="grid w-full grid-cols-2 h-10 md:h-9">
+              <TabsTrigger value="signin" disabled={emailExists === false} className="text-sm md:text-base">
                 Sign In
                 {emailChecking && <span className="ml-1 text-xs">...</span>}
               </TabsTrigger>
-              <TabsTrigger value="signup" disabled={emailExists === true}>
+              <TabsTrigger value="signup" disabled={emailExists === true} className="text-sm md:text-base">
                 Sign Up
                 {emailExists === false && <span className="ml-1 text-xs text-primary">•</span>}
               </TabsTrigger>
             </TabsList>
             
             <TabsContent value="signin">
-              <form onSubmit={handleSignIn} className="space-y-4">
+              <form onSubmit={handleSignIn} className="space-y-3 md:space-y-4">
                 <div>
                   <Input
                     type="email"
@@ -300,6 +300,9 @@ const SmartAuthForm = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
+                    className="h-11 md:h-10 text-base md:text-sm"
+                    autoComplete="email"
+                    inputMode="email"
                   />
                 </div>
                 <div>
@@ -309,17 +312,19 @@ const SmartAuthForm = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
+                    className="h-11 md:h-10 text-base md:text-sm"
+                    autoComplete="current-password"
                   />
                 </div>
                 
                 <Button 
                   type="submit" 
-                  className="w-full"
+                  className="w-full h-11 md:h-10 text-base md:text-sm"
                   disabled={loading}
                 >
                   {loading ? 'Signing In...' : 'Sign In'}
                   {isAdmin && hasPreferences && (
-                    <Zap className="w-4 h-4 ml-2" />
+                    <Zap className="w-4 h-4 ml-2 flex-shrink-0" />
                   )}
                 </Button>
                 
@@ -327,7 +332,7 @@ const SmartAuthForm = () => {
                   <button
                     type="button"
                     onClick={() => setShowForgotPassword(true)}
-                    className="text-sm text-primary hover:underline"
+                    className="text-sm md:text-base text-primary hover:underline min-h-[44px] md:min-h-0 flex items-center justify-center"
                   >
                     Forgot your password?
                   </button>
@@ -336,19 +341,23 @@ const SmartAuthForm = () => {
             </TabsContent>
             
             <TabsContent value="signup">
-              <form onSubmit={handleSignUp} className="space-y-4">
+              <form onSubmit={handleSignUp} className="space-y-3 md:space-y-4">
                 <div className="grid grid-cols-2 gap-2">
                   <Input
                     placeholder="First Name"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     required
+                    className="h-11 md:h-10 text-base md:text-sm"
+                    autoComplete="given-name"
                   />
                   <Input
                     placeholder="Last Name"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     required
+                    className="h-11 md:h-10 text-base md:text-sm"
+                    autoComplete="family-name"
                   />
                 </div>
                 <div>
@@ -358,6 +367,9 @@ const SmartAuthForm = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
+                    className="h-11 md:h-10 text-base md:text-sm"
+                    autoComplete="email"
+                    inputMode="email"
                   />
                 </div>
                 <div>
@@ -367,6 +379,9 @@ const SmartAuthForm = () => {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     required
+                    className="h-11 md:h-10 text-base md:text-sm"
+                    autoComplete="tel"
+                    inputMode="tel"
                   />
                 </div>
                 <div>
@@ -376,11 +391,13 @@ const SmartAuthForm = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
+                    className="h-11 md:h-10 text-base md:text-sm"
+                    autoComplete="new-password"
                   />
                 </div>
                 <Button 
                   type="submit" 
-                  className="w-full"
+                  className="w-full h-11 md:h-10 text-base md:text-sm"
                   disabled={loading}
                 >
                   {loading ? 'Creating Account...' : 'Sign Up'}
