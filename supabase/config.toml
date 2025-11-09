@@ -239,3 +239,39 @@ verify_jwt = false
 
 [functions.send-team-ready-email]
 verify_jwt = false
+
+[functions.send-application-submitted]
+verify_jwt = false
+
+[functions.send-application-approved]
+verify_jwt = false
+
+[functions.send-application-rejected]
+verify_jwt = false
+
+[functions.send-payment-reminder]
+verify_jwt = false
+
+[functions.send-payment-failed]
+verify_jwt = false
+
+[functions.send-manager-registration-token]
+verify_jwt = false
+
+[functions.send-manager-registration-reminder]
+verify_jwt = false
+
+[functions.send-employee-progress-milestone]
+verify_jwt = false
+
+[functions.send-employee-course-stalled]
+verify_jwt = false
+
+[functions.send-certificate-expiry-warning]
+verify_jwt = false
+
+[functions.check-payment-deadlines]
+verify_jwt = false
+
+[functions.check-certificate-expiry]
+verify_jwt = false

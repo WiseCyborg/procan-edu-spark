@@ -2,9 +2,16 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 import { monitoring } from '@/lib/monitoring'
+import { registerServiceWorker, promptPWAInstall } from '@/lib/pwa-registration'
 
 // Initialize production monitoring
 monitoring.initialize();
+
+// Register PWA service worker
+registerServiceWorker();
+
+// Setup PWA install prompt
+promptPWAInstall();
 
 // Global error handlers for debugging
 window.addEventListener('error', (event) => {

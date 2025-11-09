@@ -23,6 +23,26 @@ export const EmailAnalyticsDashboard = () => {
       const clicked = data?.filter(e => e.clicked_at).length || 0;
       const failed = data?.filter(e => e.status === 'failed').length || 0;
 
+      // Calculate daily trends
+      const last7Days = Array.from({ length: 7 }, (_, i) => {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        return date.toISOString().split('T')[0];
+      }).reverse();
+
+      const dailyData = last7Days.map(date => {
+        const dayLogs = data?.filter(log => 
+          log.created_at?.startsWith(date)
+        ) || [];
+        
+        return {
+          date: new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          sent: dayLogs.filter(l => l.status === 'sent').length,
+          opened: dayLogs.filter(l => l.opened_at).length,
+          clicked: dayLogs.filter(l => l.clicked_at).length,
+        };
+      });
+
       return {
         total,
         sent,
@@ -32,6 +52,7 @@ export const EmailAnalyticsDashboard = () => {
         deliveryRate: total > 0 ? ((sent / total) * 100).toFixed(1) : 0,
         openRate: sent > 0 ? ((opened / sent) * 100).toFixed(1) : 0,
         clickRate: opened > 0 ? ((clicked / opened) * 100).toFixed(1) : 0,
+        dailyData,
       };
     },
   });
@@ -83,6 +104,22 @@ export const EmailAnalyticsDashboard = () => {
           </div>
         </Card>
       </div>
+
+      <Card className="p-6">
+        <h3 className="text-lg font-semibold mb-4">7-Day Email Trends</h3>
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={analytics?.dailyData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="date" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Line type="monotone" dataKey="sent" stroke="hsl(var(--primary))" name="Sent" />
+            <Line type="monotone" dataKey="opened" stroke="hsl(var(--chart-2))" name="Opened" />
+            <Line type="monotone" dataKey="clicked" stroke="hsl(var(--chart-3))" name="Clicked" />
+          </LineChart>
+        </ResponsiveContainer>
+      </Card>
     </div>
   );
 };
