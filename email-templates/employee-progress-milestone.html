@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Great Progress!</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 20px; }
+    .container { max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 8px; }
+    .header { text-align: center; margin-bottom: 30px; }
+    .header h1 { color: #16a34a; margin: 0; font-size: 28px; }
+    .icon { font-size: 48px; margin-bottom: 10px; }
+    .content { color: #333; line-height: 1.6; font-size: 16px; }
+    .progress-box { background: #f0fdf4; border: 2px solid #16a34a; padding: 25px; margin: 20px 0; border-radius: 8px; text-align: center; }
+    .progress-bar { width: 100%; height: 30px; background: #e5e5e5; border-radius: 15px; overflow: hidden; margin: 15px 0; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, #16a34a, #22c55e); transition: width 0.3s; }
+    .cta-button { display: inline-block; background: #16a34a; color: white; padding: 16px 40px; text-decoration: none; border-radius: 6px; font-size: 18px; font-weight: bold; margin: 20px 0; min-height: 44px; }
+    .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+    @media only screen and (max-width: 600px) {
+      .container { padding: 20px; }
+      .cta-button { width: 100%; box-sizing: border-box; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="icon">🎯</div>
+      <h1>You're Doing Great!</h1>
+    </div>
+    
+    <div class="content">
+      <p>Hi {{ .FirstName }},</p>
+      
+      <p>Awesome progress! You're <strong>{{ .ProgressPercent }}% complete</strong> with your Maryland RVT certification.</p>
+      
+      <div class="progress-box">
+        <h3 style="margin-top: 0; color: #16a34a;">Your Progress</h3>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: {{ .ProgressPercent }}%"></div>
+        </div>
+        <p style="font-size: 24px; font-weight: bold; color: #16a34a; margin: 10px 0;">{{ .ProgressPercent }}%</p>
+        <p style="margin-bottom: 0; color: #666;">{{ .ModulesCompleted }} of {{ .TotalModules }} modules completed</p>
+      </div>
+      
+      <div style="text-align: center;">
+        <a href="{{ .ContinueUrl }}" class="cta-button">Continue Training</a>
+      </div>
+      
+      <h3>📌 What's Next:</h3>
+      <p><strong>{{ .NextModule }}</strong></p>
+      <p style="color: #666;">Estimated time: {{ .NextModuleDuration }} minutes</p>
+      
+      <h3>🎉 Recent Achievements:</h3>
+      <ul>
+        <li>✅ Completed {{ .RecentModule }}</li>
+        <li>✅ Passed module quiz with {{ .QuizScore }}%</li>
+        <li>✅ {{ .TimeSpent }} total learning time</li>
+      </ul>
+      
+      {{ if .Deadline }}
+      <div style="background: #fef3c7; padding: 15px; border-left: 4px solid #f59e0b; margin: 20px 0; border-radius: 4px;">
+        <strong>⏰ Reminder:</strong> Complete by {{ .Deadline }}<br>
+        <small>You're on track! Keep up the great work.</small>
+      </div>
+      {{ end }}
+      
+      <p>You're almost there! Keep up the excellent work.</p>
+      
+      <p>Best regards,<br><strong>ProCann Edu Team</strong></p>
+    </div>
+    
+    <div class="footer">
+      <p>© 2025 ProCann Edu | Responsible Vendor Training</p>
+    </div>
+  </div>
+</body>
+</html>

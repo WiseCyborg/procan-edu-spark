@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome to ProCann Edu</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 20px; }
+    .container { max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 8px; }
+    .header { text-align: center; margin-bottom: 30px; }
+    .header h1 { color: #16a34a; margin: 0; font-size: 28px; }
+    .icon { font-size: 48px; margin-bottom: 10px; }
+    .content { color: #333; line-height: 1.6; font-size: 16px; }
+    .welcome-box { background: #f0fdf4; border: 2px solid #16a34a; padding: 25px; margin: 20px 0; border-radius: 8px; text-align: center; }
+    .cta-button { display: inline-block; background: #16a34a; color: white; padding: 16px 40px; text-decoration: none; border-radius: 6px; font-size: 18px; font-weight: bold; margin: 20px 0; min-height: 44px; }
+    .modules { background: #fafafa; padding: 20px; border-radius: 4px; margin: 20px 0; }
+    .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+    @media only screen and (max-width: 600px) {
+      .container { padding: 20px; }
+      .cta-button { width: 100%; box-sizing: border-box; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="icon">🎉</div>
+      <h1>Welcome to ProCann Edu!</h1>
+    </div>
+    
+    <div class="content">
+      <p>Hi {{ .FirstName }},</p>
+      
+      <div class="welcome-box">
+        <h2 style="margin-top: 0; color: #16a34a;">Account Created Successfully!</h2>
+        <p style="font-size: 18px; margin-bottom: 0;">You're ready to begin your Maryland RVT certification journey.</p>
+      </div>
+      
+      <div style="text-align: center;">
+        <a href="{{ .DashboardUrl }}" class="cta-button">Go to Dashboard</a>
+      </div>
+      
+      <div class="modules">
+        <h3 style="margin-top: 0;">📚 Course Modules</h3>
+        <ol>
+          <li><strong>Introduction to Maryland Cannabis Laws</strong> - 15 min</li>
+          <li><strong>Product Knowledge & Safety</strong> - 20 min</li>
+          <li><strong>Responsible Sales Practices</strong> - 25 min</li>
+          <li><strong>ID Verification & Compliance</strong> - 20 min</li>
+          <li><strong>Customer Service Excellence</strong> - 15 min</li>
+          <li><strong>Final Certification Exam</strong> - 30 min</li>
+        </ol>
+        <p><strong>Total Time:</strong> ~2-3 hours (self-paced)</p>
+      </div>
+      
+      <h3>💡 Pro Tips for Success:</h3>
+      <ul>
+        <li>✅ Complete modules in order for best results</li>
+        <li>✅ Watch all videos carefully - exam questions come from them</li>
+        <li>✅ Take notes on key regulations and requirements</li>
+        <li>✅ Use a quiet space for the proctored final exam</li>
+        <li>✅ You can pause and resume anytime</li>
+      </ul>
+      
+      <h3>🎯 What You Get Upon Completion:</h3>
+      <ul>
+        <li>Official Maryland RVT Certification (lifetime validity)</li>
+        <li>Downloadable PDF certificate</li>
+        <li>Digital badge for LinkedIn</li>
+        <li>Compliance documentation for your employer</li>
+      </ul>
+      
+      <p>Questions? Our support team is available 24/7 at <a href="mailto:support@procannedu.com">support@procannedu.com</a></p>
+      
+      <p>Let's get started!</p>
+      
+      <p>Best regards,<br><strong>ProCann Edu Team</strong></p>
+    </div>
+    
+    <div class="footer">
+      <p>© 2025 ProCann Edu | Responsible Vendor Training</p>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Reminder</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 20px; }
+    .container { max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 8px; }
+    .header { text-align: center; margin-bottom: 30px; }
+    .header h1 { color: #f59e0b; margin: 0; font-size: 28px; }
+    .icon { font-size: 48px; margin-bottom: 10px; }
+    .content { color: #333; line-height: 1.6; font-size: 16px; }
+    .reminder-box { background: #fef3c7; border: 2px solid #f59e0b; padding: 25px; margin: 20px 0; border-radius: 8px; text-align: center; }
+    .amount { font-size: 32px; color: #f59e0b; font-weight: bold; margin: 10px 0; }
+    .cta-button { display: inline-block; background: #f59e0b; color: white; padding: 16px 40px; text-decoration: none; border-radius: 6px; font-size: 18px; font-weight: bold; margin: 20px 0; min-height: 44px; }
+    .cta-button:hover { background: #d97706; }
+    .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+    @media only screen and (max-width: 600px) {
+      .container { padding: 20px; }
+      .header h1 { font-size: 24px; }
+      .amount { font-size: 24px; }
+      .cta-button { padding: 12px 30px; font-size: 16px; width: 100%; box-sizing: border-box; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="icon">⏰</div>
+      <h1>Payment Reminder</h1>
+    </div>
+    
+    <div class="content">
+      <p>Dear {{ .ContactPerson }},</p>
+      
+      <p>This is a friendly reminder that your payment for <strong>{{ .OrganizationName }}</strong>'s ProCann Edu training program is still pending.</p>
+      
+      <div class="reminder-box">
+        <h3 style="margin-top: 0; color: #f59e0b;">Amount Due</h3>
+        <div class="amount">${{ .TotalAmount }}</div>
+        <p><strong>Days Remaining:</strong> 7 days</p>
+        <p><strong>Deadline:</strong> {{ .PaymentDeadline }}</p>
+      </div>
+      
+      <div style="text-align: center;">
+        <a href="{{ .PaymentUrl }}" class="cta-button">Complete Payment Now</a>
+      </div>
+      
+      <p>Completing your payment will unlock:</p>
+      <ul>
+        <li>{{ .Credits }} training seats for your team</li>
+        <li>Immediate access to manager dashboard</li>
+        <li>Ability to invite and track employees</li>
+        <li>Full Maryland RVT certification program</li>
+      </ul>
+      
+      <p>If you've already completed payment, please disregard this message.</p>
+      
+      <p>Questions? We're here to help!</p>
+      
+      <p>Best regards,<br><strong>ProCann Edu Team</strong></p>
+    </div>
+    
+    <div class="footer">
+      <p>© 2025 ProCann Edu | Responsible Vendor Training</p>
+      <p>Contact us at <a href="mailto:billing@procannedu.com">billing@procannedu.com</a></p>
+    </div>
+  </div>
+</body>
+</html>

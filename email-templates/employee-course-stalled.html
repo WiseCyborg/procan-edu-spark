@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>We Miss You!</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 20px; }
+    .container { max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 8px; }
+    .header { text-align: center; margin-bottom: 30px; }
+    .header h1 { color: #f59e0b; margin: 0; font-size: 28px; }
+    .icon { font-size: 48px; margin-bottom: 10px; }
+    .content { color: #333; line-height: 1.6; font-size: 16px; }
+    .reminder-box { background: #fef3c7; border: 2px solid #f59e0b; padding: 25px; margin: 20px 0; border-radius: 8px; text-align: center; }
+    .cta-button { display: inline-block; background: #16a34a; color: white; padding: 16px 40px; text-decoration: none; border-radius: 6px; font-size: 18px; font-weight: bold; margin: 20px 0; min-height: 44px; }
+    .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+    @media only screen and (max-width: 600px) {
+      .container { padding: 20px; }
+      .cta-button { width: 100%; box-sizing: border-box; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="icon">👋</div>
+      <h1>We Miss You!</h1>
+    </div>
+    
+    <div class="content">
+      <p>Hi {{ .FirstName }},</p>
+      
+      <p>We noticed you haven't continued your Maryland RVT training in <strong>{{ .DaysInactive }} days</strong>.</p>
+      
+      <div class="reminder-box">
+        <h3 style="margin-top: 0; color: #f59e0b;">Your Progress is Saved!</h3>
+        <p style="font-size: 18px; margin: 10px 0;">You're <strong>{{ .ProgressPercent }}% complete</strong></p>
+        <p style="margin-bottom: 0; color: #666;">Pick up exactly where you left off</p>
+      </div>
+      
+      <div style="text-align: center;">
+        <a href="{{ .ResumeUrl }}" class="cta-button">Resume Training</a>
+      </div>
+      
+      <h3>📍 Where You Left Off:</h3>
+      <p><strong>{{ .LastModule }}</strong></p>
+      <p style="color: #666;">Next up: {{ .NextModule }} ({{ .NextModuleDuration }} min)</p>
+      
+      <h3>💡 Why Complete Your Training:</h3>
+      <ul>
+        <li>✅ Required for Maryland cannabis retail compliance</li>
+        <li>✅ Earn your lifetime RVT certification</li>
+        <li>✅ Demonstrate professionalism to your employer</li>
+        <li>✅ Only {{ .ModulesRemaining }} modules left!</li>
+      </ul>
+      
+      {{ if .Deadline }}
+      <div style="background: #fee2e2; padding: 15px; border-left: 4px solid #dc2626; margin: 20px 0; border-radius: 4px;">
+        <strong>⚠️ Training Deadline:</strong> {{ .Deadline }}<br>
+        <small>Complete soon to avoid compliance issues.</small>
+      </div>
+      {{ end }}
+      
+      <p><strong>Need help?</strong> If you're experiencing technical issues or have questions, we're here to support you.</p>
+      
+      <p>Let's finish what you started!</p>
+      
+      <p>Best regards,<br><strong>ProCann Edu Team</strong></p>
+    </div>
+    
+    <div class="footer">
+      <p>© 2025 ProCann Edu | Responsible Vendor Training</p>
+      <p>Contact support: <a href="mailto:support@procannedu.com">support@procannedu.com</a></p>
+    </div>
+  </div>
+</body>
+</html>

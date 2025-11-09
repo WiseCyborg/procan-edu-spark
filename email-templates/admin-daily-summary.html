@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Platform Summary</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 20px; }
+    .container { max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 8px; }
+    .header { background: linear-gradient(135deg, #16a34a, #22c55e); color: white; padding: 30px; border-radius: 8px 8px 0 0; margin: -40px -40px 20px -40px; text-align: center; }
+    .header h1 { margin: 0; font-size: 28px; }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
+    .stat-card { background: #fafafa; padding: 20px; border-radius: 8px; text-align: center; }
+    .stat-number { font-size: 32px; font-weight: bold; color: #16a34a; }
+    .stat-label { color: #666; font-size: 14px; }
+    .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+    @media only screen and (max-width: 600px) {
+      .stats-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📊 Daily Summary</h1>
+      <p style="margin: 10px 0 0 0; opacity: 0.9;">{{ .Date }}</p>
+    </div>
+    
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number">{{ .NewApplications }}</div>
+        <div class="stat-label">New Applications</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">{{ .ActiveUsers }}</div>
+        <div class="stat-label">Active Users</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">{{ .Certifications }}</div>
+        <div class="stat-label">Certifications Issued</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">${{ .Revenue }}</div>
+        <div class="stat-label">Revenue</div>
+      </div>
+    </div>
+    
+    <h3>📧 Email System Health</h3>
+    <p><strong>Emails Sent:</strong> {{ .EmailsSent }} | <strong>Success Rate:</strong> {{ .EmailSuccessRate }}%</p>
+    <p><strong>Circuit Breaker:</strong> <span style="color: #16a34a;">✅ Closed</span></p>
+    
+    <h3>⚠️ Action Items</h3>
+    <ul>
+      <li>{{ .PendingApplications }} applications pending review</li>
+      <li>{{ .FailedEmails }} failed emails need attention</li>
+      <li>{{ .StalledTraining }} employees with stalled training</li>
+    </ul>
+    
+    <div class="footer">
+      <p>© 2025 ProCann Edu | Admin Dashboard</p>
+    </div>
+  </div>
+</body>
+</html>

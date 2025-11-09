@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Complete Your Manager Registration</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 20px; }
+    .container { max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 8px; }
+    .header { text-align: center; margin-bottom: 30px; }
+    .header h1 { color: #16a34a; margin: 0; font-size: 28px; }
+    .icon { font-size: 48px; margin-bottom: 10px; }
+    .content { color: #333; line-height: 1.6; font-size: 16px; }
+    .welcome-box { background: #f0fdf4; border: 2px solid #16a34a; padding: 25px; margin: 20px 0; border-radius: 8px; text-align: center; }
+    .cta-button { display: inline-block; background: #16a34a; color: white; padding: 16px 40px; text-decoration: none; border-radius: 6px; font-size: 18px; font-weight: bold; margin: 20px 0; min-height: 44px; }
+    .cta-button:hover { background: #15803d; }
+    .expiry-warning { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 4px; }
+    .access-info { background: #fafafa; padding: 20px; border-radius: 4px; margin: 20px 0; }
+    .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+    @media only screen and (max-width: 600px) {
+      .container { padding: 20px; }
+      .header h1 { font-size: 24px; }
+      .cta-button { width: 100%; box-sizing: border-box; padding: 12px 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="icon">🎉</div>
+      <h1>Welcome to ProCann Edu!</h1>
+    </div>
+    
+    <div class="content">
+      <p>Dear {{ .ManagerName }},</p>
+      
+      <div class="welcome-box">
+        <h2 style="margin-top: 0; color: #16a34a;">You're Almost There!</h2>
+        <p style="font-size: 18px;">Complete your manager registration to access your organization's training dashboard.</p>
+      </div>
+      
+      <div style="text-align: center;">
+        <a href="{{ .RegistrationUrl }}" class="cta-button">Create Manager Account</a>
+      </div>
+      
+      <div class="expiry-warning">
+        <strong>⏰ Important:</strong> This registration link expires on {{ .ExpiryDate }} (14 days).<br>
+        <small>Please complete registration soon to maintain access.</small>
+      </div>
+      
+      <div class="access-info">
+        <h3 style="margin-top: 0;">🎯 What You'll Get Access To:</h3>
+        <ul>
+          <li><strong>Manager Dashboard</strong> - Full oversight of your team's training</li>
+          <li><strong>{{ .Credits }} Training Seats</strong> - Ready for your employees</li>
+          <li><strong>Team Join Code</strong> - To invite employees easily</li>
+          <li><strong>Progress Tracking</strong> - Real-time completion monitoring</li>
+          <li><strong>Certificate Management</strong> - Download and verify certifications</li>
+          <li><strong>Deadline Management</strong> - Set and track training deadlines</li>
+        </ul>
+      </div>
+      
+      <h3>📋 Next Steps After Registration:</h3>
+      <ol>
+        <li>Set up your manager profile</li>
+        <li>Review your organization's join code</li>
+        <li>Invite employees to begin training</li>
+        <li>Monitor progress from your dashboard</li>
+      </ol>
+      
+      <p><strong>Organization:</strong> {{ .OrganizationName }}</p>
+      
+      <p>Questions? Our support team is here to help at <a href="mailto:support@procannedu.com">support@procannedu.com</a></p>
+      
+      <p>We're excited to have you on board!</p>
+      
+      <p>Best regards,<br><strong>ProCann Edu Team</strong></p>
+    </div>
+    
+    <div class="footer">
+      <p>© 2025 ProCann Edu | Responsible Vendor Training</p>
+      <p>Didn't expect this email? Contact us immediately.</p>
+    </div>
+  </div>
+</body>
+</html>

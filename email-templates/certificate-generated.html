@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Certificate Ready!</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 20px; }
+    .container { max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 8px; }
+    .header { text-align: center; margin-bottom: 30px; }
+    .header h1 { color: #16a34a; margin: 0; font-size: 28px; }
+    .icon { font-size: 60px; margin-bottom: 10px; }
+    .content { color: #333; line-height: 1.6; font-size: 16px; }
+    .cert-box { background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 3px solid #16a34a; padding: 30px; margin: 20px 0; border-radius: 8px; text-align: center; }
+    .cert-number { font-size: 24px; font-weight: bold; color: #16a34a; margin: 15px 0; letter-spacing: 1px; }
+    .cta-button { display: inline-block; background: #16a34a; color: white; padding: 16px 40px; text-decoration: none; border-radius: 6px; font-size: 18px; font-weight: bold; margin: 20px 0; min-height: 44px; }
+    .exam-results { background: #fafafa; padding: 20px; border-radius: 4px; margin: 20px 0; }
+    .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+    @media only screen and (max-width: 600px) {
+      .container { padding: 20px; }
+      .cert-number { font-size: 18px; }
+      .cta-button { width: 100%; box-sizing: border-box; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="icon">🎓</div>
+      <h1>Congratulations!</h1>
+      <p style="font-size: 20px; color: #16a34a; font-weight: bold;">You're Now Certified!</p>
+    </div>
+    
+    <div class="content">
+      <p>Dear {{ .FirstName }} {{ .LastName }},</p>
+      
+      <p><strong>Congratulations on passing your Maryland Responsible Vendor Training certification exam!</strong></p>
+      
+      <div class="cert-box">
+        <h2 style="margin-top: 0; color: #16a34a;">Maryland RVT Certification</h2>
+        <p style="font-size: 18px; margin: 10px 0;">Certificate Number:</p>
+        <div class="cert-number">{{ .CertificateNumber }}</div>
+        <p style="margin-bottom: 0; color: #666;">Issued: {{ .IssuedDate }} | Valid: Lifetime</p>
+      </div>
+      
+      <div style="text-align: center;">
+        <a href="{{ .DownloadUrl }}" class="cta-button">Download Certificate</a>
+      </div>
+      
+      <div class="exam-results">
+        <h3 style="margin-top: 0;">📊 Your Exam Results</h3>
+        <p><strong>Score:</strong> {{ .ExamScore }}% (Passing: 70%)</p>
+        <p><strong>Questions:</strong> {{ .TotalQuestions }}</p>
+        <p><strong>Correct Answers:</strong> {{ .CorrectAnswers }}</p>
+        <p><strong>Completion Time:</strong> {{ .CompletionTime }}</p>
+      </div>
+      
+      <h3>🎯 What's Next:</h3>
+      <ul>
+        <li>✅ Download your certificate (PDF attached)</li>
+        <li>✅ Share your achievement on LinkedIn</li>
+        <li>✅ Provide certificate to your employer for compliance</li>
+        <li>✅ Keep certificate number for verification: <strong>{{ .CertificateNumber }}</strong></li>
+      </ul>
+      
+      <h3>📋 Certificate Verification:</h3>
+      <p>Employers and regulators can verify your certification at:</p>
+      <p><a href="{{ .VerificationUrl }}">{{ .VerificationUrl }}</a></p>
+      
+      <div style="background: #f0fdf4; padding: 15px; border-left: 4px solid #16a34a; margin: 20px 0; border-radius: 4px;">
+        <strong>💡 Pro Tip:</strong> Add this certification to your resume and LinkedIn profile to demonstrate your compliance expertise!
+      </div>
+      
+      <p>Thank you for choosing ProCann Edu for your certification needs. We wish you continued success in your career!</p>
+      
+      <p>Best regards,<br><strong>ProCann Edu Team</strong></p>
+    </div>
+    
+    <div class="footer">
+      <p>© 2025 ProCann Edu | Responsible Vendor Training</p>
+      <p>Questions? Contact us at <a href="mailto:support@procannedu.com">support@procannedu.com</a></p>
+    </div>
+  </div>
+</body>
+</html>

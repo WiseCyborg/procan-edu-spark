@@ -1119,7 +1119,7 @@ export type Database = {
           address: string | null
           admin_notes: string | null
           application_status: string | null
-          compliance_affirmation: boolean | null
+          compliance_affirmation: boolean
           contact_email: string
           contact_person: string
           contact_phone: string | null
@@ -1153,7 +1153,7 @@ export type Database = {
           address?: string | null
           admin_notes?: string | null
           application_status?: string | null
-          compliance_affirmation?: boolean | null
+          compliance_affirmation?: boolean
           contact_email: string
           contact_person: string
           contact_phone?: string | null
@@ -1187,7 +1187,7 @@ export type Database = {
           address?: string | null
           admin_notes?: string | null
           application_status?: string | null
-          compliance_affirmation?: boolean | null
+          compliance_affirmation?: boolean
           contact_email?: string
           contact_person?: string
           contact_phone?: string | null
@@ -1260,6 +1260,50 @@ export type Database = {
         }
         Relationships: []
       }
+      email_analytics: {
+        Row: {
+          created_at: string
+          email_log_id: string | null
+          event_type: string
+          id: string
+          ip_address: unknown
+          link_url: string | null
+          metadata: Json | null
+          occurred_at: string
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          email_log_id?: string | null
+          event_type: string
+          id?: string
+          ip_address?: unknown
+          link_url?: string | null
+          metadata?: Json | null
+          occurred_at?: string
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          email_log_id?: string | null
+          event_type?: string
+          id?: string
+          ip_address?: unknown
+          link_url?: string | null
+          metadata?: Json | null
+          occurred_at?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_analytics_email_log_id_fkey"
+            columns: ["email_log_id"]
+            isOneToOne: false
+            referencedRelation: "email_logs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_circuit_breaker: {
         Row: {
           circuit_state: string
@@ -1298,6 +1342,8 @@ export type Database = {
       }
       email_logs: {
         Row: {
+          click_count: number | null
+          clicked_at: string | null
           created_at: string
           delivered_at: string | null
           email_type: string
@@ -1305,6 +1351,8 @@ export type Database = {
           html_content: string | null
           id: string
           metadata: Json | null
+          open_count: number | null
+          opened_at: string | null
           provider: string | null
           provider_id: string | null
           recipient_email: string
@@ -1314,6 +1362,8 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          click_count?: number | null
+          clicked_at?: string | null
           created_at?: string
           delivered_at?: string | null
           email_type: string
@@ -1321,6 +1371,8 @@ export type Database = {
           html_content?: string | null
           id?: string
           metadata?: Json | null
+          open_count?: number | null
+          opened_at?: string | null
           provider?: string | null
           provider_id?: string | null
           recipient_email: string
@@ -1330,6 +1382,8 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          click_count?: number | null
+          clicked_at?: string | null
           created_at?: string
           delivered_at?: string | null
           email_type?: string
@@ -1337,6 +1391,8 @@ export type Database = {
           html_content?: string | null
           id?: string
           metadata?: Json | null
+          open_count?: number | null
+          opened_at?: string | null
           provider?: string | null
           provider_id?: string | null
           recipient_email?: string
