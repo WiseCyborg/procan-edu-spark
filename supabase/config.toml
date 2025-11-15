@@ -269,3 +269,16 @@ verify_jwt = false
 
 [functions.check-certificate-expiry]
 verify_jwt = false
+
+[functions.test-email-providers]
+verify_jwt = false
+
+[functions.reconcile-seats]
+verify_jwt = true
+
+[functions.batch-regenerate-tokens]
+verify_jwt = true
+
+[functions.diagnose-email-system]
+verify_jwt = false
+

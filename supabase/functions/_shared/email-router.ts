@@ -46,8 +46,8 @@ export class EmailRouter {
     const startTime = Date.now();
     const emailLogId = crypto.randomUUID();
     
-    // SMTP fallback temporarily disabled - Resend-only mode
-    const SMTP_FALLBACK_ENABLED = false;
+    // SMTP fallback ENABLED to handle Resend domain verification issues
+    const SMTP_FALLBACK_ENABLED = true;
     
     // Log initial attempt if supabase client provided
     if (supabaseClient) {
