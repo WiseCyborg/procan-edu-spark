@@ -11,6 +11,7 @@ import { AlertTriangle, CheckCircle, XCircle, RefreshCw, Clock, AlertCircle, Set
 import { formatDistanceToNow } from 'date-fns';
 import { AlertRecipientManager } from '@/components/admin/AlertRecipientManager';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { PipelineHealthMonitor } from '@/components/admin/PipelineHealthMonitor';
 
 export function PipelineHealthTab() {
   const { data: healthHistory } = usePipelineHealth();
@@ -55,6 +56,9 @@ export function PipelineHealthTab() {
       </TabsList>
 
       <TabsContent value="status" className="space-y-6">
+        {/* New Pipeline Health Monitor */}
+        <PipelineHealthMonitor />
+
         {/* Current Status */}
         <Card>
         <CardHeader>

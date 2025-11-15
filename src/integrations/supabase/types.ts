@@ -4718,6 +4718,16 @@ export type Database = {
         Args: { course_id: string; org_id: string }
         Returns: boolean
       }
+      check_seat_mismatches: {
+        Args: never
+        Returns: {
+          course_credits: number
+          deficit: number
+          organization_id: string
+          organization_name: string
+          seat_count: number
+        }[]
+      }
       check_stuck_applications: {
         Args: never
         Returns: {
