@@ -10,6 +10,7 @@ import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Building2, FileText, Contact, Shield, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { validateDateRange } from '@/utils/validation-helpers';
+import { ProgressTracker } from '@/components/application/ProgressTracker';
 
 const DispensaryApplication = () => {
   const navigate = useNavigate();
