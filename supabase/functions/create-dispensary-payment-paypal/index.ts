@@ -43,6 +43,30 @@ serve(async (req) => {
       throw new Error("Quantity and idempotency key are required");
     }
 
+    // Rate limit: 5 payment attempts per hour per IP
+    const clientIp = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+    
+    const { data: rateLimitData } = await supabaseService.rpc('check_rate_limit', {
+      _user_id: null,
+      _action_type: `create_payment_${clientIp}`,
+      _max_requests: 5,
+      _window_minutes: 60
+    });
+
+    if (rateLimitData && rateLimitData.length > 0) {
+      const remaining = rateLimitData[0].remaining;
+      if (remaining <= 0) {
+        console.warn(`[RATE LIMIT] IP ${clientIp} exceeded payment creation limit`);
+        return new Response(
+          JSON.stringify({ 
+            error: 'Too many payment attempts. Please try again in 1 hour.',
+            code: 'RATE_LIMIT_EXCEEDED'
+          }),
+          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
     // Verify user role
     const { data: hasPermission } = await supabaseService.rpc('has_any_role', {
       _user_id: user.id,

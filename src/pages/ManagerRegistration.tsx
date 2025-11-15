@@ -67,12 +67,40 @@ export default function ManagerRegistration() {
   const onSubmit = async (data: FormData) => {
     try {
       const nameParts = applicationData.contact_person.trim().split(/\s+/);
-      const { error: authError } = await supabase.auth.signUp({
-        email: sanitizeEmail(data.email),
+      const firstName = nameParts[0];
+      const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : nameParts[0];
+      const sanitizedEmail = sanitizeEmail(data.email);
+      
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: sanitizedEmail,
         password: data.password,
-        options: { data: { first_name: nameParts[0], last_name: nameParts.length > 1 ? nameParts.slice(1).join(' ') : nameParts[0] } }
+        options: { 
+          data: { 
+            firstName: firstName,
+            lastName: lastName,
+            registration_type: 'dispensary_manager'
+          } 
+        }
       });
+      
       if (authError) throw authError;
+
+      // Safety net: Ensure profile exists (trigger should handle this)
+      if (authData.user) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .upsert({
+            user_id: authData.user.id,
+            first_name: firstName,
+            last_name: lastName
+          }, {
+            onConflict: 'user_id'
+          });
+          
+        if (profileError) {
+          console.error('Profile creation error:', profileError);
+        }
+      }
 
       await supabase.from('dispensary_applications').update({ registration_completed: true }).eq('registration_token', token);
       

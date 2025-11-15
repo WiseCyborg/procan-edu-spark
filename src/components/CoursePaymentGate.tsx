@@ -46,11 +46,8 @@ export const CoursePaymentGate: React.FC<CoursePaymentGateProps> = ({
       if (error) throw error;
 
       if (data?.url) {
-        // Redirect to PayPal checkout
+        // Redirect to PayPal - payment verification happens on return
         window.location.href = data.url;
-        
-        // Start polling for payment completion
-        pollForPaymentCompletion();
       }
     } catch (error) {
       console.error('Payment error:', error);
@@ -59,56 +56,8 @@ export const CoursePaymentGate: React.FC<CoursePaymentGateProps> = ({
         description: "Failed to initiate payment. Please try again.",
         variant: "destructive"
       });
-    } finally {
       setIsProcessing(false);
     }
-  };
-
-  const pollForPaymentCompletion = () => {
-    const checkPayment = async () => {
-      try {
-        // Check if user has paid for this course
-        const { data, error } = await supabase
-          .from('orders')
-          .select('*')
-          .eq('user_id', user?.id)
-          .eq('course_id', course.id)
-          .eq('status', 'paid')
-          .order('created_at', { ascending: false })
-          .limit(1);
-
-        if (error) throw error;
-
-        if (data && data.length > 0) {
-          toast({
-            title: "Payment Successful!",
-            description: "You now have access to the course content.",
-          });
-          onPaymentSuccess();
-          return true;
-        }
-        return false;
-      } catch (error) {
-        console.error('Error checking payment status:', error);
-        return false;
-      }
-    };
-
-    // Check immediately
-    checkPayment();
-
-    // Poll every 3 seconds for up to 5 minutes
-    const interval = setInterval(async () => {
-      const isComplete = await checkPayment();
-      if (isComplete) {
-        clearInterval(interval);
-      }
-    }, 3000);
-
-    // Stop polling after 5 minutes
-    setTimeout(() => {
-      clearInterval(interval);
-    }, 300000);
   };
 
   return (

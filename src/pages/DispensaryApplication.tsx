@@ -60,34 +60,38 @@ const DispensaryApplication = () => {
     const sanitizedData = sanitizeFormData(data);
     
     try {
-      const { data: insertedApp, error: insertError } = await supabase
-        .from('dispensary_applications')
-        .insert({
-          organization_name: sanitizedData.organizationName,
-          legal_entity_name: sanitizedData.legalEntityName,
-          dba_name: sanitizedData.dbaName || sanitizedData.organizationName,
-          license_type: sanitizedData.licenseType,
-          license_number: sanitizedData.licenseNumber,
-          license_issue_date: sanitizedData.licenseIssueDate || null,
-          license_expiry_date: sanitizedData.licenseExpiryDate || null,
-          contact_person: sanitizedData.contactPerson,
-          contact_email: sanitizedData.contactEmail,
-          contact_phone: sanitizedData.contactPhone,
-          address: sanitizedData.address,
-          estimated_employees: sanitizedData.estimatedEmployees || null,
-          preferred_start_date: sanitizedData.preferredStartDate || null,
-          compliance_affirmation: true,
-          application_status: 'pending'
-        })
-        .select()
-        .single();
+      const { data: result, error } = await supabase.functions.invoke('submit-dispensary-application', {
+        body: sanitizedData
+      });
 
-      if (insertError) throw insertError;
+      if (error) {
+        console.error('Submission error:', error);
+        
+        if (error.message?.includes('RATE_LIMIT_EXCEEDED')) {
+          toast({
+            title: "Too Many Submissions",
+            description: "You've submitted too many applications. Please try again in 1 hour.",
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        if (error.message?.includes('DUPLICATE_APPLICATION')) {
+          toast({
+            title: "Application Already Exists",
+            description: "An application with this email already exists. Please check your email for updates.",
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        throw error;
+      }
+
       setSubmitted(true);
-
       toast({
         title: "Application Submitted! ✅",
-        description: `Your application has been received. We'll contact you at ${sanitizedData.contactEmail} within 24 hours.`,
+        description: result?.message || "Your application has been received. We'll be in touch soon.",
         duration: 6000,
       });
     } catch (error: any) {

@@ -47,10 +47,18 @@ const PaymentSuccess: React.FC = () => {
             if (error) throw error;
 
             if (data?.paid) {
+              setShowConfetti(true);
+              setTimeout(() => setShowConfetti(false), 3000);
+              
               toast({
                 title: "Payment Verified!",
                 description: "Your course access has been activated.",
               });
+              
+              // Redirect to course after 2 seconds
+              setTimeout(() => {
+                navigate(`/courses/${courseId}`);
+              }, 2000);
             }
           } else if (purchaseId) {
             // Verify seat purchase payment
