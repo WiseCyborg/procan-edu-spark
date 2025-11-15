@@ -83,7 +83,7 @@ serve(async (req) => {
       }],
       application_context: {
         return_url: `${req.headers.get("origin")}/payment-success?course_id=${courseId}`,
-        cancel_url: `${req.headers.get("origin")}/dashboard`,
+        cancel_url: `${req.headers.get("origin")}/courses/${courseId}?payment=cancelled`,
         brand_name: "ProCann Edu",
         landing_page: "BILLING",
         user_action: "PAY_NOW",

@@ -75,6 +75,28 @@ const handler = async (req: Request): Promise<Response> => {
     
     console.log(`Processing staff invitation: ${action}`);
 
+    // Rate limit: 50 invitations per hour per organization
+    const { data: rateLimitData } = await supabase.rpc('check_rate_limit', {
+      _user_id: inviterId,
+      _action_type: `send_invitations_org_${organizationId}`,
+      _max_requests: 50,
+      _window_minutes: 60
+    });
+
+    if (rateLimitData && rateLimitData.length > 0) {
+      const remaining = rateLimitData[0].remaining;
+      if (remaining <= 0) {
+        console.warn(`[RATE LIMIT] Org ${organizationId} exceeded invitation limit`);
+        return new Response(
+          JSON.stringify({ 
+            error: 'Too many invitations sent. Please try again in 1 hour.',
+            code: 'RATE_LIMIT_EXCEEDED'
+          }),
+          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
     switch (action) {
       case 'invite_single':
         return await inviteSingleStaff(organizationId, inviterId, email!, role || 'student', customMessage);
