@@ -12,6 +12,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { AlertRecipientManager } from '@/components/admin/AlertRecipientManager';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PipelineHealthMonitor } from '@/components/admin/PipelineHealthMonitor';
+import { EmailSystemDiagnostics } from '@/components/admin/EmailSystemDiagnostics';
 
 export function PipelineHealthTab() {
   const { data: healthHistory } = usePipelineHealth();
@@ -56,6 +57,9 @@ export function PipelineHealthTab() {
       </TabsList>
 
       <TabsContent value="status" className="space-y-6">
+        {/* Email System Diagnostics */}
+        <EmailSystemDiagnostics />
+        
         {/* New Pipeline Health Monitor */}
         <PipelineHealthMonitor />
 
