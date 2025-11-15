@@ -81,6 +81,8 @@ import ConsumerEducation from "./pages/ConsumerEducation";
 import ConsumerCourse from "./pages/ConsumerCourse";
 import ConsumerCertificates from "./pages/ConsumerCertificates";
 import EmailDomainVerification from "./pages/admin/EmailDomainVerification";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
 
 import { ProtectedCourseAccess } from "./components/ProtectedCourseAccess";
 
@@ -409,6 +411,10 @@ const App = () => (
                      } />
                      
                      <Route path="/accept-invitation" element={<AcceptInvitation />} />
+                   
+                   {/* Legal Pages */}
+                   <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                   <Route path="/terms-of-service" element={<TermsOfService />} />
                    
                    <Route path="*" element={<NotFound />} />
                 </Routes>
