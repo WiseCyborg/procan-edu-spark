@@ -244,55 +244,137 @@ const DispensaryApplication = () => {
         });
       }
     } catch (error: any) {
-      console.error('❌ Application submission failed:', {
-        message: error.message,
-        code: error.code,
-        details: error.details,
-        hint: error.hint,
+      // Generate unique error ID for tracking
+      const errorId = `ERR-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      
+      // Get current user session info
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      // COMPREHENSIVE DIAGNOSTIC LOGGING
+      console.error('❌ APPLICATION SUBMISSION FAILED - FULL DIAGNOSTIC:', {
+        errorId,
         timestamp: new Date().toISOString(),
-        formData: {
+        
+        // Complete error object
+        error: {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint,
+          name: error.name,
+          stack: error.stack,
+          // Log entire error object structure
+          fullError: JSON.stringify(error, null, 2)
+        },
+        
+        // User session information
+        session: {
+          authenticated: !!session,
+          userId: session?.user?.id || 'not_authenticated',
+          role: session?.user?.role || 'anon',
+          email: session?.user?.email || 'none'
+        },
+        
+        // Complete form data being submitted
+        submittedData: {
           organization_name: organizationName,
-          contact_email: contactEmail,
+          legal_entity_name: legalEntityName,
+          dba_name: dbaName || organizationName,
+          license_type: licenseType,
           license_number: licenseNumber,
-          estimated_employees: estimatedEmployees,
-          compliance_affirmation: complianceAffirmation,
-          preferred_start_date: preferredStartDate,
-          license_issue_date: licenseIssueDate,
-          license_expiry_date: licenseExpiryDate,
-          calculated_values: {
-            preferred_start_date_sent: preferredStartDate ? `${preferredStartDate}T00:00:00Z` : null,
-            current_browser_date: new Date().toISOString().split('T')[0],
-            browser_timezone_offset: new Date().getTimezoneOffset()
-          }
+          license_issue_date: licenseIssueDate || null,
+          license_expiry_date: licenseExpiryDate || null,
+          contact_person: contactPerson,
+          contact_email: contactEmail,
+          contact_phone: contactPhone,
+          address: address,
+          estimated_employees: parseInt(estimatedEmployees) || null,
+          preferred_start_date: preferredStartDate || null,
+          compliance_affirmation: true,
+          application_status: 'pending'
+        },
+        
+        // Browser and environment context
+        environment: {
+          userAgent: navigator.userAgent,
+          language: navigator.language,
+          platform: navigator.platform,
+          cookiesEnabled: navigator.cookieEnabled,
+          onLine: navigator.onLine,
+          url: window.location.href,
+          referrer: document.referrer,
+          browserDate: new Date().toISOString(),
+          browserTimezoneOffset: new Date().getTimezoneOffset(),
+          screenResolution: `${window.screen.width}x${window.screen.height}`
+        },
+        
+        // Supabase client info
+        supabaseInfo: {
+          hasAuthToken: !!session?.access_token
         }
       });
       
+      // Also log raw error for comparison
+      console.error('❌ RAW ERROR OBJECT:', error);
+      
       let errorMessage = "Failed to submit application. ";
+      let errorDetails = "";
       
       if (error.code === '23505') {
         errorMessage += "This license number is already registered.";
+        errorDetails = "Duplicate key violation";
       } else if (error.code === '23502') {
         errorMessage += "Please fill in all required fields.";
+        errorDetails = "Not null violation";
       } else if (error.code === '23514') { // CHECK constraint violation
         errorMessage += "Invalid data: " + (error.message || "Please verify all fields meet requirements.");
+        errorDetails = `CHECK constraint: ${error.hint || error.detail || 'unknown'}`;
         
         // Log the specific constraint that failed
-        console.error('CHECK constraint failed:', {
+        console.error('🔍 CHECK CONSTRAINT DETAILS:', {
+          errorId,
           hint: error.hint,
-          detail: error.detail
+          detail: error.detail,
+          constraint: error.constraint,
+          table: error.table
         });
-      } else if (error.message?.includes('row-level security')) {
+      } else if (error.message?.includes('row-level security') || error.code === 'PGRST301' || error.code === '42501') {
         errorMessage += "Access denied. This may be a data validation issue.";
+        errorDetails = `RLS violation - Code: ${error.code}, Message: ${error.message}`;
+        
+        // Extra RLS-specific logging
+        console.error('🔒 ROW-LEVEL SECURITY ERROR DETAILS:', {
+          errorId,
+          errorCode: error.code,
+          errorMessage: error.message,
+          postgrestCode: error.code,
+          hint: error.hint,
+          details: error.details,
+          isAuthError: error.message?.toLowerCase().includes('auth'),
+          isPermissionError: error.message?.toLowerCase().includes('permission'),
+          possibleCauses: [
+            'RLS policy denying INSERT for anon role',
+            'CHECK constraint failing silently',
+            'TRIGGER blocking the insert',
+            'Column-level permissions issue'
+          ]
+        });
       } else if (error.code === '42703') {
         errorMessage += "Database schema error - please contact support.";
+        errorDetails = "Column does not exist";
       } else {
         errorMessage += error.message || "Please try again.";
+        errorDetails = `Code: ${error.code || 'unknown'}`;
       }
+      
+      console.error(`📋 ERROR SUMMARY [${errorId}]: ${errorDetails}`);
+      console.error(`🔗 Share this error ID with support: ${errorId}`);
       
       toast({
         title: "Submission Error",
-        description: errorMessage,
+        description: `${errorMessage}\n\nError ID: ${errorId}\n(Check browser console for full details)`,
         variant: "destructive",
+        duration: 10000, // Show longer so user can copy error ID
       });
     } finally {
       setLoading(false);
