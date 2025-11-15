@@ -4637,6 +4637,33 @@ export type Database = {
         }
         Relationships: []
       }
+      v_pipeline_metrics: {
+        Row: {
+          applications_approved_30d: number | null
+          applications_pending: number | null
+          applications_rejected_30d: number | null
+          applications_submitted_30d: number | null
+          approval_rate_30d: number | null
+          assigned_seats: number | null
+          available_seats: number | null
+          avg_approval_hours_30d: number | null
+          avg_completion_days_30d: number | null
+          calculated_at: string | null
+          certificates_expired: number | null
+          certificates_expiring_soon: number | null
+          certificates_issued_30d: number | null
+          certification_conversion_rate_30d: number | null
+          exam_pass_rate_30d: number | null
+          exams_passed_30d: number | null
+          exams_taken_30d: number | null
+          orgs_with_unused_seats: number | null
+          seat_utilization_rate: number | null
+          total_seats: number | null
+          used_seats: number | null
+          users_registered_30d: number | null
+        }
+        Relationships: []
+      }
       v_processor_pulse: {
         Row: {
           avg_processing_seconds: number | null
