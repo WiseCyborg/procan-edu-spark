@@ -13,6 +13,7 @@ import { AlertRecipientManager } from '@/components/admin/AlertRecipientManager'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PipelineHealthMonitor } from '@/components/admin/PipelineHealthMonitor';
 import { EmailSystemDiagnostics } from '@/components/admin/EmailSystemDiagnostics';
+import { EmailSystemRecovery } from '@/components/admin/EmailSystemRecovery';
 
 export function PipelineHealthTab() {
   const { data: healthHistory } = usePipelineHealth();
@@ -59,6 +60,9 @@ export function PipelineHealthTab() {
       <TabsContent value="status" className="space-y-6">
         {/* Email System Diagnostics */}
         <EmailSystemDiagnostics />
+        
+        {/* Automated Recovery Actions */}
+        <EmailSystemRecovery />
         
         {/* New Pipeline Health Monitor */}
         <PipelineHealthMonitor />
