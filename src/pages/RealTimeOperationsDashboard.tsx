@@ -21,6 +21,7 @@ import { WhoIsHereWidget } from '@/components/realtime/WhoIsHereWidget';
 import { AuthActivityFeed } from '@/components/realtime/AuthActivityFeed';
 import { useRealTimeAnalytics } from '@/hooks/useRealTimeAnalytics';
 import { EnhancedDraggableChat } from '@/components/chat/EnhancedDraggableChat';
+import { ComprehensivePipelineHealth } from '@/components/admin/ComprehensivePipelineHealth';
 
 export default function RealTimeOperationsDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -130,10 +131,14 @@ export default function RealTimeOperationsDashboard() {
 
       {/* Main Dashboard Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="overview" className="gap-2">
             <BarChart3 className="h-4 w-4" />
             Overview
+          </TabsTrigger>
+          <TabsTrigger value="pipeline" className="gap-2">
+            <Activity className="h-4 w-4" />
+            Pipeline Health
           </TabsTrigger>
           <TabsTrigger value="users" className="gap-2">
             <Users className="h-4 w-4" />
@@ -154,18 +159,41 @@ export default function RealTimeOperationsDashboard() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
-          {/* Real-Time Metrics Grid */}
           <RealTimeMetricsGrid />
-          
-          {/* Phase 7: Real-Time Presence & Activity */}
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-6 lg:grid-cols-2">
             <WhoIsHereWidget />
             <AuthActivityFeed />
           </div>
-          
-          {/* Combined Overview */}
-          <div className="grid gap-4 md:grid-cols-2">
-            <RealTimeAlertsFeed />
+          <RealTimeAlertsFeed />
+        </TabsContent>
+
+        <TabsContent value="pipeline" className="space-y-6">
+          <ComprehensivePipelineHealth />
+        </TabsContent>
+
+        <TabsContent value="users" className="space-y-6">
+          <RealTimeUserActivity />
+        </TabsContent>
+
+        <TabsContent value="system" className="space-y-6">
+          <RealTimeSystemHealth />
+        </TabsContent>
+
+        <TabsContent value="alerts" className="space-y-6">
+          <RealTimeAlertsFeed />
+        </TabsContent>
+
+        <TabsContent value="analytics" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Analytics Dashboard</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">Advanced analytics coming soon...</p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
             <Card>
               <CardHeader>
                 <CardTitle className="text-sm font-medium">Quick Stats</CardTitle>
