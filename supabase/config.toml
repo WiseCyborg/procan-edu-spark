@@ -282,3 +282,6 @@ verify_jwt = true
 [functions.diagnose-email-system]
 verify_jwt = false
 
+[functions.reset-email-circuit-breaker]
+verify_jwt = true
+
