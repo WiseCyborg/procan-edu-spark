@@ -4,12 +4,14 @@ import { useUserRole } from '@/hooks/useUserRole';
 import { useProfileCompletion } from '@/hooks/useProfileCompletion';
 import { useUserProgress } from '@/hooks/useUserProgress';
 import { useTierProgress } from '@/hooks/useTierProgress';
+import { useStudentChecklistStatus } from '@/hooks/useStudentChecklistStatus';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { DeadlineCountdown } from '@/components/course/DeadlineCountdown';
 import { ProfileCompletionBanner } from '@/components/ProfileCompletionBanner';
 import { ExamStatusCard } from '@/components/exam/ExamStatusCard';
+import { GettingStartedChecklist } from '@/components/student/GettingStartedChecklist';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Award, BookOpen, Target, TrendingUp, AlertTriangle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -34,6 +36,7 @@ const StudentDashboard = () => {
   const { completionPercentage, isProfileComplete } = useProfileCompletion();
   const { getCompletedModulesCount, getTotalScore, isLoading: progressLoading } = useUserProgress(COURSE_ID);
   const { currentTier, getNextTier, getModulesNeededForNextTier } = useTierProgress();
+  const checklistStatus = useStudentChecklistStatus();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [organizationInfo, setOrganizationInfo] = useState<{name: string, coordinator: string} | null>(null);
@@ -112,9 +115,29 @@ const StudentDashboard = () => {
 
   return (
     <div className="container mx-auto p-4 md:p-6 space-y-4 md:space-y-6 pb-20 md:pb-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground">Student Dashboard</h1>
+          <p className="text-sm md:text-base text-muted-foreground mt-1">
+            Track your training progress and certification journey
+          </p>
+        </div>
+      </div>
+
+      {/* Getting Started Checklist */}
+      {!checklistStatus.hasCertificate && !checklistStatus.isLoading && (
+        <GettingStartedChecklist
+          profileComplete={Boolean(checklistStatus.profileComplete)}
+          hasWatchedWelcome={Boolean(checklistStatus.hasWatchedWelcome)}
+          hasStartedCourse={Boolean(checklistStatus.hasStartedCourse)}
+          hasPassedExam={Boolean(checklistStatus.hasPassedExam)}
+          hasCertificate={Boolean(checklistStatus.hasCertificate)}
+        />
+      )}
+
       <ProfileCompletionBanner />
 
-      {!isProfileComplete() && (
+      {!isProfileComplete && (
         <Card className="border-orange-200 bg-orange-50 dark:bg-orange-950">
           <CardHeader className="p-4 md:p-6">
             <CardTitle className="flex items-center gap-2 text-base md:text-lg">
@@ -123,7 +146,7 @@ const StudentDashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 md:space-y-4 p-4 md:p-6">
-            <Progress value={completionPercentage} className="h-2" />
+            <Progress value={completionPercentage || 0} className="h-2" />
             <p className="text-sm text-muted-foreground">
               {completionPercentage}% complete - Finish your profile to access all course features
             </p>

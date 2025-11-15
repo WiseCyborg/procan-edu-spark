@@ -1,24 +1,169 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Shield, FileText, Lock, Users, CheckCircle, Download, Mail } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { 
+  Shield, 
+  FileText, 
+  Users, 
+  Award, 
+  TrendingUp, 
+  MapPin, 
+  Search, 
+  Download,
+  CheckCircle,
+  AlertCircle,
+  Clock
+} from 'lucide-react';
 import { ComplianceDisclaimer } from '@/components/ComplianceDisclaimer';
+import { useMCAMetrics } from '@/hooks/useMCAMetrics';
+import { useNavigate } from 'react-router-dom';
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { formatDistanceToNow } from 'date-fns';
 
 const MCAComplianceReview = () => {
+  const navigate = useNavigate();
+  const { data: metrics, isLoading } = useMCAMetrics();
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleCertificateSearch = () => {
+    if (searchQuery.trim()) {
+      navigate(`/verify-certificate?number=${searchQuery.trim()}`);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary/5 to-accent/10 py-16 px-4">
+        <div className="container mx-auto max-w-7xl space-y-6">
+          <Skeleton className="h-20 w-full" />
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Skeleton className="h-32" />
+            <Skeleton className="h-32" />
+            <Skeleton className="h-32" />
+            <Skeleton className="h-32" />
+          </div>
+          <Skeleton className="h-96" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 to-accent/10 py-16 px-4">
-      <div className="container mx-auto max-w-5xl">
+      <div className="container mx-auto max-w-7xl">
         {/* Header */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-3 mb-6">
             <Shield className="h-12 w-12 text-primary" />
             <h1 className="text-4xl font-bold text-foreground">
-              MCA Compliance Documentation
+              MCA Live Compliance Dashboard
             </h1>
           </div>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Comprehensive compliance information for Maryland Cannabis Administration officials reviewing ProCann Edu's RVT training platform
+            Real-time oversight and certificate verification for Maryland Cannabis Administration
           </p>
+        </div>
+
+        {/* Certificate Verification Search - Prominent */}
+        <Card className="mb-8 border-primary/20 shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Search className="h-6 w-6" />
+              Verify Certificate
+            </CardTitle>
+            <CardDescription>
+              Enter certificate number to instantly verify authenticity and view details
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-2">
+              <Input
+                placeholder="Enter certificate number (e.g., MCA-2025-00123)"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleCertificateSearch()}
+                className="text-lg"
+              />
+              <Button onClick={handleCertificateSearch} size="lg">
+                <Search className="h-4 w-4 mr-2" />
+                Verify
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Hero Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                Licensed Dispensaries
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-foreground">
+                {metrics?.totalDispensaries || 0}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Active approved organizations
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <Award className="h-4 w-4" />
+                Certified Employees
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-green-600">
+                {metrics?.totalCertifiedEmployees || 0}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Valid RVT certifications
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <TrendingUp className="h-4 w-4" />
+                Issued This Month
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-primary">
+                {metrics?.certificatesIssuedThisMonth || 0}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                New certifications in {new Date().toLocaleString('default', { month: 'long' })}
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <Clock className="h-4 w-4" />
+                Expiring Soon
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-yellow-600">
+                {metrics?.certificatesExpiringSoon || 0}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Expiring within 30 days
+              </p>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Platform Overview */}
@@ -122,7 +267,7 @@ const MCAComplianceReview = () => {
         <Card className="mb-8">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Lock className="h-6 w-6 text-purple-600" />
+              <Shield className="h-6 w-6 text-purple-600" />
               Platform Security & Accessibility
             </CardTitle>
           </CardHeader>
@@ -241,7 +386,7 @@ const MCAComplianceReview = () => {
                 For questions about compliance, curriculum alignment, or platform security, our regulatory team is available to assist MCA officials.
               </p>
               <Button variant="secondary" size="lg">
-                <Mail className="h-4 w-4 mr-2" />
+                <FileText className="h-4 w-4 mr-2" />
                 Email: compliance@procannedu.com
               </Button>
             </div>

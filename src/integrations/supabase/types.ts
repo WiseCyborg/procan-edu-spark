@@ -5000,6 +5000,18 @@ export type Database = {
         }
         Returns: string
       }
+      reconcile_seats: {
+        Args: never
+        Returns: {
+          actual_seats: number
+          organization_id: string
+          organization_name: string
+          purchased_quantity: number
+          seats_generated: number
+          seats_missing: number
+          status: string
+        }[]
+      }
       record_email_result: { Args: { p_success: boolean }; Returns: undefined }
       regenerate_manager_token: {
         Args: { application_id: string }
