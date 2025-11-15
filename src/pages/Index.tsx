@@ -36,7 +36,7 @@ const Index = () => {
       weight: 1
     }, {
       id: 'roi_savings_focus',
-      value: "Save $12K+ Annually with Maryland's Most Advanced RVT Training",
+      value: "Maryland's Most Advanced RVT Training",
       weight: 1
     }, {
       id: 'compliance_speed_focus',
