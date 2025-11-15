@@ -61,6 +61,7 @@ import { ComplianceMonitoringTab } from '@/components/admin/operations/Complianc
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { MobileBottomNav } from '@/components/navigation/MobileBottomNav';
 
 interface AdminStats {
   totalUsers: number;
@@ -901,6 +902,9 @@ const AdminDashboard = () => {
           </div>
         </aside>
       )}
+      
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav />
     </div>
   );
 };
