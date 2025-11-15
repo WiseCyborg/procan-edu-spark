@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Building2, FileText, Contact, Shield, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { validateDateRange } from '@/utils/validation-helpers';
 import { ProgressTracker } from '@/components/application/ProgressTracker';
+import { InfoTooltip } from '@/components/ui/info-tooltip';
 
 const DispensaryApplication = () => {
   const navigate = useNavigate();
@@ -389,7 +390,10 @@ const DispensaryApplication = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="legalName">Legal Entity Name *</Label>
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="legalName">Federal Tax ID (FEIN) *</Label>
+                    <InfoTooltip content="Your Federal Employer Identification Number is required by Maryland law for all licensed dispensaries" />
+                  </div>
                   <Input
                     id="legalName"
                     placeholder="e.g., Green Leaf LLC"
@@ -433,7 +437,10 @@ const DispensaryApplication = () => {
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="licenseNumber">MCA License Number *</Label>
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="licenseNumber">MCA License Number *</Label>
+                    <InfoTooltip content="Your Maryland Cannabis Administration license number as it appears on your official license certificate" />
+                  </div>
                   <Input
                     id="licenseNumber"
                     placeholder="e.g., MD-DISP-2024-001"
@@ -531,7 +538,10 @@ const DispensaryApplication = () => {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="employees">Estimated Employees</Label>
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor="employees">Number of Employees</Label>
+                      <InfoTooltip content="Approximate number of employees who need cannabis retail training certification" />
+                    </div>
                     <Input
                       id="employees"
                       type="number"
@@ -541,7 +551,10 @@ const DispensaryApplication = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="startDate">Preferred Training Start (Optional)</Label>
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor="startDate">Preferred Training Start (Optional)</Label>
+                      <InfoTooltip content="When would you like your team to begin training? Training can start as soon as payment is processed" />
+                    </div>
                     <Input
                       id="startDate"
                       type="date"
