@@ -13,7 +13,7 @@ import { EmployeeInvitationForm } from '@/components/team/EmployeeInvitationForm
 import { SeatRequestManager } from '@/components/team/SeatRequestManager';
 import { PurchaseSeatsDialog } from '@/components/team/PurchaseSeatsDialog';
 import { EmployeeRosterWidget } from '@/components/team/EmployeeRosterWidget';
-import { Building2, CreditCard, Users, FileText, Settings, ShieldCheck, Key, Copy, ShoppingCart, PartyPopper, X, RefreshCw, Check, Circle } from 'lucide-react';
+import { Building2, CreditCard, Users, FileText, Settings, ShieldCheck, Key, Copy, ShoppingCart, PartyPopper, X, RefreshCw, Check, Circle, Mail } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -190,11 +190,11 @@ const DispensaryManagerDashboard = () => {
 
   return (
     <div className="container mx-auto p-4 md:p-6 space-y-4 md:space-y-6 pb-20 md:pb-6">
-      {/* Header */}
+      {/* Header with Quick Actions */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="flex-1">
-          <h1 className="text-2xl md:text-3xl font-bold text-foreground">Dispensary Manager Portal</h1>
-          <p className="text-sm md:text-base text-muted-foreground">Manage your organization and training programs</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground">Manager Dashboard</h1>
+          <p className="text-sm md:text-base text-muted-foreground">Manage your team's training and certification</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center w-full md:w-auto">
           <Badge variant="outline" className="text-base md:text-lg px-3 md:px-4 py-2 justify-center">
@@ -203,11 +203,29 @@ const DispensaryManagerDashboard = () => {
           </Badge>
           <Button 
             size="lg" 
+            onClick={() => {
+              const params = new URLSearchParams(searchParams);
+              params.set('tab', 'invite');
+              setSearchParams(params);
+            }}
+            className="w-full sm:w-auto h-11 md:h-10 bg-primary hover:bg-primary/90"
+          >
+            <Mail className="mr-2 h-4 w-4 flex-shrink-0" />
+            Invite Employee
+            {organization && organization.course_credits > 0 && (
+              <Badge variant="secondary" className="ml-2">
+                {organization.course_credits} seats
+              </Badge>
+            )}
+          </Button>
+          <Button 
+            size="lg" 
             onClick={() => setShowPurchaseModal(true)}
+            variant="outline"
             className="w-full sm:w-auto h-11 md:h-10"
           >
             <ShoppingCart className="mr-2 h-4 w-4 flex-shrink-0" />
-            Buy More Seats
+            Purchase Training Seats
           </Button>
         </div>
       </div>

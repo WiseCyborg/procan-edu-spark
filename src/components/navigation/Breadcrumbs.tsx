@@ -5,17 +5,23 @@ import { Home } from 'lucide-react';
 
 const pathNameMap: Record<string, string> = {
   'dashboard': 'Dashboard',
-  'student-dashboard': 'Student Dashboard',
+  'student-dashboard': 'My Training',
   'course': 'Course',
-  'profile': 'Profile',
+  'profile': 'My Profile',
   'team-management': 'Team Management',
   'admin': 'Admin',
-  'purchase-seats': 'Purchase Seats',
+  'admin-dashboard': 'Admin Dashboard',
+  'enhanced-admin-dashboard': 'Admin Dashboard',
+  'purchase-seats': 'Purchase Training Seats',
   'final-exam': 'Final Exam',
-  'certificates': 'Certificates',
+  'certificates': 'My Certificates',
   'dispensary-portal': 'Dispensary Portal',
-  'training-coordinator-dashboard': 'Training Coordinator',
+  'training-coordinator-dashboard': 'Coordinator Dashboard',
   'dispensary-manager-dashboard': 'Manager Dashboard',
+  'mca-compliance-review': 'MCA Compliance',
+  'dispensary-application': 'Application',
+  'org': 'Organization',
+  'apply': 'Apply',
 };
 
 export function Breadcrumbs() {

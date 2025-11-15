@@ -22,7 +22,8 @@ import {
   Search,
   ChevronLeft,
   ChevronRight,
-  X
+  X,
+  ClipboardCheck
 } from 'lucide-react';
 import { QuickLookupPanel } from '@/components/admin/QuickLookupPanel';
 import { CallContextSelector, CallerType } from '@/components/admin/CallContextSelector';
@@ -377,9 +378,32 @@ const AdminDashboard = () => {
       <main className="flex-1 overflow-y-auto">
         <div className="p-6">
           <Breadcrumbs />
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold">Phone Support Dashboard</h1>
-            <p className="text-muted-foreground">Quick access to dispensaries, users, and certificates</p>
+          <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+              <p className="text-muted-foreground">System oversight and operations management</p>
+            </div>
+            
+            {/* Pending Applications Alert */}
+            {stats.totalOrganizations > 0 && (
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={() => {
+                  const tabsElement = document.querySelector('[value="applications"]');
+                  if (tabsElement) {
+                    (tabsElement as HTMLElement).click();
+                  }
+                }}
+                className="w-full md:w-auto border-orange-500 text-orange-600 hover:bg-orange-50"
+              >
+                <ClipboardCheck className="w-5 h-5 mr-2" />
+                Pending Applications
+                <Badge variant="destructive" className="ml-2">
+                  New
+                </Badge>
+              </Button>
+            )}
           </div>
 
         {/* Phase 7: Real-Time Widgets */}

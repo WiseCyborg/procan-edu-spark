@@ -113,15 +113,44 @@ const StudentDashboard = () => {
   const nextModuleNumber = completedModules + 1;
   const nextModule = modules.find(m => m.module_number === nextModuleNumber);
 
+  const hasCertificate = checklistStatus.hasCertificate;
+  
   return (
     <div className="container mx-auto p-4 md:p-6 space-y-4 md:space-y-6 pb-20 md:pb-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-foreground">Student Dashboard</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground">My Training</h1>
           <p className="text-sm md:text-base text-muted-foreground mt-1">
-            Track your training progress and certification journey
+            {organizationInfo ? `${organizationInfo.name} • ` : ''}Maryland Cannabis Agent Certification
           </p>
         </div>
+        
+        {/* Resume Course Quick Action */}
+        {completedModules < agentModules.length && completedModules > 0 && (
+          <Button 
+            size="lg"
+            onClick={() => navigate('/course')}
+            className="w-full md:w-auto bg-primary hover:bg-primary/90 shadow-lg"
+          >
+            <BookOpen className="w-5 h-5 mr-2" />
+            Resume Training
+            <Badge variant="secondary" className="ml-2">
+              {Math.round((completedModules / agentModules.length) * 100)}% Complete
+            </Badge>
+          </Button>
+        )}
+        
+        {completedModules >= agentModules.length && hasCertificate && (
+          <Button 
+            size="lg"
+            onClick={() => navigate('/certificates')}
+            variant="outline"
+            className="w-full md:w-auto"
+          >
+            <Award className="w-5 h-5 mr-2" />
+            Get Your Certificate
+          </Button>
+        )}
       </div>
 
       {/* Getting Started Checklist */}
@@ -160,10 +189,6 @@ const StudentDashboard = () => {
         </Card>
       )}
 
-      <div>
-        <h1 className="text-2xl md:text-3xl font-bold text-foreground">My Training Dashboard</h1>
-        <p className="text-sm md:text-base text-muted-foreground">Track your progress and achievements</p>
-      </div>
 
       <DeadlineCountdown />
 

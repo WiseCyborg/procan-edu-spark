@@ -13,6 +13,7 @@ import { LogOut, User, MessageSquare, BookOpen, Award, BarChart3, Users, Mail, B
 import { CommunicationHub } from '@/components/communication/CommunicationHub';
 import { IntelligentNavigation } from '@/components/navigation/IntelligentNavigation';
 import { PurchaseSeatsDialog } from '@/components/team/PurchaseSeatsDialog';
+import { RoleSwitcher } from '@/components/navigation/RoleSwitcher';
 
 interface HeaderProps {
   role?: string;
@@ -46,7 +47,14 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <div className="flex items-center space-x-2">
           <Button 
-            onClick={() => navigate('/')}
+            onClick={() => {
+              // Navigate to default dashboard based on highest priority role
+              if (isAdmin) navigate('/admin-dashboard');
+              else if (isTrainingCoordinator) navigate('/training-coordinator-dashboard');
+              else if (isDispensaryManager) navigate('/dispensary-manager-dashboard');
+              else if (user) navigate('/student-dashboard');
+              else navigate('/');
+            }}
             variant="ghost"
             className="p-0 h-auto hover:bg-transparent"
           >
@@ -94,6 +102,9 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
             <div className="flex items-center space-x-4">
                 <IntelligentNavigation />
                 
+                {/* Role Switcher for Multi-Role Users */}
+                <RoleSwitcher />
+                
                 {/* Manager Quick Actions */}
                 {(isDispensaryManager || isTrainingCoordinator) && (
                   <div className="flex items-center space-x-2">
@@ -114,7 +125,7 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                       className="hidden lg:flex items-center space-x-1"
                     >
                       <Mail className="w-4 h-4" />
-                      <span>Invite</span>
+                      <span>Invite Employee</span>
                     </Button>
                   </div>
                 )}
