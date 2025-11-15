@@ -32,6 +32,7 @@ interface OrganizationInfo {
 
 import { useOrganization } from '@/hooks/useOrganization';
 import { AiLeanCoach } from '@/components/ailean/AiLeanCoach';
+import { MobileBottomNav } from '@/components/navigation/MobileBottomNav';
 
 const DispensaryManagerDashboard = () => {
   const { user } = useAuth();
@@ -604,6 +605,9 @@ const DispensaryManagerDashboard = () => {
 
       {/* AiLean Coach */}
       <AiLeanCoach />
+      
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav />
     </div>
   );
 };

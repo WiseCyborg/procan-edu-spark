@@ -100,10 +100,10 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.system-integrity-monitor]
-verify_jwt = false
+verify_jwt = true
 
 [functions.auto-fix-manager-accounts]
-verify_jwt = false
+verify_jwt = true
 
 [functions.auto-generate-join-codes]
 verify_jwt = false
@@ -160,12 +160,6 @@ verify_jwt = false
 verify_jwt = true
 
 [functions.manage-competitor]
-verify_jwt = true
-
-[functions.system-integrity-monitor]
-verify_jwt = true
-
-[functions.auto-fix-manager-accounts]
 verify_jwt = true
 
 [functions.database-integrity-fix]

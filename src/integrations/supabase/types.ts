@@ -1331,6 +1331,66 @@ export type Database = {
           },
         ]
       }
+      email_analytics_summary: {
+        Row: {
+          bounce_rate: number | null
+          click_rate: number | null
+          created_at: string | null
+          emails_delivered: number | null
+          emails_failed: number | null
+          emails_sent: number | null
+          failure_rate: number | null
+          id: string
+          metadata: Json | null
+          open_rate: number | null
+          period_end: string
+          period_start: string
+          total_clicks: number | null
+          total_opens: number | null
+          unique_clicks: number | null
+          unique_opens: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          bounce_rate?: number | null
+          click_rate?: number | null
+          created_at?: string | null
+          emails_delivered?: number | null
+          emails_failed?: number | null
+          emails_sent?: number | null
+          failure_rate?: number | null
+          id?: string
+          metadata?: Json | null
+          open_rate?: number | null
+          period_end: string
+          period_start: string
+          total_clicks?: number | null
+          total_opens?: number | null
+          unique_clicks?: number | null
+          unique_opens?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          bounce_rate?: number | null
+          click_rate?: number | null
+          created_at?: string | null
+          emails_delivered?: number | null
+          emails_failed?: number | null
+          emails_sent?: number | null
+          failure_rate?: number | null
+          id?: string
+          metadata?: Json | null
+          open_rate?: number | null
+          period_end?: string
+          period_start?: string
+          total_clicks?: number | null
+          total_opens?: number | null
+          unique_clicks?: number | null
+          unique_opens?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       email_circuit_breaker: {
         Row: {
           circuit_state: string
