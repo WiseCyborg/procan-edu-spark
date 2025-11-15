@@ -1,11 +1,20 @@
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.4';
 import { EmailRouter } from "../_shared/email-router.ts";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+// Server-side validation schema
+const EmployeeInvitationSchema = z.object({
+  employeeEmail: z.string().trim().email().max(255).toLowerCase(),
+  organizationName: z.string().trim().min(2).max(200),
+  invitationToken: z.string().trim().min(10).max(100),
+  deadline: z.string().refine((date) => !isNaN(Date.parse(date)), "Invalid deadline date")
+});
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -13,12 +22,35 @@ serve(async (req) => {
   }
 
   try {
+    const rawData = await req.json();
+    
+    // VALIDATE INPUT
+    const validationResult = EmployeeInvitationSchema.safeParse(rawData);
+    
+    if (!validationResult.success) {
+      console.error('[VALIDATION ERROR]', validationResult.error.issues);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Invalid input data',
+          details: validationResult.error.issues.map(issue => ({
+            field: issue.path.join('.'),
+            message: issue.message
+          })),
+          code: 'VALIDATION_ERROR'
+        }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+    
     const { 
       employeeEmail, 
       organizationName, 
       invitationToken,
       deadline 
-    } = await req.json();
+    } = validationResult.data;
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,

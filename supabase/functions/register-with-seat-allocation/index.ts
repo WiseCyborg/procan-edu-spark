@@ -1,10 +1,24 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Server-side validation schema
+const RegistrationSchema = z.object({
+  email: z.string().trim().email().max(255).toLowerCase(),
+  password: z.string().min(8).max(128),
+  firstName: z.string().trim().min(1).max(50).regex(/^[a-zA-Z\s'-]+$/),
+  lastName: z.string().trim().min(1).max(50).regex(/^[a-zA-Z\s'-]+$/),
+  phone: z.string().trim().regex(/^\+?1?\s*\(?([0-9]{3})\)?[\s.-]?([0-9]{3})[\s.-]?([0-9]{4})$/),
+  organizationId: z.string().uuid(),
+  organizationName: z.string().trim().min(2).max(200),
+  joinCode: z.string().trim().length(8).regex(/^[A-Z0-9]+$/i).optional(),
+  invitationToken: z.string().trim().min(10).max(100).optional()
+});
 
 interface RegistrationRequest {
   email: string;
@@ -29,7 +43,31 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const requestData: RegistrationRequest = await req.json();
+    const rawData = await req.json();
+    
+    // VALIDATE INPUT
+    const validationResult = RegistrationSchema.safeParse(rawData);
+    
+    if (!validationResult.success) {
+      console.error('[VALIDATION ERROR]', validationResult.error.issues);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Invalid input data',
+          details: validationResult.error.issues.map(issue => ({
+            field: issue.path.join('.'),
+            message: issue.message
+          })),
+          code: 'VALIDATION_ERROR'
+        }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+    
+    // Use validated data
+    const requestData = validationResult.data;
     const { 
       email, 
       password, 

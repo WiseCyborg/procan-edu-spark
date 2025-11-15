@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -9,6 +10,25 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Server-side validation schema
+const StaffInvitationSchema = z.object({
+  action: z.enum(['invite_single', 'invite_bulk', 'resend_invitation', 'cancel_invitation']),
+  organizationId: z.string().uuid(),
+  inviterId: z.string().uuid(),
+  email: z.string().email().max(255).optional(),
+  emails: z.array(z.string().email().max(255)).max(100).optional(),
+  role: z.enum(['student', 'training_coordinator', 'dispensary_manager']).optional(),
+  invitationId: z.string().uuid().optional(),
+  customMessage: z.string().max(1000).optional()
+}).refine((data) => {
+  if (data.action === 'invite_single') return !!data.email;
+  if (data.action === 'invite_bulk') return !!data.emails && data.emails.length > 0;
+  if (data.action === 'resend_invitation' || data.action === 'cancel_invitation') return !!data.invitationId;
+  return true;
+}, {
+  message: "Missing required fields for this action"
+});
 
 interface StaffInvitationRequest {
   action: 'invite_single' | 'invite_bulk' | 'resend_invitation' | 'cancel_invitation';
@@ -27,7 +47,31 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { action, organizationId, inviterId, email, emails, role, invitationId, customMessage }: StaffInvitationRequest = await req.json();
+    const rawData = await req.json();
+    
+    // VALIDATE INPUT
+    const validationResult = StaffInvitationSchema.safeParse(rawData);
+    
+    if (!validationResult.success) {
+      console.error('[VALIDATION ERROR]', validationResult.error.issues);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Invalid input data',
+          details: validationResult.error.issues.map(issue => ({
+            field: issue.path.join('.'),
+            message: issue.message
+          })),
+          code: 'VALIDATION_ERROR'
+        }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+    
+    const validatedData = validationResult.data;
+    const { action, organizationId, inviterId, email, emails, role, invitationId, customMessage } = validatedData;
     
     console.log(`Processing staff invitation: ${action}`);
 
