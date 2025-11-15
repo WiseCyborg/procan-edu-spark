@@ -20,6 +20,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { useOrganization } from '@/hooks/useOrganization';
 import { AiLeanCoach } from '@/components/ailean/AiLeanCoach';
+import { MobileBottomNav } from '@/components/navigation/MobileBottomNav';
 
 const TrainingCoordinatorDashboard = () => {
   const { user } = useAuth();
@@ -441,6 +442,9 @@ const TrainingCoordinatorDashboard = () => {
 
       {/* AiLean Coach */}
       <AiLeanCoach />
+      
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav />
     </div>
   );
 };

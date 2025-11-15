@@ -299,6 +299,39 @@ serve(async (req) => {
       }
     });
 
+    // Step 3: Wire Payment Flow - Send payment link email after successful approval
+    try {
+      const { data: appData } = await serviceClient
+        .from('dispensary_applications')
+        .select('contact_email, organization_name, payment_amount')
+        .eq('id', application_id)
+        .single();
+
+      if (appData) {
+        console.log('[APPROVE-APPLICATION] Sending payment link email to:', appData.contact_email);
+        
+        // Insert into notification queue for payment link
+        await serviceClient.from('notification_queue').insert({
+          recipient_email: appData.contact_email,
+          subject: '💳 Payment Required - Complete Your Registration',
+          message: 'Your application has been approved. Please complete payment to activate your account.',
+          scheduled_for: new Date().toISOString(),
+          priority: 'high',
+          metadata: {
+            template: 'payment-link',
+            OrganizationName: appData.organization_name,
+            PaymentAmount: appData.payment_amount || 0,
+            ApplicationId: application_id
+          }
+        });
+        
+        console.log('[APPROVE-APPLICATION] ✅ Payment link email queued');
+      }
+    } catch (emailError: any) {
+      console.error('[APPROVE-APPLICATION] Failed to queue payment email:', emailError);
+      // Don't fail the approval if email queueing fails
+    }
+
     // Cache the result for idempotency
     await serviceClient.from('api_requests').insert({
       idempotency_key,
