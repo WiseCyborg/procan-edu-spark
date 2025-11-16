@@ -31,6 +31,25 @@ export interface PipelineMetrics {
   avg_completion_days_30d: number;
   exam_pass_rate_30d: number;
   
+  // Dispensary Funnel
+  funnel_dispensary_applied: number;
+  funnel_dispensary_approved: number;
+  funnel_dispensary_registered: number;
+  funnel_dispensary_seats_purchased: number;
+  
+  // Employee Funnel
+  funnel_employee_invited: number;
+  funnel_employee_registered: number;
+  funnel_employee_started: number;
+  funnel_employee_completed: number;
+  funnel_employee_took_exam: number;
+  
+  // Certification Funnel
+  funnel_cert_took_exam: number;
+  funnel_cert_passed: number;
+  funnel_cert_generated: number;
+  funnel_cert_delivered: number;
+  
   calculated_at: string;
 }
 
