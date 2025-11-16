@@ -247,7 +247,7 @@ export const ComprehensivePipelineHealth = () => {
             <div className="space-y-2">
               <div className="flex justify-between items-center text-sm">
                 <span>Applied</span>
-                <span className="font-semibold">{metrics.applications_submitted_30d}</span>
+                <span className="font-semibold">{metrics.funnel_dispensary_applied}</span>
               </div>
               <Progress value={100} className="h-1" />
             </div>
@@ -256,20 +256,31 @@ export const ComprehensivePipelineHealth = () => {
               <div className="flex justify-between items-center text-sm">
                 <span>Approved</span>
                 <span className="font-semibold text-green-600">
-                  {metrics.applications_approved_30d} ({metrics.approval_rate_30d}%)
+                  {metrics.funnel_dispensary_approved} ({metrics.funnel_dispensary_applied > 0 ? Math.round((metrics.funnel_dispensary_approved / metrics.funnel_dispensary_applied) * 100) : 0}%)
                 </span>
               </div>
-              <Progress value={metrics.approval_rate_30d} className="h-1" />
+              <Progress value={metrics.funnel_dispensary_applied > 0 ? (metrics.funnel_dispensary_approved / metrics.funnel_dispensary_applied) * 100 : 0} className="h-1" />
             </div>
             
-            {metrics.applications_pending > 0 && (
-              <div className="space-y-2">
-                <div className="flex justify-between items-center text-sm">
-                  <span>Pending</span>
-                  <span className="font-semibold text-orange-600">{metrics.applications_pending}</span>
-                </div>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center text-sm">
+                <span>Manager Registered</span>
+                <span className="font-semibold">
+                  {metrics.funnel_dispensary_registered} ({metrics.funnel_dispensary_approved > 0 ? Math.round((metrics.funnel_dispensary_registered / metrics.funnel_dispensary_approved) * 100) : 0}%)
+                </span>
               </div>
-            )}
+              <Progress value={metrics.funnel_dispensary_approved > 0 ? (metrics.funnel_dispensary_registered / metrics.funnel_dispensary_approved) * 100 : 0} className="h-1" />
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex justify-between items-center text-sm">
+                <span>Seats Purchased</span>
+                <span className="font-semibold text-blue-600">
+                  {metrics.funnel_dispensary_seats_purchased} ({metrics.funnel_dispensary_approved > 0 ? Math.round((metrics.funnel_dispensary_seats_purchased / metrics.funnel_dispensary_approved) * 100) : 0}%)
+                </span>
+              </div>
+              <Progress value={metrics.funnel_dispensary_approved > 0 ? (metrics.funnel_dispensary_seats_purchased / metrics.funnel_dispensary_approved) * 100 : 0} className="h-1" />
+            </div>
           </CardContent>
         </Card>
 
@@ -283,20 +294,50 @@ export const ComprehensivePipelineHealth = () => {
           <CardContent className="space-y-3">
             <div className="space-y-2">
               <div className="flex justify-between items-center text-sm">
-                <span>Registered</span>
-                <span className="font-semibold">{metrics.users_registered_30d}</span>
+                <span>Invited</span>
+                <span className="font-semibold">{metrics.funnel_employee_invited}</span>
               </div>
               <Progress value={100} className="h-1" />
             </div>
             
             <div className="space-y-2">
               <div className="flex justify-between items-center text-sm">
-                <span>Took Exam</span>
+                <span>Registered</span>
                 <span className="font-semibold">
-                  {metrics.exams_taken_30d} ({Math.round((metrics.exams_taken_30d / Math.max(metrics.users_registered_30d, 1)) * 100)}%)
+                  {metrics.funnel_employee_registered} ({metrics.funnel_employee_invited > 0 ? Math.round((metrics.funnel_employee_registered / metrics.funnel_employee_invited) * 100) : 0}%)
                 </span>
               </div>
-              <Progress value={(metrics.exams_taken_30d / Math.max(metrics.users_registered_30d, 1)) * 100} className="h-1" />
+              <Progress value={metrics.funnel_employee_invited > 0 ? (metrics.funnel_employee_registered / metrics.funnel_employee_invited) * 100 : 0} className="h-1" />
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex justify-between items-center text-sm">
+                <span>Started Course</span>
+                <span className="font-semibold">
+                  {metrics.funnel_employee_started} ({metrics.funnel_employee_registered > 0 ? Math.round((metrics.funnel_employee_started / metrics.funnel_employee_registered) * 100) : 0}%)
+                </span>
+              </div>
+              <Progress value={metrics.funnel_employee_registered > 0 ? (metrics.funnel_employee_started / metrics.funnel_employee_registered) * 100 : 0} className="h-1" />
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex justify-between items-center text-sm">
+                <span>Completed</span>
+                <span className="font-semibold text-green-600">
+                  {metrics.funnel_employee_completed} ({metrics.funnel_employee_started > 0 ? Math.round((metrics.funnel_employee_completed / metrics.funnel_employee_started) * 100) : 0}%)
+                </span>
+              </div>
+              <Progress value={metrics.funnel_employee_started > 0 ? (metrics.funnel_employee_completed / metrics.funnel_employee_started) * 100 : 0} className="h-1" />
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex justify-between items-center text-sm">
+                <span>Took Exam</span>
+                <span className="font-semibold text-blue-600">
+                  {metrics.funnel_employee_took_exam} ({metrics.funnel_employee_completed > 0 ? Math.round((metrics.funnel_employee_took_exam / metrics.funnel_employee_completed) * 100) : 0}%)
+                </span>
+              </div>
+              <Progress value={metrics.funnel_employee_completed > 0 ? (metrics.funnel_employee_took_exam / metrics.funnel_employee_completed) * 100 : 0} className="h-1" />
             </div>
           </CardContent>
         </Card>
@@ -312,7 +353,7 @@ export const ComprehensivePipelineHealth = () => {
             <div className="space-y-2">
               <div className="flex justify-between items-center text-sm">
                 <span>Exams Taken</span>
-                <span className="font-semibold">{metrics.exams_taken_30d}</span>
+                <span className="font-semibold">{metrics.funnel_cert_took_exam}</span>
               </div>
               <Progress value={100} className="h-1" />
             </div>
@@ -321,20 +362,30 @@ export const ComprehensivePipelineHealth = () => {
               <div className="flex justify-between items-center text-sm">
                 <span>Passed</span>
                 <span className="font-semibold text-green-600">
-                  {metrics.exams_passed_30d} ({metrics.exam_pass_rate_30d}%)
+                  {metrics.funnel_cert_passed} ({metrics.funnel_cert_took_exam > 0 ? Math.round((metrics.funnel_cert_passed / metrics.funnel_cert_took_exam) * 100) : 0}%)
                 </span>
               </div>
-              <Progress value={metrics.exam_pass_rate_30d} className="h-1" />
+              <Progress value={metrics.funnel_cert_took_exam > 0 ? (metrics.funnel_cert_passed / metrics.funnel_cert_took_exam) * 100 : 0} className="h-1" />
             </div>
             
             <div className="space-y-2">
               <div className="flex justify-between items-center text-sm">
-                <span>Certified</span>
-                <span className="font-semibold text-blue-600">
-                  {metrics.certificates_issued_30d}
+                <span>Cert Generated</span>
+                <span className="font-semibold">
+                  {metrics.funnel_cert_generated} ({metrics.funnel_cert_passed > 0 ? Math.round((metrics.funnel_cert_generated / metrics.funnel_cert_passed) * 100) : 0}%)
                 </span>
               </div>
-              <Progress value={(metrics.certificates_issued_30d / Math.max(metrics.exams_taken_30d, 1)) * 100} className="h-1" />
+              <Progress value={metrics.funnel_cert_passed > 0 ? (metrics.funnel_cert_generated / metrics.funnel_cert_passed) * 100 : 0} className="h-1" />
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex justify-between items-center text-sm">
+                <span>Delivered</span>
+                <span className="font-semibold text-blue-600">
+                  {metrics.funnel_cert_delivered} ({metrics.funnel_cert_generated > 0 ? Math.round((metrics.funnel_cert_delivered / metrics.funnel_cert_generated) * 100) : 0}%)
+                </span>
+              </div>
+              <Progress value={metrics.funnel_cert_generated > 0 ? (metrics.funnel_cert_delivered / metrics.funnel_cert_generated) * 100 : 0} className="h-1" />
             </div>
           </CardContent>
         </Card>

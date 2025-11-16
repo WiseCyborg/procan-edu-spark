@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Shield, Search, CheckCircle, XCircle, Calendar, Award, Lock } from 'lucide-react';
+import { Shield, Search, CheckCircle, XCircle, Calendar, Award, Lock, Copy, Check } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -18,12 +19,26 @@ interface CertificateStatus {
 }
 
 const CertificateVerification = () => {
+  const [searchParams] = useSearchParams();
   const [certificateNumber, setCertificateNumber] = useState('');
   const [certificate, setCertificate] = useState<CertificateStatus | null>(null);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
+  const [copied, setCopied] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
+
+  // Auto-verify if cert parameter is present
+  useEffect(() => {
+    const certParam = searchParams.get('cert');
+    if (certParam) {
+      setCertificateNumber(certParam);
+      // Trigger verification after state is set
+      setTimeout(() => {
+        verifyCertificate();
+      }, 100);
+    }
+  }, [searchParams]);
 
   const verifyCertificate = async () => {
     if (!certificateNumber.trim()) {
@@ -104,6 +119,25 @@ const CertificateVerification = () => {
       return { status: 'expired', color: 'bg-yellow-100 text-yellow-800', label: 'Expired' };
     }
     return { status: 'valid', color: 'bg-green-100 text-green-800', label: 'Valid' };
+  };
+
+  const copyVerificationLink = async () => {
+    const link = `${window.location.origin}/verify-certificate?cert=${certificateNumber}`;
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopied(true);
+      toast({
+        title: "Link Copied",
+        description: "Verification link copied to clipboard",
+      });
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to copy link",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -215,6 +249,27 @@ const CertificateVerification = () => {
                           </div>
                         )}
                       </div>
+                    </div>
+
+                    {/* Copy Verification Link Button */}
+                    <div className="pt-4 border-t">
+                      <Button
+                        onClick={copyVerificationLink}
+                        variant="outline"
+                        className="w-full"
+                      >
+                        {copied ? (
+                          <>
+                            <Check className="mr-2 h-4 w-4" />
+                            Link Copied!
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="mr-2 h-4 w-4" />
+                            Copy Verification Link
+                          </>
+                        )}
+                      </Button>
                     </div>
 
                     {/* Privacy Notice */}
