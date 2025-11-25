@@ -300,3 +300,6 @@ verify_jwt = false
 [functions.generate-certificate]
 verify_jwt = true
 
+[functions.send-approval-email]
+verify_jwt = false
+

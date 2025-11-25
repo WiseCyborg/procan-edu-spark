@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Status Update</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #dc3545;
+            padding-bottom: 20px;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2A7F3F;
+            margin-bottom: 10px;
+        }
+        h1 {
+            color: #dc3545;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .info-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid #dc3545;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .info-box strong {
+            color: #dc3545;
+        }
+        .reason {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .reason-label {
+            font-weight: bold;
+            color: #856404;
+            margin-bottom: 8px;
+        }
+        .cta-section {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+        }
+        .cta-button {
+            display: inline-block;
+            background-color: #2A7F3F;
+            color: white !important;
+            padding: 14px 32px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            margin-top: 15px;
+        }
+        .cta-button:hover {
+            background-color: #236532;
+        }
+        .support-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            text-align: center;
+            color: #666;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">ProCann Edu</div>
+            <p>Maryland Cannabis Education Platform</p>
+        </div>
+
+        <h1>Application Status Update</h1>
+
+        <p>Dear {{ .ContactPerson }},</p>
+
+        <p>Thank you for your interest in partnering with ProCann Edu for compliance training at <strong>{{ .OrganizationName }}</strong>.</p>
+
+        <div class="info-box">
+            <strong>Application Status:</strong> Not Approved
+        </div>
+
+        <div class="reason">
+            <div class="reason-label">Reason:</div>
+            <p>{{ .RejectionReason }}</p>
+        </div>
+
+        <p>We appreciate your interest in our platform. If you believe this decision was made in error or if you have questions about your application status, please don't hesitate to reach out to our support team.</p>
+
+        <div class="support-section">
+            <h3 style="color: #2A7F3F; margin-bottom: 10px;">Need Assistance?</h3>
+            <p>Our support team is here to help clarify any concerns or questions you may have.</p>
+            <p>
+                <strong>Email:</strong> <a href="mailto:support@procannedu.com" style="color: #2A7F3F;">support@procannedu.com</a><br>
+                <strong>Phone:</strong> (555) 123-4567
+            </p>
+        </div>
+
+        <div class="cta-section">
+            <p><strong>Have additional questions or concerns?</strong></p>
+            <a href="https://www.procannedu.com/contact" class="cta-button">Contact Support</a>
+        </div>
+
+        <div class="footer">
+            <p>&copy; 2025 ProCann Edu. All rights reserved.</p>
+            <p>This email was sent regarding your dispensary application.</p>
+        </div>
+    </div>
+</body>
+</html>
