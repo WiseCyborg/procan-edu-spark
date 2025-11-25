@@ -16,7 +16,7 @@ const RegistrationSchema = z.object({
   phone: z.string().trim().regex(/^\+?1?\s*\(?([0-9]{3})\)?[\s.-]?([0-9]{3})[\s.-]?([0-9]{4})$/),
   organizationId: z.string().uuid(),
   organizationName: z.string().trim().min(2).max(200),
-  joinCode: z.string().trim().length(8).regex(/^[A-Z0-9]+$/i).optional(),
+  joinCode: z.string().trim().min(8).max(30).regex(/^[A-Z0-9-]+$/i).optional(),
   invitationToken: z.string().trim().min(10).max(100).optional()
 });
 
