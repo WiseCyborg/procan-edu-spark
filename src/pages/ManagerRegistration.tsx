@@ -40,29 +40,35 @@ export default function ManagerRegistration() {
       return;
     }
 
-    supabase.from('dispensary_applications').select('*').eq('registration_token', token).eq('application_status', 'approved').single()
-      .then(({ data, error }) => {
-        if (error || !data) { 
-          setValidationStatus('invalid');
-          setLoading(false);
-          return; 
-        }
-        if (data.registration_completed) { 
-          setValidationStatus('used');
-          setLoading(false);
-          return; 
-        }
-        if (new Date(data.registration_token_expires_at) < new Date()) { 
-          setValidationStatus('expired');
-          setLoading(false);
-          return; 
-        }
-        setApplicationData(data);
-        setValue('email', sanitizeEmail(data.contact_email));
-        setValidationStatus('valid');
+    // Use edge function for token validation with proper security
+    supabase.functions.invoke('validate-manager-registration', {
+      body: { token }
+    }).then(({ data, error }) => {
+      if (error || !data?.is_valid) {
+        setValidationStatus(data?.error_message?.includes('expired') ? 'expired' : 
+                           data?.error_message?.includes('completed') ? 'used' : 'invalid');
         setLoading(false);
-      });
-  }, [token]);
+        return;
+      }
+
+      // Fetch full application data after validation
+      supabase.from('dispensary_applications')
+        .select('*')
+        .eq('id', data.application_id)
+        .single()
+        .then(({ data: appData, error: appError }) => {
+          if (appError || !appData) {
+            setValidationStatus('invalid');
+            setLoading(false);
+            return;
+          }
+          setApplicationData(appData);
+          setValue('email', sanitizeEmail(appData.contact_email));
+          setValidationStatus('valid');
+          setLoading(false);
+        });
+    });
+  }, [token, setValue]);
 
   const onSubmit = async (data: FormData) => {
     try {

@@ -67,7 +67,7 @@ serve(async (req) => {
       .eq("email", email)
       .single();
 
-    const resetUrl = `${Deno.env.get("SUPABASE_URL")?.replace('.supabase.co', '.lovable.app')}/reset-password?token=${token}`;
+    const resetUrl = `https://www.procannedu.com/auth?mode=reset&token=${token}`;
 
     const html = `
 <!DOCTYPE html>
