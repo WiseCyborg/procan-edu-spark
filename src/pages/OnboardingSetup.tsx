@@ -3,12 +3,14 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ManagerOnboarding } from '@/components/onboarding/ManagerOnboarding';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useJourneyState } from '@/hooks/useJourneyState';
 import { Loader2 } from 'lucide-react';
 
 export default function OnboardingSetup() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { isDispensaryManager, isTrainingCoordinator, isLoading } = useUserRole();
+  const { journeyState, updateStage } = useJourneyState();
   const [searchParams] = useSearchParams();
   const isFirstLogin = searchParams.get('first_login') === 'true';
 
@@ -36,7 +38,10 @@ export default function OnboardingSetup() {
   }, [user, isDispensaryManager, isTrainingCoordinator, isFirstLogin, isLoading, navigate]);
 
   const handleComplete = () => {
-    // Mark onboarding as complete
+    // Mark onboarding as complete in journey state
+    updateStage('onboarding_complete');
+    
+    // Mark onboarding as complete in localStorage (legacy)
     if (user) {
       localStorage.setItem(`onboarding_complete_${user.id}`, 'true');
     }
@@ -46,7 +51,10 @@ export default function OnboardingSetup() {
   };
 
   const handleSkip = () => {
-    // Still mark as complete to prevent re-showing
+    // Mark onboarding as complete in journey state (even if skipped)
+    updateStage('onboarding_complete');
+    
+    // Still mark as complete to prevent re-showing (legacy)
     if (user) {
       localStorage.setItem(`onboarding_complete_${user.id}`, 'true');
     }

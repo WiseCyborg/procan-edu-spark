@@ -4220,6 +4220,60 @@ export type Database = {
         }
         Relationships: []
       }
+      user_journey_state: {
+        Row: {
+          created_at: string | null
+          current_stage: string
+          current_step: number | null
+          current_wizard: string | null
+          id: string
+          last_action: string | null
+          last_activity_at: string | null
+          last_page_visited: string | null
+          last_resume_prompt_at: string | null
+          resume_prompt_count: number | null
+          stage_entered_at: string | null
+          updated_at: string | null
+          user_id: string
+          welcome_message_shown: boolean | null
+          wizard_metadata: Json | null
+        }
+        Insert: {
+          created_at?: string | null
+          current_stage?: string
+          current_step?: number | null
+          current_wizard?: string | null
+          id?: string
+          last_action?: string | null
+          last_activity_at?: string | null
+          last_page_visited?: string | null
+          last_resume_prompt_at?: string | null
+          resume_prompt_count?: number | null
+          stage_entered_at?: string | null
+          updated_at?: string | null
+          user_id: string
+          welcome_message_shown?: boolean | null
+          wizard_metadata?: Json | null
+        }
+        Update: {
+          created_at?: string | null
+          current_stage?: string
+          current_step?: number | null
+          current_wizard?: string | null
+          id?: string
+          last_action?: string | null
+          last_activity_at?: string | null
+          last_page_visited?: string | null
+          last_resume_prompt_at?: string | null
+          resume_prompt_count?: number | null
+          stage_entered_at?: string | null
+          updated_at?: string | null
+          user_id?: string
+          welcome_message_shown?: boolean | null
+          wizard_metadata?: Json | null
+        }
+        Relationships: []
+      }
       user_learning_journey: {
         Row: {
           ai_recommendations: string | null
