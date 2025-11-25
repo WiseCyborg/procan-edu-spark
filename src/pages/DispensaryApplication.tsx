@@ -95,9 +95,24 @@ const DispensaryApplication = () => {
         duration: 6000,
       });
     } catch (error: any) {
+      console.error('Submission error:', error);
+      
+      let errorMessage = "Please try again or contact support@procannedu.com";
+      
+      // Check for specific error types
+      if (error.message?.includes('401') || error.message?.includes('Missing authorization') || error.message?.includes('JWT')) {
+        errorMessage = "Service temporarily unavailable. Our team has been notified. Please try again in a few minutes.";
+      } else if (error.message?.includes('network') || error.message?.includes('fetch') || error.message?.includes('Failed to fetch')) {
+        errorMessage = "Network error. Please check your connection and try again.";
+      } else if (error.message?.includes('timeout') || error.message?.includes('timed out')) {
+        errorMessage = "Request timed out. Please try again.";
+      } else if (error.message?.includes('500') || error.message?.includes('Internal Server Error')) {
+        errorMessage = "Server error occurred. Please try again in a few moments.";
+      }
+      
       toast({
         title: "Submission Failed",
-        description: "Please try again or contact support@procannedu.com",
+        description: errorMessage,
         variant: "destructive",
       });
     }

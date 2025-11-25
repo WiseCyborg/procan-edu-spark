@@ -1,5 +1,8 @@
 project_id = "zhmpwczrvitomsxjwpzc"
 
+[functions.submit-dispensary-application]
+verify_jwt = false
+
 [functions.approve-application]
 verify_jwt = true
 
