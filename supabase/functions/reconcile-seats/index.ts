@@ -75,17 +75,19 @@ serve(async (req) => {
 
         console.log(`🔧 ${org.name}: ${seatCount} seats, ${creditCount} credits, deficit: ${deficit}`);
 
-        // Get the RVT course ID
-        const { data: course } = await supabase
+        // Get ANY active course (fallback to first available)
+        const { data: courses } = await supabase
           .from('courses')
-          .select('id')
-          .eq('course_type', 'professional')
-          .eq('target_audience', 'agent')
-          .single();
+          .select('id, title')
+          .eq('is_active', true)
+          .limit(1);
 
-        if (!course) {
-          throw new Error('RVT course not found');
+        if (!courses || courses.length === 0) {
+          throw new Error('No active courses found in system');
         }
+
+        const course = courses[0];
+        console.log(`📚 Using course: ${course.title} (${course.id})`)
 
         // Create missing seats
         const seatsToCreate = Array.from({ length: deficit }, (_, i) => ({

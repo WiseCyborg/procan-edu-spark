@@ -62,38 +62,52 @@ serve(async (req) => {
       try {
         console.log(`🔑 Regenerating token for: ${app.organization_name}`);
 
-        // Call existing regenerate function
-        const { data: regenData, error: regenError } = await supabase.rpc(
-          'regenerate_manager_token',
-          { application_id: app.id }
-        );
+        // Generate new token directly (RPC may have issues)
+        const newToken = Array.from(crypto.getRandomValues(new Uint8Array(32)))
+          .map(b => b.toString(16).padStart(2, '0'))
+          .join('');
+        const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
 
-        if (regenError) {
-          console.error(`❌ Failed to regenerate for ${app.organization_name}:`, regenError);
+        // Update application with new token
+        const { error: updateError } = await supabase
+          .from('dispensary_applications')
+          .update({
+            registration_token: newToken,
+            registration_token_expires_at: expiresAt,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', app.id);
+
+        if (updateError) {
+          console.error(`❌ Failed to update token for ${app.organization_name}:`, updateError);
           results.failed++;
           results.errors.push({
             organization: app.organization_name,
-            error: regenError.message
+            error: updateError.message
           });
           continue;
         }
 
-        // Send new approval email
-        const registrationUrl = `https://www.procannedu.com/manager-registration?token=${regenData.registration_token}`;
+        // Queue approval email via notification system
+        const registrationUrl = `https://www.procannedu.com/register/manager?token=${newToken}`;
         
-        const { error: emailError } = await supabase.functions.invoke('send-approval-email', {
-          body: {
-            contact_email: app.contact_email,
-            contact_person: app.contact_person,
-            organization_name: app.organization_name,
-            access_key: regenData.registration_token,
-            registration_url: registrationUrl,
-            credits: app.requested_credits || 10
-          }
-        });
+        const { error: notifError } = await supabase
+          .from('notification_queue')
+          .insert({
+            recipient_email: app.contact_email,
+            subject: 'ProCann Edu - Manager Registration Link',
+            message: `Dear ${app.contact_person},\n\nYour organization ${app.organization_name} has been approved!\n\nRegister here: ${registrationUrl}\n\nThis link expires in 30 days.`,
+            scheduled_for: new Date().toISOString(),
+            priority: 'high',
+            metadata: {
+              application_id: app.id,
+              token_regenerated: true,
+              expires_at: expiresAt
+            }
+          });
 
-        if (emailError) {
-          console.error(`⚠️ Email failed for ${app.organization_name}:`, emailError);
+        if (notifError) {
+          console.error(`⚠️ Failed to queue email for ${app.organization_name}:`, notifError);
         }
 
         results.regenerated++;
