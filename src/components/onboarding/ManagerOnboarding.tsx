@@ -7,6 +7,7 @@ import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useOrganization } from '@/hooks/useOrganization';
+import { useJourneyState } from '@/hooks/useJourneyState';
 import { ArrowLeft, X } from 'lucide-react';
 import { 
   WelcomeStep, 
@@ -32,6 +33,7 @@ export const ManagerOnboarding = ({ onComplete, onSkip }: ManagerOnboardingProps
   const navigate = useNavigate();
   const { user } = useAuth();
   const { organizationId } = useOrganization();
+  const { journeyState, updateStep, startWizard, completeWizard, loading: journeyLoading } = useJourneyState();
   
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -40,6 +42,20 @@ export const ManagerOnboarding = ({ onComplete, onSkip }: ManagerOnboardingProps
 
   const totalSteps = 4;
   const progress = (currentStep / totalSteps) * 100;
+
+  // Initialize wizard in journey state
+  useEffect(() => {
+    if (user && !journeyLoading) {
+      startWizard('manager_onboarding', currentStep);
+    }
+  }, [user, journeyLoading]);
+
+  // Restore step from journey state on mount
+  useEffect(() => {
+    if (journeyState?.current_wizard === 'manager_onboarding' && journeyState.current_step > 1) {
+      setCurrentStep(journeyState.current_step);
+    }
+  }, [journeyState]);
 
   // Fetch organization data
   useEffect(() => {
@@ -64,13 +80,17 @@ export const ManagerOnboarding = ({ onComplete, onSkip }: ManagerOnboardingProps
 
   const handleNext = () => {
     if (currentStep < totalSteps) {
-      setCurrentStep(currentStep + 1);
+      const nextStep = currentStep + 1;
+      setCurrentStep(nextStep);
+      updateStep(nextStep); // Persist to database
     }
   };
 
   const handleBack = () => {
     if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
+      const prevStep = currentStep - 1;
+      setCurrentStep(prevStep);
+      updateStep(prevStep); // Persist to database
     }
   };
 
@@ -127,6 +147,7 @@ export const ManagerOnboarding = ({ onComplete, onSkip }: ManagerOnboardingProps
         });
       }
 
+      completeWizard(); // Mark wizard as complete in journey state
       onComplete?.();
     } catch (error) {
       console.error("Exception during bulk invitation:", error);
@@ -141,6 +162,7 @@ export const ManagerOnboarding = ({ onComplete, onSkip }: ManagerOnboardingProps
   };
 
   const handleSkip = () => {
+    completeWizard(); // Mark wizard as skipped/complete in journey state
     onSkip?.();
   };
 
@@ -154,16 +176,22 @@ export const ManagerOnboarding = ({ onComplete, onSkip }: ManagerOnboardingProps
     }
   };
 
+  // Show resume message if returning to wizard
+  const showResumeMessage = journeyState?.current_step && journeyState.current_step > 1;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 py-12 px-4">
       <div className="max-w-3xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-green-700 mb-2">
-            Manager Onboarding
+            {showResumeMessage ? 'Welcome Back!' : 'Manager Onboarding'}
           </h1>
           <p className="text-muted-foreground">
-            Let's get your organization set up for success
+            {showResumeMessage 
+              ? `Continuing from Step ${currentStep} of ${totalSteps}` 
+              : "Let's get your organization set up for success"
+            }
           </p>
         </div>
 
