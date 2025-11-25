@@ -1,0 +1,46 @@
+-- Fix validate_join_code_has_seats to accept hyphenated join codes
+CREATE OR REPLACE FUNCTION public.validate_join_code_has_seats(_code text)
+RETURNS boolean
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO 'public'
+AS $function$
+DECLARE
+  v_join_code RECORD;
+  v_available_seats INTEGER;
+BEGIN
+  -- Get join code details (accept any alphanumeric + hyphens format)
+  SELECT 
+    jc.id,
+    jc.organization_id,
+    jc.course_id,
+    jc.max_uses,
+    jc.current_uses,
+    jc.expires_at,
+    jc.is_active
+  INTO v_join_code
+  FROM public.rvt_join_codes jc
+  WHERE jc.code = _code
+    AND jc.is_active = true
+    AND (jc.expires_at IS NULL OR jc.expires_at > NOW());
+  
+  IF NOT FOUND THEN
+    RETURN false;
+  END IF;
+  
+  -- Check if code has uses remaining
+  IF v_join_code.max_uses IS NOT NULL 
+     AND v_join_code.current_uses >= v_join_code.max_uses THEN
+    RETURN false;
+  END IF;
+  
+  -- Check available seats
+  SELECT COUNT(*) INTO v_available_seats
+  FROM public.rvt_seats
+  WHERE organization_id = v_join_code.organization_id
+    AND course_id = v_join_code.course_id
+    AND status = 'available';
+  
+  RETURN v_available_seats > 0;
+END;
+$function$;

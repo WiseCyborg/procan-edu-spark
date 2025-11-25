@@ -111,7 +111,7 @@ serve(async (req) => {
       console.log('[ATOMIC REGISTRATION] Validating join code has available seats:', joinCode);
       
       const { data: hasSeats, error: validateError } = await supabaseClient
-        .rpc('validate_join_code_has_seats', { p_join_code: joinCode });
+        .rpc('validate_join_code_has_seats', { _code: joinCode });
 
       if (validateError) {
         console.error('[ATOMIC REGISTRATION] Join code validation error:', validateError);
