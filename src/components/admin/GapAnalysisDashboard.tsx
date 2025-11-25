@@ -8,6 +8,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { toast } from 'sonner';
+import { FixPreviewDialog } from './FixPreviewDialog';
 import {
   AlertTriangle,
   CheckCircle2,
@@ -19,7 +20,9 @@ import {
   XCircle,
   TrendingUp,
   Eye,
-  Zap
+  Zap,
+  Brain,
+  Play
 } from 'lucide-react';
 
 interface IntegrityCheck {
@@ -41,6 +44,12 @@ export const GapAnalysisDashboard = () => {
   const [selectedSeverity, setSelectedSeverity] = useState<string>('all');
   const [expandedCheck, setExpandedCheck] = useState<string | null>(null);
   const queryClient = useQueryClient();
+  
+  // AI Analysis state
+  const [analyzingCheckId, setAnalyzingCheckId] = useState<string | null>(null);
+  const [fixPlans, setFixPlans] = useState<Record<string, any>>({});
+  const [selectedFixPlan, setSelectedFixPlan] = useState<any>(null);
+  const [showFixPreview, setShowFixPreview] = useState(false);
 
   // Fetch integrity checks
   const { data: checks, isLoading, refetch } = useQuery({
@@ -72,34 +81,44 @@ export const GapAnalysisDashboard = () => {
     }
   });
 
-  // Auto-fix mutation
-  const autoFix = useMutation({
-    mutationFn: async ({ checkId, fixType }: { checkId: string; fixType: string }) => {
-      const functionMap: Record<string, string> = {
-        'missing_manager_account': 'auto-fix-manager-accounts',
-        'missing_join_code': 'auto-generate-join-codes'
-      };
-
-      const functionName = functionMap[fixType];
-      if (!functionName) {
-        throw new Error('No auto-fix available for this issue type');
-      }
-
-      const { data, error } = await supabase.functions.invoke(functionName, {
-        body: { check_id: checkId }
+  // AI Analysis mutation
+  const analyzeIssue = useMutation({
+    mutationFn: async (checkId: string) => {
+      const { data, error } = await supabase.functions.invoke('analyze-system-issue', {
+        body: { checkId }
       });
-
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
-      toast.success('Auto-fix completed successfully');
-      queryClient.invalidateQueries({ queryKey: ['integrity-checks'] });
+    onSuccess: (data, checkId) => {
+      toast.success('AI analysis complete - review and execute when ready');
+      setFixPlans(prev => ({ ...prev, [checkId]: data.fixPlan }));
+      setAnalyzingCheckId(null);
     },
     onError: (error: Error) => {
-      toast.error(`Auto-fix failed: ${error.message}`);
+      toast.error(`AI analysis failed: ${error.message}`);
+      setAnalyzingCheckId(null);
     }
   });
+
+  const handleAnalyzeWithAI = (checkId: string) => {
+    setAnalyzingCheckId(checkId);
+    analyzeIssue.mutate(checkId);
+  };
+
+  const handleExecuteFix = (check: IntegrityCheck) => {
+    const fixPlan = fixPlans[check.id];
+    if (!fixPlan) {
+      toast.error('Please analyze the issue first to generate a fix plan');
+      return;
+    }
+    setSelectedFixPlan({ check, fixPlan });
+    setShowFixPreview(true);
+  };
+
+  const handleFixComplete = () => {
+    queryClient.invalidateQueries({ queryKey: ['integrity-checks'] });
+  };
 
   const filteredChecks = checks?.filter(check => {
     if (selectedSeverity === 'all') return true;
@@ -305,27 +324,74 @@ export const GapAnalysisDashboard = () => {
                           </div>
 
                           {/* Actions */}
-                          <div className="flex gap-2">
+                          <div className="space-y-4">
                             {check.auto_fixable && check.status === 'detected' && (
-                              <Button
-                                onClick={() => autoFix.mutate({ checkId: check.id, fixType: check.check_type })}
-                                disabled={autoFix.isPending}
-                                size="sm"
-                                className="gap-2"
-                              >
-                                {autoFix.isPending ? (
-                                  <Loader2 className="h-4 w-4 animate-spin" />
-                                ) : (
-                                  <Wrench className="h-4 w-4" />
+                              <div className="flex gap-2">
+                                <Button
+                                  onClick={() => handleAnalyzeWithAI(check.id)}
+                                  disabled={analyzingCheckId === check.id}
+                                  size="sm"
+                                  variant="outline"
+                                  className="gap-2"
+                                >
+                                  {analyzingCheckId === check.id ? (
+                                    <>
+                                      <Loader2 className="h-4 w-4 animate-spin" />
+                                      Analyzing...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Brain className="h-4 w-4" />
+                                      Analyze with AI
+                                    </>
+                                  )}
+                                </Button>
+                                
+                                {fixPlans[check.id] && (
+                                  <Button
+                                    onClick={() => handleExecuteFix(check)}
+                                    size="sm"
+                                    className="gap-2"
+                                  >
+                                    <Play className="h-4 w-4" />
+                                    Execute Fix
+                                  </Button>
                                 )}
-                                Auto-Fix Now
-                              </Button>
+                              </div>
                             )}
+                            
                             {check.status === 'fixed' && (
                               <Badge variant="outline" className="gap-1">
                                 <CheckCircle2 className="h-3 w-3" />
                                 Resolved {check.resolved_at ? new Date(check.resolved_at).toLocaleString() : ''}
                               </Badge>
+                            )}
+                            
+                            {/* Show AI Analysis if available */}
+                            {fixPlans[check.id] && (
+                              <div className="p-4 bg-muted rounded-lg space-y-3">
+                                <div className="flex items-center gap-2 text-sm font-semibold">
+                                  <Brain className="h-4 w-4 text-primary" />
+                                  AI Analysis Complete
+                                </div>
+                                <div className="space-y-2 text-sm">
+                                  <div>
+                                    <span className="font-medium">Root Cause:</span>
+                                    <p className="text-muted-foreground mt-1">{fixPlans[check.id].root_cause}</p>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Badge variant="outline">
+                                      Risk: {fixPlans[check.id].risk_level}
+                                    </Badge>
+                                    <Badge variant="outline">
+                                      {fixPlans[check.id].fix_steps?.length || 0} steps
+                                    </Badge>
+                                    <Badge variant="outline">
+                                      ~{fixPlans[check.id].estimated_duration_seconds}s
+                                    </Badge>
+                                  </div>
+                                </div>
+                              </div>
                             )}
                           </div>
                         </div>
@@ -338,6 +404,20 @@ export const GapAnalysisDashboard = () => {
           </Tabs>
         </CardContent>
       </Card>
+
+      {/* Fix Preview Dialog */}
+      {selectedFixPlan && (
+        <FixPreviewDialog
+          open={showFixPreview}
+          onClose={() => {
+            setShowFixPreview(false);
+            setSelectedFixPlan(null);
+          }}
+          check={selectedFixPlan.check}
+          fixPlan={selectedFixPlan.fixPlan}
+          onFixComplete={handleFixComplete}
+        />
+      )}
     </div>
   );
 };

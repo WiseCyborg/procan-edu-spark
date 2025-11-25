@@ -1,5 +1,11 @@
 project_id = "zhmpwczrvitomsxjwpzc"
 
+[functions.analyze-system-issue]
+verify_jwt = true
+
+[functions.execute-ai-fix]
+verify_jwt = true
+
 [functions.submit-dispensary-application]
 verify_jwt = false
 
