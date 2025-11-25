@@ -83,8 +83,10 @@ import ConsumerCertificates from "./pages/ConsumerCertificates";
 import EmailDomainVerification from "./pages/admin/EmailDomainVerification";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
+import CertificateRenewal from "./pages/CertificateRenewal";
 
 import { ProtectedCourseAccess } from "./components/ProtectedCourseAccess";
+import { JourneyStateProvider } from "./providers/JourneyStateProvider";
 
 const queryClient = new QueryClient();
 
@@ -138,7 +140,8 @@ const App = () => (
             </div>
           }>
             <OrganizationProvider>
-              <TooltipProvider>
+              <JourneyStateProvider>
+                <TooltipProvider>
           <Toaster />
           <Sonner />
           <LiveRegion />
@@ -234,6 +237,12 @@ const App = () => (
                     </ProtectedRoute>
                   } />
                   
+                   <Route path="/renew" element={
+                     <ProtectedRoute>
+                       <CertificateRenewal />
+                     </ProtectedRoute>
+                   } />
+                   
                    <Route path="/dispensary-portal" element={<Navigate to="/dispensary-manager-dashboard" replace />} />
                    
                    <Route path="/purchase-seats" element={
@@ -424,6 +433,7 @@ const App = () => (
             <DraggableVoiceAssistant />
           </BrowserRouter>
               </TooltipProvider>
+            </JourneyStateProvider>
             </OrganizationProvider>
           </Suspense>
         </AuthProvider>
