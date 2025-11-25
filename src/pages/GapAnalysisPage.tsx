@@ -3,6 +3,7 @@ import { UnifiedGapOverview } from '@/components/admin/gaps/UnifiedGapOverview';
 import { TrainingGapDashboard } from '@/components/admin/gaps/TrainingGapDashboard';
 import { DataQualityGapDashboard } from '@/components/admin/gaps/DataQualityGapDashboard';
 import { PaymentGapDashboard } from '@/components/admin/gaps/PaymentGapDashboard';
+import { GapFixesExecutor } from '@/components/admin/GapFixesExecutor';
 import { GapCategory } from '@/services/gapDetectionService';
 import { useState } from 'react';
 
@@ -33,6 +34,7 @@ export default function GapAnalysisPage() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="mb-6">
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="week1-fixes">Week 1 Fixes</TabsTrigger>
           <TabsTrigger value="training">Training</TabsTrigger>
           <TabsTrigger value="data">Data Quality</TabsTrigger>
           <TabsTrigger value="payment">Payment & License</TabsTrigger>
@@ -40,6 +42,10 @@ export default function GapAnalysisPage() {
 
         <TabsContent value="overview">
           <UnifiedGapOverview onCategoryClick={handleCategoryClick} />
+        </TabsContent>
+
+        <TabsContent value="week1-fixes">
+          <GapFixesExecutor />
         </TabsContent>
 
         <TabsContent value="training">
