@@ -5148,6 +5148,10 @@ export type Database = {
         Args: { _target_user_id: string; _viewer_id: string }
         Returns: boolean
       }
+      validate_join_code_has_seats: {
+        Args: { _code: string }
+        Returns: boolean
+      }
       validate_registration_token: {
         Args: { token_value: string }
         Returns: {
