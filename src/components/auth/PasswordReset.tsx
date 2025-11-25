@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Lock, CheckCircle } from 'lucide-react';
+import { Lock, CheckCircle, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -12,6 +12,8 @@ export const PasswordReset: React.FC = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [validating, setValidating] = useState(true);
+  const [tokenValid, setTokenValid] = useState(false);
   const [success, setSuccess] = useState(false);
   const [email, setEmail] = useState('');
   const [token, setToken] = useState('');
@@ -19,24 +21,57 @@ export const PasswordReset: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if we're in password reset mode
+    validateToken();
+  }, [navigate]);
+
+  const validateToken = async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const mode = urlParams.get('mode');
+    const resetToken = urlParams.get('token');
     
-    if (mode !== 'reset') {
+    if (mode !== 'reset' || !resetToken) {
+      toast({
+        title: "Invalid Request",
+        description: "Missing password reset token",
+        variant: "destructive"
+      });
       navigate('/auth');
       return;
     }
-    
-    // Listen for auth state changes to handle successful password reset
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'PASSWORD_RECOVERY') {
-        console.log('Password recovery mode activated');
+
+    setToken(resetToken);
+    setValidating(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('validate-password-reset-token', {
+        body: { token: resetToken }
+      });
+
+      if (error || !data.is_valid) {
+        toast({
+          title: "Invalid Token",
+          description: data?.error_message || "This password reset link is invalid or has expired",
+          variant: "destructive"
+        });
+        setTokenValid(false);
+        setTimeout(() => navigate('/forgot-password'), 2000);
+        return;
       }
-    });
-    
-    return () => subscription.unsubscribe();
-  }, [navigate]);
+
+      setEmail(data.email);
+      setTokenValid(true);
+    } catch (error) {
+      console.error('Token validation error:', error);
+      toast({
+        title: "Validation Error",
+        description: "Failed to validate reset token",
+        variant: "destructive"
+      });
+      setTokenValid(false);
+    } finally {
+      setValidating(false);
+    }
+  };
 
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,6 +105,12 @@ export const PasswordReset: React.FC = () => {
         throw new Error(error.message || 'Failed to update password');
       }
 
+      // Mark token as used
+      await supabase
+        .from('password_reset_tokens')
+        .update({ used_at: new Date().toISOString() })
+        .eq('token', token);
+
       setSuccess(true);
       toast({
         title: "Password Updated",
@@ -92,6 +133,41 @@ export const PasswordReset: React.FC = () => {
       setLoading(false);
     }
   };
+
+  if (validating) {
+    return (
+      <Card className="w-full max-w-md">
+        <CardContent className="p-6 text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">Validating reset token...</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!tokenValid) {
+    return (
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <div className="flex justify-center mb-4">
+            <AlertTriangle className="h-12 w-12 text-red-600" />
+          </div>
+          <CardTitle>Invalid Reset Link</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4 text-center">
+          <Alert className="border-red-200 bg-red-50">
+            <AlertDescription className="text-red-800">
+              This password reset link is invalid or has expired.
+            </AlertDescription>
+          </Alert>
+          
+          <p className="text-sm text-muted-foreground">
+            Redirecting you to request a new reset link...
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (success) {
     return (

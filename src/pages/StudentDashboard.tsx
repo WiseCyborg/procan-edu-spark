@@ -12,12 +12,15 @@ import { DeadlineCountdown } from '@/components/course/DeadlineCountdown';
 import { ProfileCompletionBanner } from '@/components/ProfileCompletionBanner';
 import { ExamStatusCard } from '@/components/exam/ExamStatusCard';
 import { GettingStartedChecklist } from '@/components/student/GettingStartedChecklist';
+import { ResumePrompt } from '@/components/journey/ResumePrompt';
+import { WelcomeModal } from '@/components/onboarding/WelcomeModal';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Award, BookOpen, Target, TrendingUp, AlertTriangle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { MobileBottomNav } from '@/components/navigation/MobileBottomNav';
+import Confetti from 'react-confetti';
 
 const COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
 const TOTAL_MODULES = 18;
@@ -41,6 +44,8 @@ const StudentDashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [organizationInfo, setOrganizationInfo] = useState<{name: string, coordinator: string} | null>(null);
   const [modules, setModules] = useState<ModuleData[]>([]);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [milestoneReached, setMilestoneReached] = useState<number | null>(null);
   
   const isManagerRole = isDispensaryManager || isTrainingCoordinator || isAdmin;
   const agentModules = modules.filter(m => !m.is_manager_only);
@@ -49,8 +54,31 @@ const StudentDashboard = () => {
   useEffect(() => {
     if (!progressLoading) {
       fetchOrganizationInfo();
+      checkMilestones();
     }
   }, [progressLoading, user]);
+
+  const checkMilestones = () => {
+    const completedCount = getCompletedModulesCount();
+    const totalCount = agentModules.length || TOTAL_MODULES;
+    const progressPercent = Math.round((completedCount / totalCount) * 100);
+
+    // Check if milestone reached (25%, 50%, 75%, 100%)
+    const milestones = [25, 50, 75, 100];
+    const reachedMilestone = milestones.find(m => 
+      progressPercent >= m && 
+      localStorage.getItem(`milestone_${m}_shown`) !== 'true'
+    );
+
+    if (reachedMilestone) {
+      setMilestoneReached(reachedMilestone);
+      setShowConfetti(true);
+      localStorage.setItem(`milestone_${reachedMilestone}_shown`, 'true');
+      
+      // Stop confetti after 5 seconds
+      setTimeout(() => setShowConfetti(false), 5000);
+    }
+  };
 
   const fetchOrganizationInfo = async () => {
     if (!user) return;
@@ -117,6 +145,9 @@ const StudentDashboard = () => {
   
   return (
     <div className="container mx-auto p-4 md:p-6 space-y-4 md:space-y-6 pb-20 md:pb-6">
+      {showConfetti && <Confetti recycle={false} numberOfPieces={200} />}
+      <WelcomeModal />
+      
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-foreground">My Training</h1>
@@ -152,6 +183,33 @@ const StudentDashboard = () => {
           </Button>
         )}
       </div>
+
+      {/* Resume Prompt */}
+      <ResumePrompt />
+
+      {/* Milestone Achievement Banner */}
+      {milestoneReached && (
+        <Card className="bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 border-primary/20">
+          <CardContent className="p-6 text-center">
+            <div className="flex items-center justify-center gap-3 mb-2">
+              <Award className="h-8 w-8 text-primary" />
+              <h3 className="text-2xl font-bold">Milestone Achieved! 🎉</h3>
+            </div>
+            <p className="text-lg text-muted-foreground">
+              You've completed {milestoneReached}% of your training!
+            </p>
+            {milestoneReached === 100 ? (
+              <p className="text-sm text-muted-foreground mt-2">
+                Amazing work! You're now ready for the final exam.
+              </p>
+            ) : (
+              <p className="text-sm text-muted-foreground mt-2">
+                Keep up the great work! You're {milestoneReached === 75 ? 'almost there' : 'making excellent progress'}.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Getting Started Checklist */}
       {!checklistStatus.hasCertificate && !checklistStatus.isLoading && (

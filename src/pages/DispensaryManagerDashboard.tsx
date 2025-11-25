@@ -13,12 +13,14 @@ import { EmployeeInvitationForm } from '@/components/team/EmployeeInvitationForm
 import { SeatRequestManager } from '@/components/team/SeatRequestManager';
 import { PurchaseSeatsDialog } from '@/components/team/PurchaseSeatsDialog';
 import { EmployeeRosterWidget } from '@/components/team/EmployeeRosterWidget';
-import { Building2, CreditCard, Users, FileText, Settings, ShieldCheck, Key, Copy, ShoppingCart, PartyPopper, X, RefreshCw, Check, Circle, Mail } from 'lucide-react';
+import { ResumePrompt } from '@/components/journey/ResumePrompt';
+import { Building2, CreditCard, Users, FileText, Settings, ShieldCheck, Key, Copy, ShoppingCart, PartyPopper, X, RefreshCw, Check, Circle, Mail, Download } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import jsPDF from 'jspdf';
 
 interface OrganizationInfo {
   id: string;
@@ -47,6 +49,8 @@ const DispensaryManagerDashboard = () => {
   const [joinCodes, setJoinCodes] = useState<any[]>([]);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [showRestartDialog, setShowRestartDialog] = useState(false);
+  const [certificates, setCertificates] = useState<any[]>([]);
+  const [employees, setEmployees] = useState<any[]>([]);
 
   useEffect(() => {
     if (!roleLoading && !isDispensaryManager) {
@@ -57,6 +61,7 @@ const DispensaryManagerDashboard = () => {
 
     if (user && isDispensaryManager && organization?.id) {
       fetchCoordinators();
+      fetchComplianceData();
     }
   }, [user, isDispensaryManager, roleLoading, organization?.id]);
 
@@ -119,6 +124,112 @@ const DispensaryManagerDashboard = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchComplianceData = async () => {
+    if (!organization?.id) return;
+
+    try {
+      // Fetch certificates
+      const { data: certsData } = await supabase
+        .rpc('get_organization_certificates', { org_id: organization.id });
+      setCertificates(certsData || []);
+
+      // Fetch employee profiles
+      const { data: empsData } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('organization_id', organization.id);
+      setEmployees(empsData || []);
+    } catch (error) {
+      console.error('Error fetching compliance data:', error);
+    }
+  };
+
+  const generateCompliancePDF = () => {
+    if (!organization) return;
+
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    let yPos = 20;
+
+    // Header
+    doc.setFontSize(20);
+    doc.setFont('helvetica', 'bold');
+    doc.text('MCA Compliance Report', pageWidth / 2, yPos, { align: 'center' });
+    
+    yPos += 15;
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Generated: ${new Date().toLocaleDateString()}`, pageWidth / 2, yPos, { align: 'center' });
+    
+    yPos += 20;
+    doc.setFont('helvetica', 'bold');
+    doc.text('Organization Information', 14, yPos);
+    
+    yPos += 10;
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Name: ${organization.name}`, 14, yPos);
+    yPos += 7;
+    doc.text(`License Number: ${organization.license_number}`, 14, yPos);
+    yPos += 7;
+    doc.text(`Dispensary Number: ${organization.dispensary_number}`, 14, yPos);
+    yPos += 7;
+    doc.text(`License Type: ${organization.license_type || 'N/A'}`, 14, yPos);
+    
+    // Compliance Score
+    yPos += 15;
+    const certifiedCount = certificates.filter(c => !c.is_revoked).length;
+    const complianceScore = employees.length > 0 
+      ? Math.round((certifiedCount / employees.length) * 100)
+      : 0;
+    
+    doc.setFont('helvetica', 'bold');
+    doc.text(`Team Compliance Score: ${complianceScore}%`, 14, yPos);
+    yPos += 7;
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Certified Employees: ${certifiedCount} / ${employees.length}`, 14, yPos);
+    
+    // Certificate List
+    yPos += 15;
+    doc.setFont('helvetica', 'bold');
+    doc.text('Certified Employees', 14, yPos);
+    yPos += 10;
+    
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    
+    certificates.filter(c => !c.is_revoked).forEach((cert, index) => {
+      if (yPos > 270) {
+        doc.addPage();
+        yPos = 20;
+      }
+      
+      doc.text(`${index + 1}. ${cert.first_name} ${cert.last_name}`, 14, yPos);
+      yPos += 5;
+      doc.text(`   Certificate: ${cert.certificate_number}`, 14, yPos);
+      yPos += 5;
+      doc.text(`   Issued: ${new Date(cert.issued_at).toLocaleDateString()}`, 14, yPos);
+      yPos += 5;
+      doc.text(`   Expires: ${new Date(cert.expiry_date).toLocaleDateString()}`, 14, yPos);
+      yPos += 8;
+    });
+    
+    // Footer
+    const pageCount = doc.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.text(
+        `ProCann Edu - Maryland RVT Compliance Report | Page ${i} of ${pageCount}`,
+        pageWidth / 2,
+        doc.internal.pageSize.getHeight() - 10,
+        { align: 'center' }
+      );
+    }
+    
+    doc.save(`${organization.name}_Compliance_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+    toast.success('Compliance report downloaded successfully');
   };
 
   const handleRestartOnboarding = () => {
@@ -190,6 +301,9 @@ const DispensaryManagerDashboard = () => {
 
   return (
     <div className="container mx-auto p-4 md:p-6 space-y-4 md:space-y-6 pb-20 md:pb-6">
+      {/* Resume Prompt */}
+      <ResumePrompt />
+
       {/* Header with Quick Actions */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="flex-1">
@@ -515,21 +629,80 @@ const DispensaryManagerDashboard = () => {
         <TabsContent value="compliance" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Compliance Reports</CardTitle>
-              <CardDescription>Download reports for regulatory compliance</CardDescription>
+              <CardTitle className="flex items-center gap-2">
+                <ShieldCheck className="h-5 w-5" />
+                MCA Compliance Report
+              </CardTitle>
+              <CardDescription>
+                Download a comprehensive compliance report for MCA audits
+              </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <Button variant="outline" className="w-full justify-start">
-                <FileText className="w-4 h-4 mr-2" />
-                Employee Training Status Report
-              </Button>
-              <Button variant="outline" className="w-full justify-start">
-                <FileText className="w-4 h-4 mr-2" />
-                Certificate Compliance Report
-              </Button>
-              <Button variant="outline" className="w-full justify-start">
-                <FileText className="w-4 h-4 mr-2" />
-                Audit Trail Export
+            <CardContent className="space-y-6">
+              {/* Compliance Score */}
+              <div className="p-6 bg-muted rounded-lg">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold">Team Compliance Score</h3>
+                  <Badge variant="outline" className="text-2xl px-4 py-2">
+                    {employees.length > 0
+                      ? Math.round((certificates.filter(c => !c.is_revoked).length / employees.length) * 100)
+                      : 0}%
+                  </Badge>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {certificates.filter(c => !c.is_revoked).length} out of {employees.length} employees are currently certified
+                </p>
+              </div>
+
+              {/* Expiring Certificates */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Certificates Expiring Soon</h3>
+                <div className="space-y-2">
+                  {certificates
+                    .filter(cert => {
+                      const daysToExpiry = Math.ceil(
+                        (new Date(cert.expiry_date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
+                      );
+                      return daysToExpiry <= 90 && daysToExpiry > 0 && !cert.is_revoked;
+                    })
+                    .map(cert => {
+                      const daysToExpiry = Math.ceil(
+                        (new Date(cert.expiry_date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
+                      );
+                      return (
+                        <div key={cert.certificate_id} className="flex items-center justify-between p-3 border rounded-lg">
+                          <div>
+                            <p className="font-medium">{cert.first_name} {cert.last_name}</p>
+                            <p className="text-sm text-muted-foreground">
+                              Certificate #{cert.certificate_number}
+                            </p>
+                          </div>
+                          <Badge variant={daysToExpiry <= 30 ? "destructive" : "secondary"}>
+                            {daysToExpiry} days
+                          </Badge>
+                        </div>
+                      );
+                    })}
+                  {certificates.filter(cert => {
+                    const daysToExpiry = Math.ceil(
+                      (new Date(cert.expiry_date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
+                    );
+                    return daysToExpiry <= 90 && daysToExpiry > 0 && !cert.is_revoked;
+                  }).length === 0 && (
+                    <p className="text-center text-muted-foreground py-4">
+                      No certificates expiring in the next 90 days
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Download Button */}
+              <Button 
+                size="lg" 
+                onClick={generateCompliancePDF}
+                className="w-full"
+              >
+                <Download className="mr-2 h-4 w-4" />
+                Download MCA Compliance Report (PDF)
               </Button>
             </CardContent>
           </Card>
