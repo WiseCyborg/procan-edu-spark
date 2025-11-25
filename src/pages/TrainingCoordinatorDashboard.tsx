@@ -21,6 +21,7 @@ import { useNavigate } from 'react-router-dom';
 import { useOrganization } from '@/hooks/useOrganization';
 import { AiLeanCoach } from '@/components/ailean/AiLeanCoach';
 import { MobileBottomNav } from '@/components/navigation/MobileBottomNav';
+import { ResumePrompt } from '@/components/journey/ResumePrompt';
 
 const TrainingCoordinatorDashboard = () => {
   const { user } = useAuth();
@@ -168,6 +169,9 @@ const TrainingCoordinatorDashboard = () => {
         <h1 className="text-2xl md:text-3xl font-bold text-foreground">Training Coordinator Portal</h1>
         <p className="text-sm md:text-base text-muted-foreground">Manage employee training and progress</p>
       </div>
+
+      {/* Resume Prompt */}
+      <ResumePrompt />
 
       {/* Quick Stats */}
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-4">

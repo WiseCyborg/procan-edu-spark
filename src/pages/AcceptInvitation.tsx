@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Loader2, CheckCircle, XCircle } from 'lucide-react';
+import { PasswordStrengthIndicator } from '@/components/ui/password-strength-indicator';
 
 const AcceptInvitation = () => {
   const [searchParams] = useSearchParams();
@@ -16,6 +17,7 @@ const AcceptInvitation = () => {
   const [invitationData, setInvitationData] = useState<any>(null);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
 
   useEffect(() => {
     const token = searchParams.get('token');
@@ -77,12 +79,24 @@ const AcceptInvitation = () => {
 
       if (authError) throw authError;
 
-      // Update profile with organization
+      // Update profile with organization and phone
       if (authData.user) {
         await supabase
           .from('profiles')
-          .update({ organization_id: invitationData.organization_id })
+          .update({ 
+            organization_id: invitationData.organization_id,
+            phone_number: phoneNumber || null
+          })
           .eq('user_id', authData.user.id);
+
+        // Initialize journey state with profile_incomplete stage
+        await supabase
+          .from('user_journey_state')
+          .insert({
+            user_id: authData.user.id,
+            current_stage: 'profile_incomplete',
+            last_page_visited: '/accept-invitation'
+          });
 
         // Mark invitation as accepted
         await supabase
@@ -167,6 +181,17 @@ const AcceptInvitation = () => {
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="phone">Phone Number (Optional)</Label>
+              <Input
+                id="phone"
+                type="tel"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                placeholder="(555) 123-4567"
+              />
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="password">Create Password</Label>
               <Input
                 id="password"
@@ -176,6 +201,7 @@ const AcceptInvitation = () => {
                 placeholder="Minimum 8 characters"
                 required
               />
+              <PasswordStrengthIndicator password={password} showRequirements />
             </div>
 
             <div className="space-y-2">
