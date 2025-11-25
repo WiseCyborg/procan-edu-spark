@@ -84,6 +84,7 @@ import EmailDomainVerification from "./pages/admin/EmailDomainVerification";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import CertificateRenewal from "./pages/CertificateRenewal";
+import AdminUtilities from "./pages/AdminUtilities";
 
 import { ProtectedCourseAccess } from "./components/ProtectedCourseAccess";
 import { JourneyStateProvider } from "./providers/JourneyStateProvider";
@@ -308,6 +309,12 @@ const App = () => (
                     <Route path="/admin/pipeline-monitor" element={
                       <ProtectedRoute>
                         <PipelineMonitor />
+                      </ProtectedRoute>
+                    } />
+                    
+                    <Route path="/admin/utilities" element={
+                      <ProtectedRoute>
+                        <AdminUtilities />
                       </ProtectedRoute>
                     } />
                    
