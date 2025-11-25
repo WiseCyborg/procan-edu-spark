@@ -83,6 +83,62 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_fix_plans: {
+        Row: {
+          affected_systems: Json | null
+          analysis_model: string
+          approved_at: string | null
+          approved_by: string | null
+          check_id: string | null
+          created_at: string
+          estimated_duration_seconds: number | null
+          fix_steps: Json
+          generated_at: string
+          id: string
+          risk_level: string | null
+          rollback_strategy: string | null
+          root_cause: string | null
+        }
+        Insert: {
+          affected_systems?: Json | null
+          analysis_model: string
+          approved_at?: string | null
+          approved_by?: string | null
+          check_id?: string | null
+          created_at?: string
+          estimated_duration_seconds?: number | null
+          fix_steps?: Json
+          generated_at?: string
+          id?: string
+          risk_level?: string | null
+          rollback_strategy?: string | null
+          root_cause?: string | null
+        }
+        Update: {
+          affected_systems?: Json | null
+          analysis_model?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          check_id?: string | null
+          created_at?: string
+          estimated_duration_seconds?: number | null
+          fix_steps?: Json
+          generated_at?: string
+          id?: string
+          risk_level?: string | null
+          rollback_strategy?: string | null
+          root_cause?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_fix_plans_check_id_fkey"
+            columns: ["check_id"]
+            isOneToOne: false
+            referencedRelation: "system_integrity_checks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_insights: {
         Row: {
           action_taken: boolean | null
@@ -4011,6 +4067,7 @@ export type Database = {
       }
       system_integrity_fixes: {
         Row: {
+          ai_plan_id: string | null
           changes_made: Json | null
           check_id: string | null
           created_at: string | null
@@ -4019,14 +4076,18 @@ export type Database = {
           executed_by: string | null
           execution_duration_ms: number | null
           execution_mode: string
+          execution_steps: Json | null
           fix_action: string
           fix_type: string
           id: string
           rollback_available: boolean | null
           rollback_data: Json | null
           success: boolean
+          user_approved_at: string | null
+          verification_result: Json | null
         }
         Insert: {
+          ai_plan_id?: string | null
           changes_made?: Json | null
           check_id?: string | null
           created_at?: string | null
@@ -4035,14 +4096,18 @@ export type Database = {
           executed_by?: string | null
           execution_duration_ms?: number | null
           execution_mode: string
+          execution_steps?: Json | null
           fix_action: string
           fix_type: string
           id?: string
           rollback_available?: boolean | null
           rollback_data?: Json | null
           success: boolean
+          user_approved_at?: string | null
+          verification_result?: Json | null
         }
         Update: {
+          ai_plan_id?: string | null
           changes_made?: Json | null
           check_id?: string | null
           created_at?: string | null
@@ -4051,14 +4116,24 @@ export type Database = {
           executed_by?: string | null
           execution_duration_ms?: number | null
           execution_mode?: string
+          execution_steps?: Json | null
           fix_action?: string
           fix_type?: string
           id?: string
           rollback_available?: boolean | null
           rollback_data?: Json | null
           success?: boolean
+          user_approved_at?: string | null
+          verification_result?: Json | null
         }
         Relationships: [
+          {
+            foreignKeyName: "system_integrity_fixes_ai_plan_id_fkey"
+            columns: ["ai_plan_id"]
+            isOneToOne: false
+            referencedRelation: "ai_fix_plans"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "system_integrity_fixes_check_id_fkey"
             columns: ["check_id"]
