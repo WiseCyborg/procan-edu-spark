@@ -155,6 +155,29 @@ serve(async (req) => {
 
     console.log(`✅ Application submitted: ${application.id} by ${validatedData.contactEmail}`);
 
+    // Trigger confirmation email asynchronously
+    try {
+      const { error: emailError } = await supabase.functions.invoke('send-application-confirmation', {
+        body: {
+          application_id: application.id,
+          contact_person: validatedData.contactPerson,
+          contact_email: validatedData.contactEmail,
+          organization_name: validatedData.organizationName,
+          license_number: validatedData.licenseNumber
+        }
+      });
+      
+      if (emailError) {
+        console.error('⚠️ Failed to send confirmation email:', emailError);
+        // Don't fail the application - email failure is non-critical
+      } else {
+        console.log('📧 Confirmation email queued for', validatedData.contactEmail);
+      }
+    } catch (emailError) {
+      console.error('⚠️ Exception sending confirmation email:', emailError);
+      // Don't fail the application - email failure is non-critical
+    }
+
     return new Response(
       JSON.stringify({ 
         success: true,
