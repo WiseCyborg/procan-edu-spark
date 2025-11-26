@@ -38,9 +38,12 @@ serve(async (req) => {
       );
     }
 
-    // Check if email already has an account
-    const { data: existingUser } = await supabase
-      .rpc('check_email_exists', { email_address: invitation.email });
+    // Check if email already has an account using edge function
+    const { data: emailCheckData } = await supabase.functions.invoke('check-email-exists', {
+      body: { email: invitation.email }
+    });
+    
+    const existingUser = emailCheckData?.exists;
 
     if (existingUser) {
       return new Response(
