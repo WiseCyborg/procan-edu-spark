@@ -85,7 +85,7 @@ const AcceptInvitation = () => {
           .from('profiles')
           .update({ 
             organization_id: invitationData.organization_id,
-            phone_number: phoneNumber || null
+            phone: phoneNumber || null
           })
           .eq('user_id', authData.user.id);
 
