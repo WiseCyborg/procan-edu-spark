@@ -37,8 +37,27 @@ serve(async (req) => {
 
     const validation = Array.isArray(data) ? data[0] : data;
 
+    // If valid, fetch full application data
+    let applicationData = null;
+    if (validation.is_valid && validation.application_id) {
+      const { data: appData, error: appError } = await supabase
+        .from('dispensary_applications')
+        .select('id, organization_id, organization_name, contact_email, contact_person')
+        .eq('id', validation.application_id)
+        .single();
+
+      if (appError) {
+        console.error('Error fetching application data:', appError);
+      } else {
+        applicationData = appData;
+      }
+    }
+
     return new Response(
-      JSON.stringify(validation),
+      JSON.stringify({
+        ...validation,
+        application_data: applicationData
+      }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: validation.is_valid ? 200 : 400
