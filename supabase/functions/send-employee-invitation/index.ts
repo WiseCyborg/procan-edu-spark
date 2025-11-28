@@ -57,7 +57,7 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    const registrationUrl = `${Deno.env.get("SUPABASE_URL")?.replace('.supabase.co', '.lovable.app')}/auth?invite=${invitationToken}`;
+    const registrationUrl = `https://www.procannedu.com/auth?invite=${invitationToken}`;
 
     const router = new EmailRouter();
     const emailResult = await router.sendWithFailover({

@@ -26,7 +26,7 @@ serve(async (req) => {
     const { data: user } = await supabase
       .from("profiles")
       .select("user_id")
-      .eq("email", email)
+      .eq("email_cache", email)
       .single();
 
     if (user?.user_id) {
@@ -64,7 +64,7 @@ serve(async (req) => {
     const { data: profile } = await supabase
       .from("profiles")
       .select("first_name")
-      .eq("email", email)
+      .eq("email_cache", email)
       .single();
 
     const resetUrl = `https://www.procannedu.com/auth?mode=reset&token=${token}`;

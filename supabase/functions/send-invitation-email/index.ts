@@ -42,9 +42,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log(`📧 [v1.2] Sending invitation email to ${email}`, { organizationName, role, isReminder });
 
     // Build the acceptance URL - points to student auth with invitation token
-    const baseUrl = supabaseUrl.includes('zhmpwczrvitomsxjwpzc')
-      ? 'https://zhmpwczrvitomsxjwpzc.lovable.app'
-      : 'https://www.procannedu.com';
+    const baseUrl = 'https://www.procannedu.com';
     const acceptInvitationURL = `${baseUrl}/auth?role=student&invitation=${invitationToken}`;
     
     // Format expiry date

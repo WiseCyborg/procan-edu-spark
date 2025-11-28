@@ -63,7 +63,6 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         is_valid: true,
-        email: tokenData.email,
         user_id: tokenData.user_id
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }

@@ -28,9 +28,7 @@ const handler = async (req: Request): Promise<Response> => {
     
     console.log(`Sending test emails to ${targetEmail}`);
 
-    const baseUrl = supabaseUrl.includes('zhmpwczrvitomsxjwpzc')
-      ? 'https://zhmpwczrvitomsxjwpzc.lovable.app'
-      : 'https://www.procannedu.com';
+    const baseUrl = 'https://www.procannedu.com';
 
     // Define all email types with test data
     const allEmailTypes = [
