@@ -41,9 +41,9 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`📧 [v1.2] Sending invitation email to ${email}`, { organizationName, role, isReminder });
 
-    // Build the acceptance URL - points to student auth with invitation token
+    // Build the acceptance URL - direct to accept-invitation page with token
     const baseUrl = 'https://www.procannedu.com';
-    const acceptInvitationURL = `${baseUrl}/auth?role=student&invitation=${invitationToken}`;
+    const acceptInvitationURL = `${baseUrl}/accept-invitation?token=${invitationToken}`;
     
     // Format expiry date
     const formattedExpiryDate = new Date(expiryDate).toLocaleDateString('en-US', {

@@ -1502,6 +1502,8 @@ export type Database = {
           sent_at: string | null
           status: string | null
           subject: string | null
+          template_data: Json | null
+          template_name: string | null
           user_id: string | null
         }
         Insert: {
@@ -1522,6 +1524,8 @@ export type Database = {
           sent_at?: string | null
           status?: string | null
           subject?: string | null
+          template_data?: Json | null
+          template_name?: string | null
           user_id?: string | null
         }
         Update: {
@@ -1542,6 +1546,8 @@ export type Database = {
           sent_at?: string | null
           status?: string | null
           subject?: string | null
+          template_data?: Json | null
+          template_name?: string | null
           user_id?: string | null
         }
         Relationships: []
