@@ -24,9 +24,7 @@ serve(async (req) => {
 
     console.log('Sending team-ready email to:', recipientEmail);
 
-    const baseUrl = Deno.env.get('SUPABASE_URL')?.includes('localhost') 
-      ? 'http://localhost:5173'
-      : 'https://www.procannedu.com';
+    const baseUrl = 'https://www.procannedu.com';
 
     const html = await loadEmailTemplate('team-onboarding-ready', {
       ManagerName: managerName || 'Manager',

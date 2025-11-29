@@ -185,8 +185,8 @@ serve(async (req) => {
         custom_id: `purchase_${purchase.id}_org_${organization.id}_qty_${quantity}`,
       }],
       application_context: {
-        return_url: `${req.headers.get("origin")}/payment-success`,
-        cancel_url: `${req.headers.get("origin")}/purchase-seats`,
+        return_url: `https://www.procannedu.com/payment-success`,
+        cancel_url: `https://www.procannedu.com/purchase-seats`,
         brand_name: "ProCann Edu",
         landing_page: "BILLING",
         user_action: "PAY_NOW",
