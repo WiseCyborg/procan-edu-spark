@@ -119,9 +119,11 @@ serve(async (req) => {
     if (org?.contact_email) {
       await supabase.functions.invoke('send-seat-purchase-confirmation', {
         body: {
-          email: org.contact_email,
+          coordinatorEmail: org.contact_email,
+          coordinatorName: org.contact_person || 'Manager',
           organizationName: org.name,
           quantity,
+          amountPaid: (quantity * 49.99).toFixed(2),
           joinCode,
           purchaseId: purchase.id,
         },

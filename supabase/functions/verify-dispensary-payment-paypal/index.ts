@@ -248,11 +248,12 @@ Deno.serve(async (req) => {
       if (organization) {
         await supabaseService.functions.invoke('send-seat-purchase-confirmation', {
           body: {
-            recipientEmail: organization.contact_email,
+            coordinatorEmail: organization.contact_email,
+            coordinatorName: organization.contact_person,
             organizationName: organization.name,
             quantity,
-            totalAmount: (quantity * 49.99).toFixed(2),
-            accessKey: organization.unique_access_key,
+            amountPaid: (quantity * 49.99).toFixed(2),
+            joinCode,
             purchaseId
           }
         }).catch(err => {

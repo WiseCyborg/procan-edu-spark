@@ -116,8 +116,8 @@ serve(async (req) => {
       throw new Error("Organization not yet approved by admin");
     }
 
-    if (!organization.dispensary_number) {
-      throw new Error("Organization missing dispensary number");
+    if (!organization.license_number) {
+      throw new Error("Organization missing license number");
     }
 
     // Get PayPal environment for this organization (test orgs always use sandbox)

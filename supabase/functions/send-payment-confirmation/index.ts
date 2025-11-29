@@ -92,7 +92,7 @@ const handler = async (req: Request): Promise<Response> => {
             <h2 style="color: #1E1E1E; margin-bottom: 20px; font-size: 20px;">Hello ${userName}!</h2>
             <p style="color: #4b5563; line-height: 1.6; margin-bottom: 20px;">
               Thank you for enrolling in <strong>${courseTitle}</strong>. Your payment has been confirmed 
-              and you now have full access to all 18 modules of the Stoplight Standard™ training program.
+              and you now have full access to all 23 modules of the Stoplight Standard™ training program.
             </p>
             
             <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-top: 20px;">
@@ -129,7 +129,7 @@ const handler = async (req: Request): Promise<Response> => {
           <div style="margin-bottom: 25px;">
             <h3 style="color: #1E1E1E; margin-bottom: 15px;">What's Next?</h3>
             <ul style="color: #4b5563; line-height: 1.8; padding-left: 20px;">
-              <li style="margin-bottom: 8px;">Access all 18 training modules immediately</li>
+              <li style="margin-bottom: 8px;">Access all 23 training modules immediately</li>
               <li style="margin-bottom: 8px;">Progress through Green, Yellow, and Red tiers</li>
               <li style="margin-bottom: 8px;">Complete quizzes to test your knowledge</li>
               <li style="margin-bottom: 8px;">Pass the final exam to earn your MCA-compliant certificate</li>
