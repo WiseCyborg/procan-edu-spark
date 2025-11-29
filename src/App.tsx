@@ -425,8 +425,6 @@ const App = () => (
                          <UnifiedHealthReport />
                        </ProtectedRoute>
                      } />
-                     
-                     <Route path="/accept-invitation" element={<AcceptInvitation />} />
                    
                    {/* Legal Pages */}
                    <Route path="/privacy-policy" element={<PrivacyPolicy />} />

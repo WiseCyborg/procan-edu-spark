@@ -85,25 +85,23 @@ serve(async (req) => {
     // Check rate limit: 10 registration attempts per hour per IP
     const clientIp = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
     
-    const { data: rateLimitData } = await supabaseClient.rpc('check_rate_limit', {
+    const { data: rateLimitPassed } = await supabaseClient.rpc('check_rate_limit', {
       _user_id: null,
       _action_type: `register_employee_${clientIp}`,
       _max_requests: 10,
       _window_minutes: 60
     });
 
-    if (rateLimitData && rateLimitData.length > 0) {
-      const remaining = rateLimitData[0].remaining;
-      if (remaining <= 0) {
-        console.warn(`[RATE LIMIT] IP ${clientIp} exceeded registration limit`);
-        return new Response(
-          JSON.stringify({ 
-            error: 'Too many registration attempts. Please try again in 1 hour.',
-            code: 'RATE_LIMIT_EXCEEDED'
-          }),
-          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
+    // check_rate_limit returns boolean: true if under limit, false if exceeded
+    if (rateLimitPassed === false) {
+      console.warn(`[RATE LIMIT] IP ${clientIp} exceeded registration limit`);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Too many registration attempts. Please try again in 1 hour.',
+          code: 'RATE_LIMIT_EXCEEDED'
+        }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     // VALIDATE: Check join code has available seats (if using join code)
