@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { UnifiedVoiceProvider } from "@/providers/UnifiedVoiceProvider";
 import { OrganizationProvider } from "@/contexts/OrganizationContext";
@@ -125,6 +125,28 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   }
   
   return <>{children}</>;
+};
+
+// Conditional wrapper to exclude voice assistant from auth pages
+const ConditionalVoiceAssistant = () => {
+  const location = useLocation();
+  
+  // Pages where voice assistant should NOT render
+  const excludedPaths = [
+    '/auth',
+    '/forgot-password',
+    '/accept-invitation',
+    '/manager-registration'
+  ];
+  
+  // Check if on excluded path or has reset mode
+  const isExcludedPage = excludedPaths.some(path => 
+    location.pathname.startsWith(path)
+  ) || location.search.includes('mode=reset');
+  
+  if (isExcludedPage) return null;
+  
+  return <DraggableVoiceAssistant />;
 };
 
 const App = () => (
@@ -435,7 +457,7 @@ const App = () => (
               </main>
               <Footer />
             </div>
-            <DraggableVoiceAssistant />
+            <ConditionalVoiceAssistant />
           </TooltipProvider>
         </JourneyStateProvider>
       </OrganizationProvider>
