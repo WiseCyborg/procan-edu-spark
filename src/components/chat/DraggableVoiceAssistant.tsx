@@ -154,18 +154,6 @@ export const DraggableVoiceAssistant: React.FC = () => {
   const { roles } = useUserRole();
   const { isPinned, pinMessage, unpinMessage } = usePinnedMessages();
   const { speak, stop, settings: voiceSettings, isSpeaking } = useUnifiedVoice();
-
-  // Hide voice assistant on authentication pages to prevent auth errors
-  const isAuthPage = location.pathname === '/auth' || 
-                     location.pathname === '/forgot-password' ||
-                     location.pathname.includes('/accept-invitation') ||
-                     location.pathname.includes('/manager-registration') ||
-                     location.search.includes('mode=reset');
-
-  if (isAuthPage) {
-    return null;
-  }
-
   const {
     chatSessions,
     currentSessionId,
@@ -215,6 +203,18 @@ export const DraggableVoiceAssistant: React.FC = () => {
 
   const contextInfo = getContextInfo(location.pathname);
   const isChatDisabled = contextInfo.route === 'final-exam';
+
+  // Hide voice assistant on authentication pages to prevent auth errors
+  // This check comes AFTER all hooks to comply with Rules of Hooks
+  const isAuthPage = location.pathname === '/auth' || 
+                     location.pathname === '/forgot-password' ||
+                     location.pathname.includes('/accept-invitation') ||
+                     location.pathname.includes('/manager-registration') ||
+                     location.search.includes('mode=reset');
+
+  if (isAuthPage) {
+    return null;
+  }
 
   // Check if user should see welcome overlay
   useEffect(() => {
@@ -360,6 +360,17 @@ export const DraggableVoiceAssistant: React.FC = () => {
     try {
       setIsLoading(true);
       
+      // Auth guard: Voice features require authentication
+      if (!user) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to use voice features.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+      
       // Convert audio to base64
       const reader = new FileReader();
       reader.onloadend = async () => {
@@ -373,15 +384,14 @@ export const DraggableVoiceAssistant: React.FC = () => {
         });
 
         if (transcriptError) {
-          if (transcriptError.message?.includes('Auth session missing') || transcriptError.message?.includes('JWT')) {
-            toast({
-              title: "Authentication Required",
-              description: "Please sign in to use voice features.",
-              variant: "destructive",
-            });
-            return;
-          }
-          throw transcriptError;
+          console.error('[Voice] Transcription error:', transcriptError);
+          toast({
+            title: "Voice Processing Error",
+            description: "Could not process voice input. Please try again.",
+            variant: "destructive",
+          });
+          setIsLoading(false);
+          return;
         }
 
         const transcribedText = transcriptData.text;
@@ -490,13 +500,28 @@ export const DraggableVoiceAssistant: React.FC = () => {
     setIsLoading(true);
 
     try {
+      // Auth guard for chat assistant calls
       const { data, error } = await supabase.functions.invoke('chat-assistant', {
         body: {
           message: text,
           context: contextInfo,
-          user_id: user?.id,
-          user_roles: roles
+          user_id: user?.id || null,
+          user_roles: roles || []
         }
+      }).catch(err => {
+        // Catch auth-related errors gracefully
+        if (err?.message?.includes('Auth session missing') || 
+            err?.message?.includes('JWT') ||
+            err?.message?.includes('401')) {
+          console.log('[Chat] Running in anonymous mode');
+          return { 
+            data: { 
+              response: "I'm having trouble connecting right now. Please try signing in for full chat functionality." 
+            }, 
+            error: null 
+          };
+        }
+        throw err;
       });
 
       if (error) throw error;
