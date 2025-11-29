@@ -4,8 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Mail, ArrowLeft } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { invokePublicFunction } from '@/lib/publicEdgeFunctions';
 
 interface ForgotPasswordProps {
   onBack: () => void;
@@ -32,8 +32,8 @@ export const ForgotPassword: React.FC<ForgotPasswordProps> = ({ onBack }) => {
 
     setLoading(true);
     try {
-      const { error } = await supabase.functions.invoke("send-password-reset", {
-        body: { email: email.trim() },
+      const { data, error } = await invokePublicFunction('send-password-reset', {
+        email: email.trim()
       });
 
       if (error) {
@@ -66,8 +66,8 @@ export const ForgotPassword: React.FC<ForgotPasswordProps> = ({ onBack }) => {
   const handleResendEmail = async () => {
     setResending(true);
     try {
-      const { error } = await supabase.functions.invoke("send-password-reset", {
-        body: { email: email.trim() },
+      const { data, error } = await invokePublicFunction('send-password-reset', {
+        email: email.trim()
       });
 
       if (error) {

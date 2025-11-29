@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useSearchParams } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { UnifiedVoiceProvider } from "@/providers/UnifiedVoiceProvider";
 import { OrganizationProvider } from "@/contexts/OrganizationContext";
@@ -111,6 +111,10 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
+  const [searchParams] = useSearchParams();
+  
+  // Allow password reset even if logged in
+  const isPasswordReset = searchParams.get('mode') === 'reset';
   
   if (loading) {
     return (
@@ -120,7 +124,8 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
   
-  if (user) {
+  // Don't redirect if this is a password reset
+  if (user && !isPasswordReset) {
     return <Navigate to="/dashboard" replace />;
   }
   
