@@ -278,18 +278,20 @@ serve(async (req) => {
       }
     }
 
-    // STEP 8: Create enrollment with 30-day deadline
+    // STEP 8: Set enrollment deadline
     const deadlineDate = new Date();
     deadlineDate.setDate(deadlineDate.getDate() + 30);
     
-    await supabaseClient
-      .from('rvt_enrollments' as any)
+    const { error: deadlineError } = await supabaseClient
+      .from('enrollment_deadlines')
       .insert({
         user_id: authData.user.id,
-        organization_id: organizationId,
-        course_id: courseData.id,
-        deadline_at: deadlineDate.toISOString(),
+        deadline: deadlineDate.toISOString()
       });
+    
+    if (deadlineError) {
+      console.error('[ATOMIC REGISTRATION] Deadline creation failed:', deadlineError);
+    }
 
     // STEP 9: Accept invitation (if applicable)
     if (invitationToken) {

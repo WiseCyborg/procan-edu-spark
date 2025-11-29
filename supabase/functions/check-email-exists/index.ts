@@ -36,10 +36,23 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log('Checking email existence for:', email);
 
-    // Query auth.users table to check if email exists
-    const { data, error } = await supabase.auth.admin.listUsers();
+    // Use efficient direct email lookup instead of listing all users
+    const { data, error } = await supabase.auth.admin.getUserByEmail(email);
     
     if (error) {
+      // If error is "User not found", that means email doesn't exist
+      if (error.message?.includes('not found') || error.status === 404) {
+        console.log('Email does not exist:', email);
+        return new Response(
+          JSON.stringify({ exists: false }),
+          { 
+            status: 200, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
+      }
+      
+      // Other errors
       console.error('Error checking email:', error);
       return new Response(
         JSON.stringify({ error: 'Failed to check email', exists: false }),
@@ -50,10 +63,7 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    const emailExists = data.users.some(user => 
-      user.email?.toLowerCase() === email.toLowerCase()
-    );
-
+    const emailExists = !!data?.user;
     console.log('Email exists:', emailExists);
 
     return new Response(
