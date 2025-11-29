@@ -59,11 +59,19 @@ serve(async (req) => {
       );
     }
 
+    // Fetch user email from profiles table
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('email_cache')
+      .eq('user_id', tokenData.user_id)
+      .single();
+
     // Token is valid
     return new Response(
       JSON.stringify({
         is_valid: true,
-        user_id: tokenData.user_id
+        user_id: tokenData.user_id,
+        email: profileData?.email_cache || 'user@procannedu.com'
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     );

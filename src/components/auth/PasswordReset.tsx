@@ -96,20 +96,14 @@ export const PasswordReset: React.FC = () => {
 
     setLoading(true);
     try {
-      const { error } = await supabase.auth.updateUser({
-        password: password
+      const { data, error } = await supabase.functions.invoke('execute-password-reset', {
+        body: { token, new_password: password }
       });
 
-      if (error) {
+      if (error || !data?.success) {
         console.error('Password update error:', error);
-        throw new Error(error.message || 'Failed to update password');
+        throw new Error(data?.error || error?.message || 'Failed to update password');
       }
-
-      // Mark token as used
-      await supabase
-        .from('password_reset_tokens')
-        .update({ used_at: new Date().toISOString() })
-        .eq('token', token);
 
       setSuccess(true);
       toast({
