@@ -154,6 +154,18 @@ export const DraggableVoiceAssistant: React.FC = () => {
   const { roles } = useUserRole();
   const { isPinned, pinMessage, unpinMessage } = usePinnedMessages();
   const { speak, stop, settings: voiceSettings, isSpeaking } = useUnifiedVoice();
+
+  // Hide voice assistant on authentication pages to prevent auth errors
+  const isAuthPage = location.pathname === '/auth' || 
+                     location.pathname === '/forgot-password' ||
+                     location.pathname.includes('/accept-invitation') ||
+                     location.pathname.includes('/manager-registration') ||
+                     location.search.includes('mode=reset');
+
+  if (isAuthPage) {
+    return null;
+  }
+
   const {
     chatSessions,
     currentSessionId,
@@ -455,6 +467,11 @@ export const DraggableVoiceAssistant: React.FC = () => {
   const sendMessage = async (messageText?: string) => {
     const text = messageText || inputMessage.trim();
     if (!text || isLoading || isChatDisabled) return;
+
+    // For unauthenticated users, chat still works but won't persist or have full context
+    if (!user) {
+      console.log('[DraggableVoiceAssistant] Chat in anonymous mode - limited functionality');
+    }
 
     const userMessage: Message = {
       id: Date.now().toString(),
