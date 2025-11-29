@@ -4,9 +4,9 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Lock, CheckCircle, AlertTriangle } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { invokePublicFunction } from '@/lib/publicEdgeFunctions';
 
 export const PasswordReset: React.FC = () => {
   const [password, setPassword] = useState('');
@@ -43,11 +43,11 @@ export const PasswordReset: React.FC = () => {
     setValidating(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('validate-password-reset-token', {
-        body: { token: resetToken }
+      const { data, error } = await invokePublicFunction('validate-password-reset-token', {
+        token: resetToken
       });
 
-      if (error || !data.is_valid) {
+      if (error || !data?.is_valid) {
         toast({
           title: "Invalid Token",
           description: data?.error_message || "This password reset link is invalid or has expired",
@@ -96,8 +96,9 @@ export const PasswordReset: React.FC = () => {
 
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('execute-password-reset', {
-        body: { token, new_password: password }
+      const { data, error } = await invokePublicFunction('execute-password-reset', {
+        token,
+        new_password: password
       });
 
       if (error || !data?.success) {
