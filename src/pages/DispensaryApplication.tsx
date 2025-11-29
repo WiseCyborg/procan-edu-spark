@@ -129,7 +129,21 @@ const DispensaryApplication = () => {
   };
 
   const handleNext = async () => {
-    const isValid = await trigger();
+    let fieldsToValidate: (keyof FormData)[] = [];
+    
+    switch (currentStep) {
+      case 1:
+        fieldsToValidate = ['organizationName', 'legalEntityName', 'dbaName'];
+        break;
+      case 2:
+        fieldsToValidate = ['licenseType', 'licenseNumber', 'licenseIssueDate', 'licenseExpiryDate'];
+        break;
+      case 3:
+        fieldsToValidate = ['contactPerson', 'contactEmail', 'contactPhone', 'address', 'estimatedEmployees', 'preferredStartDate'];
+        break;
+    }
+    
+    const isValid = await trigger(fieldsToValidate);
     if (isValid && canProceed()) setCurrentStep(currentStep + 1);
   };
 
