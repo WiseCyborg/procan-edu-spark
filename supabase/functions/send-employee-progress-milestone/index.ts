@@ -48,7 +48,7 @@ serve(async (req) => {
       recipient_email: userEmail,
       subject: `🎯 ${percentage}% Complete - Keep Going!`,
       email_type: "progress_milestone",
-      delivery_status: result.success ? "sent" : "failed",
+      status: result.success ? "sent" : "failed",
       metadata: { user_id, percentage },
     });
 

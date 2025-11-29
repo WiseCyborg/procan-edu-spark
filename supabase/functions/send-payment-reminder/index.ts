@@ -49,7 +49,7 @@ serve(async (req) => {
       recipient_email: application.contact_email,
       subject: `⏰ Payment Reminder - ${days_remaining} Days Remaining`,
       email_type: "payment_reminder",
-      delivery_status: result.success ? "sent" : "failed",
+      status: result.success ? "sent" : "failed",
       metadata: { application_id, days_remaining },
     });
 

@@ -90,7 +90,7 @@ serve(async (req) => {
             recipient_email: notification.recipient_email,
             subject: notification.subject,
             email_type: notification.metadata?.template || "notification",
-            delivery_status: "sent",
+            status: "sent",
             metadata: notification.metadata,
           });
 
@@ -116,7 +116,7 @@ serve(async (req) => {
           recipient_email: notification.recipient_email,
           subject: notification.subject,
           email_type: notification.metadata?.template || "notification",
-          delivery_status: "failed",
+          status: "failed",
           error_message: error.message,
           metadata: notification.metadata,
         });

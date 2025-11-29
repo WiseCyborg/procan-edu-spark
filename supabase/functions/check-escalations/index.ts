@@ -50,7 +50,7 @@ serve(async (req) => {
     const { data: failedEmails, count } = await supabase
       .from("email_logs")
       .select("*", { count: "exact" })
-      .eq("delivery_status", "failed")
+      .eq("status", "failed")
       .gte("created_at", new Date(Date.now() - 60 * 60 * 1000).toISOString());
 
     if (count && count > 5) {

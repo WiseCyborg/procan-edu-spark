@@ -83,12 +83,12 @@ serve(async (req) => {
     try {
       const { data: emailLogs } = await supabase
         .from("email_logs")
-        .select("delivery_status, created_at")
+        .select("status, created_at")
         .gte("created_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
         .limit(1000);
 
       const totalEmails = emailLogs?.length || 0;
-      const successfulEmails = emailLogs?.filter(log => log.delivery_status === "delivered").length || 0;
+      const successfulEmails = emailLogs?.filter(log => log.status === "sent").length || 0;
       const successRate = totalEmails > 0 ? (successfulEmails / totalEmails) * 100 : 100;
 
       healthChecks.email = {

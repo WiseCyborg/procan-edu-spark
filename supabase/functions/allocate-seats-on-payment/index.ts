@@ -107,7 +107,6 @@ serve(async (req) => {
       recipient_email: org?.contact_email || 'unknown',
       subject: 'Training Seats Allocated',
       content: `${quantity} training seats allocated for ${org?.name}`,
-      delivery_status: 'sent',
       metadata: {
         purchase_id: purchase.id,
         join_code: joinCode,

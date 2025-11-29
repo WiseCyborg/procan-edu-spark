@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
+import { invokePublicFunction } from '@/lib/publicEdgeFunctions';
 import { toast } from 'sonner';
 import { Loader2, CheckCircle, XCircle } from 'lucide-react';
 import { PasswordStrengthIndicator } from '@/components/ui/password-strength-indicator';
@@ -31,9 +32,11 @@ const AcceptInvitation = () => {
 
   const validateToken = async (token: string) => {
     try {
-      const { data, error } = await supabase.functions.invoke('validate-invitation', {
-        body: { token },
+      console.log('[AcceptInvitation] Validating invitation token');
+      const { data, error } = await invokePublicFunction('validate-invitation', {
+        token
       });
+      console.log('[AcceptInvitation] Validation response:', { data, error });
 
       if (error || !data?.valid) {
         toast.error(data?.message || 'Invalid or expired invitation');

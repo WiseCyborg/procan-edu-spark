@@ -50,7 +50,7 @@ serve(async (req) => {
       recipient_email: userEmail,
       subject: `⏰ Certificate Expires in ${days_until_expiry} Days`,
       email_type: "certificate_expiry_warning",
-      delivery_status: result.success ? "sent" : "failed",
+      status: result.success ? "sent" : "failed",
       metadata: { certificate_id, days_until_expiry },
     });
 

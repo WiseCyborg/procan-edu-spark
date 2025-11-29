@@ -82,7 +82,7 @@ serve(async (req) => {
       // Get manager contact info
       const { data: managerProfile } = await supabase
         .from('user_roles')
-        .select('profiles(first_name, last_name, email)')
+        .select('profiles(first_name, last_name, email_cache)')
         .eq('role', 'dispensary_manager')
         .limit(1)
         .maybeSingle();
@@ -90,7 +90,7 @@ serve(async (req) => {
       const managerName = managerProfile?.profiles 
         ? `${managerProfile.profiles.first_name} ${managerProfile.profiles.last_name}`
         : 'your manager';
-      const managerEmail = managerProfile?.profiles?.email || '';
+      const managerEmail = managerProfile?.profiles?.email_cache || '';
 
       return new Response(JSON.stringify({ 
         valid: false, 

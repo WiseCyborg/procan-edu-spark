@@ -47,7 +47,7 @@ serve(async (req) => {
       recipient_email: purchase.organizations?.contact_email,
       subject: "Payment Failed - Action Required",
       email_type: "payment_failed",
-      delivery_status: result.success ? "sent" : "failed",
+      status: result.success ? "sent" : "failed",
       metadata: { purchase_id, error_message },
     });
 

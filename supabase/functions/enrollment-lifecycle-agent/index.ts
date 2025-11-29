@@ -20,7 +20,7 @@ interface LearningJourney {
   intervention_types: string[];
   at_risk_flag: boolean;
   profiles: {
-    email: string;
+    email_cache: string;
     first_name: string;
     last_name: string;
   };
@@ -49,7 +49,7 @@ serve(async (req) => {
     // Stage 1: Profile Completion (0-48 hours)
     const { data: incompleteProfiles } = await supabase
       .from('user_learning_journey')
-      .select('*, profiles!inner(email, first_name, last_name)')
+      .select('*, profiles!inner(email_cache, first_name, last_name)')
       .eq('current_stage', 'profile_incomplete')
       .lt('stage_entered_at', new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString());
 
@@ -65,7 +65,7 @@ serve(async (req) => {
           
           await supabase.functions.invoke('send-welcome-email', {
             body: {
-              email: journey.profiles.email,
+              email: journey.profiles.email_cache,
               firstName: journey.profiles.first_name || 'there',
               reminderType: 'profile_completion',
               message: `Complete your profile to start your Maryland cannabis training journey!`,
@@ -88,7 +88,7 @@ serve(async (req) => {
     // Stage 2: Course Not Started (Days 2-7)
     const { data: notStarted } = await supabase
       .from('user_learning_journey')
-      .select('*, profiles!inner(email, first_name, last_name)')
+      .select('*, profiles!inner(email_cache, first_name, last_name)')
       .eq('current_stage', 'course_not_started')
       .gte('stage_entered_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
       .lt('stage_entered_at', new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString());
@@ -98,7 +98,7 @@ serve(async (req) => {
         if (journey.interventions_sent < 2) {
           await supabase.functions.invoke('send-welcome-email', {
             body: {
-              email: journey.profiles.email,
+              email: journey.profiles.email_cache,
               firstName: journey.profiles.first_name || 'there',
               reminderType: 'course_start',
               message: `Ready to get started? Your Maryland COMAR certification is just a click away!`,
@@ -121,7 +121,7 @@ serve(async (req) => {
     // Stage 3: Detect Stuck Learners (No activity in 7+ days)
     const { data: inProgress } = await supabase
       .from('user_learning_journey')
-      .select('*, profiles!inner(email, first_name, last_name)')
+      .select('*, profiles!inner(email_cache, first_name, last_name)')
       .eq('current_stage', 'course_in_progress')
       .lt('last_activity_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
 
@@ -141,7 +141,7 @@ serve(async (req) => {
         if (journey.interventions_sent < 3) {
           await supabase.functions.invoke('send-welcome-email', {
             body: {
-              email: journey.profiles.email,
+              email: journey.profiles.email_cache,
               firstName: journey.profiles.first_name || 'there',
               reminderType: 'stuck_learner',
               message: `We noticed you haven't continued your training. Need help? Our Charm AI is here 24/7!`,
@@ -164,7 +164,7 @@ serve(async (req) => {
     // Stage 4: Near Completion (80%+)
     const { data: nearingCompletion } = await supabase
       .from('user_learning_journey')
-      .select('*, profiles!inner(email, first_name, last_name)')
+      .select('*, profiles!inner(email_cache, first_name, last_name)')
       .eq('current_stage', 'course_nearing_completion');
 
     if (nearingCompletion && nearingCompletion.length > 0) {
@@ -172,7 +172,7 @@ serve(async (req) => {
         if (journey.interventions_sent < 1) {
           await supabase.functions.invoke('send-welcome-email', {
             body: {
-              email: journey.profiles.email,
+              email: journey.profiles.email_cache,
               firstName: journey.profiles.first_name || 'there',
               reminderType: 'nearing_completion',
               message: `You're almost there! Just ${100 - journey.completion_percentage}% left to complete your certification!`,
@@ -195,7 +195,7 @@ serve(async (req) => {
     // Stage 5: Certificate Expiring (60, 30, 7 days)
     const { data: certificates } = await supabase
       .from('certificates')
-      .select('*, profiles!inner(email, first_name, last_name)')
+      .select('*, profiles!inner(email_cache, first_name, last_name)')
       .not('expiry_date', 'is', null)
       .gte('expiry_date', new Date().toISOString())
       .lte('expiry_date', new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString());
@@ -207,7 +207,7 @@ serve(async (req) => {
         if ([60, 30, 7].includes(daysUntilExpiry)) {
           await supabase.functions.invoke('send-welcome-email', {
             body: {
-              email: cert.profiles.email,
+              email: cert.profiles.email_cache,
               firstName: cert.profiles.first_name || 'there',
               reminderType: 'certificate_renewal',
               message: `Your Maryland COMAR certificate expires in ${daysUntilExpiry} days. Renew now to stay compliant!`,
