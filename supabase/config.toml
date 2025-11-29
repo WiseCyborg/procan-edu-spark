@@ -18,6 +18,24 @@ verify_jwt = false
 [functions.enrollment-lifecycle-agent]
 verify_jwt = false
 
+[functions.voice-to-text]
+verify_jwt = false
+
+[functions.text-to-voice]
+verify_jwt = false
+
+[functions.openai-avatar-voice]
+verify_jwt = false
+
+[functions.check-employee-course-stalls]
+verify_jwt = false
+
+[functions.check-manager-registration-expiry]
+verify_jwt = false
+
+[functions.comprehensive-health-check]
+verify_jwt = false
+
 [functions.execute-ai-fix]
 verify_jwt = true
 
