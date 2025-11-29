@@ -49,14 +49,14 @@ serve(async (req) => {
     // Get requester info
     const { data: requester } = await supabase
       .from('profiles')
-      .select('first_name, last_name, email')
+      .select('first_name, last_name, email_cache')
       .eq('user_id', requesterId)
       .single();
 
     // Get manager emails
     const { data: managers } = await supabase
       .from('user_roles')
-      .select('user_id, profiles!inner(email, first_name, last_name)')
+      .select('user_id, profiles!inner(email_cache, first_name, last_name)')
       .eq('role', 'dispensary_manager')
       .eq('profiles.organization_id', organizationId);
 
@@ -69,10 +69,10 @@ serve(async (req) => {
       await supabase.rpc('queue_job', {
         p_job_type: 'send_seat_request_email',
         p_payload: {
-          manager_email: manager.profiles.email,
+          manager_email: manager.profiles.email_cache,
           manager_name: manager.profiles.first_name,
           requester_name: `${requester?.first_name} ${requester?.last_name}`,
-          requester_email: requester?.email,
+          requester_email: requester?.email_cache,
           quantity,
           reason: reason || 'No reason provided',
           request_id: request.id,
@@ -81,7 +81,7 @@ serve(async (req) => {
         p_organization_id: organizationId
       });
 
-      console.log('[REQUEST-SEATS] Queued email for manager:', manager.profiles.email);
+      console.log('[REQUEST-SEATS] Queued email for manager:', manager.profiles.email_cache);
     }
 
     return new Response(

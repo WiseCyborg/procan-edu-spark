@@ -117,7 +117,7 @@ serve(async (req) => {
       const { data: failedEmails } = await supabase
         .from('email_logs')
         .select('id, recipient_email, subject, error_message, created_at')
-        .eq('delivery_status', 'failed')
+        .eq('status', 'failed')
         .gt('created_at', new Date(Date.now() - 3600000).toISOString())
         .order('created_at', { ascending: false })
         .limit(10);

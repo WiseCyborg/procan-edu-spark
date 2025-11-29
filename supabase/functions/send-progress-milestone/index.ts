@@ -21,7 +21,7 @@ serve(async (req) => {
     // Get user details
     const { data: profile } = await supabase
       .from('profiles')
-      .select('first_name, email')
+      .select('first_name, email_cache')
       .eq('user_id', user_id)
       .single();
 
@@ -59,7 +59,7 @@ serve(async (req) => {
 
     // Queue email notification
     await supabase.from('notification_queue').insert({
-      recipient_email: profile.email,
+      recipient_email: profile.email_cache,
       subject: `${milestone.emoji} ${milestone.title}`,
       message: milestone.message,
       scheduled_for: new Date().toISOString(),
@@ -72,7 +72,7 @@ serve(async (req) => {
       }
     });
 
-    console.log(`Progress milestone email queued for ${profile.email} (${milestone_percentage}%)`);
+    console.log(`Progress milestone email queued for ${profile.email_cache} (${milestone_percentage}%)`);
 
     return new Response(
       JSON.stringify({ success: true, message: 'Milestone notification queued' }),

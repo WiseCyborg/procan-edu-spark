@@ -51,7 +51,7 @@ serve(async (req) => {
       recipient_email: application.contact_email,
       subject: "🎉 Complete Your Manager Registration - ProCann Edu",
       email_type: "manager_registration_token",
-      delivery_status: result.success ? "sent" : "failed",
+      status: result.success ? "sent" : "failed",
       metadata: { application_id },
     });
 

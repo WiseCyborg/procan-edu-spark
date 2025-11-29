@@ -55,7 +55,7 @@ serve(async (req) => {
       recipient_email: application.contact_email,
       subject: "Application Received - ProCann Edu RVT Program",
       email_type: "application_submitted",
-      delivery_status: result.success ? "sent" : "failed",
+      status: result.success ? "sent" : "failed",
       metadata: { application_id },
     });
 

@@ -48,7 +48,7 @@ serve(async (req) => {
       recipient_email: userEmail,
       subject: "👋 Continue Your RVT Training",
       email_type: "course_stalled",
-      delivery_status: result.success ? "sent" : "failed",
+      status: result.success ? "sent" : "failed",
       metadata: { user_id, days_inactive },
     });
 

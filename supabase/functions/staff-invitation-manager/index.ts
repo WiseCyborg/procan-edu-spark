@@ -205,7 +205,6 @@ async function inviteSingleStaff(organizationId: string, inviterId: string, emai
       subject: `Invitation to Cannabis Training Program`,
       content: `Invitation sent to ${email} for ${role} role`,
       recipient_email: email,
-      delivery_status: emailResponse.error ? 'failed' : 'sent',
       metadata: {
         invitation_id: invitation.id,
         invitation_token: invitationToken,
@@ -314,7 +313,6 @@ async function inviteBulkStaff(organizationId: string, inviterId: string, emails
           subject: `Bulk Invitation to Cannabis Training Program`,
           content: `Bulk invitation sent to ${email} for ${role} role`,
           recipient_email: email.trim(),
-          delivery_status: emailResponse.error ? 'failed' : 'sent',
           metadata: {
             invitation_id: invitation.id,
             invitation_token: invitationToken,
@@ -415,7 +413,6 @@ async function resendInvitation(invitationId: string): Promise<Response> {
       subject: `Reminder: Invitation to Cannabis Training Program`,
       content: `Invitation reminder sent to ${invitation.email}`,
       recipient_email: invitation.email,
-      delivery_status: emailResponse.error ? 'failed' : 'sent',
       metadata: {
         invitation_id: invitation.id,
         invitation_token: invitation.invitation_token,
