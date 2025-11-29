@@ -360,7 +360,17 @@ export const DraggableVoiceAssistant: React.FC = () => {
           body: { audio: base64Audio }
         });
 
-        if (transcriptError) throw transcriptError;
+        if (transcriptError) {
+          if (transcriptError.message?.includes('Auth session missing') || transcriptError.message?.includes('JWT')) {
+            toast({
+              title: "Authentication Required",
+              description: "Please sign in to use voice features.",
+              variant: "destructive",
+            });
+            return;
+          }
+          throw transcriptError;
+        }
 
         const transcribedText = transcriptData.text;
         
@@ -511,6 +521,15 @@ export const DraggableVoiceAssistant: React.FC = () => {
   };
 
   const toggleVoiceRecording = () => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to use voice features.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (isListening) {
       stopVoiceRecording();
     } else {
