@@ -27,10 +27,28 @@ const JOB_HANDLERS: Record<string, (job: Job, supabase: any) => Promise<void>> =
     }
     
     try {
-      const { application_id, contact_email, organization_name, access_key } = job.payload;
+      const { 
+        application_id, 
+        contact_email, 
+        organization_name, 
+        access_key,
+        registration_url,
+        credits,
+        join_code,
+        contact_person
+      } = job.payload;
       
       const { error } = await supabase.functions.invoke('send-approval-email', {
-        body: { application_id, contact_email, organization_name, access_key }
+        body: { 
+          application_id, 
+          contact_email, 
+          contact_person,
+          organization_name, 
+          access_key,
+          registration_url,
+          credits,
+          join_code
+        }
       });
       
       if (error) throw error;

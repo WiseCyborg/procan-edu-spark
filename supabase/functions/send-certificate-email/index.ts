@@ -68,7 +68,7 @@ const handler = async (req: Request): Promise<Response> => {
     const { data: logData } = await supabase
       .from('email_logs')
       .insert({
-        recipient: email,
+        recipient_email: email,
         email_type: 'certificate',
         status: 'sending',
         template_name: 'certificate',

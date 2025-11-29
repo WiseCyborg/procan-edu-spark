@@ -309,3 +309,9 @@ verify_jwt = true
 [functions.send-approval-email]
 verify_jwt = false
 
+[functions.send-certificate-email]
+verify_jwt = false
+
+[functions.jobs-processor]
+verify_jwt = false
+

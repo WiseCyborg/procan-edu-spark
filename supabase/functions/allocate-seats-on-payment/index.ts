@@ -42,9 +42,15 @@ serve(async (req) => {
         organization_id,
         quantity,
         amount_paid: quantity * 49.99,
+        currency: 'USD',
         payment_method: 'paypal',
-        purchased_by: user_id,
-        transaction_id: payment_id,
+        status: 'paid',
+        idempotency_key: payment_id,
+        metadata: {
+          paypal_payment_id: payment_id,
+          allocated_by: user_id,
+          allocation_type: 'paypal_purchase'
+        }
       })
       .select()
       .single();
