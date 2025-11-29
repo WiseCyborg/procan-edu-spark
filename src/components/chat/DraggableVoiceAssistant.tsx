@@ -204,38 +204,41 @@ export const DraggableVoiceAssistant: React.FC = () => {
   const contextInfo = getContextInfo(location.pathname);
   const isChatDisabled = contextInfo.route === 'final-exam';
 
-  // Hide voice assistant on authentication pages to prevent auth errors
-  // This check comes AFTER all hooks to comply with Rules of Hooks
+  // Compute isAuthPage (not a hook, so this is fine before useEffect)
   const isAuthPage = location.pathname === '/auth' || 
                      location.pathname === '/forgot-password' ||
                      location.pathname.includes('/accept-invitation') ||
                      location.pathname.includes('/manager-registration') ||
                      location.search.includes('mode=reset');
 
-  if (isAuthPage) {
-    return null;
-  }
+  // ============================================
+  // ALL HOOKS MUST BE CALLED BEFORE ANY CONDITIONAL RETURNS
+  // ============================================
 
   // Check if user should see welcome overlay
   useEffect(() => {
+    if (isAuthPage) return; // Don't run on auth pages
     const hasSeenWelcome = localStorage.getItem('chat-welcome-seen');
     if (!hasSeenWelcome && !isChatDisabled) {
       setShowWelcome(true);
     }
-  }, [isChatDisabled]);
+  }, [isChatDisabled, isAuthPage]);
 
   // Save position to localStorage when it changes
   useEffect(() => {
+    if (isAuthPage) return; // Don't run on auth pages
     localStorage.setItem('chatAssistantPosition', JSON.stringify(position));
-  }, [position]);
+  }, [position, isAuthPage]);
 
   // Save window size to localStorage when it changes
   useEffect(() => {
+    if (isAuthPage) return; // Don't run on auth pages
     localStorage.setItem('chatAssistantSize', JSON.stringify(windowSize));
-  }, [windowSize]);
+  }, [windowSize, isAuthPage]);
 
   // Load saved window size on mount
   useEffect(() => {
+    if (isAuthPage) return; // Don't run on auth pages
     const savedSize = localStorage.getItem('chatAssistantSize');
     if (savedSize) {
       try {
@@ -244,7 +247,7 @@ export const DraggableVoiceAssistant: React.FC = () => {
         console.error('Error parsing saved size:', error);
       }
     }
-  }, []);
+  }, [isAuthPage]);
 
   // For future ElevenLabs Conversational AI integration
   // const conversation = useConversation({...});
@@ -300,6 +303,7 @@ export const DraggableVoiceAssistant: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    if (isAuthPage) return; // Don't run on auth pages
     if (isDragging) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
@@ -308,7 +312,7 @@ export const DraggableVoiceAssistant: React.FC = () => {
         document.removeEventListener('mouseup', handleMouseUp);
       };
     }
-  }, [isDragging, handleMouseMove, handleMouseUp]);
+  }, [isDragging, handleMouseMove, handleMouseUp, isAuthPage]);
 
   // Scroll to bottom of messages
   const scrollToBottom = () => {
@@ -316,8 +320,9 @@ export const DraggableVoiceAssistant: React.FC = () => {
   };
 
   useEffect(() => {
+    if (isAuthPage) return; // Don't run on auth pages
     scrollToBottom();
-  }, [messages]);
+  }, [messages, isAuthPage]);
 
   // Voice recording functionality
   const startVoiceRecording = async () => {
@@ -416,7 +421,7 @@ export const DraggableVoiceAssistant: React.FC = () => {
 
   // Proactive help trigger
   useEffect(() => {
-    if (isChatDisabled) return;
+    if (isAuthPage || isChatDisabled) return; // Don't run on auth pages or when disabled
     
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
@@ -433,46 +438,55 @@ export const DraggableVoiceAssistant: React.FC = () => {
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [location.pathname, isOpen, isChatDisabled]);
+  }, [location.pathname, isOpen, isChatDisabled, isAuthPage, contextInfo.helpTips.length]);
 
   // Enhanced session management
   useEffect(() => {
-    if (isOpen && messages.length === 0 && !isChatDisabled) {
-      // Start new session or load existing
-      let sessionId = currentSessionId;
-      if (!sessionId) {
-        sessionId = startNewSession(contextInfo.route, contextInfo.title);
-      }
-
-      const getWeatherContext = () => {
-        const hour = new Date().getHours();
-        const season = new Date().getMonth();
-        
-        if (hour < 12) return "Good morning from Maryland!";
-        if (hour < 17) return "Hey there!";
-        if (season >= 11 || season <= 2) return "Hope you're staying warm in Maryland!";
-        if (season >= 5 && season <= 8) return "Beautiful day in Maryland!";
-        return "How's it going in Maryland today?";
-      };
-
-      const welcomeMessage: Message = {
-        id: Date.now().toString(),
-        content: `${getWeatherContext()} I'm ProCann Assist, your Maryland cannabis training assistant. I'm here to help you with ${contextInfo.description.toLowerCase()}. Maryland's cannabis industry is growing fast - what can I help you with today?`,
-        isUser: false,
-        timestamp: new Date(),
-        pageContext: {
-          route: contextInfo.route,
-          title: contextInfo.title,
-          description: contextInfo.description
-        }
-      };
-      
-      setMessages([welcomeMessage]);
-      if (sessionId) {
-        saveMessage(sessionId, welcomeMessage);
-      }
+    if (isAuthPage || !isOpen || messages.length > 0 || isChatDisabled) return; // Don't run on auth pages
+    
+    // Start new session or load existing
+    let sessionId = currentSessionId;
+    if (!sessionId) {
+      sessionId = startNewSession(contextInfo.route, contextInfo.title);
     }
-  }, [isOpen, contextInfo, isChatDisabled, currentSessionId, startNewSession, saveMessage]);
+
+    const getWeatherContext = () => {
+      const hour = new Date().getHours();
+      const season = new Date().getMonth();
+      
+      if (hour < 12) return "Good morning from Maryland!";
+      if (hour < 17) return "Hey there!";
+      if (season >= 11 || season <= 2) return "Hope you're staying warm in Maryland!";
+      if (season >= 5 && season <= 8) return "Beautiful day in Maryland!";
+      return "How's it going in Maryland today?";
+    };
+
+    const welcomeMessage: Message = {
+      id: Date.now().toString(),
+      content: `${getWeatherContext()} I'm ProCann Assist, your Maryland cannabis training assistant. I'm here to help you with ${contextInfo.description.toLowerCase()}. Maryland's cannabis industry is growing fast - what can I help you with today?`,
+      isUser: false,
+      timestamp: new Date(),
+      pageContext: {
+        route: contextInfo.route,
+        title: contextInfo.title,
+        description: contextInfo.description
+      }
+    };
+    
+    setMessages([welcomeMessage]);
+    if (sessionId) {
+      saveMessage(sessionId, welcomeMessage);
+    }
+  }, [isOpen, messages.length, isChatDisabled, isAuthPage, currentSessionId, startNewSession, saveMessage, contextInfo]);
+
+  // ============================================
+  // CONDITIONAL RETURNS MUST COME AFTER ALL HOOKS
+  // ============================================
+
+  // Hide voice assistant on authentication pages to prevent auth errors
+  if (isAuthPage) {
+    return null;
+  }
 
   const sendMessage = async (messageText?: string) => {
     const text = messageText || inputMessage.trim();
