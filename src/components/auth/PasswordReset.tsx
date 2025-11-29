@@ -29,6 +29,8 @@ export const PasswordReset: React.FC = () => {
     const mode = urlParams.get('mode');
     const resetToken = urlParams.get('token');
     
+    console.log('[PasswordReset] Validating token...', { mode, hasToken: !!resetToken });
+    
     if (mode !== 'reset' || !resetToken) {
       toast({
         title: "Invalid Request",
@@ -43,9 +45,11 @@ export const PasswordReset: React.FC = () => {
     setValidating(true);
 
     try {
+      console.log('[PasswordReset] Calling validate-password-reset-token...');
       const { data, error } = await invokePublicFunction('validate-password-reset-token', {
         token: resetToken
       });
+      console.log('[PasswordReset] Validation response:', { data, error });
 
       if (error || !data?.is_valid) {
         toast({
@@ -75,6 +79,7 @@ export const PasswordReset: React.FC = () => {
 
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('[PasswordReset] Starting password reset...');
     
     if (password.length < 6) {
       toast({
@@ -96,10 +101,12 @@ export const PasswordReset: React.FC = () => {
 
     setLoading(true);
     try {
+      console.log('[PasswordReset] Calling execute-password-reset...');
       const { data, error } = await invokePublicFunction('execute-password-reset', {
         token,
         new_password: password
       });
+      console.log('[PasswordReset] Reset response:', { data, error });
 
       if (error || !data?.success) {
         console.error('Password update error:', error);
