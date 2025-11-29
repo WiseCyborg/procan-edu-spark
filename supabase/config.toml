@@ -3,6 +3,21 @@ project_id = "zhmpwczrvitomsxjwpzc"
 [functions.analyze-system-issue]
 verify_jwt = true
 
+[functions.ai-at-risk-agent]
+verify_jwt = false
+
+[functions.ai-seat-utilization-agent]
+verify_jwt = false
+
+[functions.ai-rvt-renewal-monitor]
+verify_jwt = false
+
+[functions.ai-rvt-competitor-monitor]
+verify_jwt = false
+
+[functions.enrollment-lifecycle-agent]
+verify_jwt = false
+
 [functions.execute-ai-fix]
 verify_jwt = true
 
