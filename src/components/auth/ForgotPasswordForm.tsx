@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { invokePublicFunction } from "@/lib/publicEdgeFunctions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,9 +15,11 @@ export function ForgotPasswordForm() {
 
   const resetMutation = useMutation({
     mutationFn: async (email: string) => {
-      const { error } = await supabase.functions.invoke("send-password-reset", {
-        body: { email },
+      console.log('[ForgotPasswordForm] Sending password reset request for:', email);
+      const { data, error } = await invokePublicFunction('send-password-reset', {
+        email
       });
+      console.log('[ForgotPasswordForm] Response:', { data, error });
 
       if (error) throw error;
     },
