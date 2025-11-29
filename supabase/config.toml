@@ -303,6 +303,9 @@ verify_jwt = true
 [functions.validate-password-reset-token]
 verify_jwt = false
 
+[functions.execute-password-reset]
+verify_jwt = false
+
 [functions.send-progress-milestone]
 verify_jwt = false
 
