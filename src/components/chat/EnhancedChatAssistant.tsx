@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { MessageCircle, Send, X, HelpCircle, Settings, Maximize2, Minimize2 } from 'lucide-react';
+import { MessageCircle, Send, X, HelpCircle, Settings, Maximize2, Minimize2, User, Bot } from 'lucide-react';
+import { format } from 'date-fns';
 import { EnhancedScrollArea } from './EnhancedScrollArea';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
@@ -159,11 +160,35 @@ export const EnhancedChatAssistant: React.FC = () => {
   const [showProactiveTip, setShowProactiveTip] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [currentMode, setCurrentMode] = useState<'ai_assist' | 'console' | 'human'>('ai_assist');
+  const [userFirstName, setUserFirstName] = useState<string>('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout>();
 
   const contextInfo = getContextInfo(location.pathname, roles);
   const isChatDisabled = contextInfo.route === 'final-exam';
+
+  // Fetch user's first name
+  useEffect(() => {
+    if (!user) return;
+    
+    const fetchUserName = async () => {
+      try {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('first_name')
+          .eq('user_id', user.id)
+          .single();
+        
+        if (profile?.first_name) {
+          setUserFirstName(profile.first_name);
+        }
+      } catch (error) {
+        console.error('Error fetching user name:', error);
+      }
+    };
+    
+    fetchUserName();
+  }, [user]);
 
   // Scroll to bottom of messages
   const scrollToBottom = () => {
@@ -211,9 +236,11 @@ export const EnhancedChatAssistant: React.FC = () => {
         'dispensary manager' : 
         'student';
         
+      const greeting = userFirstName ? `Hi ${userFirstName}!` : 'Hi!';
+      
       const welcomeMessage: Message = {
         id: Date.now().toString(),
-        content: `Hi! I'm your ProCann Edu assistant with ${contextInfo.securityLevel} access level. As a ${roleContext}, I can help you with ${contextInfo.description.toLowerCase()}. I understand Maryland cannabis regulations and can provide role-specific guidance. What can I help you with today?`,
+        content: `${greeting} I'm your ProCann Edu assistant with ${contextInfo.securityLevel} access level. As a ${roleContext}, I can help you with ${contextInfo.description.toLowerCase()}. I understand Maryland cannabis regulations and can provide role-specific guidance. What can I help you with today?`,
         isUser: false,
         timestamp: new Date()
       };
@@ -464,30 +491,50 @@ export const EnhancedChatAssistant: React.FC = () => {
               showUnreadCount={unreadCount}
               autoScroll={true}
             >
-              <div className="space-y-2 p-1">
+              <div className="space-y-3 p-1">
                 {messages.map((message) => (
                   <div key={message.id}>
-                    <div className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}>
-                      <div
-                        className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${
-                          message.isUser
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-muted text-foreground'
-                        }`}
-                      >
-                        {message.content}
-                        {/* Audio player for avatar voice */}
-                        {message.audioUrl && (
-                          <audio 
-                            src={message.audioUrl} 
-                            autoPlay 
-                            className="hidden"
-                            onEnded={() => {
-                              URL.revokeObjectURL(message.audioUrl!);
-                            }}
-                          />
-                        )}
+                    <div className={`flex gap-2 ${message.isUser ? 'justify-end' : 'justify-start'}`}>
+                      {!message.isUser && (
+                        <div className="flex-shrink-0 w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center mt-1">
+                          <Bot className="w-4 h-4 text-primary" />
+                        </div>
+                      )}
+                      <div className={`flex flex-col ${message.isUser ? 'items-end' : 'items-start'} max-w-[75%]`}>
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <span className="text-xs font-medium text-muted-foreground">
+                            {message.isUser ? (userFirstName || 'You') : 'ProCann Assistant'}
+                          </span>
+                          <span className="text-xs text-muted-foreground/60">
+                            {format(message.timestamp, 'h:mm a')}
+                          </span>
+                        </div>
+                        <div
+                          className={`rounded-lg px-3 py-2 text-sm animate-in fade-in slide-in-from-bottom-2 duration-300 ${
+                            message.isUser
+                              ? 'bg-primary text-primary-foreground'
+                              : 'bg-muted text-foreground'
+                          }`}
+                        >
+                          {message.content}
+                          {/* Audio player for avatar voice */}
+                          {message.audioUrl && (
+                            <audio 
+                              src={message.audioUrl} 
+                              autoPlay 
+                              className="hidden"
+                              onEnded={() => {
+                                URL.revokeObjectURL(message.audioUrl!);
+                              }}
+                            />
+                          )}
+                        </div>
                       </div>
+                      {message.isUser && (
+                        <div className="flex-shrink-0 w-7 h-7 rounded-full bg-primary flex items-center justify-center mt-1">
+                          <User className="w-4 h-4 text-primary-foreground" />
+                        </div>
+                      )}
                     </div>
                     
                     {/* Contextual Links */}
@@ -509,12 +556,14 @@ export const EnhancedChatAssistant: React.FC = () => {
                   </div>
                 ))}
                 {isLoading && (
-                  <div className="flex justify-start">
-                    <div className="bg-muted text-foreground rounded-lg px-3 py-2 text-sm">
-                      <div className="flex space-x-1">
-                        <div className="w-2 h-2 bg-current rounded-full animate-bounce"></div>
-                        <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                        <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  <div className="flex gap-2 items-start">
+                    <div className="flex-shrink-0 w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Bot className="w-4 h-4 text-primary animate-pulse" />
+                    </div>
+                    <div className="flex flex-col items-start">
+                      <span className="text-xs font-medium text-muted-foreground mb-1">ProCann Assistant</span>
+                      <div className="bg-muted rounded-lg px-3 py-2 text-sm text-muted-foreground animate-pulse">
+                        Typing...
                       </div>
                     </div>
                   </div>
