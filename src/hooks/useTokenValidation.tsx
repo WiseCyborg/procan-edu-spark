@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { invokePublicFunction } from '@/lib/publicEdgeFunctions';
 
 interface TokenValidation {
   is_valid: boolean;
@@ -21,8 +21,8 @@ export const useValidateRegistrationToken = (token: string | null) => {
         } as TokenValidation;
       }
 
-      const { data, error } = await supabase.functions.invoke('validate-manager-registration', {
-        body: { token }
+      const { data, error } = await invokePublicFunction('validate-manager-registration', {
+        token
       });
 
       if (error) throw error;

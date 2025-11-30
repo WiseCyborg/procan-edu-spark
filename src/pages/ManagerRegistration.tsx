@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { supabase } from '@/integrations/supabase/client';
+import { invokePublicFunction } from '@/lib/publicEdgeFunctions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -41,8 +42,8 @@ export default function ManagerRegistration() {
     }
 
     // Use edge function for token validation with proper security
-    supabase.functions.invoke('validate-manager-registration', {
-      body: { token }
+    invokePublicFunction('validate-manager-registration', {
+      token
     }).then(({ data, error }) => {
       if (error || !data?.is_valid) {
         setValidationStatus(data?.error_message?.includes('expired') ? 'expired' : 

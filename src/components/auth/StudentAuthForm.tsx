@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { invokePublicFunction } from '@/lib/publicEdgeFunctions';
 import { Loader2 } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import { employeeRegistrationSchema } from '@/lib/validation-schemas';
@@ -38,7 +39,7 @@ const StudentAuthForm = () => {
     if (invitationToken) {
       setIsLoadingInvitation(true);
       setIsRegistering(true);
-      supabase.functions.invoke('accept-invitation', { body: { token: invitationToken, action: 'validate' } })
+      invokePublicFunction('accept-invitation', { token: invitationToken, action: 'validate' })
         .then(({ data }) => {
           if (data?.success) {
             setInvitationData(data.invitation);
@@ -67,13 +68,11 @@ const StudentAuthForm = () => {
   const onSubmit = async (data: FormData) => {
     const sanitizedData = sanitizeFormData(data);
     try {
-      const { data: result, error } = await supabase.functions.invoke('register-with-seat-allocation', {
-        body: {
-          ...sanitizedData,
-          organizationId: invitationData?.organizationId,
-          organizationName: invitationData?.organizationName,
-          invitationToken: invitationData ? invitationToken : undefined
-        }
+      const { data: result, error } = await invokePublicFunction('register-with-seat-allocation', {
+        ...sanitizedData,
+        organizationId: invitationData?.organizationId,
+        organizationName: invitationData?.organizationName,
+        invitationToken: invitationData ? invitationToken : undefined
       });
       if (error || result?.error) throw new Error(result?.error || 'Registration failed');
       toast({ title: "Account Created!", description: "Redirecting..." });
