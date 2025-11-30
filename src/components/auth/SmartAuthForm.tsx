@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { invokePublicFunction } from '@/lib/publicEdgeFunctions';
 import { useUserRole } from '@/hooks/useUserRole';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -37,8 +38,8 @@ const SmartAuthForm = () => {
     
     setEmailChecking(true);
     try {
-      const { data, error } = await supabase.functions.invoke('check-email-exists', {
-        body: { email: emailToCheck }
+      const { data, error } = await invokePublicFunction('check-email-exists', {
+        email: emailToCheck
       });
       
       if (error) {

@@ -103,7 +103,7 @@ serve(async (req) => {
       <div class="security-notice">
         <strong>⚠️ Security Notice:</strong>
         <ul style="margin: 10px 0; padding-left: 20px;">
-          <li>This link will expire in 1 hour</li>
+          <li>This link will expire in 24 hours</li>
           <li>If you didn't request this reset, please ignore this email</li>
           <li>Never share this link with anyone</li>
         </ul>
