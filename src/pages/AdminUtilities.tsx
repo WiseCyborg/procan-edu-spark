@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Loader2, Database, RefreshCw, Key, FileCheck, AlertCircle } from 'lucide-react';
+import { SystemMaintenancePanel } from '@/components/admin/SystemMaintenancePanel';
 
 const AdminUtilities = () => {
   const [reconciling, setReconciling] = useState(false);
@@ -152,6 +153,8 @@ const AdminUtilities = () => {
         <h1 className="text-3xl font-bold">Admin Utilities</h1>
         <p className="text-muted-foreground mt-1">Database maintenance and system operations</p>
       </div>
+
+      <SystemMaintenancePanel />
 
       <Card>
         <CardHeader>
