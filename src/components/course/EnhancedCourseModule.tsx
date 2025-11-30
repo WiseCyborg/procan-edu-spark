@@ -23,8 +23,9 @@ interface ModuleContent {
     id: string;
     title: string;
     description?: string;
-    url: string;
-    type: 'pdf' | 'doc' | 'image' | 'link';
+    contentId?: string; // References moduleDocuments.ts
+    url?: string; // For external links
+    type: 'html' | 'link';
     size?: string;
     required?: boolean;
   }>;
@@ -125,9 +126,8 @@ const moduleContent: {[key: string]: ModuleContent} = {
         id: 'md-laws-guide',
         title: 'Maryland Cannabis Laws Guide',
         description: 'Comprehensive guide to Maryland cannabis regulations',
-        url: '/documents/maryland-cannabis-laws.pdf',
-        type: 'pdf',
-        size: '2.3 MB',
+        contentId: 'md-laws-guide',
+        type: 'html',
         required: true
       },
       {
@@ -200,9 +200,18 @@ const moduleContent: {[key: string]: ModuleContent} = {
     documents: [
       {
         id: 'sop-template',
-        title: 'SOP Template Library',
-        url: '/documents/sop-templates.pdf',
-        type: 'pdf',
+        title: 'Standard Operating Procedures Manual',
+        description: 'Complete SOP guide for dispensary operations',
+        contentId: 'dispensary-sops',
+        type: 'html',
+        required: true
+      },
+      {
+        id: 'emergency-guide',
+        title: 'Emergency Response Procedures',
+        description: 'Emergency protocols and safety procedures',
+        contentId: 'emergency-procedures',
+        type: 'html',
         required: true
       }
     ],
