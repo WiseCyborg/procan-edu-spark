@@ -222,6 +222,15 @@ verify_jwt = true
 [functions.populate-comar-content]
 verify_jwt = true
 
+[functions.update-comar-references]
+verify_jwt = true
+
+[functions.send-all-manager-reminders]
+verify_jwt = true
+
+[functions.clear-deadletter-queue]
+verify_jwt = true
+
 [functions.lookup-access-key]
 verify_jwt = false
 
