@@ -1,16 +1,20 @@
 import React, { useState } from 'react';
-import { Download, Eye, FileText, ExternalLink, CheckCircle } from 'lucide-react';
+import { Download, Eye, FileText, ExternalLink, CheckCircle, X, Printer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/components/ui/use-toast';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { getDocumentContent } from '@/data/moduleDocuments';
+import { sanitizeHtml } from '@/utils/sanitize-html';
 
 interface Document {
   id: string;
   title: string;
   description?: string;
-  url: string;
-  type: 'pdf' | 'doc' | 'image' | 'link';
+  contentId?: string; // References moduleDocuments.ts
+  url?: string;
+  type: 'html' | 'link';
   size?: string;
   required?: boolean;
 }
@@ -39,47 +43,69 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
     }
   };
 
-  const handleDownload = async (document: Document) => {
-    try {
-      const response = await fetch(document.url);
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = window.document.createElement('a');
-      a.href = url;
-      a.download = document.title;
-      window.document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      window.document.body.removeChild(a);
-      
-      onDocumentDownload?.(document.id);
-      
-      toast({
-        title: "Download Complete",
-        description: `${document.title} has been downloaded.`,
-      });
-    } catch (error) {
-      toast({
-        title: "Download Failed",
-        description: "Unable to download the document. Please try again.",
-        variant: "destructive",
-      });
-    }
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleDownload = () => {
+    toast({
+      title: "Print to PDF",
+      description: "Use your browser's Print function (Ctrl/Cmd + P) and select 'Save as PDF' to download this document.",
+    });
+    handlePrint();
   };
 
   const getDocumentIcon = (type: string) => {
     switch (type) {
-      case 'pdf':
-        return <FileText className="w-5 h-5 text-red-500" />;
-      case 'doc':
-        return <FileText className="w-5 h-5 text-blue-500" />;
-      case 'image':
-        return <Eye className="w-5 h-5 text-green-500" />;
+      case 'html':
+        return <FileText className="w-5 h-5 text-primary" />;
       case 'link':
-        return <ExternalLink className="w-5 h-5 text-purple-500" />;
+        return <ExternalLink className="w-5 h-5 text-primary" />;
       default:
-        return <FileText className="w-5 h-5 text-gray-500" />;
+        return <FileText className="w-5 h-5 text-muted-foreground" />;
     }
+  };
+
+  const renderDocumentContent = () => {
+    if (!selectedDocument || selectedDocument.type === 'link') return null;
+
+    const contentData = selectedDocument.contentId 
+      ? getDocumentContent(selectedDocument.contentId)
+      : null;
+
+    if (!contentData) {
+      return (
+        <div className="p-6 text-center">
+          <p className="text-muted-foreground">Document content not available.</p>
+        </div>
+      );
+    }
+
+    const sanitizedContent = sanitizeHtml(contentData.content);
+
+    return (
+      <div className="p-6 space-y-4">
+        <div className="flex items-center justify-between text-sm text-muted-foreground border-b pb-2">
+          <div className="flex gap-4">
+            <span>Version {contentData.version}</span>
+            <span>Last Updated: {new Date(contentData.lastUpdated).toLocaleDateString()}</span>
+          </div>
+          {contentData.comarReferences && (
+            <div className="flex gap-2">
+              {contentData.comarReferences.map(ref => (
+                <Badge key={ref} variant="outline" className="text-xs">
+                  COMAR {ref}
+                </Badge>
+              ))}
+            </div>
+          )}
+        </div>
+        <div 
+          className="prose prose-sm max-w-none dark:prose-invert"
+          dangerouslySetInnerHTML={{ __html: sanitizedContent }}
+        />
+      </div>
+    );
   };
 
   return (
@@ -133,7 +159,10 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleDownload(document)}
+                        onClick={() => {
+                          setSelectedDocument(document);
+                          handleDownload();
+                        }}
                       >
                         <Download className="w-4 h-4 mr-1" />
                         Download
@@ -147,27 +176,51 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
         })}
       </div>
 
-      {/* PDF Viewer Modal */}
-      {selectedDocument && selectedDocument.type === 'pdf' && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg w-full max-w-4xl h-[80vh] flex flex-col">
-            <div className="p-4 border-b flex justify-between items-center">
-              <h3 className="font-semibold">{selectedDocument.title}</h3>
-              <Button
-                variant="outline"
-                onClick={() => setSelectedDocument(null)}
-              >
-                Close
-              </Button>
-            </div>
-            <div className="flex-1 overflow-hidden">
-              <iframe
-                src={selectedDocument.url}
-                className="w-full h-full border-0"
-                title={selectedDocument.title}
-              />
-            </div>
-          </div>
+      {/* Document Viewer Modal */}
+      {selectedDocument && selectedDocument.type === 'html' && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <Card className="w-full max-w-5xl h-[85vh] flex flex-col shadow-xl">
+            <CardHeader className="border-b flex-shrink-0">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <CardTitle>{selectedDocument.title}</CardTitle>
+                  {selectedDocument.description && (
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {selectedDocument.description}
+                    </p>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handlePrint}
+                  >
+                    <Printer className="w-4 h-4 mr-2" />
+                    Print
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleDownload}
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Save PDF
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setSelectedDocument(null)}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
+            <ScrollArea className="flex-1">
+              {renderDocumentContent()}
+            </ScrollArea>
+          </Card>
         </div>
       )}
     </div>
