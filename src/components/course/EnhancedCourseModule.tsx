@@ -243,7 +243,26 @@ const moduleContent: {[key: string]: ModuleContent} = {
     description: 'Understanding product types and consumption methods',
     videoUrl: 'https://vimeo.com/1073072065',
     stoplight_tier: 'green',
-    documents: [],
+    documents: [
+      {
+        id: 'product-guide',
+        title: 'Product Knowledge Reference Guide',
+        description: 'Complete guide to cannabis product types and their characteristics',
+        url: '/documents/product-knowledge-guide.pdf',
+        type: 'pdf',
+        size: '2.8 MB',
+        required: true
+      },
+      {
+        id: 'consumption-methods',
+        title: 'Consumption Methods Comparison Chart',
+        description: 'Visual comparison of onset times, duration, and effects by method',
+        url: '/documents/consumption-methods-chart.pdf',
+        type: 'pdf',
+        size: '1.2 MB',
+        required: false
+      }
+    ],
     readingMaterial: `
       <h3>Cannabis Product Categories</h3>
       <p>Dispensaries offer various product forms to meet different customer needs and preferences.</p>
@@ -281,7 +300,47 @@ const moduleContent: {[key: string]: ModuleContent} = {
         question: 'Which product type typically has the longest-lasting effects?',
         options: ['Flower', 'Edibles', 'Topicals', 'Vaporizers'],
         correctAnswer: 'Edibles',
-        explanation: 'Edibles are metabolized slowly, resulting in effects that last 4-8 hours.',
+        explanation: 'Edibles are metabolized slowly through the digestive system, resulting in effects that last 4-8 hours compared to 1-3 hours for inhaled products.',
+        points: 10
+      },
+      {
+        id: 'q2',
+        question: 'What is the primary difference between Indica and Sativa strains?',
+        options: ['Indica is energizing, Sativa is relaxing', 'Sativa is energizing, Indica is relaxing', 'They are exactly the same', 'Only color differs'],
+        correctAnswer: 'Sativa is energizing, Indica is relaxing',
+        explanation: 'Sativa strains typically provide energizing, uplifting effects, while Indica strains are associated with relaxing, sedating effects.',
+        points: 10
+      },
+      {
+        id: 'q3',
+        question: 'Which consumption method has the fastest onset of effects?',
+        options: ['Edibles', 'Tinctures', 'Inhalation (smoking/vaping)', 'Topicals'],
+        correctAnswer: 'Inhalation (smoking/vaping)',
+        explanation: 'Inhalation provides the fastest onset, with effects felt within 2-10 minutes as cannabinoids enter the bloodstream through the lungs.',
+        points: 10
+      },
+      {
+        id: 'q4',
+        question: 'What are concentrates?',
+        options: ['Diluted cannabis extracts', 'High-potency cannabis extracts', 'Low-THC products only', 'Synthetic cannabis'],
+        correctAnswer: 'High-potency cannabis extracts',
+        explanation: 'Concentrates are high-potency extracts that contain concentrated amounts of cannabinoids, typically 60-90% THC or CBD.',
+        points: 10
+      },
+      {
+        id: 'q5',
+        question: 'Do topical cannabis products produce psychoactive effects?',
+        options: ['Yes, always', 'No, they are absorbed locally', 'Only if applied to large areas', 'Only high-THC topicals do'],
+        correctAnswer: 'No, they are absorbed locally',
+        explanation: 'Topicals are absorbed through the skin and work locally without entering the bloodstream, so they do not produce psychoactive effects.',
+        points: 10
+      },
+      {
+        id: 'q6',
+        question: 'Which product form is recommended for precise dosing control?',
+        options: ['Pre-rolls', 'Tinctures', 'Flower', 'Smoking'],
+        correctAnswer: 'Tinctures',
+        explanation: 'Tinctures allow for precise dosing with measured droppers, making them ideal for consistent, controlled consumption.',
         points: 10
       }
     ],
@@ -298,7 +357,26 @@ const moduleContent: {[key: string]: ModuleContent} = {
     title: 'Customer Service Excellence',
     description: 'Professional customer interactions and service standards',
     stoplight_tier: 'green',
-    documents: [],
+    documents: [
+      {
+        id: 'customer-service-handbook',
+        title: 'Customer Service Handbook',
+        description: 'Best practices for professional customer interactions',
+        url: '/documents/customer-service-handbook.pdf',
+        type: 'pdf',
+        size: '1.8 MB',
+        required: true
+      },
+      {
+        id: 'needs-assessment-tool',
+        title: 'Customer Needs Assessment Tool',
+        description: 'Structured approach to understanding customer requirements',
+        url: '/documents/needs-assessment-tool.pdf',
+        type: 'pdf',
+        size: '800 KB',
+        required: false
+      }
+    ],
     readingMaterial: `
       <h3>Professional Customer Service in Cannabis Retail</h3>
       <p>Exceptional customer service builds trust and ensures safe, responsible cannabis use.</p>
@@ -339,7 +417,7 @@ const moduleContent: {[key: string]: ModuleContent} = {
         question: 'What is the recommended approach for new cannabis users?',
         options: ['Start high to feel effects', 'Start low and go slow', 'Try everything at once', 'Maximum dose for best experience'],
         correctAnswer: 'Start low and go slow',
-        explanation: 'New users should start with low doses and increase gradually to avoid adverse effects.',
+        explanation: 'New users should start with low doses and increase gradually to avoid adverse effects and find their optimal dose.',
         points: 10
       },
       {
@@ -347,7 +425,47 @@ const moduleContent: {[key: string]: ModuleContent} = {
         question: 'What should you do if a customer asks for medical advice?',
         options: ['Give your best guess', 'Recommend they consult a healthcare provider', 'Suggest the highest-rated product', 'Tell them cannabis cures everything'],
         correctAnswer: 'Recommend they consult a healthcare provider',
-        explanation: 'Dispensary agents must not provide medical advice; customers should consult qualified healthcare professionals.',
+        explanation: 'Dispensary agents must not provide medical advice; customers should consult qualified healthcare professionals for medical guidance.',
+        points: 10
+      },
+      {
+        id: 'q3',
+        question: 'What is the first step in a proper needs assessment?',
+        options: ['Recommend the most expensive product', 'Ask about experience level and desired effects', 'Show them everything', 'Skip to checkout'],
+        correctAnswer: 'Ask about experience level and desired effects',
+        explanation: 'Understanding the customer\'s experience and goals allows you to provide appropriate, personalized recommendations.',
+        points: 10
+      },
+      {
+        id: 'q4',
+        question: 'How should you handle a customer who appears intoxicated?',
+        options: ['Serve them quickly', 'Refuse service politely', 'Give them extra products', 'Ignore the situation'],
+        correctAnswer: 'Refuse service politely',
+        explanation: 'Maryland law prohibits selling cannabis to visibly intoxicated individuals. Politely refuse service to ensure safety and compliance.',
+        points: 10
+      },
+      {
+        id: 'q5',
+        question: 'What creates a welcoming customer experience?',
+        options: ['Judgment and criticism', 'Rushing customers', 'Professional, respectful engagement', 'Ignoring questions'],
+        correctAnswer: 'Professional, respectful engagement',
+        explanation: 'A judgment-free, professional environment where customers feel comfortable asking questions creates the best experience.',
+        points: 10
+      },
+      {
+        id: 'q6',
+        question: 'When should you involve a manager?',
+        options: ['Never', 'For questions beyond your training or difficult situations', 'Only during emergencies', 'For every customer'],
+        correctAnswer: 'For questions beyond your training or difficult situations',
+        explanation: 'Know your limits and involve managers for complex medical questions, compliance issues, or challenging customer situations.',
+        points: 10
+      },
+      {
+        id: 'q7',
+        question: 'What information should you gather during needs assessment?',
+        options: ['Only payment method', 'Desired effects, experience level, and use context', 'Just their name', 'Nothing specific'],
+        correctAnswer: 'Desired effects, experience level, and use context',
+        explanation: 'Comprehensive needs assessment includes understanding desired effects, experience level, timing, and context to make appropriate recommendations.',
         points: 10
       }
     ],
@@ -364,7 +482,35 @@ const moduleContent: {[key: string]: ModuleContent} = {
     title: 'Inventory Management & Security',
     description: 'Track-and-trace systems and security protocols',
     stoplight_tier: 'green',
-    documents: [],
+    documents: [
+      {
+        id: 'metrc-guide',
+        title: 'METRC User Guide for Maryland',
+        description: 'Complete guide to Maryland\'s track-and-trace system',
+        url: '/documents/metrc-user-guide.pdf',
+        type: 'pdf',
+        size: '4.2 MB',
+        required: true
+      },
+      {
+        id: 'inventory-sop',
+        title: 'Inventory Management SOP',
+        description: 'Standard operating procedures for inventory control',
+        url: '/documents/inventory-management-sop.pdf',
+        type: 'pdf',
+        size: '1.5 MB',
+        required: true
+      },
+      {
+        id: 'security-protocols',
+        title: 'Security Protocols Checklist',
+        description: 'Daily security compliance checklist',
+        url: '/documents/security-protocols-checklist.pdf',
+        type: 'pdf',
+        size: '600 KB',
+        required: false
+      }
+    ],
     readingMaterial: `
       <h3>Inventory Management in Cannabis Dispensaries</h3>
       <p>Proper inventory management ensures compliance with Maryland regulations and prevents diversion.</p>
@@ -408,7 +554,7 @@ const moduleContent: {[key: string]: ModuleContent} = {
         question: 'What tracking system does Maryland use for cannabis products?',
         options: ['BioTrack', 'METRC', 'Leafly', 'Weedmaps'],
         correctAnswer: 'METRC',
-        explanation: 'Maryland uses METRC for seed-to-sale tracking of all cannabis products.',
+        explanation: 'Maryland uses METRC (Marijuana Enforcement Tracking Reporting Compliance) for seed-to-sale tracking of all cannabis products.',
         points: 10
       },
       {
@@ -416,7 +562,47 @@ const moduleContent: {[key: string]: ModuleContent} = {
         question: 'How long must video surveillance be retained?',
         options: ['30 days', '60 days', '90 days', '1 year'],
         correctAnswer: '90 days',
-        explanation: 'Maryland requires 90 days of video surveillance retention for compliance.',
+        explanation: 'Maryland regulations require dispensaries to retain video surveillance footage for a minimum of 90 days.',
+        points: 10
+      },
+      {
+        id: 'q3',
+        question: 'Within what timeframe must theft or diversion be reported to MCA?',
+        options: ['12 hours', '24 hours', '48 hours', '1 week'],
+        correctAnswer: '24 hours',
+        explanation: 'Any theft, loss, or diversion of cannabis products must be reported to the Maryland Cannabis Administration within 24 hours.',
+        points: 10
+      },
+      {
+        id: 'q4',
+        question: 'What must be done immediately upon receiving cannabis products?',
+        options: ['Place on shelves', 'Update inventory system', 'Wait for manager', 'Leave in receiving area'],
+        correctAnswer: 'Update inventory system',
+        explanation: 'Inventory systems must be updated immediately upon receiving products to maintain accurate, real-time tracking.',
+        points: 10
+      },
+      {
+        id: 'q5',
+        question: 'What type of identifier is used in METRC tracking?',
+        options: ['Barcode only', 'RFID tag', 'Handwritten labels', 'Color codes'],
+        correctAnswer: 'RFID tag',
+        explanation: 'METRC uses RFID (Radio Frequency Identification) tags to uniquely identify and track each cannabis package.',
+        points: 10
+      },
+      {
+        id: 'q6',
+        question: 'Where must cannabis inventory be stored?',
+        options: ['Anywhere in the dispensary', 'Limited-access areas only', 'Customer-accessible areas', 'Unlocked storage rooms'],
+        correctAnswer: 'Limited-access areas only',
+        explanation: 'Cannabis inventory must be stored in limited-access areas with restricted entry to prevent theft and ensure security.',
+        points: 10
+      },
+      {
+        id: 'q7',
+        question: 'What is required for receiving shipments?',
+        options: ['Accept without checking', 'Verify manifest matches delivery', 'Sign and store immediately', 'Call police'],
+        correctAnswer: 'Verify manifest matches delivery',
+        explanation: 'All incoming shipments must be verified against the transport manifest to ensure accuracy and compliance before acceptance.',
         points: 10
       }
     ],
@@ -485,6 +671,46 @@ const moduleContent: {[key: string]: ModuleContent} = {
         correctAnswer: 'Edibles',
         explanation: 'Edibles have a slow onset (30-120 minutes) due to digestive processing but can last 4-8 hours, much longer than other forms.',
         points: 10
+      },
+      {
+        id: 'q3',
+        question: 'What is CBD?',
+        options: ['A psychoactive cannabinoid', 'A non-intoxicating cannabinoid', 'A type of terpene', 'A synthetic compound'],
+        correctAnswer: 'A non-intoxicating cannabinoid',
+        explanation: 'CBD (Cannabidiol) is a non-intoxicating cannabinoid that does not produce a "high" but may offer therapeutic benefits.',
+        points: 10
+      },
+      {
+        id: 'q4',
+        question: 'What are terpenes?',
+        options: ['Types of cannabinoids', 'Aromatic compounds that influence effects', 'Synthetic additives', 'Packaging materials'],
+        correctAnswer: 'Aromatic compounds that influence effects',
+        explanation: 'Terpenes are aromatic compounds found in cannabis that contribute to flavor, aroma, and can influence the overall effects.',
+        points: 10
+      },
+      {
+        id: 'q5',
+        question: 'Which medication class can interact with cannabis?',
+        options: ['Blood thinners', 'Vitamins only', 'Over-the-counter pain relievers only', 'None'],
+        correctAnswer: 'Blood thinners',
+        explanation: 'Cannabis can interact with blood thinners, sedatives, and other medications. Patients should consult healthcare providers.',
+        points: 10
+      },
+      {
+        id: 'q6',
+        question: 'What is sublingual absorption?',
+        options: ['Inhaling', 'Absorption under the tongue', 'Digesting', 'Topical application'],
+        correctAnswer: 'Absorption under the tongue',
+        explanation: 'Sublingual absorption occurs when tinctures are placed under the tongue, allowing cannabinoids to enter the bloodstream faster than digestion.',
+        points: 10
+      },
+      {
+        id: 'q7',
+        question: 'What should customers be advised about drug interactions?',
+        options: ['Ignore all concerns', 'Consult healthcare providers', 'Only worry about illegal drugs', 'Cannabis has no interactions'],
+        correctAnswer: 'Consult healthcare providers',
+        explanation: 'Customers taking medications should consult their healthcare providers about potential interactions with cannabis.',
+        points: 10
       }
     ],
     estimatedTime: 45,
@@ -500,7 +726,35 @@ const moduleContent: {[key: string]: ModuleContent} = {
     title: 'Medical Cannabis Fundamentals',
     description: 'Medical cannabis program, patient qualifications, and therapeutic applications',
     stoplight_tier: 'yellow',
-    documents: [],
+    documents: [
+      {
+        id: 'medical-program-guide',
+        title: 'Maryland Medical Cannabis Program Guide',
+        description: 'Complete overview of the medical cannabis program',
+        url: '/documents/medical-cannabis-program.pdf',
+        type: 'pdf',
+        size: '2.5 MB',
+        required: true
+      },
+      {
+        id: 'qualifying-conditions',
+        title: 'Qualifying Conditions Reference',
+        description: 'List of approved medical conditions and requirements',
+        url: '/documents/qualifying-conditions.pdf',
+        type: 'pdf',
+        size: '1.1 MB',
+        required: true
+      },
+      {
+        id: 'patient-guidance',
+        title: 'Patient Education Guide',
+        description: 'Resource for educating medical cannabis patients',
+        url: '/documents/patient-education-guide.pdf',
+        type: 'pdf',
+        size: '1.8 MB',
+        required: false
+      }
+    ],
     readingMaterial: `
       <h3>Maryland Medical Cannabis Program</h3>
       <p>Maryland's medical cannabis program serves patients with qualifying conditions under physician supervision.</p>
@@ -539,7 +793,47 @@ const moduleContent: {[key: string]: ModuleContent} = {
         question: 'Which is a qualifying condition for Maryland medical cannabis?',
         options: ['Common cold', 'Chronic pain', 'Seasonal allergies', 'Minor headache'],
         correctAnswer: 'Chronic pain',
-        explanation: 'Chronic or severe pain is a qualifying condition under Maryland medical cannabis law.',
+        explanation: 'Chronic or severe pain is one of the qualifying conditions under Maryland medical cannabis law.',
+        points: 10
+      },
+      {
+        id: 'q2',
+        question: 'What is required for patients to access medical cannabis?',
+        options: ['Just cash', 'Maryland medical cannabis ID card', 'Out-of-state ID', 'Nothing specific'],
+        correctAnswer: 'Maryland medical cannabis ID card',
+        explanation: 'Patients must have a Maryland medical cannabis ID card and written certification from a registered physician.',
+        points: 10
+      },
+      {
+        id: 'q3',
+        question: 'How often must medical cannabis registration be renewed?',
+        options: ['Every 6 months', 'Annually', 'Every 2 years', 'Never'],
+        correctAnswer: 'Annually',
+        explanation: 'Maryland medical cannabis patient registration must be renewed annually to maintain active status.',
+        points: 10
+      },
+      {
+        id: 'q4',
+        question: 'What is a caregiver in the medical cannabis program?',
+        options: ['A doctor', 'Someone who can purchase for patients unable to visit', 'A dispensary manager', 'A delivery driver'],
+        correctAnswer: 'Someone who can purchase for patients unable to visit',
+        explanation: 'Caregivers are registered individuals authorized to purchase medical cannabis on behalf of patients who cannot visit dispensaries.',
+        points: 10
+      },
+      {
+        id: 'q5',
+        question: 'Which condition qualifies for medical cannabis?',
+        options: ['Insomnia', 'PTSD', 'Common headache', 'Stress'],
+        correctAnswer: 'PTSD',
+        explanation: 'PTSD (Post-Traumatic Stress Disorder) is an approved qualifying condition for Maryland\'s medical cannabis program.',
+        points: 10
+      },
+      {
+        id: 'q6',
+        question: 'What type of products are recommended for sleep disorders?',
+        options: ['High-sativa strains', 'Indica-dominant strains', 'CBD-only products', 'Topicals'],
+        correctAnswer: 'Indica-dominant strains',
+        explanation: 'Indica-dominant strains are typically recommended for sleep disorders due to their relaxing, sedating effects.',
         points: 10
       }
     ],
@@ -556,7 +850,26 @@ const moduleContent: {[key: string]: ModuleContent} = {
     title: 'Dosing & Product Selection',
     description: 'Evidence-based dosing guidelines and personalized recommendations',
     stoplight_tier: 'yellow',
-    documents: [],
+    documents: [
+      {
+        id: 'dosing-guidelines',
+        title: 'Safe Dosing Guidelines Card',
+        description: 'Quick reference for dosing recommendations',
+        url: '/documents/dosing-guidelines.pdf',
+        type: 'pdf',
+        size: '900 KB',
+        required: true
+      },
+      {
+        id: 'product-selection-guide',
+        title: 'Product Selection Decision Tree',
+        description: 'Flow chart for helping customers choose appropriate products',
+        url: '/documents/product-selection-guide.pdf',
+        type: 'pdf',
+        size: '1.4 MB',
+        required: true
+      }
+    ],
     readingMaterial: `
       <h3>Cannabis Dosing Principles</h3>
       <p>Proper dosing is essential for safe and effective cannabis use.</p>
@@ -592,7 +905,55 @@ const moduleContent: {[key: string]: ModuleContent} = {
         question: 'What is the recommended starting dose for THC edibles?',
         options: ['1mg', '2.5-5mg', '10mg', '20mg'],
         correctAnswer: '2.5-5mg',
-        explanation: 'The recommended starting dose for THC edibles is 2.5-5mg to avoid adverse effects.',
+        explanation: 'The recommended starting dose for THC edibles is 2.5-5mg to minimize risk of adverse effects while finding effective dose.',
+        points: 10
+      },
+      {
+        id: 'q2',
+        question: 'How long should customers wait before taking an additional edible dose?',
+        options: ['30 minutes', '1 hour', '2-4 hours', '10 minutes'],
+        correctAnswer: '2-4 hours',
+        explanation: 'Edibles take 30-120 minutes to take effect. Waiting 2-4 hours prevents overconsumption from stacking doses.',
+        points: 10
+      },
+      {
+        id: 'q3',
+        question: 'What does "start low, go slow" mean?',
+        options: ['Use maximum dose immediately', 'Begin with lowest dose and increase gradually', 'Take breaks from cannabis', 'Only use once per month'],
+        correctAnswer: 'Begin with lowest dose and increase gradually',
+        explanation: '"Start low, go slow" means beginning with the lowest effective dose and increasing gradually to find the optimal amount.',
+        points: 10
+      },
+      {
+        id: 'q4',
+        question: 'What factor affects how someone responds to cannabis?',
+        options: ['Only age', 'Body weight, metabolism, and tolerance', 'Hair color', 'Time of year'],
+        correctAnswer: 'Body weight, metabolism, and tolerance',
+        explanation: 'Individual response varies based on body weight, metabolism, tolerance, endocannabinoid system, and other physiological factors.',
+        points: 10
+      },
+      {
+        id: 'q5',
+        question: 'What is the recommended starting dose for flower?',
+        options: ['1 gram', '0.25-0.5 grams', '2 grams', '5 grams'],
+        correctAnswer: '0.25-0.5 grams',
+        explanation: 'Beginners should start with 0.25-0.5 grams of flower to assess tolerance and avoid overconsumption.',
+        points: 10
+      },
+      {
+        id: 'q6',
+        question: 'Does food intake affect edible absorption?',
+        options: ['No effect', 'Yes, empty stomach speeds absorption', 'Only affects topicals', 'Only affects flower'],
+        correctAnswer: 'Yes, empty stomach speeds absorption',
+        explanation: 'Taking edibles on an empty stomach can speed absorption and intensify effects, while food can slow absorption.',
+        points: 10
+      },
+      {
+        id: 'q7',
+        question: 'What should customers do if initial dose is ineffective?',
+        options: ['Triple the dose immediately', 'Increase gradually in small increments', 'Give up on cannabis', 'Switch products randomly'],
+        correctAnswer: 'Increase gradually in small increments',
+        explanation: 'If initial dose is ineffective, increase gradually by 2.5mg increments over multiple sessions to find the effective dose.',
         points: 10
       }
     ],
@@ -609,7 +970,26 @@ const moduleContent: {[key: string]: ModuleContent} = {
     title: 'Effects & Adverse Reactions',
     description: 'Understanding desired effects, side effects, and managing adverse reactions',
     stoplight_tier: 'yellow',
-    documents: [],
+    documents: [
+      {
+        id: 'effects-safety-sheet',
+        title: 'Effects & Safety Information Sheet',
+        description: 'Comprehensive guide to effects and safety protocols',
+        url: '/documents/effects-safety-sheet.pdf',
+        type: 'pdf',
+        size: '1.6 MB',
+        required: true
+      },
+      {
+        id: 'adverse-reaction-protocol',
+        title: 'Adverse Reaction Response Protocol',
+        description: 'Step-by-step guide for handling customer adverse reactions',
+        url: '/documents/adverse-reaction-protocol.pdf',
+        type: 'pdf',
+        size: '1.1 MB',
+        required: true
+      }
+    ],
     readingMaterial: `
       <h3>Cannabis Effects and Safety</h3>
       <p>Understanding both therapeutic and adverse effects is crucial for customer safety.</p>
@@ -656,7 +1036,55 @@ const moduleContent: {[key: string]: ModuleContent} = {
         question: 'What should a customer do if they experience anxiety from cannabis?',
         options: ['Take more cannabis', 'Stay calm and wait for effects to pass', 'Drive home immediately', 'Ignore it completely'],
         correctAnswer: 'Stay calm and wait for effects to pass',
-        explanation: 'Anxiety from cannabis is temporary; staying calm in a safe environment helps effects pass.',
+        explanation: 'Anxiety from cannabis is temporary; staying calm in a safe, comfortable environment helps the effects pass safely.',
+        points: 10
+      },
+      {
+        id: 'q2',
+        question: 'What is a common side effect of cannabis use?',
+        options: ['Increased saliva', 'Dry mouth', 'Improved vision', 'Permanent memory loss'],
+        correctAnswer: 'Dry mouth',
+        explanation: 'Dry mouth (cottonmouth) is one of the most common side effects of cannabis use and can be managed by staying hydrated.',
+        points: 10
+      },
+      {
+        id: 'q3',
+        question: 'What can help counteract excessive THC effects?',
+        options: ['More THC', 'CBD', 'Alcohol', 'Caffeine'],
+        correctAnswer: 'CBD',
+        explanation: 'CBD can help counteract the psychoactive effects of THC and reduce anxiety or paranoia from overconsumption.',
+        points: 10
+      },
+      {
+        id: 'q4',
+        question: 'When should a customer seek medical attention?',
+        options: ['For any dry mouth', 'If severe symptoms persist', 'Never necessary', 'After every use'],
+        correctAnswer: 'If severe symptoms persist',
+        explanation: 'While most cannabis effects are temporary, customers should seek medical attention if severe symptoms like rapid heart rate or extreme anxiety persist.',
+        points: 10
+      },
+      {
+        id: 'q5',
+        question: 'What causes anxiety or paranoia from cannabis?',
+        options: ['Low-CBD products', 'High-THC products', 'Topical use', 'CBD-only products'],
+        correctAnswer: 'High-THC products',
+        explanation: 'Anxiety and paranoia are typically associated with high-THC products, especially in sensitive individuals or with overconsumption.',
+        points: 10
+      },
+      {
+        id: 'q6',
+        question: 'What should customers avoid after using cannabis?',
+        options: ['Hydrating', 'Driving or operating machinery', 'Sitting down', 'Eating food'],
+        correctAnswer: 'Driving or operating machinery',
+        explanation: 'Cannabis impairs coordination and reaction time. Customers must not drive or operate machinery while under the influence.',
+        points: 10
+      },
+      {
+        id: 'q7',
+        question: 'What is the "munchies"?',
+        options: ['Nausea from cannabis', 'Increased appetite', 'Dry mouth', 'Dizziness'],
+        correctAnswer: 'Increased appetite',
+        explanation: 'The "munchies" refers to increased appetite, a common effect of THC that can be therapeutic for patients with appetite loss.',
         points: 10
       }
     ],
@@ -673,7 +1101,26 @@ const moduleContent: {[key: string]: ModuleContent} = {
     title: 'Record Keeping & Documentation',
     description: 'Compliance documentation, transaction records, and regulatory reporting',
     stoplight_tier: 'yellow',
-    documents: [],
+    documents: [
+      {
+        id: 'record-keeping-templates',
+        title: 'Record Keeping Templates',
+        description: 'Standard templates for compliance documentation',
+        url: '/documents/record-keeping-templates.pdf',
+        type: 'pdf',
+        size: '2.2 MB',
+        required: true
+      },
+      {
+        id: 'retention-schedule',
+        title: 'Document Retention Schedule',
+        description: 'Retention requirements by document type',
+        url: '/documents/retention-schedule.pdf',
+        type: 'pdf',
+        size: '900 KB',
+        required: true
+      }
+    ],
     readingMaterial: `
       <h3>Record Keeping Requirements</h3>
       <p>Accurate documentation is essential for regulatory compliance and business operations.</p>
@@ -717,7 +1164,47 @@ const moduleContent: {[key: string]: ModuleContent} = {
         question: 'How long must most dispensary records be retained?',
         options: ['1 year', '2 years', '4 years', '10 years'],
         correctAnswer: '4 years',
-        explanation: 'Maryland requires most dispensary records to be retained for at least 4 years.',
+        explanation: 'Maryland requires most dispensary records to be retained for a minimum of 4 years to ensure compliance and audit readiness.',
+        points: 10
+      },
+      {
+        id: 'q2',
+        question: 'What information must be recorded for each transaction?',
+        options: ['Just the total amount', 'Only product names', 'ID verification, products, quantities, date/time, agent, tracking numbers', 'Only customer name'],
+        correctAnswer: 'ID verification, products, quantities, date/time, agent, tracking numbers',
+        explanation: 'Complete transaction records must include ID verification logs, products sold, quantities, date/time, responsible agent, and METRC tracking numbers.',
+        points: 10
+      },
+      {
+        id: 'q3',
+        question: 'How long must financial records be retained?',
+        options: ['4 years', '5 years', '7 years', '2 years'],
+        correctAnswer: '7 years',
+        explanation: 'Financial records must be retained for 7 years to comply with IRS requirements.',
+        points: 10
+      },
+      {
+        id: 'q4',
+        question: 'What must be documented daily?',
+        options: ['Only sales', 'Inventory reconciliation of physical vs. system', 'Only employee hours', 'Nothing daily'],
+        correctAnswer: 'Inventory reconciliation of physical vs. system',
+        explanation: 'Daily inventory reconciliation comparing physical counts to system records is required to identify discrepancies promptly.',
+        points: 10
+      },
+      {
+        id: 'q5',
+        question: 'What training records must be maintained?',
+        options: ['None required', 'Only manager training', 'All employee training certificates and annual RVT renewals', 'Only initial training'],
+        correctAnswer: 'All employee training certificates and annual RVT renewals',
+        explanation: 'Dispensaries must maintain training completion certificates and annual RVT renewals for all agents as proof of compliance.',
+        points: 10
+      },
+      {
+        id: 'q6',
+        question: 'How must records be maintained for MCA inspections?',
+        options: ['Digital only', 'Paper only', 'Readily accessible and organized', 'Off-site storage'],
+        correctAnswer: 'Readily accessible and organized',
+        explanation: 'Records must be readily accessible, well-organized, and immediately available for MCA inspections.',
         points: 10
       }
     ],
@@ -734,7 +1221,26 @@ const moduleContent: {[key: string]: ModuleContent} = {
     title: 'Quality Assurance & Testing',
     description: 'Product testing requirements, lab results interpretation, and quality control',
     stoplight_tier: 'yellow',
-    documents: [],
+    documents: [
+      {
+        id: 'lab-testing-guide',
+        title: 'Lab Testing Requirements Guide',
+        description: 'Complete guide to Maryland testing requirements',
+        url: '/documents/lab-testing-guide.pdf',
+        type: 'pdf',
+        size: '2.4 MB',
+        required: true
+      },
+      {
+        id: 'coa-interpretation',
+        title: 'Certificate of Analysis (COA) Interpretation',
+        description: 'How to read and understand lab test results',
+        url: '/documents/coa-interpretation-guide.pdf',
+        type: 'pdf',
+        size: '1.7 MB',
+        required: true
+      }
+    ],
     readingMaterial: `
       <h3>Cannabis Product Testing</h3>
       <p>Maryland requires comprehensive testing to ensure product safety and quality.</p>
@@ -772,7 +1278,55 @@ const moduleContent: {[key: string]: ModuleContent} = {
         question: 'What happens to products that fail required safety tests?',
         options: ['Can be sold at discount', 'Must be destroyed', 'Can be retested only', 'Returned to grower'],
         correctAnswer: 'Must be destroyed',
-        explanation: 'Products failing safety tests must be destroyed and cannot be sold to consumers.',
+        explanation: 'Products failing safety tests must be destroyed under MCA supervision and cannot be sold to consumers under any circumstances.',
+        points: 10
+      },
+      {
+        id: 'q2',
+        question: 'Which of the following is a required test for cannabis products?',
+        options: ['Color analysis', 'Microbial contamination', 'Taste testing', 'Package weight'],
+        correctAnswer: 'Microbial contamination',
+        explanation: 'Microbial contamination testing for bacteria, mold, and fungus is a required safety test for all cannabis products in Maryland.',
+        points: 10
+      },
+      {
+        id: 'q3',
+        question: 'What is the difference between Total THC and Delta-9 THC?',
+        options: ['No difference', 'Total THC includes THCA that converts when heated', 'Delta-9 is synthetic', 'Total THC is less potent'],
+        correctAnswer: 'Total THC includes THCA that converts when heated',
+        explanation: 'Total THC includes both Delta-9 THC and THCA (which converts to THC when heated), representing the total potential psychoactive content.',
+        points: 10
+      },
+      {
+        id: 'q4',
+        question: 'Within what timeframe must MCA be notified of failed test results?',
+        options: ['Immediately', '24 hours', '1 week', '30 days'],
+        correctAnswer: '24 hours',
+        explanation: 'The MCA must be notified within 24 hours of receiving failed test results for any product batch.',
+        points: 10
+      },
+      {
+        id: 'q5',
+        question: 'What does a Certificate of Analysis (COA) show?',
+        options: ['Only THC levels', 'Comprehensive test results including potency and safety', 'Just the batch number', 'Only expiration date'],
+        correctAnswer: 'Comprehensive test results including potency and safety',
+        explanation: 'A COA provides comprehensive test results including cannabinoid potency, terpene profiles, and all required safety tests.',
+        points: 10
+      },
+      {
+        id: 'q6',
+        question: 'Which heavy metals are tested for?',
+        options: ['Only lead', 'Lead, arsenic, cadmium, mercury', 'Iron and zinc', 'No heavy metals testing'],
+        correctAnswer: 'Lead, arsenic, cadmium, mercury',
+        explanation: 'Maryland requires testing for four specific heavy metals: lead, arsenic, cadmium, and mercury to ensure product safety.',
+        points: 10
+      },
+      {
+        id: 'q7',
+        question: 'What is tested on concentrates that is not required for flower?',
+        options: ['Potency', 'Residual solvents', 'Microbial contamination', 'Heavy metals'],
+        correctAnswer: 'Residual solvents',
+        explanation: 'Concentrates and extracts require additional testing for residual solvents used in the extraction process.',
         points: 10
       }
     ],
@@ -789,7 +1343,26 @@ const moduleContent: {[key: string]: ModuleContent} = {
     title: 'Packaging & Labeling Compliance',
     description: 'State-mandated packaging requirements, labeling standards, and child safety',
     stoplight_tier: 'yellow',
-    documents: [],
+    documents: [
+      {
+        id: 'packaging-labeling-standards',
+        title: 'Packaging & Labeling Standards Manual',
+        description: 'Complete guide to Maryland packaging and labeling requirements',
+        url: '/documents/packaging-labeling-standards.pdf',
+        type: 'pdf',
+        size: '2.6 MB',
+        required: true
+      },
+      {
+        id: 'label-checklist',
+        title: 'Label Compliance Checklist',
+        description: 'Quick reference checklist for required label elements',
+        url: '/documents/label-compliance-checklist.pdf',
+        type: 'pdf',
+        size: '700 KB',
+        required: false
+      }
+    ],
     readingMaterial: `
       <h3>Packaging and Labeling Requirements</h3>
       <p>Proper packaging and labeling protect consumers and ensure regulatory compliance.</p>
@@ -838,7 +1411,55 @@ const moduleContent: {[key: string]: ModuleContent} = {
         question: 'What type of packaging is required for all cannabis products?',
         options: ['Clear plastic bags', 'Child-resistant containers', 'Paper bags', 'Any sealed container'],
         correctAnswer: 'Child-resistant containers',
-        explanation: 'All cannabis products must be sold in certified child-resistant packaging.',
+        explanation: 'All cannabis products must be sold in certified child-resistant packaging that meets CPSC standards.',
+        points: 10
+      },
+      {
+        id: 'q2',
+        question: 'What information is NOT required on product labels?',
+        options: ['THC content', 'Batch number', 'Customer name', 'Expiration date'],
+        correctAnswer: 'Customer name',
+        explanation: 'Customer names are not required on product labels. Required info includes potency, batch number, dates, ingredients, and warnings.',
+        points: 10
+      },
+      {
+        id: 'q3',
+        question: 'Which warning statement is required on all cannabis products?',
+        options: ['"This product is organic"', '"Keep out of reach of children"', '"Best product available"', '"FDA approved"'],
+        correctAnswer: '"Keep out of reach of children"',
+        explanation: 'All cannabis products must include the warning "Keep out of reach of children" along with other mandatory safety warnings.',
+        points: 10
+      },
+      {
+        id: 'q4',
+        question: 'What is prohibited on cannabis product labels?',
+        options: ['THC content', 'Cartoon characters', 'Batch numbers', 'Expiration dates'],
+        correctAnswer: 'Cartoon characters',
+        explanation: 'Cartoon characters and images appealing to children are strictly prohibited on cannabis product packaging and labels.',
+        points: 10
+      },
+      {
+        id: 'q5',
+        question: 'What must edible product labels include?',
+        options: ['Only THC content', 'Ingredients list and allergen warnings', 'Just the price', 'Only expiration date'],
+        correctAnswer: 'Ingredients list and allergen warnings',
+        explanation: 'Edible products must include a complete ingredients list and allergen warnings in addition to standard cannabis labeling requirements.',
+        points: 10
+      },
+      {
+        id: 'q6',
+        question: 'Can health claims be made on cannabis product labels?',
+        options: ['Yes, any claims', 'No, unless FDA approved', 'Yes, if they sound good', 'Only for medical products'],
+        correctAnswer: 'No, unless FDA approved',
+        explanation: 'Health or therapeutic claims cannot be made on cannabis labels without FDA approval. False or misleading statements are prohibited.',
+        points: 10
+      },
+      {
+        id: 'q7',
+        question: 'What standard must child-resistant packaging meet?',
+        options: ['None required', 'CPSC standards', 'FDA standards', 'State standards only'],
+        correctAnswer: 'CPSC standards',
+        explanation: 'Child-resistant packaging must be tested and certified to meet CPSC (Consumer Product Safety Commission) standards.',
         points: 10
       }
     ],
@@ -855,7 +1476,26 @@ const moduleContent: {[key: string]: ModuleContent} = {
     title: 'Compliance Inspections & Audits',
     description: 'Preparing for regulatory inspections, audit procedures, and violation consequences',
     stoplight_tier: 'red',
-    documents: [],
+    documents: [
+      {
+        id: 'inspection-checklist',
+        title: 'Inspection Readiness Checklist',
+        description: 'Comprehensive checklist to prepare for MCA inspections',
+        url: '/documents/inspection-readiness-checklist.pdf',
+        type: 'pdf',
+        size: '1.4 MB',
+        required: true
+      },
+      {
+        id: 'audit-guide',
+        title: 'Compliance Audit Preparation Guide',
+        description: 'Step-by-step guide for audit preparation and response',
+        url: '/documents/audit-preparation-guide.pdf',
+        type: 'pdf',
+        size: '2.1 MB',
+        required: true
+      }
+    ],
     readingMaterial: `
       <h3>MCA Compliance Inspections</h3>
       <p>The Maryland Cannabis Administration conducts regular and unannounced inspections to ensure compliance.</p>
@@ -903,7 +1543,55 @@ const moduleContent: {[key: string]: ModuleContent} = {
         question: 'What should you do during an MCA inspection?',
         options: ['Refuse entry', 'Be professional and cooperative', 'Hide problem areas', 'Delay the inspector'],
         correctAnswer: 'Be professional and cooperative',
-        explanation: 'Always remain professional and cooperative during inspections, providing requested documents promptly.',
+        explanation: 'Always remain professional and cooperative during inspections, providing requested documents promptly while respecting the inspection process.',
+        points: 10
+      },
+      {
+        id: 'q2',
+        question: 'What type of inspection can happen without notice?',
+        options: ['Routine inspections only', 'Unannounced inspections', 'License renewal inspections', 'None without notice'],
+        correctAnswer: 'Unannounced inspections',
+        explanation: 'The MCA can conduct unannounced inspections at any time as part of random compliance checks.',
+        points: 10
+      },
+      {
+        id: 'q3',
+        question: 'Which area do inspectors typically review?',
+        options: ['Only front desk', 'Security systems, inventory, records, training docs', 'Just product displays', 'Only financial records'],
+        correctAnswer: 'Security systems, inventory, records, training docs',
+        explanation: 'Inspectors comprehensively review security, inventory tracking (METRC), employee training, transaction records, and product handling.',
+        points: 10
+      },
+      {
+        id: 'q4',
+        question: 'What is the consequence of serious violations?',
+        options: ['Just a warning', 'License revocation or criminal charges', 'Small fine only', 'No consequences'],
+        correctAnswer: 'License revocation or criminal charges',
+        explanation: 'Serious violations can result in license revocation, criminal charges, and become part of public record.',
+        points: 10
+      },
+      {
+        id: 'q5',
+        question: 'Should you sign inspection documents without reading them?',
+        options: ['Yes, always sign immediately', 'No, review carefully before signing', 'Only sign if manager approves', 'Never sign anything'],
+        correctAnswer: 'No, review carefully before signing',
+        explanation: 'Never sign inspection documents without carefully reviewing them. Take time to understand what you\'re acknowledging.',
+        points: 10
+      },
+      {
+        id: 'q6',
+        question: 'What should you do if you don\'t understand an inspector\'s question?',
+        options: ['Guess the answer', 'Ask for clarification', 'Stay silent', 'Make something up'],
+        correctAnswer: 'Ask for clarification',
+        explanation: 'Always ask for clarification if you don\'t understand a question. Accuracy is more important than quick responses.',
+        points: 10
+      },
+      {
+        id: 'q7',
+        question: 'What happens to minor violations?',
+        options: ['License suspension immediately', 'Warning letter and corrective action plan', 'Criminal charges', 'Nothing happens'],
+        correctAnswer: 'Warning letter and corrective action plan',
+        explanation: 'Minor violations typically result in a warning letter and requirement to submit a corrective action plan.',
         points: 10
       }
     ],
@@ -920,7 +1608,26 @@ const moduleContent: {[key: string]: ModuleContent} = {
     title: 'Emergency Procedures & Incident Response',
     description: 'Emergency protocols, security incidents, and crisis management',
     stoplight_tier: 'red',
-    documents: [],
+    documents: [
+      {
+        id: 'emergency-protocol',
+        title: 'Emergency Response Protocol Manual',
+        description: 'Comprehensive emergency response procedures',
+        url: '/documents/emergency-response-protocol.pdf',
+        type: 'pdf',
+        size: '2.3 MB',
+        required: true
+      },
+      {
+        id: 'incident-report-forms',
+        title: 'Incident Report Forms',
+        description: 'Templates for documenting various incident types',
+        url: '/documents/incident-report-forms.pdf',
+        type: 'pdf',
+        size: '1.2 MB',
+        required: true
+      }
+    ],
     readingMaterial: `
       <h3>Emergency Procedures</h3>
       <p>Proper emergency response protects staff, customers, and cannabis inventory.</p>
@@ -966,7 +1673,55 @@ const moduleContent: {[key: string]: ModuleContent} = {
         question: 'What is the first priority during a robbery?',
         options: ['Protect inventory', 'Staff and customer safety', 'Call police', 'Lock doors'],
         correctAnswer: 'Staff and customer safety',
-        explanation: 'Safety of people always comes first during security incidents. Do not resist robbery attempts.',
+        explanation: 'Safety of people always comes first during security incidents. Do not resist robbery attempts - compliance keeps everyone safe.',
+        points: 10
+      },
+      {
+        id: 'q2',
+        question: 'What should you do if you witness suspicious activity?',
+        options: ['Confront the person', 'Observe and report', 'Ignore it', 'Chase them outside'],
+        correctAnswer: 'Observe and report',
+        explanation: 'Observe suspicious activity from a safe distance and report it to management and/or law enforcement. Do not confront.',
+        points: 10
+      },
+      {
+        id: 'q3',
+        question: 'When should you call 911 for a medical emergency?',
+        options: ['Never', 'Immediately for serious conditions', 'After trying everything else', 'Only if customer requests'],
+        correctAnswer: 'Immediately for serious conditions',
+        explanation: 'Call 911 immediately for any serious medical condition. Time is critical in medical emergencies.',
+        points: 10
+      },
+      {
+        id: 'q4',
+        question: 'What is the proper response during a fire?',
+        options: ['Fight the fire yourself', 'Evacuate following posted routes', 'Save inventory first', 'Wait for instructions'],
+        correctAnswer: 'Evacuate following posted routes',
+        explanation: 'During a fire, evacuate the building immediately using posted routes, call 911 from a safe location, and account for all staff.',
+        points: 10
+      },
+      {
+        id: 'q5',
+        question: 'Within what timeframe must inventory theft be reported to MCA?',
+        options: ['1 week', '24 hours', '72 hours', '30 days'],
+        correctAnswer: '24 hours',
+        explanation: 'Inventory loss, theft, or diversion must be reported to the MCA within 24 hours along with filing a police report.',
+        points: 10
+      },
+      {
+        id: 'q6',
+        question: 'What should you do if a customer experiences cannabis overconsumption?',
+        options: ['Sell them more product', 'Stay calm, monitor vital signs, seek help if severe', 'Tell them to go home', 'Ignore the situation'],
+        correctAnswer: 'Stay calm, monitor vital signs, seek help if severe',
+        explanation: 'For cannabis overconsumption, stay calm, monitor the person\'s vital signs, provide a safe environment, and seek medical help if symptoms are severe.',
+        points: 10
+      },
+      {
+        id: 'q7',
+        question: 'Should you re-enter a building after evacuation?',
+        options: ['Yes, to get personal items', 'No, never until cleared by authorities', 'Yes, to check on inventory', 'Only if the fire looks small'],
+        correctAnswer: 'No, never until cleared by authorities',
+        explanation: 'Never re-enter an evacuated building until it has been cleared as safe by fire department or other authorities.',
         points: 10
       }
     ],
@@ -1058,6 +1813,38 @@ const moduleContent: {[key: string]: ModuleContent} = {
         ],
         correctAnswer: 'Increased tolerance requiring more product',
         explanation: 'Increased tolerance - needing more product to achieve the same effects - is a key warning sign of substance use disorder.',
+        points: 10
+      },
+      {
+        id: 'q3',
+        question: 'What is a sign of acute intoxication?',
+        options: ['Clear speech', 'Impaired coordination and slurred speech', 'Normal behavior', 'Sharp focus'],
+        correctAnswer: 'Impaired coordination and slurred speech',
+        explanation: 'Acute intoxication signs include impaired coordination, slurred or confused speech, unusual behavior, and strong cannabis odor.',
+        points: 10
+      },
+      {
+        id: 'q4',
+        question: 'What should you do if you recognize signs of substance use disorder in a customer?',
+        options: ['Ignore it', 'Provide resources and educate on harm reduction', 'Ban them from the dispensary', 'Lecture them'],
+        correctAnswer: 'Provide resources and educate on harm reduction',
+        explanation: 'Offer information about treatment and support services, share harm reduction strategies, and maintain a supportive, non-judgmental approach.',
+        points: 10
+      },
+      {
+        id: 'q5',
+        question: 'What is SAMHSA\'s National Helpline number?',
+        options: ['911', '1-800-662-4357', '311', '1-888-555-1212'],
+        correctAnswer: '1-800-662-4357',
+        explanation: 'The SAMHSA National Helpline (1-800-662-4357) provides 24/7 free, confidential treatment referral and information services.',
+        points: 10
+      },
+      {
+        id: 'q6',
+        question: 'Should you document interactions when you decline a sale due to intoxication?',
+        options: ['No, not necessary', 'Yes, keep records of declined sales', 'Only if police are called', 'Only tell your manager verbally'],
+        correctAnswer: 'Yes, keep records of declined sales',
+        explanation: 'Document all declined sales and concerning interactions to maintain compliance records and protect the dispensary.',
         points: 10
       }
     ],
