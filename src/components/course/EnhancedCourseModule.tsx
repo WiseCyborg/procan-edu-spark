@@ -257,18 +257,16 @@ const moduleContent: {[key: string]: ModuleContent} = {
         id: 'product-guide',
         title: 'Product Knowledge Reference Guide',
         description: 'Complete guide to cannabis product types and their characteristics',
-        url: '/documents/product-knowledge-guide.pdf',
-        type: 'pdf',
-        size: '2.8 MB',
+        contentId: 'product-guide',
+        type: 'html',
         required: true
       },
       {
         id: 'consumption-methods',
         title: 'Consumption Methods Comparison Chart',
         description: 'Visual comparison of onset times, duration, and effects by method',
-        url: '/documents/consumption-methods-chart.pdf',
-        type: 'pdf',
-        size: '1.2 MB',
+        contentId: 'consumption-methods',
+        type: 'html',
         required: false
       }
     ],
@@ -371,18 +369,16 @@ const moduleContent: {[key: string]: ModuleContent} = {
         id: 'customer-service-handbook',
         title: 'Customer Service Handbook',
         description: 'Best practices for professional customer interactions',
-        url: '/documents/customer-service-handbook.pdf',
-        type: 'pdf',
-        size: '1.8 MB',
+        contentId: 'customer-service-handbook',
+        type: 'html',
         required: true
       },
       {
         id: 'needs-assessment-tool',
         title: 'Customer Needs Assessment Tool',
         description: 'Structured approach to understanding customer requirements',
-        url: '/documents/needs-assessment-tool.pdf',
-        type: 'pdf',
-        size: '800 KB',
+        contentId: 'needs-assessment-tool',
+        type: 'html',
         required: false
       }
     ],
@@ -496,27 +492,24 @@ const moduleContent: {[key: string]: ModuleContent} = {
         id: 'metrc-guide',
         title: 'METRC User Guide for Maryland',
         description: 'Complete guide to Maryland\'s track-and-trace system',
-        url: '/documents/metrc-user-guide.pdf',
-        type: 'pdf',
-        size: '4.2 MB',
+        contentId: 'metrc-guide',
+        type: 'html',
         required: true
       },
       {
         id: 'inventory-sop',
         title: 'Inventory Management SOP',
         description: 'Standard operating procedures for inventory control',
-        url: '/documents/inventory-management-sop.pdf',
-        type: 'pdf',
-        size: '1.5 MB',
+        contentId: 'inventory-sop',
+        type: 'html',
         required: true
       },
       {
         id: 'security-protocols',
         title: 'Security Protocols Checklist',
         description: 'Daily security compliance checklist',
-        url: '/documents/security-protocols-checklist.pdf',
-        type: 'pdf',
-        size: '600 KB',
+        contentId: 'security-protocols',
+        type: 'html',
         required: false
       }
     ],
@@ -634,9 +627,8 @@ const moduleContent: {[key: string]: ModuleContent} = {
         id: 'pharmacology-guide',
         title: 'Cannabis Pharmacology Guide',
         description: 'Comprehensive guide to cannabinoids and their effects',
-        url: '/documents/cannabis-pharmacology.pdf',
-        type: 'pdf',
-        size: '3.1 MB',
+        contentId: 'pharmacology-guide',
+        type: 'html',
         required: true
       }
     ],
@@ -740,27 +732,24 @@ const moduleContent: {[key: string]: ModuleContent} = {
         id: 'medical-program-guide',
         title: 'Maryland Medical Cannabis Program Guide',
         description: 'Complete overview of the medical cannabis program',
-        url: '/documents/medical-cannabis-program.pdf',
-        type: 'pdf',
-        size: '2.5 MB',
+        contentId: 'medical-program-guide',
+        type: 'html',
         required: true
       },
       {
         id: 'qualifying-conditions',
         title: 'Qualifying Conditions Reference',
         description: 'List of approved medical conditions and requirements',
-        url: '/documents/qualifying-conditions.pdf',
-        type: 'pdf',
-        size: '1.1 MB',
+        contentId: 'qualifying-conditions',
+        type: 'html',
         required: true
       },
       {
         id: 'patient-guidance',
         title: 'Patient Education Guide',
         description: 'Resource for educating medical cannabis patients',
-        url: '/documents/patient-education-guide.pdf',
-        type: 'pdf',
-        size: '1.8 MB',
+        contentId: 'patient-guidance',
+        type: 'html',
         required: false
       }
     ],
@@ -864,18 +853,16 @@ const moduleContent: {[key: string]: ModuleContent} = {
         id: 'dosing-guidelines',
         title: 'Safe Dosing Guidelines Card',
         description: 'Quick reference for dosing recommendations',
-        url: '/documents/dosing-guidelines.pdf',
-        type: 'pdf',
-        size: '900 KB',
+        contentId: 'dosing-guidelines',
+        type: 'html',
         required: true
       },
       {
         id: 'product-selection-guide',
         title: 'Product Selection Decision Tree',
         description: 'Flow chart for helping customers choose appropriate products',
-        url: '/documents/product-selection-guide.pdf',
-        type: 'pdf',
-        size: '1.4 MB',
+        contentId: 'product-selection-guide',
+        type: 'html',
         required: true
       }
     ],
@@ -984,18 +971,16 @@ const moduleContent: {[key: string]: ModuleContent} = {
         id: 'effects-safety-sheet',
         title: 'Effects & Safety Information Sheet',
         description: 'Comprehensive guide to effects and safety protocols',
-        url: '/documents/effects-safety-sheet.pdf',
-        type: 'pdf',
-        size: '1.6 MB',
+        contentId: 'effects-safety-sheet',
+        type: 'html',
         required: true
       },
       {
         id: 'adverse-reaction-protocol',
         title: 'Adverse Reaction Response Protocol',
         description: 'Step-by-step guide for handling customer adverse reactions',
-        url: '/documents/adverse-reaction-protocol.pdf',
-        type: 'pdf',
-        size: '1.1 MB',
+        contentId: 'adverse-reaction-protocol',
+        type: 'html',
         required: true
       }
     ],
@@ -1115,18 +1100,16 @@ const moduleContent: {[key: string]: ModuleContent} = {
         id: 'record-keeping-templates',
         title: 'Record Keeping Templates',
         description: 'Standard templates for compliance documentation',
-        url: '/documents/record-keeping-templates.pdf',
-        type: 'pdf',
-        size: '2.2 MB',
+        contentId: 'record-keeping-templates',
+        type: 'html',
         required: true
       },
       {
         id: 'retention-schedule',
         title: 'Document Retention Schedule',
         description: 'Retention requirements by document type',
-        url: '/documents/retention-schedule.pdf',
-        type: 'pdf',
-        size: '900 KB',
+        contentId: 'retention-schedule',
+        type: 'html',
         required: true
       }
     ],
@@ -1235,18 +1218,16 @@ const moduleContent: {[key: string]: ModuleContent} = {
         id: 'lab-testing-guide',
         title: 'Lab Testing Requirements Guide',
         description: 'Complete guide to Maryland testing requirements',
-        url: '/documents/lab-testing-guide.pdf',
-        type: 'pdf',
-        size: '2.4 MB',
+        contentId: 'lab-testing-guide',
+        type: 'html',
         required: true
       },
       {
         id: 'coa-interpretation',
         title: 'Certificate of Analysis (COA) Interpretation',
         description: 'How to read and understand lab test results',
-        url: '/documents/coa-interpretation-guide.pdf',
-        type: 'pdf',
-        size: '1.7 MB',
+        contentId: 'coa-interpretation',
+        type: 'html',
         required: true
       }
     ],
@@ -1357,18 +1338,16 @@ const moduleContent: {[key: string]: ModuleContent} = {
         id: 'packaging-labeling-standards',
         title: 'Packaging & Labeling Standards Manual',
         description: 'Complete guide to Maryland packaging and labeling requirements',
-        url: '/documents/packaging-labeling-standards.pdf',
-        type: 'pdf',
-        size: '2.6 MB',
+        contentId: 'packaging-labeling-standards',
+        type: 'html',
         required: true
       },
       {
         id: 'label-checklist',
         title: 'Label Compliance Checklist',
         description: 'Quick reference checklist for required label elements',
-        url: '/documents/label-compliance-checklist.pdf',
-        type: 'pdf',
-        size: '700 KB',
+        contentId: 'label-checklist',
+        type: 'html',
         required: false
       }
     ],
@@ -1490,18 +1469,16 @@ const moduleContent: {[key: string]: ModuleContent} = {
         id: 'inspection-checklist',
         title: 'Inspection Readiness Checklist',
         description: 'Comprehensive checklist to prepare for MCA inspections',
-        url: '/documents/inspection-readiness-checklist.pdf',
-        type: 'pdf',
-        size: '1.4 MB',
+        contentId: 'inspection-checklist',
+        type: 'html',
         required: true
       },
       {
         id: 'audit-guide',
         title: 'Compliance Audit Preparation Guide',
         description: 'Step-by-step guide for audit preparation and response',
-        url: '/documents/audit-preparation-guide.pdf',
-        type: 'pdf',
-        size: '2.1 MB',
+        contentId: 'audit-guide',
+        type: 'html',
         required: true
       }
     ],
@@ -1622,18 +1599,16 @@ const moduleContent: {[key: string]: ModuleContent} = {
         id: 'emergency-protocol',
         title: 'Emergency Response Protocol Manual',
         description: 'Comprehensive emergency response procedures',
-        url: '/documents/emergency-response-protocol.pdf',
-        type: 'pdf',
-        size: '2.3 MB',
+        contentId: 'emergency-response-procedures',
+        type: 'html',
         required: true
       },
       {
         id: 'incident-report-forms',
         title: 'Incident Report Forms',
         description: 'Templates for documenting various incident types',
-        url: '/documents/incident-report-forms.pdf',
-        type: 'pdf',
-        size: '1.2 MB',
+        contentId: 'incident-report-forms',
+        type: 'html',
         required: true
       }
     ],
@@ -1753,9 +1728,8 @@ const moduleContent: {[key: string]: ModuleContent} = {
         id: 'substance-disorders',
         title: 'Substance Use Disorder Recognition',
         description: 'Guide to identifying symptoms and providing appropriate support',
-        url: '/documents/substance-use-disorders.pdf',
-        type: 'pdf',
-        size: '2.8 MB',
+        contentId: 'substance-disorders',
+        type: 'html',
         required: true
       }
     ],
@@ -1877,9 +1851,8 @@ const moduleContent: {[key: string]: ModuleContent} = {
         id: 'responsible-vendor',
         title: 'Responsible Vendor Certification Guide',
         description: 'Complete guide to responsible vendor practices and certification',
-        url: '/documents/responsible-vendor-guide.pdf',
-        type: 'pdf',
-        size: '2.5 MB',
+        contentId: 'responsible-vendor',
+        type: 'html',
         required: true
       }
     ],
