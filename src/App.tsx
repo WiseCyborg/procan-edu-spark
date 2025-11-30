@@ -30,7 +30,7 @@ import EnhancedAdminDashboard from "./pages/EnhancedAdminDashboard";
 import RealTimeOperationsDashboard from "./pages/RealTimeOperationsDashboard";
 import Profile from "./pages/Profile";
 import CourseLayout from "./pages/Course/CourseLayout";
-import EnhancedCourseModule from "./components/course/EnhancedCourseModule";
+import EnhancedCourseModule from "./pages/Course/EnhancedCourseModule";
 import FinalExam from "./pages/Course/FinalExam";
 import Certificates from "./pages/Certificates";
 import PaymentSuccess from "./pages/PaymentSuccess";
