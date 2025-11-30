@@ -45,9 +45,6 @@ verify_jwt = false
 [functions.approve-application]
 verify_jwt = true
 
-[functions.openai-avatar-voice]
-verify_jwt = false
-
 [functions.chat-assistant-enhanced]
 verify_jwt = false
 
@@ -135,9 +132,6 @@ verify_jwt = false
 [functions.monitor-form-submissions]
 verify_jwt = false
 
-[functions.enrollment-lifecycle-agent]
-verify_jwt = false
-
 [functions.chat-assistant]
 verify_jwt = false
 
@@ -166,12 +160,6 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.staff-invitation-manager]
-verify_jwt = false
-
-[functions.send-invitation-email]
-verify_jwt = false
-
-[functions.send-welcome-email]
 verify_jwt = false
 
 [functions.allocate-seats-on-payment]
@@ -210,9 +198,6 @@ verify_jwt = true
 [functions.manage-competitor]
 verify_jwt = true
 
-[functions.database-integrity-fix]
-verify_jwt = true
-
 [functions.calculate-recommendation-impact]
 verify_jwt = false
 
@@ -232,9 +217,6 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.database-integrity-check]
-verify_jwt = true
-
-[functions.database-integrity-fix]
 verify_jwt = true
 
 [functions.populate-comar-content]

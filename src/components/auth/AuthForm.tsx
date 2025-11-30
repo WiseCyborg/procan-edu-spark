@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { invokePublicFunction } from '@/lib/publicEdgeFunctions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -36,8 +37,8 @@ const AuthForm = () => {
     
     setEmailChecking(true);
     try {
-      const { data, error } = await supabase.functions.invoke('check-email-exists', {
-        body: { email: emailToCheck }
+      const { data, error } = await invokePublicFunction('check-email-exists', {
+        email: emailToCheck
       });
       
       if (error) {
