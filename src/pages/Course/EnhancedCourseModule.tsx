@@ -1,11 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BookOpen, Video, FileText, CheckCircle2, ArrowLeft } from 'lucide-react';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Progress } from '@/components/ui/progress';
+import { BookOpen, Video, FileText, CheckCircle2, ArrowLeft, Info } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
+import { getModuleDocuments } from '@/data/moduleDocumentMapping';
+import { getDocumentContent, DocumentContent } from '@/data/moduleDocuments';
 import { sanitizeHtml } from "@/utils/sanitize-html";
 import { markdownToHtml } from "@/utils/markdown-to-html";
 import { useUserProgress } from '@/hooks/useUserProgress';
@@ -83,6 +87,7 @@ const EnhancedCourseModule: React.FC = () => {
   const [overviewComplete, setOverviewComplete] = useState(false);
   const [videoWatched, setVideoWatched] = useState(false);
   const [docsViewed, setDocsViewed] = useState(false);
+  const [documentsViewed, setDocumentsViewed] = useState<Set<string>>(new Set());
   const [quizComplete, setQuizComplete] = useState(false);
   const [showQuizResults, setShowQuizResults] = useState(false);
   const [showWeakPractice, setShowWeakPractice] = useState(false);
@@ -91,6 +96,12 @@ const EnhancedCourseModule: React.FC = () => {
   const [weakTopics, setWeakTopics] = useState<WeakTopic[]>([]);
 
   const { updateProgress, isModuleCompleted } = useUserProgress(COURSE_ID);
+  
+  // Fetch documents for this module
+  const moduleDocuments = useMemo(() => {
+    const docIds = getModuleDocuments(moduleId || '');
+    return docIds.map(id => getDocumentContent(id)).filter((doc): doc is DocumentContent => doc !== undefined);
+  }, [moduleId]);
   
   const currentModuleNumber = parseInt(moduleId?.replace('part', '') || '0');
   const currentModule = allModules.find(m => m.number === currentModuleNumber);
@@ -454,13 +465,95 @@ const EnhancedCourseModule: React.FC = () => {
 
                 <TabsContent value="documents" className="space-y-4">
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div className="lg:col-span-2">
+                    <div className="lg:col-span-2 space-y-4">
                       <Card>
                         <CardHeader>
                           <CardTitle>Reference Documents</CardTitle>
+                          <p className="text-sm text-muted-foreground">
+                            Review all documents before proceeding to the quiz
+                          </p>
                         </CardHeader>
                         <CardContent>
-                          <p className="text-muted-foreground">Reference materials and documents for this module</p>
+                          <Accordion type="multiple" className="w-full">
+                            {moduleDocuments.map((doc, index) => {
+                              const isViewed = documentsViewed.has(doc.id);
+                              return (
+                                <AccordionItem key={doc.id} value={doc.id}>
+                                  <AccordionTrigger className="hover:no-underline">
+                                    <div className="flex items-center justify-between w-full pr-4">
+                                      <div className="flex items-center gap-3">
+                                        {isViewed ? (
+                                          <CheckCircle2 className="h-5 w-5 text-green-600" />
+                                        ) : (
+                                          <FileText className="h-5 w-5 text-muted-foreground" />
+                                        )}
+                                        <div className="text-left">
+                                          <div className="font-semibold">{doc.title}</div>
+                                          <div className="text-xs text-muted-foreground">
+                                            {doc.category} • Version {doc.version}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </AccordionTrigger>
+                                  <AccordionContent>
+                                    <div className="space-y-4 pt-4">
+                                      {doc.comarReferences && doc.comarReferences.length > 0 && (
+                                        <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 p-2 rounded">
+                                          <Info className="h-4 w-4" />
+                                          <span>
+                                            COMAR References: {doc.comarReferences.join(', ')}
+                                          </span>
+                                        </div>
+                                      )}
+                                      
+                                      <div 
+                                        className="prose prose-sm max-w-none dark:prose-invert"
+                                        dangerouslySetInnerHTML={{ 
+                                          __html: sanitizeHtml(doc.content) 
+                                        }}
+                                      />
+                                      
+                                      <div className="flex items-center justify-between pt-4 border-t">
+                                        <span className="text-xs text-muted-foreground">
+                                          Last updated: {new Date(doc.lastUpdated).toLocaleDateString()}
+                                        </span>
+                                        {!isViewed && (
+                                          <Button
+                                            size="sm"
+                                            onClick={() => {
+                                              setDocumentsViewed(prev => new Set([...prev, doc.id]));
+                                              toast({
+                                                title: "Document marked as read",
+                                                description: `You've reviewed "${doc.title}"`,
+                                              });
+                                            }}
+                                          >
+                                            <CheckCircle2 className="h-4 w-4 mr-2" />
+                                            Mark as Read
+                                          </Button>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </AccordionContent>
+                                </AccordionItem>
+                              );
+                            })}
+                          </Accordion>
+                          
+                          {moduleDocuments.length > 0 && (
+                            <div className="mt-4 p-3 bg-muted/50 rounded-lg">
+                              <div className="flex items-center justify-between text-sm">
+                                <span className="text-muted-foreground">
+                                  Documents reviewed: {documentsViewed.size} of {moduleDocuments.length}
+                                </span>
+                                <Progress 
+                                  value={(documentsViewed.size / moduleDocuments.length) * 100} 
+                                  className="w-32 h-2"
+                                />
+                              </div>
+                            </div>
+                          )}
                         </CardContent>
                       </Card>
                     </div>
@@ -479,8 +572,12 @@ const EnhancedCourseModule: React.FC = () => {
                       setDocsViewed(true);
                       setActiveTab('quiz');
                     }}
-                    canContinue={true}
-                    completionMessage="Mark Documents as Reviewed"
+                    canContinue={documentsViewed.size === moduleDocuments.length}
+                    completionMessage={
+                      documentsViewed.size === moduleDocuments.length
+                        ? "All Documents Reviewed - Continue to Quiz"
+                        : `Review all ${moduleDocuments.length} documents to continue`
+                    }
                     onMarkComplete={() => setDocsViewed(true)}
                   />
                 </TabsContent>
