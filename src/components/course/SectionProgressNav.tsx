@@ -26,7 +26,7 @@ export function SectionProgressNav({
   moduleTitle 
 }: SectionProgressNavProps) {
   return (
-    <aside className="hidden xl:block w-64 sticky top-24 h-fit">
+    <aside className="hidden lg:block w-64 sticky top-24 h-fit">
       <div className="rounded-lg border bg-card p-4 shadow-sm">
         <div className="mb-4">
           <h3 className="font-semibold text-sm mb-2">Module Progress</h3>

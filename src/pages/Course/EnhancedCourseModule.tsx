@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BookOpen, Video, FileText, CheckCircle2, ArrowLeft } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
+import { sanitizeHtml } from "@/utils/sanitize-html";
+import { markdownToHtml } from "@/utils/markdown-to-html";
 import { useUserProgress } from '@/hooks/useUserProgress';
 import { supabase } from '@/integrations/supabase/client';
 import { RegulatorySidebar } from '@/components/regulatory/RegulatorySidebar';
@@ -399,13 +401,12 @@ const EnhancedCourseModule: React.FC = () => {
                       <CardTitle>Module Content</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="prose prose-sm md:prose-base max-w-none">
-                        {moduleData.content.split('\n').map((paragraph, index) => (
-                          <p key={index} className="mb-4 text-foreground leading-relaxed">
-                            {paragraph}
-                          </p>
-                        ))}
-                      </div>
+                      <div 
+                        className="prose prose-sm md:prose-base max-w-none dark:prose-invert"
+                        dangerouslySetInnerHTML={{ 
+                          __html: sanitizeHtml(markdownToHtml(moduleData.content || '')) 
+                        }}
+                      />
                     </CardContent>
                   </Card>
                   
