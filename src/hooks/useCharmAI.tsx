@@ -58,7 +58,7 @@ export const useCharmAI = () => {
           .eq('user_id', user.id);
 
         const trainingProgress = progress ? 
-          Math.round((progress.filter((p: any) => p.is_completed).length / 18) * 100) : 0;
+          Math.round((progress.filter((p: any) => p.is_completed).length / 23) * 100) : 0;
 
         setUserProfile({
           userId: user.id,
