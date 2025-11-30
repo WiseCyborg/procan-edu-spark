@@ -5,12 +5,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import { CheckCircle, FileText, Video, BookOpen, Clock } from 'lucide-react';
+import { CheckCircle, FileText, Video, BookOpen, Clock, ArrowLeft, ArrowRight } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { useUserProgress } from '@/hooks/useUserProgress';
+import { useModuleNavigation } from '@/hooks/useModuleNavigation';
 import { VideoPlayer } from './VideoPlayer';
 import { DocumentViewer } from './DocumentViewer';
 import { InteractiveQuiz } from './InteractiveQuiz';
+import { CourseNavigationHeader } from './CourseNavigationHeader';
+import { ModuleSidebar } from './ModuleSidebar';
+import { MobileNavBar } from './MobileNavBar';
 import CourseContent from './CourseContent';
 
 interface ModuleContent {
@@ -2075,9 +2079,39 @@ const EnhancedCourseModule: React.FC = () => {
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [moduleProgress, setModuleProgress] = useState(0);
 
-  const { updateProgress, isModuleCompleted, getModuleProgress } = useUserProgress(COURSE_ID);
+  const { updateProgress, isModuleCompleted, getModuleProgress, getCompletedModulesCount } = useUserProgress(COURSE_ID);
   
   const module = moduleId ? moduleContent[moduleId] : null;
+
+  // Build modules array for navigation
+  const allModules = Object.entries(moduleContent).map(([key, mod]) => ({
+    id: mod.id,
+    number: parseInt(key.replace('part', '')),
+    title: mod.title,
+    tier: mod.stoplight_tier || 'green',
+    isCompleted: isModuleCompleted(mod.id)
+  })).sort((a, b) => a.number - b.number);
+
+  const currentModuleNumber = moduleId ? parseInt(moduleId.replace('part', '')) : 0;
+  const totalModules = allModules.length;
+  const completedCount = getCompletedModulesCount();
+
+  // Navigation hook with keyboard shortcuts
+  const {
+    goToPrevious,
+    goToNext,
+    goToModule,
+    goToCourse,
+    canGoPrevious,
+    canGoNext
+  } = useModuleNavigation({
+    currentModule: currentModuleNumber,
+    totalModules,
+    onNavigate: (moduleNumber) => navigate(`/course/part${moduleNumber}`)
+  });
+
+  const previousModule = canGoPrevious ? allModules[currentModuleNumber - 1] : null;
+  const nextModule = canGoNext ? allModules[currentModuleNumber + 1] : null;
   
   useEffect(() => {
     if (!module) {
@@ -2159,9 +2193,31 @@ const EnhancedCourseModule: React.FC = () => {
   const canTakeQuiz = (videoWatched || !module.videoUrl) && allRequiredDocumentsViewed && readingCompleted;
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* Module Header */}
-      <Card>
+    <>
+      {/* Sticky Navigation Header */}
+      <CourseNavigationHeader
+        currentModuleNumber={currentModuleNumber}
+        currentModuleTitle={module.title}
+        totalModules={totalModules}
+        completedCount={completedCount}
+        modules={allModules}
+        onModuleSelect={goToModule}
+        onClose={goToCourse}
+      />
+
+      {/* Main Content with Sidebar */}
+      <div className="flex w-full">
+        {/* Module Sidebar - Desktop Only */}
+        <ModuleSidebar
+          modules={allModules}
+          currentModuleNumber={currentModuleNumber}
+          onModuleSelect={goToModule}
+        />
+
+        {/* Main Module Content */}
+        <div className="flex-1 container mx-auto p-6 space-y-6 lg:pb-6 pb-24">
+          {/* Module Header */}
+          <Card>
         <CardHeader>
           <div className="flex justify-between items-start">
             <div>
@@ -2285,19 +2341,55 @@ const EnhancedCourseModule: React.FC = () => {
         </TabsContent>
       </Tabs>
 
-      {/* Navigation */}
-      <div className="flex justify-between">
-        <Button variant="outline" onClick={() => navigate('/course')}>
-          Back to Course
-        </Button>
-        
-        {moduleProgress === 100 && (
-          <Button onClick={() => navigate('/course')}>
-            Return to Course Overview
-          </Button>
-        )}
+          {/* Desktop Navigation */}
+          <div className="hidden lg:flex justify-between items-center pt-6 border-t">
+            <Button
+              variant="outline"
+              onClick={goToPrevious}
+              disabled={!canGoPrevious}
+              className="gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              {previousModule && (
+                <span className="max-w-[200px] truncate">
+                  Previous: {previousModule.title}
+                </span>
+              )}
+            </Button>
+
+            <Button variant="outline" onClick={goToCourse}>
+              Back to Course
+            </Button>
+
+            <Button
+              onClick={goToNext}
+              disabled={!canGoNext}
+              className="gap-2"
+            >
+              {nextModule && (
+                <span className="max-w-[200px] truncate">
+                  Next: {nextModule.title}
+                </span>
+              )}
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
       </div>
-    </div>
+
+      {/* Mobile Navigation Bar */}
+      <MobileNavBar
+        modules={allModules}
+        currentModuleNumber={currentModuleNumber}
+        canGoPrevious={canGoPrevious}
+        canGoNext={canGoNext}
+        onPrevious={goToPrevious}
+        onNext={goToNext}
+        onModuleSelect={goToModule}
+        previousTitle={previousModule?.title}
+        nextTitle={nextModule?.title}
+      />
+    </>
   );
 };
 
