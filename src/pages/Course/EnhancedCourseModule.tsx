@@ -3,18 +3,32 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { CheckCircle, XCircle, BookOpen, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { BookOpen, Video, FileText, CheckCircle2, ArrowLeft } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { useUserProgress } from '@/hooks/useUserProgress';
 import { supabase } from '@/integrations/supabase/client';
 import { RegulatorySidebar } from '@/components/regulatory/RegulatorySidebar';
+import { SectionProgressNav } from '@/components/course/SectionProgressNav';
+import { SectionNavButton } from '@/components/course/SectionNavButton';
+import { InteractiveQuiz, QuizQuestion as IQuizQuestion, WeakTopic } from '@/components/course/InteractiveQuiz';
+import { QuizResultsWithReview } from '@/components/course/QuizResultsWithReview';
+import { WeakAreaPractice } from '@/components/course/WeakAreaPractice';
+import { CourseNavigationHeader } from '@/components/course/CourseNavigationHeader';
+import { ModuleSidebar } from '@/components/course/ModuleSidebar';
+import { MobileNavBar } from '@/components/course/MobileNavBar';
+import { useModuleNavigation } from '@/hooks/useModuleNavigation';
 
 interface QuizQuestion {
+  id: string;
   question: string;
   options: string[];
   correct: string;
   explanation: string;
+  topic?: string;
+  comarRef?: string;
+  difficulty?: 'easy' | 'medium' | 'hard';
+  relatedModules?: string[];
 }
 
 interface ModuleData {
@@ -25,21 +39,64 @@ interface ModuleData {
   quiz_questions: QuizQuestion[];
   module_number: number;
   comar_reference?: string;
+  video_url?: string;
 }
 
 const COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
+
+// All 23 modules data
+const allModules = [
+  { id: 'part0', number: 0, title: 'Welcome & Platform Orientation', tier: 'green' as const, isCompleted: false },
+  { id: 'part1', number: 1, title: 'Legal and Regulatory Foundations', tier: 'green' as const, isCompleted: false },
+  { id: 'part2', number: 2, title: 'ID Verification and Age Restrictions', tier: 'green' as const, isCompleted: false },
+  { id: 'part3', number: 3, title: 'Customer Service Excellence', tier: 'green' as const, isCompleted: false },
+  { id: 'part4', number: 4, title: 'Product Knowledge', tier: 'green' as const, isCompleted: false },
+  { id: 'part5', number: 5, title: 'Dosing and Safe Consumption', tier: 'green' as const, isCompleted: false },
+  { id: 'part6', number: 6, title: 'Medical Cannabis Program', tier: 'green' as const, isCompleted: false },
+  { id: 'part7', number: 7, title: 'Inventory Management & METRC', tier: 'yellow' as const, isCompleted: false },
+  { id: 'part8', number: 8, title: 'Security and Safety Protocols', tier: 'yellow' as const, isCompleted: false },
+  { id: 'part9', number: 9, title: 'Record Keeping and Documentation', tier: 'yellow' as const, isCompleted: false },
+  { id: 'part10', number: 10, title: 'Emergency Response Procedures', tier: 'yellow' as const, isCompleted: false },
+  { id: 'part11', number: 11, title: 'Ethics and Professional Conduct', tier: 'yellow' as const, isCompleted: false },
+  { id: 'part12', number: 12, title: 'Preventing Diversion', tier: 'yellow' as const, isCompleted: false },
+  { id: 'part13', number: 13, title: 'Transportation and Delivery', tier: 'red' as const, isCompleted: false },
+  { id: 'part14', number: 14, title: 'Advertising and Marketing Compliance', tier: 'red' as const, isCompleted: false },
+  { id: 'part15', number: 15, title: 'Quality Assurance and Testing', tier: 'red' as const, isCompleted: false },
+  { id: 'part16', number: 16, title: 'Waste Disposal and Environmental Compliance', tier: 'red' as const, isCompleted: false },
+  { id: 'part17', number: 17, title: 'Inspections and Audits', tier: 'red' as const, isCompleted: false },
+  { id: 'part18', number: 18, title: 'Final Assessment Preparation', tier: 'red' as const, isCompleted: false },
+  { id: 'part19', number: 19, title: 'Advanced: Supervising Compliance', tier: 'red' as const, isCompleted: false },
+  { id: 'part20', number: 20, title: 'Advanced: Team Training and Development', tier: 'red' as const, isCompleted: false },
+  { id: 'part21', number: 21, title: 'Advanced: Incident Documentation', tier: 'red' as const, isCompleted: false },
+  { id: 'part22', number: 22, title: 'Advanced: Diversion Prevention', tier: 'red' as const, isCompleted: false },
+  { id: 'part23', number: 23, title: 'Course Completion', tier: 'red' as const, isCompleted: false },
+];
 
 const EnhancedCourseModule: React.FC = () => {
   const { moduleId } = useParams<{ moduleId: string }>();
   const navigate = useNavigate();
   const [moduleData, setModuleData] = useState<ModuleData | null>(null);
-  const [selectedAnswers, setSelectedAnswers] = useState<{[key: number]: string}>({});
-  const [submitted, setSubmitted] = useState(false);
-  const [score, setScore] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentSection, setCurrentSection] = useState<'content' | 'quiz'>('content');
+  const [activeTab, setActiveTab] = useState<string>('overview');
+  const [overviewComplete, setOverviewComplete] = useState(false);
+  const [videoWatched, setVideoWatched] = useState(false);
+  const [docsViewed, setDocsViewed] = useState(false);
+  const [quizComplete, setQuizComplete] = useState(false);
+  const [showQuizResults, setShowQuizResults] = useState(false);
+  const [showWeakPractice, setShowWeakPractice] = useState(false);
+  const [quizScore, setQuizScore] = useState(0);
+  const [quizPassed, setQuizPassed] = useState(false);
+  const [weakTopics, setWeakTopics] = useState<WeakTopic[]>([]);
 
-  const { updateProgress, isModuleCompleted, getModuleProgress } = useUserProgress(COURSE_ID);
+  const { updateProgress, isModuleCompleted } = useUserProgress(COURSE_ID);
+  
+  const currentModuleNumber = parseInt(moduleId?.replace('part', '') || '0');
+  const currentModule = allModules.find(m => m.number === currentModuleNumber);
+  
+  const { goToPrevious, goToNext, canGoPrevious, canGoNext } = useModuleNavigation({
+    currentModule: currentModuleNumber,
+    totalModules: allModules.length,
+  });
 
   useEffect(() => {
     if (!moduleId) return;
@@ -92,67 +149,81 @@ const EnhancedCourseModule: React.FC = () => {
     fetchModuleData();
   }, [moduleId, navigate]);
 
-  const handleAnswerSelect = (questionIndex: number, answer: string) => {
-    if (submitted) return;
+  const handleQuizComplete = async (score: number, passed: boolean, timeSpent: number, weakTopicsData?: WeakTopic[]) => {
+    setQuizScore(score);
+    setQuizPassed(passed);
+    setQuizComplete(true);
+    setWeakTopics(weakTopicsData || []);
     
-    setSelectedAnswers(prev => ({
-      ...prev,
-      [questionIndex]: answer
-    }));
+    if (weakTopicsData && weakTopicsData.length > 0) {
+      setShowQuizResults(true);
+    } else if (passed) {
+      await updateProgress(COURSE_ID, moduleId!, true, score);
+      toast({
+        title: "Congratulations!",
+        description: `You passed with ${score}%! Module completed.`,
+      });
+    }
   };
 
-  const submitQuiz = async () => {
-    if (!moduleData) return;
-    
-    // Check if all questions are answered
-    if (Object.keys(selectedAnswers).length < moduleData.quiz_questions.length) {
+  const handlePracticeComplete = async (score: number, passed: boolean) => {
+    if (passed) {
+      await updateProgress(COURSE_ID, moduleId!, true, score);
       toast({
-        title: "Incomplete Quiz",
-        description: "Please answer all questions before submitting.",
-        variant: "destructive",
+        title: "Great work!",
+        description: `You've mastered the weak areas! Score: ${score}%`,
       });
-      return;
-    }
-    
-    setSubmitted(true);
-    const correctAnswers = moduleData.quiz_questions.filter((q, index) => 
-      selectedAnswers[index] === q.correct
-    ).length;
-    
-    const finalScore = Math.round((correctAnswers / moduleData.quiz_questions.length) * 100);
-    setScore(correctAnswers);
-    
-    try {
-      if (finalScore >= 80) {
-        await updateProgress(COURSE_ID, moduleId!, true, finalScore);
-        
-        toast({
-          title: "Congratulations!",
-          description: `You passed with ${finalScore}%! Module completed.`,
-        });
-      } else {
-        await updateProgress(COURSE_ID, moduleId!, false, finalScore);
-        
-        toast({
-          title: "Not quite there",
-          description: `You scored ${finalScore}%. You need 80% to pass. Try again!`,
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error('Error saving progress:', error);
+      setShowWeakPractice(false);
+      setShowQuizResults(false);
+    } else {
       toast({
-        title: "Error",
-        description: "Failed to save progress. Please try again.",
+        title: "Keep practicing",
+        description: `Score: ${score}%. Review the material and try again.`,
         variant: "destructive",
       });
     }
   };
 
-  const resetQuiz = () => {
-    setSubmitted(false);
-    setSelectedAnswers({});
-    setScore(0);
+  const handleRetakeQuiz = () => {
+    setShowQuizResults(false);
+    setShowWeakPractice(false);
+    setQuizComplete(false);
+    setQuizScore(0);
+    setQuizPassed(false);
+    setWeakTopics([]);
+    setActiveTab('quiz');
+  };
+
+  const handlePracticeWeakAreas = () => {
+    setShowQuizResults(false);
+    setShowWeakPractice(true);
+  };
+
+  const getWeakTopicQuestions = (): IQuizQuestion[] => {
+    if (!moduleData) return [];
+    const weakTopicNames = weakTopics.map(t => t.topic);
+    return moduleData.quiz_questions
+      .filter(q => q.topic && weakTopicNames.includes(q.topic))
+      .map((q, idx) => ({
+        id: q.id || `q${idx}`,
+        question: q.question,
+        options: q.options,
+        correctAnswer: q.correct,
+        explanation: q.explanation,
+        topic: q.topic,
+        comarRef: q.comarRef,
+        difficulty: q.difficulty,
+        relatedModules: q.relatedModules
+      }));
+  };
+
+  const calculateSectionProgress = () => {
+    let completed = 0;
+    if (overviewComplete) completed += 25;
+    if (videoWatched) completed += 25;
+    if (docsViewed) completed += 25;
+    if (quizComplete) completed += 25;
+    return completed;
   };
 
   if (isLoading) {
@@ -166,7 +237,7 @@ const EnhancedCourseModule: React.FC = () => {
     );
   }
 
-  if (!moduleData) {
+  if (!moduleData || !currentModule) {
     return (
       <div className="container mx-auto p-6">
         <Card>
@@ -181,220 +252,322 @@ const EnhancedCourseModule: React.FC = () => {
     );
   }
 
-  const progressPercent = submitted && moduleData.quiz_questions.length > 0 
-    ? (score / moduleData.quiz_questions.length) * 100 
-    : 0;
+  const sections = [
+    {
+      id: 'overview',
+      label: 'Overview',
+      icon: <BookOpen className="h-4 w-4" />,
+      isCompleted: overviewComplete,
+      isCurrent: activeTab === 'overview',
+      isLocked: false,
+    },
+    {
+      id: 'video',
+      label: 'Video',
+      icon: <Video className="h-4 w-4" />,
+      isCompleted: videoWatched,
+      isCurrent: activeTab === 'video',
+      isLocked: false,
+    },
+    {
+      id: 'documents',
+      label: 'Documents',
+      icon: <FileText className="h-4 w-4" />,
+      isCompleted: docsViewed,
+      isCurrent: activeTab === 'documents',
+      isLocked: false,
+    },
+    {
+      id: 'quiz',
+      label: 'Quiz',
+      icon: <CheckCircle2 className="h-4 w-4" />,
+      isCompleted: quizComplete,
+      isCurrent: activeTab === 'quiz',
+      isLocked: !overviewComplete && !videoWatched,
+      lockReason: 'Complete overview and video first',
+    },
+  ];
+
+  // Show quiz results if there are weak topics
+  if (showQuizResults && weakTopics.length > 0) {
+    return (
+      <div className="container mx-auto p-6">
+        <CourseNavigationHeader 
+          modules={allModules}
+          currentModuleNumber={currentModuleNumber}
+          currentModuleTitle={currentModule?.title || ''}
+          totalModules={allModules.length}
+          completedCount={0}
+          onModuleSelect={(num) => navigate(`/course/part${num}`)}
+          onClose={() => navigate('/course')}
+        />
+        <QuizResultsWithReview
+          score={quizScore}
+          passingScore={80}
+          passed={quizPassed}
+          totalQuestions={moduleData.quiz_questions.length}
+          correctAnswers={Math.round((quizScore / 100) * moduleData.quiz_questions.length)}
+          weakTopics={weakTopics}
+          onRetakeQuiz={handleRetakeQuiz}
+          onPracticeWeakAreas={handlePracticeWeakAreas}
+          onReviewModule={(moduleId) => navigate(`/course/${moduleId}`)}
+        />
+      </div>
+    );
+  }
+
+  // Show weak area practice
+  if (showWeakPractice) {
+    return (
+      <div className="container mx-auto p-6">
+        <CourseNavigationHeader 
+          modules={allModules}
+          currentModuleNumber={currentModuleNumber}
+          currentModuleTitle={currentModule?.title || ''}
+          totalModules={allModules.length}
+          completedCount={0}
+          onModuleSelect={(num) => navigate(`/course/part${num}`)}
+          onClose={() => navigate('/course')}
+        />
+        <WeakAreaPractice
+          weakTopicQuestions={getWeakTopicQuestions()}
+          weakTopics={weakTopics.map(t => t.topic)}
+          onComplete={handlePracticeComplete}
+          onBack={() => {
+            setShowWeakPractice(false);
+            setShowQuizResults(true);
+          }}
+        />
+      </div>
+    );
+  }
 
   return (
-    <div className="container mx-auto p-4 md:p-6 space-y-4 md:space-y-6 pb-20 md:pb-6">
-      {/* Header - Mobile optimized */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-0">
-        <div className="flex flex-col space-y-2 w-full">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => navigate('/course')}
-            className="self-start h-10 md:h-9"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Course
-          </Button>
-          <div>
-            <h1 className="text-xl md:text-3xl font-bold text-foreground">{moduleData.title}</h1>
-            <p className="text-sm md:text-base text-muted-foreground mt-1">{moduleData.description}</p>
-          </div>
-        </div>
-        <Badge 
-          variant={isModuleCompleted(moduleId!) ? "default" : "secondary"}
-          className="self-start md:self-center px-3 py-1 md:px-4 md:py-2 text-sm md:text-base whitespace-nowrap"
-        >
-          {isModuleCompleted(moduleId!) ? 'Completed' : 'In Progress'}
-        </Badge>
-      </div>
-
-      {/* Navigation Tabs - Mobile optimized */}
-      <div className="flex gap-2 w-full">
-        <Button 
-          variant={currentSection === 'content' ? 'default' : 'outline'}
-          onClick={() => setCurrentSection('content')}
-          className="flex-1 md:flex-none h-11 md:h-10 text-sm md:text-base"
-        >
-          <BookOpen className="w-4 h-4 md:mr-2" />
-          <span className="hidden sm:inline ml-2">Learning Content</span>
-          <span className="sm:hidden ml-2">Content</span>
-        </Button>
-        <Button 
-          variant={currentSection === 'quiz' ? 'default' : 'outline'}
-          onClick={() => setCurrentSection('quiz')}
-          className="flex-1 md:flex-none h-11 md:h-10 text-sm md:text-base"
-        >
-          <CheckCircle className="w-4 h-4 md:mr-2" />
-          <span className="hidden sm:inline ml-2">Quiz ({moduleData.quiz_questions.length} questions)</span>
-          <span className="sm:hidden ml-2">Quiz ({moduleData.quiz_questions.length})</span>
-        </Button>
-      </div>
-
-      {/* Content Section with Regulatory Sidebar - Mobile optimized */}
-      {currentSection === 'content' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-          <div className="lg:col-span-2">
-            <Card>
-              <CardHeader className="p-4 md:p-6">
-                <CardTitle className="flex items-center space-x-2 text-lg md:text-xl">
-                  <BookOpen className="w-5 h-5 flex-shrink-0" />
-                  <span>Module Content</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4 p-4 md:p-6">
-                <div className="prose prose-sm md:prose-base max-w-none">
-                  {moduleData.content.split('\n').map((paragraph, index) => (
-                    <p key={index} className="mb-3 md:mb-4 text-base md:text-lg text-foreground leading-relaxed">
-                      {paragraph}
-                    </p>
-                  ))}
-                </div>
-                <div className="flex justify-end pt-4">
-                  <Button 
-                    onClick={() => setCurrentSection('quiz')}
-                    className="w-full md:w-auto h-11 md:h-10"
-                  >
-                    Continue to Quiz
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-          <div className="lg:col-span-1">
-            <div className="lg:sticky lg:top-6">
-              <RegulatorySidebar 
-                sectionNumber={moduleData.module_number?.toString()}
-                comarReference={moduleData.comar_reference}
-              />
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Quiz Section */}
-      {currentSection === 'quiz' && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <CheckCircle className="w-5 h-5" />
-                <span>Module Quiz</span>
+    <div className="min-h-screen bg-background">
+      <CourseNavigationHeader 
+        modules={allModules}
+        currentModuleNumber={currentModuleNumber}
+        currentModuleTitle={currentModule?.title || ''}
+        totalModules={allModules.length}
+        completedCount={0}
+        onModuleSelect={(num) => navigate(`/course/part${num}`)}
+        onClose={() => navigate('/course')}
+      />
+      
+      <div className="flex w-full">
+        <ModuleSidebar 
+          modules={allModules}
+          currentModuleNumber={currentModuleNumber}
+          onModuleSelect={(num) => navigate(`/course/part${num}`)}
+        />
+        
+        <div className="flex-1 container mx-auto p-4 md:p-6">
+          <div className="flex gap-6">
+            {/* Main Content Area */}
+            <div className="flex-1">
+              <div className="mb-4">
+                <h1 className="text-3xl font-bold mb-2">{moduleData.title}</h1>
+                <p className="text-muted-foreground">{moduleData.description}</p>
+                <Badge variant={isModuleCompleted(moduleId!) ? "default" : "secondary"} className="mt-2">
+                  {isModuleCompleted(moduleId!) ? 'Completed' : 'In Progress'}
+                </Badge>
               </div>
-              {submitted && (
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm text-muted-foreground">
-                    Score: {score}/{moduleData.quiz_questions.length} ({progressPercent.toFixed(0)}%)
-                  </span>
-                  <Progress value={progressPercent} className="w-32" />
-                </div>
-              )}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {moduleData.quiz_questions.length > 0 ? (
-              <>
-                {moduleData.quiz_questions.map((question, index) => (
-                  <div key={index} className="p-4 border rounded-lg bg-card">
-                    <p className="font-medium mb-4 text-foreground">
-                      {index + 1}. {question.question}
-                    </p>
-                    <div className="space-y-2">
-                      {question.options.map(option => {
-                        const isSelected = selectedAnswers[index] === option;
-                        const isCorrect = option === question.correct;
-                        const showFeedback = submitted;
-                        
-                        let optionClass = "block p-3 border rounded-md cursor-pointer transition-colors ";
-                        if (showFeedback) {
-                          if (isCorrect) {
-                            optionClass += "bg-green-50 border-green-300 text-green-800";
-                          } else if (isSelected && !isCorrect) {
-                            optionClass += "bg-red-50 border-red-300 text-red-800";
-                          } else {
-                            optionClass += "bg-muted text-muted-foreground";
-                          }
-                        } else {
-                          optionClass += isSelected 
-                            ? "bg-primary/10 border-primary text-primary" 
-                            : "hover:bg-muted/50";
-                        }
-                        
-                        return (
-                          <label key={option} className={optionClass}>
-                            <input
-                              type="radio"
-                              name={`q${index}`}
-                              value={option}
-                              checked={isSelected}
-                              onChange={() => handleAnswerSelect(index, option)}
-                              disabled={submitted}
-                              className="mr-3"
-                            />
-                            <span>{option}</span>
-                            {showFeedback && isCorrect && (
-                              <CheckCircle className="inline w-4 h-4 ml-2 text-green-600" />
-                            )}
-                            {showFeedback && isSelected && !isCorrect && (
-                              <XCircle className="inline w-4 h-4 ml-2 text-red-600" />
-                            )}
-                          </label>
-                        );
-                      })}
-                    </div>
-                    {submitted && question.explanation && (
-                      <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
-                        <p className="text-sm text-blue-800">
-                          <strong>Explanation:</strong> {question.explanation}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                ))}
 
-                {!submitted ? (
-                  <div className="flex justify-between">
-                    <Button variant="outline" onClick={() => setCurrentSection('content')}>
-                      <ArrowLeft className="w-4 h-4 mr-2" />
-                      Back to Content
-                    </Button>
-                    <Button onClick={submitQuiz}>
-                      Submit Quiz
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="p-4 bg-muted rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-lg font-medium">
-                          Final Score: {score}/{moduleData.quiz_questions.length} ({progressPercent.toFixed(0)}%)
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {progressPercent >= 80 ? 'Congratulations! You passed this module.' : 'You need 80% to pass. Try again!'}
-                        </p>
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="grid w-full grid-cols-4 mb-6">
+                  <TabsTrigger value="overview" className="flex items-center gap-2">
+                    <BookOpen className="h-4 w-4" />
+                    Overview
+                  </TabsTrigger>
+                  <TabsTrigger value="video" className="flex items-center gap-2">
+                    <Video className="h-4 w-4" />
+                    Video
+                  </TabsTrigger>
+                  <TabsTrigger value="documents" className="flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    Documents
+                  </TabsTrigger>
+                  <TabsTrigger value="quiz" className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4" />
+                    Quiz
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="overview" className="space-y-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Module Content</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="prose prose-sm md:prose-base max-w-none">
+                        {moduleData.content.split('\n').map((paragraph, index) => (
+                          <p key={index} className="mb-4 text-foreground leading-relaxed">
+                            {paragraph}
+                          </p>
+                        ))}
                       </div>
-                      <div className="flex space-x-2">
-                        <Button variant="outline" onClick={resetQuiz}>
-                          Try Again
-                        </Button>
-                        <Button onClick={() => navigate('/course')}>
-                          Return to Course
-                        </Button>
-                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <SectionNavButton
+                    currentSection="overview"
+                    nextSection={{ id: 'video', label: 'Video' }}
+                    onContinue={() => {
+                      setOverviewComplete(true);
+                      setActiveTab('video');
+                    }}
+                    canContinue={true}
+                    completionMessage="Mark Overview as Complete"
+                    onMarkComplete={() => setOverviewComplete(true)}
+                  />
+                </TabsContent>
+
+                <TabsContent value="video" className="space-y-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Training Video</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {moduleData.video_url ? (
+                        <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
+                          <p className="text-muted-foreground">Video player would be here</p>
+                        </div>
+                      ) : (
+                        <p className="text-muted-foreground">No video available for this module</p>
+                      )}
+                    </CardContent>
+                  </Card>
+                  
+                  <SectionNavButton
+                    currentSection="video"
+                    nextSection={{ id: 'documents', label: 'Documents' }}
+                    onContinue={() => {
+                      setVideoWatched(true);
+                      setActiveTab('documents');
+                    }}
+                    canContinue={true}
+                    completionMessage="Mark Video as Watched"
+                    onMarkComplete={() => setVideoWatched(true)}
+                  />
+                </TabsContent>
+
+                <TabsContent value="documents" className="space-y-4">
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="lg:col-span-2">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Reference Documents</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-muted-foreground">Reference materials and documents for this module</p>
+                        </CardContent>
+                      </Card>
+                    </div>
+                    <div className="lg:col-span-1">
+                      <RegulatorySidebar 
+                        sectionNumber={moduleData.module_number?.toString()}
+                        comarReference={moduleData.comar_reference}
+                      />
                     </div>
                   </div>
-                )}
-              </>
-            ) : (
-              <p className="text-center text-muted-foreground">No quiz questions available for this module.</p>
-            )}
-          </CardContent>
-        </Card>
-      )}
+                  
+                  <SectionNavButton
+                    currentSection="documents"
+                    nextSection={{ id: 'quiz', label: 'Quiz' }}
+                    onContinue={() => {
+                      setDocsViewed(true);
+                      setActiveTab('quiz');
+                    }}
+                    canContinue={true}
+                    completionMessage="Mark Documents as Reviewed"
+                    onMarkComplete={() => setDocsViewed(true)}
+                  />
+                </TabsContent>
+
+                <TabsContent value="quiz" className="space-y-4">
+                  {!quizComplete ? (
+                    <InteractiveQuiz
+                      questions={moduleData.quiz_questions.map((q, idx) => ({
+                        id: q.id || `q${idx}`,
+                        question: q.question,
+                        options: q.options,
+                        correctAnswer: q.correct,
+                        explanation: q.explanation,
+                        topic: q.topic,
+                        comarRef: q.comarRef,
+                        difficulty: q.difficulty,
+                        relatedModules: q.relatedModules
+                      }))}
+                      title={`${moduleData.title} - Quiz`}
+                      passingScore={80}
+                      onQuizComplete={handleQuizComplete}
+                    />
+                  ) : (
+                    <Card>
+                      <CardContent className="p-6 text-center">
+                        <CheckCircle2 className="h-16 w-16 text-green-600 mx-auto mb-4" />
+                        <h3 className="text-2xl font-bold mb-2">Quiz Complete!</h3>
+                        <p className="text-muted-foreground mb-4">Score: {quizScore}%</p>
+                        <div className="flex gap-3 justify-center">
+                          <Button onClick={handleRetakeQuiz} variant="outline">
+                            Retake Quiz
+                          </Button>
+                          <Button onClick={() => navigate('/course')}>
+                            Return to Course
+                          </Button>
+                          {canGoNext && (
+                            <Button onClick={goToNext}>
+                              Next Module
+                            </Button>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </TabsContent>
+              </Tabs>
+
+              {/* Previous/Next Module Navigation */}
+              <div className="flex justify-between mt-6 pt-6 border-t">
+                <Button
+                  variant="outline"
+                  onClick={goToPrevious}
+                  disabled={!canGoPrevious}
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Previous Module
+                </Button>
+                <Button
+                  onClick={goToNext}
+                  disabled={!canGoNext}
+                >
+                  Next Module
+                  <ArrowLeft className="ml-2 h-4 w-4 rotate-180" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Section Progress Navigator - Right Side */}
+            <SectionProgressNav
+              sections={sections}
+              onSectionClick={setActiveTab}
+              completedPercentage={calculateSectionProgress()}
+              moduleTitle={moduleData.title}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Navigation Bar */}
+      <MobileNavBar
+        modules={allModules}
+        currentModuleNumber={currentModuleNumber}
+        canGoPrevious={canGoPrevious}
+        canGoNext={canGoNext}
+        onPrevious={goToPrevious}
+        onNext={goToNext}
+        onModuleSelect={(num) => navigate(`/course/part${num}`)}
+      />
     </div>
   );
 };

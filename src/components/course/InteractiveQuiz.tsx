@@ -5,13 +5,25 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 
-interface QuizQuestion {
+export interface QuizQuestion {
   id: string;
   question: string;
   options: string[];
   correctAnswer: string;
   explanation?: string;
   points?: number;
+  topic?: string;
+  comarRef?: string;
+  difficulty?: 'easy' | 'medium' | 'hard';
+  relatedModules?: string[];
+}
+
+export interface WeakTopic {
+  topic: string;
+  correct: number;
+  total: number;
+  percentage: number;
+  relatedModules?: string[];
 }
 
 interface InteractiveQuizProps {
@@ -19,7 +31,7 @@ interface InteractiveQuizProps {
   title: string;
   timeLimit?: number; // in minutes
   passingScore?: number; // percentage
-  onQuizComplete: (score: number, passed: boolean, timeSpent: number) => void;
+  onQuizComplete: (score: number, passed: boolean, timeSpent: number, weakTopics?: WeakTopic[]) => void;
   onQuestionAnswer?: (questionId: string, answer: string, isCorrect: boolean) => void;
   allowRetry?: boolean;
 }
@@ -101,14 +113,43 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
     }
   };
 
+  const calculateWeakTopics = (): WeakTopic[] => {
+    const topicStats: { [topic: string]: { correct: number; total: number; relatedModules: Set<string> } } = {};
+    
+    questions.forEach(q => {
+      const topic = q.topic || 'General';
+      if (!topicStats[topic]) {
+        topicStats[topic] = { correct: 0, total: 0, relatedModules: new Set() };
+      }
+      topicStats[topic].total++;
+      if (answers[q.id] === q.correctAnswer) {
+        topicStats[topic].correct++;
+      }
+      if (q.relatedModules) {
+        q.relatedModules.forEach(m => topicStats[topic].relatedModules.add(m));
+      }
+    });
+
+    return Object.entries(topicStats)
+      .map(([topic, stats]) => ({
+        topic,
+        correct: stats.correct,
+        total: stats.total,
+        percentage: Math.round((stats.correct / stats.total) * 100),
+        relatedModules: Array.from(stats.relatedModules)
+      }))
+      .filter(t => t.percentage < 70); // Weak if < 70%
+  };
+
   const handleQuizSubmit = () => {
     const correctAnswers = questions.filter(q => answers[q.id] === q.correctAnswer).length;
     const score = Math.round((correctAnswers / questions.length) * 100);
     const passed = score >= passingScore;
     const timeSpent = Math.round((Date.now() - startTime) / 1000);
+    const weakTopics = calculateWeakTopics();
 
     setShowResults(true);
-    onQuizComplete(score, passed, timeSpent);
+    onQuizComplete(score, passed, timeSpent, weakTopics);
   };
 
   const handleRetry = () => {
