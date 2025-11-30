@@ -45,6 +45,17 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
   onQuestionAnswer,
   allowRetry = true
 }) => {
+  // Defensive guard for empty questions
+  if (!questions || questions.length === 0) {
+    return (
+      <Card className="max-w-2xl mx-auto">
+        <CardContent className="p-6 text-center">
+          <p className="text-muted-foreground">No quiz questions available.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<{[key: string]: string}>({});
   const [showResults, setShowResults] = useState(false);

@@ -413,7 +413,9 @@ const EnhancedCourseModule: React.FC = () => {
                     </CardHeader>
                     <CardContent>
                       <div 
-                        className="prose prose-sm md:prose-base max-w-none dark:prose-invert"
+                        className="prose prose-sm md:prose-base max-w-none dark:prose-invert 
+                                   prose-p:mb-4 prose-headings:mt-6 prose-headings:mb-3 
+                                   prose-li:my-1 prose-ul:my-4 prose-ol:my-4"
                         dangerouslySetInnerHTML={{ 
                           __html: sanitizeHtml(markdownToHtml(moduleData.content || '')) 
                         }}
@@ -507,12 +509,14 @@ const EnhancedCourseModule: React.FC = () => {
                                         </div>
                                       )}
                                       
-                                      <div 
-                                        className="prose prose-sm max-w-none dark:prose-invert"
-                                        dangerouslySetInnerHTML={{ 
-                                          __html: sanitizeHtml(doc.content) 
-                                        }}
-                                      />
+                              <div 
+                                className="prose prose-sm max-w-none dark:prose-invert
+                                           prose-p:mb-4 prose-headings:mt-6 prose-headings:mb-3 
+                                           prose-li:my-1 prose-ul:my-4 prose-ol:my-4"
+                                dangerouslySetInnerHTML={{ 
+                                  __html: sanitizeHtml(doc.content) 
+                                }}
+                              />
                                       
                                       <div className="flex items-center justify-between pt-4 border-t">
                                         <span className="text-xs text-muted-foreground">
@@ -583,7 +587,19 @@ const EnhancedCourseModule: React.FC = () => {
                 </TabsContent>
 
                 <TabsContent value="quiz" className="space-y-4">
-                  {!quizComplete ? (
+                  {moduleData.quiz_questions.length === 0 ? (
+                    <Card>
+                      <CardContent className="p-6 text-center">
+                        <BookOpen className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                        <h3 className="text-2xl font-bold mb-2">No Quiz Available</h3>
+                        <p className="text-muted-foreground mb-4">
+                          This introductory module doesn't have a quiz. 
+                          Continue to the next module to begin your training.
+                        </p>
+                        <Button onClick={goToNext}>Continue to Module 1</Button>
+                      </CardContent>
+                    </Card>
+                  ) : !quizComplete ? (
                     <InteractiveQuiz
                       questions={moduleData.quiz_questions.map((q, idx) => ({
                         id: q.id || `q${idx}`,
