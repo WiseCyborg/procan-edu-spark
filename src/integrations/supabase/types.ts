@@ -2388,6 +2388,35 @@ export type Database = {
         }
         Relationships: []
       }
+      message_mentions: {
+        Row: {
+          created_at: string | null
+          id: string
+          mentioned_user_id: string
+          message_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          mentioned_user_id: string
+          message_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          mentioned_user_id?: string
+          message_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_mentions_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       message_reactions: {
         Row: {
           created_at: string
@@ -3249,6 +3278,42 @@ export type Database = {
           },
         ]
       }
+      push_subscriptions: {
+        Row: {
+          auth_key: string
+          created_at: string | null
+          endpoint: string
+          id: string
+          is_active: boolean | null
+          last_used_at: string | null
+          p256dh_key: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          auth_key: string
+          created_at?: string | null
+          endpoint: string
+          id?: string
+          is_active?: boolean | null
+          last_used_at?: string | null
+          p256dh_key: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          auth_key?: string
+          created_at?: string | null
+          endpoint?: string
+          id?: string
+          is_active?: boolean | null
+          last_used_at?: string | null
+          p256dh_key?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       rate_limits: {
         Row: {
           action_type: string
@@ -3805,6 +3870,117 @@ export type Database = {
             columns: ["purchase_id"]
             isOneToOne: false
             referencedRelation: "rvt_purchases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scheduled_call_invites: {
+        Row: {
+          created_at: string | null
+          id: string
+          notified_at: string | null
+          responded_at: string | null
+          scheduled_call_id: string
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          notified_at?: string | null
+          responded_at?: string | null
+          scheduled_call_id: string
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          notified_at?: string | null
+          responded_at?: string | null
+          scheduled_call_id?: string
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheduled_call_invites_scheduled_call_id_fkey"
+            columns: ["scheduled_call_id"]
+            isOneToOne: false
+            referencedRelation: "scheduled_calls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scheduled_calls: {
+        Row: {
+          conversation_id: string | null
+          created_at: string | null
+          description: string | null
+          duration_minutes: number | null
+          host_id: string
+          id: string
+          organization_id: string | null
+          recurring_pattern: Json | null
+          reminder_sent: boolean | null
+          scheduled_at: string
+          status: string | null
+          title: string
+          updated_at: string | null
+          video_call_id: string | null
+        }
+        Insert: {
+          conversation_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          host_id: string
+          id?: string
+          organization_id?: string | null
+          recurring_pattern?: Json | null
+          reminder_sent?: boolean | null
+          scheduled_at: string
+          status?: string | null
+          title: string
+          updated_at?: string | null
+          video_call_id?: string | null
+        }
+        Update: {
+          conversation_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          host_id?: string
+          id?: string
+          organization_id?: string | null
+          recurring_pattern?: Json | null
+          reminder_sent?: boolean | null
+          scheduled_at?: string
+          status?: string | null
+          title?: string
+          updated_at?: string | null
+          video_call_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheduled_calls_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_calls_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_calls_video_call_id_fkey"
+            columns: ["video_call_id"]
+            isOneToOne: false
+            referencedRelation: "video_calls"
             referencedColumns: ["id"]
           },
         ]
@@ -4987,6 +5163,12 @@ export type Database = {
           max_participants: number | null
           metadata: Json | null
           organization_id: string | null
+          recording_duration_seconds: number | null
+          recording_egress_id: string | null
+          recording_size_mb: number | null
+          recording_started_at: string | null
+          recording_status: string | null
+          recording_url: string | null
           room_name: string
           scheduled_at: string | null
           started_at: string | null
@@ -5003,6 +5185,12 @@ export type Database = {
           max_participants?: number | null
           metadata?: Json | null
           organization_id?: string | null
+          recording_duration_seconds?: number | null
+          recording_egress_id?: string | null
+          recording_size_mb?: number | null
+          recording_started_at?: string | null
+          recording_status?: string | null
+          recording_url?: string | null
           room_name: string
           scheduled_at?: string | null
           started_at?: string | null
@@ -5019,6 +5207,12 @@ export type Database = {
           max_participants?: number | null
           metadata?: Json | null
           organization_id?: string | null
+          recording_duration_seconds?: number | null
+          recording_egress_id?: string | null
+          recording_size_mb?: number | null
+          recording_started_at?: string | null
+          recording_status?: string | null
+          recording_url?: string | null
           room_name?: string
           scheduled_at?: string | null
           started_at?: string | null

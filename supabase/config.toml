@@ -366,3 +366,21 @@ verify_jwt = false
 [functions.send-consumer-certificate-email]
 verify_jwt = false
 
+[functions.send-push-notification]
+verify_jwt = false
+
+[functions.process-scheduled-calls]
+verify_jwt = false
+
+[functions.send-call-reminder]
+verify_jwt = false
+
+[functions.start-call-recording]
+verify_jwt = true
+
+[functions.stop-call-recording]
+verify_jwt = true
+
+[functions.process-call-recording]
+verify_jwt = false
+

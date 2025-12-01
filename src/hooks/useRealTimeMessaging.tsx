@@ -169,7 +169,8 @@ export const useRealTimeMessaging = () => {
     if (!user || !content.trim()) return;
 
     try {
-      const { error } = await supabase
+      // Insert message
+      const { data: message, error } = await supabase
         .from('messages')
         .insert({
           conversation_id: conversationId,
@@ -177,9 +178,44 @@ export const useRealTimeMessaging = () => {
           content: content.trim(),
           message_type: messageType,
           metadata: metadata || {}
-        });
+        })
+        .select()
+        .single();
 
       if (error) throw error;
+
+      // Parse @mentions from content
+      const mentionPattern = /@([A-Za-z]+\s+[A-Za-z]+)/g;
+      const mentions = [...content.matchAll(mentionPattern)];
+
+      if (mentions.length > 0 && message) {
+        // Get conversation participants to match names
+        const { data: participants } = await supabase
+          .from('conversation_participants')
+          .select('user_id, profiles:user_id(first_name, last_name)')
+          .eq('conversation_id', conversationId);
+
+        // Insert mentions
+        const mentionInserts = [];
+        for (const match of mentions) {
+          const [firstName, lastName] = match[1].split(/\s+/);
+          const participant = participants?.find(p => {
+            const profile = p.profiles as any;
+            return profile?.first_name === firstName && profile?.last_name === lastName;
+          });
+
+          if (participant) {
+            mentionInserts.push({
+              message_id: message.id,
+              mentioned_user_id: participant.user_id
+            });
+          }
+        }
+
+        if (mentionInserts.length > 0) {
+          await supabase.from('message_mentions').insert(mentionInserts);
+        }
+      }
 
       // Update conversation updated_at
       await supabase
