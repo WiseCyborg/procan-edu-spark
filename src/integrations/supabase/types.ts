@@ -781,6 +781,56 @@ export type Database = {
           },
         ]
       }
+      consumer_certificates: {
+        Row: {
+          badge_name: string
+          certificate_number: string
+          course_title: string
+          created_at: string | null
+          enrollment_id: string
+          id: string
+          issue_date: string
+          metadata: Json | null
+          recipient_email: string | null
+          recipient_name: string | null
+          verification_url: string | null
+        }
+        Insert: {
+          badge_name: string
+          certificate_number: string
+          course_title: string
+          created_at?: string | null
+          enrollment_id: string
+          id?: string
+          issue_date?: string
+          metadata?: Json | null
+          recipient_email?: string | null
+          recipient_name?: string | null
+          verification_url?: string | null
+        }
+        Update: {
+          badge_name?: string
+          certificate_number?: string
+          course_title?: string
+          created_at?: string | null
+          enrollment_id?: string
+          id?: string
+          issue_date?: string
+          metadata?: Json | null
+          recipient_email?: string | null
+          recipient_name?: string | null
+          verification_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consumer_certificates_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "consumer_enrollments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       consumer_enrollments: {
         Row: {
           completed_at: string | null

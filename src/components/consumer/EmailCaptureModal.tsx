@@ -50,7 +50,7 @@ export const EmailCaptureModal = ({
 
     try {
       // Save enrollment with email
-      const { error } = await supabase
+      const { data: enrollment, error } = await supabase
         .from('consumer_enrollments')
         .insert({
           session_id: sessionId || undefined,
@@ -58,12 +58,38 @@ export const EmailCaptureModal = ({
           email,
           completed_at: new Date().toISOString(),
           metadata: { name: name || undefined }
-        });
+        })
+        .select()
+        .single();
 
       if (error) throw error;
 
       // Update guest session with email
       updateEmail(email);
+
+      // Generate consumer certificate
+      try {
+        const { data: certData, error: certError } = await supabase.functions.invoke(
+          'generate-consumer-certificate',
+          {
+            body: {
+              enrollment_id: enrollment.id,
+              email: email,
+              name: name || undefined,
+              course_id: courseId,
+            }
+          }
+        );
+
+        if (certError) {
+          console.error('Certificate generation error:', certError);
+        } else {
+          console.log('Certificate generated:', certData?.certificate?.certificate_number);
+        }
+      } catch (certError) {
+        console.error('Failed to generate certificate:', certError);
+        // Don't fail the whole flow if certificate generation fails
+      }
 
       toast({
         title: 'Success! 🎉',
