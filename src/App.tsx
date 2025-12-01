@@ -26,7 +26,7 @@ import AdminManagement from "./pages/AdminManagement";
 import DispensaryManagerDashboard from "./pages/DispensaryManagerDashboard";
 import TrainingCoordinatorDashboard from "./pages/TrainingCoordinatorDashboard";
 import StudentDashboard from "./pages/StudentDashboard";
-import EnhancedAdminDashboard from "./pages/EnhancedAdminDashboard";
+import AdminMissionControl from "./pages/AdminMissionControl";
 import RealTimeOperationsDashboard from "./pages/RealTimeOperationsDashboard";
 import Profile from "./pages/Profile";
 import CourseLayout from "./pages/Course/CourseLayout";
@@ -297,7 +297,7 @@ const AppRoutesLayout = () => {
             } />
             <Route path="/admin" element={
               <ProtectedRoute>
-                <AdminDashboard />
+                <AdminMissionControl />
               </ProtectedRoute>
             } />
             <Route path="/admin/management" element={
@@ -330,11 +330,7 @@ const AppRoutesLayout = () => {
                 <DemoAccountsSetup />
               </ProtectedRoute>
             } />
-            <Route path="/enhanced-admin-dashboard" element={
-              <ProtectedRoute>
-                <EnhancedAdminDashboard />
-              </ProtectedRoute>
-            } />
+            <Route path="/enhanced-admin-dashboard" element={<Navigate to="/admin" replace />} />
             <Route path="/admin/realtime-operations" element={
               <ProtectedRoute>
                 <RealTimeOperationsDashboard />
