@@ -6,6 +6,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, User, Building2, HelpCircle, Phone, Mail, Clock, Shield, Lock, CheckCircle, AlertCircle } from 'lucide-react';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useContentLastUpdated } from '@/hooks/useContentLastUpdated';
+import { formatDistanceToNow } from 'date-fns';
 
 interface FAQItem {
   id: string;
@@ -29,6 +31,7 @@ export const EnhancedFAQ: React.FC<EnhancedFAQProps> = ({
 }) => {
   const { roles, isAdmin, isDispensaryManager } = useUserRole();
   const [searchTerm, setSearchTerm] = useState('');
+  const { lastUpdated, isLoading: isLoadingMetadata } = useContentLastUpdated('faq');
 
   // Comprehensive FAQ data with security levels
   const faqData: FAQItem[] = [
@@ -372,11 +375,19 @@ export const EnhancedFAQ: React.FC<EnhancedFAQProps> = ({
         <p className="text-muted-foreground max-w-2xl mx-auto">
           Role-based help and support for ProCann Edu's cannabis training platform
         </p>
-        {(isAdmin || isDispensaryManager) && (
-          <Badge variant="outline" className="mt-2">
-            Advanced Access Level: {isAdmin ? 'Administrator' : 'Manager'}
-          </Badge>
-        )}
+        <div className="flex items-center justify-center gap-3 mt-3 flex-wrap">
+          {(isAdmin || isDispensaryManager) && (
+            <Badge variant="outline">
+              Advanced Access Level: {isAdmin ? 'Administrator' : 'Manager'}
+            </Badge>
+          )}
+          {!isLoadingMetadata && lastUpdated && (
+            <Badge variant="secondary" className="gap-1">
+              <Clock className="h-3 w-3" />
+              Last updated {formatDistanceToNow(lastUpdated, { addSuffix: true })}
+            </Badge>
+          )}
+        </div>
       </div>
 
       {/* Search */}
