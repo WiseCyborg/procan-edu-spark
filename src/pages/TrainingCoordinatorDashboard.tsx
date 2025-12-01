@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SeatManagementWidget } from '@/components/team/SeatManagementWidget';
 import { CompletionAnalyticsWidget } from '@/components/team/CompletionAnalyticsWidget';
+import { AdvancedSeatManagement } from '@/components/team/AdvancedSeatManagement';
 import { Users, Mail, AlertTriangle, TrendingUp, Bell, Calendar, ShoppingCart, BarChart, CheckCircle, Search } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
@@ -369,36 +370,9 @@ const TrainingCoordinatorDashboard = () => {
         </TabsContent>
 
         <TabsContent value="seats" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Training Seat Management</CardTitle>
-              <CardDescription>
-                Monitor and manage training seat allocations for your organization
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {organizationId && <SeatManagementWidget organizationId={organizationId} />}
-              
-              <div className="mt-6 space-y-4">
-                <h3 className="font-semibold">Available Actions</h3>
-                <div className="grid gap-2">
-                  <Button variant="outline" onClick={() => {
-                    toast.info('Contact your manager to purchase additional training seats');
-                  }}>
-                    <ShoppingCart className="w-4 h-4 mr-2" />
-                    Request More Seats
-                  </Button>
-                  
-                  <Button variant="outline" onClick={() => {
-                    navigate('/team-management');
-                  }}>
-                    <BarChart className="w-4 h-4 mr-2" />
-                    View Utilization Report
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          {organizationId && (
+            <AdvancedSeatManagement organizationId={organizationId} />
+          )}
         </TabsContent>
 
         <TabsContent value="certificates" className="space-y-4">
