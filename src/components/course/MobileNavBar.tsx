@@ -34,21 +34,29 @@ export const MobileNavBar = ({
   previousTitle,
   nextTitle
 }: MobileNavBarProps) => {
+  // Hide entirely if no navigation is possible
+  if (!canGoPrevious && !canGoNext) {
+    return null;
+  }
+
   return (
     <div className="fixed bottom-0 left-0 right-0 lg:hidden bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/90 border-t z-50">
       <div className="container py-3">
         <div className="flex items-center justify-between gap-2">
-          {/* Previous Button */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onPrevious}
-            disabled={!canGoPrevious}
-            className="flex-1 max-w-[120px]"
-          >
-            <ChevronLeft className="h-4 w-4 mr-1" />
-            <span className="hidden sm:inline">Prev</span>
-          </Button>
+          {/* Previous Button - conditionally render */}
+          {canGoPrevious ? (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onPrevious}
+              className="flex-1 max-w-[120px]"
+            >
+              <ChevronLeft className="h-4 w-4 mr-1" />
+              <span className="hidden sm:inline">Prev</span>
+            </Button>
+          ) : (
+            <div className="flex-1 max-w-[120px]" />
+          )}
 
           {/* Module List Drawer */}
           <Sheet>
@@ -70,17 +78,20 @@ export const MobileNavBar = ({
             </SheetContent>
           </Sheet>
 
-          {/* Next Button */}
+        {/* Next Button - conditionally render */}
+        {canGoNext ? (
           <Button
             variant="default"
             size="sm"
             onClick={onNext}
-            disabled={!canGoNext}
             className="flex-1 max-w-[120px]"
           >
             <span className="hidden sm:inline">Next</span>
             <ChevronRight className="h-4 w-4 ml-1" />
           </Button>
+        ) : (
+          <div className="flex-1 max-w-[120px]" />
+        )}
         </div>
 
         {/* Module Titles (visible on larger mobile) */}
