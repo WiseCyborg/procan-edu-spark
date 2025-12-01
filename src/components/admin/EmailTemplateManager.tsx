@@ -43,6 +43,17 @@ export const EmailTemplateManager = () => {
   const [isMigrating, setIsMigrating] = useState(false);
   const { toast } = useToast();
 
+  // Helper to normalize variables - handles both array and object formats
+  const normalizeVariables = (variables: any): string[] => {
+    if (Array.isArray(variables)) {
+      return variables;
+    }
+    if (typeof variables === 'object' && variables !== null) {
+      return Object.keys(variables);
+    }
+    return [];
+  };
+
   // Sanitize preview content
   const sanitizedPreview = useMemo(
     () => selectedTemplate?.html_content ? sanitizeHtml(selectedTemplate.html_content) : '',
@@ -195,15 +206,18 @@ export const EmailTemplateManager = () => {
     }
   };
 
-  const validateTemplate = (content: string, variables: string[]) => {
+  const validateTemplate = (content: string, variables: any) => {
     const issues: string[] = [];
+    
+    // Normalize variables to array format
+    const variablesList = normalizeVariables(variables);
     
     // Check for unreplaced variables
     const varMatches = content.match(/\{\{\s*\.\w+\s*\}\}/g) || [];
     const foundVars = varMatches.map(v => v.replace(/\{\{\s*\.(\w+)\s*\}\}/, '$1'));
     
     foundVars.forEach(v => {
-      if (!variables.includes(v)) {
+      if (!variablesList.includes(v)) {
         issues.push(`Unknown variable: ${v}`);
       }
     });
@@ -334,7 +348,7 @@ export const EmailTemplateManager = () => {
             <div>
               <p className="text-sm font-medium mb-2">Available Variables:</p>
               <div className="flex flex-wrap gap-2">
-                {selectedTemplate?.variables.map((v) => (
+                {normalizeVariables(selectedTemplate?.variables).map((v) => (
                   <Badge key={v} variant="outline">
                     {`{{ .${v} }}`}
                   </Badge>
