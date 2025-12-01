@@ -63,32 +63,32 @@ interface ModuleData {
 
 const COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
 
-// All 23 modules data
+// All 23 modules data - synced with database
 const allModules = [
   { id: 'part0', number: 0, title: 'Welcome & Platform Orientation', tier: 'green' as const, isCompleted: false },
-  { id: 'part1', number: 1, title: 'Legal and Regulatory Foundations', tier: 'green' as const, isCompleted: false },
-  { id: 'part2', number: 2, title: 'ID Verification and Age Restrictions', tier: 'green' as const, isCompleted: false },
-  { id: 'part3', number: 3, title: 'Customer Service Excellence', tier: 'green' as const, isCompleted: false },
-  { id: 'part4', number: 4, title: 'Product Knowledge', tier: 'green' as const, isCompleted: false },
-  { id: 'part5', number: 5, title: 'Dosing and Safe Consumption', tier: 'green' as const, isCompleted: false },
-  { id: 'part6', number: 6, title: 'Medical Cannabis Program', tier: 'green' as const, isCompleted: false },
-  { id: 'part7', number: 7, title: 'Inventory Management & METRC', tier: 'yellow' as const, isCompleted: false },
-  { id: 'part8', number: 8, title: 'Security and Safety Protocols', tier: 'yellow' as const, isCompleted: false },
-  { id: 'part9', number: 9, title: 'Record Keeping and Documentation', tier: 'yellow' as const, isCompleted: false },
-  { id: 'part10', number: 10, title: 'Emergency Response Procedures', tier: 'yellow' as const, isCompleted: false },
-  { id: 'part11', number: 11, title: 'Ethics and Professional Conduct', tier: 'yellow' as const, isCompleted: false },
-  { id: 'part12', number: 12, title: 'Preventing Diversion', tier: 'yellow' as const, isCompleted: false },
-  { id: 'part13', number: 13, title: 'Transportation and Delivery', tier: 'red' as const, isCompleted: false },
-  { id: 'part14', number: 14, title: 'Advertising and Marketing Compliance', tier: 'red' as const, isCompleted: false },
-  { id: 'part15', number: 15, title: 'Quality Assurance and Testing', tier: 'red' as const, isCompleted: false },
-  { id: 'part16', number: 16, title: 'Waste Disposal and Environmental Compliance', tier: 'red' as const, isCompleted: false },
-  { id: 'part17', number: 17, title: 'Inspections and Audits', tier: 'red' as const, isCompleted: false },
-  { id: 'part18', number: 18, title: 'Final Assessment Preparation', tier: 'red' as const, isCompleted: false },
-  { id: 'part19', number: 19, title: 'Advanced: Supervising Compliance', tier: 'red' as const, isCompleted: false },
-  { id: 'part20', number: 20, title: 'Advanced: Team Training and Development', tier: 'red' as const, isCompleted: false },
-  { id: 'part21', number: 21, title: 'Advanced: Incident Documentation', tier: 'red' as const, isCompleted: false },
-  { id: 'part22', number: 22, title: 'Advanced: Diversion Prevention', tier: 'red' as const, isCompleted: false },
-  { id: 'part23', number: 23, title: 'Course Completion', tier: 'red' as const, isCompleted: false },
+  { id: 'part1', number: 1, title: 'Introduction to Maryland Cannabis Laws', tier: 'green' as const, isCompleted: false },
+  { id: 'part2', number: 2, title: 'Patient Rights and Privacy', tier: 'green' as const, isCompleted: false },
+  { id: 'part3', number: 3, title: 'Product Knowledge and Safety', tier: 'green' as const, isCompleted: false },
+  { id: 'part4', number: 4, title: 'Inventory Management and Tracking', tier: 'green' as const, isCompleted: false },
+  { id: 'part5', number: 5, title: 'Customer Service Excellence', tier: 'green' as const, isCompleted: false },
+  { id: 'part6', number: 6, title: 'Security, Safety, and Drug-Free Workplace', tier: 'green' as const, isCompleted: false },
+  { id: 'part7', number: 7, title: 'Laboratory Testing and Quality Control', tier: 'yellow' as const, isCompleted: false },
+  { id: 'part8', number: 8, title: 'Dosage Guidelines and Patient Consultation', tier: 'yellow' as const, isCompleted: false },
+  { id: 'part9', number: 9, title: 'Point of Sale Systems and Transactions', tier: 'yellow' as const, isCompleted: false },
+  { id: 'part10', number: 10, title: 'Medical Cannabis and Drug Interactions', tier: 'yellow' as const, isCompleted: false },
+  { id: 'part11', number: 11, title: 'Cannabis Cultivation Basics', tier: 'yellow' as const, isCompleted: false },
+  { id: 'part12', number: 12, title: 'Product Packaging, Labeling, and Diversion Prevention', tier: 'yellow' as const, isCompleted: false },
+  { id: 'part13', number: 13, title: 'Handling Cash and Banking', tier: 'red' as const, isCompleted: false },
+  { id: 'part14', number: 14, title: 'Age Verification and ID Checking', tier: 'red' as const, isCompleted: false },
+  { id: 'part15', number: 15, title: 'Standard Operating Procedures and Record Keeping', tier: 'red' as const, isCompleted: false },
+  { id: 'part16', number: 16, title: 'Transportation and Delivery', tier: 'red' as const, isCompleted: false },
+  { id: 'part17', number: 17, title: 'Waste Disposal and Management', tier: 'red' as const, isCompleted: false },
+  { id: 'part18', number: 18, title: 'Final Review and Best Practices', tier: 'red' as const, isCompleted: false },
+  { id: 'part19', number: 19, title: 'Supervising Compliance Operations', tier: 'red' as const, isCompleted: false },
+  { id: 'part20', number: 20, title: 'Compliance Oversight & Regulatory Reporting', tier: 'red' as const, isCompleted: false },
+  { id: 'part21', number: 21, title: 'Team Training & Development Coordination', tier: 'red' as const, isCompleted: false },
+  { id: 'part22', number: 22, title: 'Incident Documentation & Investigation', tier: 'red' as const, isCompleted: false },
+  { id: 'part23', number: 23, title: 'Advanced Diversion Prevention Strategies', tier: 'red' as const, isCompleted: false },
 ];
 
 const EnhancedCourseModule: React.FC = () => {
@@ -619,13 +619,7 @@ const EnhancedCourseModule: React.FC = () => {
                 </TabsContent>
 
                 <TabsContent value="quiz" className="space-y-4">
-                  {/* SPECIAL HANDLING FOR MODULE 23 - COURSE COMPLETION */}
-                  {currentModuleNumber === 23 ? (
-                    <CourseCompletionCelebration 
-                      onTakeExam={() => navigate('/course/final-exam')}
-                      onReturnToDashboard={() => navigate('/student')}
-                    />
-                  ) : moduleData.quiz_questions.length === 0 ? (
+                  {moduleData.quiz_questions.length === 0 ? (
                     <Card>
                       <CardContent className="p-6 text-center">
                         <BookOpen className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
@@ -653,6 +647,11 @@ const EnhancedCourseModule: React.FC = () => {
                       title={`${moduleData.title} - Quiz`}
                       passingScore={80}
                       onQuizComplete={handleQuizComplete}
+                    />
+                  ) : currentModuleNumber === 23 && quizComplete ? (
+                    <CourseCompletionCelebration 
+                      onTakeExam={() => navigate('/course/final-exam')}
+                      onReturnToDashboard={() => navigate('/student')}
                     />
                   ) : (
                     <Card>
