@@ -1,6 +1,7 @@
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import DispensaryApplicationManager from './DispensaryApplicationManager';
+import { OrganizationsManagementView } from './OrganizationsManagementView';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Building2, RefreshCw } from 'lucide-react';
@@ -46,20 +47,7 @@ export const AdminDispensarySection = () => {
       </TabsContent>
 
       <TabsContent value="organizations">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Building2 className="h-5 w-5" />
-              Organization Management
-            </CardTitle>
-            <CardDescription>View and manage approved dispensaries</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Organization management interface coming soon
-            </p>
-          </CardContent>
-        </Card>
+        <OrganizationsManagementView />
       </TabsContent>
 
       <TabsContent value="seats">
