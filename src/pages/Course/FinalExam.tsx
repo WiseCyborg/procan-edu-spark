@@ -78,6 +78,7 @@ const FinalExam: React.FC = () => {
   const [submittedSections, setSubmittedSections] = useState<Set<number>>(new Set());
   const [results, setResults] = useState<ExamResult>({});
   const [topicScores, setTopicScores] = useState<TopicScore[]>([]);
+  const [shuffledQuizzes, setShuffledQuizzes] = useState<{[key: number]: QuizQuestion[]}>({});
   const [examAttemptId, setExamAttemptId] = useState<string | null>(null);
   const [sectionTimeLeft, setSectionTimeLeft] = useState(300); // 5 minutes
   const [totalTimeLeft, setTotalTimeLeft] = useState(5400); // 90 minutes
@@ -256,6 +257,23 @@ const FinalExam: React.FC = () => {
       if (totalTimerRef.current) clearInterval(totalTimerRef.current);
     };
   }, []);
+
+  // Pre-shuffle quiz options once when exam starts
+  useEffect(() => {
+    if (examStage === 'exam') {
+      const shuffled: {[key: number]: QuizQuestion[]} = {};
+      
+      Object.keys(quizzes).forEach(sectionKey => {
+        const section = parseInt(sectionKey);
+        shuffled[section] = quizzes[section].map(question => ({
+          ...question,
+          options: shuffleArray([...question.options])
+        }));
+      });
+      
+      setShuffledQuizzes(shuffled);
+    }
+  }, [examStage]);
 
   // Handle timers
   useEffect(() => {
@@ -775,10 +793,10 @@ const FinalExam: React.FC = () => {
           </h2>
           <p className="text-sm md:text-base text-gray-600 mb-4 md:mb-6">Test your knowledge of {sectionTitles[section].toLowerCase()}.</p>
           
-          {(quizzes[section] || []).map((question, index) => (
+          {(shuffledQuizzes[section] || quizzes[section] || []).map((question, index) => (
             <div key={index} className="mb-4 md:mb-6 p-3 md:p-4 bg-gray-50 rounded-lg">
               <p className="font-medium mb-3 text-base md:text-lg">{index + 1}. {question.q}</p>
-              {shuffleArray(question.options).map((option, i) => (
+              {question.options.map((option, i) => (
                 <label key={i} className="block mb-2 p-3 md:p-4 border-2 rounded-lg hover:bg-white hover:border-primary transition-all cursor-pointer min-h-[48px] flex items-center">
                   <input 
                     type="radio" 
