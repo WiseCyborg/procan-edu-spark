@@ -333,10 +333,15 @@ serve(async (req) => {
     await supabaseClient.from('user_learning_journey').insert({
       user_id: authData.user.id,
       organization_id: organizationId,
-      current_stage: 'account_created',
+      current_stage: 'registered',
+      stage_entered_at: new Date().toISOString(),
+      last_activity_at: new Date().toISOString(),
       completion_percentage: 0,
       modules_completed: 0,
-      exam_attempts: 0
+      exam_attempts: 0,
+      at_risk_flag: false,
+      predicted_completion_date: null,
+      success_probability: null
     });
 
     console.log('[ATOMIC REGISTRATION] Registration complete for:', email);
