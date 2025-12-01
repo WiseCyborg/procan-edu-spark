@@ -97,7 +97,7 @@ const EnhancedCourseModule: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<string>('overview');
   const [overviewComplete, setOverviewComplete] = useState(false);
-  const [videoWatched, setVideoWatched] = useState(false);
+  const [courseComplete, setCourseComplete] = useState(false);
   const [docsViewed, setDocsViewed] = useState(false);
   const [documentsViewed, setDocumentsViewed] = useState<Set<string>>(new Set());
   const [quizComplete, setQuizComplete] = useState(false);
@@ -247,7 +247,7 @@ const EnhancedCourseModule: React.FC = () => {
   const calculateSectionProgress = () => {
     let completed = 0;
     if (overviewComplete) completed += 25;
-    if (videoWatched) completed += 25;
+    if (courseComplete) completed += 25;
     if (docsViewed) completed += 25;
     if (quizComplete) completed += 25;
     return completed;
@@ -289,11 +289,11 @@ const EnhancedCourseModule: React.FC = () => {
       isLocked: false,
     },
     {
-      id: 'video',
-      label: 'Video',
+      id: 'course',
+      label: 'Course',
       icon: <Video className="h-4 w-4" />,
-      isCompleted: videoWatched,
-      isCurrent: activeTab === 'video',
+      isCompleted: courseComplete,
+      isCurrent: activeTab === 'course',
       isLocked: false,
     },
     {
@@ -310,8 +310,8 @@ const EnhancedCourseModule: React.FC = () => {
       icon: <CheckCircle2 className="h-4 w-4" />,
       isCompleted: quizComplete,
       isCurrent: activeTab === 'quiz',
-      isLocked: !overviewComplete && !videoWatched,
-      lockReason: 'Complete overview and video first',
+      isLocked: !overviewComplete && !courseComplete,
+      lockReason: 'Complete overview and course first',
     },
   ];
 
@@ -400,46 +400,15 @@ const EnhancedCourseModule: React.FC = () => {
                 </Badge>
               </div>
 
-              {/* Check if module has SCORM-style lessons */}
-              {moduleData.lessons && moduleData.lessons.length > 0 ? (
-                <SCORMStylePlayer 
-                  config={{
-                    id: moduleData.id,
-                    title: moduleData.title,
-                    tagLabel: `Module ${moduleData.module_number} • ${currentModule?.tier.toUpperCase()} Tier`,
-                    estimatedMinutes: moduleData.lessons.reduce((sum, l) => {
-                      const mins = parseInt(l.duration) || 0;
-                      return sum + mins;
-                    }, 0),
-                    lessons: moduleData.lessons,
-                  }}
-                  onCourseComplete={() => {
-                    setActiveTab('quiz');
-                    toast({
-                      title: "All Lessons Complete!",
-                      description: "You may now take the quiz.",
-                    });
-                  }}
-                  onLessonComplete={(lessonId) => {
-                    console.log('Lesson completed:', lessonId);
-                  }}
-                  onDocumentOpen={(docId) => {
-                    // Open document viewer (future implementation)
-                    console.log('Open document:', docId);
-                  }}
-                />
-              ) : (
-                <>
-                  {/* Existing tab-based UI for modules without lessons */}
-                  <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsList className="grid w-full grid-cols-4 mb-6">
                   <TabsTrigger value="overview" className="flex items-center gap-2">
                     <BookOpen className="h-4 w-4" />
                     Overview
                   </TabsTrigger>
-                  <TabsTrigger value="video" className="flex items-center gap-2">
+                  <TabsTrigger value="course" className="flex items-center gap-2">
                     <Video className="h-4 w-4" />
-                    Video
+                    Course
                   </TabsTrigger>
                   <TabsTrigger value="documents" className="flex items-center gap-2">
                     <FileText className="h-4 w-4" />
@@ -470,10 +439,10 @@ const EnhancedCourseModule: React.FC = () => {
                   
                   <SectionNavButton
                     currentSection="overview"
-                    nextSection={{ id: 'video', label: 'Video' }}
+                    nextSection={{ id: 'course', label: 'Course' }}
                     onContinue={() => {
                       setOverviewComplete(true);
-                      setActiveTab('video');
+                      setActiveTab('course');
                     }}
                     canContinue={true}
                     completionMessage="Mark Overview as Complete"
@@ -481,32 +450,46 @@ const EnhancedCourseModule: React.FC = () => {
                   />
                 </TabsContent>
 
-                <TabsContent value="video" className="space-y-4">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Training Video</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      {moduleData.video_url ? (
-                        <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
-                          <p className="text-muted-foreground">Video player would be here</p>
-                        </div>
-                      ) : (
-                        <p className="text-muted-foreground">No video available for this module</p>
-                      )}
-                    </CardContent>
-                  </Card>
-                  
-                  <SectionNavButton
-                    currentSection="video"
-                    nextSection={{ id: 'documents', label: 'Documents' }}
-                    onContinue={() => {
-                      setVideoWatched(true);
+                <TabsContent value="course" className="space-y-4">
+                  <SCORMStylePlayer 
+                    config={{
+                      id: moduleData.id,
+                      title: moduleData.title,
+                      tagLabel: `Module ${moduleData.module_number} • ${currentModule?.tier.toUpperCase()} Tier`,
+                      estimatedMinutes: moduleData.lessons && moduleData.lessons.length > 0 
+                        ? moduleData.lessons.reduce((sum, l) => sum + (parseInt(l.duration) || 0), 0)
+                        : 15,
+                      lessons: moduleData.lessons && moduleData.lessons.length > 0 
+                        ? moduleData.lessons 
+                        : [
+                            {
+                              id: `${moduleData.id}-lesson-1`,
+                              title: moduleData.title,
+                              duration: '15 min',
+                              videoType: 'none' as const,
+                              videoUrl: moduleData.video_url || '',
+                              htmlSummary: `<div>${sanitizeHtml(markdownToHtml(moduleData.content || ''))}</div>`,
+                              resourceLinks: moduleDocuments.map(doc => ({
+                                label: doc.title,
+                                href: `/docs/${doc.id}`
+                              }))
+                            }
+                          ],
+                    }}
+                    onCourseComplete={() => {
+                      setCourseComplete(true);
+                      setActiveTab('documents');
+                      toast({
+                        title: "Course Section Complete!",
+                        description: "Continue with the documents and then take the quiz.",
+                      });
+                    }}
+                    onLessonComplete={(lessonId) => {
+                      console.log('Lesson completed:', lessonId);
+                    }}
+                    onDocumentOpen={(docId) => {
                       setActiveTab('documents');
                     }}
-                    canContinue={true}
-                    completionMessage="Mark Video as Watched"
-                    onMarkComplete={() => setVideoWatched(true)}
                   />
                 </TabsContent>
 
@@ -685,8 +668,6 @@ const EnhancedCourseModule: React.FC = () => {
                   )}
                 </TabsContent>
               </Tabs>
-              </>
-              )}
 
               {/* Previous/Next Module Navigation */}
               <div className="flex justify-between mt-6 pt-6 border-t">
