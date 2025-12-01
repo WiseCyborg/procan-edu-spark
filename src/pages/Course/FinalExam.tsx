@@ -91,6 +91,7 @@ const FinalExam: React.FC = () => {
   const [cameraError, setCameraError] = useState<'no-camera' | 'permission-denied' | 'https-required' | 'in-use' | 'unknown'>('unknown');
   const [skipPhotoVerification, setSkipPhotoVerification] = useState(false);
   const [bypassReason, setBypassReason] = useState('');
+  const [answers, setAnswers] = useState<{[key: string]: string}>({});
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -261,6 +262,9 @@ const FinalExam: React.FC = () => {
   // Pre-shuffle quiz options once when exam starts
   useEffect(() => {
     if (examStage === 'exam') {
+      // Reset answers when exam starts
+      setAnswers({});
+      
       const shuffled: {[key: number]: QuizQuestion[]} = {};
       
       Object.keys(quizzes).forEach(sectionKey => {
@@ -545,12 +549,12 @@ const FinalExam: React.FC = () => {
     const section = currentSection;
     const questions = quizzes[section] || [];
     const sectionResults = questions.map((question, index) => {
-      const selected = document.querySelector(`input[name="q${section}${index}"]:checked`) as HTMLInputElement;
+      const selectedAnswer = answers[`q${section}${index}`];
       return {
         question: question.q,
-        selected: selected ? selected.value : "Not answered",
+        selected: selectedAnswer || "Not answered",
         correct: question.a,
-        isCorrect: selected && selected.value === question.a
+        isCorrect: selectedAnswer === question.a
       };
     });
     
@@ -801,7 +805,12 @@ const FinalExam: React.FC = () => {
                   <input 
                     type="radio" 
                     name={`q${section}${index}`} 
-                    value={option} 
+                    value={option}
+                    checked={answers[`q${section}${index}`] === option}
+                    onChange={() => setAnswers(prev => ({
+                      ...prev,
+                      [`q${section}${index}`]: option
+                    }))}
                     className="mr-3 h-4 w-4 md:h-5 md:w-5 flex-shrink-0" 
                   />
                   <span className="text-sm md:text-base">{option}</span>
