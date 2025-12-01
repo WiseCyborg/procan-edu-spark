@@ -1,8 +1,10 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { CheckCircle2, ChevronLeft, ChevronRight, Award } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { EmailCaptureModal } from './EmailCaptureModal';
+import { markdownToHtml } from '@/utils/markdown-to-html';
+import { sanitizeHtml } from '@/utils/sanitize-html';
 
 interface Module {
   id: string;
@@ -41,6 +43,12 @@ export const ConsumerModuleContent = ({
   totalCount
 }: ConsumerModuleContentProps) => {
   const [showEmailCapture, setShowEmailCapture] = useState(false);
+
+  const formattedContent = useMemo(() => {
+    if (!module.content) return '';
+    const html = markdownToHtml(module.content);
+    return sanitizeHtml(html);
+  }, [module.content]);
 
   const handleComplete = () => {
     onMarkComplete();
@@ -81,8 +89,14 @@ export const ConsumerModuleContent = ({
 
         {/* Content Section */}
         <div 
-          className="prose prose-slate dark:prose-invert max-w-none"
-          dangerouslySetInnerHTML={{ __html: module.content }}
+          className="prose prose-sm md:prose-base max-w-none dark:prose-invert 
+                     prose-p:mb-4 prose-p:leading-relaxed
+                     prose-headings:mt-6 prose-headings:mb-3 prose-headings:font-semibold 
+                     prose-h1:text-2xl prose-h1:text-primary prose-h2:text-xl prose-h3:text-lg
+                     prose-li:my-1 prose-ul:my-4 prose-ol:my-4
+                     prose-strong:text-foreground prose-strong:font-semibold
+                     prose-a:text-primary prose-a:no-underline hover:prose-a:underline"
+          dangerouslySetInnerHTML={{ __html: formattedContent }}
         />
 
         {/* Completion Status */}
