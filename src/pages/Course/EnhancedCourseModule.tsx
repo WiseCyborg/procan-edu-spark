@@ -63,34 +63,6 @@ interface ModuleData {
 
 const COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
 
-// All 23 modules data - synced with database
-const allModules = [
-  { id: 'part0', number: 0, title: 'Welcome & Platform Orientation', tier: 'green' as const, isCompleted: false },
-  { id: 'part1', number: 1, title: 'Introduction to Maryland Cannabis Laws', tier: 'green' as const, isCompleted: false },
-  { id: 'part2', number: 2, title: 'Patient Rights and Privacy', tier: 'green' as const, isCompleted: false },
-  { id: 'part3', number: 3, title: 'Product Knowledge and Safety', tier: 'green' as const, isCompleted: false },
-  { id: 'part4', number: 4, title: 'Inventory Management and Tracking', tier: 'green' as const, isCompleted: false },
-  { id: 'part5', number: 5, title: 'Customer Service Excellence', tier: 'green' as const, isCompleted: false },
-  { id: 'part6', number: 6, title: 'Security, Safety, and Drug-Free Workplace', tier: 'green' as const, isCompleted: false },
-  { id: 'part7', number: 7, title: 'Laboratory Testing and Quality Control', tier: 'yellow' as const, isCompleted: false },
-  { id: 'part8', number: 8, title: 'Dosage Guidelines and Patient Consultation', tier: 'yellow' as const, isCompleted: false },
-  { id: 'part9', number: 9, title: 'Point of Sale Systems and Transactions', tier: 'yellow' as const, isCompleted: false },
-  { id: 'part10', number: 10, title: 'Medical Cannabis and Drug Interactions', tier: 'yellow' as const, isCompleted: false },
-  { id: 'part11', number: 11, title: 'Cannabis Cultivation Basics', tier: 'yellow' as const, isCompleted: false },
-  { id: 'part12', number: 12, title: 'Product Packaging, Labeling, and Diversion Prevention', tier: 'yellow' as const, isCompleted: false },
-  { id: 'part13', number: 13, title: 'Handling Cash and Banking', tier: 'red' as const, isCompleted: false },
-  { id: 'part14', number: 14, title: 'Age Verification and ID Checking', tier: 'red' as const, isCompleted: false },
-  { id: 'part15', number: 15, title: 'Standard Operating Procedures and Record Keeping', tier: 'red' as const, isCompleted: false },
-  { id: 'part16', number: 16, title: 'Transportation and Delivery', tier: 'red' as const, isCompleted: false },
-  { id: 'part17', number: 17, title: 'Waste Disposal and Management', tier: 'red' as const, isCompleted: false },
-  { id: 'part18', number: 18, title: 'Final Review and Best Practices', tier: 'red' as const, isCompleted: false },
-  { id: 'part19', number: 19, title: 'Supervising Compliance Operations', tier: 'red' as const, isCompleted: false },
-  { id: 'part20', number: 20, title: 'Compliance Oversight & Regulatory Reporting', tier: 'red' as const, isCompleted: false },
-  { id: 'part21', number: 21, title: 'Team Training & Development Coordination', tier: 'red' as const, isCompleted: false },
-  { id: 'part22', number: 22, title: 'Incident Documentation & Investigation', tier: 'red' as const, isCompleted: false },
-  { id: 'part23', number: 23, title: 'Advanced Diversion Prevention Strategies', tier: 'red' as const, isCompleted: false },
-];
-
 const EnhancedCourseModule: React.FC = () => {
   const { moduleId } = useParams<{ moduleId: string }>();
   const navigate = useNavigate();
@@ -110,6 +82,39 @@ const EnhancedCourseModule: React.FC = () => {
 
   const { updateProgress, isModuleCompleted } = useUserProgress(COURSE_ID);
   
+  // Dynamic modules with actual completion status
+  const modulesWithCompletion = useMemo(() => [
+    { id: 'part0', number: 0, title: 'Welcome & Platform Orientation', tier: 'green' as const, isCompleted: isModuleCompleted('part0') },
+    { id: 'part1', number: 1, title: 'Introduction to Maryland Cannabis Laws', tier: 'green' as const, isCompleted: isModuleCompleted('part1') },
+    { id: 'part2', number: 2, title: 'Patient Rights and Privacy', tier: 'green' as const, isCompleted: isModuleCompleted('part2') },
+    { id: 'part3', number: 3, title: 'Product Knowledge and Safety', tier: 'green' as const, isCompleted: isModuleCompleted('part3') },
+    { id: 'part4', number: 4, title: 'Inventory Management and Tracking', tier: 'green' as const, isCompleted: isModuleCompleted('part4') },
+    { id: 'part5', number: 5, title: 'Customer Service Excellence', tier: 'green' as const, isCompleted: isModuleCompleted('part5') },
+    { id: 'part6', number: 6, title: 'Security, Safety, and Drug-Free Workplace', tier: 'green' as const, isCompleted: isModuleCompleted('part6') },
+    { id: 'part7', number: 7, title: 'Laboratory Testing and Quality Control', tier: 'yellow' as const, isCompleted: isModuleCompleted('part7') },
+    { id: 'part8', number: 8, title: 'Dosage Guidelines and Patient Consultation', tier: 'yellow' as const, isCompleted: isModuleCompleted('part8') },
+    { id: 'part9', number: 9, title: 'Point of Sale Systems and Transactions', tier: 'yellow' as const, isCompleted: isModuleCompleted('part9') },
+    { id: 'part10', number: 10, title: 'Medical Cannabis and Drug Interactions', tier: 'yellow' as const, isCompleted: isModuleCompleted('part10') },
+    { id: 'part11', number: 11, title: 'Cannabis Cultivation Basics', tier: 'yellow' as const, isCompleted: isModuleCompleted('part11') },
+    { id: 'part12', number: 12, title: 'Product Packaging, Labeling, and Diversion Prevention', tier: 'yellow' as const, isCompleted: isModuleCompleted('part12') },
+    { id: 'part13', number: 13, title: 'Handling Cash and Banking', tier: 'red' as const, isCompleted: isModuleCompleted('part13') },
+    { id: 'part14', number: 14, title: 'Age Verification and ID Checking', tier: 'red' as const, isCompleted: isModuleCompleted('part14') },
+    { id: 'part15', number: 15, title: 'Standard Operating Procedures and Record Keeping', tier: 'red' as const, isCompleted: isModuleCompleted('part15') },
+    { id: 'part16', number: 16, title: 'Transportation and Delivery', tier: 'red' as const, isCompleted: isModuleCompleted('part16') },
+    { id: 'part17', number: 17, title: 'Waste Disposal and Management', tier: 'red' as const, isCompleted: isModuleCompleted('part17') },
+    { id: 'part18', number: 18, title: 'Final Review and Best Practices', tier: 'red' as const, isCompleted: isModuleCompleted('part18') },
+    { id: 'part19', number: 19, title: 'Supervising Compliance Operations', tier: 'red' as const, isCompleted: isModuleCompleted('part19') },
+    { id: 'part20', number: 20, title: 'Compliance Oversight & Regulatory Reporting', tier: 'red' as const, isCompleted: isModuleCompleted('part20') },
+    { id: 'part21', number: 21, title: 'Team Training & Development Coordination', tier: 'red' as const, isCompleted: isModuleCompleted('part21') },
+    { id: 'part22', number: 22, title: 'Incident Documentation & Investigation', tier: 'red' as const, isCompleted: isModuleCompleted('part22') },
+    { id: 'part23', number: 23, title: 'Advanced Diversion Prevention Strategies', tier: 'red' as const, isCompleted: isModuleCompleted('part23') },
+  ], [isModuleCompleted]);
+  
+  // Calculate actual completed count
+  const completedCount = useMemo(() => {
+    return modulesWithCompletion.filter(m => m.isCompleted).length;
+  }, [modulesWithCompletion]);
+  
   // Fetch documents for this module
   const moduleDocuments = useMemo(() => {
     const docIds = getModuleDocuments(moduleId || '');
@@ -117,11 +122,11 @@ const EnhancedCourseModule: React.FC = () => {
   }, [moduleId]);
   
   const currentModuleNumber = parseInt(moduleId?.replace('part', '') || '0');
-  const currentModule = allModules.find(m => m.number === currentModuleNumber);
+  const currentModule = modulesWithCompletion.find(m => m.number === currentModuleNumber);
   
   const { goToPrevious, goToNext, canGoPrevious, canGoNext } = useModuleNavigation({
     currentModule: currentModuleNumber,
-    totalModules: allModules.length,
+    totalModules: modulesWithCompletion.length,
   });
 
   useEffect(() => {
@@ -322,11 +327,11 @@ const EnhancedCourseModule: React.FC = () => {
     return (
       <div className="container mx-auto p-6">
         <CourseNavigationHeader 
-          modules={allModules}
+          modules={modulesWithCompletion}
           currentModuleNumber={currentModuleNumber}
           currentModuleTitle={currentModule?.title || ''}
-          totalModules={allModules.length}
-          completedCount={0}
+          totalModules={modulesWithCompletion.length}
+          completedCount={completedCount}
           onModuleSelect={(num) => navigate(`/course/part${num}`)}
           onClose={() => navigate('/course')}
         />
@@ -350,11 +355,11 @@ const EnhancedCourseModule: React.FC = () => {
     return (
       <div className="container mx-auto p-6">
         <CourseNavigationHeader 
-          modules={allModules}
+          modules={modulesWithCompletion}
           currentModuleNumber={currentModuleNumber}
           currentModuleTitle={currentModule?.title || ''}
-          totalModules={allModules.length}
-          completedCount={0}
+          totalModules={modulesWithCompletion.length}
+          completedCount={completedCount}
           onModuleSelect={(num) => navigate(`/course/part${num}`)}
           onClose={() => navigate('/course')}
         />
@@ -374,18 +379,18 @@ const EnhancedCourseModule: React.FC = () => {
   return (
     <div className="min-h-screen bg-background">
       <CourseNavigationHeader 
-        modules={allModules}
+        modules={modulesWithCompletion}
         currentModuleNumber={currentModuleNumber}
         currentModuleTitle={currentModule?.title || ''}
-        totalModules={allModules.length}
-        completedCount={0}
+        totalModules={modulesWithCompletion.length}
+        completedCount={completedCount}
         onModuleSelect={(num) => navigate(`/course/part${num}`)}
         onClose={() => navigate('/course')}
       />
       
       <div className="flex w-full">
         <ModuleSidebar 
-          modules={allModules}
+          modules={modulesWithCompletion}
           currentModuleNumber={currentModuleNumber}
           onModuleSelect={(num) => navigate(`/course/part${num}`)}
         />
@@ -398,7 +403,7 @@ const EnhancedCourseModule: React.FC = () => {
                 <h1 className="text-3xl font-bold mb-2">{moduleData.title}</h1>
                 <p className="text-muted-foreground">{moduleData.description}</p>
                 <Badge variant={isModuleCompleted(moduleId!) ? "default" : "secondary"} className="mt-2">
-                  {isModuleCompleted(moduleId!) ? 'Completed' : 'In Progress'}
+                  {isModuleCompleted(moduleId!) ? '✓ Completed - Review Mode' : 'In Progress'}
                 </Badge>
               </div>
 
@@ -711,7 +716,7 @@ const EnhancedCourseModule: React.FC = () => {
 
       {/* Mobile Navigation Bar */}
       <MobileNavBar
-        modules={allModules}
+        modules={modulesWithCompletion}
         currentModuleNumber={currentModuleNumber}
         canGoPrevious={canGoPrevious}
         canGoNext={canGoNext}
