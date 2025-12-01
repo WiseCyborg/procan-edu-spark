@@ -71,6 +71,22 @@ export const SCORMStylePlayer: React.FC<SCORMStylePlayerProps> = ({
     return Math.round((completedCount / config.lessons.length) * 100);
   };
 
+  // Convert Vimeo URL to embeddable format
+  const getVimeoEmbedUrl = (url: string): string => {
+    // Extract video ID: matches vimeo.com/12345 or vimeo.com/video/12345
+    const idMatch = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+    if (!idMatch) return url;
+    
+    const videoId = idMatch[1];
+    
+    // Extract hash parameter if present: ?h=abc123
+    const hashMatch = url.match(/[?&]h=([a-zA-Z0-9]+)/);
+    const hash = hashMatch ? hashMatch[1] : null;
+    
+    // Build embed URL with hash if available
+    return `https://player.vimeo.com/video/${videoId}${hash ? `?h=${hash}&` : '?'}badge=0&autopause=0&player_id=0&app_id=58479`;
+  };
+
   // Mark lesson as completed
   const markLessonCompleted = (lessonId: string) => {
     if (!completedLessonIds.includes(lessonId)) {
@@ -182,10 +198,12 @@ export const SCORMStylePlayer: React.FC<SCORMStylePlayerProps> = ({
         <div className="relative rounded-xl overflow-hidden bg-muted border aspect-video flex items-center justify-center">
           {activeLesson.videoType === 'embed' && activeLesson.videoUrl ? (
             <iframe
-              src={activeLesson.videoUrl}
+              src={activeLesson.videoUrl.includes('vimeo.com') 
+                ? getVimeoEmbedUrl(activeLesson.videoUrl)
+                : activeLesson.videoUrl}
               title={activeLesson.title}
               className="w-full h-full"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
               allowFullScreen
             />
           ) : activeLesson.videoType === 'file' && activeLesson.videoUrl ? (
