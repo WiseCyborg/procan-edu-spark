@@ -683,24 +683,33 @@ const EnhancedCourseModule: React.FC = () => {
                 </TabsContent>
               </Tabs>
 
-              {/* Previous/Next Module Navigation */}
-              <div className="flex justify-between mt-6 pt-6 border-t">
-                <Button
-                  variant="outline"
-                  onClick={goToPrevious}
-                  disabled={!canGoPrevious}
-                >
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Previous Module
-                </Button>
-                <Button
-                  onClick={goToNext}
-                  disabled={!canGoNext}
-                >
-                  Next Module
-                  <ArrowLeft className="ml-2 h-4 w-4 rotate-180" />
-                </Button>
-              </div>
+              {/* Previous/Next Module Navigation - only show if navigation is possible */}
+              {(canGoPrevious || canGoNext) && (
+                <div className="flex justify-between mt-6 pt-6 border-t">
+                  {canGoPrevious ? (
+                    <Button
+                      variant="outline"
+                      onClick={goToPrevious}
+                    >
+                      <ArrowLeft className="mr-2 h-4 w-4" />
+                      Previous Module
+                    </Button>
+                  ) : (
+                    <div />
+                  )}
+                  
+                  {canGoNext ? (
+                    <Button
+                      onClick={goToNext}
+                    >
+                      Next Module
+                      <ArrowLeft className="ml-2 h-4 w-4 rotate-180" />
+                    </Button>
+                  ) : (
+                    <div />
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Section Progress Navigator - Right Side */}
