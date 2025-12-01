@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import DispensaryApplicationManager from './DispensaryApplicationManager';
 import { OrganizationsManagementView } from './OrganizationsManagementView';
@@ -7,10 +7,13 @@ import { Button } from '@/components/ui/button';
 import { Building2, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { AdminOrganizationSelector } from './AdminOrganizationSelector';
+import { AdvancedSeatManagement } from '@/components/team/AdvancedSeatManagement';
 
 export const AdminDispensarySection = () => {
   const { toast } = useToast();
   const [reconciling, setReconciling] = React.useState(false);
+  const [selectedOrgId, setSelectedOrgId] = useState<string>('');
 
   const handleReconcileSeats = async () => {
     setReconciling(true);
@@ -50,11 +53,11 @@ export const AdminDispensarySection = () => {
         <OrganizationsManagementView />
       </TabsContent>
 
-      <TabsContent value="seats">
+      <TabsContent value="seats" className="space-y-4">
         <Card>
           <CardHeader>
-            <CardTitle>Seat Allocation & Reconciliation</CardTitle>
-            <CardDescription>Fix seat mismatches and manage training seat inventory</CardDescription>
+            <CardTitle>Batch Seat Operations</CardTitle>
+            <CardDescription>System-wide seat reconciliation and maintenance</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <Button 
@@ -80,6 +83,24 @@ export const AdminDispensarySection = () => {
             </p>
           </CardContent>
         </Card>
+
+        <AdminOrganizationSelector 
+          onSelect={setSelectedOrgId}
+          selectedOrgId={selectedOrgId}
+        />
+
+        {selectedOrgId && (
+          <AdvancedSeatManagement organizationId={selectedOrgId} />
+        )}
+
+        {!selectedOrgId && (
+          <Card>
+            <CardContent className="py-12 text-center text-muted-foreground">
+              <Building2 className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p>Select an organization above to manage its training seats</p>
+            </CardContent>
+          </Card>
+        )}
       </TabsContent>
     </Tabs>
   );
