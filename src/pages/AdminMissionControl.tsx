@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Shield, AlertTriangle, TrendingUp, Building2, Users, Award, ChevronDown, ChevronUp } from 'lucide-react';
+import { Shield, AlertTriangle, TrendingUp, Building2, Users, Award, ChevronDown, ChevronUp, TestTube2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,7 @@ import { AdminDispensarySection } from '@/components/admin/AdminDispensarySectio
 import { AdminTrainingSection } from '@/components/admin/AdminTrainingSection';
 import { AdminSystemHealth } from '@/components/admin/AdminSystemHealth';
 import { AdminCommunications } from '@/components/admin/AdminCommunications';
+import { UATAccountManager } from '@/components/admin/UATAccountManager';
 import { Loader2 } from 'lucide-react';
 
 const AdminMissionControl = () => {
@@ -326,6 +327,30 @@ const AdminMissionControl = () => {
             {expandedSection === 'communications' && (
               <CardContent className="pt-6">
                 <AdminCommunications />
+              </CardContent>
+            )}
+          </Card>
+
+          {/* UAT Testing */}
+          <Card>
+            <CardHeader 
+              className="cursor-pointer hover:bg-muted/50 transition-colors"
+              onClick={() => toggleSection('uat')}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <TestTube2 className="h-5 w-5 text-primary" />
+                  <div>
+                    <CardTitle>UAT Testing</CardTitle>
+                    <CardDescription>Create & manage test accounts for Managers and Employees</CardDescription>
+                  </div>
+                </div>
+                {expandedSection === 'uat' ? <ChevronUp /> : <ChevronDown />}
+              </div>
+            </CardHeader>
+            {expandedSection === 'uat' && (
+              <CardContent className="pt-6">
+                <UATAccountManager />
               </CardContent>
             )}
           </Card>
