@@ -70,7 +70,7 @@ export const CourseNavigationHeader = ({
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 min-w-[140px]">
             <span className="text-sm font-medium">
-              Module {currentModuleNumber + 1} of {totalModules}
+              Module {currentModuleNumber === 0 ? 'Intro' : currentModuleNumber} of {totalModules - 1}
             </span>
           </div>
           
