@@ -1416,13 +1416,909 @@ Enter your email on the next screen to receive your "Dispensary Ready" certifica
 
     console.log('[populate-consumer-courses] Created 10 modules for Course 2');
 
+    // Create Course 3: "Maryland Cannabis Laws"
+    const { data: course3, error: course3Error } = await supabase
+      .from('courses')
+      .insert({
+        title: 'Maryland Cannabis Laws',
+        description: 'Quick reference guide to Maryland cannabis regulations, purchase limits, consumption rules, and your legal rights and responsibilities as a consumer.',
+        course_type: 'consumer',
+        is_public: true,
+        payment_required: false,
+        price_cents: 0,
+        target_audience: 'All Maryland cannabis consumers, medical patients, first-time visitors',
+        completion_badge_name: 'Maryland Compliant',
+        module_count: 4,
+        passing_score: null,
+        is_active: true
+      })
+      .select()
+      .single();
+
+    if (course3Error) {
+      throw new Error(`Failed to create Course 3: ${course3Error.message}`);
+    }
+
+    console.log('[populate-consumer-courses] Created course:', course3.title);
+
+    // Create modules for Course 3
+    const course3Modules = [
+      {
+        course_id: course3.id,
+        module_number: 1,
+        title: 'Purchase Limits & Possession',
+        content: `# Maryland Purchase Limits & Possession Laws
+
+Maryland cannabis laws define clear limits on how much you can purchase and possess.
+
+## Medical Cannabis Limits
+
+**30-Day Supply**: Medical patients can purchase up to a 30-day supply as determined by their certifying physician.
+
+**Typical Limits:**
+- 120 grams (approximately 4.2 ounces) of flower per 30 days
+- Equivalent amounts of concentrates and edibles (conversion formulas vary)
+- Limits tracked electronically through MMCC system
+
+**Important Notes:**
+- Your dispensary tracks your remaining allotment automatically
+- Different product types are converted to flower equivalents
+- Ask your budtender about your remaining balance
+
+## Recreational Cannabis Limits
+
+**Adult-Use Purchase Limits:**
+- Up to 1.5 ounces of flower per purchase
+- Equivalent limits for concentrates and edibles
+- Must be 21 years or older
+
+## Possession Limits
+
+**What You Can Legally Possess:**
+- Amount purchased legally from licensed dispensary
+- Keep products in original sealed packaging
+- Store with receipt as proof of legal purchase
+
+**Multiple Purchases:**
+- Wait appropriate time between purchases
+- Don't exceed daily/monthly limits
+- Dispensary systems prevent over-purchasing
+
+## What You Cannot Do
+
+❌ Sell or distribute cannabis without a license
+❌ Give to anyone under 21 (or 18 for medical)
+❌ Possess more than legal limits
+❌ Purchase from unlicensed sources
+❌ Cross state lines with cannabis
+
+## Penalties for Exceeding Limits
+
+**Consequences:**
+- Confiscation of excess product
+- Fines and penalties
+- Possible criminal charges (large amounts)
+- Loss of medical cannabis card
+
+## Federal Property
+
+Cannabis remains illegal on ALL federal property:
+- National parks
+- Federal buildings
+- Military bases
+- Post offices
+- Airports
+
+## Your Rights
+
+**Legal Possession Means:**
+- Police cannot seize legal amounts
+- No arrest for compliant possession
+- Protection under Maryland state law
+- Access to legal dispute resolution
+
+**Medical Patients Have Additional Protection:**
+- Employment protections (limited)
+- Housing protections (limited)
+- Custody considerations
+- Medical record privacy
+
+## Best Practices
+
+✅ Keep receipts with products
+✅ Store in original packaging
+✅ Know your limits before shopping
+✅ Track your purchases (medical patients)
+✅ Stay informed of law changes
+
+## Resources
+
+- Maryland Medical Cannabis Commission (MMCC)
+- Your dispensary's compliance team
+- NORML Maryland chapter
+- Local law enforcement non-emergency line`,
+        estimated_minutes: 6,
+        is_public: true
+      },
+      {
+        course_id: course3.id,
+        module_number: 2,
+        title: 'Where You Can Use Cannabis',
+        content: `# Where You Can Use Cannabis in Maryland
+
+Maryland law strictly regulates where cannabis can be consumed. Understanding these rules helps you stay compliant and respectful.
+
+## Legal Consumption Locations
+
+### Private Residences
+**✅ Legal:**
+- Your own home or apartment (unless lease prohibits)
+- Friend's or family member's private residence (with permission)
+- Private property with owner consent
+
+**Requirements:**
+- Must be indoors or in private outdoor areas
+- Cannot be visible from public areas
+- Respectful of neighbors and property rules
+
+### Your Vehicle (Not While Driving)
+**❌ Illegal to Consume:**
+- Even when parked
+- Even in your own driveway
+- Anywhere in or around the vehicle
+
+**⚠️ Important:**
+- Consuming in a vehicle can result in DUI charges
+- Open containers in vehicle passenger area are illegal
+
+## Illegal Consumption Locations
+
+### Public Places - Strictly Prohibited
+❌ Parks and playgrounds
+❌ Sidewalks and streets
+❌ Parking lots (including dispensary parking lots)
+❌ Restaurants and bars
+❌ Hotels and motels (unless property allows)
+❌ Concert venues and festivals
+❌ Beaches and boardwalks
+❌ Public transportation
+
+### Government and Public Buildings
+❌ Schools and universities
+❌ Libraries
+❌ Government offices
+❌ Courthouses
+❌ Public hospitals
+❌ Polling places
+
+### Workplaces
+❌ Most workplaces prohibit use on premises
+❌ During work hours (even medical patients)
+❌ In company vehicles
+❌ On employer property
+
+**Note:** Some employers may allow off-duty medical use, but this varies by workplace policy.
+
+## Special Considerations
+
+### Rental Properties
+- **Landlords can prohibit** cannabis use in lease agreements
+- **Smoking may be banned** even if other consumption allowed
+- **Medical patients** have limited protections but not absolute rights
+- **Check your lease** before consuming
+
+### College Campuses
+- Most prohibit possession and use on campus
+- Federal student housing follows federal law (illegal)
+- Violation can result in disciplinary action or loss of housing
+
+### Apartment Buildings
+- **Smoke-free buildings** prohibit smoking cannabis
+- **Common areas** (hallways, elevators, lobbies) are public space
+- **Balconies** may or may not be allowed (check rules)
+- **Edibles and tinctures** may be allowed where smoking isn't
+
+## Maryland's Public Consumption Law
+
+**Penalties for Public Use:**
+- Civil citation and fine
+- Confiscation of product
+- Court appearance may be required
+- Repeat offenses = increasing penalties
+
+**First Offense:**
+- Typically $50-$150 fine
+- Cannabis confiscated
+- No jail time (usually)
+
+**Subsequent Offenses:**
+- Higher fines
+- Possible misdemeanor charges
+- Court costs and fees
+
+## Respectful Consumption
+
+### Be a Good Neighbor
+- Keep odors contained
+- Don't smoke near air intakes or shared ventilation
+- Use edibles or tinctures in shared housing
+- Respect neighbors' concerns and preferences
+
+### Discretion Matters
+- Even legal use can create conflicts
+- Consider impact on others
+- Use methods with minimal odor when possible
+- Store products securely and out of sight
+
+## Travel Considerations
+
+### Within Maryland
+✅ Transport in sealed containers in trunk
+✅ Keep receipt with product
+❌ Never consume while traveling
+❌ Never open containers in vehicle
+
+### Leaving Maryland
+❌ **NEVER cross state lines** with cannabis
+❌ Illegal even to other legal states
+❌ Federal law applies at borders
+❌ Severe penalties including federal charges
+
+### Airports
+❌ TSA is federal agency - cannabis illegal
+❌ Don't bring to airport even for Maryland flights
+❌ Medical patients have no exception
+❌ Can result in arrest and prosecution
+
+## Medical Cannabis Protections
+
+**Limited Protections for Medical Patients:**
+- Cannot be arrested for legal possession
+- Some employment protections
+- Some housing protections
+- Custody considerations in family court
+
+**No Protection From:**
+- Federal law enforcement
+- Workplace drug testing (in most cases)
+- Operating vehicles while impaired
+- Public consumption laws
+
+## Business Policies
+
+### Dispensaries
+- No consumption on property
+- No consumption in parking lot
+- Take products home to consume
+
+### Hotels and Lodging
+- Most prohibit smoking in rooms
+- Some allow edibles/tinctures
+- Check property policy before booking
+- Designated smoking areas usually don't allow cannabis
+
+## Best Practices for Compliant Use
+
+✅ Only consume in private residences
+✅ Get permission from property owner
+✅ Check lease and property rules
+✅ Use odor-reducing methods
+✅ Be respectful of others
+✅ Never consume in vehicles
+✅ Keep products secure and private
+
+## When in Doubt
+
+**If you're unsure if consumption is legal:**
+- Assume it's not allowed
+- Ask the property owner
+- Wait until you're in a clearly private space
+- Use more discreet consumption methods
+
+**Remember: Legal purchase doesn't mean legal use everywhere. When in doubt, wait until you're in your private residence.**`,
+        estimated_minutes: 7,
+        is_public: true
+      },
+      {
+        course_id: course3.id,
+        module_number: 3,
+        title: 'Transportation & Travel Laws',
+        content: `# Transportation & Travel Laws for Cannabis in Maryland
+
+Safely and legally transporting cannabis requires understanding Maryland's specific rules and federal restrictions.
+
+## Transporting Cannabis in Maryland
+
+### Proper Transport in Your Vehicle
+
+**✅ Legal Requirements:**
+- Keep products in **original sealed containers**
+- Store in **trunk or locked glove compartment**
+- Keep **away from driver's immediate reach**
+- Keep **receipt with products** as proof of legal purchase
+
+**❌ Illegal Actions:**
+- Open containers in passenger area
+- Products within driver's reach
+- Consuming in vehicle (even when parked)
+- Products in cup holders or center console
+- Loose products (not in original packaging)
+
+### Why These Rules Matter
+
+**Legal Protection:**
+- Sealed containers prove you're not consuming while driving
+- Receipts prove legal purchase
+- Proper storage shows compliance with law
+
+**Safety:**
+- Prevents accidental consumption by passengers
+- Keeps products secure
+- Reduces odor complaints
+
+## Never Drive Under the Influence
+
+### Maryland DUI Laws Apply to Cannabis
+
+**You can be charged with DUI if:**
+- Driving while impaired by cannabis
+- Blood test shows THC presence
+- Officer observes impairment
+- Fail field sobriety tests
+
+**Penalties:**
+- License suspension
+- Fines ($500-$2000+)
+- Possible jail time
+- Criminal record
+- Increased insurance rates
+- Ignition interlock device
+
+**Medical Patients Have No Exception:**
+- Medical card doesn't protect against DUI
+- Same penalties apply
+- Can lose medical cannabis privileges
+
+### Signs of Cannabis Impairment
+
+Police look for:
+- Slow reaction times
+- Difficulty maintaining lane
+- Delayed responses
+- Smell of cannabis
+- Red eyes
+- Disoriented behavior
+- Failed sobriety tests
+
+### How Long to Wait Before Driving
+
+**General Guidelines:**
+- **Smoking/Vaping**: Wait at least 3-4 hours
+- **Edibles**: Wait at least 6-8 hours (or don't drive that day)
+- **Tinctures**: Wait 4-6 hours
+- **High doses**: Wait longer or don't drive that day
+
+**Everyone metabolizes differently - when in doubt, don't drive.**
+
+## Traveling with Cannabis
+
+### Within Maryland - Legal Options
+
+**✅ Allowed:**
+- Driving between dispensaries and home
+- Transporting to friend's private residence
+- Moving between your properties
+
+**Requirements:**
+- Products in trunk in sealed containers
+- No consumption during transport
+- Keep receipts with products
+- Respect all local ordinances
+
+### Crossing State Lines - STRICTLY ILLEGAL
+
+**❌ NEVER Legal:**
+- Taking cannabis to any other state
+- Even to states where cannabis is legal
+- Even for medical patients
+- Even tiny amounts
+
+**Federal Law:**
+- Crossing state lines = federal crime
+- Drug trafficking charges possible
+- Mandatory minimum sentences may apply
+- Can face federal prosecution
+
+**Border States:**
+- Pennsylvania: Illegal
+- Delaware: Illegal
+- Virginia: Illegal
+- West Virginia: Illegal
+- Washington, DC: Illegal to bring in (despite local legality)
+
+### Airports and Air Travel
+
+**TSA is a Federal Agency:**
+❌ Cannabis illegal at all airports
+❌ Illegal in checked bags
+❌ Illegal in carry-on bags
+❌ Medical patients have no exception
+❌ "Legal state to legal state" doesn't matter
+
+**Consequences:**
+- Product confiscation
+- Missed flight
+- Possible arrest
+- Federal charges
+- Fines and prosecution
+- Travel bans
+
+**TSA Policy:**
+- Required to report cannabis to law enforcement
+- Local police called to handle
+- Outcome depends on local policy
+- Federal charges possible
+
+### Amtrak and Interstate Buses
+
+**Federal Property = Federal Law:**
+❌ Cannabis prohibited on Amtrak (federal railway)
+❌ Interstate buses (Greyhound, etc.) prohibit cannabis
+❌ Federal charges possible if caught
+❌ No medical patient exceptions
+
+## Public Transportation in Maryland
+
+**Local Buses and Metro:**
+- Cannabis possession may be allowed (if sealed, legal amount)
+- **Consumption strictly prohibited**
+- Can result in citation or arrest
+- Products must be concealed and sealed
+
+**Rideshare (Uber, Lyft):**
+- Check company policies
+- Most prohibit consumption in vehicles
+- Keep products sealed and concealed
+- Driver can refuse service
+- Be respectful of driver
+
+## Shipping Cannabis
+
+**❌ Completely Illegal:**
+- USPS: Federal offense
+- FedEx/UPS: Against company policy and illegal
+- Within Maryland: Still illegal
+- Between states: Federal trafficking charge
+
+**Even for Medical Patients:**
+- No mailing prescriptions
+- No shipping to family members
+- No mail-order from dispensaries
+
+## Special Scenarios
+
+### Moving to Another State
+❌ Cannot bring cannabis when moving
+❌ Must consume or dispose before leaving Maryland
+❌ Start fresh in new state (if legal there)
+❌ Don't risk federal charges for moving day
+
+### Temporary Work Assignments
+❌ Cannot bring cannabis to work in other states
+❌ Cannot use Maryland medical card elsewhere (with rare exceptions)
+❌ Follow laws of state where you're working
+
+### Vacation Travel
+**Within Maryland:**
+✅ Can bring legal amounts to vacation rental
+✅ Store properly and respect property rules
+✅ Transport in trunk in sealed containers
+
+**Out of State:**
+❌ Leave cannabis at home
+❌ Don't risk vacation becoming jail time
+❌ Purchase in destination if legal there
+
+## Law Enforcement Interactions
+
+### If Pulled Over with Cannabis
+
+**Do:**
+- Be polite and respectful
+- Inform officer of products in trunk
+- Show receipt proving legal purchase
+- Explain products are sealed and secured
+
+**Don't:**
+- Lie about having cannabis
+- Admit to consuming before driving
+- Consent to searches without understanding rights
+- Be confrontational or argumentative
+
+### If Products Are Illegal
+- Out of original packaging
+- Open container in passenger area
+- Amount exceeds limits
+- Receipt doesn't match products
+
+**Expect:**
+- Product confiscation
+- Possible citation
+- Possible arrest (if excessive amount)
+- Court date
+
+## Best Practices Summary
+
+✅ **Transport only:**
+- In original sealed containers
+- In trunk or locked compartment
+- With receipt attached
+- Directly home from dispensary
+
+✅ **Never:**
+- Consume in vehicles
+- Drive while impaired
+- Cross state lines
+- Bring to airports
+- Ship via mail
+
+✅ **Wait before driving:**
+- 3-4 hours (minimum) after smoking/vaping
+- 6-8 hours after edibles
+- Overnight for high doses
+- Use rideshare if unsure
+
+## Emergency Contacts
+
+**If arrested or charged:**
+- Contact attorney immediately
+- Don't answer questions without lawyer
+- Document everything
+- Keep receipts and medical documentation
+
+**Resources:**
+- Maryland NORML legal hotline
+- Medical Cannabis Commission
+- Criminal defense attorney
+- Local public defender's office
+
+**Remember: Cannabis is still federally illegal. Any travel involving federal property, interstate commerce, or crossing state lines is a federal crime with serious consequences.**`,
+        estimated_minutes: 8,
+        is_public: true
+      },
+      {
+        course_id: course3.id,
+        module_number: 4,
+        title: 'Your Rights & Responsibilities',
+        content: `# Your Rights & Responsibilities as a Maryland Cannabis Consumer
+
+Understanding your legal rights and responsibilities ensures you can access cannabis safely while staying compliant with Maryland law.
+
+## Your Legal Rights as a Consumer
+
+### Right to Purchase and Possess
+✅ Purchase from licensed Maryland dispensaries
+✅ Possess legal amounts as defined by Maryland law
+✅ Transport properly in sealed containers
+✅ Consume in private residences with permission
+✅ Protection from arrest for legal possession and use
+
+### Medical Patient Rights (Additional)
+✅ Employment protections (limited - varies by employer)
+✅ Housing protections (limited - landlords can still restrict)
+✅ Access to medical cannabis program
+✅ Privacy of medical records
+✅ Consultation with healthcare providers
+✅ Can designate caregiver to purchase on your behalf
+
+### Right to Quality Products
+✅ Lab-tested products meeting Maryland standards
+✅ Accurate labeling of THC/CBD content
+✅ Child-resistant packaging
+✅ Clean, safe products free from contaminants
+✅ Return defective unopened products (varies by dispensary)
+
+### Right to Information
+✅ Consult knowledgeable budtenders
+✅ Ask questions about products and effects
+✅ Access product testing results
+✅ Understand dosing recommendations
+✅ Know your purchase limits and remaining allotment
+
+### Right to Privacy
+✅ Dispensary cannot share your purchase history
+✅ Medical information is confidential (HIPAA protected)
+✅ MMCC registration data is private
+✅ Police need probable cause for cannabis-related stops
+
+## Your Legal Responsibilities
+
+### Compliance with Purchase Limits
+**You MUST:**
+- Stay within 30-day medical limits (or recreational limits)
+- Allow dispensary to track your allotment
+- Wait appropriate time between purchases
+- Not use multiple dispensaries to exceed limits
+
+**You MUST NOT:**
+- Purchase from unlicensed sources
+- Buy for others (unless registered caregiver)
+- Exceed daily or monthly purchase limits
+
+### Consumption Location Rules
+**You MUST:**
+- Consume only in private residences (with permission)
+- Respect property owner/landlord rules
+- Keep consumption private and discreet
+- Use odor-reducing methods when considerate
+
+**You MUST NOT:**
+- Consume in public places
+- Consume in vehicles
+- Consume on federal property
+- Consume in view of minors
+
+### Storage and Security
+**You MUST:**
+- Keep cannabis in child-resistant containers
+- Store out of reach of children and pets
+- Keep products in original packaging with labels
+- Secure cannabis to prevent theft or unauthorized access
+
+**You MUST NOT:**
+- Leave cannabis accessible to minors
+- Store with regular food items (edibles)
+- Display openly in public view
+- Give cannabis to anyone under 21 (18 for medical)
+
+### Transportation Compliance
+**You MUST:**
+- Transport in sealed containers in trunk
+- Keep receipt with products
+- Ensure products are not in driver's reach
+- Never drive while impaired
+
+**You MUST NOT:**
+- Open containers in vehicles
+- Consume during transport
+- Cross state lines with cannabis
+- Bring cannabis to airports
+
+### Respect for Others
+**You MUST:**
+- Be considerate of neighbors and roommates
+- Respect smoke-free housing policies
+- Keep odors contained
+- Be discreet about your use
+- Not pressure others to use cannabis
+
+**You MUST NOT:**
+- Provide cannabis to minors
+- Use in a way that disturbs others
+- Endanger others while impaired
+- Force cannabis use on anyone
+
+## Minors and Cannabis
+
+### Strict Prohibition
+❌ **Never** provide cannabis to anyone under 21 (recreational) or 18 (medical)
+❌ Includes your own children (with rare medical exceptions)
+❌ Severe penalties including jail time
+❌ Loss of custody possible
+
+### Parental Responsibilities
+**If you're a parent who uses cannabis:**
+- Store securely in locked container
+- Keep completely out of children's reach
+- Never use around children
+- Don't leave in accessible areas
+- Dispose of packaging safely
+- Educate older teens about risks
+
+**Medical Cannabis for Minors:**
+- Requires specific medical recommendation
+- Parent must be registered caregiver
+- Special rules apply
+- Highly regulated process
+
+## Workplace Considerations
+
+### Employer Rights
+**Employers CAN:**
+- Prohibit cannabis use (even for medical patients)
+- Drug test employees
+- Terminate for positive tests
+- Restrict use during work hours
+- Prohibit bringing cannabis to workplace
+
+### Employee Protections (Limited)
+**Medical patients have some protections:**
+- Cannot be discriminated against for being registered (varies)
+- Off-duty medical use may be protected (not all employers)
+- Workplace accommodation may be available (case-by-case)
+
+**However, employers can still:**
+- Require drug-free workplace
+- Test safety-sensitive positions
+- Enforce no-impairment policies
+
+### Best Practices for Employees
+- Know your employer's policy
+- Don't use before or during work
+- Keep medical status private if possible
+- Don't bring cannabis to workplace
+- Follow federal contractor rules if applicable
+
+## Federal Law Conflicts
+
+### Cannabis is Still Federally Illegal
+**This means:**
+- Federal employees cannot use (even medical)
+- Federal contractors may be prohibited
+- Federal property is off-limits
+- Federal benefits can be affected
+- Immigration consequences possible
+
+### Federal vs. State Law
+**State law protects you in Maryland:**
+- Local police cannot arrest for compliant possession
+- Maryland courts recognize medical program
+- State agencies respect medical cannabis
+
+**Federal law still applies:**
+- On federal property
+- For federal employees
+- In federal court
+- Immigration proceedings
+- Interstate travel
+
+## If You Have a Problem
+
+### Dispensary Issues
+**Product defects:**
+- Contact dispensary immediately
+- Bring unopened product with receipt
+- Many have return/exchange policies
+
+**Service complaints:**
+- Speak to manager
+- File complaint with MMCC
+- Document interactions
+
+### Law Enforcement Issues
+**If arrested or cited:**
+- Remain calm and polite
+- Don't answer questions without lawyer
+- Document everything
+- Contact attorney immediately
+- Keep all receipts and documentation
+
+**Resources:**
+- Maryland NORML: Legal information and referrals
+- MMCC: Medical program questions
+- Criminal defense attorney: For charges
+
+### Medical Cannabis Concerns
+**Access issues:**
+- Contact MMCC patient services
+- Speak to your certifying physician
+- Reach out to dispensary patient services
+
+**Medical concerns:**
+- Consult your healthcare provider
+- Don't rely solely on budtenders for medical advice
+- Report adverse effects to your doctor
+
+## Common Myths About Your Rights
+
+### ❌ MYTH: "I'm a medical patient, so I can use anywhere"
+**✅ TRUTH:** Public consumption is illegal for everyone, including medical patients.
+
+### ❌ MYTH: "Police can't search my car if I have a medical card"
+**✅ TRUTH:** Police can search with probable cause or your consent. Medical card doesn't prevent searches.
+
+### ❌ MYTH: "I can take my medicine anywhere, like other prescriptions"
+**✅ TRUTH:** Cannabis is not a traditional prescription. Different rules apply.
+
+### ❌ MYTH: "Employers can't fire me for legal medical use"
+**✅ TRUTH:** Many employers can still prohibit cannabis use and terminate for positive tests.
+
+### ❌ MYTH: "I can travel to other states with my medical card"
+**✅ TRUTH:** Crossing state lines with cannabis is a federal crime.
+
+## Being a Responsible Consumer
+
+### Best Practices
+✅ Stay informed about law changes
+✅ Purchase only from licensed dispensaries
+✅ Respect all consumption location rules
+✅ Store safely away from children
+✅ Never drive impaired
+✅ Be considerate of others
+✅ Follow your doctor's guidance (medical patients)
+✅ Keep receipts and documentation
+
+### Community Responsibility
+- Be a positive example of responsible use
+- Don't give cannabis a bad reputation
+- Respect neighbors and community standards
+- Support licensed businesses
+- Advocate for reasonable policies
+- Educate others accurately
+
+## Know Your Rights Resources
+
+**Official Resources:**
+- Maryland Medical Cannabis Commission (MMCC): mmcc.maryland.gov
+- Maryland NORML: marylandnorml.org
+- Maryland State Law Library: lawlib.maryland.gov
+
+**Legal Assistance:**
+- Maryland Criminal Defense Attorney
+- NORML Legal Committee
+- Public Defender's Office
+- Legal Aid Bureau
+
+**Patient Support:**
+- MMCC Patient Hotline
+- Dispensary patient education
+- Support groups and forums
+
+## Staying Compliant Checklist
+
+✅ Purchase only from licensed Maryland dispensaries
+✅ Stay within legal possession limits
+✅ Consume only in private residences
+✅ Store securely away from children
+✅ Transport in trunk in sealed containers
+✅ Never drive impaired
+✅ Keep receipts with products
+✅ Respect employer policies
+✅ Don't cross state lines
+✅ Never provide to minors
+✅ Be considerate of others
+✅ Stay informed of law changes
+
+---
+
+## Congratulations! 🎉
+
+You've completed the "Maryland Cannabis Laws" course. You now understand:
+
+✅ Your legal rights as a cannabis consumer
+✅ Purchase limits and possession rules
+✅ Where you can legally consume cannabis
+✅ Transportation and travel restrictions
+✅ Your responsibilities to community and family
+✅ How to handle law enforcement interactions
+✅ Resources for questions and legal assistance
+
+**You're ready to be a responsible, compliant cannabis consumer in Maryland!**
+
+Enter your email on the next screen to receive your "Maryland Compliant" certificate.`,
+        estimated_minutes: 10,
+        is_public: true
+      }
+    ];
+
+    const { error: course3ModulesError } = await supabase
+      .from('course_modules')
+      .insert(course3Modules);
+
+    if (course3ModulesError) {
+      throw new Error(`Failed to create Course 3 modules: ${course3ModulesError.message}`);
+    }
+
+    console.log('[populate-consumer-courses] Created 4 modules for Course 3');
+
     return new Response(
       JSON.stringify({
         success: true,
         message: 'Consumer courses created successfully',
         courses: [
           { id: course1.id, title: course1.title, modules: 8 },
-          { id: course2.id, title: course2.title, modules: 10 }
+          { id: course2.id, title: course2.title, modules: 10 },
+          { id: course3.id, title: course3.title, modules: 4 }
         ]
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

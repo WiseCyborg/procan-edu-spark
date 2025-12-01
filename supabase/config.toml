@@ -351,3 +351,6 @@ verify_jwt = true
 [functions.create-uat-account]
 verify_jwt = true
 
+[functions.populate-consumer-courses]
+verify_jwt = true
+
