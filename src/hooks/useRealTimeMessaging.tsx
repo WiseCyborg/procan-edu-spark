@@ -14,6 +14,11 @@ export interface Message {
   is_edited: boolean;
   edited_at?: string;
   created_at: string;
+  reactions?: Array<{
+    emoji: string;
+    count: number;
+    userReacted: boolean;
+  }>;
   sender?: {
     first_name: string;
     last_name: string;

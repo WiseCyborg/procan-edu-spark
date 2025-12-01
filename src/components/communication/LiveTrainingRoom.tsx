@@ -1,11 +1,14 @@
 // Phase 6: Live Training Room Component
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Hand, MessageSquare, Users, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { VideoCallRoom } from '@/components/video/VideoCallRoom';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface LiveTrainingRoomProps {
   token: string;
@@ -18,9 +21,13 @@ interface LiveTrainingRoomProps {
 
 interface QueuedQuestion {
   id: string;
-  userName: string;
+  user_id: string;
+  user_name: string;
   question: string;
-  timestamp: Date;
+  status: 'pending' | 'answered';
+  created_at: string;
+  answered_at?: string;
+  answered_by?: string;
 }
 
 export const LiveTrainingRoom = ({
@@ -31,32 +38,107 @@ export const LiveTrainingRoom = ({
   isHost,
   conversationId,
 }: LiveTrainingRoomProps) => {
+  const { user } = useAuth();
   const [showChat, setShowChat] = useState(true);
   const [showQueue, setShowQueue] = useState(true);
   const [handRaised, setHandRaised] = useState(false);
   const [questionQueue, setQuestionQueue] = useState<QueuedQuestion[]>([]);
   const [newQuestion, setNewQuestion] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleRaiseHand = () => {
-    setHandRaised(!handRaised);
-    // TODO: Broadcast hand raise to other participants
-  };
+  // Fetch questions from database
+  useEffect(() => {
+    fetchQuestions();
+    
+    // Subscribe to real-time updates
+    const channel = supabase
+      .channel(`training_questions:${conversationId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'training_questions',
+          filter: `conversation_id=eq.${conversationId}`,
+        },
+        () => {
+          fetchQuestions();
+        }
+      )
+      .subscribe();
 
-  const handleSubmitQuestion = () => {
-    if (newQuestion.trim()) {
-      const question: QueuedQuestion = {
-        id: crypto.randomUUID(),
-        userName: 'Current User', // TODO: Get actual user name
-        question: newQuestion,
-        timestamp: new Date(),
-      };
-      setQuestionQueue([...questionQueue, question]);
-      setNewQuestion('');
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [conversationId]);
+
+  const fetchQuestions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('training_questions')
+        .select('*')
+        .eq('conversation_id', conversationId)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      setQuestionQueue((data || []) as QueuedQuestion[]);
+    } catch (error) {
+      console.error('Error fetching questions:', error);
     }
   };
 
-  const handleAnswerQuestion = (questionId: string) => {
-    setQuestionQueue(questionQueue.filter(q => q.id !== questionId));
+  const handleRaiseHand = () => {
+    setHandRaised(!handRaised);
+    // TODO: Broadcast hand raise to other participants via LiveKit data channel
+  };
+
+  const handleSubmitQuestion = async () => {
+    if (!newQuestion.trim() || !user) return;
+
+    setSubmitting(true);
+    try {
+      const { error } = await supabase
+        .from('training_questions')
+        .insert({
+          conversation_id: conversationId,
+          user_id: user.id,
+          user_name: `${user.user_metadata?.first_name || 'User'} ${user.user_metadata?.last_name || ''}`.trim(),
+          question: newQuestion.trim(),
+          status: 'pending',
+        });
+
+      if (error) throw error;
+      
+      setNewQuestion('');
+      toast.success('Question submitted to queue');
+    } catch (error) {
+      console.error('Error submitting question:', error);
+      toast.error('Failed to submit question');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleAnswerQuestion = async (questionId: string) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('training_questions')
+        .update({
+          status: 'answered',
+          answered_at: new Date().toISOString(),
+          answered_by: user.id,
+        })
+        .eq('id', questionId);
+
+      if (error) throw error;
+      toast.success('Question marked as answered');
+    } catch (error) {
+      console.error('Error updating question:', error);
+      toast.error('Failed to update question');
+    }
   };
 
   return (
@@ -155,9 +237,9 @@ export const LiveTrainingRoom = ({
                   {questionQueue.map((q) => (
                     <div key={q.id} className="bg-muted/50 p-3 rounded-lg">
                       <div className="flex items-start justify-between mb-2">
-                        <span className="font-medium text-sm">{q.userName}</span>
+                        <span className="font-medium text-sm">{q.user_name}</span>
                         <span className="text-xs text-muted-foreground">
-                          {q.timestamp.toLocaleTimeString()}
+                          {new Date(q.created_at).toLocaleTimeString()}
                         </span>
                       </div>
                       <p className="text-sm mb-2">{q.question}</p>
@@ -205,9 +287,9 @@ export const LiveTrainingRoom = ({
               <Button
                 onClick={handleSubmitQuestion}
                 className="w-full"
-                disabled={!newQuestion.trim()}
+                disabled={!newQuestion.trim() || submitting}
               >
-                Submit Question
+                {submitting ? 'Submitting...' : 'Submit Question'}
               </Button>
             </div>
           </div>
