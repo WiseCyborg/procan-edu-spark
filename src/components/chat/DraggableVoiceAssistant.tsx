@@ -194,6 +194,7 @@ export const DraggableVoiceAssistant: React.FC = () => {
   });
   const [dragOffset, setDragOffset] = useState<Position>({ x: 0, y: 0 });
   const [isListening, setIsListening] = useState(false);
+  const [isChatDismissed, setIsChatDismissed] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout>();
@@ -594,6 +595,11 @@ export const DraggableVoiceAssistant: React.FC = () => {
   };
 
   if (isChatDisabled) {
+    // If dismissed, don't render anything
+    if (isChatDismissed) {
+      return null;
+    }
+    
     return (
       <div 
         ref={cardRef}
@@ -601,7 +607,17 @@ export const DraggableVoiceAssistant: React.FC = () => {
         style={{ left: position.x, top: position.y, width: windowSize.width }}
       >
         <Card className="bg-muted border-border">
-          <CardContent className="p-4 text-center">
+          <CardContent className="p-4 text-center relative">
+            {/* Close Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-1 right-1 h-6 w-6"
+              onClick={() => setIsChatDismissed(true)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+            
             <HelpCircle className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
             <h3 className="font-semibold text-foreground mb-1">Chat Unavailable</h3>
             <p className="text-sm text-muted-foreground">
