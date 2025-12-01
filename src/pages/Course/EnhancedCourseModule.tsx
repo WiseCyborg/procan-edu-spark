@@ -23,6 +23,7 @@ import { WeakAreaPractice } from '@/components/course/WeakAreaPractice';
 import { CourseNavigationHeader } from '@/components/course/CourseNavigationHeader';
 import { ModuleSidebar } from '@/components/course/ModuleSidebar';
 import { MobileNavBar } from '@/components/course/MobileNavBar';
+import { CourseCompletionCelebration } from '@/components/course/CourseCompletionCelebration';
 import { useModuleNavigation } from '@/hooks/useModuleNavigation';
 import { SCORMStylePlayer, CourseConfig } from '@/components/course/SCORMStylePlayer';
 
@@ -618,7 +619,13 @@ const EnhancedCourseModule: React.FC = () => {
                 </TabsContent>
 
                 <TabsContent value="quiz" className="space-y-4">
-                  {moduleData.quiz_questions.length === 0 ? (
+                  {/* SPECIAL HANDLING FOR MODULE 23 - COURSE COMPLETION */}
+                  {currentModuleNumber === 23 ? (
+                    <CourseCompletionCelebration 
+                      onTakeExam={() => navigate('/course/final-exam')}
+                      onReturnToDashboard={() => navigate('/student')}
+                    />
+                  ) : moduleData.quiz_questions.length === 0 ? (
                     <Card>
                       <CardContent className="p-6 text-center">
                         <BookOpen className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
