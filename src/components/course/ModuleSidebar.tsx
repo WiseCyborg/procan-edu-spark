@@ -55,7 +55,7 @@ export const ModuleSidebar = ({
             </div>
             <div className={cn(
               'text-sm',
-              module.isCompleted && 'text-muted-foreground line-through',
+              module.isCompleted && 'text-green-700 dark:text-green-400',
               isCurrent && 'font-medium'
             )}>
               {module.title}
