@@ -4819,6 +4819,107 @@ export type Database = {
           },
         ]
       }
+      video_call_participants: {
+        Row: {
+          call_id: string | null
+          id: string
+          joined_at: string | null
+          left_at: string | null
+          role: string | null
+          user_id: string
+        }
+        Insert: {
+          call_id?: string | null
+          id?: string
+          joined_at?: string | null
+          left_at?: string | null
+          role?: string | null
+          user_id: string
+        }
+        Update: {
+          call_id?: string | null
+          id?: string
+          joined_at?: string | null
+          left_at?: string | null
+          role?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_call_participants_call_id_fkey"
+            columns: ["call_id"]
+            isOneToOne: false
+            referencedRelation: "video_calls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      video_calls: {
+        Row: {
+          call_type: string | null
+          conversation_id: string | null
+          created_at: string | null
+          ended_at: string | null
+          host_id: string
+          id: string
+          is_recording: boolean | null
+          max_participants: number | null
+          metadata: Json | null
+          organization_id: string | null
+          room_name: string
+          scheduled_at: string | null
+          started_at: string | null
+          title: string
+        }
+        Insert: {
+          call_type?: string | null
+          conversation_id?: string | null
+          created_at?: string | null
+          ended_at?: string | null
+          host_id: string
+          id?: string
+          is_recording?: boolean | null
+          max_participants?: number | null
+          metadata?: Json | null
+          organization_id?: string | null
+          room_name: string
+          scheduled_at?: string | null
+          started_at?: string | null
+          title: string
+        }
+        Update: {
+          call_type?: string | null
+          conversation_id?: string | null
+          created_at?: string | null
+          ended_at?: string | null
+          host_id?: string
+          id?: string
+          is_recording?: boolean | null
+          max_participants?: number | null
+          metadata?: Json | null
+          organization_id?: string | null
+          room_name?: string
+          scheduled_at?: string | null
+          started_at?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_calls_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "video_calls_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workflow_automations: {
         Row: {
           actions: Json

@@ -178,7 +178,15 @@ export const CommunicationHub = () => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {activeConversation ? (
-          <ConversationView conversationId={activeConversation} />
+          <ConversationView 
+            conversationId={activeConversation}
+            conversationTitle={getConversationTitle(
+              conversations.find(c => c.id === activeConversation)!
+            )}
+            conversationType={
+              conversations.find(c => c.id === activeConversation)?.conversation_type
+            }
+          />
         ) : (
           <div className="flex-1 flex items-center justify-center bg-muted/20">
             <div className="text-center text-muted-foreground">
