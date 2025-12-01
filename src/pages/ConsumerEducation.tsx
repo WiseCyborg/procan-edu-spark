@@ -129,7 +129,7 @@ const ConsumerEducation = () => {
                 Choose Your Free Course
               </h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
-                Start with whichever course fits your needs. Both are completely free 
+                Start with whichever course fits your needs. All courses are completely free 
                 and you'll earn a certificate upon completion.
               </p>
             </div>
@@ -139,7 +139,7 @@ const ConsumerEducation = () => {
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
             ) : (
-              <div className="grid md:grid-cols-2 gap-6">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {courses.map((course) => (
                   <ConsumerCourseCard key={course.id} course={course} />
                 ))}
