@@ -23,7 +23,7 @@ import { MobileBottomNav } from '@/components/navigation/MobileBottomNav';
 import Confetti from 'react-confetti';
 
 const COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
-const TOTAL_MODULES = 18;
+const TOTAL_MODULES = 24;
 
 interface ModuleData {
   module_number: number;
@@ -255,7 +255,7 @@ const StudentDashboard = () => {
         <CardContent className="p-4">
           <p className="text-sm text-blue-800 dark:text-blue-300 text-center">
             <span className="font-semibold">Progress Tiers:</span> Green, Yellow, and Red levels help you track your progress. 
-            All 23 modules are required for Maryland RVT certification.
+            All 24 modules are required for Maryland RVT certification.
           </p>
         </CardContent>
       </Card>

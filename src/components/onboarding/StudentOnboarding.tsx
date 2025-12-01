@@ -34,11 +34,11 @@ const steps = [
   {
     id: 'course-structure',
     title: 'Understanding the Course',
-    description: '18 modules organized in three tiers',
+    description: '24 modules organized in three tiers',
     content: (
       <div className="space-y-4">
         <p className="text-muted-foreground">
-          The course is divided into 18 modules, organized into three color-coded tiers. 
+          The course is divided into 24 modules, organized into three color-coded tiers. 
           You must complete all modules within each tier before advancing to the next.
         </p>
         <div className="space-y-3">

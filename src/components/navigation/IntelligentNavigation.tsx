@@ -80,11 +80,11 @@ export const IntelligentNavigation: React.FC = () => {
     },
     {
       id: 'consumer-education',
-      label: 'Free Courses',
+      label: 'Consumer Education',
       path: '/consumer-education',
       icon: GraduationCap,
       roles: ['student', 'dispensary_manager', 'training_coordinator', 'admin', 'consumer'],
-      description: '100% free cannabis education for Maryland consumers'
+      description: 'Free cannabis education for Maryland consumers and dispensary visitors'
     },
     {
       id: 'faq',

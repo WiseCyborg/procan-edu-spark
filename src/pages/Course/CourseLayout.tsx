@@ -16,7 +16,7 @@ import { EmployeeAccessMessage } from '@/components/EmployeeAccessMessage';
 import { Breadcrumbs } from '@/components/navigation/Breadcrumbs';
 import { supabase } from '@/integrations/supabase/client';
 
-const TOTAL_MODULES = 18;
+const TOTAL_MODULES = 24;
 const COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
 
 interface ModuleData {
@@ -160,7 +160,7 @@ const CourseLayout: React.FC = () => {
           <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
             <p className="text-sm text-blue-800 dark:text-blue-300 text-center">
               <span className="font-semibold">Note:</span> Green, Yellow, and Red tier levels are for progress tracking and motivation. 
-              All 23 modules are required for Maryland RVT certification compliance.
+              All 24 modules are required for Maryland RVT certification compliance.
             </p>
           </div>
           {isManagerRole && managerModules.length > 0 && (
