@@ -974,39 +974,55 @@ export type Database = {
       }
       conversations: {
         Row: {
+          active_call_id: string | null
+          channel_category: string | null
           conversation_type: string
           created_at: string
           created_by: string
           id: string
           is_active: boolean | null
+          is_pinned: boolean | null
           metadata: Json | null
           organization_id: string | null
           title: string | null
           updated_at: string
         }
         Insert: {
+          active_call_id?: string | null
+          channel_category?: string | null
           conversation_type?: string
           created_at?: string
           created_by: string
           id?: string
           is_active?: boolean | null
+          is_pinned?: boolean | null
           metadata?: Json | null
           organization_id?: string | null
           title?: string | null
           updated_at?: string
         }
         Update: {
+          active_call_id?: string | null
+          channel_category?: string | null
           conversation_type?: string
           created_at?: string
           created_by?: string
           id?: string
           is_active?: boolean | null
+          is_pinned?: boolean | null
           metadata?: Json | null
           organization_id?: string | null
           title?: string | null
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "conversations_active_call_id_fkey"
+            columns: ["active_call_id"]
+            isOneToOne: false
+            referencedRelation: "video_calls"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "conversations_organization_id_fkey"
             columns: ["organization_id"]
@@ -2371,6 +2387,38 @@ export type Database = {
           total_students?: number | null
         }
         Relationships: []
+      }
+      message_reactions: {
+        Row: {
+          created_at: string
+          emoji: string
+          id: string
+          message_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          emoji: string
+          id?: string
+          message_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          emoji?: string
+          id?: string
+          message_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_reactions_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       messages: {
         Row: {
@@ -4353,6 +4401,35 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      typing_indicators: {
+        Row: {
+          conversation_id: string
+          id: string
+          started_at: string
+          user_id: string
+        }
+        Insert: {
+          conversation_id: string
+          id?: string
+          started_at?: string
+          user_id: string
+        }
+        Update: {
+          conversation_id?: string
+          id?: string
+          started_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "typing_indicators_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       uat_accounts: {
         Row: {

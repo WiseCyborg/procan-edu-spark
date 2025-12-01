@@ -7,6 +7,9 @@ import { VideoCallRoom } from '@/components/video/VideoCallRoom';
 import { useVideoCall } from '@/hooks/useVideoCall';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useActiveCall } from '@/hooks/useActiveCall';
+import { JoinCallButton } from '@/components/video/JoinCallButton';
+import { supabase } from '@/integrations/supabase/client';
 
 interface VideoCallButtonProps {
   conversationId: string;
@@ -24,6 +27,7 @@ export const VideoCallButton = ({
   const { user } = useAuth();
   const { isTrainingCoordinator, isDispensaryManager, isAdmin } = useUserRole();
   const { createVideoCall, token, roomName, isCreating } = useVideoCall();
+  const { activeCall } = useActiveCall(conversationId);
 
   const canStartCall = isTrainingCoordinator || isDispensaryManager || isAdmin;
 
@@ -39,11 +43,30 @@ export const VideoCallButton = ({
     });
 
     if (result) {
+      // Update conversation with active call
+      await supabase
+        .from('conversations')
+        .update({ active_call_id: result.callId })
+        .eq('id', conversationId);
+      
       setInCall(true);
     }
   };
 
-  const handleDisconnect = () => {
+  const handleJoinActiveCall = (token: string, roomName: string) => {
+    // Handle joining an active call (called from JoinCallButton)
+    setInCall(true);
+    setIsOpen(true);
+  };
+
+  const handleDisconnect = async () => {
+    // Clear active call from conversation
+    if (activeCall) {
+      await supabase
+        .from('conversations')
+        .update({ active_call_id: null })
+        .eq('id', conversationId);
+    }
     setInCall(false);
     setIsOpen(false);
   };
@@ -56,15 +79,24 @@ export const VideoCallButton = ({
 
   return (
     <>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => setIsOpen(true)}
-        disabled={isCreating}
-      >
-        <Video className="w-4 h-4 mr-2" />
-        Start Video Call
-      </Button>
+      {activeCall ? (
+        <JoinCallButton
+          callId={activeCall.id}
+          conversationId={conversationId}
+          participantName={user?.email || 'User'}
+          onJoin={handleJoinActiveCall}
+        />
+      ) : (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setIsOpen(true)}
+          disabled={isCreating}
+        >
+          <Video className="w-4 h-4 mr-2" />
+          Start Video Call
+        </Button>
+      )}
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="max-w-4xl h-[80vh] p-0">
