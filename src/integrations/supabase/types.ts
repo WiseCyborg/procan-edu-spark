@@ -5110,16 +5110,21 @@ export type Database = {
       get_organization_employees: {
         Args: { org_id: string }
         Returns: {
+          certificate_number: string
+          certificate_status: string
           certificates_count: number
           created_at: string
           current_tier: string
           email: string
           first_name: string
+          invitation_sent_at: string
+          invitation_status: string
           last_activity: string
+          last_login: string
           last_name: string
-          phone: string
+          profile_completion: number
           progress_percentage: number
-          tier_unlocked_at: string
+          role: string
           user_id: string
         }[]
       }
