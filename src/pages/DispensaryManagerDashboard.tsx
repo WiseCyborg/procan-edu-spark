@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SeatManagementWidget } from '@/components/team/SeatManagementWidget';
 import { CompletionAnalyticsWidget } from '@/components/team/CompletionAnalyticsWidget';
 import { SeatAssignmentManager } from '@/components/team/SeatAssignmentManager';
+import { AdvancedSeatManagement } from '@/components/team/AdvancedSeatManagement';
 import { EmployeeInvitationForm } from '@/components/team/EmployeeInvitationForm';
 import { SeatRequestManager } from '@/components/team/SeatRequestManager';
 import { PurchaseSeatsDialog } from '@/components/team/PurchaseSeatsDialog';
@@ -564,7 +565,7 @@ const DispensaryManagerDashboard = () => {
         </TabsContent>
         
         <TabsContent value="seats" className="space-y-4">
-          <SeatAssignmentManager organizationId={organization.id} />
+          <AdvancedSeatManagement organizationId={organization.id} />
         </TabsContent>
 
         <TabsContent value="seat-requests" className="space-y-4">
