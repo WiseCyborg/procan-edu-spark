@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Send, MoreHorizontal, Paperclip, Download, FileText, Image as ImageIcon } from 'lucide-react';
+import { Send, MoreHorizontal, Paperclip, Download, FileText, Image as ImageIcon, Calendar } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useRealTimeMessaging } from '@/hooks/useRealTimeMessaging';
 import { formatDistanceToNow, format } from 'date-fns';
@@ -15,6 +15,13 @@ import { MessageReactions } from './MessageReactions';
 import { ActiveCallBanner } from '../video/ActiveCallBanner';
 import { useActiveCall } from '@/hooks/useActiveCall';
 import { useTypingIndicator } from '@/hooks/useTypingIndicator';
+import { MentionPopover } from './MentionPopover';
+import { useMentions } from '@/hooks/useMentions';
+import { useConversationParticipants } from '@/hooks/useConversationParticipants';
+import { ScheduleCallDialog } from './ScheduleCallDialog';
+import { UpcomingCallsList } from './UpcomingCallsList';
+import { useScheduledCalls } from '@/hooks/useScheduledCalls';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 interface ConversationViewProps {
   conversationId: string;
@@ -33,14 +40,29 @@ export const ConversationView = ({
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const [showScheduleDialog, setShowScheduleDialog] = useState(false);
+  const [showUpcomingCalls, setShowUpcomingCalls] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const conversationMessages = messages[conversationId] || [];
   const { activeCall, callDuration } = useActiveCall(conversationId);
+  const { participants } = useConversationParticipants(conversationId);
+  const { calls, scheduleCall, cancelCall, respondToInvite } = useScheduledCalls(conversationId);
   
   // Track typing indicator
   useTypingIndicator(conversationId, isTyping);
+
+  // @Mentions functionality
+  const {
+    showPopover,
+    cursorPosition,
+    filteredParticipants,
+    handleInputChange: handleMentionInputChange,
+    insertMention,
+    closePopover
+  } = useMentions(participants);
 
   // Fetch messages when conversation changes
   useEffect(() => {
@@ -71,6 +93,26 @@ export const ConversationView = ({
   const handleMessageChange = (value: string) => {
     setNewMessage(value);
     setIsTyping(value.length > 0);
+    
+    // Handle @mentions
+    if (inputRef.current) {
+      handleMentionInputChange(value, inputRef.current);
+    }
+  };
+
+  const handleMentionSelect = (participant: any) => {
+    const cursorPos = inputRef.current?.selectionStart || 0;
+    const result = insertMention(participant, newMessage, cursorPos);
+    setNewMessage(result.newText);
+    
+    // Set cursor position after mention
+    setTimeout(() => {
+      if (inputRef.current && result.newCursorPos) {
+        inputRef.current.selectionStart = result.newCursorPos;
+        inputRef.current.selectionEnd = result.newCursorPos;
+        inputRef.current.focus();
+      }
+    }, 0);
   };
 
   const getInitials = (firstName?: string, lastName?: string) => {
@@ -187,6 +229,40 @@ export const ConversationView = ({
           </Badge>
         </div>
         <div className="flex items-center gap-2">
+          <Popover open={showUpcomingCalls} onOpenChange={setShowUpcomingCalls}>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="sm" className="gap-2">
+                <Calendar className="h-4 w-4" />
+                {calls.length > 0 && (
+                  <Badge variant="secondary" className="h-5 px-1.5 text-xs">
+                    {calls.length}
+                  </Badge>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-96 p-4" align="end">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-semibold">Upcoming Calls</h4>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      setShowUpcomingCalls(false);
+                      setShowScheduleDialog(true);
+                    }}
+                  >
+                    Schedule
+                  </Button>
+                </div>
+                <UpcomingCallsList
+                  calls={calls}
+                  onCancel={cancelCall}
+                  onRespond={respondToInvite}
+                />
+              </div>
+            </PopoverContent>
+          </Popover>
+          
           <VideoCallButton 
             conversationId={conversationId}
             conversationTitle={conversationTitle}
@@ -286,31 +362,41 @@ export const ConversationView = ({
                       <div className="text-xs opacity-75 mt-1">
                         {formatMessageTime(message.created_at)}
                       </div>
-                    )}
-                  </div>
-                  
-                  {/* Message Reactions */}
-                  <MessageReactions
-                    messageId={message.id}
-                    reactions={message.reactions || []}
-                    onReactionChange={() => fetchMessages(conversationId)}
-                  />
-                </div>
-              </div>
-            );
-          })
-        )}
-        
-        {/* Typing Indicator */}
-        {user && (
-          <TypingIndicator
-            conversationId={conversationId}
-            currentUserId={user.id}
-          />
-        )}
-        
-        <div ref={messagesEndRef} />
-      </div>
+                     )}
+                   </div>
+                   
+                   {/* Message Reactions */}
+                   <MessageReactions
+                     messageId={message.id}
+                     reactions={message.reactions || []}
+                     onReactionChange={() => fetchMessages(conversationId)}
+                   />
+                 </div>
+               </div>
+             );
+           })
+         )}
+         
+         {/* Typing Indicator */}
+         {user && (
+           <TypingIndicator
+             conversationId={conversationId}
+             currentUserId={user.id}
+           />
+         )}
+         
+         <div ref={messagesEndRef} />
+       </div>
+
+       {/* @Mention Popover */}
+       {showPopover && (
+         <MentionPopover
+           participants={filteredParticipants}
+           position={cursorPosition}
+           onSelect={handleMentionSelect}
+           onClose={closePopover}
+         />
+       )}
 
       {/* Message Input */}
       <div className="p-4 border-t bg-card/50">
@@ -333,9 +419,10 @@ export const ConversationView = ({
             <Paperclip className="h-4 w-4" />
           </Button>
           <Input
+            ref={inputRef}
             value={newMessage}
             onChange={(e) => handleMessageChange(e.target.value)}
-            placeholder={uploading ? "Uploading file..." : "Type your message..."}
+            placeholder={uploading ? "Uploading file..." : "Type @ to mention someone..."}
             disabled={sending || uploading}
             className="flex-1"
             autoComplete="off"
@@ -350,6 +437,16 @@ export const ConversationView = ({
           </Button>
         </form>
       </div>
+
+      {/* Schedule Call Dialog */}
+      <ScheduleCallDialog
+        open={showScheduleDialog}
+        onOpenChange={setShowScheduleDialog}
+        onSchedule={async (data) => {
+          await scheduleCall(data);
+        }}
+        participantIds={participants.map(p => p.user_id)}
+      />
     </div>
   );
 };

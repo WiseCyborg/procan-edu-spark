@@ -7,6 +7,7 @@ interface ActiveCallBannerProps {
   callDuration: string;
   onJoinCall: () => void;
   onDismiss?: () => void;
+  isRecording?: boolean;
 }
 
 export const ActiveCallBanner = ({
@@ -14,6 +15,7 @@ export const ActiveCallBanner = ({
   callDuration,
   onJoinCall,
   onDismiss,
+  isRecording = false
 }: ActiveCallBannerProps) => {
   return (
     <div className="bg-primary/10 border-l-4 border-primary p-4 flex items-center justify-between">
@@ -27,7 +29,15 @@ export const ActiveCallBanner = ({
         </div>
         
         <div>
-          <h3 className="font-semibold text-sm">Active Video Call in Progress</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="font-semibold text-sm">Active Video Call in Progress</h3>
+            {isRecording && (
+              <span className="flex items-center gap-1 text-destructive text-xs font-semibold">
+                <span className="h-2 w-2 rounded-full bg-destructive animate-pulse" />
+                REC
+              </span>
+            )}
+          </div>
           <p className="text-xs text-muted-foreground">
             <Users className="w-3 h-3 inline mr-1" />
             {participantCount} participant{participantCount !== 1 ? 's' : ''} · {callDuration}
