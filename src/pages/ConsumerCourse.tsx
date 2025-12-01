@@ -63,7 +63,7 @@ const ConsumerCourse = () => {
           .from('course_modules')
           .select('id, title, content, video_url, module_number, estimated_minutes')
           .eq('course_id', courseId)
-          .eq('is_public', true)
+          .eq('is_active', true)
           .order('module_number', { ascending: true });
 
         const modulesResult = await modulesQuery;
