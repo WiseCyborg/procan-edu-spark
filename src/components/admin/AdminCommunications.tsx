@@ -1,8 +1,8 @@
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Mail, FileText, Send } from 'lucide-react';
 import { EmailAnalyticsDashboard } from '@/components/admin/EmailAnalyticsDashboard';
+import { EmailTemplateManager } from '@/components/admin/EmailTemplateManager';
+import { TestEmailSender } from '@/components/admin/TestEmailSender';
 
 export const AdminCommunications = () => {
   return (
@@ -18,37 +18,11 @@ export const AdminCommunications = () => {
       </TabsContent>
 
       <TabsContent value="templates">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              Email Templates
-            </CardTitle>
-            <CardDescription>Manage and customize email templates</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Email template editor coming soon
-            </p>
-          </CardContent>
-        </Card>
+        <EmailTemplateManager />
       </TabsContent>
 
       <TabsContent value="test">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Send className="h-5 w-5" />
-              Send Test Emails
-            </CardTitle>
-            <CardDescription>Test email delivery and formatting</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Test email interface coming soon
-            </p>
-          </CardContent>
-        </Card>
+        <TestEmailSender />
       </TabsContent>
     </Tabs>
   );
