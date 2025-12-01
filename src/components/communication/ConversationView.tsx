@@ -10,6 +10,11 @@ import { formatDistanceToNow, format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { VideoCallButton } from './VideoCallButton';
+import { TypingIndicator } from './TypingIndicator';
+import { MessageReactions } from './MessageReactions';
+import { ActiveCallBanner } from '../video/ActiveCallBanner';
+import { useActiveCall } from '@/hooks/useActiveCall';
+import { useTypingIndicator } from '@/hooks/useTypingIndicator';
 
 interface ConversationViewProps {
   conversationId: string;
@@ -27,10 +32,15 @@ export const ConversationView = ({
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const conversationMessages = messages[conversationId] || [];
+  const { activeCall, callDuration } = useActiveCall(conversationId);
+  
+  // Track typing indicator
+  useTypingIndicator(conversationId, isTyping);
 
   // Fetch messages when conversation changes
   useEffect(() => {
@@ -49,12 +59,18 @@ export const ConversationView = ({
     if (!newMessage.trim() || sending) return;
 
     setSending(true);
+    setIsTyping(false);
     try {
       await sendMessage(conversationId, newMessage);
       setNewMessage('');
     } finally {
       setSending(false);
     }
+  };
+
+  const handleMessageChange = (value: string) => {
+    setNewMessage(value);
+    setIsTyping(value.length > 0);
   };
 
   const getInitials = (firstName?: string, lastName?: string) => {
@@ -182,6 +198,21 @@ export const ConversationView = ({
         </div>
       </div>
 
+      {/* Active Call Banner */}
+      {activeCall && (
+        <ActiveCallBanner
+          participantCount={activeCall.participant_count}
+          callDuration={callDuration}
+          onJoinCall={() => {
+            // Join call logic handled by VideoCallButton
+            toast.info('Click the video button to join the call');
+          }}
+          onDismiss={() => {
+            // Dismiss banner (could be stored in local state)
+          }}
+        />
+      )}
+
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {conversationMessages.length === 0 ? (
@@ -251,17 +282,33 @@ export const ConversationView = ({
                       </>
                     )}
                     
-                    {isOwn && (
+                         {isOwn && (
                       <div className="text-xs opacity-75 mt-1">
                         {formatMessageTime(message.created_at)}
                       </div>
                     )}
                   </div>
+                  
+                  {/* Message Reactions */}
+                  <MessageReactions
+                    messageId={message.id}
+                    reactions={message.reactions || []}
+                    onReactionChange={() => fetchMessages(conversationId)}
+                  />
                 </div>
               </div>
             );
           })
         )}
+        
+        {/* Typing Indicator */}
+        {user && (
+          <TypingIndicator
+            conversationId={conversationId}
+            currentUserId={user.id}
+          />
+        )}
+        
         <div ref={messagesEndRef} />
       </div>
 
@@ -287,7 +334,7 @@ export const ConversationView = ({
           </Button>
           <Input
             value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
+            onChange={(e) => handleMessageChange(e.target.value)}
             placeholder={uploading ? "Uploading file..." : "Type your message..."}
             disabled={sending || uploading}
             className="flex-1"

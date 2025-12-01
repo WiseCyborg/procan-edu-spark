@@ -4402,6 +4402,50 @@ export type Database = {
         }
         Relationships: []
       }
+      training_questions: {
+        Row: {
+          answered_at: string | null
+          answered_by: string | null
+          conversation_id: string
+          created_at: string
+          id: string
+          question: string
+          status: string
+          user_id: string
+          user_name: string
+        }
+        Insert: {
+          answered_at?: string | null
+          answered_by?: string | null
+          conversation_id: string
+          created_at?: string
+          id?: string
+          question: string
+          status?: string
+          user_id: string
+          user_name: string
+        }
+        Update: {
+          answered_at?: string | null
+          answered_by?: string | null
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          question?: string
+          status?: string
+          user_id?: string
+          user_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_questions_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       typing_indicators: {
         Row: {
           conversation_id: string

@@ -52,6 +52,7 @@ export const CreateConversationDialog = ({
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [conversationType, setConversationType] = useState<'direct' | 'group' | 'announcement'>('group');
+  const [channelCategory, setChannelCategory] = useState<string>('general');
   const [selectedParticipants, setSelectedParticipants] = useState<string[]>([]);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(false);
@@ -208,6 +209,30 @@ export const CreateConversationDialog = ({
               </SelectContent>
             </Select>
           </div>
+
+          {/* Channel Category for Group Chats */}
+          {conversationType === 'group' && (
+            <div className="space-y-2">
+              <Label>Channel Category</Label>
+              <Select
+                value={channelCategory}
+                onValueChange={setChannelCategory}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="general">General Discussion</SelectItem>
+                  <SelectItem value="orientation">New Employee Orientation</SelectItem>
+                  <SelectItem value="study_help">Study Help</SelectItem>
+                  {(isAdmin || isDispensaryManager) && (
+                    <SelectItem value="uat">UAT Testing Feedback</SelectItem>
+                  )}
+                  <SelectItem value="live_training">Live Training Session</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {/* Title */}
           <div className="space-y-2">
