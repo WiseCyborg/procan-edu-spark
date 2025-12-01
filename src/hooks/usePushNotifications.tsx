@@ -52,13 +52,8 @@ export const usePushNotifications = () => {
       const registration = await navigator.serviceWorker.register('/sw.js');
       await navigator.serviceWorker.ready;
 
-      // Get VAPID public key from environment
-      const vapidPublicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
-      if (!vapidPublicKey) {
-        console.error('VAPID public key not configured');
-        toast.error('Push notifications not configured');
-        return;
-      }
+      // VAPID public key (safe to expose publicly)
+      const vapidPublicKey = 'BPNKt-9olMr1EvhkuUPV76cym3htD4BVysPYpFU1_S5qew1n3NI24Q21UjgWS5CPP5-EWOgBOMwZdTZVXYh9hlI';
 
       // Subscribe to push notifications
       const subscription = await registration.pushManager.subscribe({

@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import webpush from "npm:web-push@3.6.6";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -37,14 +38,20 @@ serve(async (req) => {
       });
     }
 
-    // Use web-push library (requires VAPID keys)
+    // Configure VAPID details
     const vapidPublicKey = Deno.env.get('VAPID_PUBLIC_KEY');
     const vapidPrivateKey = Deno.env.get('VAPID_PRIVATE_KEY');
-    const vapidSubject = Deno.env.get('VAPID_SUBJECT') || 'mailto:support@procannedu.com';
+    const vapidSubject = Deno.env.get('VAPID_SUBJECT') || 'mailto:info@procannedu.com';
 
     if (!vapidPublicKey || !vapidPrivateKey) {
       throw new Error('VAPID keys not configured');
     }
+
+    webpush.setVapidDetails(
+      vapidSubject,
+      vapidPublicKey,
+      vapidPrivateKey
+    );
 
     const payload = JSON.stringify({
       title: title || 'ProCann Edu',
@@ -61,33 +68,17 @@ serve(async (req) => {
 
     for (const sub of subscriptions) {
       try {
-        // Create JWT for VAPID
-        const jwtHeader = btoa(JSON.stringify({ typ: 'JWT', alg: 'ES256' }));
-        const jwtPayload = btoa(JSON.stringify({
-          aud: new URL(sub.endpoint).origin,
-          exp: Math.floor(Date.now() / 1000) + 12 * 60 * 60,
-          sub: vapidSubject
-        }));
+        const pushSubscription = {
+          endpoint: sub.endpoint,
+          keys: {
+            p256dh: sub.p256dh_key,
+            auth: sub.auth_key
+          }
+        };
 
-        // Send push notification via Web Push Protocol
-        const response = await fetch(sub.endpoint, {
-          method: 'POST',
-          headers: {
-            'TTL': '86400',
-            'Content-Type': 'application/octet-stream',
-            'Content-Encoding': 'aes128gcm',
-          },
-          body: payload
-        });
-
-        if (response.ok) {
-          sent++;
-          console.log('[Push] Notification sent successfully');
-        } else {
-          failed++;
-          failedSubscriptionIds.push(sub.id);
-          console.error('[Push] Failed to send:', response.status, await response.text());
-        }
+        await webpush.sendNotification(pushSubscription, payload);
+        sent++;
+        console.log('[Push] Notification sent successfully to:', sub.endpoint.substring(0, 50));
       } catch (error) {
         failed++;
         failedSubscriptionIds.push(sub.id);
