@@ -981,6 +981,7 @@ export type Database = {
           is_manager_only: boolean | null
           last_comar_review_date: string | null
           learning_objectives: Json | null
+          lessons: Json | null
           module_number: number
           quiz_questions: Json | null
           stoplight_tier: string | null
@@ -1002,6 +1003,7 @@ export type Database = {
           is_manager_only?: boolean | null
           last_comar_review_date?: string | null
           learning_objectives?: Json | null
+          lessons?: Json | null
           module_number: number
           quiz_questions?: Json | null
           stoplight_tier?: string | null
@@ -1023,6 +1025,7 @@ export type Database = {
           is_manager_only?: boolean | null
           last_comar_review_date?: string | null
           learning_objectives?: Json | null
+          lessons?: Json | null
           module_number?: number
           quiz_questions?: Json | null
           stoplight_tier?: string | null

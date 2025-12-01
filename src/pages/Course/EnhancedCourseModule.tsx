@@ -24,6 +24,7 @@ import { CourseNavigationHeader } from '@/components/course/CourseNavigationHead
 import { ModuleSidebar } from '@/components/course/ModuleSidebar';
 import { MobileNavBar } from '@/components/course/MobileNavBar';
 import { useModuleNavigation } from '@/hooks/useModuleNavigation';
+import { SCORMStylePlayer, CourseConfig } from '@/components/course/SCORMStylePlayer';
 
 interface QuizQuestion {
   id: string;
@@ -37,6 +38,16 @@ interface QuizQuestion {
   relatedModules?: string[];
 }
 
+interface Lesson {
+  id: string;
+  title: string;
+  duration: string;
+  videoType: 'embed' | 'file' | 'none';
+  videoUrl?: string;
+  htmlSummary: string;
+  resourceLinks: { label: string; href: string }[];
+}
+
 interface ModuleData {
   id: string;
   title: string;
@@ -46,6 +57,7 @@ interface ModuleData {
   module_number: number;
   comar_reference?: string;
   video_url?: string;
+  lessons?: Lesson[];
 }
 
 const COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
@@ -171,7 +183,8 @@ const EnhancedCourseModule: React.FC = () => {
     if (weakTopicsData && weakTopicsData.length > 0) {
       setShowQuizResults(true);
     } else if (passed) {
-      await updateProgress(COURSE_ID, moduleId!, true, score);
+      // Fix: Use moduleData.id (UUID) instead of moduleId (URL param)
+      await updateProgress(COURSE_ID, moduleData!.id, true, score);
       toast({
         title: "Congratulations!",
         description: `You passed with ${score}%! Module completed.`,
@@ -181,7 +194,8 @@ const EnhancedCourseModule: React.FC = () => {
 
   const handlePracticeComplete = async (score: number, passed: boolean) => {
     if (passed) {
-      await updateProgress(COURSE_ID, moduleId!, true, score);
+      // Fix: Use moduleData.id (UUID) instead of moduleId (URL param)
+      await updateProgress(COURSE_ID, moduleData!.id, true, score);
       toast({
         title: "Great work!",
         description: `You've mastered the weak areas! Score: ${score}%`,
@@ -386,7 +400,38 @@ const EnhancedCourseModule: React.FC = () => {
                 </Badge>
               </div>
 
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              {/* Check if module has SCORM-style lessons */}
+              {moduleData.lessons && moduleData.lessons.length > 0 ? (
+                <SCORMStylePlayer 
+                  config={{
+                    id: moduleData.id,
+                    title: moduleData.title,
+                    tagLabel: `Module ${moduleData.module_number} • ${currentModule?.tier.toUpperCase()} Tier`,
+                    estimatedMinutes: moduleData.lessons.reduce((sum, l) => {
+                      const mins = parseInt(l.duration) || 0;
+                      return sum + mins;
+                    }, 0),
+                    lessons: moduleData.lessons,
+                  }}
+                  onCourseComplete={() => {
+                    setActiveTab('quiz');
+                    toast({
+                      title: "All Lessons Complete!",
+                      description: "You may now take the quiz.",
+                    });
+                  }}
+                  onLessonComplete={(lessonId) => {
+                    console.log('Lesson completed:', lessonId);
+                  }}
+                  onDocumentOpen={(docId) => {
+                    // Open document viewer (future implementation)
+                    console.log('Open document:', docId);
+                  }}
+                />
+              ) : (
+                <>
+                  {/* Existing tab-based UI for modules without lessons */}
+                  <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsList className="grid w-full grid-cols-4 mb-6">
                   <TabsTrigger value="overview" className="flex items-center gap-2">
                     <BookOpen className="h-4 w-4" />
@@ -640,6 +685,8 @@ const EnhancedCourseModule: React.FC = () => {
                   )}
                 </TabsContent>
               </Tabs>
+              </>
+              )}
 
               {/* Previous/Next Module Navigation */}
               <div className="flex justify-between mt-6 pt-6 border-t">
