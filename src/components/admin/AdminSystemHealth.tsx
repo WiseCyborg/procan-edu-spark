@@ -6,6 +6,7 @@ import { useEmailHealthMonitor } from '@/hooks/useEmailHealthMonitor';
 import { ProductionDashboard } from '@/components/ProductionDashboard';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { EdgeFunctionsStatus } from '@/components/admin/EdgeFunctionsStatus';
 
 export const AdminSystemHealth = () => {
   const { circuitBreaker, loading } = useEmailHealthMonitor();
@@ -79,20 +80,7 @@ export const AdminSystemHealth = () => {
       </TabsContent>
 
       <TabsContent value="functions">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Zap className="h-5 w-5" />
-              Edge Functions Status
-            </CardTitle>
-            <CardDescription>Monitor serverless function health and performance</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Edge function monitoring interface coming soon
-            </p>
-          </CardContent>
-        </Card>
+        <EdgeFunctionsStatus />
       </TabsContent>
     </Tabs>
   );
