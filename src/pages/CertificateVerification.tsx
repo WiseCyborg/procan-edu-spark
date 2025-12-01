@@ -54,7 +54,27 @@ const CertificateVerification = () => {
     setSearched(true);
 
     try {
-      // Use the secure verification function that doesn't expose PII
+      // First check consumer certificates (CON-YYYY-XXXXXX format)
+      if (certificateNumber.trim().startsWith('CON-')) {
+        const { data: consumerCert, error: consumerError } = await supabase
+          .from('consumer_certificates')
+          .select('certificate_number, badge_name, issue_date')
+          .eq('certificate_number', certificateNumber.trim())
+          .single();
+
+        if (consumerCert && !consumerError) {
+          setCertificate({
+            certificate_number: consumerCert.certificate_number,
+            status: 'valid',
+            issue_date: consumerCert.issue_date,
+            expiry_date: null, // Consumer certs don't expire
+            course_title: consumerCert.badge_name,
+          });
+          return;
+        }
+      }
+
+      // Fall back to RVT certificate check
       const { data, error } = await supabase
         .rpc('verify_certificate_status', { cert_number: certificateNumber.trim() });
 
