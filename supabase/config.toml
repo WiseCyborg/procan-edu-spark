@@ -345,3 +345,9 @@ verify_jwt = false
 [functions.jobs-processor]
 verify_jwt = false
 
+[functions.reset-uat-account]
+verify_jwt = true
+
+[functions.create-uat-account]
+verify_jwt = true
+

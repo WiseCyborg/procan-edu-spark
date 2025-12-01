@@ -4304,6 +4304,59 @@ export type Database = {
         }
         Relationships: []
       }
+      uat_accounts: {
+        Row: {
+          account_type: string
+          created_at: string | null
+          created_by: string | null
+          email: string
+          id: string
+          is_active: boolean | null
+          last_reset_at: string | null
+          notes: string | null
+          organization_id: string | null
+          password_hint: string | null
+          reset_count: number | null
+          user_id: string
+        }
+        Insert: {
+          account_type: string
+          created_at?: string | null
+          created_by?: string | null
+          email: string
+          id?: string
+          is_active?: boolean | null
+          last_reset_at?: string | null
+          notes?: string | null
+          organization_id?: string | null
+          password_hint?: string | null
+          reset_count?: number | null
+          user_id: string
+        }
+        Update: {
+          account_type?: string
+          created_at?: string | null
+          created_by?: string | null
+          email?: string
+          id?: string
+          is_active?: boolean | null
+          last_reset_at?: string | null
+          notes?: string | null
+          organization_id?: string | null
+          password_hint?: string | null
+          reset_count?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "uat_accounts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_activity_log: {
         Row: {
           activity_type: string
