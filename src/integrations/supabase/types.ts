@@ -3800,6 +3800,33 @@ export type Database = {
           },
         ]
       }
+      site_content_metadata: {
+        Row: {
+          content_key: string
+          created_at: string
+          id: string
+          last_updated_at: string
+          notes: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          content_key: string
+          created_at?: string
+          id?: string
+          last_updated_at?: string
+          notes?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          content_key?: string
+          created_at?: string
+          id?: string
+          last_updated_at?: string
+          notes?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       slo_metrics: {
         Row: {
           created_at: string
