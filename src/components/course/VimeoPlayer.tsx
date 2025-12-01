@@ -36,6 +36,12 @@ export const VimeoPlayer: React.FC<VimeoPlayerProps> = ({
     return match ? match[1] : '';
   };
 
+  // Extract Vimeo privacy hash from URL
+  const getVimeoHash = (url: string): string | null => {
+    const match = url.match(/[?&]h=([a-zA-Z0-9]+)/);
+    return match ? match[1] : null;
+  };
+
   useEffect(() => {
     if (!iframeRef.current) return;
 
@@ -155,6 +161,7 @@ export const VimeoPlayer: React.FC<VimeoPlayerProps> = ({
   };
 
   const vimeoId = getVimeoId(videoUrl);
+  const vimeoHash = getVimeoHash(videoUrl);
 
   const handleRetry = () => {
     setRetryCount(prev => prev + 1);
@@ -204,7 +211,7 @@ export const VimeoPlayer: React.FC<VimeoPlayerProps> = ({
 
           <iframe
             ref={iframeRef}
-            src={`https://player.vimeo.com/video/${vimeoId}?badge=0&autopause=0&player_id=0&app_id=58479`}
+            src={`https://player.vimeo.com/video/${vimeoId}?${vimeoHash ? `h=${vimeoHash}&` : ''}badge=0&autopause=0&player_id=0&app_id=58479`}
             className="w-full h-full"
             allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
             title={title}
