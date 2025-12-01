@@ -128,6 +128,26 @@ export const useUserProgress = (courseId?: string) => {
       // Check for tier unlock after completing a module
       if (variables.isCompleted) {
         const completedCount = (progressData?.filter(p => p.is_completed).length || 0) + 1;
+        const totalModules = 23; // Total modules in course
+        const completionPercentage = Math.round((completedCount / totalModules) * 100);
+        
+        // Update learning journey state
+        try {
+          await supabase
+            .from('user_learning_journey')
+            .update({
+              modules_completed: completedCount,
+              completion_percentage: completionPercentage,
+              current_stage: completionPercentage >= 100 ? 'course_completed' : 'course_in_progress',
+              last_activity_at: new Date().toISOString(),
+              stage_entered_at: completionPercentage === Math.round((1 / totalModules) * 100) 
+                ? new Date().toISOString() 
+                : undefined
+            })
+            .eq('user_id', user.id);
+        } catch (error) {
+          console.error('Failed to update learning journey:', error);
+        }
         
         // Attempt to unlock tier
         const tierUnlocked = await checkAndUnlockTier(completedCount);

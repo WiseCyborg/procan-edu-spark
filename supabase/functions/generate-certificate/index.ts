@@ -201,6 +201,19 @@ Deno.serve(async (req: Request) => {
       }
     });
 
+    // Update learning journey to certified stage
+    await supabase
+      .from('user_learning_journey')
+      .update({
+        current_stage: 'certified',
+        stage_entered_at: new Date().toISOString(),
+        last_activity_at: new Date().toISOString(),
+        predicted_completion_date: null,
+        success_probability: 1.0,
+        at_risk_flag: false
+      })
+      .eq('user_id', user.id);
+
     // Fetch user and course details for certificate email
     const { data: profile } = await supabase
       .from("profiles")

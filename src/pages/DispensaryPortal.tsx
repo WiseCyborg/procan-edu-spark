@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { 
   Building2, 
   Users, 
@@ -16,7 +17,8 @@ import {
   UserCheck,
   Calendar,
   Award,
-  AlertCircle
+  AlertCircle,
+  AlertTriangle
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -48,12 +50,23 @@ interface Progress {
   score: number;
 }
 
+interface AtRiskEmployee {
+  user_id: string;
+  first_name: string;
+  last_name: string;
+  modules_completed: number;
+  completion_percentage: number;
+  last_activity_at: string;
+  days_inactive: number;
+}
+
 const DispensaryPortal = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [progress, setProgress] = useState<Progress[]>([]);
+  const [atRiskEmployees, setAtRiskEmployees] = useState<AtRiskEmployee[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -117,6 +130,44 @@ const DispensaryPortal = () => {
 
         if (progressError) throw progressError;
         setProgress(progressData || []);
+
+        // Fetch at-risk employees from learning journey
+        const { data: atRiskData, error: atRiskError } = await supabase
+          .from('user_learning_journey')
+          .select(`
+            user_id,
+            modules_completed,
+            completion_percentage,
+            last_activity_at,
+            at_risk_flag
+          `)
+          .eq('organization_id', userOrgId)
+          .eq('at_risk_flag', true);
+
+        if (!atRiskError && atRiskData) {
+          // Enrich with employee names
+          const enrichedAtRisk = atRiskData
+            .map(risk => {
+              const emp = employeeData?.find(e => e.user_id === risk.user_id);
+              if (!emp) return null;
+              
+              const lastActivity = new Date(risk.last_activity_at);
+              const daysInactive = Math.floor((Date.now() - lastActivity.getTime()) / (1000 * 60 * 60 * 24));
+              
+              return {
+                user_id: risk.user_id,
+                first_name: emp.first_name || 'Unknown',
+                last_name: emp.last_name || 'User',
+                modules_completed: risk.modules_completed,
+                completion_percentage: risk.completion_percentage,
+                last_activity_at: risk.last_activity_at,
+                days_inactive: daysInactive
+              };
+            })
+            .filter(Boolean) as AtRiskEmployee[];
+          
+          setAtRiskEmployees(enrichedAtRisk);
+        }
       }
 
     } catch (error) {
@@ -214,6 +265,41 @@ const DispensaryPortal = () => {
             Add Employee
           </Button>
         </div>
+
+        {/* At-Risk Employees Alert */}
+        {atRiskEmployees.length > 0 && (
+          <Alert variant="destructive" className="mb-8">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>At-Risk Employees Detected</AlertTitle>
+            <AlertDescription>
+              <div className="mt-2 space-y-2">
+                <p className="font-medium">
+                  {atRiskEmployees.length} employee{atRiskEmployees.length !== 1 ? 's' : ''} {atRiskEmployees.length !== 1 ? 'have' : 'has'} been inactive for 7+ days:
+                </p>
+                <div className="space-y-1">
+                  {atRiskEmployees.slice(0, 3).map(emp => (
+                    <div key={emp.user_id} className="flex justify-between items-center text-sm">
+                      <span>
+                        {emp.first_name} {emp.last_name}
+                      </span>
+                      <Badge variant="outline" className="bg-white">
+                        {emp.completion_percentage}% complete • {emp.days_inactive} days inactive
+                      </Badge>
+                    </div>
+                  ))}
+                  {atRiskEmployees.length > 3 && (
+                    <p className="text-xs text-muted-foreground">
+                      +{atRiskEmployees.length - 3} more at-risk employees
+                    </p>
+                  )}
+                </div>
+                <Button variant="outline" size="sm" className="mt-2">
+                  Send Reminder Emails
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
