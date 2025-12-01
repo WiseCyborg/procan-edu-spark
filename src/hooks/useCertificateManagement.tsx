@@ -24,25 +24,50 @@ export const useCertificateManagement = () => {
   const fetchCertificates = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      // Step 1: Fetch all certificates
+      const { data: certsData, error: certsError } = await supabase
         .from('certificates')
-        .select(`
-          id,
-          certificate_number,
-          user_id,
-          course_id,
-          issue_date,
-          expiry_date,
-          is_revoked,
-          profiles!inner(first_name, last_name, organizations(name))
-        `)
+        .select('*')
         .order('issue_date', { ascending: false });
 
-      if (error) throw error;
+      if (certsError) throw certsError;
 
-      const formatted = data?.map(cert => {
-        const profile = cert.profiles as any;
-        const org = profile?.organizations as any;
+      // If no certificates, return empty array (not an error)
+      if (!certsData || certsData.length === 0) {
+        setCertificates([]);
+        setLoading(false);
+        return;
+      }
+
+      // Step 2: Get unique user_ids from certificates
+      const userIds = [...new Set(certsData.map(c => c.user_id))];
+
+      // Step 3: Fetch profiles for those users
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('user_id, first_name, last_name, organization_id, email_cache')
+        .in('user_id', userIds);
+
+      // Step 4: Get unique organization_ids from profiles
+      const orgIds = [...new Set(profilesData?.map(p => p.organization_id).filter(Boolean) || [])];
+
+      // Step 5: Fetch organizations (only if we have org IDs)
+      const { data: orgsData } = orgIds.length > 0 
+        ? await supabase
+            .from('organizations')
+            .select('id, name')
+            .in('id', orgIds)
+        : { data: [] };
+
+      // Create lookup maps for efficient data combination
+      const profileMap = new Map(profilesData?.map(p => [p.user_id, p] as const) || []);
+      const orgMap = new Map(orgsData?.map(o => [o.id, o.name] as const) || []);
+
+      // Step 6: Combine all data
+      const formatted = certsData.map(cert => {
+        const profile = profileMap.get(cert.user_id);
+        const orgName = profile?.organization_id ? orgMap.get(profile.organization_id) : null;
+        
         return {
           id: cert.id,
           certificate_number: cert.certificate_number,
@@ -51,11 +76,13 @@ export const useCertificateManagement = () => {
           issue_date: cert.issue_date,
           expiry_date: cert.expiry_date,
           is_revoked: cert.is_revoked,
-          user_name: `${profile?.first_name} ${profile?.last_name}`,
-          user_email: cert.user_id, // Using user_id instead of email
-          organization_name: org?.name || 'No Organization'
+          user_name: profile 
+            ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unknown User'
+            : 'Unknown User',
+          user_email: profile?.email_cache || cert.user_id,
+          organization_name: (orgName || 'No Organization') as string
         };
-      }) || [];
+      });
 
       setCertificates(formatted);
     } catch (error) {
