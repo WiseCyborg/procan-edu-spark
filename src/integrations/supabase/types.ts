@@ -4633,6 +4633,62 @@ export type Database = {
         }
         Relationships: []
       }
+      video_assets: {
+        Row: {
+          asset_key: string
+          created_at: string | null
+          description: string | null
+          duration_seconds: number | null
+          file_size_mb: number | null
+          id: string
+          is_active: boolean | null
+          module_id: string | null
+          public_url: string
+          storage_path: string
+          thumbnail_url: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          asset_key: string
+          created_at?: string | null
+          description?: string | null
+          duration_seconds?: number | null
+          file_size_mb?: number | null
+          id?: string
+          is_active?: boolean | null
+          module_id?: string | null
+          public_url: string
+          storage_path: string
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          asset_key?: string
+          created_at?: string | null
+          description?: string | null
+          duration_seconds?: number | null
+          file_size_mb?: number | null
+          id?: string
+          is_active?: boolean | null
+          module_id?: string | null
+          public_url?: string
+          storage_path?: string
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_assets_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "course_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workflow_automations: {
         Row: {
           actions: Json
