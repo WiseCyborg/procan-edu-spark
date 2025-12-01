@@ -105,8 +105,7 @@ Dispensaries are clean, professional retail environments. Think of them like a p
 ## It's Okay to Feel Nervous!
 
 Remember: Everyone was a first-timer once. Dispensary staff are experienced in helping new customers and want to ensure you have a positive experience.`,
-        estimated_minutes: 5,
-        is_public: true
+        estimated_minutes: 5
       },
       {
         course_id: course1.id,
@@ -179,8 +178,7 @@ For first-timers, we generally recommend:
 3. **Vape pens** for convenience and discretion
 
 Your budtender can help you decide based on your preferences and needs.`,
-        estimated_minutes: 8,
-        is_public: true
+        estimated_minutes: 8
       },
       {
         course_id: course1.id,
@@ -256,8 +254,7 @@ While most budtenders are professional, be cautious if someone:
 ## Remember
 
 A good budtender wants you to have a positive, safe experience. Don't be afraid to ask questions, and never feel pressured to buy something you're uncomfortable with.`,
-        estimated_minutes: 6,
-        is_public: true
+        estimated_minutes: 6
       },
       {
         course_id: course1.id,
@@ -390,8 +387,7 @@ Labels often include:
 ## Remember
 
 When in doubt, always start with a lower dose. You can always take more next time, but you can't take less once you've consumed it!`,
-        estimated_minutes: 7,
-        is_public: true
+        estimated_minutes: 7
       },
       {
         course_id: course1.id,
@@ -530,8 +526,7 @@ Cannabis remains federally illegal. On federal property, including:
 - Consume only in private residences
 - Never drive under the influence
 - When in doubt, ask!`,
-        estimated_minutes: 5,
-        is_public: true
+        estimated_minutes: 5
       },
       {
         course_id: course1.id,
@@ -731,8 +726,7 @@ Many dispensaries offer:
 - Never drive impaired
 
 You're almost ready for your first visit! Next, we'll cover safe and responsible use.`,
-        estimated_minutes: 4,
-        is_public: true
+        estimated_minutes: 4
       },
       {
         course_id: course1.id,
@@ -990,8 +984,7 @@ Cannabis is generally safe, but be aware of:
 ✅ When in doubt, wait it out
 
 **Cannabis can be used safely and responsibly when you follow these guidelines.**`,
-        estimated_minutes: 6,
-        is_public: true
+        estimated_minutes: 6
       },
       {
         course_id: course1.id,
@@ -1282,8 +1275,7 @@ You've completed the "First Time at a Dispensary" course. You now know:
 **You're ready for your first visit!**
 
 Enter your email on the next screen to receive your "Dispensary Ready" certificate.`,
-        estimated_minutes: 5,
-        is_public: true
+        estimated_minutes: 5
       }
     ];
 
@@ -1329,80 +1321,70 @@ Enter your email on the next screen to receive your "Dispensary Ready" certifica
         module_number: 1,
         title: 'Cannabis Basics',
         content: '# Cannabis Basics\n\nLearn the fundamentals of the cannabis plant, its history, and the difference between cannabis and hemp.\n\n*Content to be expanded*',
-        estimated_minutes: 6,
-        is_public: true
+        estimated_minutes: 6
       },
       {
         course_id: course2.id,
         module_number: 2,
         title: 'The Endocannabinoid System',
         content: '# The Endocannabinoid System\n\nDiscover how your body naturally interacts with cannabis compounds.\n\n*Content to be expanded*',
-        estimated_minutes: 7,
-        is_public: true
+        estimated_minutes: 7
       },
       {
         course_id: course2.id,
         module_number: 3,
         title: 'THC Deep Dive',
         content: '# THC Deep Dive\n\nUnderstand THC - the primary psychoactive compound in cannabis.\n\n*Content to be expanded*',
-        estimated_minutes: 6,
-        is_public: true
+        estimated_minutes: 6
       },
       {
         course_id: course2.id,
         module_number: 4,
         title: 'CBD Deep Dive',
         content: '# CBD Deep Dive\n\nExplore CBD and its non-intoxicating therapeutic potential.\n\n*Content to be expanded*',
-        estimated_minutes: 6,
-        is_public: true
+        estimated_minutes: 6
       },
       {
         course_id: course2.id,
         module_number: 5,
         title: 'Other Cannabinoids',
         content: '# Other Cannabinoids\n\nLearn about CBG, CBN, THCV, and the entourage effect.\n\n*Content to be expanded*',
-        estimated_minutes: 7,
-        is_public: true
+        estimated_minutes: 7
       },
       {
         course_id: course2.id,
         module_number: 6,
         title: 'Terpenes 101',
         content: '# Terpenes 101\n\nDiscover aromatic compounds that influence cannabis effects.\n\n*Content to be expanded*',
-        estimated_minutes: 8,
-        is_public: true
+        estimated_minutes: 8
       },
       {
         course_id: course2.id,
         module_number: 7,
         title: 'Consumption Methods',
         content: '# Consumption Methods\n\nCompare different ways to consume cannabis and their effects.\n\n*Content to be expanded*',
-        estimated_minutes: 8,
-        is_public: true
+        estimated_minutes: 8
       },
       {
         course_id: course2.id,
         module_number: 8,
         title: 'Finding Your Dose',
         content: '# Finding Your Dose\n\nLearn how to find your optimal cannabis dosage.\n\n*Content to be expanded*',
-        estimated_minutes: 6,
-        is_public: true
+        estimated_minutes: 6
       },
       {
         course_id: course2.id,
         module_number: 9,
         title: 'Medical Cannabis in Maryland',
         content: '# Medical Cannabis in Maryland\n\nUnderstand the medical cannabis program in Maryland.\n\n*Content to be expanded*',
-        estimated_minutes: 7,
-        is_public: true
+        estimated_minutes: 7
       },
       {
         course_id: course2.id,
         module_number: 10,
         title: 'Quality & Safety',
         content: '# Quality & Safety\n\nLearn about lab testing, quality assurance, and safe storage.\n\n*Content to be expanded*',
-        estimated_minutes: 6,
-        is_public: true
+        estimated_minutes: 6
       }
     ];
 
@@ -1537,8 +1519,7 @@ Cannabis remains illegal on ALL federal property:
 - Your dispensary's compliance team
 - NORML Maryland chapter
 - Local law enforcement non-emergency line`,
-        estimated_minutes: 6,
-        is_public: true
+        estimated_minutes: 6
       },
       {
         course_id: course3.id,
@@ -1716,8 +1697,7 @@ Maryland law strictly regulates where cannabis can be consumed. Understanding th
 - Use more discreet consumption methods
 
 **Remember: Legal purchase doesn't mean legal use everywhere. When in doubt, wait until you're in your private residence.**`,
-        estimated_minutes: 7,
-        is_public: true
+        estimated_minutes: 7
       },
       {
         course_id: course3.id,
@@ -1983,8 +1963,7 @@ Police look for:
 - Local public defender's office
 
 **Remember: Cannabis is still federally illegal. Any travel involving federal property, interstate commerce, or crossing state lines is a federal crime with serious consequences.**`,
-        estimated_minutes: 8,
-        is_public: true
+        estimated_minutes: 8
       },
       {
         course_id: course3.id,
@@ -2296,8 +2275,7 @@ You've completed the "Maryland Cannabis Laws" course. You now understand:
 **You're ready to be a responsible, compliant cannabis consumer in Maryland!**
 
 Enter your email on the next screen to receive your "Maryland Compliant" certificate.`,
-        estimated_minutes: 10,
-        is_public: true
+        estimated_minutes: 10
       }
     ];
 
