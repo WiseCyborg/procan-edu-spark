@@ -156,7 +156,8 @@ const EnhancedCourseModule: React.FC = () => {
             content: data.content,
             quiz_questions: (data.quiz_questions as unknown as QuizQuestion[]) || [],
             module_number: data.module_number,
-            comar_reference: data.comar_reference
+            comar_reference: data.comar_reference,
+            video_url: data.video_url
           });
         }
       } catch (error) {
@@ -462,11 +463,13 @@ const EnhancedCourseModule: React.FC = () => {
                       lessons: moduleData.lessons && moduleData.lessons.length > 0 
                         ? moduleData.lessons 
                         : [
-                            {
+                          {
                               id: `${moduleData.id}-lesson-1`,
                               title: moduleData.title,
                               duration: '15 min',
-                              videoType: 'none' as const,
+                              videoType: moduleData.video_url 
+                                ? (moduleData.video_url.includes('vimeo.com') ? 'embed' : 'file') 
+                                : 'none' as const,
                               videoUrl: moduleData.video_url || '',
                               htmlSummary: `<div>${sanitizeHtml(markdownToHtml(moduleData.content || ''))}</div>`,
                               resourceLinks: moduleDocuments.map(doc => ({
