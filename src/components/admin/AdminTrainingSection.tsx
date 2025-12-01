@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Award, GraduationCap, AlertCircle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { AdvancedEmployeeManagement } from '@/components/admin/AdvancedEmployeeManagement';
+import { CertificateManagementView } from '@/components/admin/CertificateManagementView';
 
 export const AdminTrainingSection = () => {
   const { data: atRiskUsers } = useQuery({
@@ -26,20 +28,6 @@ export const AdminTrainingSection = () => {
     }
   });
 
-  const { data: recentCerts } = useQuery({
-    queryKey: ['recent-certificates'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('certificates')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(10);
-      
-      if (error) throw error;
-      return data;
-    }
-  });
-
   return (
     <Tabs defaultValue="progress" className="w-full">
       <TabsList className="grid w-full grid-cols-3">
@@ -49,48 +37,11 @@ export const AdminTrainingSection = () => {
       </TabsList>
 
       <TabsContent value="progress">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <GraduationCap className="h-5 w-5" />
-              Training Progress Overview
-            </CardTitle>
-            <CardDescription>Monitor employee training completion across all organizations</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Detailed progress tracking interface coming soon
-            </p>
-          </CardContent>
-        </Card>
+        <AdvancedEmployeeManagement />
       </TabsContent>
 
       <TabsContent value="certificates">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Award className="h-5 w-5" />
-              Certificate Management
-            </CardTitle>
-            <CardDescription>View, verify, and manage issued certificates</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <p className="text-sm font-medium">Recently Issued Certificates</p>
-              {recentCerts && recentCerts.length > 0 ? (
-                <div className="space-y-1">
-                  {recentCerts.slice(0, 5).map((cert) => (
-                    <div key={cert.id} className="text-sm text-muted-foreground">
-                      {cert.certificate_number} - {new Date(cert.issue_date).toLocaleDateString()}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">No certificates issued yet</p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+        <CertificateManagementView />
       </TabsContent>
 
       <TabsContent value="at-risk">
