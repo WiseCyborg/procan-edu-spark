@@ -9,12 +9,19 @@ import { useRealTimeMessaging } from '@/hooks/useRealTimeMessaging';
 import { formatDistanceToNow, format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { VideoCallButton } from './VideoCallButton';
 
 interface ConversationViewProps {
   conversationId: string;
+  conversationTitle?: string;
+  conversationType?: string;
 }
 
-export const ConversationView = ({ conversationId }: ConversationViewProps) => {
+export const ConversationView = ({ 
+  conversationId,
+  conversationTitle = 'Team Chat',
+  conversationType = 'group'
+}: ConversationViewProps) => {
   const { user } = useAuth();
   const { messages, sendMessage, fetchMessages } = useRealTimeMessaging();
   const [newMessage, setNewMessage] = useState('');
@@ -158,14 +165,21 @@ export const ConversationView = ({ conversationId }: ConversationViewProps) => {
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b bg-card/50">
         <div className="flex items-center gap-3">
-          <h2 className="font-semibold text-foreground">Team Chat</h2>
+          <h2 className="font-semibold text-foreground">{conversationTitle}</h2>
           <Badge variant="outline" className="text-xs">
             {conversationMessages.length} messages
           </Badge>
         </div>
-        <Button variant="ghost" size="sm">
-          <MoreHorizontal className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center gap-2">
+          <VideoCallButton 
+            conversationId={conversationId}
+            conversationTitle={conversationTitle}
+            conversationType={conversationType}
+          />
+          <Button variant="ghost" size="sm">
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
       {/* Messages */}
