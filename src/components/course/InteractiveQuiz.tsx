@@ -31,6 +31,7 @@ interface InteractiveQuizProps {
   title: string;
   timeLimit?: number; // in minutes
   passingScore?: number; // percentage
+  maxQuestions?: number; // default 10 - randomly select this many questions from pool
   onQuizComplete: (score: number, passed: boolean, timeSpent: number, weakTopics?: WeakTopic[]) => void;
   onQuestionAnswer?: (questionId: string, answer: string, isCorrect: boolean) => void;
   allowRetry?: boolean;
@@ -51,6 +52,7 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
   title,
   timeLimit,
   passingScore = 80,
+  maxQuestions = 10,
   onQuizComplete,
   onQuestionAnswer,
   allowRetry = true
@@ -66,8 +68,11 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
     );
   }
 
-  // Shuffle questions on initial load
-  const [shuffledQuestions, setShuffledQuestions] = useState(() => shuffleArray(questions));
+  // Shuffle questions on initial load and select random maxQuestions (default 10)
+  const [shuffledQuestions, setShuffledQuestions] = useState(() => {
+    const shuffled = shuffleArray(questions);
+    return shuffled.slice(0, maxQuestions);
+  });
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<{[key: string]: string}>({});
   const [showResults, setShowResults] = useState(false);
@@ -139,7 +144,7 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
   const calculateWeakTopics = (): WeakTopic[] => {
     const topicStats: { [topic: string]: { correct: number; total: number; relatedModules: Set<string> } } = {};
     
-    questions.forEach(q => {
+    shuffledQuestions.forEach(q => {
       const topic = q.topic || 'General';
       if (!topicStats[topic]) {
         topicStats[topic] = { correct: 0, total: 0, relatedModules: new Set() };
@@ -176,8 +181,9 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
   };
 
   const handleRetry = () => {
-    // Reshuffle questions on retry
-    setShuffledQuestions(shuffleArray(questions));
+    // Reshuffle and re-select new random questions on retry
+    const newShuffled = shuffleArray(questions);
+    setShuffledQuestions(newShuffled.slice(0, maxQuestions));
     setCurrentQuestionIndex(0);
     setAnswers({});
     setShowResults(false);
@@ -198,8 +204,8 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
   };
 
   if (showResults) {
-    const correctAnswers = questions.filter(q => answers[q.id] === q.correctAnswer).length;
-    const score = Math.round((correctAnswers / questions.length) * 100);
+    const correctAnswers = shuffledQuestions.filter(q => answers[q.id] === q.correctAnswer).length;
+    const score = Math.round((correctAnswers / shuffledQuestions.length) * 100);
     const passed = score >= passingScore;
 
     return (
@@ -216,7 +222,7 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
               {passed ? "PASSED" : "FAILED"}
             </Badge>
             <p className="text-muted-foreground mt-2">
-              {correctAnswers} out of {questions.length} questions correct
+              {correctAnswers} out of {shuffledQuestions.length} questions correct
             </p>
             {!passed && (
               <p className="text-sm text-muted-foreground mt-1">
@@ -228,7 +234,7 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
           {/* Question by question breakdown */}
           <div className="space-y-2">
             <h4 className="font-semibold">Question Breakdown:</h4>
-            {questions.map((question, index) => {
+            {shuffledQuestions.map((question, index) => {
               const userAnswer = answers[question.id];
               const isCorrect = userAnswer === question.correctAnswer;
               
