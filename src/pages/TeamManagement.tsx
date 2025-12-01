@@ -10,7 +10,8 @@ const TeamManagement = () => {
   const { 
     isDispensaryManager, 
     isTrainingCoordinator, 
-    isStudent, 
+    isStudent,
+    isAdmin,
     hasMultipleManagementRoles,
     managementRoleCount,
     isLoading 
@@ -24,7 +25,9 @@ const TeamManagement = () => {
       return;
     }
 
-    if (isDispensaryManager) {
+    if (isAdmin) {
+      navigate('/admin', { replace: true });
+    } else if (isDispensaryManager) {
       navigate('/dispensary-manager-dashboard', { replace: true });
     } else if (isTrainingCoordinator) {
       navigate('/training-coordinator-dashboard', { replace: true });
@@ -36,7 +39,8 @@ const TeamManagement = () => {
   }, [
     isLoading, 
     flags.multi_role_selector,
-    hasMultipleManagementRoles, 
+    hasMultipleManagementRoles,
+    isAdmin,
     isDispensaryManager, 
     isTrainingCoordinator, 
     isStudent, 
