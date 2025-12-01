@@ -1,6 +1,6 @@
 export const BUSINESS_RULES = {
   // Course
-  TOTAL_MODULES: 18,
+  TOTAL_MODULES: 24,
   PASSING_SCORE_PERCENTAGE: 80,
   
   // Seat Pricing - Maryland Regulatory Compliance
@@ -28,11 +28,11 @@ export const BUSINESS_RULES = {
   // Profile Completion
   PROFILE_REQUIRED_FOR_COURSE: true,
   
-  // Tier System
+  // Tier System (boundaries adjusted for 24-module course)
   TIERS: {
     GREEN: { modules_required: 0, color: '#22c55e', name: 'Green Tier' },
-    YELLOW: { modules_required: 6, color: '#eab308', name: 'Yellow Tier' },
-    RED: { modules_required: 12, color: '#ef4444', name: 'Red Tier' },
+    YELLOW: { modules_required: 8, color: '#eab308', name: 'Yellow Tier' },
+    RED: { modules_required: 16, color: '#ef4444', name: 'Red Tier' },
   }
 } as const;
 
