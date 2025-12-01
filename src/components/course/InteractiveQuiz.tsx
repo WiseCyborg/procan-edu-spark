@@ -36,6 +36,16 @@ interface InteractiveQuizProps {
   allowRetry?: boolean;
 }
 
+// Shuffle utility function
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
+
 export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
   questions,
   title,
@@ -56,6 +66,8 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
     );
   }
 
+  // Shuffle questions on initial load
+  const [shuffledQuestions, setShuffledQuestions] = useState(() => shuffleArray(questions));
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<{[key: string]: string}>({});
   const [showResults, setShowResults] = useState(false);
@@ -63,9 +75,9 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
   const [startTime] = useState(Date.now());
   const [showExplanation, setShowExplanation] = useState(false);
 
-  const currentQuestion = questions[currentQuestionIndex];
-  const isLastQuestion = currentQuestionIndex === questions.length - 1;
-  const totalQuestions = questions.length;
+  const currentQuestion = shuffledQuestions[currentQuestionIndex];
+  const isLastQuestion = currentQuestionIndex === shuffledQuestions.length - 1;
+  const totalQuestions = shuffledQuestions.length;
 
   // Timer effect
   useEffect(() => {
@@ -153,8 +165,8 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
   };
 
   const handleQuizSubmit = () => {
-    const correctAnswers = questions.filter(q => answers[q.id] === q.correctAnswer).length;
-    const score = Math.round((correctAnswers / questions.length) * 100);
+    const correctAnswers = shuffledQuestions.filter(q => answers[q.id] === q.correctAnswer).length;
+    const score = Math.round((correctAnswers / shuffledQuestions.length) * 100);
     const passed = score >= passingScore;
     const timeSpent = Math.round((Date.now() - startTime) / 1000);
     const weakTopics = calculateWeakTopics();
@@ -164,6 +176,8 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
   };
 
   const handleRetry = () => {
+    // Reshuffle questions on retry
+    setShuffledQuestions(shuffleArray(questions));
     setCurrentQuestionIndex(0);
     setAnswers({});
     setShowResults(false);
