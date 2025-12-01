@@ -35,6 +35,16 @@ const Dashboard = () => {
     fetchDashboardData();
   }, [user]);
 
+  // Dynamically get actual module count as fallback
+  const getActualModuleCount = async (courseId: string): Promise<number> => {
+    const { count } = await supabase
+      .from('course_modules')
+      .select('*', { count: 'exact', head: true })
+      .eq('course_id', courseId)
+      .eq('is_active', true);
+    return count || 24; // Fallback to 24 if query fails
+  };
+
   const fetchDashboardData = async () => {
     if (!user) return;
 
@@ -46,7 +56,20 @@ const Dashboard = () => {
         .eq('is_active', true);
 
       if (coursesError) throw coursesError;
-      setCourses(coursesData || []);
+      
+      // Dynamically verify module count for each course
+      if (coursesData) {
+        const coursesWithActualCount = await Promise.all(
+          coursesData.map(async (course) => {
+            const actualCount = await getActualModuleCount(course.id);
+            return {
+              ...course,
+              module_count: actualCount // Use actual count from course_modules
+            };
+          })
+        );
+        setCourses(coursesWithActualCount);
+      }
 
       // Fetch user progress
       const { data: progressData, error: progressError } = await supabase
