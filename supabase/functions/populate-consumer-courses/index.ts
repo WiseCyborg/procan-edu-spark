@@ -511,20 +511,656 @@ This is why "start low and go slow" is the golden rule of cannabis use.
           {
             module_number: 4,
             title: 'CBD Explained',
-            content: `# CBD Explained\n\n*Content to be expanded in Phase 3B*`,
-            estimated_minutes: 8
+            content: `# Understanding CBD (Cannabidiol)
+
+CBD is the second most abundant cannabinoid in cannabis, but unlike THC, it doesn't produce a "high." Instead, CBD offers potential therapeutic benefits without intoxication.
+
+## What Is CBD?
+
+**Cannabidiol (CBD)** is a non-intoxicating cannabinoid found in both cannabis and hemp plants. Since the 2018 Farm Bill legalized hemp, CBD products derived from hemp (containing ≤0.3% THC) are federally legal and widely available.
+
+Unlike THC, CBD:
+✓ Does NOT produce psychoactive "high" effects  
+✓ Does NOT impair cognition or motor function  
+✓ Is generally well-tolerated with minimal side effects  
+✓ Can actually modulate some of THC's intense effects
+
+## How CBD Works
+
+CBD doesn't bind directly to CB1 or CB2 receptors like THC does. Instead, it works through multiple pathways:
+
+**Indirect ECS Modulation:**  
+- Prevents FAAH enzyme from breaking down anandamide (your "bliss molecule")  
+- This increases natural endocannabinoid levels without adding external cannabinoids  
+- Result: Enhanced mood, reduced anxiety, better homeostasis
+
+**Serotonin System:**  
+- Acts on 5-HT1A serotonin receptors  
+- May explain CBD's anxiolytic (anti-anxiety) effects  
+- Similar mechanism to some antidepressants
+
+**Other Pathways:**  
+- Vanilloid receptors (pain and inflammation)  
+- GPR55 receptors (bone density, blood pressure)  
+- PPAR receptors (neuroprotection)
+
+## CBD:THC Ratios
+
+Cannabis products are often described by their **CBD:THC ratio**, which dramatically affects the experience:
+
+**High THC, Low CBD (1:20 to 1:10)**  
+- Strong psychoactive effects  
+- Most recreational products  
+- Example: 20% THC, 1% CBD
+
+**Balanced (1:1)**  
+- Mild psychoactive effects  
+- CBD moderates THC intensity  
+- Popular for daytime medical use  
+- Example: 10% THC, 10% CBD
+
+**High CBD, Low THC (2:1 to 20:1)**  
+- Minimal to no psychoactive effects  
+- Therapeutic benefits without impairment  
+- Ideal for beginners and daytime use  
+- Example: 15% CBD, 1% THC
+
+**CBD-Dominant (>20:1)**  
+- Virtually no psychoactive effects  
+- Pure therapeutic approach  
+- Example: 20% CBD, <1% THC
+
+**Pure CBD (hemp-derived)**  
+- 0% THC (or trace amounts <0.3%)  
+- Federally legal  
+- Available without medical card
+
+## The Entourage Effect: Why CBD + THC Work Better Together
+
+When CBD and THC are consumed together, they create synergistic effects known as the **entourage effect**:
+
+**How CBD Modulates THC:**  
+✓ Reduces anxiety and paranoia from high-THC products  
+✓ Smooths out the psychoactive experience  
+✓ Extends duration of therapeutic effects  
+✓ May reduce THC-induced memory impairment
+
+Many medical users find 1:1 or 2:1 CBD:THC ratios provide the best balance of relief and functionality.
+
+## Full Spectrum vs. Broad Spectrum vs. Isolate
+
+CBD products come in three main forms:
+
+**Full Spectrum CBD**  
+✓ Contains ALL cannabinoids, terpenes, and compounds from the plant  
+✓ Includes trace amounts of THC (<0.3% for hemp products)  
+✓ Maximum entourage effect  
+✓ Most therapeutic potential  
+✗ May cause positive drug test  
+✗ Mild psychoactive effects possible at high doses
+
+**Broad Spectrum CBD**  
+✓ Contains multiple cannabinoids and terpenes  
+✓ THC completely removed (0% THC)  
+✓ Partial entourage effect  
+✓ No risk of psychoactive effects  
+✓ Lower drug test risk  
+✗ Less entourage effect than full spectrum
+
+**CBD Isolate**  
+✓ 99%+ pure CBD  
+✓ Zero THC, zero other cannabinoids  
+✓ No taste or odor  
+✓ Precise dosing  
+✓ Zero drug test risk  
+✗ No entourage effect  
+✗ May be less effective than full/broad spectrum
+
+**Which Should You Choose?**
+
+- **Full Spectrum**: Maximum benefits, okay with trace THC  
+- **Broad Spectrum**: Want entourage effect but zero THC  
+- **Isolate**: Need guaranteed zero THC (employment testing, personal preference)
+
+## Potential Benefits of CBD
+
+While research is ongoing, studies suggest CBD may help with:
+
+**Anxiety & Stress**  
+Multiple studies show CBD reduces anxiety without sedation. Doses of 300-600mg have shown efficacy in clinical trials.
+
+**Sleep**  
+CBD may improve sleep quality, especially when anxiety or pain disrupt rest. Effects are biphasic: lower doses may be alerting, higher doses sedating.
+
+**Pain & Inflammation**  
+Anti-inflammatory properties make CBD popular for arthritis, chronic pain, and inflammatory conditions. Topical CBD targets localized pain.
+
+**Epilepsy**  
+FDA-approved CBD medication (Epidiolex) treats rare seizure disorders. Strong evidence base.
+
+**Neuroprotection**  
+Antioxidant and neuroprotective properties being studied for Alzheimer's, Parkinson's, and traumatic brain injury.
+
+**Skin Health**  
+Anti-inflammatory effects benefit acne, eczema, and psoriasis. CBD skincare is rapidly growing.
+
+## Dosing CBD
+
+CBD dosing is highly individual. Start low and increase gradually:
+
+**Beginner Dose**: 10-20mg daily  
+**Standard Dose**: 20-40mg daily  
+**Therapeutic Dose**: 40-160mg daily  
+**Clinical Dose**: 160-600mg daily (for specific conditions)
+
+**Tips:**  
+- Take consistently for 1-2 weeks to assess effects  
+- CBD builds up in your system over time  
+- Split dose throughout day for sustained relief  
+- Higher doses aren't always better - find your sweet spot
+
+## Legal Status
+
+**Hemp-Derived CBD (<0.3% THC)**: Federally legal since 2018 Farm Bill. Available nationwide.
+
+**Cannabis-Derived CBD (any THC level)**: Legal only in states with medical or adult-use cannabis programs. Requires state authorization in Maryland.
+
+**Quality Concerns**: CBD market is largely unregulated. Look for:
+- Third-party lab testing (Certificate of Analysis)  
+- Clear CBD and THC content labels  
+- Reputable brands with transparency  
+- Avoid exaggerated health claims
+
+## Side Effects & Safety
+
+CBD is generally well-tolerated, but some users experience:
+
+- Dry mouth  
+- Drowsiness (at higher doses)  
+- Changes in appetite  
+- Diarrhea (rare, usually with very high doses)
+
+**Drug Interactions**: CBD inhibits certain liver enzymes, potentially affecting:
+- Blood thinners (warfarin)  
+- Seizure medications  
+- Sedatives  
+
+Consult your doctor if taking medications metabolized by CYP450 enzymes.
+
+## Key Takeaways
+
+✓ CBD is non-intoxicating and won't get you "high"  
+✓ Works indirectly through the ECS and multiple receptor systems  
+✓ CBD:THC ratios determine the experience (1:1 balanced, 20:1 CBD-dominant)  
+✓ Full spectrum (all compounds) > Broad spectrum (no THC) > Isolate (pure CBD)  
+✓ Start with 10-20mg daily and adjust based on response  
+✓ Hemp-derived CBD is federally legal; cannabis-derived requires state authorization  
+✓ Choose products with third-party lab testing and clear labeling`,
+            estimated_minutes: 10
           },
           {
             module_number: 5,
             title: 'Other Cannabinoids',
-            content: `# Other Cannabinoids\n\n*Content to be expanded in Phase 3B*`,
-            estimated_minutes: 7
+            content: `# Beyond THC & CBD: Minor Cannabinoids
+
+While THC and CBD get most of the attention, cannabis contains over 100 other cannabinoids - each with unique properties and potential benefits. Let's explore the most important "minor cannabinoids."
+
+## CBG (Cannabigerol): The Mother Cannabinoid
+
+**What Makes It Special:**  
+CBG is called the "mother" or "stem cell" cannabinoid because THC, CBD, and other cannabinoids all start as CBG-A (the acidic precursor) in the growing plant. As the plant matures, enzymes convert CBG-A into THC-A, CBD-A, CBC-A, etc.
+
+**Effects & Benefits:**  
+✓ Non-intoxicating (no "high")  
+✓ May reduce intraocular pressure (glaucoma research)  
+✓ Antibacterial properties  
+✓ Appetite stimulation without psychoactivity  
+✓ Potential neuroprotective effects  
+✓ Anti-inflammatory for digestive issues
+
+**Why It's Rare:**  
+Most CBG converts to other cannabinoids as the plant grows, so mature cannabis contains only 1% or less CBG. Breeders are now creating high-CBG strains harvested early.
+
+**Best For:**  
+- Daytime use (non-sedating)  
+- Focus and clarity  
+- Digestive health  
+- Those avoiding THC
+
+## CBN (Cannabinol): The Sleep Cannabinoid
+
+**How It Forms:**  
+CBN is created when THC degrades over time through exposure to oxygen and UV light. Older cannabis naturally contains more CBN.
+
+**Effects & Benefits:**  
+✓ Mildly sedating ("couch-lock" cannabinoid)  
+✓ May promote sleep and relaxation  
+✓ Mild psychoactivity (about 10% as strong as THC)  
+✓ Appetite stimulation  
+✓ Potential pain relief  
+✓ Antibacterial properties
+
+**The Sleep Connection:**  
+While often called the "sleepy cannabinoid," research is mixed. CBN's sedative reputation may come from the presence of degraded terpenes in older cannabis, not CBN alone. However, many users report improved sleep with CBN products.
+
+**Best For:**  
+- Evening and nighttime use  
+- Sleep support  
+- Relaxation without intense THC effects  
+- Older cannabis users who prefer vintage effects
+
+## THCV (Tetrahydrocannabivarin): The Diet Weed
+
+**What Makes It Different:**  
+THCV is chemically similar to THC but has opposite effects at low doses. It's a CB1 receptor antagonist (blocks the receptor) rather than an agonist (activates it).
+
+**Effects & Benefits:**  
+✓ Appetite suppression (opposite of THC's "munchies")  
+✓ May help with weight management and diabetes  
+✓ Reduced anxiety and panic attacks  
+✓ Bone health promotion  
+✓ At LOW doses: clear-headed, energizing, non-intoxicating  
+✓ At HIGH doses: psychoactive (but shorter duration than THC)
+
+**Dose-Dependent Effects:**  
+- **<10mg**: Blocks CB1 receptors, reduces appetite  
+- **>10mg**: Activates CB1 receptors, mild psychoactivity
+
+**Best For:**  
+- Weight management  
+- Daytime energy without anxiety  
+- Blood sugar regulation (diabetes research)  
+- Reducing THC-induced anxiety
+
+**Where It's Found:**  
+Naturally occurs in African sativa strains (especially from regions like South Africa). Rare in most cannabis, but breeders are creating THCV-rich strains.
+
+## CBC (Cannabichromene): The Inflammation Fighter
+
+**Effects & Benefits:**  
+✓ Non-intoxicating  
+✓ Powerful anti-inflammatory  
+✓ May promote neurogenesis (brain cell growth)  
+✓ Antidepressant properties in animal studies  
+✓ Acne treatment potential  
+✓ Pain relief
+
+**How It Works:**  
+CBC interacts with TRPV1 and TRPA1 receptors (involved in pain perception) and may enhance anandamide levels by blocking its breakdown.
+
+**Best For:**  
+- Inflammation and pain  
+- Mood support  
+- Skincare (topicals)  
+- Enhanced entourage effect with THC and CBD
+
+## Delta-8-THC vs. Delta-9-THC
+
+You may have seen **Delta-8-THC** products marketed as "legal THC" or "THC lite."
+
+**What Is Delta-8?**  
+Delta-8-THC is a minor cannabinoid that occurs naturally in very small amounts. Most Delta-8 products are synthesized from CBD through chemical conversion.
+
+**Key Differences:**
+
+| Feature | Delta-9-THC | Delta-8-THC |
+|---------|-------------|-------------|
+| Natural Abundance | High | Very low |
+| Psychoactivity | Strong | Mild (about 50-70% as potent) |
+| Legal Status | Federally illegal (Schedule I), state-dependent | Gray area (hemp-derived may be legal under Farm Bill) |
+| Effects | Intense high, anxiety possible | Smoother high, less anxiety |
+| Research | Extensive | Limited |
+
+**Safety Concerns:**  
+- Most Delta-8 is synthetically converted from CBD  
+- Unregulated market with contamination risks  
+- Unknown long-term safety profile  
+- Choose products with rigorous third-party testing
+
+## THCA & CBDA: The Acidic Precursors
+
+Raw, unheated cannabis doesn't contain THC or CBD - it contains their acidic forms:
+
+**THCA (Tetrahydrocannabinolic Acid)**  
+- Non-intoxicating until heated (decarboxylation)  
+- Raw cannabis juicing provides THCA  
+- Anti-inflammatory, neuroprotective  
+- Potential anti-nausea benefits
+
+**CBDA (Cannabidiolic Acid)**  
+- Non-intoxicating  
+- May be more potent than CBD for certain conditions  
+- Anti-inflammatory, anti-nausea  
+- Being studied for anxiety and seizures
+
+When you smoke, vape, or cook cannabis, heat converts THCA → THC and CBDA → CBD.
+
+## The Entourage Effect: Why Combinations Matter
+
+The **entourage effect** is the theory that cannabinoids work better together than in isolation:
+
+**Synergistic Combinations:**  
+✓ CBD + THC: Reduced anxiety, enhanced pain relief  
+✓ CBG + CBD: Enhanced anti-inflammatory effects  
+✓ CBN + THC: Deeper sedation for sleep  
+✓ THCV + THC: Reduced anxiety and appetite  
+✓ All cannabinoids + terpenes: Maximum therapeutic potential
+
+This is why many medical patients prefer **full-spectrum products** over isolated cannabinoids - the combined effect is greater than the sum of parts.
+
+## Choosing Products with Minor Cannabinoids
+
+When shopping for cannabis, look for:
+
+**Full-spectrum products**: Contain all naturally-occurring cannabinoids  
+**Lab reports**: Show the complete cannabinoid profile  
+**Targeted formulations**: Some products are enriched with specific cannabinoids (CBN for sleep, CBG for focus)  
+**Whole-plant extracts**: Better entourage effect than isolates
+
+## Key Takeaways
+
+✓ CBG is the "mother cannabinoid" - non-intoxicating, focus-enhancing  
+✓ CBN forms from degraded THC - mildly sedating, sleep-promoting  
+✓ THCV suppresses appetite and provides energy (low doses non-intoxicating)  
+✓ Delta-8-THC is milder than Delta-9 but less researched and regulated  
+✓ THCA and CBDA are raw, acidic forms - become THC/CBD when heated  
+✓ The entourage effect: cannabinoids work better together than alone  
+✓ Look for full-spectrum products with complete lab testing for maximum benefits`,
+            estimated_minutes: 11
           },
           {
             module_number: 6,
             title: 'Terpenes 101',
-            content: `# Terpenes 101\n\n*Content to be expanded in Phase 3B*`,
-            estimated_minutes: 8
+            content: `# Terpenes: The Secret to Cannabis Effects
+
+If you've ever wondered why different cannabis strains smell so distinct - or why one strain makes you sleepy while another keeps you alert - the answer lies in **terpenes**.
+
+## What Are Terpenes?
+
+**Terpenes** are aromatic compounds found in all plants, not just cannabis. They give plants their distinctive smells:
+
+- Pine trees → Pinene (sharp, piney)  
+- Lavender → Linalool (floral, calming)  
+- Lemons → Limonene (citrus, bright)  
+- Black pepper → Caryophyllene (spicy, peppery)
+
+Cannabis contains over 200 different terpenes, but about 10-20 are prominent enough to significantly affect the experience.
+
+## Why Terpenes Matter
+
+For decades, people thought **indica vs. sativa** determined effects. Modern research reveals that's oversimplified - **terpene profiles** are far better predictors of how a strain will make you feel.
+
+**Terpenes Influence:**  
+✓ Aroma and flavor  
+✓ Therapeutic effects (pain, anxiety, inflammation)  
+✓ How THC and CBD interact with your body  
+✓ Whether a strain is energizing or sedating  
+✓ Mood and mental state
+
+This is why two strains with identical THC percentages can feel completely different - their terpene profiles create distinct experiences.
+
+## The Top 7 Cannabis Terpenes
+
+Let's explore the most common and impactful terpenes in cannabis:
+
+---
+
+### 1. Myrcene (Mer-seen)
+
+**Aroma**: Earthy, musky, herbal (like cloves or hops)
+
+**Effects:**  
+✓ Relaxing and sedating  
+✓ Muscle relaxation  
+✓ "Couch-lock" contributor  
+✓ Enhanced THC absorption (crosses blood-brain barrier faster)  
+✓ Pain relief  
+✓ Sleep promotion
+
+**Found In:**  
+- Mangoes (eating mango before cannabis may intensify effects!)  
+- Lemongrass  
+- Thyme  
+- Hops
+
+**Best For:**  
+Evening use, pain relief, insomnia, muscle tension
+
+**Strains High in Myrcene:**  
+Blue Dream, Granddaddy Purple, OG Kush
+
+**The Mango Myth:**  
+Some users swear that eating a ripe mango 45 minutes before consuming cannabis intensifies the high. The theory: myrcene-rich mango helps THC cross the blood-brain barrier more efficiently. While scientifically unproven, many users report stronger, longer effects.
+
+---
+
+### 2. Limonene (Lim-oh-neen)
+
+**Aroma**: Bright citrus (lemon, orange)
+
+**Effects:**  
+✓ Mood elevation and stress relief  
+✓ Anxiety reduction  
+✓ Energizing and uplifting  
+✓ Enhanced focus  
+✓ Immune system support  
+✓ May help with depression
+
+**Found In:**  
+- Citrus peels (lemons, oranges, limes)  
+- Peppermint  
+- Rosemary  
+- Juniper
+
+**Best For:**  
+Daytime use, mood enhancement, social situations, creative work
+
+**Strains High in Limonene:**  
+Super Lemon Haze, Durban Poison, Wedding Cake
+
+**Therapeutic Note:**  
+Limonene is being studied for its potential to reduce anxiety and depression. Its bright, uplifting effects make it popular for daytime cannabis use.
+
+---
+
+### 3. Pinene (Pie-neen)
+
+**Aroma**: Sharp pine, fresh forest air
+
+**Effects:**  
+✓ Mental alertness and clarity  
+✓ Memory retention (may counteract THC-induced memory impairment)  
+✓ Respiratory benefits (bronchodilator)  
+✓ Anti-inflammatory  
+✓ Energizing without jitteriness
+
+**Types:**  
+- **Alpha-pinene**: Pine trees, rosemary  
+- **Beta-pinene**: Basil, hops, parsley
+
+**Found In:**  
+- Pine needles  
+- Rosemary  
+- Basil  
+- Dill
+
+**Best For:**  
+Focus, productivity, daytime use, respiratory relief, creative tasks
+
+**Strains High in Pinene:**  
+Jack Herer, Blue Dream, Trainwreck
+
+**The Memory Boost:**  
+Pinene is one of the few terpenes that may actually counteract THC's short-term memory effects, making it ideal for functional cannabis use.
+
+---
+
+### 4. Linalool (Lin-ah-lool)
+
+**Aroma**: Floral, lavender, slightly spicy
+
+**Effects:**  
+✓ Calming and anti-anxiety  
+✓ Stress relief  
+✓ Sleep aid  
+✓ Pain relief  
+✓ Anti-convulsant properties  
+✓ Mood stabilization
+
+**Found In:**  
+- Lavender (200+ compounds in lavender are linalool)  
+- Coriander  
+- Mint  
+- Cinnamon
+
+**Best For:**  
+Anxiety, stress, insomnia, PTSD, panic disorders
+
+**Strains High in Linalool:**  
+Zkittlez, Do-Si-Dos, Amnesia Haze
+
+**Lavender Connection:**  
+If you find lavender calming, you'll likely benefit from linalool-rich cannabis. Some users keep dried lavender nearby to smell when cannabis effects become too intense - the linalool has calming effects.
+
+---
+
+### 5. Caryophyllene (Care-ee-oh-fill-een)
+
+**Aroma**: Spicy, peppery, woody (like black pepper or cloves)
+
+**Effects:**  
+✓ Pain relief (acts on CB2 receptors)  
+✓ Anti-inflammatory  
+✓ Stress relief without sedation  
+✓ May help with addiction and anxiety  
+✓ Unique: Only terpene that binds to cannabinoid receptors
+
+**Found In:**  
+- Black pepper  
+- Cloves  
+- Cinnamon  
+- Hops
+
+**Best For:**  
+Chronic pain, inflammation, stress management, functional relief
+
+**Strains High in Caryophyllene:**  
+GSC (Girl Scout Cookies), Sour Diesel, Chemdog
+
+**Special Property:**  
+Beta-caryophyllene is the only terpene known to interact directly with the endocannabinoid system by binding to CB2 receptors. This makes it particularly effective for pain and inflammation.
+
+---
+
+### 6. Humulene (Hew-mew-leen)
+
+**Aroma**: Earthy, woody, hoppy (like beer)
+
+**Effects:**  
+✓ Appetite suppression (opposite of THC's munchies)  
+✓ Anti-inflammatory  
+✓ Antibacterial  
+✓ Pain relief  
+✓ Energizing
+
+**Found In:**  
+- Hops (gives beer its bitter flavor)  
+- Coriander  
+- Cloves  
+- Basil
+
+**Best For:**  
+Weight management, inflammation, energy without jitters
+
+**Strains High in Humulene:**  
+GSC, Headband, Sour Diesel
+
+**The Anti-Munchies Terpene:**  
+Unlike most cannabis that increases appetite, humulene-rich strains may actually suppress hunger - useful for those managing weight or not wanting increased appetite.
+
+---
+
+### 7. Terpinolene (Ter-pin-oh-leen)
+
+**Aroma**: Fresh, herbal, floral, piney (complex scent profile)
+
+**Effects:**  
+✓ Uplifting and energizing  
+✓ Anxiety relief  
+✓ Antioxidant  
+✓ Sedating in high doses (biphasic)  
+✓ Antibacterial
+
+**Found In:**  
+- Tea tree  
+- Nutmeg  
+- Apples  
+- Cumin
+
+**Best For:**  
+Daytime energy, mood lift, creative projects
+
+**Strains High in Terpinolene:**  
+Jack Herer, XJ-13, Golden Goat
+
+---
+
+## How to Use Terpene Profiles
+
+When choosing cannabis, don't just look at THC percentage - **check the terpene profile**:
+
+**For Sleep:**  
+Look for: Myrcene + Linalool + Caryophyllene
+
+**For Focus:**  
+Look for: Pinene + Limonene + Terpinolene
+
+**For Anxiety:**  
+Look for: Linalool + Limonene + Caryophyllene
+
+**For Pain:**  
+Look for: Myrcene + Caryophyllene + Humulene
+
+**For Energy:**  
+Look for: Limonene + Pinene + Terpinolene
+
+## The Entourage Effect
+
+Terpenes don't just add flavor - they **modify how cannabinoids work** in your body. This synergy between terpenes, THC, CBD, and other cannabinoids is called the **entourage effect**.
+
+Example: THC alone might cause anxiety, but THC + linalool + CBD creates a calming, therapeutic experience.
+
+This is why many experts recommend **full-spectrum cannabis products** over pure THC or CBD isolates.
+
+## Preserving Terpenes
+
+Terpenes are volatile and easily degraded:
+
+**How to Preserve:**  
+✓ Store cannabis in airtight containers  
+✓ Keep away from light, heat, and air  
+✓ Use lower temperatures when vaping (315-350°F preserves more terpenes)  
+✓ Avoid over-drying cannabis  
+
+**What Destroys Terpenes:**  
+✗ High heat (combustion destroys many terpenes)  
+✗ UV light exposure  
+✗ Extended air exposure  
+✗ Very old cannabis
+
+## Key Takeaways
+
+✓ Terpenes create cannabis aroma and significantly influence effects  
+✓ Myrcene (earthy) = relaxing, sedating, pain relief  
+✓ Limonene (citrus) = uplifting, mood boost, anxiety relief  
+✓ Pinene (pine) = focus, memory, alertness  
+✓ Linalool (lavender) = calming, sleep, anti-anxiety  
+✓ Caryophyllene (pepper) = pain relief, anti-inflammatory  
+✓ Humulene (hops) = appetite suppression, energizing  
+✓ Terpinolene (floral) = uplifting, creative  
+✓ Terpene profiles predict effects better than indica/sativa labels  
+✓ The entourage effect: terpenes + cannabinoids work synergistically`,
+            estimated_minutes: 13
           },
           {
             module_number: 7,
@@ -607,7 +1243,64 @@ This is why "start low and go slow" is the golden rule of cannabis use.
             coursesUpdated.push(`${courseDef.title} (added ${courseDef.module_count} modules)`);
           }
         } else {
-          coursesSkipped.push(`${courseDef.title} (${moduleCount} modules already exist)`);
+          // Modules exist - check if they have placeholder content that needs updating
+          const { data: existingModules, error: fetchError } = await supabase
+            .from('course_modules')
+            .select('id, content, module_number')
+            .eq('course_id', courseId);
+          
+          if (fetchError) {
+            console.error(`[populate-consumer-courses] Error fetching modules for ${courseDef.title}:`, fetchError);
+            coursesSkipped.push(`${courseDef.title} (${moduleCount} modules exist, fetch failed)`);
+            continue;
+          }
+          
+          // Check if any modules have placeholder content
+          const hasPlaceholder = existingModules?.some(m => 
+            m.content?.includes('*Content to be expanded*') || 
+            m.content?.includes('*Content*') ||
+            (m.content?.length || 0) < 500
+          );
+          
+          if (hasPlaceholder) {
+            console.log(`[populate-consumer-courses] Updating placeholder content for ${courseDef.title}`);
+            
+            let updatedCount = 0;
+            for (const moduleDef of courseDef.modules) {
+              const existingModule = existingModules?.find(m => m.module_number === moduleDef.module_number);
+              
+              if (existingModule) {
+                const needsUpdate = 
+                  existingModule.content?.includes('*Content to be expanded*') || 
+                  existingModule.content?.includes('*Content*') ||
+                  (existingModule.content?.length || 0) < 500;
+                
+                if (needsUpdate) {
+                  const { error: updateError } = await supabase
+                    .from('course_modules')
+                    .update({ 
+                      content: moduleDef.content,
+                      estimated_minutes: moduleDef.estimated_minutes 
+                    })
+                    .eq('id', existingModule.id);
+                  
+                  if (updateError) {
+                    console.error(`[populate-consumer-courses] Failed to update module ${moduleDef.module_number}:`, updateError);
+                  } else {
+                    updatedCount++;
+                  }
+                }
+              }
+            }
+            
+            if (updatedCount > 0) {
+              coursesUpdated.push(`${courseDef.title} (updated ${updatedCount} modules with full content)`);
+            } else {
+              coursesSkipped.push(`${courseDef.title} (${moduleCount} modules exist, no updates needed)`);
+            }
+          } else {
+            coursesSkipped.push(`${courseDef.title} (${moduleCount} modules already exist with full content)`);
+          }
         }
       } else {
         // Course doesn't exist - create course and modules
