@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useLocation } from 'react-router-dom';
+import { RequestSupportButton } from './RequestSupportButton';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -187,6 +188,11 @@ export const InternalChatbot = ({
               </div>
             )}
             <div ref={messagesEndRef} />
+          </div>
+
+          {/* Support Button */}
+          <div className="px-4 pb-2">
+            <RequestSupportButton defaultSubject="Chatbot Support Request" />
           </div>
 
           {/* Input */}

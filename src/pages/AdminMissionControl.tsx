@@ -15,6 +15,7 @@ import { AdminSystemHealth } from '@/components/admin/AdminSystemHealth';
 import { AdminCommunications } from '@/components/admin/AdminCommunications';
 import { UATAccountManager } from '@/components/admin/UATAccountManager';
 import { ConsumerCoursesSection } from '@/components/admin/ConsumerCoursesSection';
+import { SupportRequestsPanel } from '@/components/admin/SupportRequestsPanel';
 import { Loader2 } from 'lucide-react';
 import { InternalChatbot } from '@/components/chat/InternalChatbot';
 import { supabase } from '@/integrations/supabase/client';
@@ -398,6 +399,11 @@ const AdminMissionControl = () => {
               </CardContent>
             )}
           </Card>
+
+          {/* Support Requests */}
+          <div className="mt-6">
+            <SupportRequestsPanel />
+          </div>
         </div>
       </div>
       

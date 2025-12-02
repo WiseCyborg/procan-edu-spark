@@ -1,5 +1,8 @@
 project_id = "zhmpwczrvitomsxjwpzc"
 
+[functions.request-procann-support]
+verify_jwt = true
+
 [functions.generate-livekit-token]
 verify_jwt = true
 
