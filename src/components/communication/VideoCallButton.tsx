@@ -10,6 +10,7 @@ import { useUserRole } from '@/hooks/useUserRole';
 import { useActiveCall } from '@/hooks/useActiveCall';
 import { JoinCallButton } from '@/components/video/JoinCallButton';
 import { supabase } from '@/integrations/supabase/client';
+import { pushNotificationService } from '@/services/pushNotificationService';
 
 interface VideoCallButtonProps {
   conversationId: string;
@@ -48,6 +49,22 @@ export const VideoCallButton = ({
         .from('conversations')
         .update({ active_call_id: result.callId })
         .eq('id', conversationId);
+      
+      // Get conversation participants to notify them
+      const { data: participants } = await supabase
+        .from('conversation_participants')
+        .select('user_id')
+        .eq('conversation_id', conversationId);
+
+      if (participants && participants.length > 0) {
+        // Send push notifications to all participants
+        await pushNotificationService.notifyVideoCallStart({
+          conversationId,
+          conversationTitle,
+          startedBy: user?.id || '',
+          participantIds: participants.map(p => p.user_id),
+        });
+      }
       
       setInCall(true);
     }
