@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Plus, Search } from 'lucide-react';
+import { Plus, Search, PlayCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useRealTimeMessaging } from '@/hooks/useRealTimeMessaging';
 import { ConversationView } from './ConversationView';
@@ -11,6 +11,7 @@ import { useOrganization } from '@/contexts/OrganizationContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { CommunicationHubOnboarding } from './CommunicationHubOnboarding';
+import { CommunicationHubTour } from './CommunicationHubTour';
 
 export const CommunicationHub = () => {
   const { user } = useAuth();
@@ -27,6 +28,7 @@ export const CommunicationHub = () => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [creatingDefaultChannels, setCreatingDefaultChannels] = useState(false);
+  const [showTour, setShowTour] = useState(false);
 
   // Auto-create default channels if none exist
   useEffect(() => {
@@ -89,7 +91,16 @@ export const CommunicationHub = () => {
 
   return (
     <>
-      <CommunicationHubOnboarding />
+      <CommunicationHubOnboarding onStartTour={() => setShowTour(true)} />
+      {showTour && (
+        <CommunicationHubTour
+          onComplete={() => {
+            setShowTour(false);
+            toast.success('Tour completed! You\'re ready to communicate with your team.');
+          }}
+          onSkip={() => setShowTour(false)}
+        />
+      )}
     <div className="flex h-[600px] bg-background border rounded-lg overflow-hidden">
       {/* Channel Sidebar */}
       <ChannelSidebar
@@ -115,13 +126,24 @@ export const CommunicationHub = () => {
             </div>
           </div>
 
-          <Button
-            onClick={() => setShowCreateDialog(true)}
-            className="gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            New Channel
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => setShowTour(true)}
+              variant="outline"
+              size="sm"
+              className="gap-2"
+            >
+              <PlayCircle className="w-4 h-4" />
+              Take Tour
+            </Button>
+            <Button
+              onClick={() => setShowCreateDialog(true)}
+              className="gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              New Channel
+            </Button>
+          </div>
         </div>
 
         {/* Conversation View */}

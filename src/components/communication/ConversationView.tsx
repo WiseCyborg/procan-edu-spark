@@ -234,7 +234,7 @@ export const ConversationView = ({
         <div className="flex items-center gap-2">
           <Popover open={showUpcomingCalls} onOpenChange={setShowUpcomingCalls}>
             <PopoverTrigger asChild>
-              <Button variant="ghost" size="sm" className="gap-2">
+              <Button variant="ghost" size="sm" className="gap-2" data-tour="schedule-button">
                 <Calendar className="h-4 w-4" />
                 {calls.length > 0 && (
                   <Badge variant="secondary" className="h-5 px-1.5 text-xs">
@@ -266,11 +266,13 @@ export const ConversationView = ({
             </PopoverContent>
           </Popover>
           
-          <VideoCallButton 
-            conversationId={conversationId}
-            conversationTitle={conversationTitle}
-            conversationType={conversationType}
-          />
+          <div data-tour="video-call-button">
+            <VideoCallButton 
+              conversationId={conversationId}
+              conversationTitle={conversationTitle}
+              conversationType={conversationType}
+            />
+          </div>
           
           {(roles.includes('dispensary_manager') || roles.includes('training_coordinator')) && (
             <InviteProCannSupport 
@@ -377,24 +379,28 @@ export const ConversationView = ({
                    </div>
                    
                    {/* Message Reactions */}
-                   <MessageReactions
-                     messageId={message.id}
-                     reactions={message.reactions || []}
-                     onReactionChange={() => fetchMessages(conversationId)}
-                   />
+                    <div data-tour="reaction-picker">
+                      <MessageReactions
+                        messageId={message.id}
+                        reactions={message.reactions || []}
+                        onReactionChange={() => fetchMessages(conversationId)}
+                      />
+                    </div>
                  </div>
                </div>
              );
            })
          )}
          
-         {/* Typing Indicator */}
-         {user && (
-           <TypingIndicator
-             conversationId={conversationId}
-             currentUserId={user.id}
-           />
-         )}
+          {/* Typing Indicator */}
+          {user && (
+            <div data-tour="typing-indicator">
+              <TypingIndicator
+                conversationId={conversationId}
+                currentUserId={user.id}
+              />
+            </div>
+          )}
          
          <div ref={messagesEndRef} />
        </div>
@@ -409,45 +415,47 @@ export const ConversationView = ({
          />
        )}
 
-      {/* Message Input */}
-      <div className="p-4 border-t bg-card/50">
-        <form onSubmit={handleSendMessage} className="flex gap-2">
-          <input
-            ref={fileInputRef}
-            type="file"
-            onChange={handleFileUpload}
-            className="hidden"
-            accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv"
-          />
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="px-3"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploading}
-          >
-            <Paperclip className="h-4 w-4" />
-          </Button>
-          <Input
-            ref={inputRef}
-            value={newMessage}
-            onChange={(e) => handleMessageChange(e.target.value)}
-            placeholder={uploading ? "Uploading file..." : "Type @ to mention someone..."}
-            disabled={sending || uploading}
-            className="flex-1"
-            autoComplete="off"
-          />
-          <Button 
-            type="submit" 
-            disabled={!newMessage.trim() || sending || uploading}
-            size="sm"
-            className="px-3"
-          >
-            <Send className="h-4 w-4" />
-          </Button>
-        </form>
-      </div>
+       {/* Message Input */}
+       <div className="p-4 border-t bg-card/50">
+         <form onSubmit={handleSendMessage} className="flex gap-2">
+           <input
+             ref={fileInputRef}
+             type="file"
+             onChange={handleFileUpload}
+             className="hidden"
+             accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv"
+           />
+           <Button
+             type="button"
+             variant="ghost"
+             size="sm"
+             className="px-3"
+             onClick={() => fileInputRef.current?.click()}
+             disabled={uploading}
+             data-tour="file-attach-button"
+           >
+             <Paperclip className="h-4 w-4" />
+           </Button>
+           <Input
+             ref={inputRef}
+             value={newMessage}
+             onChange={(e) => handleMessageChange(e.target.value)}
+             placeholder={uploading ? "Uploading file..." : "Type @ to mention someone..."}
+             disabled={sending || uploading}
+             className="flex-1"
+             autoComplete="off"
+             data-tour="message-input"
+           />
+           <Button 
+             type="submit" 
+             disabled={!newMessage.trim() || sending || uploading}
+             size="sm"
+             className="px-3"
+           >
+             <Send className="h-4 w-4" />
+           </Button>
+         </form>
+       </div>
 
       {/* Schedule Call Dialog */}
       <ScheduleCallDialog

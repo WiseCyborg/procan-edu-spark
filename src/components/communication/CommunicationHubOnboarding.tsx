@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Video, AtSign, Paperclip, Calendar, MessageSquare, CheckCircle2 } from 'lucide-react';
+import { Video, AtSign, Paperclip, Calendar, MessageSquare, CheckCircle2, PlayCircle } from 'lucide-react';
 
 const ONBOARDING_STORAGE_KEY = 'communication-hub-onboarding-seen';
 
-export const CommunicationHubOnboarding = () => {
+interface CommunicationHubOnboardingProps {
+  onStartTour: () => void;
+}
+
+export const CommunicationHubOnboarding = ({ onStartTour }: CommunicationHubOnboardingProps) => {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -19,6 +23,12 @@ export const CommunicationHubOnboarding = () => {
   const handleClose = () => {
     localStorage.setItem(ONBOARDING_STORAGE_KEY, 'true');
     setOpen(false);
+  };
+
+  const handleStartTour = () => {
+    localStorage.setItem(ONBOARDING_STORAGE_KEY, 'true');
+    setOpen(false);
+    onStartTour();
   };
 
   const features = [
@@ -89,9 +99,13 @@ export const CommunicationHubOnboarding = () => {
           </ul>
         </div>
 
-        <div className="flex justify-end pt-2">
-          <Button onClick={handleClose}>
+        <div className="flex justify-end gap-2 pt-2">
+          <Button onClick={handleClose} variant="outline">
             Got it, let's go!
+          </Button>
+          <Button onClick={handleStartTour} className="gap-2">
+            <PlayCircle className="w-4 h-4" />
+            Take the Tour
           </Button>
         </div>
       </DialogContent>

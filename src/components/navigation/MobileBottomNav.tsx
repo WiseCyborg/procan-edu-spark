@@ -4,11 +4,9 @@ import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useUserRole } from '@/hooks/useUserRole';
 
-interface MobileBottomNavProps {
-  onMessagesClick?: () => void;
-}
+interface MobileBottomNavProps {}
 
-export const MobileBottomNav = ({ onMessagesClick }: MobileBottomNavProps) => {
+export const MobileBottomNav = ({}: MobileBottomNavProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
@@ -20,13 +18,7 @@ export const MobileBottomNav = ({ onMessagesClick }: MobileBottomNavProps) => {
   const navItems = [
     { path: '/', icon: Home, label: 'Home', roles: ['all'] },
     { path: '/course', icon: BookOpen, label: 'Training', roles: ['all'] },
-    { 
-      action: 'messages', 
-      icon: MessageSquare, 
-      label: 'Messages', 
-      roles: ['all'],
-      onClick: onMessagesClick 
-    },
+    { path: '/communication', icon: MessageSquare, label: 'Chat', roles: ['all'] },
     { path: '/certificates', icon: Award, label: 'Certs', roles: ['all'] },
     { path: '/profile', icon: User, label: 'Profile', roles: ['all'] },
   ];
@@ -38,16 +30,10 @@ export const MobileBottomNav = ({ onMessagesClick }: MobileBottomNavProps) => {
       <div className="flex justify-around items-center p-2">
         {navItems.map((item, index) => (
           <Button
-            key={item.path || item.action || index}
+            key={item.path || index}
             variant="ghost"
             size="sm"
-            onClick={() => {
-              if (item.onClick) {
-                item.onClick();
-              } else if (item.path) {
-                navigate(item.path);
-              }
-            }}
+            onClick={() => navigate(item.path)}
             className={`flex-1 flex-col h-auto py-3 min-h-[60px] ${
               isActive(item.path) ? 'text-primary bg-primary/10' : 'text-muted-foreground'
             }`}
