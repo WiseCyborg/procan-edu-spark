@@ -88,6 +88,9 @@ import AdminUtilities from "./pages/AdminUtilities";
 
 import { ProtectedCourseAccess } from "./components/ProtectedCourseAccess";
 import { JourneyStateProvider } from "./providers/JourneyStateProvider";
+import { KeyboardShortcutsProvider } from "./contexts/KeyboardShortcutsContext";
+import { KeyboardShortcutsDialog } from "./components/help/KeyboardShortcutsDialog";
+import { CommunicationHubPage } from "./pages/CommunicationHubPage";
 
 const queryClient = new QueryClient();
 
@@ -195,6 +198,11 @@ const AppRoutesLayout = () => {
             <Route path="/training-handbook" element={
               <ProtectedRoute>
                 <TrainingHandbook />
+              </ProtectedRoute>
+            } />
+            <Route path="/communication" element={
+              <ProtectedRoute>
+                <CommunicationHubPage />
               </ProtectedRoute>
             } />
             <Route path="/verify-certificate" element={<CertificateVerification />} />
@@ -428,26 +436,29 @@ const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <UnifiedVoiceProvider>
-          <AuthProvider>
-            <Suspense fallback={
-              <div className="min-h-screen flex items-center justify-center">
-                <div className="text-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-                  <p className="text-muted-foreground">Loading application...</p>
+        <KeyboardShortcutsProvider>
+          <UnifiedVoiceProvider>
+            <AuthProvider>
+              <Suspense fallback={
+                <div className="min-h-screen flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                    <p className="text-muted-foreground">Loading application...</p>
+                  </div>
                 </div>
-              </div>
-            }>
-              <OrganizationProvider>
-                <JourneyStateProvider>
-                  <TooltipProvider>
-                    <AppRoutesLayout />
-                  </TooltipProvider>
-                </JourneyStateProvider>
-              </OrganizationProvider>
-            </Suspense>
-          </AuthProvider>
-        </UnifiedVoiceProvider>
+              }>
+                <OrganizationProvider>
+                  <JourneyStateProvider>
+                    <TooltipProvider>
+                      <AppRoutesLayout />
+                      <KeyboardShortcutsDialog />
+                    </TooltipProvider>
+                  </JourneyStateProvider>
+                </OrganizationProvider>
+              </Suspense>
+            </AuthProvider>
+          </UnifiedVoiceProvider>
+        </KeyboardShortcutsProvider>
       </BrowserRouter>
     </QueryClientProvider>
   </ErrorBoundary>

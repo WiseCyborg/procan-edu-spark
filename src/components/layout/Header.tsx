@@ -1,20 +1,24 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useOrganization } from '@/hooks/useOrganization';
 import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, User, MessageSquare, BookOpen, Award, BarChart3, Users, Mail, Building2, CreditCard, ShoppingCart, Home, FileText, GraduationCap, HelpCircle, Shield, ChevronDown } from 'lucide-react';
+import { LogOut, User, MessageSquare, BookOpen, Award, BarChart3, Users, Mail, Building2, CreditCard, ShoppingCart, Home, FileText, GraduationCap, HelpCircle, Shield, ChevronDown, Keyboard } from 'lucide-react';
 import { CommunicationHub } from '@/components/communication/CommunicationHub';
 import { PurchaseSeatsDialog } from '@/components/team/PurchaseSeatsDialog';
 import { RoleSwitcher } from '@/components/navigation/RoleSwitcher';
 import { DropdownMenuLabel } from '@/components/ui/dropdown-menu';
 import { MobileBottomNav } from '@/components/navigation/MobileBottomNav';
+import { useKeyboardShortcut } from '@/hooks/useKeyboardShortcut';
+import { useKeyboardShortcuts } from '@/contexts/KeyboardShortcutsContext';
+import { supabase } from '@/integrations/supabase/client';
 
 interface HeaderProps {
   role?: string;
@@ -28,8 +32,12 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
   const [showCommunicationHub, setShowCommunicationHub] = useState(false);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [currentRoleView, setCurrentRoleView] = useState<string>('');
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const { flags } = useFeatureFlags();
+  const { setShortcutsDialogOpen } = useKeyboardShortcuts();
+
+  const isMac = typeof navigator !== 'undefined' && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
 
   const handleSignOut = async () => {
     await signOut();
@@ -42,6 +50,58 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
       setCurrentRoleView(saved || managementRoles[0].replace('_', ' '));
     }
   }, [managementRoles]);
+
+  // Fetch unread message count
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchUnreadCount = async () => {
+      const { data, error } = await supabase
+        .from('conversation_participants')
+        .select('conversation_id, last_read_at, conversations(id)')
+        .eq('user_id', user.id);
+
+      if (error || !data) return;
+
+      let total = 0;
+      for (const participant of data) {
+        const { count } = await supabase
+          .from('messages')
+          .select('*', { count: 'exact', head: true })
+          .eq('conversation_id', participant.conversation_id)
+          .gt('created_at', participant.last_read_at || '1970-01-01');
+        
+        total += count || 0;
+      }
+      setUnreadCount(total);
+    };
+
+    fetchUnreadCount();
+    
+    // Subscribe to new messages
+    const channel = supabase
+      .channel('header-unread-count')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'messages'
+      }, fetchUnreadCount)
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
+
+  // Register keyboard shortcuts
+  useKeyboardShortcut({
+    key: 'm',
+    ctrlKey: true,
+    metaKey: true,
+    action: () => navigate('/communication'),
+    description: 'Open Communication Hub',
+    category: 'navigation'
+  });
 
   return (
     <header className="bg-white border-b shadow-sm" role={headerRole}>
@@ -101,7 +161,7 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
           
           {user && (
             <div className="flex items-center space-x-2">
-              {/* Desktop Navigation - Only Dashboard and Training */}
+              {/* Desktop Navigation - Dashboard, Training, Communication */}
               <nav className="hidden md:flex items-center space-x-1">
                 <Button 
                   onClick={() => navigate('/')}
@@ -121,25 +181,38 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                   <BookOpen className="w-4 h-4" />
                   <span>Training</span>
                 </Button>
+                <Button 
+                  onClick={() => navigate('/communication')}
+                  variant="ghost"
+                  size="sm"
+                  className="flex items-center space-x-2 relative"
+                >
+                  <MessageSquare className="w-4 h-4" />
+                  <span>Communication</span>
+                  {unreadCount > 0 && (
+                    <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 min-w-5 flex items-center justify-center text-xs px-1">
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </Badge>
+                  )}
+                </Button>
               </nav>
               
-              {/* Messages Button */}
-              <Dialog open={showCommunicationHub} onOpenChange={setShowCommunicationHub}>
-                <DialogTrigger asChild>
-                  <Button variant="ghost" size="sm" className="flex items-center space-x-1">
-                    <MessageSquare className="w-4 h-4" />
-                    <span className="hidden md:inline">Messages</span>
+              {/* Keyboard Shortcuts Indicator */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={() => setShortcutsDialogOpen(true)}
+                    className="hidden md:flex"
+                  >
+                    <Keyboard className="h-4 w-4" />
                   </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-6xl h-[80vh] p-0">
-                  <DialogHeader className="p-6 pb-0">
-                    <DialogTitle>Team Communication</DialogTitle>
-                  </DialogHeader>
-                  <div className="p-6 pt-4 h-full">
-                    <CommunicationHub />
-                  </div>
-                </DialogContent>
-              </Dialog>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Press <kbd className="px-1.5 py-0.5 text-xs font-semibold bg-muted rounded border">{isMac ? '⌘' : 'Ctrl'}/</kbd> for shortcuts</p>
+                </TooltipContent>
+              </Tooltip>
               
               {/* User Profile Dropdown - Expanded with organized sections */}
               <DropdownMenu>
@@ -268,7 +341,7 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
       </div>
       
       {/* Mobile Bottom Navigation */}
-      <MobileBottomNav onMessagesClick={() => setShowCommunicationHub(true)} />
+      <MobileBottomNav />
       
       {/* Purchase Seats Modal */}
       {showPurchaseModal && organization && (
