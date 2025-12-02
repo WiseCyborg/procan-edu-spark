@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { toast } from 'sonner';
+import { pushNotificationService } from '@/services/pushNotificationService';
 
 export interface Message {
   id: string;
@@ -184,6 +185,37 @@ export const useRealTimeMessaging = () => {
 
       if (error) throw error;
 
+      // Get user profile for sender name
+      const { data: senderProfile } = await supabase
+        .from('profiles')
+        .select('first_name, last_name')
+        .eq('user_id', user.id)
+        .single();
+
+      const senderName = senderProfile 
+        ? `${senderProfile.first_name} ${senderProfile.last_name}`.trim() || user.email || 'Someone'
+        : user.email || 'Someone';
+
+      // Get conversation details for notification
+      const { data: conversation } = await supabase
+        .from('conversations')
+        .select('title, conversation_type')
+        .eq('id', conversationId)
+        .single();
+
+      const conversationTitle = conversation?.title || 'a conversation';
+
+      // Send push notification to other participants
+      pushNotificationService.notifyNewMessage({
+        conversationId,
+        senderId: user.id,
+        senderName,
+        messagePreview: content.trim().substring(0, 100),
+        conversationTitle,
+      }).catch(err => {
+        console.error('[Push] Failed to send message notification:', err);
+      });
+
       // Parse @mentions from content
       const mentionPattern = /@([A-Za-z]+\s+[A-Za-z]+)/g;
       const mentions = [...content.matchAll(mentionPattern)];
@@ -214,6 +246,18 @@ export const useRealTimeMessaging = () => {
 
         if (mentionInserts.length > 0) {
           await supabase.from('message_mentions').insert(mentionInserts);
+          
+          // Send push notifications to mentioned users
+          const mentionedUserIds = mentionInserts.map(m => m.mentioned_user_id);
+          pushNotificationService.notifyMention({
+            mentionedUserIds,
+            senderName,
+            messagePreview: content.trim().substring(0, 100),
+            conversationTitle,
+            conversationId,
+          }).catch(err => {
+            console.error('[Push] Failed to send mention notifications:', err);
+          });
         }
       }
 

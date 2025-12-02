@@ -369,6 +369,9 @@ verify_jwt = false
 [functions.send-push-notification]
 verify_jwt = false
 
+[functions.send-message-notification]
+verify_jwt = false
+
 [functions.process-scheduled-calls]
 verify_jwt = false
 

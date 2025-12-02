@@ -11,10 +11,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/components/ui/use-toast';
-import { User, Save, Calendar, MapPin, Phone, Settings, AlertCircle, ArrowRight, Camera } from 'lucide-react';
+import { User, Save, Calendar, MapPin, Phone, Settings, AlertCircle, ArrowRight, Camera, Bell } from 'lucide-react';
 import { VerificationPreferencesSetup } from '@/components/auth/VerificationPreferencesSetup';
 import { ProfileChangeHistoryViewer } from '@/components/admin/ProfileChangeHistoryViewer';
 import { ProfilePhotoUpload } from '@/components/profile/ProfilePhotoUpload';
+import { PushNotificationToggle } from '@/components/settings/PushNotificationToggle';
+import { EmailPreferences } from '@/components/settings/EmailPreferences';
+import { TestPushNotification } from '@/components/settings/TestPushNotification';
 
 interface ProfileData {
   first_name: string;
@@ -352,10 +355,14 @@ const Profile: React.FC = () => {
       )}
 
       <Tabs defaultValue="profile" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="profile" className="flex items-center gap-2">
             <User className="w-4 h-4" />
             Profile Information
+          </TabsTrigger>
+          <TabsTrigger value="notifications" className="flex items-center gap-2">
+            <Bell className="w-4 h-4" />
+            Notifications
           </TabsTrigger>
           <TabsTrigger value="verification" className="flex items-center gap-2">
             <Settings className="w-4 h-4" />
@@ -600,6 +607,30 @@ const Profile: React.FC = () => {
               <span>{isSaving ? 'Saving...' : 'Save Changes'}</span>
             </Button>
           </div>
+        </TabsContent>
+        
+        <TabsContent value="notifications" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Bell className="w-5 h-5" />
+                Push Notifications
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <PushNotificationToggle />
+              <TestPushNotification />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Email Preferences</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <EmailPreferences />
+            </CardContent>
+          </Card>
         </TabsContent>
         
         <TabsContent value="verification" className="space-y-6">
