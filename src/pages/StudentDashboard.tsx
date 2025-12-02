@@ -21,6 +21,7 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { MobileBottomNav } from '@/components/navigation/MobileBottomNav';
 import Confetti from 'react-confetti';
+import { InternalChatbot } from '@/components/chat/InternalChatbot';
 
 const COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
 const TOTAL_MODULES = 24;
@@ -46,6 +47,8 @@ const StudentDashboard = () => {
   const [modules, setModules] = useState<ModuleData[]>([]);
   const [showConfetti, setShowConfetti] = useState(false);
   const [milestoneReached, setMilestoneReached] = useState<number | null>(null);
+  const [userFirstName, setUserFirstName] = useState<string>('');
+  const [userExperienceLevel, setUserExperienceLevel] = useState<'new' | 'intermediate' | 'advanced'>('intermediate');
   
   const isManagerRole = isDispensaryManager || isTrainingCoordinator || isAdmin;
   const agentModules = modules.filter(m => !m.is_manager_only);
@@ -87,7 +90,7 @@ const StudentDashboard = () => {
       const [profileResponse, modulesResponse] = await Promise.all([
         supabase
           .from('profiles')
-          .select('organization_id, organizations(name)')
+          .select('first_name, organization_id, organizations(name)')
           .eq('user_id', user.id)
           .single(),
         supabase
@@ -98,11 +101,25 @@ const StudentDashboard = () => {
           .order('module_number')
       ]);
 
-      if (profileResponse.data?.organization_id) {
-        setOrganizationInfo({
-          name: (profileResponse.data.organizations as any)?.name || 'Your Organization',
-          coordinator: 'Training Coordinator'
-        });
+      if (profileResponse.data) {
+        setUserFirstName(profileResponse.data.first_name || '');
+        
+        // Determine experience level based on progress
+        const progress = (getCompletedModulesCount() / TOTAL_MODULES) * 100;
+        if (progress < 25) {
+          setUserExperienceLevel('new');
+        } else if (progress > 75) {
+          setUserExperienceLevel('advanced');
+        } else {
+          setUserExperienceLevel('intermediate');
+        }
+        
+        if (profileResponse.data.organization_id) {
+          setOrganizationInfo({
+            name: (profileResponse.data.organizations as any)?.name || 'Your Organization',
+            coordinator: 'Training Coordinator'
+          });
+        }
       }
 
       if (modulesResponse.data) {
@@ -485,6 +502,14 @@ const StudentDashboard = () => {
       )}
       
       <MobileBottomNav />
+      
+      {/* Internal Chatbot */}
+      <InternalChatbot 
+        firstName={userFirstName}
+        organizationName={organizationInfo?.name}
+        trainingProgress={(completedModules / (agentModules.length || TOTAL_MODULES)) * 100}
+        experienceLevel={userExperienceLevel}
+      />
     </div>
   );
 };

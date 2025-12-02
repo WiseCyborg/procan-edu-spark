@@ -23,6 +23,7 @@ import { useOrganization } from '@/hooks/useOrganization';
 import { AiLeanCoach } from '@/components/ailean/AiLeanCoach';
 import { MobileBottomNav } from '@/components/navigation/MobileBottomNav';
 import { ResumePrompt } from '@/components/journey/ResumePrompt';
+import { InternalChatbot } from '@/components/chat/InternalChatbot';
 
 const TrainingCoordinatorDashboard = () => {
   const { user } = useAuth();
@@ -36,6 +37,7 @@ const TrainingCoordinatorDashboard = () => {
   const [sending, setSending] = useState(false);
   const [certificates, setCertificates] = useState<any[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [userFirstName, setUserFirstName] = useState<string>('');
 
   useEffect(() => {
     if (!roleLoading && !isTrainingCoordinator) {
@@ -79,9 +81,20 @@ const TrainingCoordinatorDashboard = () => {
   }, [organizationId]);
 
   const fetchCoordinatorData = async () => {
-    if (!organizationId) return;
+    if (!organizationId || !user) return;
     
     try {
+      // Get user profile for first name
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('first_name')
+        .eq('user_id', user.id)
+        .single();
+        
+      if (profile?.first_name) {
+        setUserFirstName(profile.first_name);
+      }
+
       // Get employees with real data using RPC
       const { data: empData, error: empError } = await supabase
         .rpc('get_organization_employees', { org_id: organizationId });
@@ -420,6 +433,13 @@ const TrainingCoordinatorDashboard = () => {
 
       {/* AiLean Coach */}
       <AiLeanCoach />
+      
+      {/* Internal Chatbot */}
+      <InternalChatbot 
+        firstName={userFirstName}
+        organizationName={organization?.name}
+        experienceLevel="intermediate"
+      />
       
       {/* Mobile Bottom Navigation */}
       <MobileBottomNav />
