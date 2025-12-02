@@ -348,6 +348,9 @@ verify_jwt = false
 [functions.send-certificate-email]
 verify_jwt = false
 
+[functions.internal-chat-assistant]
+verify_jwt = true
+
 [functions.jobs-processor]
 verify_jwt = false
 

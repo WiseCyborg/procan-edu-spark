@@ -16,6 +16,9 @@ import { AdminCommunications } from '@/components/admin/AdminCommunications';
 import { UATAccountManager } from '@/components/admin/UATAccountManager';
 import { ConsumerCoursesSection } from '@/components/admin/ConsumerCoursesSection';
 import { Loader2 } from 'lucide-react';
+import { InternalChatbot } from '@/components/chat/InternalChatbot';
+import { supabase } from '@/integrations/supabase/client';
+import { useEffect } from 'react';
 
 const AdminMissionControl = () => {
   const { user } = useAuth();
@@ -24,6 +27,22 @@ const AdminMissionControl = () => {
   const { data: alerts, isLoading: alertsLoading } = useAdminAlerts();
   
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
+  const [userFirstName, setUserFirstName] = useState<string>('');
+
+  useEffect(() => {
+    if (user) {
+      supabase
+        .from('profiles')
+        .select('first_name')
+        .eq('user_id', user.id)
+        .single()
+        .then(({ data }) => {
+          if (data?.first_name) {
+            setUserFirstName(data.first_name);
+          }
+        });
+    }
+  }, [user]);
 
   const toggleSection = (section: string) => {
     setExpandedSection(expandedSection === section ? null : section);
@@ -381,6 +400,12 @@ const AdminMissionControl = () => {
           </Card>
         </div>
       </div>
+      
+      {/* Internal Chatbot */}
+      <InternalChatbot 
+        firstName={userFirstName}
+        experienceLevel="advanced"
+      />
     </div>
   );
 };

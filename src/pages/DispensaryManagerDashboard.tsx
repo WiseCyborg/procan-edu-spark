@@ -36,6 +36,7 @@ interface OrganizationInfo {
 import { useOrganization } from '@/hooks/useOrganization';
 import { AiLeanCoach } from '@/components/ailean/AiLeanCoach';
 import { MobileBottomNav } from '@/components/navigation/MobileBottomNav';
+import { InternalChatbot } from '@/components/chat/InternalChatbot';
 
 const DispensaryManagerDashboard = () => {
   const { user } = useAuth();
@@ -52,6 +53,7 @@ const DispensaryManagerDashboard = () => {
   const [showRestartDialog, setShowRestartDialog] = useState(false);
   const [certificates, setCertificates] = useState<any[]>([]);
   const [employees, setEmployees] = useState<any[]>([]);
+  const [userFirstName, setUserFirstName] = useState<string>('');
 
   useEffect(() => {
     if (!roleLoading && !isDispensaryManager) {
@@ -96,9 +98,20 @@ const DispensaryManagerDashboard = () => {
   }, [organization?.id]);
 
   const fetchCoordinators = async () => {
-    if (!organization?.id) return;
+    if (!organization?.id || !user) return;
 
     try {
+      // Get user profile for first name
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('first_name')
+        .eq('user_id', user.id)
+        .single();
+        
+      if (profile?.first_name) {
+        setUserFirstName(profile.first_name);
+      }
+
       // Get training coordinators
       const { data: coords } = await supabase
         .from('user_roles')
@@ -797,6 +810,13 @@ const DispensaryManagerDashboard = () => {
 
       {/* AiLean Coach */}
       <AiLeanCoach />
+      
+      {/* Internal Chatbot */}
+      <InternalChatbot 
+        firstName={userFirstName}
+        organizationName={organization?.name}
+        experienceLevel="intermediate"
+      />
       
       {/* Mobile Bottom Navigation */}
       <MobileBottomNav />
