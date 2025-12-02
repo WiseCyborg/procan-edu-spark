@@ -30,7 +30,8 @@ export const VideoCallButton = ({
   const { createVideoCall, token, roomName, isCreating } = useVideoCall();
   const { activeCall } = useActiveCall(conversationId);
 
-  const canStartCall = isTrainingCoordinator || isDispensaryManager || isAdmin;
+  // All users can start/join calls now
+  const canStartCall = true;
 
   const handleJoinLobby = async (participantName: string) => {
     const callType = conversationType === 'announcement' ? 'training' : 
