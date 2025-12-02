@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -7,19 +7,67 @@ import { ConversationView } from './ConversationView';
 import { CreateConversationDialog } from './CreateConversationDialog';
 import { ChannelSidebar } from './ChannelSidebar';
 import { useAuth } from '@/hooks/useAuth';
+import { useOrganization } from '@/contexts/OrganizationContext';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { CommunicationHubOnboarding } from './CommunicationHubOnboarding';
 
 export const CommunicationHub = () => {
   const { user } = useAuth();
+  const { organizationId } = useOrganization();
   const {
     conversations,
     loading,
     activeConversation,
     setActiveConversation,
-    createConversation
+    createConversation,
+    refreshConversations
   } = useRealTimeMessaging();
 
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [creatingDefaultChannels, setCreatingDefaultChannels] = useState(false);
+
+  // Auto-create default channels if none exist
+  useEffect(() => {
+    const autoCreateChannels = async () => {
+      if (!user || !organizationId || loading || conversations.length > 0) return;
+      
+      // Check if we've already tried to create channels for this org
+      const storageKey = `channels-created-${organizationId}`;
+      if (localStorage.getItem(storageKey)) return;
+
+      setCreatingDefaultChannels(true);
+      try {
+        const { data, error } = await supabase.functions.invoke('create-org-channels', {
+          body: {
+            organizationId,
+            createdBy: user.id,
+          },
+        });
+
+        if (error) throw error;
+
+        // Mark as created
+        localStorage.setItem(storageKey, 'true');
+        
+        // Refresh conversations list
+        await refreshConversations();
+        
+        toast.success(`Created ${data.channels?.length || 0} default channels`);
+      } catch (error) {
+        console.error('Error creating default channels:', error);
+        // Don't show error toast - user can create channels manually
+      } finally {
+        setCreatingDefaultChannels(false);
+      }
+    };
+
+    // Run after initial load
+    if (!loading) {
+      autoCreateChannels();
+    }
+  }, [user, organizationId, loading, conversations.length, refreshConversations]);
 
   const filteredConversations = conversations.filter(conv => {
     return !searchTerm || 
@@ -29,15 +77,19 @@ export const CommunicationHub = () => {
 
   const activeConv = conversations.find(c => c.id === activeConversation);
 
-  if (loading) {
+  if (loading || creatingDefaultChannels) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-muted-foreground">Loading conversations...</div>
+        <div className="text-muted-foreground">
+          {creatingDefaultChannels ? 'Setting up your channels...' : 'Loading conversations...'}
+        </div>
       </div>
     );
   }
 
   return (
+    <>
+      <CommunicationHubOnboarding />
     <div className="flex h-[600px] bg-background border rounded-lg overflow-hidden">
       {/* Channel Sidebar */}
       <ChannelSidebar
@@ -100,5 +152,6 @@ export const CommunicationHub = () => {
         onCreateConversation={createConversation}
       />
     </div>
+    </>
   );
 };
