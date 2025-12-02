@@ -4288,6 +4288,113 @@ export type Database = {
         }
         Relationships: []
       }
+      support_request_messages: {
+        Row: {
+          created_at: string
+          id: string
+          is_internal_note: boolean | null
+          message_text: string
+          sender_id: string
+          support_request_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_internal_note?: boolean | null
+          message_text: string
+          sender_id: string
+          support_request_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_internal_note?: boolean | null
+          message_text?: string
+          sender_id?: string
+          support_request_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_request_messages_support_request_id_fkey"
+            columns: ["support_request_id"]
+            isOneToOne: false
+            referencedRelation: "support_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_requests: {
+        Row: {
+          assigned_to: string | null
+          conversation_id: string | null
+          created_at: string
+          description: string | null
+          id: string
+          metadata: Json | null
+          organization_id: string | null
+          priority: string
+          request_type: string
+          requester_id: string
+          resolved_at: string | null
+          resolved_by: string | null
+          scheduled_call_time: string | null
+          status: string
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          organization_id?: string | null
+          priority?: string
+          request_type: string
+          requester_id: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          scheduled_call_time?: string | null
+          status?: string
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          organization_id?: string | null
+          priority?: string
+          request_type?: string
+          requester_id?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          scheduled_call_time?: string | null
+          status?: string
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_requests_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_requests_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       system_health_snapshots: {
         Row: {
           component_scores: Json

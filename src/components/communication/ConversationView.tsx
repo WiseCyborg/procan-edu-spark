@@ -22,6 +22,8 @@ import { ScheduleCallDialog } from './ScheduleCallDialog';
 import { UpcomingCallsList } from './UpcomingCallsList';
 import { useScheduledCalls } from '@/hooks/useScheduledCalls';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { InviteProCannSupport } from './InviteProCannSupport';
+import { useUserRole } from '@/hooks/useUserRole';
 
 interface ConversationViewProps {
   conversationId: string;
@@ -35,6 +37,7 @@ export const ConversationView = ({
   conversationType = 'group'
 }: ConversationViewProps) => {
   const { user } = useAuth();
+  const { roles } = useUserRole();
   const { messages, sendMessage, fetchMessages } = useRealTimeMessaging();
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
@@ -268,6 +271,14 @@ export const ConversationView = ({
             conversationTitle={conversationTitle}
             conversationType={conversationType}
           />
+          
+          {(roles.includes('dispensary_manager') || roles.includes('training_coordinator')) && (
+            <InviteProCannSupport 
+              conversationId={conversationId}
+              conversationTitle={conversationTitle}
+            />
+          )}
+          
           <Button variant="ghost" size="sm">
             <MoreHorizontal className="h-4 w-4" />
           </Button>
