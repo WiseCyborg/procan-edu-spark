@@ -396,3 +396,15 @@ verify_jwt = false
 [functions.setup-louis-account]
 verify_jwt = true
 
+[functions.check-seat-capacity]
+verify_jwt = true
+
+[functions.archive-user-seat]
+verify_jwt = true
+
+[functions.upgrade-subscription]
+verify_jwt = true
+
+[functions.check-subscription-renewal]
+verify_jwt = false
+

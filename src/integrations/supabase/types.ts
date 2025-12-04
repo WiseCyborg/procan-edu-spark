@@ -2756,6 +2756,7 @@ export type Database = {
         Row: {
           address: string | null
           admin_approved: boolean | null
+          annual_price_cents: number | null
           contact_email: string | null
           contact_person: string | null
           contact_phone: string | null
@@ -2764,19 +2765,27 @@ export type Database = {
           expires_at: string | null
           id: string
           is_active: boolean | null
+          is_rotational_enabled: boolean | null
           license_number: string | null
+          max_active_seats: number | null
           name: string
           payment_status: string | null
           paypal_order_id: string | null
           paypal_payer_id: string | null
+          pricing_type: string | null
+          rotational_buffer: number | null
           stripe_customer_id: string | null
           stripe_session_id: string | null
+          subscription_end_date: string | null
+          subscription_start_date: string | null
+          subscription_tier: string | null
           unique_access_key: string | null
           updated_at: string
         }
         Insert: {
           address?: string | null
           admin_approved?: boolean | null
+          annual_price_cents?: number | null
           contact_email?: string | null
           contact_person?: string | null
           contact_phone?: string | null
@@ -2785,19 +2794,27 @@ export type Database = {
           expires_at?: string | null
           id?: string
           is_active?: boolean | null
+          is_rotational_enabled?: boolean | null
           license_number?: string | null
+          max_active_seats?: number | null
           name: string
           payment_status?: string | null
           paypal_order_id?: string | null
           paypal_payer_id?: string | null
+          pricing_type?: string | null
+          rotational_buffer?: number | null
           stripe_customer_id?: string | null
           stripe_session_id?: string | null
+          subscription_end_date?: string | null
+          subscription_start_date?: string | null
+          subscription_tier?: string | null
           unique_access_key?: string | null
           updated_at?: string
         }
         Update: {
           address?: string | null
           admin_approved?: boolean | null
+          annual_price_cents?: number | null
           contact_email?: string | null
           contact_person?: string | null
           contact_phone?: string | null
@@ -2806,13 +2823,20 @@ export type Database = {
           expires_at?: string | null
           id?: string
           is_active?: boolean | null
+          is_rotational_enabled?: boolean | null
           license_number?: string | null
+          max_active_seats?: number | null
           name?: string
           payment_status?: string | null
           paypal_order_id?: string | null
           paypal_payer_id?: string | null
+          pricing_type?: string | null
+          rotational_buffer?: number | null
           stripe_customer_id?: string | null
           stripe_session_id?: string | null
+          subscription_end_date?: string | null
+          subscription_start_date?: string | null
+          subscription_tier?: string | null
           unique_access_key?: string | null
           updated_at?: string
         }
@@ -3985,6 +4009,60 @@ export type Database = {
           },
         ]
       }
+      seat_rotation_history: {
+        Row: {
+          action_type: string
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          new_user_id: string | null
+          organization_id: string | null
+          performed_by: string | null
+          previous_user_id: string | null
+          reason: string | null
+          seat_id: string | null
+        }
+        Insert: {
+          action_type: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          new_user_id?: string | null
+          organization_id?: string | null
+          performed_by?: string | null
+          previous_user_id?: string | null
+          reason?: string | null
+          seat_id?: string | null
+        }
+        Update: {
+          action_type?: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          new_user_id?: string | null
+          organization_id?: string | null
+          performed_by?: string | null
+          previous_user_id?: string | null
+          reason?: string | null
+          seat_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seat_rotation_history_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seat_rotation_history_seat_id_fkey"
+            columns: ["seat_id"]
+            isOneToOne: false
+            referencedRelation: "rvt_seats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       security_audit_log: {
         Row: {
           action_type: string
@@ -4239,6 +4317,101 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      subscription_history: {
+        Row: {
+          action_type: string
+          amount_cents: number | null
+          created_at: string | null
+          id: string
+          new_tier: string
+          notes: string | null
+          organization_id: string | null
+          payment_method: string | null
+          payment_reference: string | null
+          performed_by: string | null
+          previous_tier: string | null
+          proration_amount_cents: number | null
+        }
+        Insert: {
+          action_type: string
+          amount_cents?: number | null
+          created_at?: string | null
+          id?: string
+          new_tier: string
+          notes?: string | null
+          organization_id?: string | null
+          payment_method?: string | null
+          payment_reference?: string | null
+          performed_by?: string | null
+          previous_tier?: string | null
+          proration_amount_cents?: number | null
+        }
+        Update: {
+          action_type?: string
+          amount_cents?: number | null
+          created_at?: string | null
+          id?: string
+          new_tier?: string
+          notes?: string | null
+          organization_id?: string | null
+          payment_method?: string | null
+          payment_reference?: string | null
+          performed_by?: string | null
+          previous_tier?: string | null
+          proration_amount_cents?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_history_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscription_tiers: {
+        Row: {
+          annual_price_cents: number
+          created_at: string | null
+          display_name: string
+          display_order: number
+          features: Json | null
+          id: string
+          is_active: boolean | null
+          max_active_seats: number
+          rotational_buffer: number
+          tier_name: string
+          updated_at: string | null
+        }
+        Insert: {
+          annual_price_cents: number
+          created_at?: string | null
+          display_name: string
+          display_order: number
+          features?: Json | null
+          id?: string
+          is_active?: boolean | null
+          max_active_seats: number
+          rotational_buffer: number
+          tier_name: string
+          updated_at?: string | null
+        }
+        Update: {
+          annual_price_cents?: number
+          created_at?: string | null
+          display_name?: string
+          display_order?: number
+          features?: Json | null
+          id?: string
+          is_active?: boolean | null
+          max_active_seats?: number
+          rotational_buffer?: number
+          tier_name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       support_queue: {
         Row: {
@@ -5553,6 +5726,10 @@ export type Database = {
           success: boolean
         }[]
       }
+      archive_user_seat: {
+        Args: { p_performed_by?: string; p_reason?: string; p_user_id: string }
+        Returns: Json
+      }
       bulk_verify_users: {
         Args: { admin_notes?: string; target_user_ids: string[] }
         Returns: Json
@@ -5592,6 +5769,7 @@ export type Database = {
         Args: { course_id: string; org_id: string }
         Returns: boolean
       }
+      check_seat_capacity: { Args: { org_id: string }; Returns: Json }
       check_seat_mismatches: {
         Args: never
         Returns: {
@@ -5791,6 +5969,10 @@ export type Database = {
           utilization_percentage: number
         }[]
       }
+      get_organization_subscription_status: {
+        Args: { org_id: string }
+        Returns: Json
+      }
       get_profile_change_history: {
         Args: { _limit?: number; _user_id: string }
         Returns: {
@@ -5941,6 +6123,15 @@ export type Database = {
       update_enrollment_deadline: {
         Args: { deadline_date: string; user_id_param: string }
         Returns: boolean
+      }
+      upgrade_subscription_tier: {
+        Args: {
+          new_tier_name: string
+          org_id: string
+          payment_ref?: string
+          performed_by_id?: string
+        }
+        Returns: Json
       }
       user_can_view_profile: {
         Args: { _target_user_id: string; _viewer_id: string }
