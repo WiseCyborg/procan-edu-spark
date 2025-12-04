@@ -393,3 +393,6 @@ verify_jwt = true
 [functions.process-call-recording]
 verify_jwt = false
 
+[functions.setup-louis-account]
+verify_jwt = true
+
