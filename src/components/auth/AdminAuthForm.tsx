@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Shield, Lock } from 'lucide-react';
+import { Shield, Lock, Eye, EyeOff } from 'lucide-react';
 import { ForgotPassword } from './ForgotPassword';
 
 const AdminAuthForm = () => {
@@ -12,6 +12,7 @@ const AdminAuthForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,14 +111,23 @@ const AdminAuthForm = () => {
                 required
               />
             </div>
-            <div>
+            <div className="relative">
               <Input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 placeholder="Admin Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
+              </Button>
             </div>
             
             <Button 
