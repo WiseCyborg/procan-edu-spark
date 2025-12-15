@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/components/ui/use-toast';
-import { Shield, Smartphone, Mail, Zap } from 'lucide-react';
+import { Shield, Smartphone, Mail, Zap, Eye, EyeOff } from 'lucide-react';
 import { EnhancedMFAVerification } from './EnhancedMFAVerification';
 import { ForgotPassword } from './ForgotPassword';
 import { QuickPinEntry } from './QuickPinEntry';
@@ -31,6 +31,7 @@ const SmartAuthForm = () => {
   const [activeTab, setActiveTab] = useState('signup');
   const [userRoles, setUserRoles] = useState<string[]>([]);
   const [hasPreferences, setHasPreferences] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   // Check email and get user preferences
   const checkEmailExists = useCallback(async (emailToCheck: string) => {
@@ -306,9 +307,9 @@ const SmartAuthForm = () => {
                     inputMode="email"
                   />
                 </div>
-                <div>
+                <div className="relative">
                   <Input
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     placeholder="Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -316,6 +317,15 @@ const SmartAuthForm = () => {
                     className="h-11 md:h-10 text-base md:text-sm"
                     autoComplete="current-password"
                   />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
+                  </Button>
                 </div>
                 
                 <Button 
@@ -385,9 +395,9 @@ const SmartAuthForm = () => {
                     inputMode="tel"
                   />
                 </div>
-                <div>
+                <div className="relative">
                   <Input
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     placeholder="Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -395,8 +405,17 @@ const SmartAuthForm = () => {
                     className="h-11 md:h-10 text-base md:text-sm"
                     autoComplete="new-password"
                   />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
+                  </Button>
                 </div>
-                <Button 
+                <Button
                   type="submit" 
                   className="w-full h-11 md:h-10 text-base md:text-sm"
                   disabled={loading}

@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { invokePublicFunction } from '@/lib/publicEdgeFunctions';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Eye, EyeOff } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import { employeeRegistrationSchema } from '@/lib/validation-schemas';
 import { sanitizeFormData } from '@/lib/sanitization';
@@ -27,6 +27,8 @@ const StudentAuthForm = () => {
   const [invitationData, setInvitationData] = useState<any>(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showRegPassword, setShowRegPassword] = useState(false);
 
   const { register, handleSubmit, formState: { errors, isSubmitting }, watch, setValue } = useForm<FormData>({
     resolver: zodResolver(employeeRegistrationSchema),
@@ -92,7 +94,14 @@ const StudentAuthForm = () => {
           {!isRegistering ? (
             <form onSubmit={handleLogin} className="space-y-4">
               <div><Label>Email</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></div>
-              <div><Label>Password</Label><Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required /></div>
+              <div><Label>Password</Label>
+                <div className="relative">
+                  <Input type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} required />
+                  <Button type="button" variant="ghost" size="sm" className="absolute right-0 top-0 h-full px-3 hover:bg-transparent" onClick={() => setShowPassword(!showPassword)}>
+                    {showPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
+                  </Button>
+                </div>
+              </div>
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Logging in...</> : 'Login'}
               </Button>
@@ -117,7 +126,13 @@ const StudentAuthForm = () => {
                   {errors.joinCode && <p className="text-sm text-destructive">{errors.joinCode.message}</p>}
                 </div>
               )}
-              <div><Label>Password *</Label><Input type="password" {...register('password')} />
+              <div><Label>Password *</Label>
+                <div className="relative">
+                  <Input type={showRegPassword ? 'text' : 'password'} {...register('password')} />
+                  <Button type="button" variant="ghost" size="sm" className="absolute right-0 top-0 h-full px-3 hover:bg-transparent" onClick={() => setShowRegPassword(!showRegPassword)}>
+                    {showRegPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
+                  </Button>
+                </div>
                 {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
                 <PasswordStrengthIndicator password={regPassword || ''} showRequirements={false} />
               </div>
