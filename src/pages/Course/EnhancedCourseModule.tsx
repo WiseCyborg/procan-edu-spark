@@ -26,6 +26,7 @@ import { MobileNavBar } from '@/components/course/MobileNavBar';
 import { CourseCompletionCelebration } from '@/components/course/CourseCompletionCelebration';
 import { useModuleNavigation } from '@/hooks/useModuleNavigation';
 import { SCORMStylePlayer, CourseConfig } from '@/components/course/SCORMStylePlayer';
+import { PaginatedContent } from '@/components/course/PaginatedContent';
 
 interface QuizQuestion {
   id: string;
@@ -433,13 +434,9 @@ const EnhancedCourseModule: React.FC = () => {
                       <CardTitle>Module Content</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div 
-                        className="prose prose-sm md:prose-base max-w-none dark:prose-invert 
-                                   prose-p:mb-4 prose-headings:mt-6 prose-headings:mb-3 
-                                   prose-li:my-1 prose-ul:my-4 prose-ol:my-4"
-                        dangerouslySetInnerHTML={{ 
-                          __html: sanitizeHtml(markdownToHtml(moduleData.content || '')) 
-                        }}
+                      <PaginatedContent
+                        content={moduleData.content || ''}
+                        onComplete={() => setOverviewComplete(true)}
                       />
                     </CardContent>
                   </Card>
