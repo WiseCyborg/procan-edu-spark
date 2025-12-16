@@ -41,7 +41,10 @@ export const PredictiveAnalyticsPreview = () => {
             </h3>
           </div>
           <p className="text-lg text-muted-foreground">
-            Try our AI-powered ROI calculator - no signup required
+            Estimate your potential savings - no signup required
+          </p>
+          <p className="text-sm text-muted-foreground/70 mt-2">
+            * This calculator provides estimates only. Actual savings vary based on your organization.
           </p>
         </div>
 
@@ -112,12 +115,16 @@ export const PredictiveAnalyticsPreview = () => {
 
             {/* Calculation Breakdown */}
             <div className="bg-muted/30 rounded-lg p-4 mb-6 text-sm text-muted-foreground">
-              <p className="font-semibold mb-2">How we calculated this:</p>
+              <p className="font-semibold mb-2">How this estimate is calculated:</p>
               <ul className="space-y-1">
                 <li>• {calculations.agents} agents × ${BUSINESS_RULES.SEAT_PRICE_USD} = ${calculations.trainingCost} training cost</li>
-                <li>• Average savings per agent: $800/year (reduced retakes, faster training, better compliance)</li>
-                <li>• ROI: ({calculations.annualSavings.toLocaleString()} - {calculations.trainingCost.toLocaleString()}) ÷ {calculations.trainingCost.toLocaleString()} × 100</li>
+                <li>• Estimated savings per agent: ~$800/year (potential reduction in retakes, faster onboarding)</li>
+                <li>• Estimated ROI: ({calculations.annualSavings.toLocaleString()} - {calculations.trainingCost.toLocaleString()}) ÷ {calculations.trainingCost.toLocaleString()} × 100</li>
               </ul>
+              <p className="text-xs mt-3 italic">
+                These are illustrative projections, not guarantees. Actual results depend on your organization's 
+                current training costs, compliance requirements, and operational factors.
+              </p>
             </div>
 
             {/* CTA */}
