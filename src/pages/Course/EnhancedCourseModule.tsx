@@ -83,35 +83,35 @@ const EnhancedCourseModule: React.FC = () => {
   const [weakTopics, setWeakTopics] = useState<WeakTopic[]>([]);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
-  const { updateProgress, isModuleCompleted } = useUserProgress(COURSE_ID);
+  const { updateProgress, isModuleCompletedByNumber, canAccessModule, getModuleUUID, getFirstIncompleteModule } = useUserProgress(COURSE_ID);
   
-  // Dynamic modules with actual completion status
+  // Dynamic modules with actual completion status using proper UUID-based checking
   const modulesWithCompletion = useMemo(() => [
-    { id: 'part0', number: 0, title: 'Welcome & Platform Orientation', tier: 'green' as const, isCompleted: isModuleCompleted('part0') },
-    { id: 'part1', number: 1, title: 'Introduction to Maryland Cannabis Laws', tier: 'green' as const, isCompleted: isModuleCompleted('part1') },
-    { id: 'part2', number: 2, title: 'Patient Rights and Privacy', tier: 'green' as const, isCompleted: isModuleCompleted('part2') },
-    { id: 'part3', number: 3, title: 'Product Knowledge and Safety', tier: 'green' as const, isCompleted: isModuleCompleted('part3') },
-    { id: 'part4', number: 4, title: 'Inventory Management and Tracking', tier: 'green' as const, isCompleted: isModuleCompleted('part4') },
-    { id: 'part5', number: 5, title: 'Customer Service Excellence', tier: 'green' as const, isCompleted: isModuleCompleted('part5') },
-    { id: 'part6', number: 6, title: 'Security, Safety, and Drug-Free Workplace', tier: 'green' as const, isCompleted: isModuleCompleted('part6') },
-    { id: 'part7', number: 7, title: 'Laboratory Testing and Quality Control', tier: 'yellow' as const, isCompleted: isModuleCompleted('part7') },
-    { id: 'part8', number: 8, title: 'Dosage Guidelines and Patient Consultation', tier: 'yellow' as const, isCompleted: isModuleCompleted('part8') },
-    { id: 'part9', number: 9, title: 'Point of Sale Systems and Transactions', tier: 'yellow' as const, isCompleted: isModuleCompleted('part9') },
-    { id: 'part10', number: 10, title: 'Medical Cannabis and Drug Interactions', tier: 'yellow' as const, isCompleted: isModuleCompleted('part10') },
-    { id: 'part11', number: 11, title: 'Cannabis Cultivation Basics', tier: 'yellow' as const, isCompleted: isModuleCompleted('part11') },
-    { id: 'part12', number: 12, title: 'Product Packaging, Labeling, and Diversion Prevention', tier: 'yellow' as const, isCompleted: isModuleCompleted('part12') },
-    { id: 'part13', number: 13, title: 'Handling Cash and Banking', tier: 'red' as const, isCompleted: isModuleCompleted('part13') },
-    { id: 'part14', number: 14, title: 'Age Verification and ID Checking', tier: 'red' as const, isCompleted: isModuleCompleted('part14') },
-    { id: 'part15', number: 15, title: 'Standard Operating Procedures and Record Keeping', tier: 'red' as const, isCompleted: isModuleCompleted('part15') },
-    { id: 'part16', number: 16, title: 'Transportation and Delivery', tier: 'red' as const, isCompleted: isModuleCompleted('part16') },
-    { id: 'part17', number: 17, title: 'Waste Disposal and Management', tier: 'red' as const, isCompleted: isModuleCompleted('part17') },
-    { id: 'part18', number: 18, title: 'Final Review and Best Practices', tier: 'red' as const, isCompleted: isModuleCompleted('part18') },
-    { id: 'part19', number: 19, title: 'Supervising Compliance Operations', tier: 'red' as const, isCompleted: isModuleCompleted('part19') },
-    { id: 'part20', number: 20, title: 'Compliance Oversight & Regulatory Reporting', tier: 'red' as const, isCompleted: isModuleCompleted('part20') },
-    { id: 'part21', number: 21, title: 'Team Training & Development Coordination', tier: 'red' as const, isCompleted: isModuleCompleted('part21') },
-    { id: 'part22', number: 22, title: 'Incident Documentation & Investigation', tier: 'red' as const, isCompleted: isModuleCompleted('part22') },
-    { id: 'part23', number: 23, title: 'Advanced Diversion Prevention Strategies', tier: 'red' as const, isCompleted: isModuleCompleted('part23') },
-  ], [isModuleCompleted]);
+    { id: 'f543fad9-fb96-485c-9ca0-980564acc559', number: 0, title: 'Welcome & Platform Orientation', tier: 'green' as const, isCompleted: isModuleCompletedByNumber(0), isLocked: !canAccessModule(0) },
+    { id: 'f31492ad-f497-463f-9e30-9333ff42a54e', number: 1, title: 'Introduction to Maryland Cannabis Laws', tier: 'green' as const, isCompleted: isModuleCompletedByNumber(1), isLocked: !canAccessModule(1) },
+    { id: '3b7d23c0-c7d9-48ea-ac75-17e515e6304a', number: 2, title: 'Patient Rights and Privacy', tier: 'green' as const, isCompleted: isModuleCompletedByNumber(2), isLocked: !canAccessModule(2) },
+    { id: '949aee25-1254-4dfe-a22b-e17912670ba7', number: 3, title: 'Product Knowledge and Safety', tier: 'green' as const, isCompleted: isModuleCompletedByNumber(3), isLocked: !canAccessModule(3) },
+    { id: '14d0aa9f-4436-460c-a76b-52f07ba33bf3', number: 4, title: 'Inventory Management and Tracking', tier: 'green' as const, isCompleted: isModuleCompletedByNumber(4), isLocked: !canAccessModule(4) },
+    { id: '00daed9a-9d63-4b21-ae90-7444816cb783', number: 5, title: 'Customer Service Excellence', tier: 'green' as const, isCompleted: isModuleCompletedByNumber(5), isLocked: !canAccessModule(5) },
+    { id: '9b4ccbb6-e96a-4d7e-9862-d33082cf35dc', number: 6, title: 'Security, Safety, and Drug-Free Workplace', tier: 'green' as const, isCompleted: isModuleCompletedByNumber(6), isLocked: !canAccessModule(6) },
+    { id: 'b610259f-7bd4-4f77-9350-7c2c29939432', number: 7, title: 'Laboratory Testing and Quality Control', tier: 'yellow' as const, isCompleted: isModuleCompletedByNumber(7), isLocked: !canAccessModule(7) },
+    { id: 'dbacc5bc-e14c-470a-a0ba-852df2b41220', number: 8, title: 'Dosage Guidelines and Patient Consultation', tier: 'yellow' as const, isCompleted: isModuleCompletedByNumber(8), isLocked: !canAccessModule(8) },
+    { id: 'b49e8150-f795-4d6f-a501-35d5e1f5aacf', number: 9, title: 'Point of Sale Systems and Transactions', tier: 'yellow' as const, isCompleted: isModuleCompletedByNumber(9), isLocked: !canAccessModule(9) },
+    { id: '7c10652a-202b-459a-b02c-9020906b1888', number: 10, title: 'Medical Cannabis and Drug Interactions', tier: 'yellow' as const, isCompleted: isModuleCompletedByNumber(10), isLocked: !canAccessModule(10) },
+    { id: 'f2eaecb3-603b-4f9e-90ea-254f57774b8f', number: 11, title: 'Cannabis Cultivation Basics', tier: 'yellow' as const, isCompleted: isModuleCompletedByNumber(11), isLocked: !canAccessModule(11) },
+    { id: 'f39ac55c-6ee4-4a49-a739-8a0bb6869fc8', number: 12, title: 'Product Packaging, Labeling, and Diversion Prevention', tier: 'yellow' as const, isCompleted: isModuleCompletedByNumber(12), isLocked: !canAccessModule(12) },
+    { id: '3f0bad34-49ef-4ed7-8ade-6785dd35719a', number: 13, title: 'Handling Cash and Banking', tier: 'red' as const, isCompleted: isModuleCompletedByNumber(13), isLocked: !canAccessModule(13) },
+    { id: 'b8d16c7f-10e6-40d5-b766-721839038f5e', number: 14, title: 'Age Verification and ID Checking', tier: 'red' as const, isCompleted: isModuleCompletedByNumber(14), isLocked: !canAccessModule(14) },
+    { id: 'd1c88334-3ef4-488b-8d9e-cda14d8199f8', number: 15, title: 'Standard Operating Procedures and Record Keeping', tier: 'red' as const, isCompleted: isModuleCompletedByNumber(15), isLocked: !canAccessModule(15) },
+    { id: '8c8cc197-94c8-4633-88e2-dc1e73566079', number: 16, title: 'Transportation and Delivery', tier: 'red' as const, isCompleted: isModuleCompletedByNumber(16), isLocked: !canAccessModule(16) },
+    { id: 'f0b3a393-7486-4f20-8bab-83711606105e', number: 17, title: 'Waste Disposal and Management', tier: 'red' as const, isCompleted: isModuleCompletedByNumber(17), isLocked: !canAccessModule(17) },
+    { id: '0365fffa-3111-400b-bcea-54eacd3f13ef', number: 18, title: 'Final Review and Best Practices', tier: 'red' as const, isCompleted: isModuleCompletedByNumber(18), isLocked: !canAccessModule(18) },
+    { id: 'ec62fe97-9a99-4cec-b25c-7ecbedebbd55', number: 19, title: 'Supervising Compliance Operations', tier: 'red' as const, isCompleted: isModuleCompletedByNumber(19), isLocked: !canAccessModule(19) },
+    { id: '63d100f8-ad66-4c21-a743-b01df46b94df', number: 20, title: 'Compliance Oversight & Regulatory Reporting', tier: 'red' as const, isCompleted: isModuleCompletedByNumber(20), isLocked: !canAccessModule(20) },
+    { id: '0afce5e1-eff1-41c2-b7a6-3a67511c43dc', number: 21, title: 'Team Training & Development Coordination', tier: 'red' as const, isCompleted: isModuleCompletedByNumber(21), isLocked: !canAccessModule(21) },
+    { id: '4c8c78c9-6080-40c3-98c0-9930389f771a', number: 22, title: 'Incident Documentation & Investigation', tier: 'red' as const, isCompleted: isModuleCompletedByNumber(22), isLocked: !canAccessModule(22) },
+    { id: 'bdbbc605-a8f8-4a65-ba9a-a2451198174c', number: 23, title: 'Advanced Diversion Prevention Strategies', tier: 'red' as const, isCompleted: isModuleCompletedByNumber(23), isLocked: !canAccessModule(23) },
+  ], [isModuleCompletedByNumber, canAccessModule]);
   
   // Calculate actual completed count
   const completedCount = useMemo(() => {
@@ -156,12 +156,35 @@ const EnhancedCourseModule: React.FC = () => {
     setIsTransitioning(false);
   }, [moduleId]);
 
+  // Prerequisite check - prevent URL bypass of locked modules
+  useEffect(() => {
+    if (!moduleId) return;
+    
+    const moduleNumber = parseInt(moduleId.replace('part', ''));
+    
+    // Check if user can access this module
+    if (!canAccessModule(moduleNumber)) {
+      const firstIncomplete = getFirstIncompleteModule();
+      toast({
+        title: "Module Locked",
+        description: `Please complete Module ${firstIncomplete} before accessing this module.`,
+        variant: "destructive",
+      });
+      navigate(`/course/part${firstIncomplete}`);
+    }
+  }, [moduleId, canAccessModule, getFirstIncompleteModule, navigate]);
+
   useEffect(() => {
     if (!moduleId) return;
     
     const fetchModuleData = async () => {
       try {
         const moduleNumber = parseInt(moduleId.replace('part', ''));
+        
+        // Don't fetch if module is locked
+        if (!canAccessModule(moduleNumber)) {
+          return;
+        }
         
         const { data, error } = await supabase
           .from('course_modules')
@@ -206,7 +229,7 @@ const EnhancedCourseModule: React.FC = () => {
     };
 
     fetchModuleData();
-  }, [moduleId, navigate]);
+  }, [moduleId, navigate, canAccessModule]);
 
   const handleQuizComplete = async (score: number, passed: boolean, timeSpent: number, weakTopicsData?: WeakTopic[]) => {
     setQuizScore(score);
@@ -431,8 +454,8 @@ const EnhancedCourseModule: React.FC = () => {
               <div className="mb-4">
                 <h1 className="text-3xl font-bold mb-2">{moduleData.title}</h1>
                 <p className="text-muted-foreground">{moduleData.description}</p>
-                <Badge variant={isModuleCompleted(moduleId!) ? "default" : "secondary"} className="mt-2">
-                  {isModuleCompleted(moduleId!) ? '✓ Completed - Review Mode' : 'In Progress'}
+                <Badge variant={isModuleCompletedByNumber(currentModuleNumber) ? "default" : "secondary"} className="mt-2">
+                  {isModuleCompletedByNumber(currentModuleNumber) ? '✓ Completed - Review Mode' : 'In Progress'}
                 </Badge>
               </div>
 
