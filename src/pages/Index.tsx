@@ -25,26 +25,26 @@ const Index = () => {
   const isMobile = useIsMobile();
   const [isRoleSelectorOpen, setIsRoleSelectorOpen] = React.useState(false);
 
-  // A/B Test for hero headline
+  // A/B Test for hero headline - honest, verifiable claims only
   const {
     variant: heroMessage
   } = useABTest({
     testName: 'hero_headline',
     variants: [{
-      id: 'ai_maryland_focus',
-      value: "Maryland's ONLY AI-Powered, COMAR-Embedded RVT Training Platform",
+      id: 'comar_aligned',
+      value: "COMAR-Aligned Maryland RVT Certification Training",
       weight: 1
     }, {
-      id: 'roi_savings_focus',
-      value: "Maryland's Most Advanced RVT Training",
+      id: 'comprehensive_training',
+      value: "Comprehensive Maryland RVT Training • 24 Modules • Self-Paced",
       weight: 1
     }, {
-      id: 'compliance_speed_focus',
-      value: "Get COMAR-Certified in 4-6 Hours with 87% Pass Rate Guarantee",
+      id: 'maryland_focused',
+      value: "Maryland RVT Certification Built by Local Cannabis Professionals",
       weight: 1
     }, {
-      id: 'mca_professional_aligned',
-      value: "MCA-Aligned Maryland RVT Training with Real-Time Regulatory Updates",
+      id: 'accessible_pricing',
+      value: "Complete Maryland RVT Training • $49.99 • Under MD Maximum",
       weight: 1
     }]
   });
@@ -94,7 +94,7 @@ const Index = () => {
               {isMobile ? "Maryland's AI-Powered RVT Certification" : heroMessage}
             </h2>
             {!isMobile && <p className="text-lg text-white/90 mt-4 max-w-2xl mx-auto">
-                Complete Maryland RVT certification in 4-6 hours • 87% pass rate • $49.99
+                Complete Maryland RVT certification in 4-6 hours • 24 modules • $49.99
               </p>}
           </div>
 
