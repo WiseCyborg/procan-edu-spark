@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Shield, Users, Award, CheckCircle, Star } from 'lucide-react';
+import { Shield, Users, Award, CheckCircle, Star, Clock, MapPin, DollarSign } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
@@ -74,25 +74,11 @@ export const TrustStats = () => {
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
       <Card className="p-4 text-center bg-white/10 backdrop-blur-sm border-white/20">
         <div className="text-2xl font-bold text-white">
-          <AnimatedCounter end={2500} suffix="+" />
+          <AnimatedCounter end={24} />
         </div>
-        <div className="text-sm text-white/80">Agents Trained</div>
+        <div className="text-sm text-white/80">Training Modules</div>
       </Card>
       
-      <Card className="p-4 text-center bg-white/10 backdrop-blur-sm border-white/20">
-        <div className="text-2xl font-bold text-white">
-          <AnimatedCounter end={150} suffix="+" />
-        </div>
-        <div className="text-sm text-white/80">Dispensaries</div>
-      </Card>
-      
-      <Card className="p-4 text-center bg-white/10 backdrop-blur-sm border-white/20">
-        <div className="text-2xl font-bold text-white">
-          <AnimatedCounter end={87} suffix="%" />
-        </div>
-        <div className="text-sm text-white/80">Pass Rate</div>
-      </Card>
-
       <Card className="p-4 text-center bg-white/10 backdrop-blur-sm border-white/20">
         <div className="text-2xl font-bold text-white">
           24/24
@@ -102,16 +88,30 @@ export const TrustStats = () => {
       
       <Card className="p-4 text-center bg-white/10 backdrop-blur-sm border-white/20">
         <div className="text-2xl font-bold text-white">
-          $<AnimatedCounter end={12} />K+
+          4-6
         </div>
-        <div className="text-sm text-white/80">Avg Savings</div>
+        <div className="text-sm text-white/80">Hours Self-Paced</div>
       </Card>
 
       <Card className="p-4 text-center bg-white/10 backdrop-blur-sm border-white/20">
         <div className="text-2xl font-bold text-white">
-          <AnimatedCounter end={18} />
+          $49.99
         </div>
-        <div className="text-sm text-white/80">Modules</div>
+        <div className="text-sm text-white/80">Under MD Max</div>
+      </Card>
+      
+      <Card className="p-4 text-center bg-white/10 backdrop-blur-sm border-white/20">
+        <div className="text-2xl font-bold text-white">
+          24/7
+        </div>
+        <div className="text-sm text-white/80">Access</div>
+      </Card>
+
+      <Card className="p-4 text-center bg-white/10 backdrop-blur-sm border-white/20">
+        <div className="text-2xl font-bold text-white">
+          ∞
+        </div>
+        <div className="text-sm text-white/80">Lifetime Certificate</div>
       </Card>
     </div>
   );
@@ -125,7 +125,7 @@ export const ComplianceBadges = () => {
         className="floating-badge bg-white/20 text-white border-white/30 px-4 py-2 text-sm backdrop-blur-sm"
       >
         <Shield className="h-4 w-4 mr-2" />
-        MCA Approved
+        COMAR-Aligned
       </Badge>
       
       <Badge 
@@ -134,7 +134,7 @@ export const ComplianceBadges = () => {
         style={{ animationDelay: '0.5s' }}
       >
         <CheckCircle className="h-4 w-4 mr-2" />
-        COMAR Compliant
+        MCA Standards
       </Badge>
       
       <Badge 
@@ -143,7 +143,7 @@ export const ComplianceBadges = () => {
         style={{ animationDelay: '1s' }}
       >
         <Award className="h-4 w-4 mr-2" />
-        Certified Training
+        RVT Certification
       </Badge>
     </div>
   );

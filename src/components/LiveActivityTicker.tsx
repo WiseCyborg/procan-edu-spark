@@ -10,48 +10,15 @@ interface Activity {
   icon: typeof Trophy;
 }
 
-// Mock activities for demonstration
-const mockActivities: Activity[] = [
-  {
-    type: 'certificate',
-    message: 'Sarah from Baltimore County just earned their RVT certificate! 🎉',
-    timestamp: new Date().toISOString(),
-    icon: Trophy
-  },
-  {
-    type: 'module',
-    message: 'Michael from Montgomery County completed Module 12 with 95%!',
-    timestamp: new Date().toISOString(),
-    icon: BookOpen
-  },
-  {
-    type: 'enrollment',
-    message: 'Green Leaf Wellness enrolled 8 new team members today!',
-    timestamp: new Date().toISOString(),
-    icon: Sparkles
-  },
-  {
-    type: 'certificate',
-    message: 'Jennifer from Anne Arundel just passed their final exam on first try!',
-    timestamp: new Date().toISOString(),
-    icon: Award
-  },
-  {
-    type: 'certificate',
-    message: 'David from Prince George\'s County earned perfect score on exam!',
-    timestamp: new Date().toISOString(),
-    icon: Trophy
-  },
-];
-
 export const LiveActivityTicker = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  // Only fetch REAL activity data from the database
   const { data: activities } = useQuery({
     queryKey: ['live-activities'],
     queryFn: async () => {
       try {
-        // Try to fetch recent exam passes
+        // Fetch recent exam passes (real data only)
         const { data: exams, error } = await supabase
           .from('exam_attempts')
           .select(`
@@ -78,10 +45,11 @@ export const LiveActivityTicker = () => {
           return recentActivities;
         }
       } catch (error) {
-        console.log('Using mock activity data');
+        console.log('No recent activity data available');
       }
       
-      return mockActivities;
+      // Return empty array if no real data - don't show fake activity
+      return [];
     },
     refetchInterval: 30000 // Refresh every 30 seconds
   });
@@ -96,6 +64,7 @@ export const LiveActivityTicker = () => {
     return () => clearInterval(timer);
   }, [activities]);
 
+  // Don't render anything if there's no real activity data
   if (!activities || activities.length === 0) {
     return null;
   }
