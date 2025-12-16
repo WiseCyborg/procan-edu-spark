@@ -93,7 +93,7 @@ export const RegulationExplorer = () => {
                   </div>
                   <Button asChild variant="ghost" size="sm">
                     <a
-                      href={`https://dsd.maryland.gov/regulations/Pages/10.62.aspx#${item.section_number}`}
+                      href={`https://dsd.maryland.gov/regulations/Pages/14.17.aspx#${item.section_number}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-1"
