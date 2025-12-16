@@ -1,20 +1,19 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from '@/components/ui/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { Building2, FileText, Contact, Shield, Loader2, CheckCircle2 } from 'lucide-react';
-import { InfoTooltip } from '@/components/ui/info-tooltip';
+import { Loader2, CheckCircle2 } from 'lucide-react';
 import { dispensaryApplicationSchema } from '@/lib/validation-schemas';
 import { sanitizeFormData } from '@/lib/sanitization';
 import { PhoneInput } from '@/components/ui/phone-input';
+import { invokePublicFunction } from '@/lib/publicEdgeFunctions';
 import type { z } from 'zod';
 
 type FormData = z.infer<typeof dispensaryApplicationSchema>;
