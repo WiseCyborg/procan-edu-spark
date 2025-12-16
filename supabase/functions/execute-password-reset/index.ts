@@ -22,9 +22,9 @@ serve(async (req) => {
     }
 
     // Validate password strength
-    if (new_password.length < 6) {
+    if (new_password.length < 8) {
       return new Response(
-        JSON.stringify({ success: false, error: 'Password must be at least 6 characters long' }),
+        JSON.stringify({ success: false, error: 'Password must be at least 8 characters long' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
       );
     }
@@ -75,6 +75,20 @@ serve(async (req) => {
 
     if (updateError) {
       console.error('Failed to update password:', updateError);
+      
+      // Check for pwned/weak password error from Supabase Auth
+      const errorMsg = updateError.message?.toLowerCase() || '';
+      if (errorMsg.includes('pwned') || errorMsg.includes('weak') || errorMsg.includes('breach') || errorMsg.includes('compromised')) {
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            error: 'This password has been found in a data breach. Please choose a unique password that you haven\'t used on other websites.',
+            code: 'pwned_password'
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+        );
+      }
+      
       return new Response(
         JSON.stringify({ success: false, error: 'Failed to update password' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
