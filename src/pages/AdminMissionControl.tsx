@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Shield, AlertTriangle, TrendingUp, Building2, Users, Award, ChevronDown, ChevronUp, TestTube2, BookOpen } from 'lucide-react';
+import { Shield, AlertTriangle, TrendingUp, Building2, Users, Award, ChevronDown, ChevronUp, TestTube2, BookOpen, ClipboardCheck } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,7 @@ import { AdminCommunications } from '@/components/admin/AdminCommunications';
 import { UATAccountManager } from '@/components/admin/UATAccountManager';
 import { ConsumerCoursesSection } from '@/components/admin/ConsumerCoursesSection';
 import { SupportRequestsPanel } from '@/components/admin/SupportRequestsPanel';
+import { E2EValidationReport } from '@/components/admin/E2EValidationReport';
 import { Loader2 } from 'lucide-react';
 import { InternalChatbot } from '@/components/chat/InternalChatbot';
 import { supabase } from '@/integrations/supabase/client';
@@ -396,6 +397,30 @@ const AdminMissionControl = () => {
             {expandedSection === 'consumer' && (
               <CardContent className="pt-6">
                 <ConsumerCoursesSection />
+              </CardContent>
+            )}
+          </Card>
+
+          {/* E2E Validation */}
+          <Card>
+            <CardHeader 
+              className="cursor-pointer hover:bg-muted/50 transition-colors"
+              onClick={() => toggleSection('e2e')}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <ClipboardCheck className="h-5 w-5 text-primary" />
+                  <div>
+                    <CardTitle>E2E Validation</CardTitle>
+                    <CardDescription>End-to-end system validation and test reports</CardDescription>
+                  </div>
+                </div>
+                {expandedSection === 'e2e' ? <ChevronUp /> : <ChevronDown />}
+              </div>
+            </CardHeader>
+            {expandedSection === 'e2e' && (
+              <CardContent className="pt-6">
+                <E2EValidationReport />
               </CardContent>
             )}
           </Card>

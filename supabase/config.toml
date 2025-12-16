@@ -411,3 +411,6 @@ verify_jwt = false
 [functions.admin-reset-password]
 verify_jwt = true
 
+[functions.run-e2e-validation]
+verify_jwt = true
+
