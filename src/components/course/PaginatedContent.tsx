@@ -184,8 +184,8 @@ export const PaginatedContent: React.FC<PaginatedContentProps> = ({
         </div>
       </div>
       
-      {/* Content area with swipe */}
-      <div className="relative overflow-hidden min-h-[200px]">
+      {/* Content area with swipe - fixed height with scroll */}
+      <div className="relative overflow-hidden h-[320px]">
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div
             key={currentPage}
@@ -202,12 +202,13 @@ export const PaginatedContent: React.FC<PaginatedContentProps> = ({
             dragConstraints={{ left: 0, right: 0 }}
             dragElastic={0.2}
             onDragEnd={handleDragEnd}
-            className="cursor-grab active:cursor-grabbing"
+            className="cursor-grab active:cursor-grabbing h-full overflow-y-auto pr-2"
           >
             <div 
-              className="prose prose-sm md:prose-base max-w-none dark:prose-invert 
+              className="prose prose-sm max-w-none dark:prose-invert 
                          prose-p:mb-3 prose-headings:mt-4 prose-headings:mb-2 
                          prose-li:my-1 prose-ul:my-2 prose-ol:my-2
+                         prose-h1:text-xl prose-h2:text-lg prose-h3:text-base
                          select-none"
               dangerouslySetInnerHTML={{ 
                 __html: markdownToHtml(pages[currentPage] || '') 
