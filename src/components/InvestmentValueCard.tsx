@@ -5,19 +5,19 @@ import { CheckCircle, TrendingUp } from 'lucide-react';
 export const InvestmentValueCard = () => {
   const features = [
     {
-      title: 'AI-Powered ROI Tracking',
-      description: 'Track compliance savings in real-time',
-      outcome: 'Average outcome: $12K+ annual savings',
+      title: 'AI-Powered Learning Assistant',
+      description: '24/7 help with compliance questions',
+      outcome: 'Instant answers to your training questions',
     },
     {
       title: 'Live COMAR Regulatory Updates',
-      description: 'Always aligned to latest MCA standards',
-      outcome: 'Automatic curriculum updates',
+      description: 'Content aligned to current MCA standards',
+      outcome: 'Curriculum updated when regulations change',
     },
     {
-      title: '87% First-Attempt Pass Rate',
-      description: 'Comprehensive exam preparation',
-      outcome: 'Practice quizzes with instant feedback',
+      title: 'Comprehensive Exam Preparation',
+      description: 'Practice quizzes after each module',
+      outcome: 'Instant feedback on your progress',
     },
     {
       title: 'Maryland-Specific Content',
@@ -25,14 +25,14 @@ export const InvestmentValueCard = () => {
       outcome: 'County-specific compliance scenarios',
     },
     {
-      title: '24/7 AI Compliance Assistant',
-      description: 'Instant answers to your questions',
+      title: '24/7 Platform Access',
+      description: 'Learn anytime, anywhere',
       outcome: 'Maryland regulatory expertise',
     },
     {
       title: 'Lifetime Certificate Access',
       description: 'Digital certificate with verification',
-      outcome: 'Free updates for renewals',
+      outcome: 'Publicly verifiable credentials',
     },
     {
       title: '4-6 Hour Completion Time',
@@ -73,7 +73,7 @@ export const InvestmentValueCard = () => {
                 <strong className="text-foreground">Investment: $49.99</strong> (under Maryland's $50 maximum)
               </p>
               <p className="text-sm font-semibold text-primary mt-1">
-                Typical ROI: 24,000% in first year through reduced retakes and compliance costs
+                Complete certification in one affordable package
               </p>
             </div>
           </div>
