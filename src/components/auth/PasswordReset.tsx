@@ -110,7 +110,18 @@ export const PasswordReset: React.FC = () => {
       console.log('[PasswordReset] Reset response:', { data, error });
 
       if (error || !data?.success) {
-        console.error('Password update error:', error);
+        console.error('Password update error:', error, data);
+        
+        // Check for pwned/breached password error
+        if (data?.code === 'pwned_password') {
+          toast({
+            title: "Password Found in Data Breach",
+            description: "This password has been exposed in a known data breach. Please choose a unique password that you haven't used elsewhere.",
+            variant: "destructive"
+          });
+          return;
+        }
+        
         throw new Error(data?.error || error?.message || 'Failed to update password');
       }
 
@@ -281,31 +292,52 @@ export const PasswordReset: React.FC = () => {
             {password && <PasswordStrengthIndicator password={password} showRequirements />}
           </div>
           
-          <div className="relative">
-            <Input
-              type={showConfirmPassword ? 'text' : 'password'}
-              placeholder="Confirm new password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              disabled={loading}
-              minLength={8}
-            />
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            >
-              {showConfirmPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
-            </Button>
+          <div className="space-y-2">
+            <div className="relative">
+              <Input
+                type={showConfirmPassword ? 'text' : 'password'}
+                placeholder="Confirm new password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                disabled={loading}
+                minLength={8}
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              >
+                {showConfirmPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
+              </Button>
+            </div>
+            
+            {/* Real-time password match indicator */}
+            {confirmPassword && (
+              <div className={`flex items-center gap-2 text-sm ${
+                password === confirmPassword ? 'text-green-600' : 'text-destructive'
+              }`}>
+                {password === confirmPassword ? (
+                  <>
+                    <CheckCircle className="h-4 w-4" />
+                    <span>Passwords match</span>
+                  </>
+                ) : (
+                  <>
+                    <AlertTriangle className="h-4 w-4" />
+                    <span>Passwords don't match</span>
+                  </>
+                )}
+              </div>
+            )}
           </div>
           
           <Button 
             type="submit" 
             className="w-full"
-            disabled={loading || !password || !confirmPassword}
+            disabled={loading || !password || !confirmPassword || password !== confirmPassword}
           >
             {loading ? 'Updating...' : 'Update Password'}
           </Button>
