@@ -53,6 +53,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { EmailDeliveryStatus } from './EmailDeliveryStatus';
+import { DispensaryActionsMenu } from './DispensaryActionsMenu';
 
 interface DispensaryApplication {
   id: string;
@@ -951,52 +952,18 @@ const DispensaryApplicationManager = () => {
 
                 <div className="flex gap-2 ml-4 items-start">
                   {/* Actions Dropdown Menu */}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      {application.application_status === 'approved' && application.organization_id && (
-                        <>
-                          <DropdownMenuItem
-                            onClick={() => {
-                              setActionTarget(application);
-                              setSuspendDialogOpen(true);
-                            }}
-                            className="text-orange-600"
-                          >
-                            <Ban className="h-4 w-4 mr-2" />
-                            Suspend Organization
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                        </>
-                      )}
-                      {application.application_status === 'suspended' && application.organization_id && (
-                        <>
-                          <DropdownMenuItem
-                            onClick={() => reactivateOrganization(application)}
-                            className="text-green-600"
-                          >
-                            <Power className="h-4 w-4 mr-2" />
-                            Reactivate Organization
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                        </>
-                      )}
-                      <DropdownMenuItem
-                        onClick={() => {
-                          setActionTarget(application);
-                          setDeleteDialogOpen(true);
-                        }}
-                        className="text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete Application
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <DispensaryActionsMenu
+                    application={application}
+                    onRefetch={fetchApplications}
+                    onSuspend={() => {
+                      setActionTarget(application);
+                      setSuspendDialogOpen(true);
+                    }}
+                    onDelete={() => {
+                      setActionTarget(application);
+                      setDeleteDialogOpen(true);
+                    }}
+                  />
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button
