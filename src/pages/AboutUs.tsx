@@ -66,20 +66,20 @@ export default function AboutUs() {
           </p>
           <ul>
             <li><strong>Content Accuracy:</strong> All training materials are reviewed quarterly by legal and regulatory experts</li>
-            <li><strong>Student Success:</strong> 87% pass rate with comprehensive support throughout the learning journey</li>
+            <li><strong>Student Success:</strong> Comprehensive support throughout the learning journey with AI-powered study assistance</li>
             <li><strong>Data Security:</strong> Bank-level encryption and FERPA compliance to protect student information</li>
             <li><strong>Accessibility:</strong> WCAG 2.1 AA compliant platform accessible to all learners</li>
           </ul>
 
-          <h2>Industry Recognition</h2>
+          <h2>Our Growing Community</h2>
           <p>
-            ProCann Edu is trusted by:
+            ProCann Edu serves:
           </p>
           <ul>
-            <li>Over 50 Maryland dispensaries</li>
-            <li>2,500+ certified cannabis professionals</li>
-            <li>Maryland Cannabis Administration officials</li>
-            <li>Industry associations and advocacy groups</li>
+            <li>Maryland dispensaries across all 24 counties</li>
+            <li>Cannabis professionals seeking RVT certification</li>
+            <li>Organizations committed to compliance excellence</li>
+            <li>Industry partners and advocacy groups</li>
           </ul>
 
           <h2>Our Values</h2>
