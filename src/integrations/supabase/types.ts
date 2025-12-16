@@ -5815,6 +5815,13 @@ export type Database = {
         }[]
       }
       deallocate_seat: { Args: { seat_id_param: string }; Returns: boolean }
+      delete_dispensary_application: {
+        Args: { p_application_id: string }
+        Returns: {
+          message: string
+          success: boolean
+        }[]
+      }
       detect_outdated_content: {
         Args: never
         Returns: {
@@ -5874,6 +5881,25 @@ export type Database = {
           phone: string
           raw_user_meta_data: Json
           user_id: string
+        }[]
+      }
+      get_approved_organizations: {
+        Args: never
+        Returns: {
+          available_seats: number
+          certified_count: number
+          dispensary_number: string
+          employee_count: number
+          join_code: string
+          license_number: string
+          manager_email: string
+          manager_name: string
+          manager_registered: boolean
+          org_id: string
+          organization_name: string
+          payment_status: string
+          total_seats: number
+          used_seats: number
         }[]
       }
       get_database_stats: {
@@ -6071,6 +6097,13 @@ export type Database = {
         }
         Returns: string
       }
+      reactivate_organization: {
+        Args: { p_org_id: string }
+        Returns: {
+          message: string
+          success: boolean
+        }[]
+      }
       reconcile_seats: {
         Args: never
         Returns: {
@@ -6112,6 +6145,13 @@ export type Database = {
           user_ids: string[]
         }
         Returns: number
+      }
+      suspend_organization: {
+        Args: { p_org_id: string; p_reason?: string }
+        Returns: {
+          message: string
+          success: boolean
+        }[]
       }
       test_system_health: { Args: never; Returns: Json }
       trigger_optimizer_now: { Args: never; Returns: Json }

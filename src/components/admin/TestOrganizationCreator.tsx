@@ -7,7 +7,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useSecurityMonitoring } from '@/hooks/useSecurityMonitoring';
-import { Building2, Plus, Copy, CheckCircle2, Key, Link2, Hash } from 'lucide-react';
+import { Building2, Plus, Copy, CheckCircle2, Key, Link2, Hash, AlertCircle, Loader2, RotateCcw } from 'lucide-react';
 
 interface CreatedOrgData {
   organization_id: string;
@@ -23,6 +23,8 @@ const TestOrganizationCreator = () => {
   const [contactEmail, setContactEmail] = useState('');
   const [credits, setCredits] = useState(10);
   const [createdOrg, setCreatedOrg] = useState<CreatedOrgData | null>(null);
+  const [lastError, setLastError] = useState<string | null>(null);
+  const [creationProgress, setCreationProgress] = useState<string>('');
   const { performSecurityCheck } = useSecurityMonitoring();
 
   const copyToClipboard = (text: string, label: string) => {
@@ -43,19 +45,43 @@ const TestOrganizationCreator = () => {
       return;
     }
 
-    if (!await performSecurityCheck('test_org_creation')) return;
+    console.log('[TestOrgCreator] Starting creation...', { orgName, contactEmail, credits });
+    setLastError(null);
+    setCreationProgress('Checking permissions...');
+
+    if (!await performSecurityCheck('test_org_creation')) {
+      setCreationProgress('');
+      return;
+    }
 
     setIsCreating(true);
+    setCreationProgress('Creating organization...');
+    
     try {
+      console.log('[TestOrgCreator] Calling create_test_organization RPC');
       const { data, error } = await supabase.rpc('create_test_organization', {
         org_name: orgName.trim(),
         contact_email: contactEmail.trim(),
         credits: credits
       });
 
-      if (error) throw error;
+      console.log('[TestOrgCreator] RPC Response:', { data, error });
+
+      if (error) {
+        console.error('[TestOrgCreator] RPC Error:', error);
+        setLastError(error.message || 'Database error occurred');
+        throw error;
+      }
+
+      if (!data || data.length === 0) {
+        console.error('[TestOrgCreator] Empty response from RPC');
+        setLastError('No response from server - function may not exist');
+        throw new Error('Empty response from create_test_organization');
+      }
 
       const result = data[0];
+      console.log('[TestOrgCreator] Result:', result);
+      
       if (result.success) {
         setCreatedOrg({
           organization_id: result.organization_id,
@@ -66,25 +92,32 @@ const TestOrganizationCreator = () => {
         });
         
         toast({
-          title: "Test Organization Created",
+          title: "Test Organization Created ✅",
           description: `"${orgName}" created successfully with ${credits} seats`,
         });
+        console.log('[TestOrgCreator] Success!', result);
       } else {
+        const errorMsg = result.message || 'Unknown error from function';
+        console.error('[TestOrgCreator] Function returned failure:', errorMsg);
+        setLastError(errorMsg);
         toast({
-          title: "Error",
-          description: result.message,
+          title: "Creation Failed",
+          description: errorMsg,
           variant: "destructive"
         });
       }
     } catch (error) {
-      console.error('Error creating test organization:', error);
+      console.error('[TestOrgCreator] Exception:', error);
+      const errorMsg = error instanceof Error ? error.message : 'Failed to create test organization';
+      setLastError(errorMsg);
       toast({
         title: "Error",
-        description: "Failed to create test organization",
+        description: errorMsg,
         variant: "destructive"
       });
     } finally {
       setIsCreating(false);
+      setCreationProgress('');
     }
   };
 
@@ -94,6 +127,7 @@ const TestOrganizationCreator = () => {
     setOrgName('');
     setContactEmail('');
     setCredits(10);
+    setLastError(null);
   };
 
   return (
@@ -142,14 +176,49 @@ const TestOrganizationCreator = () => {
                 />
               </div>
             </div>
+
+            {/* Progress indicator */}
+            {creationProgress && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>{creationProgress}</span>
+              </div>
+            )}
+
+            {/* Error display */}
+            {lastError && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription className="flex items-center justify-between">
+                  <span>{lastError}</span>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => setLastError(null)}
+                  >
+                    <RotateCcw className="h-3 w-3 mr-1" />
+                    Retry
+                  </Button>
+                </AlertDescription>
+              </Alert>
+            )}
             
             <Button
               onClick={createTestOrganization}
               disabled={isCreating || !orgName.trim() || !contactEmail.trim()}
               className="w-full md:w-auto"
             >
-              <Plus className="h-4 w-4 mr-1" />
-              {isCreating ? 'Creating...' : 'Create Test Organization'}
+              {isCreating ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <Plus className="h-4 w-4 mr-1" />
+                  Create Test Organization
+                </>
+              )}
             </Button>
           </CardContent>
         </Card>
