@@ -22,29 +22,42 @@ serve(async (req) => {
 
     console.log(`Password reset requested for: ${email}`);
 
-    // Rate limiting check
+    // Check if user exists in profiles
     const { data: user } = await supabase
       .from("profiles")
-      .select("user_id")
+      .select("user_id, first_name")
       .eq("email_cache", email)
       .single();
 
-    if (user?.user_id) {
-      const canProceed = await supabase.rpc("check_rate_limit", {
-        _user_id: user.user_id,
-        _action_type: "password_reset",
-        _max_requests: 3,
-        _window_minutes: 60,
-      });
+    // If no account found, return early with email_exists: false
+    if (!user?.user_id) {
+      console.log(`No account found for email: ${email}`);
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          email_exists: false,
+          message: "No account found with this email address" 
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 }
+      );
+    }
 
-      if (!canProceed.data) {
-        return new Response(
-          JSON.stringify({ 
-            error: "Too many password reset attempts. Please try again in 1 hour." 
-          }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 429 }
-        );
-      }
+    // Rate limiting check
+    const canProceed = await supabase.rpc("check_rate_limit", {
+      _user_id: user.user_id,
+      _action_type: "password_reset",
+      _max_requests: 3,
+      _window_minutes: 60,
+    });
+
+    if (!canProceed.data) {
+      return new Response(
+        JSON.stringify({ 
+          error: "Too many password reset attempts. Please try again in 1 hour.",
+          email_exists: true
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 429 }
+      );
     }
 
     // Generate secure token
@@ -52,20 +65,11 @@ serve(async (req) => {
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
     // Store token in database
-    if (user?.user_id) {
-      await supabase.from("password_reset_tokens").insert({
-        user_id: user.user_id,
-        token,
-        expires_at: expiresAt.toISOString(),
-      });
-    }
-
-    // Get user details
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("first_name")
-      .eq("email_cache", email)
-      .single();
+    await supabase.from("password_reset_tokens").insert({
+      user_id: user.user_id,
+      token,
+      expires_at: expiresAt.toISOString(),
+    });
 
     const resetUrl = `https://www.procannedu.com/auth?mode=reset&token=${token}`;
 
@@ -93,7 +97,7 @@ serve(async (req) => {
       <h1>🔐 Password Reset Request</h1>
     </div>
     <div class="content">
-      <h2>Hello ${profile?.first_name || 'there'}!</h2>
+      <h2>Hello ${user.first_name || 'there'}!</h2>
       <p>We received a request to reset your password for your ProCann Edu account.</p>
       
       <p>Click the button below to reset your password:</p>
@@ -101,11 +105,12 @@ serve(async (req) => {
       <a href="${resetUrl}" class="button">Reset Your Password</a>
       
       <div class="security-notice">
-        <strong>⚠️ Security Notice:</strong>
+        <strong>⚠️ Important - Read Before Clicking:</strong>
         <ul style="margin: 10px 0; padding-left: 20px;">
-          <li>This link will expire in 24 hours</li>
+          <li>This link expires in 24 hours</li>
+          <li><strong>Only click this link once</strong> - it becomes invalid after use</li>
+          <li>If you're on iOS, tap the link directly instead of letting Mail preview it</li>
           <li>If you didn't request this reset, please ignore this email</li>
-          <li>Never share this link with anyone</li>
         </ul>
       </div>
 
@@ -139,19 +144,18 @@ serve(async (req) => {
     );
 
     // Log in security audit
-    if (user?.user_id) {
-      await supabase.from("security_audit_log").insert({
-        user_id: user.user_id,
-        table_name: "password_reset_tokens",
-        action_type: "PASSWORD_RESET_REQUEST",
-        new_values: { token_expires_at: expiresAt.toISOString() },
-      });
-    }
+    await supabase.from("security_audit_log").insert({
+      user_id: user.user_id,
+      table_name: "password_reset_tokens",
+      action_type: "PASSWORD_RESET_REQUEST",
+      new_values: { token_expires_at: expiresAt.toISOString() },
+    });
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: "Password reset email sent if account exists" 
+        email_exists: true,
+        message: "Password reset email sent" 
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 }
     );

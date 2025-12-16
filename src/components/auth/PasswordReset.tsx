@@ -3,10 +3,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Lock, CheckCircle, AlertTriangle, Eye, EyeOff } from 'lucide-react';
+import { Lock, CheckCircle, AlertTriangle, Eye, EyeOff, ArrowRight, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { invokePublicFunction } from '@/lib/publicEdgeFunctions';
+
+type TokenError = 'expired' | 'used' | 'invalid' | 'missing' | null;
 
 export const PasswordReset: React.FC = () => {
   const [password, setPassword] = useState('');
@@ -16,6 +18,7 @@ export const PasswordReset: React.FC = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [validating, setValidating] = useState(true);
   const [tokenValid, setTokenValid] = useState(false);
+  const [tokenError, setTokenError] = useState<TokenError>(null);
   const [success, setSuccess] = useState(false);
   const [email, setEmail] = useState('');
   const [token, setToken] = useState('');
@@ -24,7 +27,7 @@ export const PasswordReset: React.FC = () => {
 
   useEffect(() => {
     validateToken();
-  }, [navigate]);
+  }, []);
 
   const validateToken = async () => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -34,12 +37,8 @@ export const PasswordReset: React.FC = () => {
     console.log('[PasswordReset] Validating token...', { mode, hasToken: !!resetToken });
     
     if (mode !== 'reset' || !resetToken) {
-      toast({
-        title: "Invalid Request",
-        description: "Missing password reset token",
-        variant: "destructive"
-      });
-      navigate('/auth');
+      setTokenError('missing');
+      setValidating(false);
       return;
     }
 
@@ -54,13 +53,16 @@ export const PasswordReset: React.FC = () => {
       console.log('[PasswordReset] Validation response:', { data, error });
 
       if (error || !data?.is_valid) {
-        toast({
-          title: "Invalid Token",
-          description: data?.error_message || "This password reset link is invalid or has expired",
-          variant: "destructive"
-        });
+        // Determine specific error type
+        const errorMsg = data?.error_message?.toLowerCase() || '';
+        if (errorMsg.includes('expired')) {
+          setTokenError('expired');
+        } else if (errorMsg.includes('used') || errorMsg.includes('already')) {
+          setTokenError('used');
+        } else {
+          setTokenError('invalid');
+        }
         setTokenValid(false);
-        setTimeout(() => navigate('/forgot-password'), 2000);
         return;
       }
 
@@ -68,11 +70,7 @@ export const PasswordReset: React.FC = () => {
       setTokenValid(true);
     } catch (error) {
       console.error('Token validation error:', error);
-      toast({
-        title: "Validation Error",
-        description: "Failed to validate reset token",
-        variant: "destructive"
-      });
+      setTokenError('invalid');
       setTokenValid(false);
     } finally {
       setValidating(false);
@@ -121,11 +119,6 @@ export const PasswordReset: React.FC = () => {
         description: "Your password has been successfully updated",
       });
 
-      // Redirect to login after 3 seconds
-      setTimeout(() => {
-        navigate('/auth');
-      }, 3000);
-
     } catch (error) {
       console.error('Password update error:', error);
       toast({
@@ -135,6 +128,44 @@ export const PasswordReset: React.FC = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Get error-specific messaging
+  const getErrorContent = () => {
+    switch (tokenError) {
+      case 'expired':
+        return {
+          title: 'Link Expired',
+          message: 'This password reset link has expired. Reset links are valid for 24 hours.',
+          icon: <AlertTriangle className="h-12 w-12 text-amber-500" />,
+          alertClass: 'border-amber-200 bg-amber-50',
+          textClass: 'text-amber-800'
+        };
+      case 'used':
+        return {
+          title: 'Link Already Used',
+          message: 'This password reset link has already been used. Each link can only be used once.',
+          icon: <AlertTriangle className="h-12 w-12 text-amber-500" />,
+          alertClass: 'border-amber-200 bg-amber-50',
+          textClass: 'text-amber-800'
+        };
+      case 'missing':
+        return {
+          title: 'Invalid Request',
+          message: 'No password reset token found. Please request a new password reset link.',
+          icon: <AlertTriangle className="h-12 w-12 text-destructive" />,
+          alertClass: 'border-destructive/20 bg-destructive/5',
+          textClass: 'text-destructive'
+        };
+      default:
+        return {
+          title: 'Invalid Reset Link',
+          message: 'This password reset link is invalid. Please request a new one.',
+          icon: <AlertTriangle className="h-12 w-12 text-destructive" />,
+          alertClass: 'border-destructive/20 bg-destructive/5',
+          textClass: 'text-destructive'
+        };
     }
   };
 
@@ -150,24 +181,35 @@ export const PasswordReset: React.FC = () => {
   }
 
   if (!tokenValid) {
+    const errorContent = getErrorContent();
     return (
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <AlertTriangle className="h-12 w-12 text-red-600" />
+            {errorContent.icon}
           </div>
-          <CardTitle>Invalid Reset Link</CardTitle>
+          <CardTitle>{errorContent.title}</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4 text-center">
-          <Alert className="border-red-200 bg-red-50">
-            <AlertDescription className="text-red-800">
-              This password reset link is invalid or has expired.
+        <CardContent className="space-y-4">
+          <Alert className={errorContent.alertClass}>
+            <AlertDescription className={errorContent.textClass}>
+              {errorContent.message}
             </AlertDescription>
           </Alert>
           
-          <p className="text-sm text-muted-foreground">
-            Redirecting you to request a new reset link...
-          </p>
+          <div className="space-y-2">
+            <Link to="/forgot-password">
+              <Button className="w-full">
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Request New Reset Link
+              </Button>
+            </Link>
+            <Link to="/auth">
+              <Button variant="outline" className="w-full">
+                Back to Login
+              </Button>
+            </Link>
+          </div>
         </CardContent>
       </Card>
     );
@@ -183,16 +225,19 @@ export const PasswordReset: React.FC = () => {
           <CardTitle>Password Updated!</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 text-center">
-          <Alert>
-            <CheckCircle className="h-4 w-4" />
-            <AlertDescription>
+          <Alert className="border-green-200 bg-green-50">
+            <CheckCircle className="h-4 w-4 text-green-600" />
+            <AlertDescription className="text-green-800">
               Your password has been successfully updated.
             </AlertDescription>
           </Alert>
           
-          <div className="text-sm text-muted-foreground">
-            <p>You will be redirected to the login page in a few seconds.</p>
-          </div>
+          <Link to="/auth">
+            <Button className="w-full">
+              <ArrowRight className="mr-2 h-4 w-4" />
+              Continue to Login
+            </Button>
+          </Link>
         </CardContent>
       </Card>
     );
