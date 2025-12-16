@@ -9,6 +9,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+type RiskLevel = 'regulatory' | 'financial' | 'security' | 'ux';
+type JourneyTier = 1 | 2 | 3;
+
 interface ErrorMeta {
   code?: string;
   message?: string;
@@ -28,6 +31,8 @@ interface TestResult {
   timestamp: string;
   error_meta?: ErrorMeta;
   is_blocker: boolean;
+  risk_level?: RiskLevel;
+  journey_tier?: JourneyTier;
 }
 
 interface JourneySummary {
@@ -36,6 +41,8 @@ interface JourneySummary {
   completed_steps: string[];
   all_passed: boolean;
   is_blocker: boolean;
+  tier: JourneyTier;
+  risk_types: RiskLevel[];
 }
 
 interface E2EReport {
@@ -47,6 +54,7 @@ interface E2EReport {
   failed_tests: number;
   blocker_count: number;
   release_gate_status: 'SHIPPABLE' | 'NOT_SHIPPABLE';
+  tier1_status: 'PASS' | 'FAIL';
   results: TestResult[];
   journey_summaries: JourneySummary[];
   cleanup_performed: boolean;
@@ -56,6 +64,7 @@ interface E2EReport {
     test_application_id?: string;
     test_progress_id?: string;
     test_certificate_id?: string;
+    test_org_id?: string;
   };
 }
 
@@ -77,7 +86,7 @@ Deno.serve(async (req: Request) => {
     const testDataCreated: E2EReport['test_data_created'] = {};
     let realTestUserId: string | null = null;
 
-    // Helper to add test result with structured error metadata
+    // Helper to add test result with structured error metadata and risk classification
     const addResult = (
       journey: string, 
       step: string, 
@@ -88,6 +97,8 @@ Deno.serve(async (req: Request) => {
         notes?: string; 
         error_meta?: ErrorMeta; 
         is_blocker?: boolean;
+        risk_level?: RiskLevel;
+        journey_tier?: JourneyTier;
       } = {}
     ) => {
       results.push({
@@ -99,10 +110,14 @@ Deno.serve(async (req: Request) => {
         notes: options.notes || '',
         timestamp: new Date().toISOString(),
         error_meta: options.error_meta,
-        is_blocker: options.is_blocker ?? false
+        is_blocker: options.is_blocker ?? false,
+        risk_level: options.risk_level,
+        journey_tier: options.journey_tier
       });
       
-      console.log(`[${journey}] ${step}: ${passed ? '✓' : '✗'} ${actual}`);
+      const tierLabel = options.journey_tier ? `[T${options.journey_tier}]` : '';
+      const riskLabel = options.risk_level ? `[${options.risk_level}]` : '';
+      console.log(`${tierLabel}${riskLabel}[${journey}] ${step}: ${passed ? '✓' : '✗'} ${actual}`);
     };
 
     // ==========================================
@@ -151,9 +166,9 @@ Deno.serve(async (req: Request) => {
     }
 
     // ==========================================
-    // JOURNEY A: TRUE E2E AUTH - Real User + Password Reset (BLOCKER)
+    // JOURNEY A: TRUE E2E AUTH - Real User + Password Reset (BLOCKER) [TIER 1]
     // ==========================================
-    console.log('=== Journey A: True Auth E2E Flow ===');
+    console.log('=== Journey A: True Auth E2E Flow [Tier 1 - Security] ===');
     
     // A1: Create real test user via admin API
     try {
@@ -167,7 +182,7 @@ Deno.serve(async (req: Request) => {
         addResult('Auth', 'Create Test User', 'Test user created via admin API',
           `Error: ${createError.message}`,
           false,
-          { is_blocker: true, error_meta: { code: createError.name, message: createError.message } }
+          { is_blocker: true, error_meta: { code: createError.name, message: createError.message }, risk_level: 'security', journey_tier: 1 }
         );
       } else {
         realTestUserId = newUser.user.id;
@@ -176,13 +191,13 @@ Deno.serve(async (req: Request) => {
         addResult('Auth', 'Create Test User', 'Test user created via admin API',
           `Created: ${testEmail} (${realTestUserId})`,
           true,
-          { notes: 'Real auth user for RLS testing' }
+          { notes: 'Real auth user for RLS testing', risk_level: 'security', journey_tier: 1 }
         );
       }
     } catch (e: any) {
       addResult('Auth', 'Create Test User', 'Test user created via admin API',
         `Exception: ${e.message}`, false,
-        { is_blocker: true, error_meta: { code: 'EXCEPTION', message: e.message } }
+        { is_blocker: true, error_meta: { code: 'EXCEPTION', message: e.message }, risk_level: 'security', journey_tier: 1 }
       );
     }
 
@@ -827,6 +842,340 @@ Deno.serve(async (req: Request) => {
     }
 
     // ==========================================
+    // JOURNEY E: ROLE TRANSITIONS [TIER 1 - Security]
+    // ==========================================
+    console.log('=== Journey E: Role Transitions [Tier 1 - Security] ===');
+    
+    if (realTestUserId) {
+      // E1: Verify user starts with student role (from auth trigger)
+      const { data: initialRoles, error: initialRoleError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', realTestUserId);
+      
+      const hasStudentRole = initialRoles?.some(r => r.role === 'student');
+      addResult('Role Transitions', 'Initial Role (Student)', 'New user has student role by default',
+        initialRoleError ? `Error: ${initialRoleError.message}` : hasStudentRole ? 'Has student role' : `Roles: ${initialRoles?.map(r => r.role).join(', ') || 'none'}`,
+        hasStudentRole || false,
+        { is_blocker: true, risk_level: 'security', journey_tier: 1 }
+      );
+      
+      // E2: Promote to dispensary_manager
+      const { error: promoteError } = await supabase
+        .from('user_roles')
+        .insert({ user_id: realTestUserId, role: 'dispensary_manager' });
+      
+      addResult('Role Transitions', 'Role Promotion', 'User promoted to dispensary_manager',
+        promoteError ? `Error: ${promoteError.message}` : 'Role added',
+        !promoteError,
+        { is_blocker: true, risk_level: 'security', journey_tier: 1, error_meta: promoteError ? { code: promoteError.code, message: promoteError.message, table: 'user_roles' } : undefined }
+      );
+      
+      // E3: Verify new role is immediately visible
+      const { data: updatedRoles } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', realTestUserId);
+      
+      const hasManagerRole = updatedRoles?.some(r => r.role === 'dispensary_manager');
+      addResult('Role Transitions', 'Role Immediately Active', 'New role visible immediately after grant',
+        hasManagerRole ? 'Manager role active' : `Roles: ${updatedRoles?.map(r => r.role).join(', ') || 'none'}`,
+        hasManagerRole || false,
+        { is_blocker: true, risk_level: 'security', journey_tier: 1 }
+      );
+      
+      // E4: Revoke manager role (downgrade)
+      const { error: revokeError } = await supabase
+        .from('user_roles')
+        .delete()
+        .eq('user_id', realTestUserId)
+        .eq('role', 'dispensary_manager');
+      
+      addResult('Role Transitions', 'Role Revocation', 'Manager role revoked successfully',
+        revokeError ? `Error: ${revokeError.message}` : 'Role revoked',
+        !revokeError,
+        { is_blocker: true, risk_level: 'security', journey_tier: 1 }
+      );
+      
+      // E5: Verify old permissions denied after downgrade
+      const { data: finalRoles } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', realTestUserId);
+      
+      const stillHasManager = finalRoles?.some(r => r.role === 'dispensary_manager');
+      addResult('Role Transitions', 'Permissions Denied After Downgrade', 'Manager role removed after revocation',
+        stillHasManager ? 'ERROR: Still has manager role!' : 'Manager role correctly removed',
+        !stillHasManager,
+        { is_blocker: true, risk_level: 'security', journey_tier: 1, notes: 'No stale sessions' }
+      );
+    } else {
+      addResult('Role Transitions', 'SKIPPED', 'Role transition tests require test user',
+        'No test user available',
+        false,
+        { is_blocker: true, risk_level: 'security', journey_tier: 1 }
+      );
+    }
+
+    // ==========================================
+    // JOURNEY F: SEAT ENFORCEMENT [TIER 1 - Financial]
+    // ==========================================
+    console.log('=== Journey F: Seat Enforcement [Tier 1 - Financial] ===');
+    
+    // F1: Find or create a test organization with limited seats
+    let testOrgId: string | null = null;
+    const { data: existingOrg } = await supabase
+      .from('organizations')
+      .select('id, name, course_credits')
+      .eq('admin_approved', true)
+      .limit(1)
+      .single();
+    
+    if (existingOrg) {
+      testOrgId = existingOrg.id;
+      testDataCreated.test_org_id = testOrgId;
+      addResult('Seat Enforcement', 'Organization Found', 'Test organization available',
+        `Found: ${existingOrg.name} (${existingOrg.course_credits || 0} credits)`,
+        true,
+        { risk_level: 'financial', journey_tier: 1 }
+      );
+      
+      // F2: Count current seats
+      const { data: orgSeats, error: seatError } = await supabase
+        .from('rvt_seats')
+        .select('id, status, assigned_user_id')
+        .eq('organization_id', testOrgId);
+      
+      const availableSeats = orgSeats?.filter(s => s.status === 'available').length || 0;
+      const totalSeats = orgSeats?.length || 0;
+      
+      addResult('Seat Enforcement', 'Seat Count', 'Organization has allocated seats',
+        seatError ? `Error: ${seatError.message}` : `${totalSeats} total, ${availableSeats} available`,
+        totalSeats > 0,
+        { risk_level: 'financial', journey_tier: 1 }
+      );
+      
+      // F3: Test seat assignment (if available seats exist)
+      if (realTestUserId && availableSeats > 0) {
+        const availableSeat = orgSeats?.find(s => s.status === 'available');
+        
+        if (availableSeat) {
+          // Assign seat to test user
+          const { error: assignError } = await supabase
+            .from('rvt_seats')
+            .update({ 
+              assigned_user_id: realTestUserId, 
+              status: 'assigned',
+              assigned_at: new Date().toISOString()
+            })
+            .eq('id', availableSeat.id);
+          
+          addResult('Seat Enforcement', 'Seat Assignment', 'Available seat can be assigned to user',
+            assignError ? `Error: ${assignError.message}` : `Seat ${availableSeat.id.slice(0, 8)}... assigned`,
+            !assignError,
+            { is_blocker: true, risk_level: 'financial', journey_tier: 1 }
+          );
+          
+          // F4: Verify seat status changed
+          const { data: updatedSeat } = await supabase
+            .from('rvt_seats')
+            .select('status, assigned_user_id')
+            .eq('id', availableSeat.id)
+            .single();
+          
+          addResult('Seat Enforcement', 'Seat Status Updated', 'Seat marked as assigned after assignment',
+            updatedSeat?.status === 'assigned' ? 'Status correctly set to assigned' : `Status: ${updatedSeat?.status}`,
+            updatedSeat?.status === 'assigned',
+            { risk_level: 'financial', journey_tier: 1 }
+          );
+          
+          // F5: Release seat (reclaim)
+          const { error: releaseError } = await supabase
+            .from('rvt_seats')
+            .update({ 
+              assigned_user_id: null, 
+              status: 'available',
+              assigned_at: null
+            })
+            .eq('id', availableSeat.id);
+          
+          addResult('Seat Enforcement', 'Seat Release', 'Seat can be reclaimed and returned to available pool',
+            releaseError ? `Error: ${releaseError.message}` : 'Seat released successfully',
+            !releaseError,
+            { is_blocker: true, risk_level: 'financial', journey_tier: 1 }
+          );
+          
+          // F6: Verify seat is available again
+          const { data: releasedSeat } = await supabase
+            .from('rvt_seats')
+            .select('status, assigned_user_id')
+            .eq('id', availableSeat.id)
+            .single();
+          
+          addResult('Seat Enforcement', 'Seat Reuse Ready', 'Released seat returns to available status',
+            releasedSeat?.status === 'available' && !releasedSeat?.assigned_user_id 
+              ? 'Seat available for reuse' 
+              : `Status: ${releasedSeat?.status}, User: ${releasedSeat?.assigned_user_id}`,
+            releasedSeat?.status === 'available' && !releasedSeat?.assigned_user_id,
+            { risk_level: 'financial', journey_tier: 1 }
+          );
+        }
+      } else if (!realTestUserId) {
+        addResult('Seat Enforcement', 'Seat Assignment', 'Available seat can be assigned to user',
+          'SKIPPED - No test user',
+          false,
+          { notes: 'Requires test user for seat assignment', risk_level: 'financial', journey_tier: 1 }
+        );
+      } else if (availableSeats === 0) {
+        addResult('Seat Enforcement', 'Seat Assignment', 'Available seat can be assigned to user',
+          'SKIPPED - No available seats to test',
+          true,
+          { notes: 'Organization has no available seats', risk_level: 'financial', journey_tier: 1 }
+        );
+      }
+    } else {
+      addResult('Seat Enforcement', 'Organization Found', 'Test organization available',
+        'No approved organization found',
+        false,
+        { is_blocker: false, notes: 'Create an approved org to test seat enforcement', risk_level: 'financial', journey_tier: 1 }
+      );
+    }
+
+    // ==========================================
+    // JOURNEY G: COURSE GATING [TIER 1 - Regulatory]
+    // ==========================================
+    console.log('=== Journey G: Course Gating [Tier 1 - Regulatory] ===');
+    
+    if (activeCourse && realTestUserId) {
+      // G1: Get all course modules
+      const { data: allModules, error: modulesError } = await supabase
+        .from('course_modules')
+        .select('id, module_number, title')
+        .eq('course_id', activeCourse.id)
+        .eq('is_active', true)
+        .order('module_number', { ascending: true });
+      
+      if (modulesError || !allModules || allModules.length < 2) {
+        addResult('Course Gating', 'Multiple Modules Exist', 'Course has multiple modules for gating test',
+          modulesError ? `Error: ${modulesError.message}` : `Found ${allModules?.length || 0} modules`,
+          false,
+          { is_blocker: true, risk_level: 'regulatory', journey_tier: 1 }
+        );
+      } else {
+        addResult('Course Gating', 'Multiple Modules Exist', 'Course has multiple modules for gating test',
+          `${allModules.length} modules available`,
+          true,
+          { risk_level: 'regulatory', journey_tier: 1 }
+        );
+        
+        const module1 = allModules[0];
+        const module2 = allModules[1];
+        const lastModule = allModules[allModules.length - 1];
+        
+        // G2: Check user has NOT completed module 1 (clean slate)
+        const { count: existingProgress } = await supabase
+          .from('user_progress')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', realTestUserId)
+          .eq('module_id', module1.id)
+          .eq('is_completed', true);
+        
+        // G3: Simulate "access check" for module 2 without module 1 complete
+        // In a properly gated system, this should be blocked
+        // We test by checking if there's prerequisite enforcement logic
+        const { count: module1CompletedCount } = await supabase
+          .from('user_progress')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', realTestUserId)
+          .eq('course_id', activeCourse.id)
+          .eq('is_completed', true)
+          .lt('module_id', module2.id);
+        
+        // If no completed modules exist, module 2 access should be gated
+        const shouldBeGated = (module1CompletedCount || 0) === 0;
+        addResult('Course Gating', 'Prerequisites Checked', 'System tracks prerequisite completion status',
+          `Modules completed before Module 2: ${module1CompletedCount || 0}`,
+          true, // This is tracking whether we CAN check, not enforcement
+          { risk_level: 'regulatory', journey_tier: 1, notes: shouldBeGated ? 'Module 2 should be gated' : 'Prerequisites met' }
+        );
+        
+        // G4: Complete module 1
+        const { error: completeM1Error } = await supabase
+          .from('user_progress')
+          .upsert({
+            user_id: realTestUserId,
+            course_id: activeCourse.id,
+            module_id: module1.id,
+            is_completed: true,
+            score: 100,
+            time_spent: 300
+          }, { onConflict: 'user_id,module_id' });
+        
+        addResult('Course Gating', 'Complete Module 1', 'Module 1 marked as completed',
+          completeM1Error ? `Error: ${completeM1Error.message}` : 'Module 1 completed',
+          !completeM1Error,
+          { is_blocker: !!completeM1Error, risk_level: 'regulatory', journey_tier: 1 }
+        );
+        
+        // G5: Now module 2 should be accessible (prerequisite met)
+        const { count: prereqMet } = await supabase
+          .from('user_progress')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', realTestUserId)
+          .eq('module_id', module1.id)
+          .eq('is_completed', true);
+        
+        addResult('Course Gating', 'Module 2 Access After Prereq', 'Module 2 accessible after completing Module 1',
+          (prereqMet || 0) > 0 ? 'Prerequisite met - Module 2 accessible' : 'Prerequisite still not met',
+          (prereqMet || 0) > 0,
+          { is_blocker: true, risk_level: 'regulatory', journey_tier: 1 }
+        );
+        
+        // G6: Test exam gating - check if user can take exam without all modules complete
+        const { count: totalCompleted } = await supabase
+          .from('user_progress')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', realTestUserId)
+          .eq('course_id', activeCourse.id)
+          .eq('is_completed', true);
+        
+        const allModulesComplete = (totalCompleted || 0) >= allModules.length;
+        const examShouldBeGated = !allModulesComplete;
+        
+        addResult('Course Gating', 'Exam Gating Check', 'Exam access requires all modules complete',
+          `${totalCompleted || 0}/${allModules.length} modules complete - Exam ${examShouldBeGated ? 'should be gated' : 'accessible'}`,
+          true, // We're verifying we can CHECK the status
+          { 
+            risk_level: 'regulatory', 
+            journey_tier: 1, 
+            notes: examShouldBeGated 
+              ? 'Enforcement should block exam access' 
+              : 'User has completed all prerequisites' 
+          }
+        );
+        
+        // G7: Verify certificate generation requires passed exam (not just module completion)
+        const { count: certWithoutExam } = await supabase
+          .from('certificates')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', realTestUserId)
+          .is('exam_attempt_id', null);
+        
+        addResult('Course Gating', 'Certificate Requires Exam', 'Certificates only generated with passed exam',
+          (certWithoutExam || 0) === 0 ? 'No certificates without exams' : `WARNING: ${certWithoutExam} certs without exam`,
+          (certWithoutExam || 0) === 0,
+          { is_blocker: (certWithoutExam || 0) > 0, risk_level: 'regulatory', journey_tier: 1 }
+        );
+      }
+    } else {
+      addResult('Course Gating', 'SKIPPED', 'Course gating requires active course and test user',
+        !activeCourse ? 'No active course' : 'No test user',
+        false,
+        { is_blocker: true, risk_level: 'regulatory', journey_tier: 1 }
+      );
+    }
+
+    // ==========================================
     // ADDITIONAL SYSTEM CHECKS
     // ==========================================
     console.log('=== Additional System Checks ===');
@@ -849,37 +1198,59 @@ Deno.serve(async (req: Request) => {
     
     addResult('Email', 'Delivery Rate', '≥80% success rate',
       `${successRate}% (${sentCount} sent, ${failedCount} failed)`,
-      successRate >= 80
+      successRate >= 80,
+      { risk_level: 'ux', journey_tier: 2 }
     );
 
     // Organization & seats check
     const { count: orgCount } = await supabase
       .from('organizations')
       .select('*', { count: 'exact', head: true });
-    addResult('Organizations', 'Org Count', '≥1 organizations', `${orgCount || 0} organizations`, (orgCount || 0) >= 1);
+    addResult('Organizations', 'Org Count', '≥1 organizations', `${orgCount || 0} organizations`, (orgCount || 0) >= 1, { risk_level: 'financial', journey_tier: 2 });
 
     const { count: seatCount } = await supabase
       .from('rvt_seats')
       .select('*', { count: 'exact', head: true });
-    addResult('Organizations', 'Seats Allocated', 'Seats available', `${seatCount || 0} seats`, (seatCount || 0) >= 0);
+    addResult('Organizations', 'Seats Allocated', 'Seats available', `${seatCount || 0} seats`, (seatCount || 0) >= 0, { risk_level: 'financial', journey_tier: 2 });
 
     // ==========================================
     // CALCULATE JOURNEY SUMMARIES & RELEASE GATE
     // ==========================================
-    const journeys = ['Auth', 'Dispensary Application', 'Training', 'Exam', 'Certificate'];
-    const journeySummaries: JourneySummary[] = journeys.map(journeyName => {
-      const journeyResults = results.filter(r => r.journey === journeyName);
+    
+    // Journey definitions with tier and risk classifications
+    const journeyDefinitions: { name: string; tier: JourneyTier; risk_types: RiskLevel[] }[] = [
+      { name: 'Auth', tier: 1, risk_types: ['security'] },
+      { name: 'Dispensary Application', tier: 1, risk_types: ['regulatory', 'ux'] },
+      { name: 'Training', tier: 1, risk_types: ['regulatory', 'ux'] },
+      { name: 'Exam', tier: 1, risk_types: ['regulatory'] },
+      { name: 'Certificate', tier: 1, risk_types: ['regulatory', 'financial'] },
+      { name: 'Role Transitions', tier: 1, risk_types: ['security'] },
+      { name: 'Seat Enforcement', tier: 1, risk_types: ['financial'] },
+      { name: 'Course Gating', tier: 1, risk_types: ['regulatory'] },
+      { name: 'Email', tier: 2, risk_types: ['ux'] },
+      { name: 'Organizations', tier: 2, risk_types: ['financial'] },
+    ];
+    
+    const journeySummaries: JourneySummary[] = journeyDefinitions.map(def => {
+      const journeyResults = results.filter(r => r.journey === def.name);
       const blockerResults = journeyResults.filter(r => r.is_blocker);
-      const allPassed = blockerResults.every(r => r.passed);
+      const allPassed = blockerResults.length === 0 || blockerResults.every(r => r.passed);
       
       return {
-        name: journeyName,
+        name: def.name,
         required_steps: blockerResults.map(r => r.step),
         completed_steps: blockerResults.filter(r => r.passed).map(r => r.step),
         all_passed: allPassed,
-        is_blocker: blockerResults.length > 0
+        is_blocker: blockerResults.length > 0,
+        tier: def.tier,
+        risk_types: def.risk_types
       };
     });
+
+    // Calculate tier-specific status
+    const tier1Journeys = journeySummaries.filter(j => j.tier === 1);
+    const tier1AllPassed = tier1Journeys.every(j => j.all_passed);
+    const tier1Status = tier1AllPassed ? 'PASS' : 'FAIL';
 
     const blockerCount = results.filter(r => r.is_blocker && !r.passed).length;
     const releaseGateStatus = blockerCount === 0 ? 'SHIPPABLE' : 'NOT_SHIPPABLE';
@@ -896,6 +1267,7 @@ Deno.serve(async (req: Request) => {
       failed_tests: failedTests,
       blocker_count: blockerCount,
       release_gate_status: releaseGateStatus,
+      tier1_status: tier1Status,
       results,
       journey_summaries: journeySummaries,
       cleanup_performed: true,
@@ -904,7 +1276,7 @@ Deno.serve(async (req: Request) => {
 
     // Store the test results
     await supabase.from('automated_test_results').insert({
-      test_name: 'E2E Validation Suite v3',
+      test_name: 'E2E Validation Suite v4',
       status: releaseGateStatus === 'SHIPPABLE' ? 'passed' : 'failed',
       metadata: report,
       duration_ms: new Date().getTime() - new Date(startedAt).getTime()

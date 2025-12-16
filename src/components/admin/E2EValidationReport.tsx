@@ -10,6 +10,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Loader2, CheckCircle, XCircle, Play, Download, Shield, ShieldAlert, Rocket, Ban, Copy, Filter } from 'lucide-react';
 import { toast } from 'sonner';
 
+type RiskLevel = 'regulatory' | 'financial' | 'security' | 'ux';
+type JourneyTier = 1 | 2 | 3;
+
 interface ErrorMeta {
   code?: string;
   message?: string;
@@ -29,6 +32,8 @@ interface TestResult {
   timestamp: string;
   error_meta?: ErrorMeta;
   is_blocker: boolean;
+  risk_level?: RiskLevel;
+  journey_tier?: JourneyTier;
 }
 
 interface JourneySummary {
@@ -37,6 +42,8 @@ interface JourneySummary {
   completed_steps: string[];
   all_passed: boolean;
   is_blocker: boolean;
+  tier: JourneyTier;
+  risk_types: RiskLevel[];
 }
 
 interface E2EReport {
@@ -48,6 +55,7 @@ interface E2EReport {
   failed_tests: number;
   blocker_count: number;
   release_gate_status: 'SHIPPABLE' | 'NOT_SHIPPABLE';
+  tier1_status: 'PASS' | 'FAIL';
   results: TestResult[];
   journey_summaries: JourneySummary[];
   cleanup_performed: boolean;
@@ -57,13 +65,28 @@ interface E2EReport {
     test_application_id?: string;
     test_progress_id?: string;
     test_certificate_id?: string;
+    test_org_id?: string;
   };
 }
+
+const RISK_COLORS: Record<RiskLevel, string> = {
+  regulatory: 'bg-purple-100 text-purple-700 border-purple-300',
+  financial: 'bg-emerald-100 text-emerald-700 border-emerald-300',
+  security: 'bg-red-100 text-red-700 border-red-300',
+  ux: 'bg-blue-100 text-blue-700 border-blue-300'
+};
+
+const TIER_LABELS: Record<JourneyTier, string> = {
+  1: 'Critical',
+  2: 'Recommended',
+  3: 'Compliance'
+};
 
 export const E2EValidationReport: React.FC = () => {
   const queryClient = useQueryClient();
   const [isRunning, setIsRunning] = useState(false);
   const [showBlockersOnly, setShowBlockersOnly] = useState(false);
+  const [tierFilter, setTierFilter] = useState<JourneyTier | 'all'>('all');
 
   // Fetch latest test results
   const { data: latestReport, isLoading } = useQuery({
@@ -142,9 +165,9 @@ export const E2EValidationReport: React.FC = () => {
   };
 
   const filteredResults = latestReport?.results 
-    ? showBlockersOnly 
-      ? latestReport.results.filter(r => r.is_blocker && !r.passed)
-      : latestReport.results
+    ? latestReport.results
+        .filter(r => showBlockersOnly ? (r.is_blocker && !r.passed) : true)
+        .filter(r => tierFilter === 'all' ? true : r.journey_tier === tierFilter)
     : [];
 
   return (
@@ -231,7 +254,18 @@ export const E2EValidationReport: React.FC = () => {
           </Card>
 
           {/* Summary Cards */}
-          <div className="grid gap-4 md:grid-cols-4">
+          <div className="grid gap-4 md:grid-cols-5">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Tier 1 Status</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className={`text-2xl font-bold ${latestReport.tier1_status === 'PASS' ? 'text-green-600' : 'text-red-600'}`}>
+                  {latestReport.tier1_status || 'N/A'}
+                </div>
+                <p className="text-xs text-muted-foreground">Critical journeys</p>
+              </CardContent>
+            </Card>
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium">Blockers</CardTitle>
@@ -284,7 +318,7 @@ export const E2EValidationReport: React.FC = () => {
               <CardDescription>Critical user journeys and their completion status</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 {latestReport.journey_summaries?.map((journey) => (
                   <div 
                     key={journey.name} 
@@ -295,7 +329,14 @@ export const E2EValidationReport: React.FC = () => {
                     }`}
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium">{journey.name}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">{journey.name}</span>
+                        {journey.tier && (
+                          <Badge variant="outline" className="text-xs">
+                            T{journey.tier}
+                          </Badge>
+                        )}
+                      </div>
                       {journey.all_passed ? (
                         <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300">
                           PASSED
@@ -309,6 +350,16 @@ export const E2EValidationReport: React.FC = () => {
                         <Badge variant="secondary">FAILED</Badge>
                       )}
                     </div>
+                    {/* Risk type badges */}
+                    {journey.risk_types && journey.risk_types.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-2">
+                        {journey.risk_types.map(risk => (
+                          <Badge key={risk} variant="outline" className={`text-xs ${RISK_COLORS[risk]}`}>
+                            {risk}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
                     <div className="text-sm text-muted-foreground">
                       {journey.completed_steps.length}/{journey.required_steps.length} required steps
                     </div>
@@ -317,7 +368,9 @@ export const E2EValidationReport: React.FC = () => {
                         <span className="text-red-600">Missing:</span>{' '}
                         {journey.required_steps
                           .filter(s => !journey.completed_steps.includes(s))
+                          .slice(0, 3)
                           .join(', ')}
+                        {journey.required_steps.filter(s => !journey.completed_steps.includes(s)).length > 3 && '...'}
                       </div>
                     )}
                   </div>
@@ -391,14 +444,42 @@ export const E2EValidationReport: React.FC = () => {
                   <CardTitle>Detailed Test Matrix</CardTitle>
                   <CardDescription>All test results with expected vs actual outcomes</CardDescription>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Filter className="h-4 w-4 text-muted-foreground" />
-                  <Switch 
-                    id="blockers-only"
-                    checked={showBlockersOnly} 
-                    onCheckedChange={setShowBlockersOnly} 
-                  />
-                  <Label htmlFor="blockers-only" className="text-sm">Blockers only</Label>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <Filter className="h-4 w-4 text-muted-foreground" />
+                    <Switch 
+                      id="blockers-only"
+                      checked={showBlockersOnly} 
+                      onCheckedChange={setShowBlockersOnly} 
+                    />
+                    <Label htmlFor="blockers-only" className="text-sm">Blockers only</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">Tier:</span>
+                    <div className="flex gap-1">
+                      <Button 
+                        variant={tierFilter === 'all' ? 'default' : 'outline'} 
+                        size="sm"
+                        onClick={() => setTierFilter('all')}
+                      >
+                        All
+                      </Button>
+                      <Button 
+                        variant={tierFilter === 1 ? 'default' : 'outline'} 
+                        size="sm"
+                        onClick={() => setTierFilter(1)}
+                      >
+                        T1
+                      </Button>
+                      <Button 
+                        variant={tierFilter === 2 ? 'default' : 'outline'} 
+                        size="sm"
+                        onClick={() => setTierFilter(2)}
+                      >
+                        T2
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </CardHeader>
@@ -428,13 +509,23 @@ export const E2EValidationReport: React.FC = () => {
                       }
                     >
                       <TableCell>
-                        {result.is_blocker ? (
-                          <Badge variant="outline" className="text-xs bg-amber-100 text-amber-700 border-amber-300">
-                            GATE
-                          </Badge>
-                        ) : (
-                          <span className="text-xs text-muted-foreground">check</span>
-                        )}
+                        <div className="flex flex-col gap-1">
+                          {result.is_blocker ? (
+                            <Badge variant="outline" className="text-xs bg-amber-100 text-amber-700 border-amber-300 w-fit">
+                              GATE
+                            </Badge>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">check</span>
+                          )}
+                          {result.journey_tier && (
+                            <Badge variant="outline" className="text-xs w-fit">T{result.journey_tier}</Badge>
+                          )}
+                          {result.risk_level && (
+                            <Badge variant="outline" className={`text-xs w-fit ${RISK_COLORS[result.risk_level]}`}>
+                              {result.risk_level}
+                            </Badge>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell className="font-medium">{result.journey}</TableCell>
                       <TableCell>{result.step}</TableCell>
