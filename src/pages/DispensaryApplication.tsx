@@ -61,32 +61,15 @@ const DispensaryApplication = () => {
     console.log('Submitting application with data:', sanitizedData);
     
     try {
-      const { data: result, error } = await supabase.functions.invoke('submit-dispensary-application', {
-        body: sanitizedData
-      });
+      const { data: result, error, raw } = await invokePublicFunction('submit-dispensary-application', sanitizedData);
 
-      console.log('Submission response:', { result, error });
+      console.log('Submission response:', { result, error, raw });
 
       if (error) {
-        console.error('Submission error details:', {
-          message: error.message,
-          name: error.name,
-          context: error.context,
-          stack: error.stack
-        });
+        console.error('Submission error:', error.message);
         
-        // Parse error response if it contains JSON
-        let errorData: any = null;
-        try {
-          if (error.context?.body) {
-            errorData = JSON.parse(error.context.body);
-          }
-        } catch (e) {
-          // Not JSON, use raw message
-        }
-        
-        const errorCode = errorData?.code || error.message;
-        const errorDetails = errorData?.details || [];
+        const errorCode = raw?.code || error.message;
+        const errorDetails = raw?.details || [];
         
         if (errorCode?.includes('RATE_LIMIT_EXCEEDED')) {
           toast({
@@ -119,7 +102,7 @@ const DispensaryApplication = () => {
         if (errorCode?.includes('CONSTRAINT_VIOLATION')) {
           toast({
             title: "Invalid Data",
-            description: errorData?.error || "Please check your inputs and try again.",
+            description: raw?.error || "Please check your inputs and try again.",
             variant: "destructive",
           });
           return;
@@ -135,31 +118,11 @@ const DispensaryApplication = () => {
         duration: 6000,
       });
     } catch (error: any) {
-      console.error('Submission error (catch):', {
-        message: error.message,
-        name: error.name,
-        stack: error.stack,
-        fullError: error
-      });
-      
-      let errorMessage = "Please try again or contact support@procannedu.com";
-      
-      // Check for specific error types
-      if (error.message?.includes('401') || error.message?.includes('Missing authorization') || error.message?.includes('JWT')) {
-        errorMessage = "Service temporarily unavailable. Our team has been notified. Please try again in a few minutes.";
-      } else if (error.message?.includes('network') || error.message?.includes('fetch') || error.message?.includes('Failed to fetch')) {
-        errorMessage = "Network error. Please check your connection and try again.";
-      } else if (error.message?.includes('timeout') || error.message?.includes('timed out')) {
-        errorMessage = "Request timed out. Please try again.";
-      } else if (error.message?.includes('500') || error.message?.includes('Internal Server Error')) {
-        errorMessage = "Server error occurred. Please try again in a few moments.";
-      } else if (error.message?.includes('23514') || error.message?.includes('check constraint')) {
-        errorMessage = "Invalid data format. Please verify all fields are correct.";
-      }
+      console.error('Submission error:', error.message);
       
       toast({
         title: "Submission Failed",
-        description: errorMessage,
+        description: "Please try again or contact support@procannedu.com",
         variant: "destructive",
       });
     }
