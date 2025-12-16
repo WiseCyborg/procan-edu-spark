@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, Lock, Video as VideoIcon, AlertTriangle } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import DOMPurify from 'dompurify';
+import { PaginatedContent } from './PaginatedContent';
 
 export interface Lesson {
   id: string;
@@ -13,6 +14,7 @@ export interface Lesson {
   videoType: 'embed' | 'file' | 'none';
   videoUrl?: string;
   htmlSummary: string;
+  markdownContent?: string; // Raw markdown for paginated display
   resourceLinks: { label: string; href: string }[];
 }
 
@@ -38,8 +40,10 @@ export const SCORMStylePlayer: React.FC<SCORMStylePlayerProps> = ({
   onDocumentOpen,
 }) => {
   const storageKey = `procan-course-progress:${config.id}`;
+  const sectionStorageKey = `procan-section-progress:${config.id}`;
   const [completedLessonIds, setCompletedLessonIds] = useState<string[]>([]);
   const [activeLessonIndex, setActiveLessonIndex] = useState(0);
+  const [sectionByLesson, setSectionByLesson] = useState<Record<string, number>>({});
 
   // Load progress from localStorage
   useEffect(() => {
@@ -48,10 +52,15 @@ export const SCORMStylePlayer: React.FC<SCORMStylePlayerProps> = ({
       if (raw) {
         setCompletedLessonIds(JSON.parse(raw));
       }
+      // Load section progress
+      const sectionRaw = localStorage.getItem(sectionStorageKey);
+      if (sectionRaw) {
+        setSectionByLesson(JSON.parse(sectionRaw));
+      }
     } catch (e) {
       console.warn('Course progress load failed', e);
     }
-  }, [storageKey]);
+  }, [storageKey, sectionStorageKey]);
 
   // Save progress to localStorage
   const saveProgress = (lessonIds: string[]) => {
@@ -60,6 +69,22 @@ export const SCORMStylePlayer: React.FC<SCORMStylePlayerProps> = ({
     } catch (e) {
       console.warn('Course progress save failed', e);
     }
+  };
+
+  // Save section progress
+  const saveSectionProgress = (sections: Record<string, number>) => {
+    try {
+      localStorage.setItem(sectionStorageKey, JSON.stringify(sections));
+    } catch (e) {
+      console.warn('Section progress save failed', e);
+    }
+  };
+
+  // Handle section change within a lesson
+  const handleSectionChange = (lessonId: string, page: number) => {
+    const newSections = { ...sectionByLesson, [lessonId]: page };
+    setSectionByLesson(newSections);
+    saveSectionProgress(newSections);
   };
 
   // Calculate progress percentage
@@ -223,16 +248,25 @@ export const SCORMStylePlayer: React.FC<SCORMStylePlayerProps> = ({
 
         {/* Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-4">
-          {/* Lesson Summary */}
+          {/* Lesson Summary - Now Paginated */}
           <Card>
             <CardContent className="p-4">
-              <h3 className="text-sm font-semibold mb-2">Lesson Summary</h3>
-              <div 
-                className="prose prose-sm dark:prose-invert max-w-none"
-                dangerouslySetInnerHTML={{ 
-                  __html: DOMPurify.sanitize(activeLesson.htmlSummary) 
-                }}
-              />
+              <h3 className="text-sm font-semibold mb-3">Lesson Content</h3>
+              {activeLesson.markdownContent ? (
+                <PaginatedContent
+                  content={activeLesson.markdownContent}
+                  initialPage={sectionByLesson[activeLesson.id] || 0}
+                  onPageChange={(page) => handleSectionChange(activeLesson.id, page)}
+                  onComplete={() => markLessonCompleted(activeLesson.id)}
+                />
+              ) : (
+                <div 
+                  className="prose prose-sm dark:prose-invert max-w-none"
+                  dangerouslySetInnerHTML={{ 
+                    __html: DOMPurify.sanitize(activeLesson.htmlSummary) 
+                  }}
+                />
+              )}
             </CardContent>
           </Card>
 
