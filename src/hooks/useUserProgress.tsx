@@ -188,6 +188,36 @@ export const useUserProgress = (courseId?: string) => {
     },
   });
 
+  // Module UUID mapping - maps module numbers to database UUIDs
+  const MODULE_UUID_MAP: Record<number, string> = {
+    0: 'f543fad9-fb96-485c-9ca0-980564acc559',
+    1: 'f31492ad-f497-463f-9e30-9333ff42a54e',
+    2: '3b7d23c0-c7d9-48ea-ac75-17e515e6304a',
+    3: '949aee25-1254-4dfe-a22b-e17912670ba7',
+    4: '14d0aa9f-4436-460c-a76b-52f07ba33bf3',
+    5: '00daed9a-9d63-4b21-ae90-7444816cb783',
+    6: '9b4ccbb6-e96a-4d7e-9862-d33082cf35dc',
+    7: 'b610259f-7bd4-4f77-9350-7c2c29939432',
+    8: 'dbacc5bc-e14c-470a-a0ba-852df2b41220',
+    9: 'b49e8150-f795-4d6f-a501-35d5e1f5aacf',
+    10: '7c10652a-202b-459a-b02c-9020906b1888',
+    11: 'f2eaecb3-603b-4f9e-90ea-254f57774b8f',
+    12: 'f39ac55c-6ee4-4a49-a739-8a0bb6869fc8',
+    13: '3f0bad34-49ef-4ed7-8ade-6785dd35719a',
+    14: 'b8d16c7f-10e6-40d5-b766-721839038f5e',
+    15: 'd1c88334-3ef4-488b-8d9e-cda14d8199f8',
+    16: '8c8cc197-94c8-4633-88e2-dc1e73566079',
+    17: 'f0b3a393-7486-4f20-8bab-83711606105e',
+    18: '0365fffa-3111-400b-bcea-54eacd3f13ef',
+    19: 'ec62fe97-9a99-4cec-b25c-7ecbedebbd55',
+    20: '63d100f8-ad66-4c21-a743-b01df46b94df',
+    21: '0afce5e1-eff1-41c2-b7a6-3a67511c43dc',
+    22: '4c8c78c9-6080-40c3-98c0-9930389f771a',
+    23: 'bdbbc605-a8f8-4a65-ba9a-a2451198174c',
+  };
+
+  const TOTAL_MODULES = 24; // Modules 0-23
+
   // Helper functions
   const getModuleProgress = (moduleId: string): ModuleProgress | null => {
     if (!progressData) return null;
@@ -217,8 +247,55 @@ export const useUserProgress = (courseId?: string) => {
     return Math.round(totalScore / completedModules.length);
   };
 
+  // Check if module is completed by UUID
   const isModuleCompleted = (moduleId: string): boolean => {
     return getModuleProgress(moduleId)?.isCompleted || false;
+  };
+
+  // Check if module is completed by module number (0-23)
+  const isModuleCompletedByNumber = (moduleNumber: number): boolean => {
+    const uuid = MODULE_UUID_MAP[moduleNumber];
+    if (!uuid) return false;
+    return isModuleCompleted(uuid);
+  };
+
+  // Get module UUID from number
+  const getModuleUUID = (moduleNumber: number): string | undefined => {
+    return MODULE_UUID_MAP[moduleNumber];
+  };
+
+  // Check if user can access a module (prerequisite check)
+  const canAccessModule = (moduleNumber: number): boolean => {
+    // Module 0 is always accessible
+    if (moduleNumber === 0) return true;
+    
+    // All previous modules must be completed
+    for (let i = 0; i < moduleNumber; i++) {
+      if (!isModuleCompletedByNumber(i)) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  // Check if all modules are completed (for exam access)
+  const areAllModulesCompleted = (): boolean => {
+    for (let i = 0; i < TOTAL_MODULES; i++) {
+      if (!isModuleCompletedByNumber(i)) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  // Get first incomplete module number
+  const getFirstIncompleteModule = (): number => {
+    for (let i = 0; i < TOTAL_MODULES; i++) {
+      if (!isModuleCompletedByNumber(i)) {
+        return i;
+      }
+    }
+    return TOTAL_MODULES; // All complete
   };
 
   const updateProgress = async (
@@ -275,9 +352,15 @@ export const useUserProgress = (courseId?: string) => {
     getCompletedModulesCount,
     getTotalScore,
     isModuleCompleted,
+    isModuleCompletedByNumber,
+    getModuleUUID,
+    canAccessModule,
+    areAllModulesCompleted,
+    getFirstIncompleteModule,
     updateProgress,
     migrateFromLocalStorage,
-    isUpdating: updateProgressMutation.isPending
+    isUpdating: updateProgressMutation.isPending,
+    TOTAL_MODULES,
   };
 };
 

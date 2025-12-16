@@ -11,8 +11,9 @@ import { ProtectedCourseAccess } from '@/components/ProtectedCourseAccess';
 import { RemedialRecommendations } from '@/components/exam/RemedialRecommendations';
 import { ExamAttemptHistory } from '@/components/exam/ExamAttemptHistory';
 import { useExamAttempts } from '@/hooks/useExamAttempts';
+import { useUserProgress } from '@/hooks/useUserProgress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Clock, History } from 'lucide-react';
+import { Clock, History, AlertTriangle, BookOpen } from 'lucide-react';
 
 interface QuizQuestion {
   q: string;
@@ -49,9 +50,21 @@ interface TopicScore {
   needs_remediation: boolean;
 }
 
+const COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
+
 const FinalExam: React.FC = () => {
   const navigate = useNavigate();
   const [showHistory, setShowHistory] = useState(false);
+  const [moduleGatingChecked, setModuleGatingChecked] = useState(false);
+  
+  // Use user progress hook for module completion checking
+  const { 
+    areAllModulesCompleted, 
+    getCompletedModulesCount, 
+    getFirstIncompleteModule,
+    isLoading: progressLoading,
+    TOTAL_MODULES 
+  } = useUserProgress(COURSE_ID);
   
   // Use exam attempts hook for cooldown and history
   const {
@@ -219,21 +232,24 @@ const FinalExam: React.FC = () => {
 
   // Check if all modules are completed before allowing exam access
   useEffect(() => {
-    try {
-      const completedModules = JSON.parse(localStorage.getItem('completedModules') || '{}');
-      const moduleCount = Object.keys(completedModules).length;
-      
-      // Uncomment this for production to enforce module completion
-      /*
-      if (moduleCount < TOTAL_MODULES) {
-        toast.error("You must complete all modules before taking the final exam.");
-        navigate('/course');
-      }
-      */
-    } catch (error) {
-      console.error('Error checking module completion:', error);
+    if (progressLoading) return;
+    
+    const allComplete = areAllModulesCompleted();
+    const completedCount = getCompletedModulesCount();
+    
+    if (!allComplete) {
+      const firstIncomplete = getFirstIncompleteModule();
+      toast.error(
+        `You must complete all ${TOTAL_MODULES} modules before taking the final exam. ` +
+        `You have completed ${completedCount} of ${TOTAL_MODULES}. ` +
+        `Please complete Module ${firstIncomplete} next.`
+      );
+      navigate('/course');
+      return;
     }
-  }, [navigate]);
+    
+    setModuleGatingChecked(true);
+  }, [progressLoading, areAllModulesCompleted, getCompletedModulesCount, getFirstIncompleteModule, navigate, TOTAL_MODULES]);
 
   useEffect(() => {
     // Get user's IP address
@@ -950,6 +966,23 @@ const FinalExam: React.FC = () => {
       />
     );
   };
+
+  // Show loading while checking module completion
+  if (progressLoading || !moduleGatingChecked) {
+    return (
+      <ProtectedCourseAccess requiresCompleteProfile={true}>
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-md mx-auto text-center">
+            <div className="animate-pulse space-y-4">
+              <div className="h-8 bg-muted rounded w-3/4 mx-auto"></div>
+              <div className="h-4 bg-muted rounded w-1/2 mx-auto"></div>
+              <p className="text-muted-foreground mt-4">Verifying course completion...</p>
+            </div>
+          </div>
+        </div>
+      </ProtectedCourseAccess>
+    );
+  }
 
   return (
     <ProtectedCourseAccess requiresCompleteProfile={true}>
