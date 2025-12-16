@@ -4,8 +4,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Loader2, CheckCircle, XCircle, AlertTriangle, Play, Download, Shield, ShieldAlert, Rocket, Ban } from 'lucide-react';
+import { Loader2, CheckCircle, XCircle, Play, Download, Shield, ShieldAlert, Rocket, Ban, Copy, Filter } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface ErrorMeta {
@@ -51,6 +53,7 @@ interface E2EReport {
   cleanup_performed: boolean;
   test_data_created: {
     test_user_email?: string;
+    test_user_id?: string;
     test_application_id?: string;
     test_progress_id?: string;
     test_certificate_id?: string;
@@ -60,6 +63,7 @@ interface E2EReport {
 export const E2EValidationReport: React.FC = () => {
   const queryClient = useQueryClient();
   const [isRunning, setIsRunning] = useState(false);
+  const [showBlockersOnly, setShowBlockersOnly] = useState(false);
 
   // Fetch latest test results
   const { data: latestReport, isLoading } = useQuery({
@@ -112,6 +116,21 @@ export const E2EValidationReport: React.FC = () => {
     a.click();
   };
 
+  // Copy blocker details to clipboard
+  const copyBlockerText = () => {
+    if (!latestReport) return;
+    const blockers = latestReport.results.filter(r => !r.passed && r.is_blocker);
+    const text = blockers.map(b => 
+      `❌ [${b.journey}] ${b.step}\n   Expected: ${b.expected}\n   Actual: ${b.actual}${b.error_meta?.code ? `\n   Error Code: ${b.error_meta.code}` : ''}${b.error_meta?.table ? `\n   Table: ${b.error_meta.table}` : ''}${b.notes ? `\n   Notes: ${b.notes}` : ''}`
+    ).join('\n\n');
+    
+    navigator.clipboard.writeText(text).then(() => {
+      toast.success('Blocker details copied to clipboard');
+    }).catch(() => {
+      toast.error('Failed to copy to clipboard');
+    });
+  };
+
   const getStatusIcon = (passed: boolean, isBlocker: boolean) => {
     if (passed) {
       return <CheckCircle className="h-4 w-4 text-green-500" />;
@@ -121,6 +140,12 @@ export const E2EValidationReport: React.FC = () => {
     }
     return <XCircle className="h-4 w-4 text-red-500" />;
   };
+
+  const filteredResults = latestReport?.results 
+    ? showBlockersOnly 
+      ? latestReport.results.filter(r => r.is_blocker && !r.passed)
+      : latestReport.results
+    : [];
 
   return (
     <div className="space-y-6">
@@ -148,10 +173,18 @@ export const E2EValidationReport: React.FC = () => {
             )}
           </Button>
           {latestReport && (
-            <Button variant="outline" onClick={exportReport}>
-              <Download className="mr-2 h-4 w-4" />
-              Export Report
-            </Button>
+            <>
+              <Button variant="outline" onClick={exportReport}>
+                <Download className="mr-2 h-4 w-4" />
+                Export
+              </Button>
+              {latestReport.blocker_count > 0 && (
+                <Button variant="outline" onClick={copyBlockerText}>
+                  <Copy className="mr-2 h-4 w-4" />
+                  Copy Blockers
+                </Button>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -297,10 +330,16 @@ export const E2EValidationReport: React.FC = () => {
           {latestReport.blocker_count > 0 && (
             <Card className="border-red-300 bg-red-50 dark:bg-red-950/20">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-red-700">
-                  <ShieldAlert className="h-5 w-5" />
-                  Release Blockers ({latestReport.blocker_count})
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2 text-red-700">
+                    <ShieldAlert className="h-5 w-5" />
+                    Release Blockers ({latestReport.blocker_count})
+                  </CardTitle>
+                  <Button variant="outline" size="sm" onClick={copyBlockerText}>
+                    <Copy className="mr-2 h-3 w-3" />
+                    Copy All
+                  </Button>
+                </div>
                 <CardDescription className="text-red-600">
                   These issues must be resolved before the system can be shipped
                 </CardDescription>
@@ -347,8 +386,21 @@ export const E2EValidationReport: React.FC = () => {
           {/* Detailed Results Table */}
           <Card>
             <CardHeader>
-              <CardTitle>Detailed Test Matrix</CardTitle>
-              <CardDescription>All test results with expected vs actual outcomes</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Detailed Test Matrix</CardTitle>
+                  <CardDescription>All test results with expected vs actual outcomes</CardDescription>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Filter className="h-4 w-4 text-muted-foreground" />
+                  <Switch 
+                    id="blockers-only"
+                    checked={showBlockersOnly} 
+                    onCheckedChange={setShowBlockersOnly} 
+                  />
+                  <Label htmlFor="blockers-only" className="text-sm">Blockers only</Label>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <Table>
@@ -364,7 +416,7 @@ export const E2EValidationReport: React.FC = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {latestReport.results.map((result, idx) => (
+                  {filteredResults.map((result, idx) => (
                     <TableRow 
                       key={idx} 
                       className={
@@ -424,6 +476,12 @@ export const E2EValidationReport: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="grid gap-2 text-sm">
+                  {latestReport.test_data_created.test_user_email && (
+                    <div><span className="text-muted-foreground">Test User:</span> {latestReport.test_data_created.test_user_email}</div>
+                  )}
+                  {latestReport.test_data_created.test_user_id && (
+                    <div><span className="text-muted-foreground">User ID:</span> {latestReport.test_data_created.test_user_id}</div>
+                  )}
                   {latestReport.test_data_created.test_application_id && (
                     <div><span className="text-muted-foreground">Application ID:</span> {latestReport.test_data_created.test_application_id}</div>
                   )}
@@ -441,12 +499,21 @@ export const E2EValidationReport: React.FC = () => {
       ) : (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
-            <AlertTriangle className="h-12 w-12 text-muted-foreground mb-4" />
+            <Shield className="h-16 w-16 text-muted-foreground mb-4" />
             <h3 className="text-lg font-medium mb-2">No Validation Report Found</h3>
-            <p className="text-muted-foreground mb-4">Run the E2E validation to test all critical user journeys</p>
+            <p className="text-muted-foreground mb-4">Run the E2E validation suite to generate a report</p>
             <Button onClick={() => runValidation.mutate()} disabled={isRunning}>
-              <Play className="mr-2 h-4 w-4" />
-              Run First Validation
+              {isRunning ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Running...
+                </>
+              ) : (
+                <>
+                  <Play className="mr-2 h-4 w-4" />
+                  Run E2E Validation
+                </>
+              )}
             </Button>
           </CardContent>
         </Card>
@@ -454,5 +521,3 @@ export const E2EValidationReport: React.FC = () => {
     </div>
   );
 };
-
-export default E2EValidationReport;
