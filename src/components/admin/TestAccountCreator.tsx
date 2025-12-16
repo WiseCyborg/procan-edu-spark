@@ -105,69 +105,95 @@ const TestAccountCreator = () => {
     }
   };
 
-  const createFullTestSuite = async () => {
+  const [creationProgress, setCreationProgress] = useState<string | null>(null);
+  const [lastError, setLastError] = useState<string | null>(null);
+
+  const createFullTestSuite = async (retry = false) => {
     setIsCreating(true);
-    setCreatedAccounts([]);
-    setTestOrgInfo(null);
+    setLastError(null);
+    if (!retry) {
+      setCreatedAccounts([]);
+      setTestOrgInfo(null);
+    }
 
     try {
+      console.log('[TestAccountCreator] Starting full test suite creation...');
+      setCreationProgress('Initializing demo environment...');
+      
       toast({
         title: "Creating Demo Accounts",
         description: "Setting up complete demo environment...",
       });
 
+      console.log('[TestAccountCreator] Invoking create-demo-accounts edge function...');
       const { data, error } = await supabase.functions.invoke('create-demo-accounts');
 
+      console.log('[TestAccountCreator] Edge function response:', { data, error });
+
       if (error) {
-        console.error('Edge function invocation error:', error);
+        const errorMsg = error.message || "Could not reach demo account creation service";
+        console.error('[TestAccountCreator] Edge function invocation error:', error);
+        setLastError(errorMsg);
         toast({
           title: "Function Error",
-          description: error.message || "Could not reach demo account creation service. Check console for details.",
+          description: `${errorMsg}. Check console for details.`,
           variant: "destructive"
         });
         setIsCreating(false);
+        setCreationProgress(null);
         return;
       }
 
       if (!data) {
-        console.error('No data returned from edge function');
+        const errorMsg = "The demo account service didn't return any data";
+        console.error('[TestAccountCreator] No data returned from edge function');
+        setLastError(errorMsg);
         toast({
           title: "No Response",
-          description: "The demo account service didn't return any data",
+          description: errorMsg,
           variant: "destructive"
         });
         setIsCreating(false);
+        setCreationProgress(null);
         return;
       }
 
       if (!data.success) {
-        console.error('Demo creation failed:', data);
+        const errorMsg = data.error || data.message || 'Failed to create demo accounts';
+        console.error('[TestAccountCreator] Demo creation failed:', data);
+        setLastError(errorMsg);
         toast({
           title: "Creation Failed",
-          description: data.error || data.message || 'Failed to create demo accounts',
+          description: errorMsg,
           variant: "destructive"
         });
         setIsCreating(false);
+        setCreationProgress(null);
         return;
       }
 
       // Success path
+      console.log('[TestAccountCreator] Success! Created accounts:', data.accounts);
       setCreatedAccounts(data.accounts);
       setTestOrgInfo(data.organization);
+      setCreationProgress(null);
 
       toast({
         title: "✅ Demo Accounts Created!",
         description: `Created ${data.accounts.length} accounts successfully`,
       });
     } catch (error) {
-      console.error('Error creating test suite:', error);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error occurred';
+      console.error('[TestAccountCreator] Error creating test suite:', error);
+      setLastError(errorMsg);
       toast({
         title: "Error",
-        description: "Failed to create test suite",
+        description: `Failed to create test suite: ${errorMsg}`,
         variant: "destructive"
       });
     } finally {
       setIsCreating(false);
+      setCreationProgress(null);
     }
   };
 
@@ -272,10 +298,36 @@ const TestAccountCreator = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Progress indicator */}
+          {creationProgress && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+              <span className="text-sm text-blue-700">{creationProgress}</span>
+            </div>
+          )}
+
+          {/* Error with retry */}
+          {lastError && !isCreating && (
+            <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
+              <div className="flex items-start gap-2">
+                <span className="text-sm text-destructive font-medium">Error: {lastError}</span>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="mt-2"
+                onClick={() => createFullTestSuite(true)}
+              >
+                <Loader2 className="h-3 w-3 mr-1" />
+                Retry
+              </Button>
+            </div>
+          )}
+
           {/* Quick Actions */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Button 
-              onClick={createFullTestSuite} 
+              onClick={() => createFullTestSuite()} 
               disabled={isCreating}
               className="w-full"
               size="lg"
