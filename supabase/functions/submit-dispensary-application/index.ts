@@ -8,20 +8,36 @@ const corsHeaders = {
 };
 
 // Server-side validation schema
+// Helper to check if date is today or later
+const isTodayOrLater = (dateString: string) => {
+  const selectedDate = new Date(dateString);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  selectedDate.setHours(0, 0, 0, 0);
+  return selectedDate >= today;
+};
+
 const DispensaryApplicationSchema = z.object({
   organizationName: z.string().trim().min(2).max(200).regex(/^[a-zA-Z0-9\s&.,'-]+$/),
   legalEntityName: z.string().trim().min(2).max(200),
   dbaName: z.string().trim().max(200).optional(),
   licenseType: z.enum(['dispensary', 'processor', 'grower', 'other']),
-  licenseNumber: z.string().trim().min(3).max(50).regex(/^[A-Z0-9-]+$/),
-  licenseIssueDate: z.string().refine((date) => !isNaN(Date.parse(date)) && new Date(date) <= new Date()),
-  licenseExpiryDate: z.string().refine((date) => !isNaN(Date.parse(date)) && new Date(date) > new Date()),
+  // Transform to uppercase before validation to match frontend case-insensitive behavior
+  licenseNumber: z.string().trim().min(3).max(50)
+    .transform(val => val.toUpperCase())
+    .pipe(z.string().regex(/^[A-Z0-9-]+$/, "License number must contain only letters, numbers, and hyphens")),
+  licenseIssueDate: z.string().refine((date) => !isNaN(Date.parse(date)) && new Date(date) <= new Date(), 
+    "License issue date must be in the past"),
+  licenseExpiryDate: z.string().refine((date) => !isNaN(Date.parse(date)) && new Date(date) > new Date(),
+    "License expiry date must be in the future"),
   contactPerson: z.string().trim().min(2).max(100).regex(/^[a-zA-Z\s'-]+$/),
   contactEmail: z.string().trim().email().max(255).toLowerCase(),
   contactPhone: z.string().trim().regex(/^\+?1?\s*\(?([0-9]{3})\)?[\s.-]?([0-9]{3})[\s.-]?([0-9]{4})$/),
   address: z.string().trim().min(5).max(500),
   estimatedEmployees: z.coerce.number().int().min(1).max(10000),
-  preferredStartDate: z.string().refine((date) => !isNaN(Date.parse(date)) && new Date(date) >= new Date()),
+  // Allow today or any future date
+  preferredStartDate: z.string().refine((date) => !isNaN(Date.parse(date)) && isTodayOrLater(date),
+    "Preferred start date must be today or in the future"),
   complianceAffirmation: z.boolean().refine((val) => val === true),
   privacyAcknowledgment: z.boolean().refine((val) => val === true),
   trainingResponsibility: z.boolean().refine((val) => val === true),
@@ -71,7 +87,8 @@ serve(async (req) => {
     const validationResult = DispensaryApplicationSchema.safeParse(rawData);
     
     if (!validationResult.success) {
-      console.error('[VALIDATION ERROR]', validationResult.error.issues);
+      const failedFields = validationResult.error.issues.map(i => `${i.path.join('.')}: ${i.message}`);
+      console.error('[VALIDATION ERROR] Failed fields:', failedFields);
       return new Response(
         JSON.stringify({ 
           error: 'Invalid application data',
@@ -79,6 +96,7 @@ serve(async (req) => {
             field: issue.path.join('.'),
             message: issue.message
           })),
+          failedFields: validationResult.error.issues.map(i => i.path.join('.')),
           code: 'VALIDATION_ERROR'
         }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

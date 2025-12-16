@@ -89,12 +89,20 @@ const DispensaryApplication = () => {
           return;
         }
         
-        if (errorCode?.includes('VALIDATION_ERROR') && errorDetails.length > 0) {
-          const fieldErrors = errorDetails.map((d: any) => `${d.field}: ${d.message}`).join(', ');
+        if (errorCode?.includes('VALIDATION_ERROR')) {
+          const failedFields = raw?.failedFields || errorDetails.map((d: any) => d.field);
+          const fieldNames = failedFields.map((f: string) => {
+            // Convert camelCase to readable format
+            return f.replace(/([A-Z])/g, ' $1').replace(/^./, (str: string) => str.toUpperCase());
+          }).join(', ');
+          
           toast({
-            title: "Validation Error",
-            description: `Please fix: ${fieldErrors}`,
+            title: "Please Check Your Information",
+            description: failedFields.length > 0 
+              ? `These fields need attention: ${fieldNames}`
+              : "Please verify all fields are filled correctly.",
             variant: "destructive",
+            duration: 8000,
           });
           return;
         }
