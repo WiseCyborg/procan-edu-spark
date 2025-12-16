@@ -7,6 +7,7 @@ import { Lock, CheckCircle, AlertTriangle, Eye, EyeOff, ArrowRight, RefreshCw } 
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate, Link } from 'react-router-dom';
 import { invokePublicFunction } from '@/lib/publicEdgeFunctions';
+import { PasswordStrengthIndicator } from '@/components/ui/password-strength-indicator';
 
 type TokenError = 'expired' | 'used' | 'invalid' | 'missing' | null;
 
@@ -81,10 +82,10 @@ export const PasswordReset: React.FC = () => {
     e.preventDefault();
     console.log('[PasswordReset] Starting password reset...');
     
-    if (password.length < 6) {
+    if (password.length < 8) {
       toast({
         title: "Password Too Short",
-        description: "Password must be at least 6 characters long",
+        description: "Password must be at least 8 characters long",
         variant: "destructive"
       });
       return;
@@ -256,25 +257,28 @@ export const PasswordReset: React.FC = () => {
       </CardHeader>
       <CardContent>
         <form onSubmit={handlePasswordReset} className="space-y-4">
-          <div className="relative">
-            <Input
-              type={showPassword ? 'text' : 'password'}
-              placeholder="New password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              disabled={loading}
-              minLength={6}
-            />
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-              onClick={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
-            </Button>
+          <div className="space-y-2">
+            <div className="relative">
+              <Input
+                type={showPassword ? 'text' : 'password'}
+                placeholder="New password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                disabled={loading}
+                minLength={8}
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
+              </Button>
+            </div>
+            {password && <PasswordStrengthIndicator password={password} showRequirements />}
           </div>
           
           <div className="relative">
@@ -285,7 +289,7 @@ export const PasswordReset: React.FC = () => {
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
               disabled={loading}
-              minLength={6}
+              minLength={8}
             />
             <Button
               type="button"
