@@ -5,8 +5,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Loader2, CheckCircle, XCircle, AlertTriangle, Play, RefreshCw, Download } from 'lucide-react';
+import { Loader2, CheckCircle, XCircle, AlertTriangle, Play, Download, Shield, ShieldAlert, Rocket, Ban } from 'lucide-react';
 import { toast } from 'sonner';
+
+interface ErrorMeta {
+  code?: string;
+  message?: string;
+  table?: string;
+  rpc?: string;
+  hint?: string;
+  details?: any;
+}
 
 interface TestResult {
   journey: string;
@@ -16,6 +25,16 @@ interface TestResult {
   passed: boolean;
   notes: string;
   timestamp: string;
+  error_meta?: ErrorMeta;
+  is_blocker: boolean;
+}
+
+interface JourneySummary {
+  name: string;
+  required_steps: string[];
+  completed_steps: string[];
+  all_passed: boolean;
+  is_blocker: boolean;
 }
 
 interface E2EReport {
@@ -25,15 +44,16 @@ interface E2EReport {
   total_tests: number;
   passed_tests: number;
   failed_tests: number;
+  blocker_count: number;
+  release_gate_status: 'SHIPPABLE' | 'NOT_SHIPPABLE';
   results: TestResult[];
-  summary: {
-    account_creation: boolean;
-    password_reset: boolean;
-    auth_guards: boolean;
-    dispensary_application: boolean;
-    training_flow: boolean;
-    email_system: boolean;
-    certificate_generation: boolean;
+  journey_summaries: JourneySummary[];
+  cleanup_performed: boolean;
+  test_data_created: {
+    test_user_email?: string;
+    test_application_id?: string;
+    test_progress_id?: string;
+    test_certificate_id?: string;
   };
 }
 
@@ -48,7 +68,7 @@ export const E2EValidationReport: React.FC = () => {
       const { data, error } = await supabase
         .from('automated_test_results')
         .select('*')
-        .eq('test_name', 'E2E Validation Suite')
+        .ilike('test_name', 'E2E Validation Suite%')
         .order('test_date', { ascending: false })
         .limit(1)
         .single();
@@ -68,7 +88,11 @@ export const E2EValidationReport: React.FC = () => {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['e2e-validation-report'] });
-      toast.success(`E2E Validation Complete: ${data.passed_tests}/${data.total_tests} passed`);
+      if (data.release_gate_status === 'SHIPPABLE') {
+        toast.success(`E2E Validation Complete: SHIPPABLE - ${data.passed_tests}/${data.total_tests} passed`);
+      } else {
+        toast.error(`E2E Validation Complete: NOT SHIPPABLE - ${data.blocker_count} blockers found`);
+      }
       setIsRunning(false);
     },
     onError: (error: any) => {
@@ -88,19 +112,14 @@ export const E2EValidationReport: React.FC = () => {
     a.click();
   };
 
-  const getStatusIcon = (passed: boolean) => {
-    return passed ? (
-      <CheckCircle className="h-4 w-4 text-green-500" />
-    ) : (
-      <XCircle className="h-4 w-4 text-red-500" />
-    );
-  };
-
-  const getOverallStatus = (report: E2EReport) => {
-    const passRate = (report.passed_tests / report.total_tests) * 100;
-    if (passRate >= 90) return { label: 'READY', color: 'bg-green-500' };
-    if (passRate >= 70) return { label: 'NEEDS ATTENTION', color: 'bg-yellow-500' };
-    return { label: 'CRITICAL GAPS', color: 'bg-red-500' };
+  const getStatusIcon = (passed: boolean, isBlocker: boolean) => {
+    if (passed) {
+      return <CheckCircle className="h-4 w-4 text-green-500" />;
+    }
+    if (isBlocker) {
+      return <ShieldAlert className="h-4 w-4 text-red-600" />;
+    }
+    return <XCircle className="h-4 w-4 text-red-500" />;
   };
 
   return (
@@ -109,7 +128,7 @@ export const E2EValidationReport: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">End-to-End Validation Report</h2>
-          <p className="text-muted-foreground">Complete system validation across all critical user journeys</p>
+          <p className="text-muted-foreground">Real journey transaction tests with release gate status</p>
         </div>
         <div className="flex gap-2">
           <Button
@@ -119,7 +138,7 @@ export const E2EValidationReport: React.FC = () => {
             {isRunning ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Running Tests...
+                Running Journey Tests...
               </>
             ) : (
               <>
@@ -143,16 +162,51 @@ export const E2EValidationReport: React.FC = () => {
         </div>
       ) : latestReport ? (
         <>
+          {/* Release Gate Status Banner */}
+          <Card className={latestReport.release_gate_status === 'SHIPPABLE' 
+            ? 'border-green-500 bg-green-50 dark:bg-green-950/20' 
+            : 'border-red-500 bg-red-50 dark:bg-red-950/20'
+          }>
+            <CardContent className="flex items-center justify-between py-6">
+              <div className="flex items-center gap-4">
+                {latestReport.release_gate_status === 'SHIPPABLE' ? (
+                  <Rocket className="h-12 w-12 text-green-600" />
+                ) : (
+                  <Ban className="h-12 w-12 text-red-600" />
+                )}
+                <div>
+                  <h3 className={`text-2xl font-bold ${latestReport.release_gate_status === 'SHIPPABLE' ? 'text-green-700' : 'text-red-700'}`}>
+                    Release Gate: {latestReport.release_gate_status}
+                  </h3>
+                  <p className="text-muted-foreground">
+                    {latestReport.release_gate_status === 'SHIPPABLE' 
+                      ? 'All critical journey tests passed. System is ready for production.'
+                      : `${latestReport.blocker_count} blocker(s) must be resolved before release.`
+                    }
+                  </p>
+                </div>
+              </div>
+              <Badge 
+                className={`text-lg px-4 py-2 ${latestReport.release_gate_status === 'SHIPPABLE' 
+                  ? 'bg-green-600 hover:bg-green-700' 
+                  : 'bg-red-600 hover:bg-red-700'
+                }`}
+              >
+                {latestReport.passed_tests}/{latestReport.total_tests} Tests Passed
+              </Badge>
+            </CardContent>
+          </Card>
+
           {/* Summary Cards */}
           <div className="grid gap-4 md:grid-cols-4">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Overall Status</CardTitle>
+                <CardTitle className="text-sm font-medium">Blockers</CardTitle>
               </CardHeader>
               <CardContent>
-                <Badge className={`${getOverallStatus(latestReport).color} text-white`}>
-                  {getOverallStatus(latestReport).label}
-                </Badge>
+                <div className={`text-2xl font-bold ${latestReport.blocker_count > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                  {latestReport.blocker_count}
+                </div>
               </CardContent>
             </Card>
             <Card>
@@ -161,7 +215,7 @@ export const E2EValidationReport: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-green-600">
-                  {latestReport.passed_tests}/{latestReport.total_tests}
+                  {latestReport.passed_tests}
                 </div>
               </CardContent>
             </Card>
@@ -187,25 +241,110 @@ export const E2EValidationReport: React.FC = () => {
             </Card>
           </div>
 
-          {/* Journey Summary */}
+          {/* Journey Summaries */}
           <Card>
             <CardHeader>
-              <CardTitle>Journey Summary</CardTitle>
-              <CardDescription>Status of each critical user journey</CardDescription>
+              <CardTitle className="flex items-center gap-2">
+                <Shield className="h-5 w-5" />
+                Journey Status
+              </CardTitle>
+              <CardDescription>Critical user journeys and their completion status</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                {Object.entries(latestReport.summary).map(([key, passed]) => (
-                  <div key={key} className="flex items-center gap-2 p-3 rounded-lg border">
-                    {getStatusIcon(passed)}
-                    <span className="capitalize">{key.replace(/_/g, ' ')}</span>
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {latestReport.journey_summaries?.map((journey) => (
+                  <div 
+                    key={journey.name} 
+                    className={`p-4 rounded-lg border ${
+                      journey.all_passed 
+                        ? 'border-green-200 bg-green-50 dark:bg-green-950/20' 
+                        : 'border-red-200 bg-red-50 dark:bg-red-950/20'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium">{journey.name}</span>
+                      {journey.all_passed ? (
+                        <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300">
+                          PASSED
+                        </Badge>
+                      ) : journey.is_blocker ? (
+                        <Badge variant="destructive" className="flex items-center gap-1">
+                          <ShieldAlert className="h-3 w-3" />
+                          BLOCKER
+                        </Badge>
+                      ) : (
+                        <Badge variant="secondary">FAILED</Badge>
+                      )}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {journey.completed_steps.length}/{journey.required_steps.length} required steps
+                    </div>
+                    {!journey.all_passed && journey.required_steps.length > 0 && (
+                      <div className="mt-2 text-xs">
+                        <span className="text-red-600">Missing:</span>{' '}
+                        {journey.required_steps
+                          .filter(s => !journey.completed_steps.includes(s))
+                          .join(', ')}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
             </CardContent>
           </Card>
 
-          {/* Detailed Results */}
+          {/* Blockers Alert */}
+          {latestReport.blocker_count > 0 && (
+            <Card className="border-red-300 bg-red-50 dark:bg-red-950/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-red-700">
+                  <ShieldAlert className="h-5 w-5" />
+                  Release Blockers ({latestReport.blocker_count})
+                </CardTitle>
+                <CardDescription className="text-red-600">
+                  These issues must be resolved before the system can be shipped
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3">
+                  {latestReport.results
+                    .filter(r => r.is_blocker && !r.passed)
+                    .map((r, idx) => (
+                      <li key={idx} className="p-3 bg-white dark:bg-gray-900 rounded-lg border border-red-200">
+                        <div className="flex items-start gap-2">
+                          <ShieldAlert className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+                          <div className="flex-1">
+                            <div className="font-medium text-red-700">
+                              {r.journey} → {r.step}
+                            </div>
+                            <div className="text-sm text-muted-foreground mt-1">
+                              <span className="font-medium">Expected:</span> {r.expected}
+                            </div>
+                            <div className="text-sm text-red-600 mt-1">
+                              <span className="font-medium">Actual:</span> {r.actual}
+                            </div>
+                            {r.error_meta && (
+                              <div className="mt-2 p-2 bg-red-100 dark:bg-red-900/30 rounded text-xs font-mono">
+                                {r.error_meta.code && <div>Code: {r.error_meta.code}</div>}
+                                {r.error_meta.table && <div>Table: {r.error_meta.table}</div>}
+                                {r.error_meta.hint && <div>Hint: {r.error_meta.hint}</div>}
+                              </div>
+                            )}
+                            {r.notes && (
+                              <div className="text-sm text-muted-foreground mt-1 italic">
+                                {r.notes}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Detailed Results Table */}
           <Card>
             <CardHeader>
               <CardTitle>Detailed Test Matrix</CardTitle>
@@ -215,6 +354,7 @@ export const E2EValidationReport: React.FC = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-12">Type</TableHead>
                     <TableHead>Journey</TableHead>
                     <TableHead>Step</TableHead>
                     <TableHead>Expected</TableHead>
@@ -225,19 +365,46 @@ export const E2EValidationReport: React.FC = () => {
                 </TableHeader>
                 <TableBody>
                   {latestReport.results.map((result, idx) => (
-                    <TableRow key={idx} className={!result.passed ? 'bg-red-50 dark:bg-red-950/20' : ''}>
-                      <TableCell className="font-medium">{result.journey}</TableCell>
-                      <TableCell>{result.step}</TableCell>
-                      <TableCell className="text-muted-foreground">{result.expected}</TableCell>
-                      <TableCell>{result.actual}</TableCell>
+                    <TableRow 
+                      key={idx} 
+                      className={
+                        !result.passed && result.is_blocker 
+                          ? 'bg-red-100 dark:bg-red-950/30' 
+                          : !result.passed 
+                            ? 'bg-red-50 dark:bg-red-950/20' 
+                            : ''
+                      }
+                    >
                       <TableCell>
-                        {result.passed ? (
-                          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                            Pass
+                        {result.is_blocker ? (
+                          <Badge variant="outline" className="text-xs bg-amber-100 text-amber-700 border-amber-300">
+                            GATE
                           </Badge>
                         ) : (
-                          <Badge variant="destructive">Fail</Badge>
+                          <span className="text-xs text-muted-foreground">check</span>
                         )}
+                      </TableCell>
+                      <TableCell className="font-medium">{result.journey}</TableCell>
+                      <TableCell>{result.step}</TableCell>
+                      <TableCell className="text-muted-foreground text-sm max-w-32 truncate">
+                        {result.expected}
+                      </TableCell>
+                      <TableCell className="text-sm max-w-40 truncate">
+                        {result.actual}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          {getStatusIcon(result.passed, result.is_blocker)}
+                          {result.passed ? (
+                            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                              Pass
+                            </Badge>
+                          ) : result.is_blocker ? (
+                            <Badge variant="destructive">BLOCKER</Badge>
+                          ) : (
+                            <Badge variant="secondary">Fail</Badge>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground max-w-xs truncate">
                         {result.notes || '-'}
@@ -249,28 +416,24 @@ export const E2EValidationReport: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* Critical Gaps Alert */}
-          {latestReport.failed_tests > 0 && (
-            <Card className="border-red-200 bg-red-50 dark:bg-red-950/20">
+          {/* Test Data Created */}
+          {latestReport.test_data_created && Object.keys(latestReport.test_data_created).length > 0 && (
+            <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-red-700">
-                  <AlertTriangle className="h-5 w-5" />
-                  Critical Gaps Identified
-                </CardTitle>
+                <CardTitle className="text-sm">Test Data Created (This Run)</CardTitle>
               </CardHeader>
               <CardContent>
-                <ul className="space-y-2">
-                  {latestReport.results
-                    .filter(r => !r.passed || r.notes?.includes('CRITICAL'))
-                    .map((r, idx) => (
-                      <li key={idx} className="flex items-start gap-2 text-red-700">
-                        <XCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                        <span>
-                          <strong>{r.journey} - {r.step}:</strong> {r.notes || r.actual}
-                        </span>
-                      </li>
-                    ))}
-                </ul>
+                <div className="grid gap-2 text-sm">
+                  {latestReport.test_data_created.test_application_id && (
+                    <div><span className="text-muted-foreground">Application ID:</span> {latestReport.test_data_created.test_application_id}</div>
+                  )}
+                  {latestReport.test_data_created.test_progress_id && (
+                    <div><span className="text-muted-foreground">Progress ID:</span> {latestReport.test_data_created.test_progress_id}</div>
+                  )}
+                  {latestReport.test_data_created.test_certificate_id && (
+                    <div><span className="text-muted-foreground">Certificate ID:</span> {latestReport.test_data_created.test_certificate_id}</div>
+                  )}
+                </div>
               </CardContent>
             </Card>
           )}
@@ -280,7 +443,7 @@ export const E2EValidationReport: React.FC = () => {
           <CardContent className="flex flex-col items-center justify-center py-12">
             <AlertTriangle className="h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-medium mb-2">No Validation Report Found</h3>
-            <p className="text-muted-foreground mb-4">Run the E2E validation to generate a comprehensive system report</p>
+            <p className="text-muted-foreground mb-4">Run the E2E validation to test all critical user journeys</p>
             <Button onClick={() => runValidation.mutate()} disabled={isRunning}>
               <Play className="mr-2 h-4 w-4" />
               Run First Validation
