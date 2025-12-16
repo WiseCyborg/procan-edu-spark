@@ -81,6 +81,7 @@ const EnhancedCourseModule: React.FC = () => {
   const [quizScore, setQuizScore] = useState(0);
   const [quizPassed, setQuizPassed] = useState(false);
   const [weakTopics, setWeakTopics] = useState<WeakTopic[]>([]);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   const { updateProgress, isModuleCompleted } = useUserProgress(COURSE_ID);
   
@@ -130,6 +131,30 @@ const EnhancedCourseModule: React.FC = () => {
     currentModule: currentModuleNumber,
     totalModules: modulesWithCompletion.length,
   });
+
+  // Transition handlers for smooth module navigation
+  const handleNextModuleWithTransition = () => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setActiveTab('overview');
+      goToNext();
+    }, 300);
+  };
+
+  const handlePreviousModuleWithTransition = () => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setActiveTab('overview');
+      goToPrevious();
+    }, 300);
+  };
+
+  // Reset transition state when module changes
+  useEffect(() => {
+    setIsTransitioning(false);
+  }, [moduleId]);
 
   useEffect(() => {
     if (!moduleId) return;
@@ -397,7 +422,9 @@ const EnhancedCourseModule: React.FC = () => {
           onModuleSelect={(num) => navigate(`/course/part${num}`)}
         />
         
-        <div className="flex-1 container mx-auto p-4 md:p-6">
+        <div className={`flex-1 container mx-auto p-4 md:p-6 transition-all duration-300 ${
+          isTransitioning ? 'opacity-0 -translate-y-2' : 'opacity-100 translate-y-0 animate-fade-in-module'
+        }`}>
           <div className="flex gap-6">
             {/* Main Content Area */}
             <div className="flex-1">
@@ -674,7 +701,7 @@ const EnhancedCourseModule: React.FC = () => {
                             Return to Course
                           </Button>
                           {canGoNext && (
-                            <Button onClick={goToNext}>
+                            <Button onClick={handleNextModuleWithTransition} disabled={isTransitioning}>
                               Next Module
                             </Button>
                           )}
@@ -691,7 +718,8 @@ const EnhancedCourseModule: React.FC = () => {
                   {canGoPrevious ? (
                     <Button
                       variant="outline"
-                      onClick={goToPrevious}
+                      onClick={handlePreviousModuleWithTransition}
+                      disabled={isTransitioning}
                     >
                       <ArrowLeft className="mr-2 h-4 w-4" />
                       Previous Module
@@ -702,7 +730,8 @@ const EnhancedCourseModule: React.FC = () => {
                   
                   {canGoNext ? (
                     <Button
-                      onClick={goToNext}
+                      onClick={handleNextModuleWithTransition}
+                      disabled={isTransitioning}
                     >
                       Next Module
                       <ArrowLeft className="ml-2 h-4 w-4 rotate-180" />
@@ -729,10 +758,10 @@ const EnhancedCourseModule: React.FC = () => {
       <MobileNavBar
         modules={modulesWithCompletion}
         currentModuleNumber={currentModuleNumber}
-        canGoPrevious={canGoPrevious}
-        canGoNext={canGoNext}
-        onPrevious={goToPrevious}
-        onNext={goToNext}
+        canGoPrevious={canGoPrevious && !isTransitioning}
+        canGoNext={canGoNext && !isTransitioning}
+        onPrevious={handlePreviousModuleWithTransition}
+        onNext={handleNextModuleWithTransition}
         onModuleSelect={(num) => navigate(`/course/part${num}`)}
       />
     </div>

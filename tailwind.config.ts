@@ -97,6 +97,14 @@ export default {
 						height: '0'
 					}
 				},
+				'fade-in-module': {
+					'0%': { opacity: '0', transform: 'translateY(10px)' },
+					'100%': { opacity: '1', transform: 'translateY(0)' }
+				},
+				'fade-out-module': {
+					'0%': { opacity: '1', transform: 'translateY(0)' },
+					'100%': { opacity: '0', transform: 'translateY(-10px)' }
+				},
 				heartbeat: {
 					'0%, 100%': { transform: 'scale(1)', opacity: '0.8' },
 					'50%': { transform: 'scale(1.05)', opacity: '1' }
@@ -131,6 +139,8 @@ export default {
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-in-module': 'fade-in-module 0.3s ease-out forwards',
+				'fade-out-module': 'fade-out-module 0.3s ease-out forwards',
 				heartbeat: 'heartbeat 2s ease-in-out infinite',
 				'float-up': 'float-up 8s ease-in-out infinite',
 				'glow-pulse': 'glow-pulse 2s ease-in-out infinite',
