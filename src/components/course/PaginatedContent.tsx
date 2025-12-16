@@ -9,6 +9,7 @@ interface PaginatedContentProps {
   onPageChange?: (page: number, totalPages: number) => void;
   onComplete?: () => void;
   className?: string;
+  initialPage?: number;
 }
 
 // Split content by H2 (##) headers into pages
@@ -65,9 +66,10 @@ export const PaginatedContent: React.FC<PaginatedContentProps> = ({
   content,
   onPageChange,
   onComplete,
-  className
+  className,
+  initialPage = 0
 }) => {
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPage, setCurrentPage] = useState(initialPage);
   const [direction, setDirection] = useState(0);
   
   const pages = useMemo(() => splitContentIntoPages(content), [content]);

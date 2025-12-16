@@ -47,6 +47,7 @@ interface Lesson {
   videoType: 'embed' | 'file' | 'none';
   videoUrl?: string;
   htmlSummary: string;
+  markdownContent?: string;
   resourceLinks: { label: string; href: string }[];
 }
 
@@ -464,7 +465,10 @@ const EnhancedCourseModule: React.FC = () => {
                         ? moduleData.lessons.reduce((sum, l) => sum + (parseInt(l.duration) || 0), 0)
                         : 15,
                       lessons: moduleData.lessons && moduleData.lessons.length > 0 
-                        ? moduleData.lessons 
+                        ? moduleData.lessons.map(l => ({
+                            ...l,
+                            markdownContent: l.markdownContent || moduleData.content || ''
+                          }))
                         : [
                           {
                               id: `${moduleData.id}-lesson-1`,
@@ -474,6 +478,7 @@ const EnhancedCourseModule: React.FC = () => {
                                 ? (moduleData.video_url.includes('vimeo.com') ? 'embed' : 'file') 
                                 : 'none' as const,
                               videoUrl: moduleData.video_url || '',
+                              markdownContent: moduleData.content || '', // Raw markdown for pagination
                               htmlSummary: `<div>${sanitizeHtml(markdownToHtml(moduleData.content || ''))}</div>`,
                               resourceLinks: moduleDocuments.map(doc => ({
                                 label: doc.title,
