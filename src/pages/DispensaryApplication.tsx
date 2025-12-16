@@ -59,15 +59,37 @@ const DispensaryApplication = () => {
   const onSubmit = async (data: FormData) => {
     const sanitizedData = sanitizeFormData(data);
     
+    console.log('Submitting application with data:', sanitizedData);
+    
     try {
       const { data: result, error } = await supabase.functions.invoke('submit-dispensary-application', {
         body: sanitizedData
       });
 
+      console.log('Submission response:', { result, error });
+
       if (error) {
-        console.error('Submission error:', error);
+        console.error('Submission error details:', {
+          message: error.message,
+          name: error.name,
+          context: error.context,
+          stack: error.stack
+        });
         
-        if (error.message?.includes('RATE_LIMIT_EXCEEDED')) {
+        // Parse error response if it contains JSON
+        let errorData: any = null;
+        try {
+          if (error.context?.body) {
+            errorData = JSON.parse(error.context.body);
+          }
+        } catch (e) {
+          // Not JSON, use raw message
+        }
+        
+        const errorCode = errorData?.code || error.message;
+        const errorDetails = errorData?.details || [];
+        
+        if (errorCode?.includes('RATE_LIMIT_EXCEEDED')) {
           toast({
             title: "Too Many Submissions",
             description: "You've submitted too many applications. Please try again in 1 hour.",
@@ -76,10 +98,29 @@ const DispensaryApplication = () => {
           return;
         }
         
-        if (error.message?.includes('DUPLICATE_APPLICATION')) {
+        if (errorCode?.includes('DUPLICATE_APPLICATION')) {
           toast({
             title: "Application Already Exists",
             description: "An application with this email already exists. Please check your email for updates.",
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        if (errorCode?.includes('VALIDATION_ERROR') && errorDetails.length > 0) {
+          const fieldErrors = errorDetails.map((d: any) => `${d.field}: ${d.message}`).join(', ');
+          toast({
+            title: "Validation Error",
+            description: `Please fix: ${fieldErrors}`,
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        if (errorCode?.includes('CONSTRAINT_VIOLATION')) {
+          toast({
+            title: "Invalid Data",
+            description: errorData?.error || "Please check your inputs and try again.",
             variant: "destructive",
           });
           return;
@@ -95,7 +136,12 @@ const DispensaryApplication = () => {
         duration: 6000,
       });
     } catch (error: any) {
-      console.error('Submission error:', error);
+      console.error('Submission error (catch):', {
+        message: error.message,
+        name: error.name,
+        stack: error.stack,
+        fullError: error
+      });
       
       let errorMessage = "Please try again or contact support@procannedu.com";
       
@@ -108,6 +154,8 @@ const DispensaryApplication = () => {
         errorMessage = "Request timed out. Please try again.";
       } else if (error.message?.includes('500') || error.message?.includes('Internal Server Error')) {
         errorMessage = "Server error occurred. Please try again in a few moments.";
+      } else if (error.message?.includes('23514') || error.message?.includes('check constraint')) {
+        errorMessage = "Invalid data format. Please verify all fields are correct.";
       }
       
       toast({
