@@ -28,14 +28,36 @@ import {
   AlertTriangle,
   RefreshCw,
   Hash,
-  Info
+  Info,
+  Trash2,
+  Ban,
+  MoreVertical,
+  Power
 } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { EmailDeliveryStatus } from './EmailDeliveryStatus';
 
 interface DispensaryApplication {
   id: string;
   organization_name: string;
+  organization_id: string | null;
   contact_person: string;
   contact_email: string;
   contact_phone: string;
@@ -64,6 +86,9 @@ const DispensaryApplicationManager = () => {
     emailSent: boolean;
     emailError: string | null;
   } | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [suspendDialogOpen, setSuspendDialogOpen] = useState(false);
+  const [actionTarget, setActionTarget] = useState<DispensaryApplication | null>(null);
   const { performSecurityCheck } = useSecurityMonitoring();
 
   useEffect(() => {
@@ -535,6 +560,138 @@ const DispensaryApplicationManager = () => {
     }
   };
 
+  const deleteApplication = async (application: DispensaryApplication) => {
+    if (!await performSecurityCheck('application_deletion')) return;
+
+    setIsProcessing(true);
+    try {
+      console.log('[DELETE] Deleting application:', application.id);
+      const { data, error } = await supabase.rpc('delete_dispensary_application', {
+        p_application_id: application.id
+      });
+
+      if (error) throw error;
+
+      const result = data?.[0];
+      if (result?.success) {
+        toast({
+          title: "Application Deleted",
+          description: `"${application.organization_name}" application has been deleted.`,
+        });
+        await fetchApplications();
+      } else {
+        toast({
+          title: "Error",
+          description: result?.message || "Failed to delete application",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('[DELETE] Error:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to delete application",
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessing(false);
+      setDeleteDialogOpen(false);
+      setActionTarget(null);
+    }
+  };
+
+  const suspendOrganization = async (application: DispensaryApplication) => {
+    if (!application.organization_id) {
+      toast({
+        title: "Cannot Suspend",
+        description: "No organization associated with this application",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      console.log('[SUSPEND] Suspending org for application:', application.id);
+      const { data, error } = await supabase.rpc('suspend_organization', {
+        p_org_id: application.organization_id,
+        p_reason: adminNotes || 'Suspended by admin'
+      });
+
+      if (error) throw error;
+
+      const result = data?.[0];
+      if (result?.success) {
+        toast({
+          title: "Organization Suspended",
+          description: `"${application.organization_name}" has been suspended.`,
+        });
+        await fetchApplications();
+      } else {
+        toast({
+          title: "Error",
+          description: result?.message || "Failed to suspend organization",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('[SUSPEND] Error:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to suspend organization",
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessing(false);
+      setSuspendDialogOpen(false);
+      setActionTarget(null);
+    }
+  };
+
+  const reactivateOrganization = async (application: DispensaryApplication) => {
+    if (!application.organization_id) {
+      toast({
+        title: "Cannot Reactivate",
+        description: "No organization associated with this application",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      console.log('[REACTIVATE] Reactivating org for application:', application.id);
+      const { data, error } = await supabase.rpc('reactivate_organization', {
+        p_org_id: application.organization_id
+      });
+
+      if (error) throw error;
+
+      const result = data?.[0];
+      if (result?.success) {
+        toast({
+          title: "Organization Reactivated",
+          description: `"${application.organization_name}" has been reactivated.`,
+        });
+        await fetchApplications();
+      } else {
+        toast({
+          title: "Error",
+          description: result?.message || "Failed to reactivate organization",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('[REACTIVATE] Error:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to reactivate organization",
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
   const createTestOrganization = async (orgName: string, contactEmail: string, credits: number = 10) => {
     if (!await performSecurityCheck('test_org_creation')) return;
 
@@ -792,7 +949,54 @@ const DispensaryApplicationManager = () => {
                   </div>
                 </div>
 
-                <div className="flex gap-2 ml-4">
+                <div className="flex gap-2 ml-4 items-start">
+                  {/* Actions Dropdown Menu */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {application.application_status === 'approved' && application.organization_id && (
+                        <>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setActionTarget(application);
+                              setSuspendDialogOpen(true);
+                            }}
+                            className="text-orange-600"
+                          >
+                            <Ban className="h-4 w-4 mr-2" />
+                            Suspend Organization
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                        </>
+                      )}
+                      {application.application_status === 'suspended' && application.organization_id && (
+                        <>
+                          <DropdownMenuItem
+                            onClick={() => reactivateOrganization(application)}
+                            className="text-green-600"
+                          >
+                            <Power className="h-4 w-4 mr-2" />
+                            Reactivate Organization
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                        </>
+                      )}
+                      <DropdownMenuItem
+                        onClick={() => {
+                          setActionTarget(application);
+                          setDeleteDialogOpen(true);
+                        }}
+                        className="text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete Application
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button
@@ -1089,6 +1293,58 @@ const DispensaryApplicationManager = () => {
 
       {/* Test Organization Creator */}
       <TestOrganizationCreator />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+              <Trash2 className="h-5 w-5" />
+              Delete Application
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete the application for "{actionTarget?.organization_name}"?
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isProcessing}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => actionTarget && deleteApplication(actionTarget)}
+              disabled={isProcessing}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isProcessing ? 'Deleting...' : 'Delete Application'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Suspend Confirmation Dialog */}
+      <AlertDialog open={suspendDialogOpen} onOpenChange={setSuspendDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-orange-600">
+              <Ban className="h-5 w-5" />
+              Suspend Organization
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to suspend "{actionTarget?.organization_name}"?
+              This will deactivate the organization and prevent employees from accessing training.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isProcessing}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => actionTarget && suspendOrganization(actionTarget)}
+              disabled={isProcessing}
+              className="bg-orange-600 text-white hover:bg-orange-700"
+            >
+              {isProcessing ? 'Suspending...' : 'Suspend Organization'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
