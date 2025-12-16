@@ -173,8 +173,8 @@ export const EnhancedFAQ: React.FC<EnhancedFAQProps> = ({
     },
     {
       id: 'general-2',
-      question: 'Is ProCann Edu approved by the Maryland Cannabis Administration?',
-      answer: 'Yes, ProCann Edu is fully approved and compliant with all MCA requirements for Responsible Vendor Training programs and maintains current regulatory compliance.',
+      question: 'Is ProCann Edu aligned with Maryland Cannabis Administration requirements?',
+      answer: 'ProCann Edu is designed to meet MCA Responsible Vendor Training standards under COMAR 14.17.05. Our curriculum is regularly updated to align with current Maryland cannabis regulations.',
       category: 'Certification',
       securityLevel: 'public'
     },

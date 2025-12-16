@@ -96,7 +96,7 @@ const RVTIntelligence = () => {
           </p>
         </div>
         <Badge variant="default" className="text-lg px-4 py-2">
-          MCA Approved Provider
+          COMAR-Aligned Training
         </Badge>
       </div>
 

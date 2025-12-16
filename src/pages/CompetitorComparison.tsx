@@ -17,7 +17,7 @@ export default function CompetitorComparison() {
     { feature: "Compliance Risk Scoring", proCannEdu: "Predictive AI", industryStandard: "Not available" },
     { feature: "Mobile Learning", proCannEdu: "Fully optimized", industryStandard: "Limited" },
     { feature: "Certificate Verification", proCannEdu: "Secure QR system", industryStandard: "PDF format" },
-    { feature: "First-Attempt Pass Rate", proCannEdu: "87%", industryStandard: "Varies by provider" },
+    { feature: "Exam Preparation", proCannEdu: "AI-powered study tools", industryStandard: "Self-study materials" },
     { feature: "Average Completion Time", proCannEdu: "4-6 hours", industryStandard: "6-12 hours" },
   ];
 
@@ -138,7 +138,7 @@ export default function CompetitorComparison() {
                   </p>
                   <p className="flex items-start gap-2">
                     <Zap className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-                    <span><strong>Proven outcomes:</strong> 87% first-attempt pass rate with measurable compliance cost reduction through AI-powered ROI tracking</span>
+                    <span><strong>Comprehensive preparation:</strong> AI-powered study tools and practice exams designed to support first-attempt success</span>
                   </p>
                 </div>
               </div>

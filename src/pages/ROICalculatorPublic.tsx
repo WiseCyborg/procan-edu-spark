@@ -69,10 +69,13 @@ export default function ROICalculatorPublic() {
             AI-Powered ROI Calculator
           </Badge>
           <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-green-600 bg-clip-text text-transparent">
-            Calculate Your Dispensary's ROI
+            Estimate Your Potential ROI
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            See exactly how much ProCann Edu can save your Maryland dispensary
+            Explore potential savings for your Maryland dispensary *
+          </p>
+          <p className="text-sm text-muted-foreground mt-2">
+            * This calculator provides estimates only. Actual results vary based on your organization.
           </p>
         </div>
 
@@ -251,12 +254,16 @@ export default function ROICalculatorPublic() {
         </div>
 
         {/* Disclaimer */}
-        <Card className="mt-8 bg-muted/30">
-          <CardContent className="p-6">
+        <Card className="mt-8 bg-muted/30 border-amber-500/30">
+          <CardContent className="p-6 space-y-3">
+            <p className="text-sm text-muted-foreground text-center">
+              <strong>⚠️ Important Disclaimer:</strong> This calculator provides illustrative estimates only. 
+              Projections are based on hypothetical scenarios and industry assumptions—not guaranteed outcomes. 
+              Actual savings depend on your organization's size, current processes, employee performance, and other factors.
+            </p>
             <p className="text-sm text-muted-foreground text-center">
               <strong>Maryland Pricing Compliance:</strong> ProCann Edu charges ${BUSINESS_RULES.SEAT_PRICE_USD} per employee, 
-              maintaining compliance with Maryland's maximum charge of ${BUSINESS_RULES.MAX_ALLOWED_PRICE_MARYLAND.toFixed(2)} per employee. 
-              Calculations based on industry averages and historical data from Maryland dispensaries.
+              maintaining compliance with Maryland's maximum charge of ${BUSINESS_RULES.MAX_ALLOWED_PRICE_MARYLAND.toFixed(2)} per employee.
             </p>
           </CardContent>
         </Card>
