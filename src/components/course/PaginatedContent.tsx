@@ -12,21 +12,24 @@ interface PaginatedContentProps {
   initialPage?: number;
 }
 
-// Split content by H2 (##) headers into pages
+// Split content by H1 (#) or H2 (##) headers into pages
 const splitContentIntoPages = (content: string): string[] => {
   if (!content) return [''];
   
-  // Split by ## headers but keep the header with its content
-  const sections = content.split(/(?=^## )/gm);
+  // Normalize line breaks and trim
+  const normalizedContent = content.replace(/\r\n/g, '\n').trim();
+  
+  // Split by H1 or H2 headers (# or ##) - handles whitespace before headers
+  const sections = normalizedContent.split(/(?=^\s*#{1,2}\s+)/gm);
   
   // Filter out empty sections and trim
   const pages = sections
     .map(s => s.trim())
     .filter(s => s.length > 0);
   
-  // If no H2 headers found, try splitting by paragraphs into chunks
-  if (pages.length <= 1 && content.length > 800) {
-    const paragraphs = content.split(/\n\n+/);
+  // If no headers found, try splitting by paragraphs into chunks
+  if (pages.length <= 1 && normalizedContent.length > 800) {
+    const paragraphs = normalizedContent.split(/\n\n+/);
     const chunks: string[] = [];
     let currentChunk = '';
     
@@ -42,10 +45,10 @@ const splitContentIntoPages = (content: string): string[] => {
       chunks.push(currentChunk.trim());
     }
     
-    return chunks.length > 1 ? chunks : [content];
+    return chunks.length > 1 ? chunks : [normalizedContent];
   }
   
-  return pages.length > 0 ? pages : [content];
+  return pages.length > 0 ? pages : [normalizedContent];
 };
 
 // Simple markdown to HTML conversion
