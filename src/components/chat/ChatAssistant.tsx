@@ -5,12 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { MessageCircle, Send, X, HelpCircle, Lock } from 'lucide-react';
+import { MessageCircle, Send, X, HelpCircle, Lock, Bug, CheckSquare, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { usePaymentStatus } from '@/hooks/usePaymentStatus';
 import { useOrganizationAccess } from '@/hooks/useOrganizationAccess';
+import { useUATMode } from '@/hooks/useUATMode';
 import { toast } from '@/components/ui/use-toast';
 
 const COURSE_ID = '76524ea8-a00f-47b3-8e29-a0aa12c23a60';
@@ -20,6 +21,7 @@ interface Message {
   content: string;
   isUser: boolean;
   timestamp: Date;
+  isUATTip?: boolean;
 }
 
 interface ContextInfo {
@@ -119,7 +121,7 @@ const getContextInfo = (pathname: string): ContextInfo => {
       systemPrompt: `You are a welcoming assistant for new ProCann Edu users. Help them understand the platform and get excited about cannabis education. Key points:
       - ProCann Edu is Maryland's premier cannabis training platform
       - Training covers all aspects of cannabis compliance and regulations
-      - 18 comprehensive modules plus final exam
+      - 23 comprehensive modules plus final exam
       - Certificates recognized by Maryland cannabis industry
       - Support contact: info@procannedu.com
       - Be enthusiastic about cannabis industry opportunities
@@ -146,7 +148,7 @@ const getContextInfo = (pathname: string): ContextInfo => {
     - Be encouraging about career opportunities in cannabis
     - Guide users to appropriate sections of the platform`
   };
-};
+}
 
 export const ChatAssistant: React.FC = () => {
   const location = useLocation();
@@ -154,16 +156,19 @@ export const ChatAssistant: React.FC = () => {
   const { roles, isAdmin, isDispensaryManager, isStudent } = useUserRole();
   const { hasPaid, isLoading: paymentLoading } = usePaymentStatus(COURSE_ID);
   const { hasAccess: hasOrgAccess, isLoading: orgLoading } = useOrganizationAccess(user?.id);
+  const { isUATUser, uatAccount, getPageGuidance, formatBugReport } = useUATMode();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showProactiveTip, setShowProactiveTip] = useState(false);
+  const [showUATPanel, setShowUATPanel] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout>();
 
   const contextInfo = getContextInfo(location.pathname);
   const isChatDisabled = contextInfo.route === 'final-exam';
+  const uatGuidance = isUATUser ? getPageGuidance(location.pathname) : null;
 
   // Access control for training-related routes
   const accessType = useMemo(() => {
@@ -214,15 +219,22 @@ export const ChatAssistant: React.FC = () => {
   // Initial welcome message when chat opens
   useEffect(() => {
     if (isOpen && messages.length === 0 && !isChatDisabled) {
+      let welcomeContent = `Hi! I'm your ProCann Edu assistant. I'm here to help you with ${contextInfo.description.toLowerCase()}. What can I help you with today?`;
+      
+      // Add UAT-specific welcome for UAT users
+      if (isUATUser && uatGuidance) {
+        welcomeContent = `🧪 UAT Mode Active!\n\nYou're testing: ${uatGuidance.title}\n\nI can help you with:\n• Testing guidance for this page\n• Expected behaviors\n• Bug reporting\n\nWhat would you like help with?`;
+      }
+
       const welcomeMessage: Message = {
         id: Date.now().toString(),
-        content: `Hi! I'm your ProCann Edu assistant. I'm here to help you with ${contextInfo.description.toLowerCase()}. What can I help you with today?`,
+        content: welcomeContent,
         isUser: false,
         timestamp: new Date()
       };
       setMessages([welcomeMessage]);
     }
-  }, [isOpen, contextInfo.description, isChatDisabled]);
+  }, [isOpen, contextInfo.description, isChatDisabled, isUATUser, uatGuidance]);
 
   const sendMessage = async () => {
     if (!inputMessage.trim() || isLoading || isChatDisabled) return;
@@ -244,7 +256,9 @@ export const ChatAssistant: React.FC = () => {
           message: inputMessage.trim(),
           context: contextInfo,
           user_id: user?.id,
-          user_roles: roles
+          user_roles: roles,
+          is_uat: isUATUser,
+          uat_guidance: uatGuidance
         }
       });
 
@@ -273,6 +287,28 @@ export const ChatAssistant: React.FC = () => {
   const handleQuickTip = (tip: string) => {
     setInputMessage(tip);
     if (!isOpen) setIsOpen(true);
+  };
+
+  const handleBugReport = (issue: string) => {
+    const report = formatBugReport(issue, `Page: ${location.pathname}`);
+    const reportText = `🐛 Bug Report:\n\nIssue: ${issue}\nPage: ${report.url}\nTime: ${report.timestamp}\nUser: ${report.user}\nRole: ${report.accountType}`;
+    
+    // Copy to clipboard
+    navigator.clipboard.writeText(JSON.stringify(report, null, 2));
+    
+    // Add to chat
+    const bugMessage: Message = {
+      id: Date.now().toString(),
+      content: reportText,
+      isUser: true,
+      timestamp: new Date()
+    };
+    setMessages(prev => [...prev, bugMessage]);
+    
+    toast({
+      title: "Bug Report Created",
+      description: "Report copied to clipboard. Paste in Slack/email to submit.",
+    });
   };
 
   if (isChatDisabled) {
@@ -320,9 +356,14 @@ export const ChatAssistant: React.FC = () => {
             <CardContent className="p-3">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-sm font-medium mb-1">Need help?</p>
+                  <p className="text-sm font-medium mb-1">
+                    {isUATUser ? '🧪 UAT Testing Mode' : 'Need help?'}
+                  </p>
                   <p className="text-xs opacity-90">
-                    I'm here to assist with {contextInfo.description.toLowerCase()}
+                    {isUATUser 
+                      ? `Testing: ${uatGuidance?.title || 'This page'}`
+                      : `I'm here to assist with ${contextInfo.description.toLowerCase()}`
+                    }
                   </p>
                 </div>
                 <Button
@@ -345,7 +386,9 @@ export const ChatAssistant: React.FC = () => {
           setIsOpen(!isOpen);
           setShowProactiveTip(false);
         }}
-        className="fixed bottom-4 right-4 z-50 h-12 w-12 rounded-full shadow-lg"
+        className={`fixed bottom-4 right-4 z-50 h-12 w-12 rounded-full shadow-lg ${
+          isUATUser ? 'bg-amber-500 hover:bg-amber-600' : ''
+        }`}
         size="icon"
       >
         {isOpen ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
@@ -353,36 +396,103 @@ export const ChatAssistant: React.FC = () => {
 
       {/* Chat Window */}
       {isOpen && (
-        <Card className="fixed bottom-20 right-4 z-40 w-80 h-96 flex flex-col shadow-xl">
+        <Card className={`fixed bottom-20 right-4 z-40 w-80 ${isUATUser ? 'h-[480px]' : 'h-96'} flex flex-col shadow-xl`}>
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-sm">{contextInfo.title}</CardTitle>
+                <CardTitle className="text-sm flex items-center gap-2">
+                  {isUATUser && <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-300">🧪 UAT</Badge>}
+                  {isUATUser ? uatGuidance?.title : contextInfo.title}
+                </CardTitle>
                 <Badge variant="secondary" className="text-xs mt-1">
                   {contextInfo.route}
                 </Badge>
               </div>
+              {isUATUser && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-6 w-6 p-0"
+                  onClick={() => setShowUATPanel(!showUATPanel)}
+                >
+                  <CheckSquare className="w-4 h-4" />
+                </Button>
+              )}
             </div>
           </CardHeader>
           
-          <CardContent className="flex-1 flex flex-col p-3 pt-0">
-            {/* Quick Tips */}
-            {contextInfo.helpTips.length > 0 && messages.length <= 1 && (
-              <div className="mb-3">
-                <p className="text-xs text-muted-foreground mb-2">Quick help:</p>
-                <div className="space-y-1">
-                  {contextInfo.helpTips.slice(0, 2).map((tip, index) => (
-                    <Button
-                      key={index}
-                      variant="outline"
-                      size="sm"
-                      className="w-full text-xs h-7 justify-start"
-                      onClick={() => handleQuickTip(tip)}
-                    >
-                      {tip}
-                    </Button>
+          <CardContent className="flex-1 flex flex-col p-3 pt-0 overflow-hidden">
+            {/* UAT Testing Panel */}
+            {isUATUser && showUATPanel && uatGuidance && (
+              <div className="mb-3 p-2 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-200 dark:border-amber-800 max-h-40 overflow-y-auto">
+                <p className="text-xs font-medium text-amber-800 dark:text-amber-200 mb-2">
+                  Testing Tips:
+                </p>
+                <ul className="text-xs text-amber-700 dark:text-amber-300 space-y-1">
+                  {uatGuidance.testingTips.slice(0, 3).map((tip, i) => (
+                    <li key={i} className="flex items-start gap-1">
+                      <CheckSquare className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                      <span>{tip}</span>
+                    </li>
                   ))}
-                </div>
+                </ul>
+                {uatGuidance.knownIssues && uatGuidance.knownIssues.length > 0 && (
+                  <>
+                    <p className="text-xs font-medium text-amber-800 dark:text-amber-200 mt-2 mb-1">
+                      Known Issues:
+                    </p>
+                    <ul className="text-xs text-amber-600 dark:text-amber-400 space-y-1">
+                      {uatGuidance.knownIssues.map((issue, i) => (
+                        <li key={i} className="flex items-start gap-1">
+                          <AlertTriangle className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                          <span>{issue}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* Quick Tips / Bug Report Buttons */}
+            {messages.length <= 1 && (
+              <div className="mb-3">
+                {isUATUser && uatGuidance ? (
+                  <>
+                    <p className="text-xs text-muted-foreground mb-2">Quick bug reports:</p>
+                    <div className="space-y-1">
+                      {uatGuidance.bugReportPrompts.slice(0, 2).map((prompt, index) => (
+                        <Button
+                          key={index}
+                          variant="outline"
+                          size="sm"
+                          className="w-full text-xs h-7 justify-start text-destructive border-destructive/30"
+                          onClick={() => handleBugReport(prompt)}
+                        >
+                          <Bug className="w-3 h-3 mr-1" />
+                          {prompt}
+                        </Button>
+                      ))}
+                    </div>
+                  </>
+                ) : contextInfo.helpTips.length > 0 ? (
+                  <>
+                    <p className="text-xs text-muted-foreground mb-2">Quick help:</p>
+                    <div className="space-y-1">
+                      {contextInfo.helpTips.slice(0, 2).map((tip, index) => (
+                        <Button
+                          key={index}
+                          variant="outline"
+                          size="sm"
+                          className="w-full text-xs h-7 justify-start"
+                          onClick={() => handleQuickTip(tip)}
+                        >
+                          {tip}
+                        </Button>
+                      ))}
+                    </div>
+                  </>
+                ) : null}
               </div>
             )}
 
@@ -395,10 +505,12 @@ export const ChatAssistant: React.FC = () => {
                     className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
-                      className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${
+                      className={`max-w-[80%] rounded-lg px-3 py-2 text-sm whitespace-pre-wrap ${
                         message.isUser
                           ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted text-foreground'
+                          : message.isUATTip 
+                            ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 border border-amber-200 dark:border-amber-700'
+                            : 'bg-muted text-foreground'
                       }`}
                     >
                       {message.content}
@@ -425,7 +537,7 @@ export const ChatAssistant: React.FC = () => {
               <Input
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
-                placeholder="Ask me anything..."
+                placeholder={isUATUser ? "Describe issue or ask for help..." : "Ask me anything..."}
                 onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
                 disabled={isLoading}
                 className="text-sm"
@@ -439,6 +551,19 @@ export const ChatAssistant: React.FC = () => {
                 <Send className="w-4 h-4" />
               </Button>
             </div>
+
+            {/* UAT Bug Report Button */}
+            {isUATUser && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-2 w-full text-xs text-destructive border-destructive/30"
+                onClick={() => handleBugReport('Custom issue - describe in chat')}
+              >
+                <Bug className="w-3 h-3 mr-1" />
+                Report Bug on This Page
+              </Button>
+            )}
           </CardContent>
         </Card>
       )}
