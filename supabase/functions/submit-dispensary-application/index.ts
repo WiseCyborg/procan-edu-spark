@@ -115,17 +115,23 @@ serve(async (req) => {
     if (existingApp) {
       const daysSinceSubmission = (Date.now() - new Date(existingApp.created_at).getTime()) / (1000 * 60 * 60 * 24);
       
-      if (existingApp.application_status !== 'rejected' || daysSinceSubmission < 7) {
-        console.warn(`[DUPLICATE] Application already exists for ${validatedData.contactEmail}`);
+      // Allow resubmission if application was rejected or archived AND it's been at least 7 days
+      const canResubmit = ['rejected', 'archived'].includes(existingApp.application_status) && daysSinceSubmission >= 7;
+      
+      if (!canResubmit) {
+        console.warn(`[DUPLICATE] Application already exists for ${validatedData.contactEmail} (status: ${existingApp.application_status}, days: ${Math.floor(daysSinceSubmission)})`);
         return new Response(
           JSON.stringify({ 
             error: 'An application with this email already exists. Please check your email for updates.',
             code: 'DUPLICATE_APPLICATION',
-            applicationId: existingApp.id
+            applicationId: existingApp.id,
+            status: existingApp.application_status
           }),
           { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
+      
+      console.log(`[RESUBMISSION] Allowing resubmission for ${validatedData.contactEmail} (previous status: ${existingApp.application_status})`);
     }
 
     // Format phone number

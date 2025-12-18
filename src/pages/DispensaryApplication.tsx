@@ -63,12 +63,18 @@ const DispensaryApplication = () => {
     try {
       const { data: result, error, raw } = await invokePublicFunction('submit-dispensary-application', sanitizedData);
 
-      console.log('Submission response:', { result, error, raw });
+      console.log('Full submission response:', { result, error, raw, rawType: typeof raw });
 
       if (error) {
-        console.error('Submission error:', error.message);
+        console.error('Submission error details:', { 
+          message: error.message, 
+          raw, 
+          rawCode: raw?.code,
+          rawStatus: raw?.status 
+        });
         
-        const errorCode = raw?.code || error.message;
+        // More robust error code extraction
+        const errorCode = raw?.code || (typeof raw === 'string' ? raw : '') || error?.message || '';
         const errorDetails = raw?.details || [];
         
         if (errorCode?.includes('RATE_LIMIT_EXCEEDED')) {
