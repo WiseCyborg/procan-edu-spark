@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Brain, TrendingUp, DollarSign, Users, Clock, Award, ArrowRight } from "lucide-react";
+import { Brain, TrendingUp, DollarSign, Users, Award, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { BUSINESS_RULES } from "@/config/business-rules";
 import { Badge } from "@/components/ui/badge";
+import { ROIIntelligenceAgent } from "@/components/roi/ROIIntelligenceAgent";
 
 type RetakeFrequency = 'never' | 'rare' | 'occasional' | 'frequent';
 
@@ -69,13 +70,10 @@ export default function ROICalculatorPublic() {
             AI-Powered ROI Calculator
           </Badge>
           <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-green-600 bg-clip-text text-transparent">
-            Estimate Your Potential ROI
+            Calculate Your Dispensary's ROI
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Explore potential savings for your Maryland dispensary *
-          </p>
-          <p className="text-sm text-muted-foreground mt-2">
-            * This calculator provides estimates only. Actual results vary based on your organization.
+            See exactly how much ProCann Edu can save your Maryland dispensary
           </p>
         </div>
 
@@ -196,19 +194,44 @@ export default function ROICalculatorPublic() {
                 </div>
 
                 {/* ROI */}
-                <div className="flex justify-between items-center p-4 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                <div className={`flex justify-between items-center p-4 rounded-lg border ${
+                  calculations.roi >= 0 
+                    ? 'bg-blue-500/10 border-blue-500/20' 
+                    : 'bg-amber-500/10 border-amber-500/20'
+                }`}>
                   <div>
-                    <p className="text-sm font-semibold text-blue-700 dark:text-blue-400">Return on Investment</p>
+                    <p className={`text-sm font-semibold ${
+                      calculations.roi >= 0 
+                        ? 'text-blue-700 dark:text-blue-400' 
+                        : 'text-amber-700 dark:text-amber-400'
+                    }`}>Return on Investment</p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Payback in {calculations.paybackWeeks} weeks
+                      Payback in {calculations.paybackWeeks > 0 ? `${calculations.paybackWeeks} weeks` : 'N/A'}
                     </p>
                   </div>
-                  <div className="text-3xl font-bold text-blue-600">
+                  <div className={`text-3xl font-bold ${
+                    calculations.roi >= 0 ? 'text-blue-600' : 'text-amber-600'
+                  }`}>
                     {calculations.roi}%
                   </div>
                 </div>
               </CardContent>
             </Card>
+
+            {/* ROI Intelligence Agent */}
+            <ROIIntelligenceAgent
+              roi={calculations.roi}
+              currentPassRate={currentPassRate}
+              agents={agents}
+              annualSavings={calculations.annualSavings}
+              trainingCost={calculations.trainingCost}
+              retakeFrequency={retakeFrequency}
+              hourlyWage={hourlyWage}
+              onOptimize={() => {
+                setCurrentPassRate(70);
+                setRetakeFrequency('occasional');
+              }}
+            />
 
             {/* Breakdown */}
             <Card className="shadow-lg">
