@@ -515,6 +515,48 @@ export type Database = {
         }
         Relationships: []
       }
+      avatar_prompts: {
+        Row: {
+          category: string
+          created_at: string
+          gaze_target: string | null
+          id: string
+          is_active: boolean
+          name: string
+          priority: string
+          roles: string[]
+          template: string
+          trigger: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          gaze_target?: string | null
+          id: string
+          is_active?: boolean
+          name: string
+          priority?: string
+          roles?: string[]
+          template: string
+          trigger: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          gaze_target?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          priority?: string
+          roles?: string[]
+          template?: string
+          trigger?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       certificates: {
         Row: {
           certificate_number: string
