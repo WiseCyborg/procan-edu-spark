@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -111,6 +112,7 @@ export const EnhancedCoursePreview: React.FC<EnhancedCoursePreviewProps> = ({
 };
 
 export const CoursePreviewSystem: React.FC = () => {
+  const navigate = useNavigate();
   const [currentModule, setCurrentModule] = React.useState(0);
   
   const modules = [
@@ -200,7 +202,7 @@ export const CoursePreviewSystem: React.FC = () => {
         
         <EnhancedCoursePreview
           module={modules[currentModule]}
-          onStart={() => console.log(`Starting ${modules[currentModule].id}`)}
+          onStart={() => navigate('/course')}
         />
         
         <Button
