@@ -9,8 +9,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useOrganization } from '@/hooks/useOrganization';
 import { useFeatureFlags } from '@/hooks/useFeatureFlags';
-import { useNavigate } from 'react-router-dom';
-import { LogOut, User, MessageSquare, BookOpen, Award, BarChart3, Users, Mail, Building2, CreditCard, ShoppingCart, Home, FileText, GraduationCap, HelpCircle, Shield, ChevronDown, Keyboard } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { LogOut, User, MessageSquare, BookOpen, Award, BarChart3, Users, Mail, Building2, CreditCard, ShoppingCart, Home, FileText, GraduationCap, HelpCircle, Shield, ChevronDown, Keyboard, LayoutDashboard } from 'lucide-react';
 import { CommunicationHub } from '@/components/communication/CommunicationHub';
 import { PurchaseSeatsDialog } from '@/components/team/PurchaseSeatsDialog';
 import { RoleSwitcher } from '@/components/navigation/RoleSwitcher';
@@ -24,15 +24,46 @@ interface HeaderProps {
   role?: string;
 }
 
+// Public routes where we show marketing navigation (not app navigation)
+const PUBLIC_MARKETING_ROUTES = [
+  '/',
+  '/faq',
+  '/verify-certificate',
+  '/consumer-education',
+  '/dispensary-portal',
+  '/employers',
+  '/about',
+  '/get-started',
+  '/stoplight-standard',
+  '/privacy-policy',
+  '/terms-of-service',
+  '/roi-calculator',
+  '/success-stories'
+];
+
 const Header = ({ role: headerRole }: HeaderProps = {}) => {
   const { user, signOut } = useAuth();
   const { isDispensaryManager, isTrainingCoordinator, isAdmin, roles, hasMultipleManagementRoles, managementRoles } = useUserRole();
   const { organization } = useOrganization();
   const navigate = useNavigate();
+  const location = useLocation();
   const [showCommunicationHub, setShowCommunicationHub] = useState(false);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [currentRoleView, setCurrentRoleView] = useState<string>('');
   const [unreadCount, setUnreadCount] = useState(0);
+
+  // Check if we're on a public marketing route
+  const isPublicMarketingRoute = PUBLIC_MARKETING_ROUTES.some(route => 
+    location.pathname === route || location.pathname.startsWith(route + '/')
+  );
+
+  // Get the user's appropriate dashboard route
+  const getDashboardRoute = () => {
+    if (isAdmin) return '/admin';
+    if (isTrainingCoordinator) return '/training-coordinator-dashboard';
+    if (isDispensaryManager) return '/dispensary-manager-dashboard';
+    return '/student-dashboard';
+  };
 
   const { flags } = useFeatureFlags();
   const { setShortcutsDialogOpen } = useKeyboardShortcuts();
@@ -108,14 +139,7 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <div className="flex items-center space-x-2">
           <Button 
-            onClick={() => {
-              // Navigate to default dashboard based on highest priority role
-              if (isAdmin) navigate('/admin-dashboard');
-              else if (isTrainingCoordinator) navigate('/training-coordinator-dashboard');
-              else if (isDispensaryManager) navigate('/dispensary-manager-dashboard');
-              else if (user) navigate('/student-dashboard');
-              else navigate('/');
-            }}
+            onClick={() => navigate('/')}
             variant="ghost"
             className="p-0 h-auto hover:bg-transparent"
           >
@@ -125,12 +149,14 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
         </div>
         
         <div className="flex items-center space-x-4">
-          {!user && (
+          {/* Public Marketing Navigation - show for non-logged-in users OR logged-in users on public pages */}
+          {(!user || isPublicMarketingRoute) && (
             <div className="flex items-center space-x-2">
               <Button 
                 onClick={() => navigate('/training-handbook')}
                 variant="ghost"
                 size="sm"
+                className="hidden md:inline-flex"
               >
                 Training Handbook
               </Button>
@@ -138,6 +164,7 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                 onClick={() => navigate('/faq')}
                 variant="ghost"
                 size="sm"
+                className="hidden md:inline-flex"
               >
                 FAQ
               </Button>
@@ -145,26 +172,48 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                 onClick={() => navigate('/verify-certificate')}
                 variant="ghost"
                 size="sm"
+                className="hidden md:inline-flex"
               >
                 Verify Certificate
               </Button>
-              <Button 
-                onClick={() => navigate('/auth?role=admin')}
-                variant="outline"
-                size="sm"
-                className="border-red-300 text-red-700 hover:bg-red-50 hover:border-red-400"
-              >
-                Admin Login
-              </Button>
+              {!user ? (
+                <>
+                  <Button 
+                    onClick={() => navigate('/auth')}
+                    variant="outline"
+                    size="sm"
+                  >
+                    Sign In
+                  </Button>
+                  <Button 
+                    onClick={() => navigate('/get-started')}
+                    size="sm"
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    Get Started
+                  </Button>
+                </>
+              ) : (
+                /* Logged-in user on public page - show Go to Dashboard CTA */
+                <Button 
+                  onClick={() => navigate(getDashboardRoute())}
+                  size="sm"
+                  className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+                >
+                  <LayoutDashboard className="w-4 h-4" />
+                  Go to Dashboard
+                </Button>
+              )}
             </div>
           )}
           
-          {user && (
+          {/* App Navigation - show for logged-in users on non-public routes */}
+          {user && !isPublicMarketingRoute && (
             <div className="flex items-center space-x-2">
               {/* Desktop Navigation - Dashboard, Training, Communication */}
               <nav className="hidden md:flex items-center space-x-1">
                 <Button 
-                  onClick={() => navigate('/')}
+                  onClick={() => navigate(getDashboardRoute())}
                   variant="ghost"
                   size="sm"
                   className="flex items-center space-x-2"
@@ -196,25 +245,32 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                   )}
                 </Button>
               </nav>
+            </div>
+          )}
+          
+          {/* User Controls - Profile Dropdown for all logged-in users */}
+          {user && (
+            <div className="flex items-center space-x-2">
+              {/* Keyboard Shortcuts Indicator - only on app routes */}
+              {!isPublicMarketingRoute && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={() => setShortcutsDialogOpen(true)}
+                      className="hidden md:flex"
+                    >
+                      <Keyboard className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Press <kbd className="px-1.5 py-0.5 text-xs font-semibold bg-muted rounded border">{isMac ? '⌘' : 'Ctrl'}/</kbd> for shortcuts</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
               
-              {/* Keyboard Shortcuts Indicator */}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="icon"
-                    onClick={() => setShortcutsDialogOpen(true)}
-                    className="hidden md:flex"
-                  >
-                    <Keyboard className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Press <kbd className="px-1.5 py-0.5 text-xs font-semibold bg-muted rounded border">{isMac ? '⌘' : 'Ctrl'}/</kbd> for shortcuts</p>
-                </TooltipContent>
-              </Tooltip>
-              
-              {/* User Profile Dropdown - Expanded with organized sections */}
+              {/* User Profile Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="sm" className="h-9 px-3">
@@ -247,7 +303,7 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                   <DropdownMenuLabel className="text-xs text-muted-foreground font-semibold px-2 py-1.5">
                     QUICK LINKS
                   </DropdownMenuLabel>
-                  <DropdownMenuItem onClick={() => navigate('/')}>
+                  <DropdownMenuItem onClick={() => navigate(getDashboardRoute())}>
                     <Home className="mr-2 h-4 w-4" />
                     <span>Dashboard</span>
                   </DropdownMenuItem>
