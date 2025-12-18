@@ -17,22 +17,19 @@ export const UATAccountManager = () => {
   const [selectedAccount, setSelectedAccount] = useState<any>(null);
 
   // Fetch UAT accounts
-  const { data: uatAccounts, isLoading } = useQuery({
+  const { data: uatAccounts, isLoading, isError, error } = useQuery({
     queryKey: ['uat-accounts'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('uat_accounts')
-        .select(`
-          *,
-          profiles:user_id (first_name, last_name, email_cache, organization_id),
-          user_progress:user_id (count)
-        `)
+        .select('*')
         .eq('is_active', true)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
       return data || [];
-    }
+    },
+    retry: 1
   });
 
   // Reset account mutation
@@ -151,6 +148,22 @@ export const UATAccountManager = () => {
         <TabsContent value="accounts" className="space-y-4">
           {isLoading ? (
             <div className="text-center py-8 text-muted-foreground">Loading UAT accounts...</div>
+          ) : isError ? (
+            <Card>
+              <CardContent className="p-8 text-center">
+                <AlertTriangle className="h-12 w-12 text-destructive mx-auto mb-4" />
+                <p className="text-destructive font-medium mb-2">Failed to load UAT accounts</p>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {(error as Error)?.message || 'Unable to fetch data. Check permissions or try again.'}
+                </p>
+                <Button 
+                  variant="outline" 
+                  onClick={() => queryClient.invalidateQueries({ queryKey: ['uat-accounts'] })}
+                >
+                  Retry
+                </Button>
+              </CardContent>
+            </Card>
           ) : uatAccounts && uatAccounts.length > 0 ? (
             <div className="space-y-2">
               {uatAccounts.map((account) => (
