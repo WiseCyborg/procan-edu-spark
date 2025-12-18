@@ -206,9 +206,9 @@ const CertificateVerification = () => {
                     type="text"
                     placeholder="Enter certificate number (e.g., CERT-2024-001-1234)"
                     value={certificateNumber}
-                    onChange={(e) => setCertificateNumber(e.target.value)}
+                    onChange={(e) => setCertificateNumber(e.target.value.toUpperCase().trim())}
                     onKeyPress={handleKeyPress}
-                    className="flex-1"
+                    className="flex-1 font-mono"
                   />
                   <Button 
                     onClick={verifyCertificate}
@@ -218,8 +218,8 @@ const CertificateVerification = () => {
                     {loading ? 'Verifying...' : 'Verify'}
                   </Button>
                 </div>
-                <p className="text-sm text-gray-500">
-                  Certificate numbers are case-sensitive and follow the format: CERT-YYYY-DDD-XXXX
+                <p className="text-sm text-muted-foreground">
+                  Format: CERT-YYYY-DDD-XXXX or CON-YYYY-XXXXXX
                 </p>
               </div>
             </CardContent>
