@@ -34,7 +34,8 @@ export const AdminOrganizationSelector = ({ onSelect, selectedOrgId }: AdminOrga
       const orgsResult = await supabase
         .from('organizations')
         .select('id, name')
-        .eq('status', 'active')
+        .eq('is_active', true)
+        .eq('admin_approved', true)
         .order('name');
 
       if (orgsResult.error) throw orgsResult.error;
