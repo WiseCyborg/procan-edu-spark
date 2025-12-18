@@ -186,7 +186,7 @@ verify_jwt = false
 [functions.generate-compliance-report]
 verify_jwt = false
 
-[functions._diagnostic-email]
+[functions.diagnostic-email]
 verify_jwt = false
 
 [functions.email-health-check]
