@@ -12,7 +12,7 @@ import '@livekit/components-styles';
 import { Track } from 'livekit-client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { PhoneOff } from 'lucide-react';
+import { PhoneOff, Bot } from 'lucide-react';
 import { RecordingControls } from './RecordingControls';
 
 interface VideoCallRoomProps {
@@ -23,6 +23,8 @@ interface VideoCallRoomProps {
   isHost?: boolean;
   callId?: string;
   isRecording?: boolean;
+  sessionId?: string;
+  isAgentCovered?: boolean;
 }
 
 export const VideoCallRoom = ({
@@ -32,7 +34,9 @@ export const VideoCallRoom = ({
   onDisconnect,
   isHost = false,
   callId,
-  isRecording = false
+  isRecording = false,
+  sessionId,
+  isAgentCovered = false
 }: VideoCallRoomProps) => {
   const [connected, setConnected] = useState(false);
   const [recordingState, setRecordingState] = useState(isRecording);
@@ -45,6 +49,12 @@ export const VideoCallRoom = ({
             <h2 className="text-lg font-semibold">Video Call</h2>
             <p className="text-sm text-muted-foreground">{roomName}</p>
           </div>
+          {isAgentCovered && (
+            <Badge variant="secondary" className="gap-1">
+              <Bot className="h-3 w-3" />
+              Agent Covered
+            </Badge>
+          )}
           {recordingState && (
             <Badge variant="destructive" className="animate-pulse gap-1">
               <span className="h-2 w-2 rounded-full bg-white" />

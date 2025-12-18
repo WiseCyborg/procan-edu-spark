@@ -1170,6 +1170,97 @@ export type Database = {
         }
         Relationships: []
       }
+      covered_sessions: {
+        Row: {
+          conversation_id: string | null
+          created_at: string
+          ended_at: string | null
+          generate_summary: boolean | null
+          host_id: string
+          id: string
+          organization_id: string | null
+          pre_meeting_context: Json | null
+          record_audio: boolean | null
+          related_module_id: string | null
+          related_pipeline_stage: string | null
+          scheduled_at: string | null
+          session_type: string
+          started_at: string | null
+          status: string
+          title: string
+          track_actions: boolean | null
+          transcribe: boolean | null
+          updated_at: string
+          video_call_id: string | null
+        }
+        Insert: {
+          conversation_id?: string | null
+          created_at?: string
+          ended_at?: string | null
+          generate_summary?: boolean | null
+          host_id: string
+          id?: string
+          organization_id?: string | null
+          pre_meeting_context?: Json | null
+          record_audio?: boolean | null
+          related_module_id?: string | null
+          related_pipeline_stage?: string | null
+          scheduled_at?: string | null
+          session_type: string
+          started_at?: string | null
+          status?: string
+          title: string
+          track_actions?: boolean | null
+          transcribe?: boolean | null
+          updated_at?: string
+          video_call_id?: string | null
+        }
+        Update: {
+          conversation_id?: string | null
+          created_at?: string
+          ended_at?: string | null
+          generate_summary?: boolean | null
+          host_id?: string
+          id?: string
+          organization_id?: string | null
+          pre_meeting_context?: Json | null
+          record_audio?: boolean | null
+          related_module_id?: string | null
+          related_pipeline_stage?: string | null
+          scheduled_at?: string | null
+          session_type?: string
+          started_at?: string | null
+          status?: string
+          title?: string
+          track_actions?: boolean | null
+          transcribe?: boolean | null
+          updated_at?: string
+          video_call_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "covered_sessions_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "covered_sessions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "covered_sessions_video_call_id_fkey"
+            columns: ["video_call_id"]
+            isOneToOne: false
+            referencedRelation: "video_calls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cron_job_executions: {
         Row: {
           error_message: string | null
@@ -4477,6 +4568,264 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      session_actions: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          due_date: string | null
+          id: string
+          linked_module_id: string | null
+          linked_org_id: string | null
+          linked_pipeline_stage: string | null
+          owner_id: string | null
+          owner_name: string | null
+          priority: string | null
+          session_id: string
+          status: string | null
+          task_description: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          linked_module_id?: string | null
+          linked_org_id?: string | null
+          linked_pipeline_stage?: string | null
+          owner_id?: string | null
+          owner_name?: string | null
+          priority?: string | null
+          session_id: string
+          status?: string | null
+          task_description: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          linked_module_id?: string | null
+          linked_org_id?: string | null
+          linked_pipeline_stage?: string | null
+          owner_id?: string | null
+          owner_name?: string | null
+          priority?: string | null
+          session_id?: string
+          status?: string | null
+          task_description?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_actions_linked_org_id_fkey"
+            columns: ["linked_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_actions_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "covered_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      session_decisions: {
+        Row: {
+          context: string | null
+          created_at: string
+          decided_by: string | null
+          decided_by_id: string | null
+          decision_text: string
+          id: string
+          impacted_org_id: string | null
+          impacted_pipeline: string | null
+          session_id: string
+        }
+        Insert: {
+          context?: string | null
+          created_at?: string
+          decided_by?: string | null
+          decided_by_id?: string | null
+          decision_text: string
+          id?: string
+          impacted_org_id?: string | null
+          impacted_pipeline?: string | null
+          session_id: string
+        }
+        Update: {
+          context?: string | null
+          created_at?: string
+          decided_by?: string | null
+          decided_by_id?: string | null
+          decision_text?: string
+          id?: string
+          impacted_org_id?: string | null
+          impacted_pipeline?: string | null
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_decisions_impacted_org_id_fkey"
+            columns: ["impacted_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_decisions_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "covered_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      session_participants: {
+        Row: {
+          consent_given: boolean | null
+          consent_given_at: string | null
+          created_at: string
+          id: string
+          joined_at: string | null
+          left_at: string | null
+          participant_name: string
+          participant_role: string | null
+          session_id: string
+          user_id: string | null
+        }
+        Insert: {
+          consent_given?: boolean | null
+          consent_given_at?: string | null
+          created_at?: string
+          id?: string
+          joined_at?: string | null
+          left_at?: string | null
+          participant_name: string
+          participant_role?: string | null
+          session_id: string
+          user_id?: string | null
+        }
+        Update: {
+          consent_given?: boolean | null
+          consent_given_at?: string | null
+          created_at?: string
+          id?: string
+          joined_at?: string | null
+          left_at?: string | null
+          participant_name?: string
+          participant_role?: string | null
+          session_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_participants_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "covered_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      session_summaries: {
+        Row: {
+          created_at: string
+          duration_minutes: number | null
+          executive_summary: string | null
+          generated_at: string | null
+          id: string
+          key_outcomes: Json | null
+          model_used: string | null
+          participant_count: number | null
+          risks_identified: Json | null
+          session_id: string
+          topics_discussed: Json | null
+        }
+        Insert: {
+          created_at?: string
+          duration_minutes?: number | null
+          executive_summary?: string | null
+          generated_at?: string | null
+          id?: string
+          key_outcomes?: Json | null
+          model_used?: string | null
+          participant_count?: number | null
+          risks_identified?: Json | null
+          session_id: string
+          topics_discussed?: Json | null
+        }
+        Update: {
+          created_at?: string
+          duration_minutes?: number | null
+          executive_summary?: string | null
+          generated_at?: string | null
+          id?: string
+          key_outcomes?: Json | null
+          model_used?: string | null
+          participant_count?: number | null
+          risks_identified?: Json | null
+          session_id?: string
+          topics_discussed?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_summaries_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "covered_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      session_transcripts: {
+        Row: {
+          confidence: number | null
+          content: string
+          created_at: string
+          id: string
+          session_id: string
+          speaker_id: string | null
+          speaker_name: string | null
+          timestamp_end: number | null
+          timestamp_start: number
+        }
+        Insert: {
+          confidence?: number | null
+          content: string
+          created_at?: string
+          id?: string
+          session_id: string
+          speaker_id?: string | null
+          speaker_name?: string | null
+          timestamp_end?: number | null
+          timestamp_start: number
+        }
+        Update: {
+          confidence?: number | null
+          content?: string
+          created_at?: string
+          id?: string
+          session_id?: string
+          speaker_id?: string | null
+          speaker_name?: string | null
+          timestamp_end?: number | null
+          timestamp_start?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_transcripts_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "covered_sessions"
             referencedColumns: ["id"]
           },
         ]
