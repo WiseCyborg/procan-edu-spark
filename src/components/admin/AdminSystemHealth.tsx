@@ -2,19 +2,16 @@ import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Mail, Database, Zap, Video, RefreshCw, CheckCircle, AlertTriangle, Loader2 } from 'lucide-react';
-import { useEmailHealthMonitor } from '@/hooks/useEmailHealthMonitor';
-import { ProductionDashboard } from '@/components/ProductionDashboard';
+import { Mail, Database, Zap, Video, RefreshCw, Loader2, Activity } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { EdgeFunctionsStatus } from '@/components/admin/EdgeFunctionsStatus';
 import { ImageAssetManager } from '@/components/admin/ImageAssetManager';
 import { VideoAssetManager } from '@/components/admin/VideoAssetManager';
+import { RealSystemHealthPanel } from '@/components/admin/RealSystemHealthPanel';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 export const AdminSystemHealth = () => {
-  const { circuitBreaker, loading } = useEmailHealthMonitor();
   const [isRunningHealthCheck, setIsRunningHealthCheck] = useState(false);
   const [healthCheckResult, setHealthCheckResult] = useState<any>(null);
 
@@ -53,55 +50,33 @@ export const AdminSystemHealth = () => {
   };
 
   return (
-    <Tabs defaultValue="email" className="w-full">
-      <TabsList className="grid w-full grid-cols-4">
-        <TabsTrigger value="email">Email System</TabsTrigger>
+    <Tabs defaultValue="overview" className="w-full">
+      <TabsList className="grid w-full grid-cols-5">
+        <TabsTrigger value="overview" className="flex items-center gap-1">
+          <Activity className="h-4 w-4" />
+          Overview
+        </TabsTrigger>
+        <TabsTrigger value="email">Email</TabsTrigger>
         <TabsTrigger value="database">Database</TabsTrigger>
-        <TabsTrigger value="functions">Edge Functions</TabsTrigger>
-        <TabsTrigger value="media">Media Assets</TabsTrigger>
+        <TabsTrigger value="functions">Functions</TabsTrigger>
+        <TabsTrigger value="media">Media</TabsTrigger>
       </TabsList>
+
+      <TabsContent value="overview" className="mt-4">
+        <RealSystemHealthPanel />
+      </TabsContent>
 
       <TabsContent value="email">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Mail className="h-5 w-5" />
-              Email System Health
+              Email System Details
             </CardTitle>
-            <CardDescription>Monitor email delivery and circuit breaker status</CardDescription>
+            <CardDescription>Detailed email delivery monitoring and diagnostics</CardDescription>
           </CardHeader>
           <CardContent>
-            {loading ? (
-              <p className="text-sm text-muted-foreground">Loading email health...</p>
-            ) : circuitBreaker ? (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Circuit State:</span>
-                  <Badge variant={circuitBreaker.circuit_state === 'closed' ? 'default' : 'destructive'}>
-                    {circuitBreaker.circuit_state.toUpperCase()}
-                  </Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Failure Count:</span>
-                  <span className="text-sm">{circuitBreaker.failure_count}</span>
-                </div>
-                {circuitBreaker.last_failure_at && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Last Failure:</span>
-                    <span className="text-sm">{new Date(circuitBreaker.last_failure_at).toLocaleString()}</span>
-                  </div>
-                )}
-                {circuitBreaker.circuit_state !== 'closed' && (
-                  <Alert variant="destructive">
-                    <AlertDescription>
-                      Email circuit breaker is open - email delivery is currently blocked
-                    </AlertDescription>
-                  </Alert>
-                )}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">Unable to load email health status</p>
-            )}
+            <RealSystemHealthPanel />
           </CardContent>
         </Card>
       </TabsContent>
@@ -116,7 +91,7 @@ export const AdminSystemHealth = () => {
             <CardDescription>Monitor database performance and integrity</CardDescription>
           </CardHeader>
           <CardContent>
-            <ProductionDashboard />
+            <RealSystemHealthPanel />
           </CardContent>
         </Card>
       </TabsContent>
@@ -126,8 +101,8 @@ export const AdminSystemHealth = () => {
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-lg">Health Check</CardTitle>
-                <CardDescription>Run comprehensive system health check</CardDescription>
+                <CardTitle className="text-lg">Comprehensive Health Check</CardTitle>
+                <CardDescription>Run full system health analysis</CardDescription>
               </div>
               <Button 
                 onClick={runComprehensiveHealthCheck} 
