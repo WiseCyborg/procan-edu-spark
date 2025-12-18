@@ -501,7 +501,17 @@ const EnhancedCourseModule: React.FC = () => {
                     }}
                     canContinue={true}
                     completionMessage="Mark Overview as Complete"
-                    onMarkComplete={() => setOverviewComplete(true)}
+                    onMarkComplete={async () => {
+                      setOverviewComplete(true);
+                      // Persist to database so next modules unlock
+                      if (moduleData) {
+                        await updateProgress(COURSE_ID, moduleData.id, true, 100, 0);
+                        toast({
+                          title: "Progress Saved",
+                          description: "Module overview marked as complete!",
+                        });
+                      }
+                    }}
                   />
                 </TabsContent>
 
