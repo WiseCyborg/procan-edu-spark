@@ -166,9 +166,28 @@ export const HealthFeed: React.FC<HealthFeedProps> = ({
   showFilters = true,
   compact = false 
 }) => {
-  const { data: events, isLoading } = usePipelineHealthEvents(maxItems);
+  const { data: events, isLoading, refetch } = usePipelineHealthEvents(maxItems);
   const [filter, setFilter] = useState<'all' | 'critical' | 'auto_fixed' | 'admin'>('all');
   const [showAcknowledged, setShowAcknowledged] = useState(true);
+
+  // Real-time subscription for live updates
+  React.useEffect(() => {
+    const supabase = (window as any).__supabase_client;
+    if (!supabase) return;
+
+    const channel = supabase
+      .channel('health-feed-realtime')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'pipeline_health_events' },
+        () => refetch()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [refetch]);
 
   const filteredEvents = React.useMemo(() => {
     if (!events) return [];

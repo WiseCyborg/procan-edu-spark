@@ -425,3 +425,15 @@ verify_jwt = true
 
 [functions.process-session]
 verify_jwt = true
+
+[functions.application-state-agent]
+verify_jwt = true
+
+[functions.organization-integrity-agent]
+verify_jwt = true
+
+[functions.seat-reconciliation-agent]
+verify_jwt = true
+
+[functions.certificate-integrity-agent]
+verify_jwt = true

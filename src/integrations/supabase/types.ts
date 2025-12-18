@@ -41,6 +41,164 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_configs: {
+        Row: {
+          agent_type: string
+          created_at: string | null
+          failure_count: number | null
+          id: string
+          is_enabled: boolean | null
+          last_run_at: string | null
+          last_run_duration_ms: number | null
+          last_run_status: string | null
+          run_count: number | null
+          schedule_cron: string | null
+          success_count: number | null
+          thresholds: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          agent_type: string
+          created_at?: string | null
+          failure_count?: number | null
+          id?: string
+          is_enabled?: boolean | null
+          last_run_at?: string | null
+          last_run_duration_ms?: number | null
+          last_run_status?: string | null
+          run_count?: number | null
+          schedule_cron?: string | null
+          success_count?: number | null
+          thresholds?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          agent_type?: string
+          created_at?: string | null
+          failure_count?: number | null
+          id?: string
+          is_enabled?: boolean | null
+          last_run_at?: string | null
+          last_run_duration_ms?: number | null
+          last_run_status?: string | null
+          run_count?: number | null
+          schedule_cron?: string | null
+          success_count?: number | null
+          thresholds?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      agent_escalations: {
+        Row: {
+          agent_type: string
+          attempts: number | null
+          created_at: string | null
+          escalation_level: number | null
+          first_detected_at: string | null
+          id: string
+          issue_description: string
+          issue_type: string
+          last_escalated_at: string | null
+          metadata: Json | null
+          organization_id: string | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          user_id: string | null
+        }
+        Insert: {
+          agent_type: string
+          attempts?: number | null
+          created_at?: string | null
+          escalation_level?: number | null
+          first_detected_at?: string | null
+          id?: string
+          issue_description: string
+          issue_type: string
+          last_escalated_at?: string | null
+          metadata?: Json | null
+          organization_id?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          agent_type?: string
+          attempts?: number | null
+          created_at?: string | null
+          escalation_level?: number | null
+          first_detected_at?: string | null
+          id?: string
+          issue_description?: string
+          issue_type?: string
+          last_escalated_at?: string | null
+          metadata?: Json | null
+          organization_id?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_escalations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_events: {
+        Row: {
+          completed_at: string | null
+          correlation_id: string | null
+          created_at: string | null
+          error_message: string | null
+          event_type: string
+          id: string
+          max_retries: number | null
+          payload: Json
+          processed_at: string | null
+          retry_count: number | null
+          source_agent: string
+          status: string | null
+          target_agent: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          correlation_id?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          event_type: string
+          id?: string
+          max_retries?: number | null
+          payload?: Json
+          processed_at?: string | null
+          retry_count?: number | null
+          source_agent: string
+          status?: string | null
+          target_agent?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          correlation_id?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          event_type?: string
+          id?: string
+          max_retries?: number | null
+          payload?: Json
+          processed_at?: string | null
+          retry_count?: number | null
+          source_agent?: string
+          status?: string | null
+          target_agent?: string | null
+        }
+        Relationships: []
+      }
       ai_agent_runs: {
         Row: {
           actions_taken: Json | null
