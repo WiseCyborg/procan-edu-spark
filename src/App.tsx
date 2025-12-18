@@ -422,6 +422,12 @@ const AppRoutesLayout = () => {
             {/* Legal Pages */}
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms-of-service" element={<TermsOfService />} />
+            {/* Legacy/typo redirects */}
+            <Route path="/student/dashboard" element={<Navigate to="/student-dashboard" replace />} />
+            <Route path="/student" element={<Navigate to="/student-dashboard" replace />} />
+            <Route path="/manager/dashboard" element={<Navigate to="/dispensary-manager-dashboard" replace />} />
+            <Route path="/admin/dashboard" element={<Navigate to="/admin" replace />} />
+            
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
