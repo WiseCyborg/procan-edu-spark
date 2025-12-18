@@ -11,6 +11,8 @@ interface DashboardMetrics {
   activeChats: number;
   aiLeanSessions: number;
   aiLeanActiveManagers: number;
+  totalOrganizations: number;
+  activeOrganizations: number;
 }
 
 export const useAdminDashboardMetrics = () => {
@@ -23,6 +25,8 @@ export const useAdminDashboardMetrics = () => {
     activeChats: 0,
     aiLeanSessions: 0,
     aiLeanActiveManagers: 0,
+    totalOrganizations: 0,
+    activeOrganizations: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -72,6 +76,14 @@ export const useAdminDashboardMetrics = () => {
       
       const uniqueManagers = new Set(aiLeanUsers?.map(s => s.user_id)).size;
 
+      // Fetch organizations counts
+      const { data: allOrgs } = await supabase
+        .from('organizations')
+        .select('id, is_active');
+      
+      const totalOrgsCount = allOrgs?.length || 0;
+      const activeOrgsCount = allOrgs?.filter(o => o.is_active === true).length || 0;
+
       setMetrics({
         activeUsers: usersCount || 0,
         pendingVerifications: pendingCount,
@@ -81,6 +93,8 @@ export const useAdminDashboardMetrics = () => {
         activeChats: chatsCount || 0,
         aiLeanSessions: aiLeanCount || 0,
         aiLeanActiveManagers: uniqueManagers,
+        totalOrganizations: totalOrgsCount || 0,
+        activeOrganizations: activeOrgsCount || 0,
       });
     } catch (error) {
       console.error('Error fetching dashboard metrics:', error);
@@ -126,6 +140,14 @@ export const useAdminDashboardMetrics = () => {
         () => {
           fetchMetrics();
           toast.info('Conversation data updated');
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'organizations' },
+        () => {
+          fetchMetrics();
+          toast.info('Organization data updated');
         }
       )
       .subscribe();
