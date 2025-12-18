@@ -422,3 +422,6 @@ verify_jwt = true
 
 [functions.email-personalization-agent]
 verify_jwt = true
+
+[functions.process-session]
+verify_jwt = true
