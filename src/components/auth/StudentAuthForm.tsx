@@ -21,8 +21,10 @@ type FormData = z.infer<typeof employeeRegistrationSchema>;
 const StudentAuthForm = () => {
   const [searchParams] = useSearchParams();
   const invitationToken = searchParams.get('invitation');
+  const prefilledCode = searchParams.get('code');
+  const forceRegister = searchParams.get('register') === 'true';
   const [loading, setLoading] = useState(false);
-  const [isRegistering, setIsRegistering] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(forceRegister || !!invitationToken);
   const [isLoadingInvitation, setIsLoadingInvitation] = useState(false);
   const [invitationData, setInvitationData] = useState<any>(null);
   const [email, setEmail] = useState('');
@@ -38,6 +40,7 @@ const StudentAuthForm = () => {
   const regPassword = watch('password');
 
   useEffect(() => {
+    // Handle invite token
     if (invitationToken) {
       setIsLoadingInvitation(true);
       setIsRegistering(true);
@@ -51,7 +54,12 @@ const StudentAuthForm = () => {
         })
         .finally(() => setIsLoadingInvitation(false));
     }
-  }, [invitationToken]);
+    // Handle prefilled join code from URL
+    else if (prefilledCode) {
+      setValue('joinCode', prefilledCode);
+      setIsRegistering(true);
+    }
+  }, [invitationToken, prefilledCode, setValue]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -89,7 +97,9 @@ const StudentAuthForm = () => {
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
-        <CardHeader><CardTitle>{isRegistering ? 'Register' : 'Student Login'}</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle>{isRegistering ? 'Create Your Account' : 'Employee Login'}</CardTitle>
+        </CardHeader>
         <CardContent>
           {!isRegistering ? (
             <form onSubmit={handleLogin} className="space-y-4">
