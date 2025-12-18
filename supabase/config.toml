@@ -437,3 +437,6 @@ verify_jwt = true
 
 [functions.certificate-integrity-agent]
 verify_jwt = true
+
+[functions.avatar-agent]
+verify_jwt = false
