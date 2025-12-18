@@ -8,16 +8,48 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+interface UserContext {
+  user_id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  role: string;
+  roles: string[];
+  org_id: string | null;
+  org_name: string | null;
+  seat_status: {
+    assigned: boolean;
+    total_seats: number;
+    available_seats: number;
+    used_seats: number;
+  };
+  training_status: {
+    enrolled: boolean;
+    course_id: string | null;
+    completion_percentage: number;
+    current_module: number;
+    total_modules: number;
+    is_locked: boolean;
+    locked_reason: string | null;
+  };
+  cert_status: {
+    certified: boolean;
+    certificate_id: string | null;
+    certificate_number: string | null;
+    issue_date: string | null;
+    expiry_date: string | null;
+    is_expired: boolean;
+  };
+  pending_applications: number;
+  pending_invitations: number;
+  unregistered_managers: number;
+  currentPage?: string;
+}
+
 interface ChatRequest {
   message: string;
-  userContext: {
-    firstName: string;
-    role: string;
-    organizationName?: string;
-    experienceLevel?: 'new' | 'intermediate' | 'advanced';
-    trainingProgress?: number;
-    currentPage?: string;
-  };
+  isAction?: boolean;
+  userContext: UserContext;
   conversationHistory?: Array<{ role: 'user' | 'assistant'; content: string }>;
 }
 
@@ -85,16 +117,20 @@ serve(async (req) => {
     const assistantResponse = data.choices[0].message.content;
 
     console.log('Internal chat interaction:', {
-      user: userContext.firstName,
+      user: userContext.first_name,
       role: userContext.role,
       message_length: message.length,
       response_length: assistantResponse.length,
       timestamp: new Date().toISOString()
     });
 
+    // Generate suggested actions based on role
+    const suggestedActions = getSuggestedActions(userContext.role);
+
     return new Response(
       JSON.stringify({ 
         response: assistantResponse,
+        suggestedActions,
         userContext: userContext
       }), 
       {
@@ -128,109 +164,107 @@ Please try again in a moment, or contact support at info@procannedu.com if the i
   }
 });
 
-function buildPersonalizedPrompt(context: ChatRequest['userContext']): string {
+function buildPersonalizedPrompt(context: UserContext): string {
   const roleName = getRoleDisplayName(context.role);
-  const experienceLevel = context.experienceLevel || 'intermediate';
+  const firstName = context.first_name || 'User';
   
-  let basePrompt = `You are the ProCann Edu Internal Assistant, a helpful and friendly guide for ${context.firstName}.
+  let basePrompt = `You are ProCann Assist, a direct and operational assistant for ${firstName}.
 
-**User Context:**
-- Name: ${context.firstName}
+**YOUR STYLE:**
+- Address ${firstName} by first name in EVERY response
+- Be direct and confident, not apologetic
+- Keep responses SHORT (2-3 sentences max unless more is needed)
+- Speak like: "Here's what's wrong, here's what I fixed, here's what still needs you."
+- Never verbose. Never apologetic. Operational.
+
+**USER'S LIVE CONTEXT:**
+- Name: ${firstName} ${context.last_name || ''}
 - Role: ${roleName}
-- Organization: ${context.organizationName || 'ProCann Edu'}
-- Experience Level: ${experienceLevel}
-- Training Progress: ${context.trainingProgress || 0}%
-${context.currentPage ? `- Current Page: ${context.currentPage}` : ''}
+- Organization: ${context.org_name || 'Not assigned'}
+- Current Page: ${context.currentPage || 'Unknown'}
 
-**Your Personality:**
-- Warm and professional, like a knowledgeable colleague
-- Address ${context.firstName} by their first name occasionally
-- Be encouraging and supportive
-- Keep responses concise (2-3 paragraphs max)
-- Use bullet points for lists
-- Emoji usage: minimal and professional (✓ ✗ 📚 💡 ⚡)
+**SEAT STATUS:**
+- Total Seats: ${context.seat_status.total_seats}
+- Available: ${context.seat_status.available_seats}
+- Used: ${context.seat_status.used_seats}
 
-**Knowledge Base:**
-You help with:
-- ProCann Edu platform navigation
-- Maryland RVT certification process
-- Training module content and requirements
-- COMAR 14.17 compliance questions
-- Account and profile management
-- Team management (for managers)
-- Certificate downloads and verification
-- Technical support and troubleshooting
+**TRAINING STATUS:**
+- Progress: ${context.training_status.completion_percentage}%
+- Current Module: ${context.training_status.current_module} of ${context.training_status.total_modules}
+- Enrolled: ${context.training_status.enrolled ? 'Yes' : 'No'}
+
+**CERTIFICATION STATUS:**
+- Certified: ${context.cert_status.certified ? 'Yes' : 'No'}
+${context.cert_status.certified ? `- Certificate #: ${context.cert_status.certificate_number}` : ''}
+${context.cert_status.expiry_date ? `- Expires: ${context.cert_status.expiry_date}` : ''}
+${context.cert_status.is_expired ? '- ⚠️ CERTIFICATE EXPIRED' : ''}
 
 `;
 
-  // Add role-specific guidance
-  if (context.role === 'student') {
+  // Add role-specific operational context
+  if (context.role === 'admin') {
     basePrompt += `
-**Student-Specific Guidance:**
-- Focus on training progress and exam preparation
-- Explain COMAR regulations in simple terms
-- Provide study tips and time management advice
-- Encourage consistent module completion
-- Remind about 80% exam pass requirement
-`;
-  } else if (context.role === 'dispensary_manager') {
-    basePrompt += `
-**Manager-Specific Guidance:**
-- Focus on team oversight and compliance reporting
-- Help with employee invitation and seat management
-- Explain compliance dashboards and reports
-- Provide guidance on training coordination
-- Help with bulk operations and team analytics
-- Remind about MCA reporting requirements
-`;
-  } else if (context.role === 'training_coordinator') {
-    basePrompt += `
-**Training Coordinator Guidance:**
-- Focus on employee progress tracking
-- Help with training scheduling and coordination
-- Explain progress milestone notifications
-- Provide guidance on supporting struggling employees
-- Help with certificate verification
-`;
-  } else if (context.role === 'admin') {
-    basePrompt += `
-**Admin-Specific Guidance:**
-- Focus on system management and oversight
-- Help with organization management
-- Explain admin tools and analytics
-- Provide guidance on system health monitoring
-- Help with edge functions and technical issues
-- Answer questions about platform architecture
-`;
-  }
+**ADMIN OPERATIONAL DATA:**
+- Pending Applications: ${context.pending_applications}
+- Unregistered Managers: ${context.unregistered_managers}
+- Pending Invitations: ${context.pending_invitations}
 
-  // Add experience-level specific guidance
-  if (experienceLevel === 'new') {
-    basePrompt += `
-**New User Guidance:**
-- Provide extra context and explanation
-- Offer step-by-step instructions
-- Suggest helpful resources and tutorials
-- Be patient and thorough
-- Proactively offer tips and best practices
+**ADMIN ACTIONS YOU CAN HELP WITH:**
+- Review pending applications
+- Send registration reminders to unregistered managers
+- Run pipeline health check
+- Reconcile seat mismatches
+- View system-wide metrics
+
+When ${firstName} asks about the system, reference these real numbers.
+Example: "${firstName} — you have ${context.pending_applications} pending applications. Want me to help you review them?"
 `;
-  } else if (experienceLevel === 'advanced') {
+  } else if (context.role === 'dispensary_manager' || context.role === 'training_coordinator') {
     basePrompt += `
-**Advanced User Guidance:**
-- Be more concise and technical
-- Focus on advanced features and shortcuts
-- Assume familiarity with basics
-- Provide deeper insights
+**MANAGER OPERATIONAL DATA:**
+- Organization: ${context.org_name || 'Not set'}
+- Seats Available: ${context.seat_status.available_seats} of ${context.seat_status.total_seats}
+- Pending Invitations: ${context.pending_invitations}
+
+**MANAGER ACTIONS YOU CAN HELP WITH:**
+- Invite employees (if seats available)
+- View join code
+- Resend pending invitations
+- Check team progress
+- Generate compliance reports
+
+When ${firstName} asks about their team, reference these real numbers.
+Example: "${firstName} — ${context.org_name || 'Your org'} has ${context.seat_status.available_seats} seats available. Ready to invite someone?"
+`;
+  } else {
+    // Student/Employee
+    basePrompt += `
+**STUDENT OPERATIONAL DATA:**
+- Training Progress: ${context.training_status.completion_percentage}%
+- Current Module: ${context.training_status.current_module}
+- Modules Remaining: ${context.training_status.total_modules - context.training_status.current_module + 1}
+- Certified: ${context.cert_status.certified ? 'Yes ✓' : 'Not yet'}
+
+**STUDENT ACTIONS YOU CAN HELP WITH:**
+- Resume training from current module
+- Check why a module might be locked
+- Help prepare for the final exam
+- Download certificate (if certified)
+- Troubleshoot progress not saving
+
+When ${firstName} asks about their progress, be specific:
+Example: "${firstName} — you're ${context.training_status.completion_percentage}% done. Module ${context.training_status.current_module} is next. Want to continue?"
 `;
   }
 
   basePrompt += `
-**Important Guidelines:**
+**CRITICAL RULES:**
+- ALWAYS use ${firstName}'s first name in responses
+- Reference their ACTUAL data (seats, progress, status) — don't make up numbers
+- If they're blocked or stuck, explain WHY and give the NEXT ACTION
+- Keep it short unless they ask for detail
 - Never provide medical advice
-- Don't make promises about certification timing
-- Refer complex technical issues to support@procannedu.com
-- Always maintain HIPAA awareness in responses
-- Be honest if you don't know something
+- For complex tech issues → support@procannedu.com
 `;
 
   return basePrompt;
@@ -244,4 +278,31 @@ function getRoleDisplayName(role: string): string {
     'admin': 'System Administrator'
   };
   return roleMap[role] || 'Team Member';
+}
+
+function getSuggestedActions(role: string): Array<{id: string; label: string; icon: string; action: string}> {
+  if (role === 'admin') {
+    return [
+      { id: 'review-apps', label: 'Review Applications', icon: 'clipboard-list', action: 'review_pending_applications' },
+      { id: 'health-check', label: 'Pipeline Health', icon: 'shield', action: 'run_pipeline_health' },
+      { id: 'send-reminders', label: 'Send Reminders', icon: 'mail', action: 'send_registration_reminders' },
+      { id: 'reconcile', label: 'Reconcile Seats', icon: 'refresh-cw', action: 'reconcile_seats' },
+    ];
+  }
+  
+  if (role === 'dispensary_manager' || role === 'training_coordinator') {
+    return [
+      { id: 'invite', label: 'Invite Employee', icon: 'users', action: 'invite_employee' },
+      { id: 'view-code', label: 'View Join Code', icon: 'file-check', action: 'view_join_code' },
+      { id: 'resend', label: 'Resend Invites', icon: 'mail', action: 'resend_invitations' },
+      { id: 'allocate', label: 'Manage Seats', icon: 'settings', action: 'manage_seats' },
+    ];
+  }
+  
+  // Student / Employee
+  return [
+    { id: 'resume', label: 'Resume Course', icon: 'book-open', action: 'resume_course' },
+    { id: 'unlock', label: 'Check Unlock', icon: 'refresh-cw', action: 'check_unlock_status' },
+    { id: 'cert', label: 'Get Certificate', icon: 'file-check', action: 'get_certificate' },
+  ];
 }
