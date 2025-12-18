@@ -5676,6 +5676,19 @@ export type Database = {
           exam_pass_rate_30d: number | null
           exams_passed_30d: number | null
           exams_taken_30d: number | null
+          funnel_cert_delivered: number | null
+          funnel_cert_generated: number | null
+          funnel_cert_passed: number | null
+          funnel_cert_took_exam: number | null
+          funnel_dispensary_applied: number | null
+          funnel_dispensary_approved: number | null
+          funnel_dispensary_registered: number | null
+          funnel_dispensary_seats_purchased: number | null
+          funnel_employee_completed: number | null
+          funnel_employee_invited: number | null
+          funnel_employee_registered: number | null
+          funnel_employee_started: number | null
+          funnel_employee_took_exam: number | null
           orgs_with_unused_seats: number | null
           seat_utilization_rate: number | null
           total_seats: number | null
