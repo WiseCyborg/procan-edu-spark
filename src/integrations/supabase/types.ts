@@ -1552,6 +1552,204 @@ export type Database = {
         }
         Relationships: []
       }
+      email_events: {
+        Row: {
+          created_at: string
+          error_code: string | null
+          error_message: string | null
+          id: string
+          meta: Json | null
+          org_id: string | null
+          provider: string | null
+          provider_message_id: string | null
+          recipient_email: string
+          retry_count: number | null
+          status: string
+          template_id: string | null
+          template_version: number | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          error_code?: string | null
+          error_message?: string | null
+          id?: string
+          meta?: Json | null
+          org_id?: string | null
+          provider?: string | null
+          provider_message_id?: string | null
+          recipient_email: string
+          retry_count?: number | null
+          status?: string
+          template_id?: string | null
+          template_version?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          error_code?: string | null
+          error_message?: string | null
+          id?: string
+          meta?: Json | null
+          org_id?: string | null
+          provider?: string | null
+          provider_message_id?: string | null
+          recipient_email?: string
+          retry_count?: number | null
+          status?: string
+          template_id?: string | null
+          template_version?: number | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_events_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_events_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "email_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_health_snapshot: {
+        Row: {
+          bounce_rate_24h: number | null
+          circuit_reason: string | null
+          circuit_state: string | null
+          complaint_rate_24h: number | null
+          created_at: string
+          delivery_rate_24h: number | null
+          emails_clicked_24h: number | null
+          emails_delivered_24h: number | null
+          emails_opened_24h: number | null
+          emails_sent_24h: number | null
+          failures_1h: number | null
+          id: string
+          last_provider_error: string | null
+          latency_avg_ms: number | null
+          queue_depth: number | null
+        }
+        Insert: {
+          bounce_rate_24h?: number | null
+          circuit_reason?: string | null
+          circuit_state?: string | null
+          complaint_rate_24h?: number | null
+          created_at?: string
+          delivery_rate_24h?: number | null
+          emails_clicked_24h?: number | null
+          emails_delivered_24h?: number | null
+          emails_opened_24h?: number | null
+          emails_sent_24h?: number | null
+          failures_1h?: number | null
+          id?: string
+          last_provider_error?: string | null
+          latency_avg_ms?: number | null
+          queue_depth?: number | null
+        }
+        Update: {
+          bounce_rate_24h?: number | null
+          circuit_reason?: string | null
+          circuit_state?: string | null
+          complaint_rate_24h?: number | null
+          created_at?: string
+          delivery_rate_24h?: number | null
+          emails_clicked_24h?: number | null
+          emails_delivered_24h?: number | null
+          emails_opened_24h?: number | null
+          emails_sent_24h?: number | null
+          failures_1h?: number | null
+          id?: string
+          last_provider_error?: string | null
+          latency_avg_ms?: number | null
+          queue_depth?: number | null
+        }
+        Relationships: []
+      }
+      email_inbox_messages: {
+        Row: {
+          ai_draft_response: string | null
+          assigned_to: string | null
+          body_html: string | null
+          body_text: string | null
+          classification: string | null
+          from_email: string
+          id: string
+          linked_event_id: string | null
+          linked_message_id: string | null
+          meta: Json | null
+          org_id: string | null
+          priority: string | null
+          received_at: string
+          resolved_at: string | null
+          status: string | null
+          subject: string | null
+          to_email: string
+          user_id: string | null
+        }
+        Insert: {
+          ai_draft_response?: string | null
+          assigned_to?: string | null
+          body_html?: string | null
+          body_text?: string | null
+          classification?: string | null
+          from_email: string
+          id?: string
+          linked_event_id?: string | null
+          linked_message_id?: string | null
+          meta?: Json | null
+          org_id?: string | null
+          priority?: string | null
+          received_at?: string
+          resolved_at?: string | null
+          status?: string | null
+          subject?: string | null
+          to_email: string
+          user_id?: string | null
+        }
+        Update: {
+          ai_draft_response?: string | null
+          assigned_to?: string | null
+          body_html?: string | null
+          body_text?: string | null
+          classification?: string | null
+          from_email?: string
+          id?: string
+          linked_event_id?: string | null
+          linked_message_id?: string | null
+          meta?: Json | null
+          org_id?: string | null
+          priority?: string | null
+          received_at?: string
+          resolved_at?: string | null
+          status?: string | null
+          subject?: string | null
+          to_email?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_inbox_messages_linked_event_id_fkey"
+            columns: ["linked_event_id"]
+            isOneToOne: false
+            referencedRelation: "email_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_inbox_messages_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_logs: {
         Row: {
           click_count: number | null
@@ -1736,6 +1934,9 @@ export type Database = {
       }
       email_templates: {
         Row: {
+          ai_personalization_enabled: boolean | null
+          allowed_tone: string | null
+          contract_json: Json | null
           created_at: string | null
           created_by: string | null
           html_content: string
@@ -1750,6 +1951,9 @@ export type Database = {
           version: number | null
         }
         Insert: {
+          ai_personalization_enabled?: boolean | null
+          allowed_tone?: string | null
+          contract_json?: Json | null
           created_at?: string | null
           created_by?: string | null
           html_content: string
@@ -1764,6 +1968,9 @@ export type Database = {
           version?: number | null
         }
         Update: {
+          ai_personalization_enabled?: boolean | null
+          allowed_tone?: string | null
+          contract_json?: Json | null
           created_at?: string | null
           created_by?: string | null
           html_content?: string

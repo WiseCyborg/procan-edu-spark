@@ -417,3 +417,8 @@ verify_jwt = true
 [functions.pipeline-health-agent]
 verify_jwt = true
 
+[functions.email-health-agent]
+verify_jwt = true
+
+[functions.email-personalization-agent]
+verify_jwt = true
