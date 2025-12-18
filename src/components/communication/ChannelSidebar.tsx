@@ -80,7 +80,7 @@ export const ChannelSidebar = ({
     },
   ].filter(cat => cat.conversations.length > 0);
 
-  const renderConversation = (conversation: ChannelConversation) => {
+  const renderConversation = (conversation: ChannelConversation, isFirst: boolean = false) => {
     const isActive = conversation.id === activeConversationId;
     const hasActiveCall = !!conversation.active_call_id;
     const unreadCount = conversation.unread_count || 0;
@@ -94,6 +94,8 @@ export const ChannelSidebar = ({
           isActive && 'bg-accent text-accent-foreground'
         )}
         onClick={() => onSelectConversation(conversation.id)}
+        data-tour={isFirst ? "channel-item" : undefined}
+        data-active-conversation={isActive ? conversation.id : undefined}
       >
         <span className="text-muted-foreground">
           {conversation.metadata?.icon || '#'}
@@ -114,7 +116,7 @@ export const ChannelSidebar = ({
   };
 
   return (
-    <div className="w-64 border-r border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex flex-col h-full">
+    <div className="w-64 border-r border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex flex-col h-full" data-tour="channel-sidebar">
       <div className="p-4 border-b border-border">
         <h2 className="font-semibold text-lg">Communication Hub</h2>
         <p className="text-xs text-muted-foreground mt-1">
@@ -156,7 +158,7 @@ export const ChannelSidebar = ({
                       }
                       return (a.title || '').localeCompare(b.title || '');
                     })
-                    .map(renderConversation)}
+                    .map((conv, idx) => renderConversation(conv, idx === 0))}
                 </div>
               )}
             </div>
