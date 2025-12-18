@@ -3043,6 +3043,59 @@ export type Database = {
         }
         Relationships: []
       }
+      pipeline_health_events: {
+        Row: {
+          auto_fixed: boolean | null
+          created_at: string | null
+          description: string
+          fix_action: string | null
+          id: string
+          issue_type: string
+          metadata: Json | null
+          organization_id: string | null
+          pipeline: string
+          requires_admin: boolean | null
+          severity: string
+          user_id: string | null
+        }
+        Insert: {
+          auto_fixed?: boolean | null
+          created_at?: string | null
+          description: string
+          fix_action?: string | null
+          id?: string
+          issue_type: string
+          metadata?: Json | null
+          organization_id?: string | null
+          pipeline: string
+          requires_admin?: boolean | null
+          severity?: string
+          user_id?: string | null
+        }
+        Update: {
+          auto_fixed?: boolean | null
+          created_at?: string | null
+          description?: string
+          fix_action?: string | null
+          id?: string
+          issue_type?: string
+          metadata?: Json | null
+          organization_id?: string | null
+          pipeline?: string
+          requires_admin?: boolean | null
+          severity?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pipeline_health_events_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pipeline_health_log: {
         Row: {
           check_type: string
@@ -3076,6 +3129,75 @@ export type Database = {
           metadata?: Json | null
           status?: string
           success_count?: number | null
+        }
+        Relationships: []
+      }
+      pipeline_health_snapshot: {
+        Row: {
+          allocated_seats: number | null
+          auto_fixed_today: number | null
+          created_at: string | null
+          healthy_orgs: number | null
+          id: string
+          issues_detected: number | null
+          last_run_at: string | null
+          last_run_duration_ms: number | null
+          needs_admin_attention: number | null
+          orgs_with_issues: number | null
+          pipelines_healthy: number | null
+          pipelines_total: number | null
+          seat_mismatches: number | null
+          stalled_users: number | null
+          total_certified: number | null
+          total_in_training: number | null
+          total_orgs: number | null
+          total_seats: number | null
+          unregistered_managers: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          allocated_seats?: number | null
+          auto_fixed_today?: number | null
+          created_at?: string | null
+          healthy_orgs?: number | null
+          id?: string
+          issues_detected?: number | null
+          last_run_at?: string | null
+          last_run_duration_ms?: number | null
+          needs_admin_attention?: number | null
+          orgs_with_issues?: number | null
+          pipelines_healthy?: number | null
+          pipelines_total?: number | null
+          seat_mismatches?: number | null
+          stalled_users?: number | null
+          total_certified?: number | null
+          total_in_training?: number | null
+          total_orgs?: number | null
+          total_seats?: number | null
+          unregistered_managers?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          allocated_seats?: number | null
+          auto_fixed_today?: number | null
+          created_at?: string | null
+          healthy_orgs?: number | null
+          id?: string
+          issues_detected?: number | null
+          last_run_at?: string | null
+          last_run_duration_ms?: number | null
+          needs_admin_attention?: number | null
+          orgs_with_issues?: number | null
+          pipelines_healthy?: number | null
+          pipelines_total?: number | null
+          seat_mismatches?: number | null
+          stalled_users?: number | null
+          total_certified?: number | null
+          total_in_training?: number | null
+          total_orgs?: number | null
+          total_seats?: number | null
+          unregistered_managers?: number | null
+          updated_at?: string | null
         }
         Relationships: []
       }

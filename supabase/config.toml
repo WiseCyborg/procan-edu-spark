@@ -414,3 +414,6 @@ verify_jwt = true
 [functions.run-e2e-validation]
 verify_jwt = true
 
+[functions.pipeline-health-agent]
+verify_jwt = true
+
