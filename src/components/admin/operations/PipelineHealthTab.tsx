@@ -7,13 +7,14 @@ import {
   useStuckApplications,
   useRunPipelineHealthCheck 
 } from '@/hooks/usePipelineHealth';
-import { AlertTriangle, CheckCircle, XCircle, RefreshCw, Clock, AlertCircle, Settings } from 'lucide-react';
+import { AlertTriangle, CheckCircle, XCircle, RefreshCw, Clock, AlertCircle, Settings, Bot } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { AlertRecipientManager } from '@/components/admin/AlertRecipientManager';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PipelineHealthMonitor } from '@/components/admin/PipelineHealthMonitor';
 import { EmailSystemDiagnostics } from '@/components/admin/EmailSystemDiagnostics';
 import { EmailSystemRecovery } from '@/components/admin/EmailSystemRecovery';
+import { PipelineHealthAgent } from '@/components/admin/PipelineHealthAgent';
 
 export function PipelineHealthTab() {
   const { data: healthHistory } = usePipelineHealth();
@@ -48,14 +49,23 @@ export function PipelineHealthTab() {
   };
 
   return (
-    <Tabs defaultValue="status" className="space-y-6">
+    <Tabs defaultValue="agent" className="space-y-6">
       <TabsList>
+        <TabsTrigger value="agent">
+          <Bot className="h-4 w-4 mr-2" />
+          Health Agent
+        </TabsTrigger>
         <TabsTrigger value="status">Health Status</TabsTrigger>
         <TabsTrigger value="settings">
           <Settings className="h-4 w-4 mr-2" />
           Alert Settings
         </TabsTrigger>
       </TabsList>
+
+      <TabsContent value="agent" className="space-y-6">
+        {/* Pipeline Health Agent - Primary Monitoring */}
+        <PipelineHealthAgent />
+      </TabsContent>
 
       <TabsContent value="status" className="space-y-6">
         {/* Email System Diagnostics */}
