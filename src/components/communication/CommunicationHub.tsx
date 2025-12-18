@@ -11,7 +11,7 @@ import { useOrganization } from '@/contexts/OrganizationContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { CommunicationHubOnboarding } from './CommunicationHubOnboarding';
-import { CommunicationHubTour } from './CommunicationHubTour';
+import { InteractiveCommunicationTour } from './InteractiveCommunicationTour';
 
 export const CommunicationHub = () => {
   const { user } = useAuth();
@@ -22,7 +22,8 @@ export const CommunicationHub = () => {
     activeConversation,
     setActiveConversation,
     createConversation,
-    refreshConversations
+    refreshConversations,
+    messages
   } = useRealTimeMessaging();
 
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -93,12 +94,14 @@ export const CommunicationHub = () => {
     <>
       <CommunicationHubOnboarding onStartTour={() => setShowTour(true)} />
       {showTour && (
-        <CommunicationHubTour
+        <InteractiveCommunicationTour
           onComplete={() => {
             setShowTour(false);
             toast.success('Tour completed! You\'re ready to communicate with your team.');
           }}
           onSkip={() => setShowTour(false)}
+          activeConversationId={activeConversation}
+          hasMessages={Object.values(messages).some((m: any) => m.length > 0)}
         />
       )}
     <div className="flex h-[600px] bg-background border rounded-lg overflow-hidden">
@@ -122,6 +125,7 @@ export const CommunicationHub = () => {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
+                data-tour="search-input"
               />
             </div>
           </div>
@@ -139,6 +143,7 @@ export const CommunicationHub = () => {
             <Button
               onClick={() => setShowCreateDialog(true)}
               className="gap-2"
+              data-tour="new-channel-button"
             >
               <Plus className="w-4 h-4" />
               New Channel
