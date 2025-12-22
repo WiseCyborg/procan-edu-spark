@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -257,6 +258,11 @@ const DispensaryAuthForm = () => {
                 >
                   {loading ? 'Signing In...' : 'Sign In to Dispensary Portal'}
                 </Button>
+                <div className="text-center">
+                  <Link to="/forgot-password" className="text-sm text-primary hover:underline">
+                    Forgot your password?
+                  </Link>
+                </div>
               </form>
             </TabsContent>
           </Tabs>
