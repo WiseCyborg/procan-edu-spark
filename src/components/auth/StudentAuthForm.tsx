@@ -9,7 +9,7 @@ import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { invokePublicFunction } from '@/lib/publicEdgeFunctions';
 import { Loader2, Eye, EyeOff } from 'lucide-react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { employeeRegistrationSchema } from '@/lib/validation-schemas';
 import { sanitizeFormData } from '@/lib/sanitization';
 import { PhoneInput } from '@/components/ui/phone-input';
@@ -115,7 +115,10 @@ const StudentAuthForm = () => {
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Logging in...</> : 'Login'}
               </Button>
-              <Button type="button" variant="link" className="w-full" onClick={() => setIsRegistering(true)}>Need an account? Register</Button>
+              <div className="flex justify-between items-center">
+                <Button type="button" variant="link" className="px-0" onClick={() => setIsRegistering(true)}>Need an account? Register</Button>
+                <Link to="/forgot-password" className="text-sm text-primary hover:underline">Forgot password?</Link>
+              </div>
             </form>
           ) : (
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

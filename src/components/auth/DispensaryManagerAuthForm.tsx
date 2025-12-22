@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Building2, Shield, Eye, EyeOff } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const DispensaryManagerAuthForm = () => {
   const [loading, setLoading] = useState(false);
@@ -112,12 +113,12 @@ const DispensaryManagerAuthForm = () => {
             </Button>
           </form>
 
-          <div className="mt-6 pt-4 border-t text-center">
-            <p className="text-sm text-gray-600">
-              Need help accessing your account?
-            </p>
-            <p className="text-xs text-gray-500 mt-1">
-              Contact your system administrator or support team.
+          <div className="mt-6 pt-4 border-t text-center space-y-2">
+            <Link to="/forgot-password" className="text-sm text-primary hover:underline">
+              Forgot your password?
+            </Link>
+            <p className="text-xs text-muted-foreground">
+              Need additional help? Contact your system administrator.
             </p>
           </div>
         </CardContent>
