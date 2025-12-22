@@ -87,20 +87,33 @@ export default function ManagerRegistration() {
       
       if (authError) throw authError;
 
-      // Safety net: Ensure profile exists (trigger should handle this)
+      // Safety net: Ensure profile exists with organization_id
       if (authData.user) {
         const { error: profileError } = await supabase
           .from('profiles')
           .upsert({
             user_id: authData.user.id,
             first_name: firstName,
-            last_name: lastName
+            last_name: lastName,
+            organization_id: applicationData.organization_id // Link manager to organization
           }, {
             onConflict: 'user_id'
           });
           
         if (profileError) {
           console.error('Profile creation error:', profileError);
+        }
+
+        // Create dispensary_manager role entry
+        const { error: roleError } = await supabase
+          .from('user_roles')
+          .insert({
+            user_id: authData.user.id,
+            role: 'dispensary_manager'
+          });
+          
+        if (roleError) {
+          console.error('Role assignment error:', roleError);
         }
       }
 
