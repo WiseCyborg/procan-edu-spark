@@ -1,7 +1,7 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { UserRole } from '@/hooks/useUserRole';
-import { Shield, Users, GraduationCap, Crown, ShoppingBag } from 'lucide-react';
+import { Shield, Users, GraduationCap, Crown, ShoppingBag, UserCheck } from 'lucide-react';
 
 interface RoleBadgeProps {
   role: UserRole;
@@ -33,6 +33,11 @@ const roleConfig: Record<UserRole, { label: string; icon: React.ElementType; cla
     label: 'Admin',
     icon: Crown,
     className: 'bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20'
+  },
+  trainer: {
+    label: 'Trainer',
+    icon: UserCheck,
+    className: 'bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-500/20'
   }
 };
 

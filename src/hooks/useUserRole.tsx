@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 
-export type UserRole = 'student' | 'dispensary_manager' | 'training_coordinator' | 'admin' | 'consumer';
+export type UserRole = 'student' | 'dispensary_manager' | 'training_coordinator' | 'admin' | 'consumer' | 'trainer';
 
 export const useUserRole = () => {
   const { user } = useAuth();
@@ -48,6 +48,7 @@ export const useUserRole = () => {
   const isDispensaryManager = hasRole('dispensary_manager');
   const isTrainingCoordinator = hasRole('training_coordinator');
   const isAdmin = hasRole('admin');
+  const isTrainer = hasRole('trainer');
   
   const canManageOrganization = isAdmin || isDispensaryManager || isTrainingCoordinator;
   const hasAnyRole = (...rolesToCheck: UserRole[]): boolean => {
@@ -69,6 +70,7 @@ export const useUserRole = () => {
     isDispensaryManager,
     isTrainingCoordinator,
     isAdmin,
+    isTrainer,
     canManageOrganization,
     isLoading,
     managementRoleCount,
