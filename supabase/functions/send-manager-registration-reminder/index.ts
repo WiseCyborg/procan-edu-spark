@@ -55,7 +55,7 @@ serve(async (req) => {
 
       // Get active join code
       const { data: joinCodes } = await supabase
-        .from("join_codes")
+        .from("rvt_join_codes")
         .select("code")
         .eq("organization_id", organizationId)
         .eq("is_active", true)

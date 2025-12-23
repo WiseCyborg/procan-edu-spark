@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
-import { Loader2, CheckCircle2, XCircle, Eye, EyeOff } from 'lucide-react';
+import { Loader2, CheckCircle2, XCircle, Eye, EyeOff, Mail, Home, LogIn } from 'lucide-react';
 import { managerRegistrationSchema } from '@/lib/validation-schemas';
 import { sanitizeEmail } from '@/lib/sanitization';
 import { PasswordStrengthIndicator } from '@/components/ui/password-strength-indicator';
@@ -17,15 +17,33 @@ import type { z } from 'zod';
 
 type FormData = z.infer<typeof managerRegistrationSchema>;
 
+interface ApplicationData {
+  id?: string;
+  organization_id: string;
+  organization_name: string;
+  contact_email: string;
+  contact_person: string;
+}
+
+interface ValidationResponse {
+  is_valid: boolean;
+  registration_type?: 'application' | 'join_code';
+  application_data?: ApplicationData;
+  error_message?: string;
+}
+
 export default function ManagerRegistration() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const token = searchParams.get('token');
   const [loading, setLoading] = useState(true);
   const [validationStatus, setValidationStatus] = useState<'validating' | 'valid' | 'invalid' | 'expired' | 'used'>('validating');
-  const [applicationData, setApplicationData] = useState<any>(null);
+  const [applicationData, setApplicationData] = useState<ApplicationData | null>(null);
+  const [registrationType, setRegistrationType] = useState<'application' | 'join_code'>('application');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [recoveryEmail, setRecoveryEmail] = useState('');
+  const [isResending, setIsResending] = useState(false);
 
   const { register, handleSubmit, formState: { errors, isSubmitting }, watch, setValue } = useForm<FormData>({
     resolver: zodResolver(managerRegistrationSchema),
@@ -44,15 +62,19 @@ export default function ManagerRegistration() {
     // Use edge function for token validation with proper security
     invokePublicFunction('validate-manager-registration', {
       token
-    }).then(({ data, error }) => {
+    }).then(({ data, error }: { data: ValidationResponse | null; error: any }) => {
       if (error || !data?.is_valid) {
-        setValidationStatus(data?.error_message?.includes('expired') ? 'expired' : 
-                           data?.error_message?.includes('completed') ? 'used' : 'invalid');
+        const errorMsg = data?.error_message || '';
+        setValidationStatus(
+          errorMsg.includes('expired') ? 'expired' : 
+          errorMsg.includes('completed') || errorMsg.includes('used') ? 'used' : 
+          'invalid'
+        );
         setLoading(false);
         return;
       }
 
-      // Use application data returned by edge function (no second query needed)
+      // Use application data returned by edge function
       if (!data.application_data) {
         setValidationStatus('invalid');
         setLoading(false);
@@ -60,13 +82,48 @@ export default function ManagerRegistration() {
       }
 
       setApplicationData(data.application_data);
+      setRegistrationType(data.registration_type || 'application');
       setValue('email', sanitizeEmail(data.application_data.contact_email));
       setValidationStatus('valid');
       setLoading(false);
     });
   }, [token, setValue]);
 
+  const handleResendLink = async () => {
+    if (!recoveryEmail) {
+      toast({ title: "Email required", description: "Please enter your email address", variant: "destructive" });
+      return;
+    }
+
+    setIsResending(true);
+    try {
+      // Call edge function to resend registration link
+      const { error } = await invokePublicFunction('send-manager-registration-reminder', {
+        email: sanitizeEmail(recoveryEmail),
+        days_remaining: 7
+      });
+
+      if (error) throw error;
+
+      toast({ 
+        title: "Link Sent!", 
+        description: "If your email is registered, you'll receive a new registration link shortly." 
+      });
+      setRecoveryEmail('');
+    } catch (error: any) {
+      toast({ 
+        title: "Request Failed", 
+        description: "Unable to send new link. Please contact support.", 
+        variant: "destructive" 
+      });
+    } finally {
+      setIsResending(false);
+    }
+  };
+
   const onSubmit = async (data: FormData) => {
+    if (!applicationData) return;
+
     try {
       const nameParts = applicationData.contact_person.trim().split(/\s+/);
       const firstName = nameParts[0];
@@ -128,52 +185,163 @@ export default function ManagerRegistration() {
         }
       }
 
-      await supabase.from('dispensary_applications').update({ registration_completed: true }).eq('registration_token', token);
+      // Only update dispensary_applications for application-based registrations
+      if (registrationType === 'application' && token) {
+        await supabase.from('dispensary_applications').update({ registration_completed: true }).eq('registration_token', token);
+      }
       
       toast({ title: "Account Created!", description: "Redirecting to setup..." });
-      setTimeout(() => navigate('/onboarding/setup-team?first_login=true', { state: { applicationId: applicationData.id } }), 2000);
+      setTimeout(() => navigate('/onboarding/setup-team?first_login=true', { 
+        state: { applicationId: applicationData.id, organizationId: applicationData.organization_id } 
+      }), 2000);
     } catch (error: any) {
       toast({ title: "Registration Failed", description: error.message, variant: "destructive" });
     }
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>;
-  if (validationStatus !== 'valid') return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <Card className="w-full max-w-md"><CardHeader><XCircle className="h-6 w-6 text-destructive" /><CardTitle>Invalid Link</CardTitle></CardHeader>
-        <CardContent><Button onClick={() => navigate('/')} className="w-full">Return Home</Button></CardContent>
-      </Card>
-    </div>
-  );
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Invalid/Expired/Used link - show recovery flow
+  if (validationStatus !== 'valid') {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background to-muted/30">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center space-y-2">
+            <XCircle className="h-12 w-12 text-destructive mx-auto" />
+            <CardTitle className="text-xl">
+              {validationStatus === 'expired' ? 'Link Expired' : 
+               validationStatus === 'used' ? 'Already Registered' : 'Invalid Link'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <p className="text-muted-foreground text-center">
+              {validationStatus === 'expired' 
+                ? "This registration link has expired. Request a new one below."
+                : validationStatus === 'used'
+                ? "This registration has already been completed. You can sign in instead."
+                : "This link is no longer valid. Please contact your administrator or request a new link."}
+            </p>
+            
+            {validationStatus !== 'used' && (
+              <div className="space-y-3">
+                <Label htmlFor="recovery-email">Email Address</Label>
+                <Input 
+                  id="recovery-email"
+                  type="email" 
+                  placeholder="Enter your email"
+                  value={recoveryEmail}
+                  onChange={(e) => setRecoveryEmail(e.target.value)}
+                />
+                <Button 
+                  onClick={handleResendLink}
+                  disabled={isResending || !recoveryEmail}
+                  className="w-full"
+                >
+                  {isResending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Mail className="mr-2 h-4 w-4" />
+                      Request New Registration Link
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
+            
+            <div className="flex gap-3">
+              <Button 
+                variant="outline" 
+                onClick={() => navigate('/auth')} 
+                className="flex-1"
+              >
+                <LogIn className="mr-2 h-4 w-4" />
+                Sign In
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => navigate('/')} 
+                className="flex-1"
+              >
+                <Home className="mr-2 h-4 w-4" />
+                Home
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background to-muted/30">
       <Card className="w-full max-w-md">
-        <CardHeader><CheckCircle2 className="h-6 w-6 text-green-600" /><CardTitle>Create Manager Account</CardTitle></CardHeader>
+        <CardHeader className="text-center space-y-2">
+          <CheckCircle2 className="h-12 w-12 text-green-600 mx-auto" />
+          <CardTitle className="text-xl">Create Manager Account</CardTitle>
+          {applicationData?.organization_name && (
+            <p className="text-sm text-muted-foreground">
+              for {applicationData.organization_name}
+            </p>
+          )}
+        </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div><Label>Email</Label><Input type="email" disabled {...register('email')} /></div>
-            <div><Label>Password *</Label>
+            <div className="space-y-2">
+              <Label>Email</Label>
+              <Input type="email" disabled {...register('email')} className="bg-muted" />
+            </div>
+            <div className="space-y-2">
+              <Label>Password *</Label>
               <div className="relative">
                 <Input type={showPassword ? 'text' : 'password'} {...register('password')} />
-                <Button type="button" variant="ghost" size="sm" className="absolute right-0 top-0 h-full" onClick={() => setShowPassword(!showPassword)}>
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  size="sm" 
+                  className="absolute right-0 top-0 h-full px-3" 
+                  onClick={() => setShowPassword(!showPassword)}
+                >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </Button>
               </div>
               {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
               <PasswordStrengthIndicator password={password || ''} />
             </div>
-            <div><Label>Confirm Password *</Label>
+            <div className="space-y-2">
+              <Label>Confirm Password *</Label>
               <div className="relative">
                 <Input type={showConfirmPassword ? 'text' : 'password'} {...register('confirmPassword')} />
-                <Button type="button" variant="ghost" size="sm" className="absolute right-0 top-0 h-full" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  size="sm" 
+                  className="absolute right-0 top-0 h-full px-3" 
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
                   {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </Button>
               </div>
               {errors.confirmPassword && <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>}
             </div>
             <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Creating...</> : 'Create Account'}
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                'Create Account'
+              )}
             </Button>
           </form>
         </CardContent>
