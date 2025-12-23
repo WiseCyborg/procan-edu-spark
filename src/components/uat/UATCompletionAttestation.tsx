@@ -69,17 +69,17 @@ export const UATCompletionAttestation: React.FC<UATCompletionAttestationProps> =
       if (error) throw error;
 
       // Log the attestation in security audit
-      await supabase.from('security_audit_log').insert([{
+      await supabase.from('security_audit_log').insert({
         user_id: user?.id,
         action_type: 'uat_attestation_signed',
         table_name: 'organizations',
         record_id: organizationId,
-        new_values: {
+        new_values: JSON.parse(JSON.stringify({
           attestation_checklist: checklist,
           typed_name: typedName,
           signed_at: new Date().toISOString(),
-        } as Record<string, unknown>,
-      }]);
+        })),
+      });
 
       toast({
         title: 'UAT Attestation Signed',
