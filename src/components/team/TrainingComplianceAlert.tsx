@@ -19,10 +19,9 @@ interface ComplianceAlert {
   resolved_at: string | null;
   created_at: string;
   profiles?: {
-    first_name: string;
-    last_name: string;
-    email: string;
-  };
+    first_name: string | null;
+    last_name: string | null;
+  } | null;
 }
 
 export const TrainingComplianceAlert = ({ organizationId }: { organizationId?: string }) => {
@@ -49,7 +48,7 @@ export const TrainingComplianceAlert = ({ organizationId }: { organizationId?: s
         (data || []).map(async (alert) => {
           const { data: profile } = await supabase
             .from('profiles')
-            .select('first_name, last_name, email')
+            .select('first_name, last_name')
             .eq('user_id', alert.employee_user_id)
             .single();
           return { ...alert, profiles: profile } as ComplianceAlert;
