@@ -3818,6 +3818,7 @@ export type Database = {
           contact_phone: string | null
           course_credits: number | null
           created_at: string
+          current_uat_run_id: string | null
           expires_at: string | null
           id: string
           is_active: boolean | null
@@ -3837,6 +3838,8 @@ export type Database = {
           subscription_end_date: string | null
           subscription_start_date: string | null
           subscription_tier: string | null
+          uat_email: string | null
+          uat_enabled: boolean | null
           unique_access_key: string | null
           updated_at: string
         }
@@ -3849,6 +3852,7 @@ export type Database = {
           contact_phone?: string | null
           course_credits?: number | null
           created_at?: string
+          current_uat_run_id?: string | null
           expires_at?: string | null
           id?: string
           is_active?: boolean | null
@@ -3868,6 +3872,8 @@ export type Database = {
           subscription_end_date?: string | null
           subscription_start_date?: string | null
           subscription_tier?: string | null
+          uat_email?: string | null
+          uat_enabled?: boolean | null
           unique_access_key?: string | null
           updated_at?: string
         }
@@ -3880,6 +3886,7 @@ export type Database = {
           contact_phone?: string | null
           course_credits?: number | null
           created_at?: string
+          current_uat_run_id?: string | null
           expires_at?: string | null
           id?: string
           is_active?: boolean | null
@@ -3899,10 +3906,20 @@ export type Database = {
           subscription_end_date?: string | null
           subscription_start_date?: string | null
           subscription_tier?: string | null
+          uat_email?: string | null
+          uat_enabled?: boolean | null
           unique_access_key?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_organizations_current_uat_run"
+            columns: ["current_uat_run_id"]
+            isOneToOne: false
+            referencedRelation: "uat_runs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       owner_digest_preferences: {
         Row: {
@@ -7053,6 +7070,172 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_pipeline_compliance_health"
             referencedColumns: ["organization_id"]
+          },
+        ]
+      }
+      uat_runs: {
+        Row: {
+          checklist_id: string | null
+          completed_at: string | null
+          created_at: string | null
+          id: string
+          notes: string | null
+          organization_id: string
+          run_code: string
+          started_at: string | null
+          started_by: string | null
+          status: string | null
+          summary_metrics: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          checklist_id?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          run_code: string
+          started_at?: string | null
+          started_by?: string | null
+          status?: string | null
+          summary_metrics?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          checklist_id?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          run_code?: string
+          started_at?: string | null
+          started_by?: string | null
+          status?: string | null
+          summary_metrics?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "uat_runs_checklist_id_fkey"
+            columns: ["checklist_id"]
+            isOneToOne: false
+            referencedRelation: "uat_validation_checklists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "uat_runs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "compliance_dashboard_metrics"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "uat_runs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "uat_runs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
+          },
+        ]
+      }
+      uat_tasks: {
+        Row: {
+          assigned_to: string | null
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string | null
+          deep_link: string | null
+          description: string | null
+          evidence: string | null
+          evidence_file_path: string | null
+          expected_result: string | null
+          id: string
+          organization_id: string
+          priority: number | null
+          role_to_test: string | null
+          run_id: string
+          status: string | null
+          task_code: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string | null
+          deep_link?: string | null
+          description?: string | null
+          evidence?: string | null
+          evidence_file_path?: string | null
+          expected_result?: string | null
+          id?: string
+          organization_id: string
+          priority?: number | null
+          role_to_test?: string | null
+          run_id: string
+          status?: string | null
+          task_code?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string | null
+          deep_link?: string | null
+          description?: string | null
+          evidence?: string | null
+          evidence_file_path?: string | null
+          expected_result?: string | null
+          id?: string
+          organization_id?: string
+          priority?: number | null
+          role_to_test?: string | null
+          run_id?: string
+          status?: string | null
+          task_code?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "uat_tasks_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "compliance_dashboard_metrics"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "uat_tasks_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "uat_tasks_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "uat_tasks_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "uat_runs"
+            referencedColumns: ["id"]
           },
         ]
       }
