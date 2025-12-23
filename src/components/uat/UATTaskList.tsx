@@ -35,8 +35,8 @@ interface UATTask {
 }
 
 interface UATTaskListProps {
-  runId: string;
-  organizationId: string;
+  runId?: string;
+  organizationId?: string;
   onTaskUpdate?: () => void;
 }
 

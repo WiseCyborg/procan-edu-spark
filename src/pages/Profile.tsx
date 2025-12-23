@@ -646,6 +646,11 @@ const Profile: React.FC = () => {
         <TabsContent value="history" className="space-y-6">
           {user && <ProfileChangeHistoryViewer userId={user.id} showAsUser={true} />}
         </TabsContent>
+
+        <TabsContent value="uat" className="space-y-6">
+          <UATControlPanel />
+          {profile.organization_id && <UATTaskList organizationId={profile.organization_id} />}
+        </TabsContent>
       </Tabs>
     </div>
   );

@@ -458,3 +458,15 @@ verify_jwt = true
 
 [functions.bulk-assign-retraining]
 verify_jwt = true
+
+[functions.paypal-webhook]
+verify_jwt = false
+
+[functions.seed-uat-test-data]
+verify_jwt = true
+
+[functions.generate-uat-tasks]
+verify_jwt = true
+
+[functions.send-uat-digest]
+verify_jwt = true
