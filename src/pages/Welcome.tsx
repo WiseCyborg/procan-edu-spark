@@ -1,17 +1,30 @@
 import React, { useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfileCompletion } from '@/hooks/useProfileCompletion';
+import { useUserRole } from '@/hooks/useUserRole';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle, BookOpen, Award, Lock } from 'lucide-react';
 
 const Welcome = () => {
   const { user } = useAuth();
   const { completionPercentage, isProfileComplete } = useProfileCompletion();
+  const { isStudent, isDispensaryManager, isTrainingCoordinator, isAdmin, isLoading: rolesLoading } = useUserRole();
   const navigate = useNavigate();
+
+  // Role-based redirect: employees go to student dashboard
+  useEffect(() => {
+    if (rolesLoading) return;
+    
+    // If employee/student only (not a manager/admin), redirect to student dashboard
+    if (isStudent && !isDispensaryManager && !isTrainingCoordinator && !isAdmin) {
+      navigate('/student-dashboard', { replace: true });
+    }
+  }, [rolesLoading, isStudent, isDispensaryManager, isTrainingCoordinator, isAdmin, navigate]);
 
   useEffect(() => {
     const sendWelcomeEmail = async () => {
@@ -38,6 +51,18 @@ const Welcome = () => {
 
     sendWelcomeEmail();
   }, [user]);
+
+  // Show loading while checking roles
+  if (rolesLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Skeleton className="h-12 w-12 rounded-full mx-auto" />
+          <Skeleton className="h-4 w-32 mx-auto" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
