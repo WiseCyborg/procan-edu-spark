@@ -7073,6 +7073,75 @@ export type Database = {
           },
         ]
       }
+      uat_evidence: {
+        Row: {
+          action_performed: string
+          actual_result: string | null
+          created_at: string | null
+          download_link: string | null
+          expected_result: string | null
+          id: string
+          notes: string | null
+          passed: boolean | null
+          record_ids: Json | null
+          role_used: string | null
+          run_id: string | null
+          screenshot_path: string | null
+          task_id: string | null
+          tester_email: string
+          updated_at: string | null
+        }
+        Insert: {
+          action_performed: string
+          actual_result?: string | null
+          created_at?: string | null
+          download_link?: string | null
+          expected_result?: string | null
+          id?: string
+          notes?: string | null
+          passed?: boolean | null
+          record_ids?: Json | null
+          role_used?: string | null
+          run_id?: string | null
+          screenshot_path?: string | null
+          task_id?: string | null
+          tester_email: string
+          updated_at?: string | null
+        }
+        Update: {
+          action_performed?: string
+          actual_result?: string | null
+          created_at?: string | null
+          download_link?: string | null
+          expected_result?: string | null
+          id?: string
+          notes?: string | null
+          passed?: boolean | null
+          record_ids?: Json | null
+          role_used?: string | null
+          run_id?: string | null
+          screenshot_path?: string | null
+          task_id?: string | null
+          tester_email?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "uat_evidence_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "uat_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "uat_evidence_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "uat_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       uat_runs: {
         Row: {
           checklist_id: string | null
