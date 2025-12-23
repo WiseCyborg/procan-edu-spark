@@ -14,47 +14,101 @@ serve(async (req) => {
   }
 
   try {
-    const { application_id, days_remaining } = await req.json();
+    const { application_id, organizationId, email, days_remaining = 7 } = await req.json();
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    const { data: application } = await supabase
-      .from("dispensary_applications")
-      .select("*")
-      .eq("id", application_id)
-      .single();
+    let recipientEmail: string;
+    let recipientName: string;
+    let orgName: string;
+    let registrationToken: string | null = null;
 
-    if (!application) throw new Error("Application not found");
+    if (application_id) {
+      // Legacy path: look up from dispensary_applications
+      console.log(`📧 Looking up application: ${application_id}`);
+      const { data: application } = await supabase
+        .from("dispensary_applications")
+        .select("*")
+        .eq("id", application_id)
+        .single();
+
+      if (!application) throw new Error("Application not found");
+
+      recipientEmail = application.contact_email;
+      recipientName = application.contact_person;
+      orgName = application.organization_name;
+      registrationToken = application.registration_token;
+
+    } else if (organizationId) {
+      // New path: look up from organizations
+      console.log(`📧 Looking up organization: ${organizationId}`);
+      const { data: org, error: orgError } = await supabase
+        .from("organizations")
+        .select("id, name")
+        .eq("id", organizationId)
+        .single();
+
+      if (orgError || !org) throw new Error("Organization not found");
+
+      // Get active join code
+      const { data: joinCodes } = await supabase
+        .from("join_codes")
+        .select("code")
+        .eq("organization_id", organizationId)
+        .eq("is_active", true)
+        .limit(1);
+
+      const activeCode = joinCodes?.[0]?.code;
+
+      recipientEmail = email;
+      recipientName = "Manager";
+      orgName = org.name;
+      registrationToken = activeCode || null;
+
+      if (!recipientEmail) throw new Error("Manager email is required for organization path");
+
+    } else {
+      throw new Error("Either application_id or organizationId is required");
+    }
 
     const templateName = days_remaining <= 3 
       ? "manager-registration-reminder-3day" 
       : "manager-registration-reminder-5day";
 
+    // Build registration URL - use join code for organizations, token for applications
+    const registrationUrl = registrationToken 
+      ? `https://www.procannedu.com/register/manager?token=${registrationToken}`
+      : `https://www.procannedu.com/register/manager`;
+
+    console.log(`📧 Sending reminder to ${recipientEmail} for ${orgName}`);
+
     const html = await loadEmailTemplate(templateName, {
-      ContactPerson: application.contact_person,
-      OrganizationName: application.organization_name,
+      ContactPerson: recipientName,
+      OrganizationName: orgName,
       DaysRemaining: days_remaining.toString(),
-      RegistrationURL: `https://www.procannedu.com/register/manager?token=${application.registration_token}`,
+      RegistrationURL: registrationUrl,
     });
 
     const emailRouter = new EmailRouter();
     const result = await emailRouter.sendWithFailover({
-      to: application.contact_email,
-      subject: `⏰ Registration Expires in ${days_remaining} Days`,
+      to: recipientEmail,
+      subject: `⏰ Registration Reminder for ${orgName}`,
       html,
       metadata: { email_type: 'manager_registration_reminder' }
     }, supabase);
 
     await supabase.from("email_logs").insert({
-      recipient_email: application.contact_email,
-      subject: `⏰ Registration Expires in ${days_remaining} Days`,
+      recipient_email: recipientEmail,
+      subject: `⏰ Registration Reminder for ${orgName}`,
       email_type: "manager_registration_reminder",
       status: result.success ? "sent" : "failed",
-      metadata: { application_id, days_remaining },
+      metadata: { application_id, organizationId, days_remaining },
     });
+
+    console.log(`✅ Reminder ${result.success ? 'sent' : 'failed'} to ${recipientEmail}`);
 
     return new Response(JSON.stringify({ success: result.success }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

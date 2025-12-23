@@ -106,7 +106,8 @@ export const OrganizationActionsMenu = ({ organization, onRefetch }: Organizatio
       const { error } = await supabase.functions.invoke('send-manager-registration-reminder', {
         body: { 
           organizationId: organization.org_id,
-          email: organization.manager_email
+          email: organization.manager_email,
+          days_remaining: 7
         }
       });
 
