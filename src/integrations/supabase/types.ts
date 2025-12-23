@@ -7076,6 +7076,7 @@ export type Database = {
           overall_status: string | null
           packet_content_section: Json | null
           packet_export_section: Json | null
+          payment_testing_section: Json | null
           primary_test_email: string
           retraining_section: Json | null
           roles_tested: string[] | null
@@ -7111,6 +7112,7 @@ export type Database = {
           overall_status?: string | null
           packet_content_section?: Json | null
           packet_export_section?: Json | null
+          payment_testing_section?: Json | null
           primary_test_email: string
           retraining_section?: Json | null
           roles_tested?: string[] | null
@@ -7146,6 +7148,7 @@ export type Database = {
           overall_status?: string | null
           packet_content_section?: Json | null
           packet_export_section?: Json | null
+          payment_testing_section?: Json | null
           primary_test_email?: string
           retraining_section?: Json | null
           roles_tested?: string[] | null
