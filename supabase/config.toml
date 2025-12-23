@@ -455,3 +455,6 @@ verify_jwt = false
 
 [functions.export-employee-compliance-packet]
 verify_jwt = true
+
+[functions.bulk-assign-retraining]
+verify_jwt = true
