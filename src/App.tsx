@@ -87,6 +87,7 @@ import CertificateRenewal from "./pages/CertificateRenewal";
 import AdminUtilities from "./pages/AdminUtilities";
 import UATValidationPage from "./pages/UATValidationPage";
 import UATEvidenceSubmission from "./pages/UATEvidenceSubmission";
+import UATDispensaryOnboarding from "./pages/UATDispensaryOnboarding";
 
 import { ProtectedCourseAccess } from "./components/ProtectedCourseAccess";
 import { JourneyStateProvider } from "./providers/JourneyStateProvider";
