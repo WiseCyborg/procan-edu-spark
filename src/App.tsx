@@ -85,6 +85,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import CertificateRenewal from "./pages/CertificateRenewal";
 import AdminUtilities from "./pages/AdminUtilities";
+import UATValidationPage from "./pages/UATValidationPage";
 
 import { ProtectedCourseAccess } from "./components/ProtectedCourseAccess";
 import { JourneyStateProvider } from "./providers/JourneyStateProvider";
@@ -357,6 +358,11 @@ const AppRoutesLayout = () => {
             } />
             <Route path="/accept-invitation" element={<AcceptInvitation />} />
             <Route path="/system-health" element={<SystemHealthDashboard />} />
+            <Route path="/uat/validation-checklist" element={
+              <ProtectedRoute>
+                <UATValidationPage />
+              </ProtectedRoute>
+            } />
             <Route path="/activate-ailean" element={<ActivateAiLean />} />
             <Route path="/ailean-info" element={<AiLeanInfo />} />
             <Route path="/admin/advanced-analytics" element={
