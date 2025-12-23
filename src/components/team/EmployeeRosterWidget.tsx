@@ -8,8 +8,9 @@ import { Badge } from '@/components/ui/badge';
 import { 
   Users, Search, Calendar, Mail, Download, 
   CheckCircle, AlertCircle, Clock, Loader2, Filter,
-  User, Send, Award, MoreVertical
+  User, Send, Award, MoreVertical, Package
 } from 'lucide-react';
+import { EmployeePacketExportButton } from '@/components/compliance/EmployeePacketExportButton';
 import {
   Table,
   TableBody,
@@ -399,6 +400,14 @@ export const EmployeeRosterWidget = ({ organizationId }: EmployeeRosterWidgetPro
                             <Award className="h-4 w-4" />
                           </Button>
                         )}
+                        <EmployeePacketExportButton
+                          organizationId={organizationId}
+                          employeeUserId={employee.user_id}
+                          employeeName={`${employee.first_name} ${employee.last_name}`}
+                          size="icon"
+                          variant="ghost"
+                          showLabel={false}
+                        />
                       </div>
                     </TableCell>
                   </TableRow>

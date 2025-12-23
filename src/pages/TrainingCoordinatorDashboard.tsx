@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SeatManagementWidget } from '@/components/team/SeatManagementWidget';
 import { CompletionAnalyticsWidget } from '@/components/team/CompletionAnalyticsWidget';
 import { AdvancedSeatManagement } from '@/components/team/AdvancedSeatManagement';
-import { Users, Mail, AlertTriangle, TrendingUp, Bell, Calendar, ShoppingCart, BarChart, CheckCircle, Search } from 'lucide-react';
+import { Users, Mail, AlertTriangle, TrendingUp, Bell, Calendar, ShoppingCart, BarChart, CheckCircle, Search, ShieldCheck, Package } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -24,6 +24,11 @@ import { AiLeanCoach } from '@/components/ailean/AiLeanCoach';
 import { MobileBottomNav } from '@/components/navigation/MobileBottomNav';
 import { ResumePrompt } from '@/components/journey/ResumePrompt';
 import { InternalChatbot } from '@/components/chat/InternalChatbot';
+import { EmployeePacketExportButton } from '@/components/compliance/EmployeePacketExportButton';
+import { IncidentModuleMappingAdmin } from '@/components/compliance/IncidentModuleMappingAdmin';
+import { ComplianceDashboardWidget } from '@/components/compliance/ComplianceDashboardWidget';
+import { BulkRetrainingAssignment } from '@/components/compliance/BulkRetrainingAssignment';
+import { ExpiryNotificationBanner } from '@/components/compliance/ExpiryNotificationBanner';
 
 const TrainingCoordinatorDashboard = () => {
   const { user } = useAuth();
@@ -236,13 +241,20 @@ const TrainingCoordinatorDashboard = () => {
         </Card>
       </div>
 
+      {/* Certificate Expiry Banner */}
+      {organizationId && <ExpiryNotificationBanner organizationId={organizationId} />}
+
       {/* Main Content Tabs */}
       <Tabs defaultValue="employees" className="space-y-4">
-        <TabsList>
+        <TabsList className="flex-wrap">
           <TabsTrigger value="employees">Employee Management</TabsTrigger>
           <TabsTrigger value="analytics">Analytics & Reports</TabsTrigger>
           <TabsTrigger value="seats">Seat Management</TabsTrigger>
           <TabsTrigger value="certificates">Certificates</TabsTrigger>
+          <TabsTrigger value="compliance">
+            <ShieldCheck className="h-4 w-4 mr-1" />
+            Compliance
+          </TabsTrigger>
           <TabsTrigger value="invite">Invite Employees</TabsTrigger>
         </TabsList>
 
@@ -345,6 +357,14 @@ const TrainingCoordinatorDashboard = () => {
                         </div>
                       </div>
                       <div className="flex gap-2">
+                        <EmployeePacketExportButton
+                          organizationId={organizationId!}
+                          employeeUserId={emp.user_id}
+                          employeeName={`${emp.first_name} ${emp.last_name}`}
+                          size="icon"
+                          variant="ghost"
+                          showLabel={false}
+                        />
                         <Dialog>
                           <DialogTrigger asChild>
                             <Button size="sm" variant="outline">
@@ -400,6 +420,28 @@ const TrainingCoordinatorDashboard = () => {
               {organizationId && <CertificateVerificationWidget organizationId={organizationId} />}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="compliance" className="space-y-4">
+          {organizationId && (
+            <>
+              <div className="grid gap-4 md:grid-cols-2">
+                <ComplianceDashboardWidget organizationId={organizationId} />
+                <BulkRetrainingAssignment organizationId={organizationId} />
+              </div>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Incident → Retraining Mappings</CardTitle>
+                  <CardDescription>
+                    Configure which incidents automatically trigger module retraining
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <IncidentModuleMappingAdmin organizationId={organizationId} />
+                </CardContent>
+              </Card>
+            </>
+          )}
         </TabsContent>
 
         <TabsContent value="invite" className="space-y-4">
