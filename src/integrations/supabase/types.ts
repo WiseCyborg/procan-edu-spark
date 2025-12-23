@@ -934,6 +934,68 @@ export type Database = {
         }
         Relationships: []
       }
+      compliance_incidents: {
+        Row: {
+          created_at: string
+          description: string
+          employee_user_id: string | null
+          id: string
+          incident_type: string
+          metadata: Json | null
+          organization_id: string
+          reported_at: string
+          reported_by: string
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: Database["public"]["Enums"]["incident_severity"]
+          status: Database["public"]["Enums"]["incident_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          employee_user_id?: string | null
+          id?: string
+          incident_type: string
+          metadata?: Json | null
+          organization_id: string
+          reported_at?: string
+          reported_by: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: Database["public"]["Enums"]["incident_severity"]
+          status?: Database["public"]["Enums"]["incident_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          employee_user_id?: string | null
+          id?: string
+          incident_type?: string
+          metadata?: Json | null
+          organization_id?: string
+          reported_at?: string
+          reported_by?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: Database["public"]["Enums"]["incident_severity"]
+          status?: Database["public"]["Enums"]["incident_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_incidents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       compliance_metrics: {
         Row: {
           calculation_date: string
@@ -2698,6 +2760,95 @@ export type Database = {
         }
         Relationships: []
       }
+      incident_module_mappings: {
+        Row: {
+          created_at: string
+          id: string
+          incident_type: string
+          is_required: boolean | null
+          module_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          incident_type: string
+          is_required?: boolean | null
+          module_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          incident_type?: string
+          is_required?: boolean | null
+          module_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incident_module_mappings_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "course_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      incident_retraining_assignments: {
+        Row: {
+          assigned_at: string
+          assigned_by: string
+          completed_at: string | null
+          created_at: string
+          due_date: string
+          id: string
+          incident_id: string
+          module_id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by: string
+          completed_at?: string | null
+          created_at?: string
+          due_date: string
+          id?: string
+          incident_id: string
+          module_id: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string
+          completed_at?: string | null
+          created_at?: string
+          due_date?: string
+          id?: string
+          incident_id?: string
+          module_id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incident_retraining_assignments_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "compliance_incidents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incident_retraining_assignments_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "course_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       integration_health: {
         Row: {
           created_at: string
@@ -2987,6 +3138,63 @@ export type Database = {
             columns: ["conversation_id"]
             isOneToOne: false
             referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      module_attestations: {
+        Row: {
+          attestation_text: string
+          attested_at: string
+          course_id: string
+          created_at: string
+          curriculum_version_id: string | null
+          id: string
+          ip_address: unknown
+          module_id: string
+          trainer_id: string | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          attestation_text?: string
+          attested_at?: string
+          course_id: string
+          created_at?: string
+          curriculum_version_id?: string | null
+          id?: string
+          ip_address?: unknown
+          module_id: string
+          trainer_id?: string | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          attestation_text?: string
+          attested_at?: string
+          course_id?: string
+          created_at?: string
+          curriculum_version_id?: string | null
+          id?: string
+          ip_address?: unknown
+          module_id?: string
+          trainer_id?: string | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_attestations_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "module_attestations_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "course_modules"
             referencedColumns: ["id"]
           },
         ]
@@ -3843,6 +4051,7 @@ export type Database = {
           first_name: string | null
           id: string
           is_verified: boolean | null
+          job_role: Database["public"]["Enums"]["job_role"] | null
           job_title: string | null
           last_name: string | null
           mca_registration_number: string | null
@@ -3870,6 +4079,7 @@ export type Database = {
           first_name?: string | null
           id?: string
           is_verified?: boolean | null
+          job_role?: Database["public"]["Enums"]["job_role"] | null
           job_title?: string | null
           last_name?: string | null
           mca_registration_number?: string | null
@@ -3897,6 +4107,7 @@ export type Database = {
           first_name?: string | null
           id?: string
           is_verified?: boolean | null
+          job_role?: Database["public"]["Enums"]["job_role"] | null
           job_title?: string | null
           last_name?: string | null
           mca_registration_number?: string | null
@@ -4332,6 +4543,41 @@ export type Database = {
             columns: ["recommendation_id"]
             isOneToOne: false
             referencedRelation: "curriculum_recommendations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      role_module_requirements: {
+        Row: {
+          created_at: string
+          id: string
+          is_required: boolean | null
+          job_role: Database["public"]["Enums"]["job_role"]
+          module_id: string
+          priority_order: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_required?: boolean | null
+          job_role: Database["public"]["Enums"]["job_role"]
+          module_id: string
+          priority_order?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_required?: boolean | null
+          job_role?: Database["public"]["Enums"]["job_role"]
+          module_id?: string
+          priority_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_module_requirements_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "course_modules"
             referencedColumns: ["id"]
           },
         ]
@@ -5736,6 +5982,62 @@ export type Database = {
         }
         Relationships: []
       }
+      trainer_certifications: {
+        Row: {
+          authorized_at: string | null
+          authorized_by: string | null
+          certification_type: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          issued_at: string
+          notes: string | null
+          organization_id: string | null
+          scope: Json | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          authorized_at?: string | null
+          authorized_by?: string | null
+          certification_type?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          issued_at?: string
+          notes?: string | null
+          organization_id?: string | null
+          scope?: Json | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          authorized_at?: string | null
+          authorized_by?: string | null
+          certification_type?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          issued_at?: string
+          notes?: string | null
+          organization_id?: string | null
+          scope?: Json | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trainer_certifications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       training_questions: {
         Row: {
           answered_at: string | null
@@ -6113,6 +6415,8 @@ export type Database = {
           score: number | null
           tier_unlocked_at: string | null
           time_spent: number | null
+          trainer_id: string | null
+          training_method: string | null
           updated_at: string
           user_id: string
         }
@@ -6127,6 +6431,8 @@ export type Database = {
           score?: number | null
           tier_unlocked_at?: string | null
           time_spent?: number | null
+          trainer_id?: string | null
+          training_method?: string | null
           updated_at?: string
           user_id: string
         }
@@ -6141,6 +6447,8 @@ export type Database = {
           score?: number | null
           tier_unlocked_at?: string | null
           time_spent?: number | null
+          trainer_id?: string | null
+          training_method?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -7122,6 +7430,17 @@ export type Database = {
         | "admin"
         | "training_coordinator"
         | "consumer"
+        | "trainer"
+      incident_severity: "low" | "medium" | "high" | "critical"
+      incident_status: "reported" | "investigating" | "resolved" | "closed"
+      job_role:
+        | "budtender"
+        | "security"
+        | "intake"
+        | "operations"
+        | "manager"
+        | "owner"
+        | "trainer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -7277,6 +7596,18 @@ export const Constants = {
         "admin",
         "training_coordinator",
         "consumer",
+        "trainer",
+      ],
+      incident_severity: ["low", "medium", "high", "critical"],
+      incident_status: ["reported", "investigating", "resolved", "closed"],
+      job_role: [
+        "budtender",
+        "security",
+        "intake",
+        "operations",
+        "manager",
+        "owner",
+        "trainer",
       ],
     },
   },
