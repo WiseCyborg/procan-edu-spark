@@ -55,7 +55,7 @@ serve(async (req) => {
         user_id,
         first_name,
         last_name,
-        email,
+        email_cache,
         job_title,
         job_role,
         created_at,
@@ -184,7 +184,7 @@ serve(async (req) => {
       if (!trainerError) trainerCerts = trainerData || [];
     }
 
-    // Get supervisor signoffs
+    // Get supervisor signoffs with validity tracking
     const { data: signoffs, error: signoffError } = await supabase
       .from("supervisor_signoffs")
       .select(`
@@ -195,7 +195,26 @@ serve(async (req) => {
         signed_off_at,
         notes,
         is_floor_observation,
-        observation_date
+        observation_date,
+        module_id,
+        module_version,
+        valid,
+        invalidated_at,
+        invalidation_reason
+      `)
+      .eq("organization_id", organization_id);
+
+    // Get retraining events
+    const { data: retrainingEvents, error: retrainEventsError } = await supabase
+      .from("retraining_events")
+      .select(`
+        id,
+        employee_user_id,
+        module_id,
+        reason,
+        incident_id,
+        created_at,
+        course_modules (title)
       `)
       .eq("organization_id", organization_id);
 
@@ -250,7 +269,7 @@ serve(async (req) => {
         return {
           user_id: emp.user_id,
           name: `${emp.first_name || ''} ${emp.last_name || ''}`.trim(),
-          email: emp.email,
+          email: emp.email_cache,
           job_title: emp.job_title,
           job_role: emp.job_role,
           hire_date: emp.created_at,
@@ -284,9 +303,20 @@ serve(async (req) => {
             competency: s.competency_area,
             signed_off_at: s.signed_off_at,
             floor_observation: s.is_floor_observation,
-            observation_date: s.observation_date
+            observation_date: s.observation_date,
+            valid: s.valid,
+            invalidated_at: s.invalidated_at,
+            invalidation_reason: s.invalidation_reason
           })),
-          retraining: empRetraining.map(r => ({
+          retraining_events: (retrainingEvents || [])
+            .filter((r: any) => r.employee_user_id === emp.user_id)
+            .map((r: any) => ({
+              module: r.course_modules?.title,
+              reason: r.reason,
+              incident_id: r.incident_id,
+              created_at: r.created_at
+            })),
+          retraining_assignments: empRetraining.map(r => ({
             module: (r as any).course_modules?.title,
             status: r.status,
             assigned: r.assigned_at,

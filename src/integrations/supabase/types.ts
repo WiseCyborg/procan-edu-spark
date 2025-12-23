@@ -584,6 +584,7 @@ export type Database = {
           issue_date: string
           metadata: Json | null
           pdf_url: string | null
+          status: string | null
           tier_badge: string | null
           user_id: string
         }
@@ -599,6 +600,7 @@ export type Database = {
           issue_date?: string
           metadata?: Json | null
           pdf_url?: string | null
+          status?: string | null
           tier_badge?: string | null
           user_id: string
         }
@@ -614,6 +616,7 @@ export type Database = {
           issue_date?: string
           metadata?: Json | null
           pdf_url?: string | null
+          status?: string | null
           tier_badge?: string | null
           user_id?: string
         }
@@ -1078,6 +1081,57 @@ export type Database = {
           },
         ]
       }
+      compliance_packets: {
+        Row: {
+          created_at: string
+          created_by: string
+          employee_user_id: string | null
+          file_name: string | null
+          id: string
+          metadata: Json | null
+          organization_id: string
+          packet_type: string
+          storage_path: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          employee_user_id?: string | null
+          file_name?: string | null
+          id?: string
+          metadata?: Json | null
+          organization_id: string
+          packet_type?: string
+          storage_path?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          employee_user_id?: string | null
+          file_name?: string | null
+          id?: string
+          metadata?: Json | null
+          organization_id?: string
+          packet_type?: string
+          storage_path?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_packets_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_packets_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
+          },
+        ]
+      }
       consumer_certificates: {
         Row: {
           badge_name: string
@@ -1357,6 +1411,7 @@ export type Database = {
           stoplight_tier: string | null
           title: string
           updated_at: string
+          version: number | null
           video_url: string | null
         }
         Insert: {
@@ -1379,6 +1434,7 @@ export type Database = {
           stoplight_tier?: string | null
           title: string
           updated_at?: string
+          version?: number | null
           video_url?: string | null
         }
         Update: {
@@ -1401,6 +1457,7 @@ export type Database = {
           stoplight_tier?: string | null
           title?: string
           updated_at?: string
+          version?: number | null
           video_url?: string | null
         }
         Relationships: [
@@ -4725,6 +4782,68 @@ export type Database = {
         }
         Relationships: []
       }
+      retraining_events: {
+        Row: {
+          created_at: string
+          employee_user_id: string
+          id: string
+          incident_id: string | null
+          module_id: string
+          organization_id: string
+          reason: string
+          triggered_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          employee_user_id: string
+          id?: string
+          incident_id?: string | null
+          module_id: string
+          organization_id: string
+          reason: string
+          triggered_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          employee_user_id?: string
+          id?: string
+          incident_id?: string | null
+          module_id?: string
+          organization_id?: string
+          reason?: string
+          triggered_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "retraining_events_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "compliance_incidents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retraining_events_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "course_modules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retraining_events_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retraining_events_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
+          },
+        ]
+      }
       roi_forecasts: {
         Row: {
           comparable_implementations: Json | null
@@ -5911,12 +6030,17 @@ export type Database = {
           employee_user_id: string
           expires_at: string | null
           id: string
+          invalidated_at: string | null
+          invalidation_reason: string | null
           is_floor_observation: boolean | null
+          module_id: string | null
+          module_version: number | null
           notes: string | null
           observation_date: string | null
           organization_id: string
           signed_off_at: string
           supervisor_user_id: string
+          valid: boolean | null
         }
         Insert: {
           competency_area: string
@@ -5924,12 +6048,17 @@ export type Database = {
           employee_user_id: string
           expires_at?: string | null
           id?: string
+          invalidated_at?: string | null
+          invalidation_reason?: string | null
           is_floor_observation?: boolean | null
+          module_id?: string | null
+          module_version?: number | null
           notes?: string | null
           observation_date?: string | null
           organization_id: string
           signed_off_at?: string
           supervisor_user_id: string
+          valid?: boolean | null
         }
         Update: {
           competency_area?: string
@@ -5937,14 +6066,26 @@ export type Database = {
           employee_user_id?: string
           expires_at?: string | null
           id?: string
+          invalidated_at?: string | null
+          invalidation_reason?: string | null
           is_floor_observation?: boolean | null
+          module_id?: string | null
+          module_version?: number | null
           notes?: string | null
           observation_date?: string | null
           organization_id?: string
           signed_off_at?: string
           supervisor_user_id?: string
+          valid?: boolean | null
         }
         Relationships: [
+          {
+            foreignKeyName: "supervisor_signoffs_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "course_modules"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "supervisor_signoffs_organization_id_fkey"
             columns: ["organization_id"]
@@ -7810,6 +7951,8 @@ export type Database = {
         Args: { _profile_user_id: string; _user_id: string }
         Returns: boolean
       }
+      jwt_org_id: { Args: never; Returns: string }
+      jwt_role: { Args: never; Returns: string }
       log_security_event: {
         Args: { _details?: Json; _event_type: string }
         Returns: undefined
