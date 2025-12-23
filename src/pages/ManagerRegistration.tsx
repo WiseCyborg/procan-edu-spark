@@ -77,6 +77,7 @@ export default function ManagerRegistration() {
         email: sanitizedEmail,
         password: data.password,
         options: { 
+          emailRedirectTo: `${window.location.origin}/onboarding/setup-team?first_login=true`,
           data: { 
             firstName: firstName,
             lastName: lastName,
@@ -95,13 +96,18 @@ export default function ManagerRegistration() {
             user_id: authData.user.id,
             first_name: firstName,
             last_name: lastName,
-            organization_id: applicationData.organization_id // Link manager to organization
+            organization_id: applicationData.organization_id
           }, {
             onConflict: 'user_id'
           });
           
         if (profileError) {
           console.error('Profile creation error:', profileError);
+          toast({ 
+            title: "Warning", 
+            description: "Profile setup incomplete. Please contact support if issues persist.", 
+            variant: "destructive" 
+          });
         }
 
         // Create dispensary_manager role entry
@@ -114,13 +120,18 @@ export default function ManagerRegistration() {
           
         if (roleError) {
           console.error('Role assignment error:', roleError);
+          toast({ 
+            title: "Warning", 
+            description: "Role assignment incomplete. Please contact support.", 
+            variant: "destructive" 
+          });
         }
       }
 
       await supabase.from('dispensary_applications').update({ registration_completed: true }).eq('registration_token', token);
       
-      toast({ title: "Account Created!", description: "Redirecting..." });
-      setTimeout(() => navigate('/onboarding/wizard', { state: { applicationId: applicationData.id } }), 2000);
+      toast({ title: "Account Created!", description: "Redirecting to setup..." });
+      setTimeout(() => navigate('/onboarding/setup-team?first_login=true', { state: { applicationId: applicationData.id } }), 2000);
     } catch (error: any) {
       toast({ title: "Registration Failed", description: error.message, variant: "destructive" });
     }
