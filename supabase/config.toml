@@ -443,3 +443,12 @@ verify_jwt = false
 
 [functions.incident-retraining-trigger]
 verify_jwt = true
+
+[functions.first-shift-compliance-check]
+verify_jwt = false
+
+[functions.generate-mca-audit-report]
+verify_jwt = true
+
+[functions.compliance-review-scheduler]
+verify_jwt = false

@@ -149,6 +149,13 @@ export type Database = {
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "agent_escalations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
+          },
         ]
       }
       agent_events: {
@@ -377,6 +384,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ailean_activation_tokens_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
           },
         ]
       }
@@ -748,6 +762,13 @@ export type Database = {
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "communication_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
+          },
         ]
       }
       competitive_alerts: {
@@ -994,6 +1015,13 @@ export type Database = {
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "compliance_incidents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
+          },
         ]
       }
       compliance_metrics: {
@@ -1040,6 +1068,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_metrics_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
           },
         ]
       }
@@ -1292,6 +1327,13 @@ export type Database = {
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "conversations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
+          },
         ]
       }
       course_modules: {
@@ -1515,6 +1557,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "covered_sessions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
+          },
+          {
             foreignKeyName: "covered_sessions_video_call_id_fkey"
             columns: ["video_call_id"]
             isOneToOne: false
@@ -1618,6 +1667,60 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      curriculum_versions: {
+        Row: {
+          changelog: string | null
+          comar_version_id: string | null
+          course_id: string
+          created_at: string
+          created_by: string | null
+          effective_date: string
+          id: string
+          is_active: boolean | null
+          updated_at: string
+          version_number: string
+        }
+        Insert: {
+          changelog?: string | null
+          comar_version_id?: string | null
+          course_id: string
+          created_at?: string
+          created_by?: string | null
+          effective_date: string
+          id?: string
+          is_active?: boolean | null
+          updated_at?: string
+          version_number: string
+        }
+        Update: {
+          changelog?: string | null
+          comar_version_id?: string | null
+          course_id?: string
+          created_at?: string
+          created_by?: string | null
+          effective_date?: string
+          id?: string
+          is_active?: boolean | null
+          updated_at?: string
+          version_number?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "curriculum_versions_comar_version_id_fkey"
+            columns: ["comar_version_id"]
+            isOneToOne: false
+            referencedRelation: "comar_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "curriculum_versions_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       dispensary_applications: {
         Row: {
@@ -1729,6 +1832,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dispensary_applications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
           },
         ]
       }
@@ -1963,6 +2073,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "email_events_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
+          },
+          {
             foreignKeyName: "email_events_template_id_fkey"
             columns: ["template_id"]
             isOneToOne: false
@@ -2100,6 +2217,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_inbox_messages_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
           },
         ]
       }
@@ -2715,6 +2839,63 @@ export type Database = {
         }
         Relationships: []
       }
+      first_shift_compliance_alerts: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          alert_type: string
+          created_at: string
+          days_until_shift: number | null
+          employee_user_id: string
+          first_shift_date: string
+          id: string
+          organization_id: string
+          resolved_at: string | null
+          training_status: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_type: string
+          created_at?: string
+          days_until_shift?: number | null
+          employee_user_id: string
+          first_shift_date: string
+          id?: string
+          organization_id: string
+          resolved_at?: string | null
+          training_status: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_type?: string
+          created_at?: string
+          days_until_shift?: number | null
+          employee_user_id?: string
+          first_shift_date?: string
+          id?: string
+          organization_id?: string
+          resolved_at?: string | null
+          training_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "first_shift_compliance_alerts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "first_shift_compliance_alerts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
+          },
+        ]
+      }
       image_assets: {
         Row: {
           alt_text: string
@@ -3295,6 +3476,13 @@ export type Database = {
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "notification_preferences_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
+          },
         ]
       }
       notification_queue: {
@@ -3350,6 +3538,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_queue_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
           },
           {
             foreignKeyName: "notification_queue_rule_id_fkey"
@@ -3479,7 +3674,9 @@ export type Database = {
           paypal_order_id: string | null
           paypal_payer_id: string | null
           pricing_type: string | null
+          require_supervisor_signoff: boolean | null
           rotational_buffer: number | null
+          signoff_competency_areas: string[] | null
           stripe_customer_id: string | null
           stripe_session_id: string | null
           subscription_end_date: string | null
@@ -3508,7 +3705,9 @@ export type Database = {
           paypal_order_id?: string | null
           paypal_payer_id?: string | null
           pricing_type?: string | null
+          require_supervisor_signoff?: boolean | null
           rotational_buffer?: number | null
+          signoff_competency_areas?: string[] | null
           stripe_customer_id?: string | null
           stripe_session_id?: string | null
           subscription_end_date?: string | null
@@ -3537,7 +3736,9 @@ export type Database = {
           paypal_order_id?: string | null
           paypal_payer_id?: string | null
           pricing_type?: string | null
+          require_supervisor_signoff?: boolean | null
           rotational_buffer?: number | null
+          signoff_competency_areas?: string[] | null
           stripe_customer_id?: string | null
           stripe_session_id?: string | null
           subscription_end_date?: string | null
@@ -3693,6 +3894,13 @@ export type Database = {
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "payments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
+          },
         ]
       }
       paypal_configuration: {
@@ -3799,6 +4007,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pipeline_health_events_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
           },
         ]
       }
@@ -4049,6 +4264,7 @@ export type Database = {
           emergency_contact_name: string | null
           emergency_contact_phone: string | null
           first_name: string | null
+          first_shift_date: string | null
           id: string
           is_verified: boolean | null
           job_role: Database["public"]["Enums"]["job_role"] | null
@@ -4062,6 +4278,8 @@ export type Database = {
           profile_photo_url: string | null
           state: string | null
           tier_status: string | null
+          training_verified_at: string | null
+          training_verified_by: string | null
           updated_at: string
           user_id: string
           verification_method_preference: string | null
@@ -4077,6 +4295,7 @@ export type Database = {
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
           first_name?: string | null
+          first_shift_date?: string | null
           id?: string
           is_verified?: boolean | null
           job_role?: Database["public"]["Enums"]["job_role"] | null
@@ -4090,6 +4309,8 @@ export type Database = {
           profile_photo_url?: string | null
           state?: string | null
           tier_status?: string | null
+          training_verified_at?: string | null
+          training_verified_by?: string | null
           updated_at?: string
           user_id: string
           verification_method_preference?: string | null
@@ -4105,6 +4326,7 @@ export type Database = {
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
           first_name?: string | null
+          first_shift_date?: string | null
           id?: string
           is_verified?: boolean | null
           job_role?: Database["public"]["Enums"]["job_role"] | null
@@ -4118,6 +4340,8 @@ export type Database = {
           profile_photo_url?: string | null
           state?: string | null
           tier_status?: string | null
+          training_verified_at?: string | null
+          training_verified_by?: string | null
           updated_at?: string
           user_id?: string
           verification_method_preference?: string | null
@@ -4130,6 +4354,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
           },
         ]
       }
@@ -4645,6 +4876,13 @@ export type Database = {
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "rvt_join_codes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
+          },
         ]
       }
       rvt_purchases: {
@@ -4704,6 +4942,13 @@ export type Database = {
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "rvt_purchases_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
+          },
         ]
       }
       rvt_seats: {
@@ -4754,6 +4999,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rvt_seats_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
           },
           {
             foreignKeyName: "rvt_seats_purchase_id_fkey"
@@ -4867,11 +5119,84 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "scheduled_calls_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
+          },
+          {
             foreignKeyName: "scheduled_calls_video_call_id_fkey"
             columns: ["video_call_id"]
             isOneToOne: false
             referencedRelation: "video_calls"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      scheduled_reviews: {
+        Row: {
+          action_items: Json | null
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          due_date: string
+          findings: string | null
+          id: string
+          metadata: Json | null
+          organization_id: string
+          review_name: string
+          review_type: string
+          scheduled_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          action_items?: Json | null
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          due_date: string
+          findings?: string | null
+          id?: string
+          metadata?: Json | null
+          organization_id: string
+          review_name: string
+          review_type: string
+          scheduled_date: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          action_items?: Json | null
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          due_date?: string
+          findings?: string | null
+          id?: string
+          metadata?: Json | null
+          organization_id?: string
+          review_name?: string
+          review_type?: string
+          scheduled_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheduled_reviews_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_reviews_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
           },
         ]
       }
@@ -4919,6 +5244,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seat_rotation_history_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
           },
           {
             foreignKeyName: "seat_rotation_history_seat_id_fkey"
@@ -5016,6 +5348,13 @@ export type Database = {
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "security_events_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
+          },
         ]
       }
       session_actions: {
@@ -5076,6 +5415,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "session_actions_linked_org_id_fkey"
+            columns: ["linked_org_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
+          },
+          {
             foreignKeyName: "session_actions_session_id_fkey"
             columns: ["session_id"]
             isOneToOne: false
@@ -5125,6 +5471,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_decisions_impacted_org_id_fkey"
+            columns: ["impacted_org_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
           },
           {
             foreignKeyName: "session_decisions_session_id_fkey"
@@ -5399,6 +5752,13 @@ export type Database = {
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "staff_invitations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
+          },
         ]
       }
       student_certification_versions: {
@@ -5493,6 +5853,13 @@ export type Database = {
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "subscription_history_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
+          },
         ]
       }
       subscription_tiers: {
@@ -5536,6 +5903,63 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      supervisor_signoffs: {
+        Row: {
+          competency_area: string
+          created_at: string
+          employee_user_id: string
+          expires_at: string | null
+          id: string
+          is_floor_observation: boolean | null
+          notes: string | null
+          observation_date: string | null
+          organization_id: string
+          signed_off_at: string
+          supervisor_user_id: string
+        }
+        Insert: {
+          competency_area: string
+          created_at?: string
+          employee_user_id: string
+          expires_at?: string | null
+          id?: string
+          is_floor_observation?: boolean | null
+          notes?: string | null
+          observation_date?: string | null
+          organization_id: string
+          signed_off_at?: string
+          supervisor_user_id: string
+        }
+        Update: {
+          competency_area?: string
+          created_at?: string
+          employee_user_id?: string
+          expires_at?: string | null
+          id?: string
+          is_floor_observation?: boolean | null
+          notes?: string | null
+          observation_date?: string | null
+          organization_id?: string
+          signed_off_at?: string
+          supervisor_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supervisor_signoffs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supervisor_signoffs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
+          },
+        ]
       }
       support_queue: {
         Row: {
@@ -5689,6 +6113,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_requests_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
           },
         ]
       }
@@ -5917,6 +6348,13 @@ export type Database = {
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "system_jobs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
+          },
         ]
       }
       system_jobs_deadletter: {
@@ -6036,6 +6474,13 @@ export type Database = {
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "trainer_certifications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
+          },
         ]
       }
       training_questions: {
@@ -6078,6 +6523,67 @@ export type Database = {
             columns: ["conversation_id"]
             isOneToOne: false
             referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_version_mismatches: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          course_id: string
+          created_at: string
+          current_version_id: string | null
+          id: string
+          retraining_assigned_at: string | null
+          retraining_required: boolean | null
+          trained_version_id: string | null
+          user_id: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          course_id: string
+          created_at?: string
+          current_version_id?: string | null
+          id?: string
+          retraining_assigned_at?: string | null
+          retraining_required?: boolean | null
+          trained_version_id?: string | null
+          user_id: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          course_id?: string
+          created_at?: string
+          current_version_id?: string | null
+          id?: string
+          retraining_assigned_at?: string | null
+          retraining_required?: boolean | null
+          trained_version_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_version_mismatches_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_version_mismatches_current_version_id_fkey"
+            columns: ["current_version_id"]
+            isOneToOne: false
+            referencedRelation: "curriculum_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_version_mismatches_trained_version_id_fkey"
+            columns: ["trained_version_id"]
+            isOneToOne: false
+            referencedRelation: "curriculum_versions"
             referencedColumns: ["id"]
           },
         ]
@@ -6161,6 +6667,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "uat_accounts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
           },
         ]
       }
@@ -6323,6 +6836,13 @@ export type Database = {
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "user_learning_journey_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
+          },
         ]
       }
       user_metadata: {
@@ -6409,6 +6929,7 @@ export type Database = {
           course_id: string
           created_at: string
           current_tier: string | null
+          curriculum_version_id: string | null
           id: string
           is_completed: boolean | null
           module_id: string | null
@@ -6425,6 +6946,7 @@ export type Database = {
           course_id: string
           created_at?: string
           current_tier?: string | null
+          curriculum_version_id?: string | null
           id?: string
           is_completed?: boolean | null
           module_id?: string | null
@@ -6441,6 +6963,7 @@ export type Database = {
           course_id?: string
           created_at?: string
           current_tier?: string | null
+          curriculum_version_id?: string | null
           id?: string
           is_completed?: boolean | null
           module_id?: string | null
@@ -6458,6 +6981,13 @@ export type Database = {
             columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_progress_curriculum_version_id_fkey"
+            columns: ["curriculum_version_id"]
+            isOneToOne: false
+            referencedRelation: "curriculum_versions"
             referencedColumns: ["id"]
           },
           {
@@ -6699,6 +7229,13 @@ export type Database = {
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "video_calls_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
+          },
         ]
       }
       workflow_automations: {
@@ -6840,6 +7377,21 @@ export type Database = {
           id: string | null
           mode: string | null
           updated_at: string | null
+        }
+        Relationships: []
+      }
+      v_pipeline_compliance_health: {
+        Row: {
+          certification_rate: number | null
+          certified_employees: number | null
+          compliance_status: string | null
+          missing_signoffs: number | null
+          organization_id: string | null
+          organization_name: string | null
+          overdue_reviews: number | null
+          pending_retraining: number | null
+          total_employees: number | null
+          working_uncertified: number | null
         }
         Relationships: []
       }
