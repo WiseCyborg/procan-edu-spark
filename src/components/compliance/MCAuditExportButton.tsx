@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { supabase } from '@/integrations/supabase/client';
-import { FileDown, Loader2, FileText, Shield } from 'lucide-react';
+import { FileDown, Loader2, FileText, Shield, Cloud } from 'lucide-react';
 import { toast } from 'sonner';
 import { format, subDays } from 'date-fns';
 
@@ -22,6 +22,7 @@ export const MCAuditExportButton = ({ organizationId, organizationName }: MCAudi
   const [includeIncidents, setIncludeIncidents] = useState(true);
   const [includeAttestations, setIncludeAttestations] = useState(true);
   const [includeTrainerCerts, setIncludeTrainerCerts] = useState(true);
+  const [saveToStorage, setSaveToStorage] = useState(true);
 
   const handleExport = async () => {
     setIsLoading(true);
@@ -39,18 +40,62 @@ export const MCAuditExportButton = ({ organizationId, organizationName }: MCAudi
 
       if (error) throw error;
 
+      const timestamp = format(new Date(), 'yyyy-MM-dd_HH-mm-ss');
+      const fileName = `MCA_Audit_Report_${organizationName || 'Organization'}_${timestamp}.json`;
+      const reportJson = JSON.stringify(data, null, 2);
+
+      // Save to storage if enabled
+      if (saveToStorage) {
+        try {
+          const storagePath = `org/${organizationId}/audit-reports/${timestamp}.json`;
+          
+          const { error: uploadError } = await supabase.storage
+            .from('compliance')
+            .upload(storagePath, reportJson, {
+              contentType: 'application/json',
+              upsert: false,
+            });
+
+          if (!uploadError) {
+            // Track in compliance_packets table
+            const supabaseAny = supabase as any;
+            await supabaseAny
+              .from('compliance_packets')
+              .insert({
+                organization_id: organizationId,
+                packet_type: 'organization',
+                storage_path: storagePath,
+                file_name: fileName,
+                created_by: (await supabase.auth.getUser()).data.user?.id,
+                metadata: {
+                  report_type: 'mca_audit',
+                  start_date: startDate,
+                  end_date: endDate,
+                  include_incidents: includeIncidents,
+                  include_attestations: includeAttestations,
+                  include_trainer_certs: includeTrainerCerts,
+                },
+              });
+          }
+        } catch (storageError) {
+          console.warn('Failed to save to storage, continuing with download:', storageError);
+        }
+      }
+
       // Create a downloadable JSON file
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const blob = new Blob([reportJson], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `MCA_Audit_Report_${organizationName || 'Organization'}_${format(new Date(), 'yyyy-MM-dd')}.json`;
+      a.download = fileName;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      toast.success('Audit report generated successfully');
+      toast.success('Audit report generated successfully', {
+        description: saveToStorage ? 'Report saved to compliance storage' : undefined,
+      });
       setIsOpen(false);
     } catch (error: any) {
       console.error('Export error:', error);
@@ -135,13 +180,26 @@ export const MCAuditExportButton = ({ organizationId, organizationName }: MCAudi
             </div>
           </div>
 
+          <div className="flex items-center space-x-2 p-3 bg-primary/5 rounded-lg border border-primary/10">
+            <Checkbox 
+              id="saveToStorage" 
+              checked={saveToStorage}
+              onCheckedChange={(checked) => setSaveToStorage(!!checked)}
+            />
+            <label htmlFor="saveToStorage" className="text-sm flex items-center gap-2">
+              <Cloud className="h-4 w-4 text-primary" />
+              Save copy to compliance storage (audit trail)
+            </label>
+          </div>
+
           <div className="bg-muted/50 p-3 rounded-lg text-sm">
             <p className="font-medium mb-1">Report Contents:</p>
             <ul className="text-muted-foreground space-y-1">
               <li>• Organization & license information</li>
               <li>• Complete employee training records</li>
               <li>• Certificate history with verification</li>
-              <li>• Supervisor sign-offs</li>
+              <li>• Supervisor sign-offs with validity status</li>
+              <li>• Retraining events & invalidation history</li>
               <li>• Scheduled compliance reviews</li>
               <li>• COMAR version alignment proof</li>
             </ul>

@@ -52,31 +52,30 @@ export const IncidentModuleMappingAdmin: React.FC<IncidentModuleMappingAdminProp
     fetchData();
   }, [organizationId]);
 
+  // Use untyped client access to avoid TS deep recursion in generated types
+  const supabaseAny = supabase as any;
+
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      // Use RPC or direct fetch to avoid TS deep type issues
       const [mappingRes, moduleRes] = await Promise.all([
-        supabase.rpc('get_incident_mappings_for_org', { org_id: organizationId }).then(r => r),
-        supabase.from('course_modules').select('id, title, module_number').eq('is_active', true).order('module_number')
-      ]);
-
-      // Fallback: direct query if RPC doesn't exist
-      let mappingData: Mapping[] = [];
-      if (mappingRes.error?.code === 'PGRST202') {
-        // RPC doesn't exist, use direct query with type assertion
-        const directRes = await supabase
+        supabaseAny
           .from('incident_module_mappings')
-          .select('*')
-          .eq('organization_id', organizationId);
-        mappingData = (directRes.data || []) as unknown as Mapping[];
-      } else if (!mappingRes.error) {
-        mappingData = (mappingRes.data || []) as Mapping[];
-      }
+          .select('id, incident_type, module_id')
+          .eq('organization_id', organizationId),
+        supabaseAny
+          .from('course_modules')
+          .select('id, title, module_number')
+          .eq('is_active', true)
+          .order('module_number')
+      ]);
+      
+      if (mappingRes.error) throw mappingRes.error;
+      if (moduleRes.error) throw moduleRes.error;
+      
+      const mappingData: Array<{ id: string; incident_type: string; module_id: string }> = mappingRes.data ?? [];
+      const moduleData: Module[] = moduleRes.data ?? [];
 
-      const moduleData: Module[] = (moduleRes.data || []) as Module[];
-
-      // Enrich mappings with module titles
       const enrichedMappings: Mapping[] = mappingData.map(m => ({
         ...m,
         module_title: moduleData.find(mod => mod.id === m.module_id)?.title || 'Unknown Module',
@@ -111,7 +110,7 @@ export const IncidentModuleMappingAdmin: React.FC<IncidentModuleMappingAdminProp
         module_id: newModuleId,
       };
       
-      const result = await supabase
+      const result = await supabaseAny
         .from('incident_module_mappings')
         .insert(insertData)
         .select('id, incident_type, module_id')
@@ -119,7 +118,7 @@ export const IncidentModuleMappingAdmin: React.FC<IncidentModuleMappingAdminProp
 
       if (result.error) throw result.error;
 
-      const data = result.data as unknown as Mapping;
+      const data = result.data as Mapping;
       const moduleTitle = modules.find(m => m.id === newModuleId)?.title || 'Unknown Module';
       setMappings([...mappings, { ...data, module_title: moduleTitle }]);
       setNewIncidentType('');
@@ -135,7 +134,7 @@ export const IncidentModuleMappingAdmin: React.FC<IncidentModuleMappingAdminProp
 
   const handleDeleteMapping = async (mappingId: string) => {
     try {
-      const result = await supabase
+      const result = await supabaseAny
         .from('incident_module_mappings')
         .delete()
         .eq('id', mappingId);
