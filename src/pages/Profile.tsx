@@ -11,7 +11,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/components/ui/use-toast';
-import { User, Save, Calendar, MapPin, Phone, Settings, AlertCircle, ArrowRight, Camera, Bell } from 'lucide-react';
+import { User, Save, Calendar, MapPin, Phone, Settings, AlertCircle, ArrowRight, Camera, Bell, ClipboardCheck } from 'lucide-react';
+import { UATControlPanel } from '@/components/uat/UATControlPanel';
+import { UATTaskList } from '@/components/uat/UATTaskList';
 import { VerificationPreferencesSetup } from '@/components/auth/VerificationPreferencesSetup';
 import { ProfileChangeHistoryViewer } from '@/components/admin/ProfileChangeHistoryViewer';
 import { ProfilePhotoUpload } from '@/components/profile/ProfilePhotoUpload';
@@ -355,10 +357,10 @@ const Profile: React.FC = () => {
       )}
 
       <Tabs defaultValue="profile" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="profile" className="flex items-center gap-2">
             <User className="w-4 h-4" />
-            Profile Information
+            Profile
           </TabsTrigger>
           <TabsTrigger value="notifications" className="flex items-center gap-2">
             <Bell className="w-4 h-4" />
@@ -366,11 +368,15 @@ const Profile: React.FC = () => {
           </TabsTrigger>
           <TabsTrigger value="verification" className="flex items-center gap-2">
             <Settings className="w-4 h-4" />
-            Verification Settings
+            Verification
           </TabsTrigger>
           <TabsTrigger value="history" className="flex items-center gap-2">
             <Calendar className="w-4 h-4" />
-            My Change History
+            History
+          </TabsTrigger>
+          <TabsTrigger value="uat" className="flex items-center gap-2">
+            <ClipboardCheck className="w-4 h-4" />
+            UAT Testing
           </TabsTrigger>
         </TabsList>
         
