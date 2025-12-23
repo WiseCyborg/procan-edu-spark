@@ -28,10 +28,12 @@ import {
   Layers,
   ClipboardCheck,
   Lock,
-  Package
+  Package,
+  CreditCard
 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import { Json } from '@/integrations/supabase/types';
+import { PaymentTestingGuide } from './PaymentTestingGuide';
 
 // Define all checklist sections
 const CHECKLIST_SECTIONS: Array<{
@@ -182,6 +184,23 @@ const CHECKLIST_SECTIONS: Array<{
       { id: 'export_records_on_demand', label: 'Able to export records on demand' },
       { id: 'records_complete_consistent', label: 'Records appear complete & consistent' }
     ]
+  },
+  {
+    id: 'payment_testing_section',
+    title: '13. Payment Testing (PayPal Sandbox)',
+    description: 'Payment flow verification',
+    icon: <CreditCard className="h-5 w-5" />,
+    items: [
+      { id: 'sandbox_mode_confirmed', label: 'PayPal sandbox mode confirmed active' },
+      { id: 'course_payment_initiated', label: 'Course payment successfully initiated' },
+      { id: 'paypal_redirect_works', label: 'Redirect to PayPal sandbox works' },
+      { id: 'test_credentials_accepted', label: 'Test credentials accepted by PayPal' },
+      { id: 'payment_completion_redirect', label: 'Payment completion redirects correctly' },
+      { id: 'order_recorded_database', label: 'Order recorded in database' },
+      { id: 'seat_purchase_works', label: 'Dispensary seat purchase works' },
+      { id: 'seats_allocated_correctly', label: 'Seats allocated correctly after payment' },
+      { id: 'no_real_charges', label: 'Confirmed no real charges occurred' }
+    ]
   }
 ];
 
@@ -204,6 +223,7 @@ interface ChecklistData {
   notifications_section: ChecklistSectionData;
   bulk_operations_section: ChecklistSectionData;
   audit_readiness_section: ChecklistSectionData;
+  payment_testing_section: ChecklistSectionData;
   what_worked_well: string;
   what_was_confusing: string;
   blocker_concerns: string;
@@ -235,6 +255,7 @@ const getDefaultChecklistData = (email: string): ChecklistData => ({
   notifications_section: defaultSectionData(),
   bulk_operations_section: defaultSectionData(),
   audit_readiness_section: defaultSectionData(),
+  payment_testing_section: defaultSectionData(),
   what_worked_well: '',
   what_was_confusing: '',
   blocker_concerns: '',
@@ -290,6 +311,7 @@ export const UATValidationChecklist: React.FC = () => {
             notifications_section: (existing.notifications_section as unknown as ChecklistSectionData) || defaultSectionData(),
             bulk_operations_section: (existing.bulk_operations_section as unknown as ChecklistSectionData) || defaultSectionData(),
             audit_readiness_section: (existing.audit_readiness_section as unknown as ChecklistSectionData) || defaultSectionData(),
+            payment_testing_section: (existing.payment_testing_section as unknown as ChecklistSectionData) || defaultSectionData(),
             what_worked_well: existing.what_worked_well || '',
             what_was_confusing: existing.what_was_confusing || '',
             blocker_concerns: existing.blocker_concerns || '',
@@ -342,6 +364,7 @@ export const UATValidationChecklist: React.FC = () => {
         notifications_section: checklistData.notifications_section as unknown as Json,
         bulk_operations_section: checklistData.bulk_operations_section as unknown as Json,
         audit_readiness_section: checklistData.audit_readiness_section as unknown as Json,
+        payment_testing_section: checklistData.payment_testing_section as unknown as Json,
         what_worked_well: checklistData.what_worked_well,
         what_was_confusing: checklistData.what_was_confusing,
         blocker_concerns: checklistData.blocker_concerns,
@@ -697,17 +720,22 @@ export const UATValidationChecklist: React.FC = () => {
 
       {/* Checklist Sections */}
       {CHECKLIST_SECTIONS.map((section) => (
-        <ChecklistSection
-          key={section.id}
-          id={section.id}
-          title={section.title}
-          description={section.description}
-          icon={section.icon}
-          items={section.items}
-          data={(data[section.id] as ChecklistSectionData) || {}}
-          onChange={handleSectionChange}
-          disabled={isSubmitted}
-        />
+        <React.Fragment key={section.id}>
+          <ChecklistSection
+            id={section.id}
+            title={section.title}
+            description={section.description}
+            icon={section.icon}
+            items={section.items}
+            data={(data[section.id as keyof ChecklistData] as ChecklistSectionData) || {}}
+            onChange={handleSectionChange}
+            disabled={isSubmitted}
+          />
+          {/* Insert Payment Testing Guide after the payment section */}
+          {section.id === 'payment_testing_section' && (
+            <PaymentTestingGuide />
+          )}
+        </React.Fragment>
       ))}
 
       {/* Overall Feedback */}
