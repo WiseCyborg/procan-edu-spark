@@ -3812,6 +3812,9 @@ export type Database = {
         Row: {
           address: string | null
           admin_approved: boolean | null
+          admin_attestation_signed: boolean | null
+          admin_attestation_signed_at: string | null
+          admin_attestation_signed_by: string | null
           annual_price_cents: number | null
           contact_email: string | null
           contact_person: string | null
@@ -3819,6 +3822,7 @@ export type Database = {
           course_credits: number | null
           created_at: string
           current_uat_run_id: string | null
+          environment: string | null
           expires_at: string | null
           id: string
           is_active: boolean | null
@@ -3830,6 +3834,7 @@ export type Database = {
           paypal_order_id: string | null
           paypal_payer_id: string | null
           pricing_type: string | null
+          ready_for_production: boolean | null
           require_supervisor_signoff: boolean | null
           rotational_buffer: number | null
           signoff_competency_areas: string[] | null
@@ -3838,6 +3843,7 @@ export type Database = {
           subscription_end_date: string | null
           subscription_start_date: string | null
           subscription_tier: string | null
+          uat_completed_at: string | null
           uat_email: string | null
           uat_enabled: boolean | null
           unique_access_key: string | null
@@ -3846,6 +3852,9 @@ export type Database = {
         Insert: {
           address?: string | null
           admin_approved?: boolean | null
+          admin_attestation_signed?: boolean | null
+          admin_attestation_signed_at?: string | null
+          admin_attestation_signed_by?: string | null
           annual_price_cents?: number | null
           contact_email?: string | null
           contact_person?: string | null
@@ -3853,6 +3862,7 @@ export type Database = {
           course_credits?: number | null
           created_at?: string
           current_uat_run_id?: string | null
+          environment?: string | null
           expires_at?: string | null
           id?: string
           is_active?: boolean | null
@@ -3864,6 +3874,7 @@ export type Database = {
           paypal_order_id?: string | null
           paypal_payer_id?: string | null
           pricing_type?: string | null
+          ready_for_production?: boolean | null
           require_supervisor_signoff?: boolean | null
           rotational_buffer?: number | null
           signoff_competency_areas?: string[] | null
@@ -3872,6 +3883,7 @@ export type Database = {
           subscription_end_date?: string | null
           subscription_start_date?: string | null
           subscription_tier?: string | null
+          uat_completed_at?: string | null
           uat_email?: string | null
           uat_enabled?: boolean | null
           unique_access_key?: string | null
@@ -3880,6 +3892,9 @@ export type Database = {
         Update: {
           address?: string | null
           admin_approved?: boolean | null
+          admin_attestation_signed?: boolean | null
+          admin_attestation_signed_at?: string | null
+          admin_attestation_signed_by?: string | null
           annual_price_cents?: number | null
           contact_email?: string | null
           contact_person?: string | null
@@ -3887,6 +3902,7 @@ export type Database = {
           course_credits?: number | null
           created_at?: string
           current_uat_run_id?: string | null
+          environment?: string | null
           expires_at?: string | null
           id?: string
           is_active?: boolean | null
@@ -3898,6 +3914,7 @@ export type Database = {
           paypal_order_id?: string | null
           paypal_payer_id?: string | null
           pricing_type?: string | null
+          ready_for_production?: boolean | null
           require_supervisor_signoff?: boolean | null
           rotational_buffer?: number | null
           signoff_competency_areas?: string[] | null
@@ -3906,6 +3923,7 @@ export type Database = {
           subscription_end_date?: string | null
           subscription_start_date?: string | null
           subscription_tier?: string | null
+          uat_completed_at?: string | null
           uat_email?: string | null
           uat_enabled?: boolean | null
           unique_access_key?: string | null

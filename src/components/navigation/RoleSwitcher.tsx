@@ -1,6 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import {
   Select,
   SelectContent,
@@ -40,6 +42,7 @@ const ROLE_CONFIG = {
 
 export const RoleSwitcher: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { managementRoles, hasMultipleManagementRoles } = useUserRole();
   const [selectedRole, setSelectedRole] = React.useState<string>(() => {
     return sessionStorage.getItem('selected_role_view') || managementRoles[0] || '';
@@ -49,9 +52,30 @@ export const RoleSwitcher: React.FC = () => {
     return null;
   }
 
-  const handleRoleChange = (role: string) => {
+  const logRoleSwitch = async (fromRole: string, toRole: string) => {
+    try {
+      await supabase.from('security_audit_log').insert({
+        user_id: user?.id,
+        action_type: 'role_switch',
+        table_name: 'role_simulation',
+        old_values: { role: fromRole },
+        new_values: { role: toRole },
+        ip_address: null,
+        user_agent: navigator.userAgent,
+      });
+    } catch (error) {
+      console.error('Failed to log role switch:', error);
+    }
+  };
+
+  const handleRoleChange = async (role: string) => {
+    const previousRole = selectedRole;
     setSelectedRole(role);
     sessionStorage.setItem('selected_role_view', role);
+    
+    // Log the role switch for MCA audit compliance
+    await logRoleSwitch(previousRole, role);
+    
     const config = ROLE_CONFIG[role as keyof typeof ROLE_CONFIG];
     if (config) {
       navigate(config.path);
