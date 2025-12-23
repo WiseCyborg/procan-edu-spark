@@ -7056,6 +7056,136 @@ export type Database = {
           },
         ]
       }
+      uat_validation_checklists: {
+        Row: {
+          audit_readiness_section: Json | null
+          auth_section: Json | null
+          blocker_concerns: string | null
+          bulk_operations_section: Json | null
+          certificates_section: Json | null
+          company_name: string
+          confident_explanation: string | null
+          confident_for_auditor: boolean | null
+          created_at: string | null
+          dashboard_metrics_section: Json | null
+          id: string
+          incident_workflow_section: Json | null
+          module_version_section: Json | null
+          notifications_section: Json | null
+          organization_id: string | null
+          overall_status: string | null
+          packet_content_section: Json | null
+          packet_export_section: Json | null
+          primary_test_email: string
+          retraining_section: Json | null
+          roles_tested: string[] | null
+          signature_name: string | null
+          signed_at: string | null
+          signoffs_section: Json | null
+          submitted_at: string | null
+          test_organization_name: string | null
+          tester_name: string
+          tester_user_id: string
+          testers: Json | null
+          testing_dates: Json | null
+          updated_at: string | null
+          what_was_confusing: string | null
+          what_worked_well: string | null
+        }
+        Insert: {
+          audit_readiness_section?: Json | null
+          auth_section?: Json | null
+          blocker_concerns?: string | null
+          bulk_operations_section?: Json | null
+          certificates_section?: Json | null
+          company_name: string
+          confident_explanation?: string | null
+          confident_for_auditor?: boolean | null
+          created_at?: string | null
+          dashboard_metrics_section?: Json | null
+          id?: string
+          incident_workflow_section?: Json | null
+          module_version_section?: Json | null
+          notifications_section?: Json | null
+          organization_id?: string | null
+          overall_status?: string | null
+          packet_content_section?: Json | null
+          packet_export_section?: Json | null
+          primary_test_email: string
+          retraining_section?: Json | null
+          roles_tested?: string[] | null
+          signature_name?: string | null
+          signed_at?: string | null
+          signoffs_section?: Json | null
+          submitted_at?: string | null
+          test_organization_name?: string | null
+          tester_name: string
+          tester_user_id: string
+          testers?: Json | null
+          testing_dates?: Json | null
+          updated_at?: string | null
+          what_was_confusing?: string | null
+          what_worked_well?: string | null
+        }
+        Update: {
+          audit_readiness_section?: Json | null
+          auth_section?: Json | null
+          blocker_concerns?: string | null
+          bulk_operations_section?: Json | null
+          certificates_section?: Json | null
+          company_name?: string
+          confident_explanation?: string | null
+          confident_for_auditor?: boolean | null
+          created_at?: string | null
+          dashboard_metrics_section?: Json | null
+          id?: string
+          incident_workflow_section?: Json | null
+          module_version_section?: Json | null
+          notifications_section?: Json | null
+          organization_id?: string | null
+          overall_status?: string | null
+          packet_content_section?: Json | null
+          packet_export_section?: Json | null
+          primary_test_email?: string
+          retraining_section?: Json | null
+          roles_tested?: string[] | null
+          signature_name?: string | null
+          signed_at?: string | null
+          signoffs_section?: Json | null
+          submitted_at?: string | null
+          test_organization_name?: string | null
+          tester_name?: string
+          tester_user_id?: string
+          testers?: Json | null
+          testing_dates?: Json | null
+          updated_at?: string | null
+          what_was_confusing?: string | null
+          what_worked_well?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "uat_validation_checklists_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "compliance_dashboard_metrics"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "uat_validation_checklists_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "uat_validation_checklists_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
+          },
+        ]
+      }
       user_activity_log: {
         Row: {
           activity_type: string
