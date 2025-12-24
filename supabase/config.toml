@@ -303,6 +303,9 @@ verify_jwt = false
 [functions.send-manager-registration-reminder]
 verify_jwt = false
 
+[functions.resend-manager-registration]
+verify_jwt = false
+
 [functions.send-employee-progress-milestone]
 verify_jwt = false
 
