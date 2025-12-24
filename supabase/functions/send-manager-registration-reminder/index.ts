@@ -51,22 +51,38 @@ serve(async (req) => {
         .eq("id", organizationId)
         .single();
 
-      if (orgError || !org) throw new Error("Organization not found");
+      if (orgError || !org) {
+        console.error(`❌ Organization lookup failed:`, orgError);
+        throw new Error("Organization not found");
+      }
 
       // Get active join code
-      const { data: joinCodes } = await supabase
+      const { data: joinCodes, error: joinCodeError } = await supabase
         .from("rvt_join_codes")
         .select("code")
         .eq("organization_id", organizationId)
         .eq("is_active", true)
         .limit(1);
 
+      if (joinCodeError) {
+        console.error(`❌ Join code query error:`, joinCodeError);
+      }
+
+      console.log(`📊 Join code lookup for ${organizationId}: found ${joinCodes?.length || 0} codes`);
+
       const activeCode = joinCodes?.[0]?.code;
+
+      if (!activeCode) {
+        console.error(`❌ CRITICAL: No active join code found for organization ${organizationId} (${org.name})`);
+        throw new Error(`Cannot send reminder - no active join code found for organization ${org.name}`);
+      }
 
       recipientEmail = email;
       recipientName = "Manager";
       orgName = org.name;
-      registrationToken = activeCode || null;
+      registrationToken = activeCode;
+
+      console.log(`✅ Found join code for ${orgName}: ${activeCode.substring(0, 10)}...`);
 
       if (!recipientEmail) throw new Error("Manager email is required for organization path");
 
@@ -84,6 +100,7 @@ serve(async (req) => {
       : `https://www.procannedu.com/register/manager`;
 
     console.log(`📧 Sending reminder to ${recipientEmail} for ${orgName}`);
+    console.log(`📧 Registration URL: ${registrationUrl}`);
 
     const html = await loadEmailTemplate(templateName, {
       ContactPerson: recipientName,

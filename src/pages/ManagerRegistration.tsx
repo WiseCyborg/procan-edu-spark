@@ -97,23 +97,31 @@ export default function ManagerRegistration() {
 
     setIsResending(true);
     try {
-      // Call edge function to resend registration link
-      const { error } = await invokePublicFunction('send-manager-registration-reminder', {
-        email: sanitizeEmail(recoveryEmail),
-        days_remaining: 7
+      // Call dedicated resend function that looks up org by email
+      const { data, error } = await invokePublicFunction('resend-manager-registration', {
+        email: sanitizeEmail(recoveryEmail)
       });
 
       if (error) throw error;
 
-      toast({ 
-        title: "Link Sent!", 
-        description: "If your email is registered, you'll receive a new registration link shortly." 
-      });
-      setRecoveryEmail('');
+      if (data?.error === 'already_registered') {
+        toast({ 
+          title: "Already Registered", 
+          description: data.message || "Please sign in instead.",
+          variant: "default"
+        });
+      } else {
+        toast({ 
+          title: "Link Sent!", 
+          description: "If your email is registered, you'll receive a new registration link shortly." 
+        });
+        setRecoveryEmail('');
+      }
     } catch (error: any) {
+      console.error('Resend link error:', error);
       toast({ 
         title: "Request Failed", 
-        description: "Unable to send new link. Please contact support.", 
+        description: "Unable to send new link. Please contact support@procannedu.com", 
         variant: "destructive" 
       });
     } finally {
