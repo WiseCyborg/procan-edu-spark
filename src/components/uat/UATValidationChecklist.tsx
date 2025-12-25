@@ -35,7 +35,7 @@ import { jsPDF } from 'jspdf';
 import { Json } from '@/integrations/supabase/types';
 import { PaymentTestingGuide } from './PaymentTestingGuide';
 
-// Define all checklist sections
+// Define all checklist sections - comprehensive E2E UAT
 const CHECKLIST_SECTIONS: Array<{
   id: string;
   title: string;
@@ -43,104 +43,202 @@ const CHECKLIST_SECTIONS: Array<{
   icon: React.ReactNode;
   items: ChecklistSectionItem[];
 }> = [
+  // Section 0: Pre-flight
+  {
+    id: 'preflight_section',
+    title: '0. Pre-flight (Environment + Baseline)',
+    description: 'Environment verification before testing',
+    icon: <Shield className="h-5 w-5" />,
+    items: [
+      { id: 'uat_mode_on', label: 'UAT mode is ON (no production emails/payments)' },
+      { id: 'base_url_correct', label: 'Base URL (UAT) + email template domain correct' },
+      { id: 'redirect_urls_correct', label: 'Redirect URLs point to correct environment' },
+      { id: 'rls_roles_active', label: 'RLS + roles are active (no admin-only behavior)' },
+      { id: 'seed_data_exists', label: 'Seed data exists OR clean test path available' },
+      { id: 'pages_load_no_errors', label: 'All pages load, no console errors, no 401/403 surprises' }
+    ]
+  },
+  // Section 1: Identity + Access
   {
     id: 'auth_section',
-    title: '1. Login & Email Link Validation',
-    description: 'Authentication & Email Delivery',
+    title: '1. Identity + Access (Auth, Roles, Profile)',
+    description: 'Authentication & Role Verification',
     icon: <Lock className="h-5 w-5" />,
     items: [
-      { id: 'magic_link_received', label: 'Magic link / login email received' },
-      { id: 'login_routes_correctly', label: 'Login link routes correctly' },
-      { id: 'user_lands_correct_org', label: 'User lands in correct organization' },
-      { id: 'no_profile_errors', label: 'No profile/email errors displayed' }
+      { id: 'signup_uat_email', label: 'Sign up using shared UAT email works' },
+      { id: 'verification_link_opens', label: 'Email verification link opens correctly' },
+      { id: 'token_valid', label: 'Token is valid (not expired/used)' },
+      { id: 'redirect_lands_correct', label: 'Redirect lands on correct page' },
+      { id: 'login_logout_works', label: 'Login/logout works correctly' },
+      { id: 'password_reset_flow', label: 'Password reset flow works end-to-end' },
+      { id: 'role_switching_consistent', label: 'Role switching is consistent' },
+      { id: 'permissions_match', label: 'Permissions match role expectations' }
     ]
   },
+  // Section 2: Company Onboarding
   {
-    id: 'certificates_section',
-    title: '2. Certificate Status Automation',
-    description: 'Certificates & Expiry Logic',
+    id: 'company_onboarding_section',
+    title: '2. Company Onboarding (Org Setup + Users)',
+    description: 'Organization and employee setup',
+    icon: <Users className="h-5 w-5" />,
+    items: [
+      { id: 'create_test_company', label: 'Create new test company (legal name, location, license)' },
+      { id: 'company_profile_created', label: 'Company profile created correctly' },
+      { id: 'add_employees_manual', label: 'Add employees manually works' },
+      { id: 'bulk_import_available', label: 'Bulk import (if available) works' },
+      { id: 'invite_employee_email', label: 'Invite employee via email works' },
+      { id: 'invite_link_valid', label: 'Invite link opens correctly' },
+      { id: 'employee_accepts_invite', label: 'Employee accepts invite successfully' },
+      { id: 'employee_lands_correct_company', label: 'Employee lands in correct company' }
+    ]
+  },
+  // Section 3: Course Catalog + Learning Flow
+  {
+    id: 'learning_section',
+    title: '3. Course Catalog + Enrollment + Learning',
+    description: 'Course enrollment and completion flow',
     icon: <Award className="h-5 w-5" />,
     items: [
-      { id: 'expired_auto_shows', label: 'Expired certificate auto-shows expired' },
-      { id: 'active_remains_active', label: 'Active certificate remains active' },
-      { id: 'revoked_shows_revoked', label: 'Revoked certificate shows revoked' },
-      { id: 'status_updates_auto', label: 'Status updates without manual refresh' }
+      { id: 'admin_enrolls_employee', label: 'Company Admin enrolls employee into course' },
+      { id: 'employee_opens_course', label: 'Employee opens course successfully' },
+      { id: 'lessons_complete', label: 'Employee completes lessons' },
+      { id: 'quiz_works', label: 'Employee completes quiz' },
+      { id: 'completion_submitted', label: 'Completion submitted successfully' },
+      { id: 'completion_date_recorded', label: 'Completion date recorded correctly' },
+      { id: 'expiration_date_set', label: 'Expiration date set (if applicable)' },
+      { id: 'certificate_eligibility', label: 'Certificate eligibility triggered' }
     ]
   },
+  // Section 4: Certificates
+  {
+    id: 'certificates_section',
+    title: '4. Certificate Generation + Storage + Retrieval',
+    description: 'Certificate lifecycle verification',
+    icon: <Award className="h-5 w-5" />,
+    items: [
+      { id: 'cert_generated_on_completion', label: 'Certificate generated on completion' },
+      { id: 'cert_stored_correctly', label: 'Certificate stored (bucket/path)' },
+      { id: 'employee_view_cert', label: 'Employee can view certificate' },
+      { id: 'employee_download_cert', label: 'Employee can download certificate' },
+      { id: 'admin_view_cert_list', label: 'Admin can view employee certificate list' },
+      { id: 'export_packet_works', label: 'Export packet works (if available)' },
+      { id: 'expired_auto_shows', label: 'Expired certificate auto-shows expired' },
+      { id: 'revoked_shows_revoked', label: 'Revoked certificate shows revoked' }
+    ]
+  },
+  // Section 5: Compliance Incidents → Retraining
+  {
+    id: 'incident_retraining_section',
+    title: '5. Compliance Incidents → Retraining Triggers',
+    description: 'Critical incident-driven retraining workflow',
+    icon: <AlertCircle className="h-5 w-5" />,
+    items: [
+      { id: 'log_incident', label: 'Log compliance incident against employee' },
+      { id: 'incident_trigger_runs', label: 'incident-retraining-trigger runs' },
+      { id: 'retraining_event_created', label: 'Retraining event created' },
+      { id: 'employee_notified', label: 'Employee notified of retraining' },
+      { id: 'admin_sees_task', label: 'Admin sees retraining task' },
+      { id: 'employee_completes_retraining', label: 'Employee completes retraining course' },
+      { id: 'compliance_status_updated', label: 'System updates compliance status' },
+      { id: 'retraining_closed', label: 'Retraining requirement closed correctly' }
+    ]
+  },
+  // Section 6: Payments
+  {
+    id: 'payment_section',
+    title: '6. Payments (PayPal) + Invoices + Receipts',
+    description: 'Payment flow verification',
+    icon: <CreditCard className="h-5 w-5" />,
+    items: [
+      { id: 'select_paid_action', label: 'Company Admin selects paid action' },
+      { id: 'paypal_checkout_works', label: 'PayPal checkout success path works' },
+      { id: 'returns_to_app', label: 'Payment returns to app correctly' },
+      { id: 'payment_recorded', label: 'App records payment in DB' },
+      { id: 'invoice_status_updated', label: 'Invoice status: pending → paid' },
+      { id: 'receipt_email_sent', label: 'Receipt email sent (if enabled)' },
+      { id: 'sandbox_mode_confirmed', label: 'PayPal sandbox mode confirmed' },
+      { id: 'no_real_charges', label: 'No real charges occurred' }
+    ]
+  },
+  // Section 7: Email + Link Integrity
+  {
+    id: 'email_links_section',
+    title: '7. Email + Link Integrity',
+    description: 'All email links work correctly',
+    icon: <Bell className="h-5 w-5" />,
+    items: [
+      { id: 'verification_email_link', label: 'Verification email link works' },
+      { id: 'invite_link_works', label: 'Invite link works' },
+      { id: 'password_reset_link', label: 'Password reset link works' },
+      { id: 'certificate_link', label: 'Certificate link works' },
+      { id: 'payment_receipt_link', label: 'Payment receipt link works (if any)' },
+      { id: 'token_expiry_correct', label: 'Token expiry behavior is correct' },
+      { id: 'redirect_domain_matches', label: 'Redirect domain matches environment' },
+      { id: 'deep_links_land_correctly', label: 'Deep links land on intended screen' }
+    ]
+  },
+  // Section 8: Admin Console + Reporting
+  {
+    id: 'admin_section',
+    title: '8. Admin Console + Reporting + Exports',
+    description: 'Admin functionality verification',
+    icon: <BarChart3 className="h-5 w-5" />,
+    items: [
+      { id: 'admin_views_company_list', label: 'Admin views company list' },
+      { id: 'admin_views_compliance_status', label: 'Admin views employee compliance status' },
+      { id: 'admin_views_incidents', label: 'Admin views incidents + retraining queue' },
+      { id: 'export_compliance_packet', label: 'Export employee compliance packet works' },
+      { id: 'export_company_roster', label: 'Export company roster works' },
+      { id: 'export_certificate_list', label: 'Export certificate list works' },
+      { id: 'audit_trail_visible', label: 'Audit trail / activity log visible' },
+      { id: 'no_rls_issues', label: 'No RLS issues blocking exports' }
+    ]
+  },
+  // Section 9: Data Integrity + Security (RLS / Tenant Isolation)
+  {
+    id: 'security_section',
+    title: '9. Data Integrity + Security (RLS / Tenant Isolation)',
+    description: 'Security and tenant isolation verification',
+    icon: <Shield className="h-5 w-5" />,
+    items: [
+      { id: 'create_two_test_companies', label: 'Create 2 test companies' },
+      { id: 'company_a_no_see_b', label: 'Company A employees cannot view Company B' },
+      { id: 'api_enforces_rls', label: 'API calls enforce RLS (not UI-only security)' },
+      { id: 'tenant_isolation_airtight', label: 'Tenant isolation is airtight' },
+      { id: 'no_cross_org_data_leak', label: 'No cross-org data leakage' }
+    ]
+  },
+  // Section 10: Failure / Edge Cases
+  {
+    id: 'edge_cases_section',
+    title: '10. Failure / Edge Cases (Must-test)',
+    description: 'System fails safely and recovers',
+    icon: <AlertCircle className="h-5 w-5" />,
+    items: [
+      { id: 'unassigned_course_blocked', label: 'Employee cannot take course not assigned' },
+      { id: 'no_duplicate_certs', label: 'Complete course twice → no duplicate certs' },
+      { id: 'incident_no_enrollment', label: 'Incident logged for employee with no enrollment handled' },
+      { id: 'payment_db_fail_recovery', label: 'Payment success + DB write fail → graceful recovery' },
+      { id: 'expired_token_clean_error', label: 'Expired token shows clean error + new link option' },
+      { id: 'invalid_link_recovery', label: 'Invalid link shows recovery path' }
+    ]
+  },
+  // Section 11: Supervisor Signoffs (existing)
   {
     id: 'signoffs_section',
-    title: '3. Supervisor Signoffs',
+    title: '11. Supervisor Signoffs',
     description: 'Training & Signoff Control',
     icon: <Users className="h-5 w-5" />,
     items: [
       { id: 'signoff_saved', label: 'Signoff saved with module + version' },
-      { id: 'signoff_initially_valid', label: 'Signoff initially marked valid' }
+      { id: 'signoff_initially_valid', label: 'Signoff initially marked valid' },
+      { id: 'version_bump_invalidates', label: 'Version bump invalidates old signoffs' }
     ]
   },
+  // Section 12: Dashboard Metrics
   {
-    id: 'retraining_section',
-    title: '4. Retraining Invalidates Signoffs',
-    description: 'Retraining workflow verification',
-    icon: <RefreshCw className="h-5 w-5" />,
-    items: [
-      { id: 'retraining_event_created', label: 'Retraining event created' },
-      { id: 'signoff_auto_invalidated', label: 'Previous signoff auto-invalidated' },
-      { id: 'invalidation_reason_populated', label: 'Invalidation reason populated' }
-    ]
-  },
-  {
-    id: 'module_version_section',
-    title: '5. Module Version Update',
-    description: 'Version change handling',
-    icon: <Layers className="h-5 w-5" />,
-    items: [
-      { id: 'version_bump_invalidates', label: 'Version bump invalidates old signoffs' },
-      { id: 'new_version_in_ui', label: 'New version reflected in UI' }
-    ]
-  },
-  {
-    id: 'incident_workflow_section',
-    title: '6. Incident → Retraining Workflow',
-    description: 'Incident-driven compliance',
-    icon: <AlertCircle className="h-5 w-5" />,
-    items: [
-      { id: 'incident_logged', label: 'Incident successfully logged' },
-      { id: 'incident_mapped', label: 'Incident mapped to training module' },
-      { id: 'retraining_auto_assigned', label: 'Retraining auto-assigned' },
-      { id: 'signoffs_invalidated', label: 'Related signoffs invalidated' }
-    ]
-  },
-  {
-    id: 'packet_export_section',
-    title: '7. Employee Compliance Packet',
-    description: 'Compliance packet export',
-    icon: <FileText className="h-5 w-5" />,
-    items: [
-      { id: 'export_button_available', label: 'Export button available' },
-      { id: 'file_saved_securely', label: 'File saved to secure storage' },
-      { id: 'signed_download_works', label: 'Signed download link works' },
-      { id: 'export_logged', label: 'Export logged in system' }
-    ]
-  },
-  {
-    id: 'packet_content_section',
-    title: '8. Packet Content Verification',
-    description: 'Verify packet includes all required data',
-    icon: <Package className="h-5 w-5" />,
-    items: [
-      { id: 'employee_identity', label: 'Employee identity & role included' },
-      { id: 'certificates_status', label: 'Certificates + status included' },
-      { id: 'training_signoffs', label: 'Training signoffs (valid/invalid) included' },
-      { id: 'retraining_events', label: 'Retraining events included' },
-      { id: 'incident_history', label: 'Incident history included' },
-      { id: 'scheduled_reviews', label: 'Scheduled reviews included' },
-      { id: 'module_titles_versions', label: 'Module titles & versions included' },
-      { id: 'timestamps_generated_by', label: 'Timestamps & generated-by info included' }
-    ]
-  },
-  {
-    id: 'dashboard_metrics_section',
-    title: '9. Dashboard Metrics',
+    id: 'dashboard_section',
+    title: '12. Dashboard Metrics',
     description: 'Compliance dashboard accuracy',
     icon: <BarChart3 className="h-5 w-5" />,
     items: [
@@ -151,55 +249,17 @@ const CHECKLIST_SECTIONS: Array<{
       { id: 'overdue_reviews_visible', label: 'Overdue reviews visible' }
     ]
   },
+  // Section 13: Mock MCA Audit
   {
-    id: 'notifications_section',
-    title: '10. Certificate Expiry Notifications',
-    description: 'Email notification system',
-    icon: <Bell className="h-5 w-5" />,
-    items: [
-      { id: 'expiry_email_received', label: 'Expiry email received' },
-      { id: 'email_links_route', label: 'Email links route correctly' },
-      { id: 'no_duplicate_notifications', label: 'No duplicate notifications' }
-    ]
-  },
-  {
-    id: 'bulk_operations_section',
-    title: '11. Bulk Retraining Assignment',
-    description: 'Bulk operations testing',
-    icon: <Users className="h-5 w-5" />,
-    items: [
-      { id: 'multiple_employees_selected', label: 'Multiple employees selected' },
-      { id: 'retraining_assigned_all', label: 'Retraining assigned to all' },
-      { id: 'signoffs_invalidated_auto', label: 'Signoffs invalidated automatically' }
-    ]
-  },
-  {
-    id: 'audit_readiness_section',
-    title: '12. Mock MCA Audit Walkthrough',
+    id: 'audit_section',
+    title: '13. Mock MCA Audit Walkthrough',
     description: 'Audit readiness verification',
-    icon: <Shield className="h-5 w-5" />,
+    icon: <ClipboardCheck className="h-5 w-5" />,
     items: [
       { id: 'demonstrate_training_proof', label: 'Able to demonstrate training proof' },
       { id: 'show_incident_response', label: 'Able to show incident response' },
       { id: 'export_records_on_demand', label: 'Able to export records on demand' },
       { id: 'records_complete_consistent', label: 'Records appear complete & consistent' }
-    ]
-  },
-  {
-    id: 'payment_testing_section',
-    title: '13. Payment Testing (PayPal Sandbox)',
-    description: 'Payment flow verification',
-    icon: <CreditCard className="h-5 w-5" />,
-    items: [
-      { id: 'sandbox_mode_confirmed', label: 'PayPal sandbox mode confirmed active' },
-      { id: 'course_payment_initiated', label: 'Course payment successfully initiated' },
-      { id: 'paypal_redirect_works', label: 'Redirect to PayPal sandbox works' },
-      { id: 'test_credentials_accepted', label: 'Test credentials accepted by PayPal' },
-      { id: 'payment_completion_redirect', label: 'Payment completion redirects correctly' },
-      { id: 'order_recorded_database', label: 'Order recorded in database' },
-      { id: 'seat_purchase_works', label: 'Dispensary seat purchase works' },
-      { id: 'seats_allocated_correctly', label: 'Seats allocated correctly after payment' },
-      { id: 'no_real_charges', label: 'Confirmed no real charges occurred' }
     ]
   }
 ];
@@ -211,19 +271,8 @@ interface ChecklistData {
   primary_test_email: string;
   testing_dates: string[];
   testers: string[];
-  auth_section: ChecklistSectionData;
-  certificates_section: ChecklistSectionData;
-  signoffs_section: ChecklistSectionData;
-  retraining_section: ChecklistSectionData;
-  module_version_section: ChecklistSectionData;
-  incident_workflow_section: ChecklistSectionData;
-  packet_export_section: ChecklistSectionData;
-  packet_content_section: ChecklistSectionData;
-  dashboard_metrics_section: ChecklistSectionData;
-  notifications_section: ChecklistSectionData;
-  bulk_operations_section: ChecklistSectionData;
-  audit_readiness_section: ChecklistSectionData;
-  payment_testing_section: ChecklistSectionData;
+  // Dynamic section data - keyed by section id
+  [sectionId: string]: ChecklistSectionData | string | string[] | boolean | null | undefined;
   what_worked_well: string;
   what_was_confusing: string;
   blocker_concerns: string;
@@ -237,34 +286,30 @@ interface ChecklistData {
 
 const defaultSectionData = (): ChecklistSectionData => ({});
 
-const getDefaultChecklistData = (email: string): ChecklistData => ({
-  company_name: '',
-  test_organization_name: '',
-  primary_test_email: email,
-  testing_dates: [new Date().toISOString().split('T')[0]],
-  testers: [],
-  auth_section: defaultSectionData(),
-  certificates_section: defaultSectionData(),
-  signoffs_section: defaultSectionData(),
-  retraining_section: defaultSectionData(),
-  module_version_section: defaultSectionData(),
-  incident_workflow_section: defaultSectionData(),
-  packet_export_section: defaultSectionData(),
-  packet_content_section: defaultSectionData(),
-  dashboard_metrics_section: defaultSectionData(),
-  notifications_section: defaultSectionData(),
-  bulk_operations_section: defaultSectionData(),
-  audit_readiness_section: defaultSectionData(),
-  payment_testing_section: defaultSectionData(),
-  what_worked_well: '',
-  what_was_confusing: '',
-  blocker_concerns: '',
-  overall_status: '',
-  confident_for_auditor: null,
-  confident_explanation: '',
-  signature_name: '',
-  roles_tested: []
-});
+const getDefaultChecklistData = (email: string): ChecklistData => {
+  const defaults: ChecklistData = {
+    company_name: '',
+    test_organization_name: '',
+    primary_test_email: email,
+    testing_dates: [new Date().toISOString().split('T')[0]],
+    testers: [],
+    what_worked_well: '',
+    what_was_confusing: '',
+    blocker_concerns: '',
+    overall_status: '',
+    confident_for_auditor: null,
+    confident_explanation: '',
+    signature_name: '',
+    roles_tested: []
+  };
+  
+  // Add all section defaults
+  CHECKLIST_SECTIONS.forEach(section => {
+    defaults[section.id] = defaultSectionData();
+  });
+  
+  return defaults;
+};
 
 export const UATValidationChecklist: React.FC = () => {
   const { user } = useAuth();
