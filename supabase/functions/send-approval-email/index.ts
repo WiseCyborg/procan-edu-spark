@@ -32,12 +32,12 @@ serve(async (req) => {
     const payload: ApprovalEmailRequest = await req.json();
     console.log('📧 [v1.1] Sending approval email to:', payload.contact_email); // Redeployment trigger
 
-    // Load and render template
+    // Load and render template - use PortalURL to match template variable
     const htmlContent = await loadEmailTemplate('application-approved', {
       ContactPerson: payload.contact_person,
       OrganizationName: payload.organization_name,
       AccessKey: payload.access_key,
-      RegistrationURL: payload.registration_url,
+      PortalURL: payload.registration_url, // Template uses PortalURL
       Credits: payload.credits.toString(),
       JoinCode: payload.join_code || ''
     });
