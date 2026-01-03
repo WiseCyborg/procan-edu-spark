@@ -29,12 +29,24 @@ export async function invokePublicFunction<T = any>(
       body: JSON.stringify(body),
     });
 
-    const raw = await response.json().catch(() => null);
+    const contentType = response.headers.get('content-type') || '';
+    let raw: any = null;
+
+    if (contentType.includes('application/json')) {
+      raw = await response.json().catch(() => null);
+    } else {
+      raw = await response.text().catch(() => null);
+    }
 
     if (!response.ok) {
+      const message =
+        (raw && typeof raw === 'object' && (raw.error || raw.message)) ||
+        (typeof raw === 'string' && raw.trim()) ||
+        `Request failed (${response.status})`;
+
       return {
         data: null,
-        error: new Error(raw?.error || raw?.message || `Request failed (${response.status})`),
+        error: new Error(message),
         status: response.status,
         raw,
       };
