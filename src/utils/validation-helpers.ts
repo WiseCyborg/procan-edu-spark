@@ -122,3 +122,31 @@ export const sanitizeProfileData = (data: any) => {
   
   return sanitized;
 };
+
+/**
+ * Normalize Maryland cannabis license number to standard format: DA-YY-#####
+ * Accepts loose input like "da2300089", "DA-23-89", "DA 23 00089"
+ * Returns normalized format or original if cannot parse
+ */
+export const normalizeMarylandLicense = (input: string): string => {
+  if (!input) return '';
+  
+  // Uppercase and remove extra whitespace
+  let cleaned = input.toUpperCase().trim();
+  
+  // Replace common separators with dash
+  cleaned = cleaned.replace(/[\s\/\\._]+/g, '-');
+  
+  // Try to extract parts: TYPE-YY-SEQ
+  const match = cleaned.match(/^(DA|GA|PA)-?(\d{2})-?(\d{1,5})$/);
+  
+  if (match) {
+    const [, type, year, seq] = match;
+    // Zero-pad sequence to 5 digits
+    const paddedSeq = seq.padStart(5, '0');
+    return `${type}-${year}-${paddedSeq}`;
+  }
+  
+  // Return cleaned version if no match (will fail validation)
+  return cleaned;
+};

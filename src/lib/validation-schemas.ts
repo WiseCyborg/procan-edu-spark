@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { normalizeMarylandLicense } from '@/utils/validation-helpers';
 
 // Dispensary Application Schema
 export const dispensaryApplicationSchema = z.object({
@@ -26,9 +27,11 @@ export const dispensaryApplicationSchema = z.object({
   
   licenseNumber: z.string()
     .trim()
-    .min(3, "License number must be at least 3 characters")
-    .max(50, "License number must be less than 50 characters")
-    .regex(/^[A-Z0-9-]+$/i, "License number must contain only letters, numbers, and hyphens"),
+    .min(1, "License number is required")
+    .transform((val): string => normalizeMarylandLicense(val))
+    .refine((val): val is string => /^(DA|GA|PA)-\d{2}-\d{5}$/.test(val), {
+      message: "License must be format: DA-YY-##### (e.g., DA-23-00089)"
+    }),
   
   licenseIssueDate: z.string()
     .refine((date) => !isNaN(Date.parse(date)), "Invalid date format")

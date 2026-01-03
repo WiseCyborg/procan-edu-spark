@@ -202,7 +202,7 @@ const DispensaryApplication = () => {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {currentStep === 1 && (
               <div className="space-y-4">
-                <div><Label>Organization Name * <span className="text-xs text-muted-foreground">({formValues.organizationName?.length || 0}/200)</span></Label>
+                <div><Label>Organization Name * <span className="text-xs text-muted-foreground">({String(formValues.organizationName || '').length}/200)</span></Label>
                   <Input {...register('organizationName')} placeholder="Green Leaf Dispensary" />
                   {errors.organizationName && <p className="text-sm text-destructive">{errors.organizationName.message}</p>}
                 </div>
@@ -217,19 +217,20 @@ const DispensaryApplication = () => {
             {currentStep === 2 && (
               <div className="space-y-4">
                 <div><Label>License Type *</Label>
-                  <Select value={formValues.licenseType} onValueChange={(v) => setValue('licenseType', v as any)}>
+                  <Select value={String(formValues.licenseType || '')} onValueChange={(v) => setValue('licenseType', v as 'dispensary' | 'processor' | 'grower' | 'other')}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="dispensary">Dispensary</SelectItem>
-                      <SelectItem value="processor">Processor</SelectItem>
-                      <SelectItem value="grower">Grower</SelectItem>
+                      <SelectItem value="dispensary">Dispensary (DA)</SelectItem>
+                      <SelectItem value="processor">Processor (PA)</SelectItem>
+                      <SelectItem value="grower">Grower (GA)</SelectItem>
                       <SelectItem value="other">Other</SelectItem>
                     </SelectContent>
                   </Select>
                   {errors.licenseType && <p className="text-sm text-destructive">{errors.licenseType.message}</p>}
                 </div>
-                <div><Label>License Number *</Label>
-                  <Input {...register('licenseNumber')} placeholder="MD-DISP-12345" />
+                <div><Label>MCA License Number *</Label>
+                  <Input {...register('licenseNumber')} placeholder="DA-23-00089" />
+                  <p className="text-xs text-muted-foreground mt-1">Format: DA-YY-##### (e.g., DA-23-00089, GA-25-00001)</p>
                   {errors.licenseNumber && <p className="text-sm text-destructive">{errors.licenseNumber.message}</p>}
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -254,7 +255,7 @@ const DispensaryApplication = () => {
                 <div><Label>Phone *</Label><PhoneInput {...register('contactPhone')} />
                   {errors.contactPhone && <p className="text-sm text-destructive">{errors.contactPhone.message}</p>}
                 </div>
-                <div><Label>Address * <span className="text-xs text-muted-foreground">({formValues.address?.length || 0}/500)</span></Label>
+                <div><Label>Address * <span className="text-xs text-muted-foreground">({String(formValues.address || '').length}/500)</span></Label>
                   <Input {...register('address')} />
                   {errors.address && <p className="text-sm text-destructive">{errors.address.message}</p>}
                 </div>
@@ -270,15 +271,15 @@ const DispensaryApplication = () => {
             {currentStep === 4 && (
               <div className="space-y-4">
                 <div className="flex items-start space-x-3">
-                  <Checkbox checked={formValues.complianceAffirmation} onCheckedChange={(c) => setValue('complianceAffirmation', !!c)} />
+                  <Checkbox checked={Boolean(formValues.complianceAffirmation)} onCheckedChange={(c) => setValue('complianceAffirmation', !!c)} />
                   <Label className="leading-normal">I affirm compliance with Maryland Cannabis Administration regulations</Label>
                 </div>
                 <div className="flex items-start space-x-3">
-                  <Checkbox checked={formValues.privacyAcknowledgment} onCheckedChange={(c) => setValue('privacyAcknowledgment', !!c)} />
+                  <Checkbox checked={Boolean(formValues.privacyAcknowledgment)} onCheckedChange={(c) => setValue('privacyAcknowledgment', !!c)} />
                   <Label className="leading-normal">I acknowledge privacy policy</Label>
                 </div>
                 <div className="flex items-start space-x-3">
-                  <Checkbox checked={formValues.trainingResponsibility} onCheckedChange={(c) => setValue('trainingResponsibility', !!c)} />
+                  <Checkbox checked={Boolean(formValues.trainingResponsibility)} onCheckedChange={(c) => setValue('trainingResponsibility', !!c)} />
                   <Label className="leading-normal">I accept training responsibility</Label>
                 </div>
               </div>
