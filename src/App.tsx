@@ -119,10 +119,16 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   const [searchParams] = useSearchParams();
-  
+
+  const mode = searchParams.get('mode');
+  const tab = searchParams.get('tab');
+
   // Allow password reset even if logged in
-  const isPasswordReset = searchParams.get('mode') === 'reset';
-  
+  const isPasswordReset = mode === 'reset';
+
+  // Allow logged-in users to access utility registration flows (used when course access is blocked)
+  const isUtilityAuthTab = tab === 'accesskey' || tab === 'code';
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -130,12 +136,12 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
       </div>
     );
   }
-  
-  // Don't redirect if this is a password reset
-  if (user && !isPasswordReset) {
+
+  // Don't redirect if this is a password reset or utility registration tab
+  if (user && !isPasswordReset && !isUtilityAuthTab) {
     return <Navigate to="/dashboard" replace />;
   }
-  
+
   return <>{children}</>;
 };
 
