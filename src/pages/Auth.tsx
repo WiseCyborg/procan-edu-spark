@@ -11,8 +11,9 @@ import DispensaryAuthForm from '@/components/auth/DispensaryAuthForm';
 import StudentAuthForm from '@/components/auth/StudentAuthForm';
 import AdminAuthForm from '@/components/auth/AdminAuthForm';
 import DispensaryManagerAuthForm from '@/components/auth/DispensaryManagerAuthForm';
+import AccessKeyEntry from '@/components/auth/AccessKeyEntry';
 import { PasswordReset } from '@/components/auth/PasswordReset';
-import { Mail, Key, ArrowRight, Info } from 'lucide-react';
+import { Mail, Key, ArrowRight, Info, Building2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 // Join Code Entry Component (Registration Only - No Login)
@@ -77,8 +78,16 @@ const Auth = () => {
   const [searchParams] = useSearchParams();
   const role = searchParams.get('role');
   const mode = searchParams.get('mode');
+  const tabParam = searchParams.get('tab');
   const prefilledCode = searchParams.get('code');
   const forceRegister = searchParams.get('register') === 'true';
+
+  // Determine default tab based on URL params
+  const getDefaultTab = () => {
+    if (tabParam === 'accesskey') return 'accesskey';
+    if (tabParam === 'code' || prefilledCode) return 'code';
+    return 'invite';
+  };
 
   // Handle password reset mode
   if (mode === 'reset') {
@@ -99,15 +108,19 @@ const Auth = () => {
             <CardDescription>Sign in or register for your organization's training</CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue={prefilledCode ? 'code' : 'invite'} className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="invite" className="flex items-center gap-2">
+            <Tabs defaultValue={getDefaultTab()} className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="invite" className="flex items-center gap-1 text-xs sm:text-sm">
                   <Mail className="h-4 w-4" />
-                  Email Invite
+                  <span className="hidden sm:inline">Email</span> Invite
                 </TabsTrigger>
-                <TabsTrigger value="code" className="flex items-center gap-2">
+                <TabsTrigger value="code" className="flex items-center gap-1 text-xs sm:text-sm">
                   <Key className="h-4 w-4" />
-                  Join Code
+                  <span className="hidden sm:inline">Join</span> Code
+                </TabsTrigger>
+                <TabsTrigger value="accesskey" className="flex items-center gap-1 text-xs sm:text-sm">
+                  <Building2 className="h-4 w-4" />
+                  Access Key
                 </TabsTrigger>
               </TabsList>
               
@@ -124,6 +137,13 @@ const Auth = () => {
                   Enter the join code provided by your manager to register
                 </div>
                 <JoinCodeEntry />
+              </TabsContent>
+
+              <TabsContent value="accesskey" className="mt-4">
+                <div className="text-center mb-4 text-sm text-muted-foreground">
+                  Enter your organization's access key (format: DISP-YYYY-XXXXXXXX)
+                </div>
+                <AccessKeyEntry />
               </TabsContent>
             </Tabs>
             

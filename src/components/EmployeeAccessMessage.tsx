@@ -1,12 +1,10 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, Key, Mail, Phone } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 
 export const EmployeeAccessMessage: React.FC = () => {
-  const navigate = useNavigate();
-
   return (
     <div className="container mx-auto px-4 py-8">
       <Card className="max-w-2xl mx-auto">
@@ -69,12 +67,11 @@ export const EmployeeAccessMessage: React.FC = () => {
               If you received your access key but haven't registered yet, 
               you can create your account now.
             </p>
-            <Button 
-              onClick={() => navigate('/auth?role=student')}
-              variant="default"
-              className="w-full"
-            >
-              Register with Access Key
+            {/* Use real link for iOS Safari reliability */}
+            <Button asChild variant="default" className="w-full">
+              <Link to="/auth?tab=accesskey">
+                Register with Access Key
+              </Link>
             </Button>
           </div>
 
