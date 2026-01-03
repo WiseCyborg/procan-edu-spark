@@ -48,7 +48,7 @@ export const GettingStartedChecklist: React.FC<GettingStartedChecklistProps> = (
       description: 'Learn about the RVT training program',
       completed: hasWatchedWelcome,
       action: 'Watch Video',
-      route: '/welcome',
+      route: '/welcome-video',
       estimatedMinutes: 3,
     },
     {

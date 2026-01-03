@@ -14,6 +14,7 @@ import { LiveRegion } from "@/components/accessibility/LiveRegion";
 import Auth from "./pages/Auth";
 import Index from "./pages/Index";
 import Welcome from "./pages/Welcome";
+import WelcomeVideo from "./pages/WelcomeVideo";
 import NotFound from "./pages/NotFound";
 import FAQ from "./pages/FAQ";
 import CertificateVerification from "./pages/CertificateVerification";
@@ -194,6 +195,11 @@ const AppRoutesLayout = () => {
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/welcome" element={<Welcome />} />
+            <Route path="/welcome-video" element={
+              <ProtectedRoute>
+                <WelcomeVideo />
+              </ProtectedRoute>
+            } />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/consumer-education" element={<ConsumerEducation />} />
             <Route path="/consumer-education/:courseId" element={<ConsumerCourse />} />
