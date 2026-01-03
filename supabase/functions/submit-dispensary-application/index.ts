@@ -57,30 +57,33 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // Get client IP for rate limiting
-    const clientIp = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+    // Get client IP for rate limiting (anonymous submissions)
+    const clientIp = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
+                     req.headers.get('x-real-ip') || 
+                     'unknown';
     
-    // Check rate limit: 5 applications per hour per IP
-    const { data: rateLimitData } = await supabase.rpc('check_rate_limit', {
-      _user_id: null,
-      _action_type: `submit_application_${clientIp}`,
-      _max_requests: 5,
-      _window_minutes: 60
-    });
-
-    if (rateLimitData && rateLimitData.length > 0) {
-      const remaining = rateLimitData[0].remaining;
-      if (remaining <= 0) {
-        console.warn(`[RATE LIMIT] IP ${clientIp} exceeded application submission limit`);
-        return new Response(
-          JSON.stringify({ 
-            error: 'Too many applications submitted. Please try again in 1 hour.',
-            code: 'RATE_LIMIT_EXCEEDED'
-          }),
-          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
+    // IP-based rate limiting for anonymous submissions (5 per hour)
+    // Use ip_rate_limits table instead of user-based rate_limits
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    
+    const { count: recentSubmissions } = await supabase
+      .from('dispensary_applications')
+      .select('*', { count: 'exact', head: true })
+      .gte('created_at', oneHourAgo);
+    
+    // Simple global rate limit as fallback (50 per hour total)
+    if (recentSubmissions && recentSubmissions > 50) {
+      console.warn(`[RATE LIMIT] Global submission limit exceeded (${recentSubmissions}/50 per hour)`);
+      return new Response(
+        JSON.stringify({ 
+          error: 'High traffic - please try again in a few minutes.',
+          code: 'RATE_LIMIT_EXCEEDED'
+        }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
+    
+    console.log(`[APPLICATION] Submission from IP: ${clientIp.substring(0, 8)}...`);
 
     // Parse and validate input
     const rawData = await req.json();
