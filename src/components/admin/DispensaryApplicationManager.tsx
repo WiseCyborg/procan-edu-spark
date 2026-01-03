@@ -32,7 +32,8 @@ import {
   Trash2,
   Ban,
   MoreVertical,
-  Power
+  Power,
+  Key
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -465,6 +466,109 @@ const DispensaryApplicationManager = () => {
       toast({
         title: "Regeneration Failed",
         description: error instanceof Error ? error.message : 'Failed to regenerate token',
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const grantTrainingAccess = async (application: DispensaryApplication) => {
+    if (!application.organization_id) {
+      toast({
+        title: "Cannot Grant Access",
+        description: "No organization linked to this application. The dispensary manager needs to register first.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      // Get an active course
+      const { data: courses, error: courseError } = await supabase
+        .from('courses')
+        .select('id')
+        .eq('is_active', true)
+        .limit(1);
+
+      if (courseError || !courses?.length) {
+        throw new Error('No active courses available');
+      }
+
+      const courseId = courses[0].id;
+
+      // Check for existing users in the organization that need seats
+      const { data: orgProfiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('user_id, first_name, last_name')
+        .eq('organization_id', application.organization_id);
+
+      if (profilesError) throw profilesError;
+
+      if (!orgProfiles?.length) {
+        toast({
+          title: "No Users Found",
+          description: "No users are linked to this organization yet. The manager needs to register first.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      let seatsAllocated = 0;
+      let errors: string[] = [];
+
+      // Allocate seats to each user
+      for (const profile of orgProfiles) {
+        // Check if user already has a seat
+        const { data: existingSeat } = await supabase
+          .from('rvt_seats')
+          .select('id')
+          .eq('assigned_user_id', profile.user_id)
+          .eq('course_id', courseId)
+          .maybeSingle();
+
+        if (existingSeat) {
+          continue; // Already has a seat
+        }
+
+        const { error: seatError } = await supabase.rpc('allocate_seat_to_user', {
+          org_id: application.organization_id,
+          user_id: profile.user_id,
+          course_id: courseId
+        });
+
+        if (seatError) {
+          errors.push(`${profile.first_name || 'User'}: ${seatError.message}`);
+        } else {
+          seatsAllocated++;
+        }
+      }
+
+      if (seatsAllocated > 0) {
+        toast({
+          title: "Training Access Granted ✅",
+          description: `${seatsAllocated} user(s) now have training access`,
+        });
+      } else if (errors.length > 0) {
+        toast({
+          title: "Some Allocations Failed",
+          description: errors.slice(0, 2).join(', '),
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "All Users Have Access",
+          description: "All organization users already have training seats allocated",
+        });
+      }
+
+      await fetchApplications();
+    } catch (error) {
+      console.error('Error granting training access:', error);
+      toast({
+        title: "Failed to Grant Access",
+        description: error instanceof Error ? error.message : 'Unknown error occurred',
         variant: "destructive"
       });
     } finally {
@@ -1225,6 +1329,14 @@ const DispensaryApplicationManager = () => {
                           
                           {application.application_status === 'approved' && (
                             <>
+                              <Button
+                                onClick={() => grantTrainingAccess(application)}
+                                disabled={isProcessing}
+                                className="bg-primary hover:bg-primary/90"
+                              >
+                                <Key className="h-4 w-4 mr-1" />
+                                Grant Access to Training
+                              </Button>
                               <Button
                                 onClick={() => regenerateManagerToken(application)}
                                 disabled={isProcessing}
