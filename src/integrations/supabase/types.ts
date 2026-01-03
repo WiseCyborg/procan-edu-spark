@@ -4487,6 +4487,7 @@ export type Database = {
           updated_at: string
           user_id: string
           verification_method_preference: string | null
+          welcome_video_watched: boolean | null
           zip_code: string | null
         }
         Insert: {
@@ -4518,6 +4519,7 @@ export type Database = {
           updated_at?: string
           user_id: string
           verification_method_preference?: string | null
+          welcome_video_watched?: boolean | null
           zip_code?: string | null
         }
         Update: {
@@ -4549,6 +4551,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
           verification_method_preference?: string | null
+          welcome_video_watched?: boolean | null
           zip_code?: string | null
         }
         Relationships: [
