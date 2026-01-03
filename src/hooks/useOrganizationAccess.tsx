@@ -67,8 +67,10 @@ export const useOrganizationAccess = (userId: string | undefined): OrganizationA
           return;
         }
 
+        // Accept 'paid', 'approved', or 'test' as valid payment statuses
+        const validPaymentStatuses = ['paid', 'approved', 'test'];
         const hasValidAccess = 
-          org?.payment_status === 'paid' && 
+          validPaymentStatuses.includes(org?.payment_status || '') && 
           org?.admin_approved === true &&
           !!userSeat; // User MUST have a seat
 
