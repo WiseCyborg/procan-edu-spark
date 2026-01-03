@@ -134,15 +134,22 @@ export const normalizeMarylandLicense = (input: string): string => {
   // Uppercase and remove extra whitespace
   let cleaned = input.toUpperCase().trim();
   
-  // Replace common separators with dash
-  cleaned = cleaned.replace(/[\s\/\\._]+/g, '-');
+  // Remove all separators first to get raw characters
+  const raw = cleaned.replace(/[\s\-\/\\._]+/g, '');
   
-  // Try to extract parts: TYPE-YY-SEQ
-  const match = cleaned.match(/^(DA|GA|PA)-?(\d{2})-?(\d{1,5})$/);
+  // Try pattern: TYPE(2 letters) + YY(2 digits) + SEQ(1-5 digits)
+  // Examples: DA2300089, GA2500001
+  const rawMatch = raw.match(/^(DA|GA|PA)(\d{2})(\d{1,5})$/);
+  if (rawMatch) {
+    const [, type, year, seq] = rawMatch;
+    const paddedSeq = seq.padStart(5, '0');
+    return `${type}-${year}-${paddedSeq}`;
+  }
   
-  if (match) {
-    const [, type, year, seq] = match;
-    // Zero-pad sequence to 5 digits
+  // Try already-formatted with dashes: DA-23-00089 or DA-23-89
+  const dashMatch = cleaned.match(/^(DA|GA|PA)-(\d{2})-(\d{1,5})$/);
+  if (dashMatch) {
+    const [, type, year, seq] = dashMatch;
     const paddedSeq = seq.padStart(5, '0');
     return `${type}-${year}-${paddedSeq}`;
   }
