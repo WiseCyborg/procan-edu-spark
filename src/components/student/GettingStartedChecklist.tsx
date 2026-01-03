@@ -3,8 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { CheckCircle, Circle, Clock } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-
+import { useNavigate, Link } from 'react-router-dom';
 interface Step {
   id: string;
   title: string;
@@ -180,9 +179,11 @@ export const GettingStartedChecklist: React.FC<GettingStartedChecklistProps> = (
                       <Button
                         size="sm"
                         variant={isCurrent ? 'default' : 'outline'}
-                        onClick={() => navigate(step.route)}
+                        asChild
                       >
-                        {step.action}
+                        <Link to={step.route}>
+                          {step.action}
+                        </Link>
                       </Button>
                     )}
                     
@@ -207,9 +208,11 @@ export const GettingStartedChecklist: React.FC<GettingStartedChecklistProps> = (
               variant="secondary"
               size="lg"
               className="w-full"
-              onClick={() => navigate(currentStep.route)}
+              asChild
             >
-              {currentStep.action}
+              <Link to={currentStep.route}>
+                {currentStep.action}
+              </Link>
             </Button>
           </div>
         )}
