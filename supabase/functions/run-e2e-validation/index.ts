@@ -419,7 +419,8 @@ Deno.serve(async (req: Request) => {
       licenseNumber: `E2E-${testRunId.slice(0, 8)}`,
       licenseIssueDate: '2024-01-15',
       licenseExpiryDate: '2026-01-15',
-      contactPerson: 'E2E Test User',
+      // Server-side validation only allows letters/spaces/apostrophes/hyphens
+      contactPerson: 'Eee Test User',
       contactEmail: `${testEmailPrefix}@procannedu.com`,
       contactPhone: '(555) 123-4567',
       address: '123 Test Street, Baltimore, MD 21201',
@@ -530,15 +531,36 @@ Deno.serve(async (req: Request) => {
     // B5: Test duplicate prevention
     if (applicationSubmitSuccess) {
       try {
-        const { data: dupData } = await supabase.functions.invoke('submit-dispensary-application', {
+        const { data: dupData, error: dupError } = await supabase.functions.invoke('submit-dispensary-application', {
           body: testApplicationPayload
         });
-        
-        const isDuplicateBlocked = dupData?.error?.includes('DUPLICATE') || dupData?.code === 'DUPLICATE_APPLICATION';
-        addResult('Dispensary Application', 'Duplicate Prevention', 'Duplicate submission blocked',
-          isDuplicateBlocked ? 'Duplicate correctly rejected' : `Unexpected: ${JSON.stringify(dupData)}`,
+
+        const dupStatus = (dupError as any)?.context?.status;
+        const isDuplicateBlocked =
+          dupStatus === 409 ||
+          dupData?.code === 'DUPLICATE_APPLICATION' ||
+          dupData?.error?.includes('DUPLICATE');
+
+        addResult(
+          'Dispensary Application',
+          'Duplicate Prevention',
+          'Duplicate submission blocked',
+          isDuplicateBlocked
+            ? 'Duplicate correctly rejected'
+            : dupError
+              ? `Error: ${dupError.message}`
+              : `Unexpected: ${JSON.stringify(dupData)}`,
           isDuplicateBlocked,
-          { notes: 'Same email should be rejected' }
+          {
+            notes: 'Same email should be rejected',
+            error_meta: !isDuplicateBlocked && dupError
+              ? {
+                  code: 'EDGE_FUNCTION_ERROR',
+                  message: dupError.message,
+                  details: dupError,
+                }
+              : undefined,
+          }
         );
       } catch (e: any) {
         addResult('Dispensary Application', 'Duplicate Prevention', 'Duplicate submission blocked',
