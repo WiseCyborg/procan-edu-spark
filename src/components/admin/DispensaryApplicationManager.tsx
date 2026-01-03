@@ -33,7 +33,8 @@ import {
   Ban,
   MoreVertical,
   Power,
-  Key
+  Key,
+  Wrench
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -568,6 +569,43 @@ const DispensaryApplicationManager = () => {
       console.error('Error granting training access:', error);
       toast({
         title: "Failed to Grant Access",
+        description: error instanceof Error ? error.message : 'Unknown error occurred',
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const fixManagerRegistration = async (application: DispensaryApplication) => {
+    setIsProcessing(true);
+    try {
+      const { data, error } = await supabase.rpc('fix_manager_registration', {
+        p_user_email: application.contact_email,
+        p_application_id: application.id
+      });
+
+      if (error) throw error;
+
+      const result = data as { success: boolean; message?: string; error?: string };
+      
+      if (result.success) {
+        toast({
+          title: "Registration Fixed ✅",
+          description: result.message || "User is now linked, has manager role, and seat assigned",
+        });
+        await fetchApplications();
+      } else {
+        toast({
+          title: "Fix Failed",
+          description: result.error || "Unknown error",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error fixing registration:', error);
+      toast({
+        title: "Fix Failed",
         description: error instanceof Error ? error.message : 'Unknown error occurred',
         variant: "destructive"
       });
@@ -1336,6 +1374,15 @@ const DispensaryApplicationManager = () => {
                               >
                                 <Key className="h-4 w-4 mr-1" />
                                 Grant Access to Training
+                              </Button>
+                              <Button
+                                onClick={() => fixManagerRegistration(application)}
+                                disabled={isProcessing}
+                                variant="outline"
+                                className="border-orange-500 text-orange-600 hover:bg-orange-50"
+                              >
+                                <Wrench className="h-4 w-4 mr-1" />
+                                Fix Registration
                               </Button>
                               <Button
                                 onClick={() => regenerateManagerToken(application)}

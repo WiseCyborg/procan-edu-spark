@@ -8422,6 +8422,10 @@ export type Database = {
         }[]
       }
       expire_test_organizations: { Args: never; Returns: undefined }
+      fix_manager_registration: {
+        Args: { p_application_id: string; p_user_email: string }
+        Returns: Json
+      }
       generate_certificate_number: { Args: never; Returns: string }
       generate_compliance_report: {
         Args: { org_id?: string }
