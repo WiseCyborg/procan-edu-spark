@@ -1109,7 +1109,7 @@ Deno.serve(async (req: Request) => {
             is_completed: true,
             score: 100,
             time_spent: 300
-          }, { onConflict: 'user_id,module_id' });
+          }, { onConflict: 'user_id,course_id,module_id' });
         
         addResult('Course Gating', 'Complete Module 1', 'Module 1 marked as completed',
           completeM1Error ? `Error: ${completeM1Error.message}` : 'Module 1 completed',
