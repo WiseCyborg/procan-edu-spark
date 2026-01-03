@@ -303,14 +303,31 @@ serve(async (req) => {
     try {
       const { data: appData } = await serviceClient
         .from('dispensary_applications')
-        .select('contact_email, organization_name, payment_amount')
+        .select('contact_email, contact_person, organization_name, payment_amount, requested_credits')
         .eq('id', application_id)
         .single();
 
       if (appData) {
         console.log('[APPROVE-APPLICATION] Sending payment link email to:', appData.contact_email);
         
-        // Insert into notification queue for payment link
+        // Calculate payment details
+        const creditsToUse = credits || appData.requested_credits || 10;
+        const pricePerCredit = 49; // $49 per training credit
+        const totalAmount = creditsToUse * pricePerCredit;
+        
+        // Calculate payment deadline (30 days from now)
+        const deadline = new Date();
+        deadline.setDate(deadline.getDate() + 30);
+        const paymentDeadline = deadline.toLocaleDateString('en-US', { 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric' 
+        });
+        
+        // Generate payment URL
+        const paymentUrl = `https://procann-edu.lovable.app/payment?application_id=${application_id}`;
+        
+        // Insert into notification queue for payment link with ALL required template variables
         await serviceClient.from('notification_queue').insert({
           recipient_email: appData.contact_email,
           subject: '💳 Payment Required - Complete Your Registration',
@@ -319,8 +336,14 @@ serve(async (req) => {
           priority: 'high',
           metadata: {
             template: 'payment-link',
+            // All template variables (PascalCase to match template)
+            ContactPerson: appData.contact_person || 'Valued Customer',
             OrganizationName: appData.organization_name,
-            PaymentAmount: appData.payment_amount || 0,
+            Credits: creditsToUse,
+            TotalAmount: `$${totalAmount.toLocaleString()}`,
+            PaymentDeadline: paymentDeadline,
+            PaymentUrl: paymentUrl,
+            PaymentAmount: totalAmount,
             ApplicationId: application_id
           }
         });
