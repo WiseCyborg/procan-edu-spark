@@ -467,7 +467,8 @@ Deno.serve(async (req: Request) => {
         );
       } else {
         applicationSubmitSuccess = true;
-        applicationId = submitData?.application?.id;
+        // Edge function returns { applicationId } not { application: { id } }
+        applicationId = submitData?.applicationId || submitData?.application?.id;
         testDataCreated.test_application_id = applicationId || undefined;
         addResult('Dispensary Application', 'Step 4 Submit', 'Application submitted successfully',
           `Submitted: ${applicationId}`,
