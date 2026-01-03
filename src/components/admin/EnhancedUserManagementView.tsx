@@ -10,7 +10,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { SensitiveOperationWrapper } from '@/components/auth/SensitiveOperationWrapper';
-import { Search, CheckCircle, XCircle, Mail, Shield, Users, Clock, AlertCircle } from 'lucide-react';
+import { Search, CheckCircle, XCircle, Mail, Shield, Users, Clock, AlertCircle, Eye } from 'lucide-react';
+import { useAdminProxy } from '@/contexts/AdminProxyContext';
 import { format } from 'date-fns';
 
 interface User {
@@ -28,6 +29,7 @@ interface User {
 
 export const EnhancedUserManagementView = () => {
   const { toast } = useToast();
+  const { startProxySession, isLoading: proxyLoading } = useAdminProxy();
   const [users, setUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -455,13 +457,24 @@ export const EnhancedUserManagementView = () => {
                       {format(new Date(user.created_at), 'MMM d, yyyy')}
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setSelectedUser(user)}
-                      >
-                        Manage
-                      </Button>
+                      <div className="flex items-center justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => startProxySession(user.user_id)}
+                          disabled={proxyLoading}
+                          title="View as this user"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setSelectedUser(user)}
+                        >
+                          Manage
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -537,12 +550,24 @@ export const EnhancedUserManagementView = () => {
               <div className="border-t pt-4">
                 <h4 className="text-sm font-medium mb-3">Quick Actions</h4>
                 <div className="flex flex-wrap gap-2">
+                  <Button
+                    variant="default"
+                    onClick={() => {
+                      setSelectedUser(null);
+                      startProxySession(selectedUser.user_id);
+                    }}
+                    disabled={proxyLoading}
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    View as User
+                  </Button>
+
                   {!selectedUser.email_verified && (
                     <SensitiveOperationWrapper
                       operation="manual_verify_user"
                       operationDescription={`Manually verify ${selectedUser.first_name} ${selectedUser.last_name}`}
                       onExecute={() => handleManualVerify(selectedUser.user_id, `${selectedUser.first_name} ${selectedUser.last_name}`)}
-                      variant="default"
+                      variant="outline"
                     >
                       <CheckCircle className="h-4 w-4 mr-2" />
                       Manually Verify

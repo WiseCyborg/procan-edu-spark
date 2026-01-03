@@ -476,3 +476,6 @@ verify_jwt = true
 
 [functions.generate-uat-completion-report]
 verify_jwt = true
+
+[functions.admin-impersonate-user]
+verify_jwt = true
