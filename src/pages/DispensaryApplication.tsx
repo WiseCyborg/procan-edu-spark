@@ -57,26 +57,35 @@ const DispensaryApplication = () => {
 
   const onSubmit = async (data: FormData) => {
     const sanitizedData = sanitizeFormData(data);
-    
-    console.log('Submitting application with data:', sanitizedData);
-    
-    try {
-      const { data: result, error, raw } = await invokePublicFunction('submit-dispensary-application', sanitizedData);
 
-      console.log('Full submission response:', { result, error, raw, rawType: typeof raw });
+    console.log('Submitting application with data:', sanitizedData);
+
+    try {
+      const { data: result, error, raw, status } = await invokePublicFunction(
+        'submit-dispensary-application',
+        sanitizedData
+      );
+
+      console.log('Full submission response:', {
+        result,
+        error,
+        status,
+        raw,
+        rawType: typeof raw,
+      });
 
       if (error) {
-        console.error('Submission error details:', { 
-          message: error.message, 
-          raw, 
+        console.error('Submission error details:', {
+          message: error.message,
+          status,
+          raw,
           rawCode: raw?.code,
-          rawStatus: raw?.status 
         });
-        
+
         // More robust error code extraction
         const errorCode = raw?.code || (typeof raw === 'string' ? raw : '') || error?.message || '';
         const errorDetails = raw?.details || [];
-        
+
         if (errorCode?.includes('RATE_LIMIT_EXCEEDED')) {
           toast({
             title: "Too Many Submissions",
@@ -85,7 +94,7 @@ const DispensaryApplication = () => {
           });
           return;
         }
-        
+
         if (errorCode?.includes('DUPLICATE_APPLICATION')) {
           toast({
             title: "Application Already Exists",
@@ -94,25 +103,28 @@ const DispensaryApplication = () => {
           });
           return;
         }
-        
+
         if (errorCode?.includes('VALIDATION_ERROR')) {
           const failedFields = raw?.failedFields || errorDetails.map((d: any) => d.field);
-          const fieldNames = failedFields.map((f: string) => {
-            // Convert camelCase to readable format
-            return f.replace(/([A-Z])/g, ' $1').replace(/^./, (str: string) => str.toUpperCase());
-          }).join(', ');
-          
+          const fieldNames = failedFields
+            .map((f: string) => {
+              // Convert camelCase to readable format
+              return f.replace(/([A-Z])/g, ' $1').replace(/^./, (str: string) => str.toUpperCase());
+            })
+            .join(', ');
+
           toast({
             title: "Please Check Your Information",
-            description: failedFields.length > 0 
-              ? `These fields need attention: ${fieldNames}`
-              : "Please verify all fields are filled correctly.",
+            description:
+              failedFields.length > 0
+                ? `These fields need attention: ${fieldNames}`
+                : "Please verify all fields are filled correctly.",
             variant: "destructive",
             duration: 8000,
           });
           return;
         }
-        
+
         if (errorCode?.includes('CONSTRAINT_VIOLATION')) {
           toast({
             title: "Invalid Data",
@@ -121,8 +133,16 @@ const DispensaryApplication = () => {
           });
           return;
         }
-        
-        throw error;
+
+        // IMPORTANT: Show the real error so we can pinpoint the failure in UAT
+        const debugBits = [raw?.code, status ? `HTTP ${status}` : null].filter(Boolean).join(' · ');
+        toast({
+          title: "Submission Failed",
+          description: debugBits ? `${error.message} (${debugBits})` : error.message,
+          variant: "destructive",
+          duration: 10000,
+        });
+        return;
       }
 
       setSubmitted(true);
@@ -132,12 +152,13 @@ const DispensaryApplication = () => {
         duration: 6000,
       });
     } catch (error: any) {
-      console.error('Submission error:', error.message);
-      
+      console.error('Submission exception:', error);
+
       toast({
         title: "Submission Failed",
-        description: "Please try again or contact support@procannedu.com",
+        description: error?.message || "Please try again or contact support@procannedu.com",
         variant: "destructive",
+        duration: 10000,
       });
     }
   };
