@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Progress } from '@/components/ui/progress';
-import { BookOpen, Video, FileText, CheckCircle2, ArrowLeft, Info } from 'lucide-react';
+import { BookOpen, Video, FileText, CheckCircle2, ArrowLeft, Info, Lock } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { getModuleDocuments } from '@/data/moduleDocumentMapping';
 import { getDocumentContent, DocumentContent } from '@/data/moduleDocuments';
@@ -336,6 +336,13 @@ const EnhancedCourseModule: React.FC = () => {
     );
   }
 
+  // Step gating logic - strict left-to-right progression
+  const canAccessCourse = overviewComplete;
+  const canAccessDocuments = overviewComplete && courseComplete;
+  // Quiz requires docs reviewed, OR no docs exist for this module
+  const allDocsReviewed = moduleDocuments.length === 0 || docsViewed;
+  const canAccessQuiz = overviewComplete && courseComplete && allDocsReviewed;
+
   const sections = [
     {
       id: 'overview',
@@ -351,7 +358,8 @@ const EnhancedCourseModule: React.FC = () => {
       icon: <Video className="h-4 w-4" />,
       isCompleted: courseComplete,
       isCurrent: activeTab === 'course',
-      isLocked: false,
+      isLocked: !canAccessCourse,
+      lockReason: 'Complete Overview first',
     },
     {
       id: 'documents',
@@ -359,18 +367,48 @@ const EnhancedCourseModule: React.FC = () => {
       icon: <FileText className="h-4 w-4" />,
       isCompleted: docsViewed,
       isCurrent: activeTab === 'documents',
-      isLocked: false,
+      isLocked: !canAccessDocuments,
+      lockReason: 'Complete Course first',
     },
     {
       id: 'quiz',
       label: 'Quiz',
       icon: <CheckCircle2 className="h-4 w-4" />,
-      isCompleted: quizComplete,
+      isCompleted: quizComplete && quizPassed,
       isCurrent: activeTab === 'quiz',
-      isLocked: !overviewComplete && !courseComplete,
-      lockReason: 'Complete overview and course first',
+      isLocked: !canAccessQuiz,
+      lockReason: 'Review all documents first',
     },
   ];
+
+  // Handle tab changes with gating enforcement
+  const handleTabChange = (newTab: string) => {
+    if (newTab === 'course' && !canAccessCourse) {
+      toast({
+        title: "Step Locked",
+        description: "Complete the Overview section first.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (newTab === 'documents' && !canAccessDocuments) {
+      toast({
+        title: "Step Locked", 
+        description: "Complete the Course section first.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (newTab === 'quiz' && !canAccessQuiz) {
+      toast({
+        title: "Step Locked",
+        description: "Review all documents before taking the quiz.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setActiveTab(newTab);
+  };
 
   // Show quiz results if there are weak topics
   if (showQuizResults && weakTopics.length > 0) {
@@ -459,22 +497,41 @@ const EnhancedCourseModule: React.FC = () => {
                 </Badge>
               </div>
 
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
                 <TabsList className="grid w-full grid-cols-4 mb-6">
                   <TabsTrigger value="overview" className="flex items-center gap-2">
-                    <BookOpen className="h-4 w-4" />
+                    {overviewComplete && <CheckCircle2 className="h-4 w-4 text-green-600" />}
+                    {!overviewComplete && <BookOpen className="h-4 w-4" />}
                     Overview
                   </TabsTrigger>
-                  <TabsTrigger value="course" className="flex items-center gap-2">
-                    <Video className="h-4 w-4" />
+                  <TabsTrigger 
+                    value="course" 
+                    className="flex items-center gap-2"
+                    disabled={!canAccessCourse}
+                  >
+                    {courseComplete && <CheckCircle2 className="h-4 w-4 text-green-600" />}
+                    {!courseComplete && !canAccessCourse && <Lock className="h-4 w-4 text-muted-foreground" />}
+                    {!courseComplete && canAccessCourse && <Video className="h-4 w-4" />}
                     Course
                   </TabsTrigger>
-                  <TabsTrigger value="documents" className="flex items-center gap-2">
-                    <FileText className="h-4 w-4" />
+                  <TabsTrigger 
+                    value="documents" 
+                    className="flex items-center gap-2"
+                    disabled={!canAccessDocuments}
+                  >
+                    {docsViewed && <CheckCircle2 className="h-4 w-4 text-green-600" />}
+                    {!docsViewed && !canAccessDocuments && <Lock className="h-4 w-4 text-muted-foreground" />}
+                    {!docsViewed && canAccessDocuments && <FileText className="h-4 w-4" />}
                     Documents
                   </TabsTrigger>
-                  <TabsTrigger value="quiz" className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4" />
+                  <TabsTrigger 
+                    value="quiz" 
+                    className="flex items-center gap-2"
+                    disabled={!canAccessQuiz}
+                  >
+                    {quizComplete && quizPassed && <CheckCircle2 className="h-4 w-4 text-green-600" />}
+                    {!canAccessQuiz && <Lock className="h-4 w-4 text-muted-foreground" />}
+                    {canAccessQuiz && !(quizComplete && quizPassed) && <CheckCircle2 className="h-4 w-4" />}
                     Quiz
                   </TabsTrigger>
                 </TabsList>
@@ -500,17 +557,13 @@ const EnhancedCourseModule: React.FC = () => {
                       setActiveTab('course');
                     }}
                     canContinue={true}
-                    completionMessage="Mark Overview as Complete"
-                    onMarkComplete={async () => {
+                    completionMessage="Continue to Course"
+                    onMarkComplete={() => {
                       setOverviewComplete(true);
-                      // Persist to database so next modules unlock
-                      if (moduleData) {
-                        await updateProgress(COURSE_ID, moduleData.id, true, 100, 0);
-                        toast({
-                          title: "Progress Saved",
-                          description: "Module overview marked as complete!",
-                        });
-                      }
+                      toast({
+                        title: "Overview Complete",
+                        description: "Continue to the Course section.",
+                      });
                     }}
                   />
                 </TabsContent>
@@ -675,11 +728,13 @@ const EnhancedCourseModule: React.FC = () => {
                       setDocsViewed(true);
                       setActiveTab('quiz');
                     }}
-                    canContinue={documentsViewed.size === moduleDocuments.length}
+                    canContinue={moduleDocuments.length === 0 || documentsViewed.size === moduleDocuments.length}
                     completionMessage={
-                      documentsViewed.size === moduleDocuments.length
-                        ? "All Documents Reviewed - Continue to Quiz"
-                        : `Review all ${moduleDocuments.length} documents to continue`
+                      moduleDocuments.length === 0
+                        ? "No documents for this module - Continue to Quiz"
+                        : documentsViewed.size === moduleDocuments.length
+                          ? "All Documents Reviewed - Continue to Quiz"
+                          : `Review all ${moduleDocuments.length} documents to continue`
                     }
                     onMarkComplete={() => setDocsViewed(true)}
                   />
@@ -779,7 +834,7 @@ const EnhancedCourseModule: React.FC = () => {
             {/* Section Progress Navigator - Right Side */}
             <SectionProgressNav
               sections={sections}
-              onSectionClick={setActiveTab}
+              onSectionClick={handleTabChange}
               completedPercentage={calculateSectionProgress()}
               moduleTitle={moduleData.title}
             />
