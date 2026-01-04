@@ -136,9 +136,9 @@ export const OrganizationActionsMenu = ({ organization, onRefetch }: Organizatio
 
     setLoading('resend');
     try {
-      // Call regenerate token function and resend registration email
-      const { data, error } = await supabase.rpc('regenerate_manager_token', {
-        application_id: organization.org_id
+      // Call regenerate token function using organization_id
+      const { data, error } = await supabase.rpc('regenerate_manager_token_by_org', {
+        org_id: organization.org_id
       } as any);
 
       if (error) throw error;
@@ -146,21 +146,24 @@ export const OrganizationActionsMenu = ({ organization, onRefetch }: Organizatio
       // Get the result (RPC returns table, access first row)
       const result = Array.isArray(data) ? data[0] : data;
       
-      // Send the new registration email
-      const { error: emailError } = await supabase.functions.invoke('send-manager-registration-email', {
+      if (!result?.success) {
+        throw new Error(result?.message || 'Failed to regenerate token');
+      }
+      
+      // Send the new registration email using the correct edge function
+      const { error: emailError } = await supabase.functions.invoke('send-manager-registration-token', {
         body: { 
-          organizationId: organization.org_id,
-          email: organization.manager_email,
-          organizationName: organization.organization_name,
-          token: result?.new_token
+          application_id: result.application_id
         }
       });
 
       if (emailError) {
         console.warn('Email send failed but token was regenerated:', emailError);
+        toast.success('Token regenerated! Email may have failed - check logs.');
+      } else {
+        toast.success('New registration link sent successfully');
       }
-
-      toast.success('New registration link sent successfully');
+      
       onRefetch?.();
       
     } catch (error: any) {
