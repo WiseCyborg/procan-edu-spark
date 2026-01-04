@@ -8,6 +8,7 @@ interface PaginatedContentProps {
   content: string;
   onPageChange?: (page: number, totalPages: number) => void;
   onComplete?: () => void;
+  onAllPagesViewed?: () => void;
   className?: string;
   initialPage?: number;
 }
@@ -69,6 +70,7 @@ export const PaginatedContent: React.FC<PaginatedContentProps> = ({
   content,
   onPageChange,
   onComplete,
+  onAllPagesViewed,
   className,
   initialPage = 0
 }) => {
@@ -234,14 +236,24 @@ export const PaginatedContent: React.FC<PaginatedContentProps> = ({
           Swipe or use arrow keys
         </span>
         
-        <Button
-          onClick={goNext}
-          disabled={currentPage === totalPages - 1}
-          className="flex items-center gap-2"
-        >
-          Next
-          <ChevronRight className="h-4 w-4" />
-        </Button>
+        {currentPage === totalPages - 1 && onAllPagesViewed ? (
+          <Button
+            onClick={onAllPagesViewed}
+            className="flex items-center gap-2"
+          >
+            Continue to Course
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        ) : (
+          <Button
+            onClick={goNext}
+            disabled={currentPage === totalPages - 1}
+            className="flex items-center gap-2"
+          >
+            Next
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        )}
       </div>
     </div>
   );
