@@ -8815,7 +8815,7 @@ export type Database = {
         }[]
       }
       get_user_organization: { Args: { _user_id: string }; Returns: string }
-      get_user_organization_id: { Args: { user_uuid: string }; Returns: string }
+      get_user_organization_id: { Args: { _user_id: string }; Returns: string }
       get_user_tier: { Args: { _user_id: string }; Returns: string }
       get_users_with_roles: {
         Args: never
