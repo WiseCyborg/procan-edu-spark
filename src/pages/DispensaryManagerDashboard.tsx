@@ -42,7 +42,7 @@ import { NextActionBanner } from '@/components/guidance/NextActionBanner';
 
 const DispensaryManagerDashboard = () => {
   const { user } = useAuth();
-  const { isDispensaryManager, isLoading: roleLoading } = useUserRole();
+  const { isDispensaryManager, isAdmin, isLoading: roleLoading } = useUserRole();
   const { organization, isLoading: orgLoading, refreshOrganization } = useOrganization();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -57,18 +57,21 @@ const DispensaryManagerDashboard = () => {
   const [employees, setEmployees] = useState<any[]>([]);
   const [userFirstName, setUserFirstName] = useState<string>('');
 
+  // Allow both dispensary managers AND admins to access this dashboard
+  const hasAccess = isDispensaryManager || isAdmin;
+
   useEffect(() => {
-    if (!roleLoading && !isDispensaryManager) {
-      toast.error('Access denied: Dispensary Manager role required');
+    if (!roleLoading && !hasAccess) {
+      toast.error('Access denied: Dispensary Manager or Admin role required');
       navigate('/');
       return;
     }
 
-    if (user && isDispensaryManager && organization?.id) {
+    if (user && hasAccess && organization?.id) {
       fetchCoordinators();
       fetchComplianceData();
     }
-  }, [user, isDispensaryManager, roleLoading, organization?.id]);
+  }, [user, hasAccess, roleLoading, organization?.id]);
 
   // Phase 6: Add real-time subscriptions
   useEffect(() => {
