@@ -63,7 +63,7 @@ const FinalExam: React.FC = () => {
     getCompletedModulesCount, 
     getFirstIncompleteModule,
     isLoading: progressLoading,
-    TOTAL_MODULES 
+    REQUIRED_FOR_EXAM 
   } = useUserProgress(COURSE_ID);
   
   // Use exam attempts hook for cooldown and history
@@ -240,8 +240,8 @@ const FinalExam: React.FC = () => {
     if (!allComplete) {
       const firstIncomplete = getFirstIncompleteModule();
       toast.error(
-        `You must complete all ${TOTAL_MODULES} modules before taking the final exam. ` +
-        `You have completed ${completedCount} of ${TOTAL_MODULES}. ` +
+        `You must complete all ${REQUIRED_FOR_EXAM} modules before taking the final exam. ` +
+        `You have completed ${completedCount} of ${REQUIRED_FOR_EXAM}. ` +
         `Please complete Module ${firstIncomplete} next.`
       );
       navigate('/course');
@@ -249,7 +249,7 @@ const FinalExam: React.FC = () => {
     }
     
     setModuleGatingChecked(true);
-  }, [progressLoading, areAllModulesCompleted, getCompletedModulesCount, getFirstIncompleteModule, navigate, TOTAL_MODULES]);
+  }, [progressLoading, areAllModulesCompleted, getCompletedModulesCount, getFirstIncompleteModule, navigate, REQUIRED_FOR_EXAM]);
 
   useEffect(() => {
     // Get user's IP address
