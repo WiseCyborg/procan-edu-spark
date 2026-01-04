@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from '@/components/ui/use-toast';
 import { useTierProgress } from './useTierProgress';
+import { useUserRole } from './useUserRole';
 
 export interface UserProgress {
   id: string;
@@ -29,6 +30,10 @@ export const useUserProgress = (courseId?: string) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const { checkAndUnlockTier } = useTierProgress();
+  const { isDispensaryManager, isTrainingCoordinator, isAdmin } = useUserRole();
+  
+  // Role-based module requirements
+  const isManagerRole = isDispensaryManager || isTrainingCoordinator || isAdmin;
 
   // Fetch user progress for a specific course
   const {
@@ -216,7 +221,11 @@ export const useUserProgress = (courseId?: string) => {
     23: 'bdbbc605-a8f8-4a65-ba9a-a2451198174c',
   };
 
-  const TOTAL_MODULES = 24; // Modules 0-23
+  // Module counts: employees need 0-18 (19 modules), managers need 0-23 (24 modules)
+  const EMPLOYEE_MODULE_COUNT = 19; // Modules 0-18
+  const MANAGER_MODULE_COUNT = 24; // Modules 0-23
+  const TOTAL_MODULES = isManagerRole ? MANAGER_MODULE_COUNT : EMPLOYEE_MODULE_COUNT;
+  const REQUIRED_FOR_EXAM = isManagerRole ? MANAGER_MODULE_COUNT : EMPLOYEE_MODULE_COUNT;
 
   // Helper functions
   const getModuleProgress = (moduleId: string): ModuleProgress | null => {
@@ -278,9 +287,10 @@ export const useUserProgress = (courseId?: string) => {
     return true;
   };
 
-  // Check if all modules are completed (for exam access)
+  // Check if all required modules are completed (for exam access)
+  // Employees need modules 0-18 (19 modules), managers need 0-23 (24 modules)
   const areAllModulesCompleted = (): boolean => {
-    for (let i = 0; i < TOTAL_MODULES; i++) {
+    for (let i = 0; i < REQUIRED_FOR_EXAM; i++) {
       if (!isModuleCompletedByNumber(i)) {
         return false;
       }
@@ -288,14 +298,14 @@ export const useUserProgress = (courseId?: string) => {
     return true;
   };
 
-  // Get first incomplete module number
+  // Get first incomplete module number (within required modules)
   const getFirstIncompleteModule = (): number => {
-    for (let i = 0; i < TOTAL_MODULES; i++) {
+    for (let i = 0; i < REQUIRED_FOR_EXAM; i++) {
       if (!isModuleCompletedByNumber(i)) {
         return i;
       }
     }
-    return TOTAL_MODULES; // All complete
+    return REQUIRED_FOR_EXAM; // All required modules complete
   };
 
   const updateProgress = async (
@@ -361,6 +371,8 @@ export const useUserProgress = (courseId?: string) => {
     migrateFromLocalStorage,
     isUpdating: updateProgressMutation.isPending,
     TOTAL_MODULES,
+    REQUIRED_FOR_EXAM,
+    isManagerRole,
   };
 };
 
