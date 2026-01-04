@@ -2430,6 +2430,63 @@ export type Database = {
         }
         Relationships: []
       }
+      email_outbox: {
+        Row: {
+          created_at: string | null
+          cta_url: string | null
+          environment: string | null
+          error_message: string | null
+          has_html: boolean | null
+          has_text: boolean | null
+          id: string
+          metadata: Json | null
+          provider: string | null
+          provider_message_id: string | null
+          recipient_email: string
+          rendered_at: string | null
+          sent_at: string | null
+          status: string | null
+          subject: string
+          template_name: string
+        }
+        Insert: {
+          created_at?: string | null
+          cta_url?: string | null
+          environment?: string | null
+          error_message?: string | null
+          has_html?: boolean | null
+          has_text?: boolean | null
+          id?: string
+          metadata?: Json | null
+          provider?: string | null
+          provider_message_id?: string | null
+          recipient_email: string
+          rendered_at?: string | null
+          sent_at?: string | null
+          status?: string | null
+          subject: string
+          template_name: string
+        }
+        Update: {
+          created_at?: string | null
+          cta_url?: string | null
+          environment?: string | null
+          error_message?: string | null
+          has_html?: boolean | null
+          has_text?: boolean | null
+          id?: string
+          metadata?: Json | null
+          provider?: string | null
+          provider_message_id?: string | null
+          recipient_email?: string
+          rendered_at?: string | null
+          sent_at?: string | null
+          status?: string | null
+          subject?: string
+          template_name?: string
+        }
+        Relationships: []
+      }
       email_preferences: {
         Row: {
           created_at: string | null
@@ -2547,13 +2604,16 @@ export type Database = {
         Row: {
           ai_personalization_enabled: boolean | null
           allowed_tone: string | null
+          category: string | null
           contract_json: Json | null
           created_at: string | null
           created_by: string | null
+          email_type: string | null
           html_content: string
           id: string
           is_active: boolean | null
           last_tested_at: string | null
+          requires_internal_badge: boolean | null
           subject_line: string
           template_name: string
           updated_at: string | null
@@ -2564,13 +2624,16 @@ export type Database = {
         Insert: {
           ai_personalization_enabled?: boolean | null
           allowed_tone?: string | null
+          category?: string | null
           contract_json?: Json | null
           created_at?: string | null
           created_by?: string | null
+          email_type?: string | null
           html_content: string
           id?: string
           is_active?: boolean | null
           last_tested_at?: string | null
+          requires_internal_badge?: boolean | null
           subject_line: string
           template_name: string
           updated_at?: string | null
@@ -2581,13 +2644,16 @@ export type Database = {
         Update: {
           ai_personalization_enabled?: boolean | null
           allowed_tone?: string | null
+          category?: string | null
           contract_json?: Json | null
           created_at?: string | null
           created_by?: string | null
+          email_type?: string | null
           html_content?: string
           id?: string
           is_active?: boolean | null
           last_tested_at?: string | null
+          requires_internal_badge?: boolean | null
           subject_line?: string
           template_name?: string
           updated_at?: string | null

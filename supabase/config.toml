@@ -479,3 +479,6 @@ verify_jwt = true
 
 [functions.admin-impersonate-user]
 verify_jwt = true
+
+[functions.email-preview]
+verify_jwt = true
