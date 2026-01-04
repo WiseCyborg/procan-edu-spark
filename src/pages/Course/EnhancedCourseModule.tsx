@@ -545,20 +545,13 @@ const EnhancedCourseModule: React.FC = () => {
                       <PaginatedContent
                         content={moduleData.content || ''}
                         onComplete={() => setOverviewComplete(true)}
+                        onAllPagesViewed={() => {
+                          setOverviewComplete(true);
+                          setActiveTab('course');
+                        }}
                       />
                     </CardContent>
                   </Card>
-                  
-                  <SectionNavButton
-                    currentSection="overview"
-                    nextSection={{ id: 'course', label: 'Course' }}
-                    onContinue={() => {
-                      setOverviewComplete(true);
-                      setActiveTab('course');
-                    }}
-                    canContinue={true}
-                    completionMessage="Continue to Course"
-                  />
                 </TabsContent>
 
                 <TabsContent value="course" className="space-y-4">
@@ -799,18 +792,22 @@ const EnhancedCourseModule: React.FC = () => {
                 </TabsContent>
               </Tabs>
 
-              {/* Previous/Next Module Navigation - only show Previous, Next is gated by quiz */}
-              {canGoPrevious && (
+              {/* Module Navigation - only show when quiz is complete and passed */}
+              {(quizComplete && quizPassed) && (
                 <div className="flex justify-between mt-6 pt-6 border-t">
-                  <Button
-                    variant="outline"
-                    onClick={handlePreviousModuleWithTransition}
-                    disabled={isTransitioning}
-                  >
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Previous Module
+                  {canGoPrevious ? (
+                    <Button
+                      variant="outline"
+                      onClick={handlePreviousModuleWithTransition}
+                      disabled={isTransitioning}
+                    >
+                      <ArrowLeft className="mr-2 h-4 w-4" />
+                      Previous Module
+                    </Button>
+                  ) : <div />}
+                  <Button onClick={() => navigate('/course')} variant="ghost">
+                    Back to Course Outline
                   </Button>
-                  <div />
                 </div>
               )}
             </div>
