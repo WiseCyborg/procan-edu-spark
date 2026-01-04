@@ -68,6 +68,7 @@ import DemoAccountsSetup from "./pages/DemoAccountsSetup";
 import SystemHealthDashboard from "./pages/SystemHealthDashboard";
 import UnifiedHealthReport from "./pages/UnifiedHealthReport";
 import AcceptInvitation from "./pages/AcceptInvitation";
+import AcceptInvite from "./pages/AcceptInvite";
 import RoleSelectionDashboard from "./pages/RoleSelectionDashboard";
 import OnboardingSetup from "./pages/OnboardingSetup";
 import OperationsCommandCenter from "./pages/OperationsCommandCenter";
@@ -314,6 +315,7 @@ const AppRoutesLayout = () => {
             <Route path="/success-stories" element={<SuccessStories />} />
             <Route path="/mca-compliance-review" element={<MCAComplianceReview />} />
             <Route path="/regulatory-explorer" element={<RegulatoryExplorerPage />} />
+            <Route path="/accept-invite" element={<AcceptInvite />} />
             <Route path="/team-management" element={
               <ProtectedRoute>
                 <TeamManagement />
