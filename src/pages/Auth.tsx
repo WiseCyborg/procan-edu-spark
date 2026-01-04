@@ -131,9 +131,16 @@ const Auth = () => {
               
               <TabsContent value="code" className="mt-4">
                 <div className="text-center mb-4 text-sm text-muted-foreground">
-                  Enter the join code provided by your manager to register
+                  {prefilledCode 
+                    ? 'Complete your registration below'
+                    : 'Enter the join code provided by your manager to register'}
                 </div>
-                <JoinCodeEntry />
+                {/* If code is prefilled, show registration form. Otherwise show code entry */}
+                {prefilledCode && forceRegister ? (
+                  <StudentAuthForm />
+                ) : (
+                  <JoinCodeEntry />
+                )}
               </TabsContent>
             </Tabs>
             
