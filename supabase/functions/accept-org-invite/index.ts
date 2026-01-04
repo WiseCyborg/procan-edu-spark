@@ -6,6 +6,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// RVT Course ID (Maryland Responsible Vendor Training)
+const RVT_COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -82,7 +85,7 @@ serve(async (req) => {
       );
     }
 
-    // Verify email matches
+    // Verify email matches (CRITICAL: invite email must equal login email)
     if (invite.email.toLowerCase() !== user.email?.toLowerCase()) {
       console.warn('[ACCEPT-INVITE] Email mismatch:', { invite: invite.email, user: user.email });
       return new Response(
@@ -97,7 +100,7 @@ serve(async (req) => {
 
     console.log('[ACCEPT-INVITE] Processing invite:', { role: invite.role, org: invite.organization_id });
 
-    // Update organization_members
+    // Update organization_members - link user_id and set status to active
     const { error: memberError } = await serviceClient
       .from('organization_members')
       .update({
@@ -152,7 +155,82 @@ serve(async (req) => {
       })
       .eq('user_id', user.id);
 
-    console.log('[ACCEPT-INVITE] ✅ Invite accepted successfully');
+    console.log('[ACCEPT-INVITE] ✅ Membership activated, now auto-enrolling in RVT course...');
+
+    // ========== AUTO-ENROLL IN RVT COURSE ==========
+    let enrollmentResult = {
+      enrolled: false,
+      courseId: null as string | null,
+      seatAllocated: false,
+      message: ''
+    };
+
+    try {
+      // Step 1: Find an available seat for this organization
+      const { data: availableSeat, error: seatError } = await serviceClient
+        .from('rvt_seats')
+        .select('id, course_id')
+        .eq('organization_id', invite.organization_id)
+        .eq('status', 'available')
+        .is('assigned_user_id', null)
+        .limit(1)
+        .single();
+
+      if (seatError || !availableSeat) {
+        console.warn('[ACCEPT-INVITE] No available seats for org:', invite.organization_id);
+        enrollmentResult.message = 'No training seats available. Contact your organization admin.';
+      } else {
+        // Step 2: Assign the seat to this user
+        const { error: assignError } = await serviceClient
+          .from('rvt_seats')
+          .update({
+            assigned_user_id: user.id,
+            status: 'assigned',
+            assigned_at: new Date().toISOString()
+          })
+          .eq('id', availableSeat.id)
+          .eq('status', 'available'); // Prevent race conditions
+
+        if (assignError) {
+          console.error('[ACCEPT-INVITE] Failed to assign seat:', assignError);
+          enrollmentResult.message = 'Failed to allocate training seat.';
+        } else {
+          enrollmentResult.seatAllocated = true;
+          enrollmentResult.courseId = availableSeat.course_id || RVT_COURSE_ID;
+
+          console.log('[ACCEPT-INVITE] ✅ Seat allocated:', availableSeat.id);
+
+          // Step 3: Create/update user_learning_journey
+          await serviceClient
+            .from('user_learning_journey')
+            .upsert({
+              user_id: user.id,
+              organization_id: invite.organization_id,
+              current_stage: 'enrolled',
+              stage_entered_at: new Date().toISOString(),
+              last_activity_at: new Date().toISOString(),
+              completion_percentage: 0,
+              modules_completed: 0,
+              exam_attempts: 0,
+              at_risk_flag: false,
+              updated_at: new Date().toISOString()
+            }, {
+              onConflict: 'user_id,organization_id',
+              ignoreDuplicates: false
+            });
+
+          enrollmentResult.enrolled = true;
+          enrollmentResult.message = 'Successfully enrolled in Responsible Vendor Training!';
+
+          console.log('[ACCEPT-INVITE] ✅ Learning journey created for user:', user.id);
+        }
+      }
+    } catch (enrollError: any) {
+      console.error('[ACCEPT-INVITE] Auto-enrollment error:', enrollError);
+      enrollmentResult.message = 'Enrollment failed: ' + enrollError.message;
+    }
+
+    console.log('[ACCEPT-INVITE] ✅ Invite accepted successfully, enrollment:', enrollmentResult);
 
     return new Response(
       JSON.stringify({ 
@@ -161,7 +239,8 @@ serve(async (req) => {
           organization_id: invite.organization_id,
           organization_name: invite.organizations?.name,
           role: invite.role,
-          message: `Welcome! You are now a ${invite.role.replace('_', ' ')} at ${invite.organizations?.name || 'the organization'}.`
+          enrollment: enrollmentResult,
+          message: `Welcome! You are now a ${invite.role.replace(/_/g, ' ')} at ${invite.organizations?.name || 'the organization'}.${enrollmentResult.enrolled ? ' Your RVT course is ready to start!' : ''}`
         }
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

@@ -17,6 +17,7 @@ export default function AcceptInvite() {
   const [message, setMessage] = useState('');
   const [organizationName, setOrganizationName] = useState('');
   const [role, setRole] = useState('');
+  const [enrollmentInfo, setEnrollmentInfo] = useState<{ enrolled: boolean; message: string } | null>(null);
   
   const token = searchParams.get('token');
 
@@ -55,13 +56,16 @@ export default function AcceptInvite() {
       }
 
       setOrganizationName(data.data.organization_name || 'the organization');
-      setRole(data.data.role?.replace('_', ' ') || 'member');
+      setRole(data.data.role?.replace(/_/g, ' ') || 'member');
       setMessage(data.data.message);
+      setEnrollmentInfo(data.data.enrollment || null);
       setStatus('success');
       
       toast({
         title: "Welcome! 🎉",
-        description: `You've joined ${data.data.organization_name} as ${data.data.role?.replace('_', ' ')}.`,
+        description: data.data.enrollment?.enrolled 
+          ? `You've joined ${data.data.organization_name} and are enrolled in training!`
+          : `You've joined ${data.data.organization_name} as ${data.data.role?.replace(/_/g, ' ')}.`,
       });
 
     } catch (err: any) {
@@ -149,9 +153,21 @@ export default function AcceptInvite() {
                   Your role: <span className="font-medium capitalize">{role}</span>
                 </p>
               </div>
+
+              {/* Enrollment Status */}
+              {enrollmentInfo && (
+                <Alert className={enrollmentInfo.enrolled ? "border-green-200 bg-green-50" : "border-yellow-200 bg-yellow-50"}>
+                  <AlertCircle className={`h-4 w-4 ${enrollmentInfo.enrolled ? 'text-green-600' : 'text-yellow-600'}`} />
+                  <AlertDescription className={enrollmentInfo.enrolled ? 'text-green-800' : 'text-yellow-800'}>
+                    {enrollmentInfo.enrolled 
+                      ? "✅ You're enrolled in Responsible Vendor Training! Click below to start."
+                      : enrollmentInfo.message || "Training enrollment pending - contact your admin."}
+                  </AlertDescription>
+                </Alert>
+              )}
               
               <Button onClick={handleGoToDashboard} className="w-full" size="lg">
-                Go to Dashboard
+                {enrollmentInfo?.enrolled ? 'Start Training' : 'Go to Dashboard'}
               </Button>
             </>
           )}
