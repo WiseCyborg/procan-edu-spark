@@ -14,6 +14,7 @@ import { CoursePaymentGate } from '@/components/CoursePaymentGate';
 import { ProtectedCourseAccess } from '@/components/ProtectedCourseAccess';
 import { EmployeeAccessMessage } from '@/components/EmployeeAccessMessage';
 import { Breadcrumbs } from '@/components/navigation/Breadcrumbs';
+import { CourseProgressionCTA } from '@/components/course/CourseProgressionCTA';
 import { supabase } from '@/integrations/supabase/client';
 
 const TOTAL_MODULES = 24;
@@ -49,6 +50,10 @@ const CourseLayout: React.FC = () => {
     getTotalScore,
     isModuleCompleted,
     migrateFromLocalStorage,
+    areAllModulesCompleted,
+    getFirstIncompleteModule,
+    REQUIRED_FOR_EXAM,
+    isManagerRole: isManagerRoleFromProgress,
     isLoading
   } = useUserProgress(COURSE_ID);
 
@@ -84,14 +89,13 @@ const CourseLayout: React.FC = () => {
     migrateFromLocalStorage(COURSE_ID);
   }, []);
 
-  const updateProgress = () => {
+  const updateProgressDisplay = () => {
     const completedCount = getCompletedModulesCount();
     const averageScore = getTotalScore();
-    const totalRequired = modules.filter(m => !m.is_manager_only).length || TOTAL_MODULES;
-    return `${completedCount}/${totalRequired} modules completed${averageScore > 0 ? ` • Average score: ${averageScore}%` : ''}`;
+    return `${completedCount}/${REQUIRED_FOR_EXAM} modules completed${averageScore > 0 ? ` • Average score: ${averageScore}%` : ''}`;
   };
 
-  const isExamEnabled = getCompletedModulesCount() === TOTAL_MODULES;
+  const isExamEnabled = areAllModulesCompleted();
   const isManagerRole = isDispensaryManager || isAdmin;
   const managerModules = modules.filter(m => m.is_manager_only);
   const agentModules = modules.filter(m => !m.is_manager_only);
@@ -154,7 +158,7 @@ const CourseLayout: React.FC = () => {
         <CardContent className="space-y-4">
           <div className="text-center">
             <Badge variant="secondary" className="text-lg px-4 py-2">
-              {updateProgress()}
+              {updateProgressDisplay()}
             </Badge>
           </div>
           <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
@@ -281,37 +285,14 @@ const CourseLayout: React.FC = () => {
         </div>
       )}
 
-      <Card className={`${isExamEnabled ? 'border-primary' : 'border-muted'}`}>
-        <CardContent className="p-6">
-          <Link 
-            to="/course/final-exam" 
-            className={`flex items-center justify-center space-x-2 ${
-              !isExamEnabled && 'pointer-events-none'
-            }`}
-            onClick={(e) => !isExamEnabled && e.preventDefault()}
-          >
-            <div className="flex items-center space-x-3">
-              {isExamEnabled ? (
-                <Award className="w-6 h-6 text-primary" />
-              ) : (
-                <Lock className="w-6 h-6 text-muted-foreground" />
-              )}
-              <div className="text-center">
-                <h3 className={`text-xl font-bold ${
-                  isExamEnabled ? 'text-primary' : 'text-muted-foreground'
-                }`}>
-                  Final Exam & Certificate
-                </h3>
-                {!isExamEnabled && (
-                  <p className="text-sm text-muted-foreground">
-                    Complete all modules to unlock
-                  </p>
-                )}
-              </div>
-            </div>
-          </Link>
-        </CardContent>
-      </Card>
+      {/* Dynamic Progression CTA - Always shows the ONE next step */}
+      <CourseProgressionCTA
+        completedModulesCount={getCompletedModulesCount()}
+        requiredModulesCount={REQUIRED_FOR_EXAM}
+        firstIncompleteModule={getFirstIncompleteModule()}
+        allModulesCompleted={areAllModulesCompleted()}
+        isManagerRole={isManagerRole}
+      />
       </div>
     </ProtectedCourseAccess>
   );
