@@ -8488,6 +8488,7 @@ export type Database = {
           org_id: string
           organization_name: string
           payment_status: string
+          registration_token_expires_at: string
           total_seats: number
           used_seats: number
         }[]
