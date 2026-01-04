@@ -780,12 +780,19 @@ const EnhancedCourseModule: React.FC = () => {
                           <Button onClick={() => navigate('/course')}>
                             Return to Course
                           </Button>
-                          {canGoNext && (
+                          {/* Only show Next Module when quiz is passed - single source of truth */}
+                          {canGoNext && quizPassed && (
                             <Button onClick={handleNextModuleWithTransition} disabled={isTransitioning}>
                               Next Module
                             </Button>
                           )}
                         </div>
+                        {/* Show guidance if quiz failed */}
+                        {!quizPassed && quizComplete && (
+                          <p className="text-sm text-muted-foreground mt-4">
+                            Score 80% or higher to unlock the next module
+                          </p>
+                        )}
                       </CardContent>
                     </Card>
                   )}
