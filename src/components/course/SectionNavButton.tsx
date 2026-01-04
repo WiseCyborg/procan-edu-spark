@@ -12,6 +12,7 @@ interface SectionNavButtonProps {
   canContinue: boolean;
   completionMessage?: string;
   onMarkComplete?: () => void;
+  showMarkComplete?: boolean;
 }
 
 export function SectionNavButton({
@@ -20,12 +21,18 @@ export function SectionNavButton({
   onContinue,
   canContinue,
   completionMessage,
-  onMarkComplete
+  onMarkComplete,
+  showMarkComplete = false
 }: SectionNavButtonProps) {
+  // Only show ONE primary action, never both buttons
+  const showContinueButton = nextSection && canContinue;
+  const showCompleteButton = showMarkComplete && onMarkComplete && !showContinueButton;
+
   return (
     <div className="mt-8 pt-6 border-t border-border/50">
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-        {onMarkComplete && (
+      <div className="flex flex-col sm:flex-row items-center justify-end gap-4">
+        {/* Show Mark Complete only if explicitly requested AND can't continue yet */}
+        {showCompleteButton && (
           <Button
             variant="outline"
             size="lg"
@@ -37,26 +44,27 @@ export function SectionNavButton({
           </Button>
         )}
 
-        {nextSection && (
+        {/* Show Continue button when ready to proceed */}
+        {showContinueButton && (
           <Button
             onClick={onContinue}
-            disabled={!canContinue}
             size="lg"
             className={cn(
-              "w-full sm:w-auto sm:ml-auto font-semibold",
-              canContinue && "bg-primary hover:bg-primary/90 shadow-md hover:shadow-lg transition-all"
+              "w-full sm:w-auto font-semibold",
+              "bg-primary hover:bg-primary/90 shadow-md hover:shadow-lg transition-all"
             )}
           >
-            Continue to {nextSection.label}
+            {completionMessage || `Continue to ${nextSection.label}`}
             <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
         )}
       </div>
 
+      {/* Guidance message when blocked */}
       {!canContinue && nextSection && (
         <p className="text-sm text-muted-foreground mt-3 text-center sm:text-right flex items-center justify-center sm:justify-end gap-2">
           <span className="inline-block w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
-          Complete this section to continue
+          {completionMessage || "Complete this section to continue"}
         </p>
       )}
     </div>

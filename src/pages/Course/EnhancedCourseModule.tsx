@@ -558,13 +558,6 @@ const EnhancedCourseModule: React.FC = () => {
                     }}
                     canContinue={true}
                     completionMessage="Continue to Course"
-                    onMarkComplete={() => {
-                      setOverviewComplete(true);
-                      toast({
-                        title: "Overview Complete",
-                        description: "Continue to the Course section.",
-                      });
-                    }}
                   />
                 </TabsContent>
 
@@ -731,12 +724,11 @@ const EnhancedCourseModule: React.FC = () => {
                     canContinue={moduleDocuments.length === 0 || documentsViewed.size === moduleDocuments.length}
                     completionMessage={
                       moduleDocuments.length === 0
-                        ? "No documents for this module - Continue to Quiz"
+                        ? "Continue to Quiz"
                         : documentsViewed.size === moduleDocuments.length
-                          ? "All Documents Reviewed - Continue to Quiz"
+                          ? "Continue to Quiz"
                           : `Review all ${moduleDocuments.length} documents to continue`
                     }
-                    onMarkComplete={() => setDocsViewed(true)}
                   />
                 </TabsContent>
 
@@ -800,33 +792,18 @@ const EnhancedCourseModule: React.FC = () => {
                 </TabsContent>
               </Tabs>
 
-              {/* Previous/Next Module Navigation - only show if navigation is possible */}
-              {(canGoPrevious || canGoNext) && (
+              {/* Previous/Next Module Navigation - only show Previous, Next is gated by quiz */}
+              {canGoPrevious && (
                 <div className="flex justify-between mt-6 pt-6 border-t">
-                  {canGoPrevious ? (
-                    <Button
-                      variant="outline"
-                      onClick={handlePreviousModuleWithTransition}
-                      disabled={isTransitioning}
-                    >
-                      <ArrowLeft className="mr-2 h-4 w-4" />
-                      Previous Module
-                    </Button>
-                  ) : (
-                    <div />
-                  )}
-                  
-                  {canGoNext ? (
-                    <Button
-                      onClick={handleNextModuleWithTransition}
-                      disabled={isTransitioning}
-                    >
-                      Next Module
-                      <ArrowLeft className="ml-2 h-4 w-4 rotate-180" />
-                    </Button>
-                  ) : (
-                    <div />
-                  )}
+                  <Button
+                    variant="outline"
+                    onClick={handlePreviousModuleWithTransition}
+                    disabled={isTransitioning}
+                  >
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Previous Module
+                  </Button>
+                  <div />
                 </div>
               )}
             </div>
@@ -851,6 +828,7 @@ const EnhancedCourseModule: React.FC = () => {
         onPrevious={handlePreviousModuleWithTransition}
         onNext={handleNextModuleWithTransition}
         onModuleSelect={(num) => navigate(`/course/part${num}`)}
+        isCurrentModuleComplete={quizComplete && quizPassed}
       />
     </div>
   );
