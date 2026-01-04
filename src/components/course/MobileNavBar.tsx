@@ -1,7 +1,8 @@
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { ChevronLeft, ChevronRight, Menu } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Menu, Lock } from 'lucide-react';
 import { ModuleSidebar } from './ModuleSidebar';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface Module {
   id: string;
@@ -9,6 +10,7 @@ interface Module {
   title: string;
   tier: 'green' | 'yellow' | 'red';
   isCompleted: boolean;
+  isLocked?: boolean;
 }
 
 interface MobileNavBarProps {
@@ -21,6 +23,7 @@ interface MobileNavBarProps {
   onModuleSelect: (moduleNumber: number) => void;
   previousTitle?: string;
   nextTitle?: string;
+  isCurrentModuleComplete?: boolean;
 }
 
 export const MobileNavBar = ({
@@ -32,12 +35,11 @@ export const MobileNavBar = ({
   onNext,
   onModuleSelect,
   previousTitle,
-  nextTitle
+  nextTitle,
+  isCurrentModuleComplete = false
 }: MobileNavBarProps) => {
-  // Hide entirely if no navigation is possible
-  if (!canGoPrevious && !canGoNext) {
-    return null;
-  }
+  // Next is only allowed if current module is completed
+  const nextEnabled = canGoNext && isCurrentModuleComplete;
 
   return (
     <div className="fixed bottom-0 left-0 right-0 lg:hidden bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/90 border-t z-50">
@@ -78,20 +80,35 @@ export const MobileNavBar = ({
             </SheetContent>
           </Sheet>
 
-        {/* Next Button - conditionally render */}
-        {canGoNext ? (
-          <Button
-            variant="default"
-            size="sm"
-            onClick={onNext}
-            className="flex-1 max-w-[120px]"
-          >
-            <span className="hidden sm:inline">Next</span>
-            <ChevronRight className="h-4 w-4 ml-1" />
-          </Button>
-        ) : (
-          <div className="flex-1 max-w-[120px]" />
-        )}
+          {/* Next Button - only enabled if current module is complete */}
+          {canGoNext ? (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="flex-1 max-w-[120px]">
+                    <Button
+                      variant={nextEnabled ? "default" : "outline"}
+                      size="sm"
+                      onClick={nextEnabled ? onNext : undefined}
+                      disabled={!nextEnabled}
+                      className="w-full"
+                    >
+                      {!nextEnabled && <Lock className="h-3 w-3 mr-1" />}
+                      <span className="hidden sm:inline">Next</span>
+                      {nextEnabled && <ChevronRight className="h-4 w-4 ml-1" />}
+                    </Button>
+                  </span>
+                </TooltipTrigger>
+                {!nextEnabled && (
+                  <TooltipContent side="top">
+                    <p>Pass the quiz to continue</p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            </TooltipProvider>
+          ) : (
+            <div className="flex-1 max-w-[120px]" />
+          )}
         </div>
 
         {/* Module Titles (visible on larger mobile) */}
@@ -102,7 +119,7 @@ export const MobileNavBar = ({
             )}
           </div>
           <div className="flex-1 text-right truncate">
-            {canGoNext && nextTitle && (
+            {nextEnabled && nextTitle && (
               <span>{nextTitle}</span>
             )}
           </div>
