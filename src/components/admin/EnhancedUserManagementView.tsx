@@ -10,7 +10,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { SensitiveOperationWrapper } from '@/components/auth/SensitiveOperationWrapper';
-import { Search, CheckCircle, XCircle, Mail, Shield, Users, Clock, AlertCircle, Eye } from 'lucide-react';
+import { AdminUserAssignmentDialog } from './AdminUserAssignmentDialog';
+import { Search, CheckCircle, XCircle, Mail, Shield, Users, Clock, AlertCircle, Eye, Building2 } from 'lucide-react';
 import { useAdminProxy } from '@/contexts/AdminProxyContext';
 import { format } from 'date-fns';
 
@@ -38,6 +39,8 @@ export const EnhancedUserManagementView = () => {
   const [verificationFilter, setVerificationFilter] = useState<string>('all');
   const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [showAssignmentDialog, setShowAssignmentDialog] = useState(false);
+  const [assignmentUser, setAssignmentUser] = useState<User | null>(null);
 
   useEffect(() => {
     fetchUsers();
@@ -470,6 +473,17 @@ export const EnhancedUserManagementView = () => {
                         <Button
                           variant="ghost"
                           size="sm"
+                          onClick={() => {
+                            setAssignmentUser(user);
+                            setShowAssignmentDialog(true);
+                          }}
+                          title="Assign to organization"
+                        >
+                          <Building2 className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onClick={() => setSelectedUser(user)}
                         >
                           Manage
@@ -551,6 +565,17 @@ export const EnhancedUserManagementView = () => {
                 <h4 className="text-sm font-medium mb-3">Quick Actions</h4>
                 <div className="flex flex-wrap gap-2">
                   <Button
+                    variant="outline"
+                    onClick={() => {
+                      setAssignmentUser(selectedUser);
+                      setShowAssignmentDialog(true);
+                    }}
+                  >
+                    <Building2 className="h-4 w-4 mr-2" />
+                    Assign to Organization
+                  </Button>
+                  
+                  <Button
                     variant="default"
                     onClick={() => {
                       setSelectedUser(null);
@@ -587,6 +612,14 @@ export const EnhancedUserManagementView = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Admin User Assignment Dialog */}
+      <AdminUserAssignmentDialog
+        open={showAssignmentDialog}
+        onOpenChange={setShowAssignmentDialog}
+        user={assignmentUser}
+        onAssigned={fetchUsers}
+      />
     </div>
   );
 };
