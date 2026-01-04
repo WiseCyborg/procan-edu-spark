@@ -8719,6 +8719,16 @@ export type Database = {
           success: boolean
         }[]
       }
+      regenerate_manager_token_by_org: {
+        Args: { org_id: string }
+        Returns: {
+          application_id: string
+          expires_at: string
+          message: string
+          new_token: string
+          success: boolean
+        }[]
+      }
       reject_dispensary_application: {
         Args: { application_id: string; rejection_reason: string }
         Returns: {
