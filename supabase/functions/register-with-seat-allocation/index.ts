@@ -353,20 +353,16 @@ serve(async (req) => {
       // Don't fail registration if email queueing fails
     }
 
-    // STEP 11: Create learning journey tracking
-    await supabaseClient.from('user_learning_journey').insert({
-      user_id: authData.user.id,
-      organization_id: organizationId,
-      current_stage: 'registered',
-      stage_entered_at: new Date().toISOString(),
-      last_activity_at: new Date().toISOString(),
-      completion_percentage: 0,
-      modules_completed: 0,
-      exam_attempts: 0,
-      at_risk_flag: false,
-      predicted_completion_date: null,
-      success_probability: null
+    // STEP 11: Create learning journey tracking (idempotent via safe function)
+    const { error: journeyError } = await supabaseClient.rpc('safe_upsert_learning_journey', {
+      p_user_id: authData.user.id,
+      p_organization_id: organizationId,
+      p_current_stage: 'registered'
     });
+    
+    if (journeyError) {
+      console.error('[ATOMIC REGISTRATION] Learning journey upsert failed:', journeyError);
+    }
 
     console.log('[ATOMIC REGISTRATION] Registration complete for:', email);
 

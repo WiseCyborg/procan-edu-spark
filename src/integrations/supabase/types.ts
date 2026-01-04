@@ -8757,6 +8757,24 @@ export type Database = {
         }
         Returns: string
       }
+      safe_complete_module: {
+        Args: {
+          p_course_id: string
+          p_module_id: string
+          p_score?: number
+          p_time_spent?: number
+          p_user_id: string
+        }
+        Returns: string
+      }
+      safe_upsert_learning_journey: {
+        Args: {
+          p_current_stage?: string
+          p_organization_id: string
+          p_user_id: string
+        }
+        Returns: string
+      }
       schedule_if_missing: {
         Args: { p_jobname: string; p_spec: string; p_sql: string }
         Returns: undefined
