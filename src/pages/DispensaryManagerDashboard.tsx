@@ -38,6 +38,7 @@ import { useOrganization } from '@/hooks/useOrganization';
 import { AiLeanCoach } from '@/components/ailean/AiLeanCoach';
 import { MobileBottomNav } from '@/components/navigation/MobileBottomNav';
 import { InternalChatbot } from '@/components/chat/InternalChatbot';
+import { NextActionBanner } from '@/components/guidance/NextActionBanner';
 
 const DispensaryManagerDashboard = () => {
   const { user } = useAuth();
@@ -316,6 +317,9 @@ const DispensaryManagerDashboard = () => {
 
   return (
     <div className="container mx-auto p-4 md:p-6 space-y-4 md:space-y-6 pb-20 md:pb-6">
+      {/* Role-aware next action guidance */}
+      <NextActionBanner className="mb-2" />
+      
       {/* Resume Prompt */}
       <ResumePrompt />
 

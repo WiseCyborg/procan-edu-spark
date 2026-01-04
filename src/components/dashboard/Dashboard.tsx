@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { BookOpen, Award, Clock, CheckCircle, FileText } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { ProfileCompletionBanner } from '@/components/ProfileCompletionBanner';
+import { NextActionBanner } from '@/components/guidance/NextActionBanner';
 
 interface Course {
   id: string;
@@ -143,7 +144,10 @@ const Dashboard = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-green-700 mb-8">Learning Dashboard</h1>
+      <h1 className="text-3xl font-bold text-green-700 mb-6">Learning Dashboard</h1>
+      
+      {/* Role-aware next action guidance */}
+      <NextActionBanner className="mb-6" />
       
       <ProfileCompletionBanner />
       
