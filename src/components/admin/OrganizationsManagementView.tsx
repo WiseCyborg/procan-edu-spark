@@ -223,15 +223,28 @@ export const OrganizationsManagementView = () => {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-2">
-                          <div>
-                            <div className="text-sm font-medium">{org.manager_name}</div>
-                            <div className="text-xs text-muted-foreground">{org.manager_email}</div>
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-center gap-2">
+                            <div>
+                              <div className="text-sm font-medium">{org.manager_name}</div>
+                              <div className="text-xs text-muted-foreground">{org.manager_email}</div>
+                            </div>
+                            {!org.manager_registered && (
+                              <Badge variant="outline" className="text-orange-600 border-orange-600">
+                                ⚠️ Not Registered
+                              </Badge>
+                            )}
                           </div>
-                          {!org.manager_registered && (
-                            <Badge variant="outline" className="text-orange-600 border-orange-600">
-                              ⚠️ Not Registered
-                            </Badge>
+                          {!org.manager_registered && org.registration_token_expires_at && (
+                            <div className="text-xs text-muted-foreground">
+                              {new Date(org.registration_token_expires_at) < new Date() ? (
+                                <span className="text-destructive">Token expired</span>
+                              ) : (
+                                <span>
+                                  Expires: {new Date(org.registration_token_expires_at).toLocaleDateString()}
+                                </span>
+                              )}
+                            </div>
                           )}
                         </div>
                       </TableCell>

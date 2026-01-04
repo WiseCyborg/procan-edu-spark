@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Copy, RefreshCw, Mail, Plus, FileText, Edit, MoreVertical, Download } from 'lucide-react';
+import { Copy, RefreshCw, Mail, Plus, FileText, Edit, MoreVertical, Download, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -27,6 +27,7 @@ interface OrganizationActionsMenuProps {
     join_code?: string;
     manager_email?: string;
     manager_registered: boolean;
+    registration_token_expires_at?: string | null;
     total_seats?: number;
     license_number?: string;
     contact_person?: string;
@@ -117,6 +118,53 @@ export const OrganizationActionsMenu = ({ organization, onRefetch }: Organizatio
       
     } catch (error: any) {
       toast.error(error.message || 'Failed to send reminder');
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const handleResendRegistration = async () => {
+    if (!organization.manager_email) {
+      toast.error('No manager email available');
+      return;
+    }
+
+    if (managerRegistered) {
+      toast.info('Manager is already registered');
+      return;
+    }
+
+    setLoading('resend');
+    try {
+      // Call regenerate token function and resend registration email
+      const { data, error } = await supabase.rpc('regenerate_manager_token', {
+        application_id: organization.org_id
+      } as any);
+
+      if (error) throw error;
+
+      // Get the result (RPC returns table, access first row)
+      const result = Array.isArray(data) ? data[0] : data;
+      
+      // Send the new registration email
+      const { error: emailError } = await supabase.functions.invoke('send-manager-registration-email', {
+        body: { 
+          organizationId: organization.org_id,
+          email: organization.manager_email,
+          organizationName: organization.organization_name,
+          token: result?.new_token
+        }
+      });
+
+      if (emailError) {
+        console.warn('Email send failed but token was regenerated:', emailError);
+      }
+
+      toast.success('New registration link sent successfully');
+      onRefetch?.();
+      
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to resend registration');
     } finally {
       setLoading(null);
     }
@@ -218,6 +266,45 @@ export const OrganizationActionsMenu = ({ organization, onRefetch }: Organizatio
                     <DropdownMenuItem disabled className="opacity-50">
                       <Mail className="h-4 w-4 mr-2" />
                       Send Manager Reminder
+                    </DropdownMenuItem>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>No manager email on file</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+            
+            {/* Resend Registration - for unregistered managers */}
+            {managerRegistered ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div>
+                    <DropdownMenuItem disabled className="opacity-50">
+                      <Send className="h-4 w-4 mr-2" />
+                      Resend Registration
+                    </DropdownMenuItem>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Manager already registered</p>
+                </TooltipContent>
+              </Tooltip>
+            ) : hasManagerEmail ? (
+              <DropdownMenuItem 
+                onClick={handleResendRegistration}
+                disabled={loading === 'resend'}
+              >
+                <Send className={`h-4 w-4 mr-2 ${loading === 'resend' ? 'animate-pulse' : ''}`} />
+                Resend Registration Link
+              </DropdownMenuItem>
+            ) : (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div>
+                    <DropdownMenuItem disabled className="opacity-50">
+                      <Send className="h-4 w-4 mr-2" />
+                      Resend Registration
                     </DropdownMenuItem>
                   </div>
                 </TooltipTrigger>
