@@ -27,6 +27,9 @@ import { CourseCompletionCelebration } from '@/components/course/CourseCompletio
 import { useModuleNavigation } from '@/hooks/useModuleNavigation';
 import { SCORMStylePlayer, CourseConfig } from '@/components/course/SCORMStylePlayer';
 import { PaginatedContent } from '@/components/course/PaginatedContent';
+import { DocumentReadTracker } from '@/components/course/DocumentReadTracker';
+import { DocumentsProgressHeader } from '@/components/course/DocumentsProgressHeader';
+import { QuizLockIndicator } from '@/components/course/QuizLockIndicator';
 
 interface QuizQuestion {
   id: string;
@@ -610,96 +613,59 @@ const EnhancedCourseModule: React.FC = () => {
                         <CardHeader>
                           <CardTitle>Reference Documents</CardTitle>
                           <p className="text-sm text-muted-foreground">
-                            Review all documents before proceeding to the quiz
+                            Read each document completely to unlock the quiz
                           </p>
                         </CardHeader>
-                        <CardContent>
-                          <Accordion type="multiple" className="w-full">
-                            {moduleDocuments.map((doc, index) => {
-                              const isViewed = documentsViewed.has(doc.id);
-                              return (
-                                <AccordionItem key={doc.id} value={doc.id}>
-                                  <AccordionTrigger className="hover:no-underline">
-                                    <div className="flex items-center justify-between w-full pr-4">
-                                      <div className="flex items-center gap-3">
-                                        {isViewed ? (
-                                          <CheckCircle2 className="h-5 w-5 text-green-600" />
-                                        ) : (
-                                          <FileText className="h-5 w-5 text-muted-foreground" />
-                                        )}
-                                        <div className="text-left">
-                                          <div className="font-semibold">{doc.title}</div>
-                                          <div className="text-xs text-muted-foreground">
-                                            {doc.category} • Version {doc.version}
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </AccordionTrigger>
-                                  <AccordionContent>
-                                    <div className="space-y-4 pt-4">
-                                      {doc.comarReferences && doc.comarReferences.length > 0 && (
-                                        <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 p-2 rounded">
-                                          <Info className="h-4 w-4" />
-                                          <span>
-                                            COMAR References: {doc.comarReferences.join(', ')}
-                                          </span>
-                                        </div>
-                                      )}
-                                      
-                              <div 
-                                className="prose prose-sm max-w-none dark:prose-invert
-                                           prose-p:mb-4 prose-headings:mt-6 prose-headings:mb-3 
-                                           prose-li:my-1 prose-ul:my-4 prose-ol:my-4"
-                                dangerouslySetInnerHTML={{ 
-                                  __html: sanitizeHtml(doc.content) 
-                                }}
-                              />
-                                      
-                                      <div className="flex items-center justify-between pt-4 border-t">
-                                        <span className="text-xs text-muted-foreground">
-                                          Last updated: {new Date(doc.lastUpdated).toLocaleDateString()}
-                                        </span>
-                                        {!isViewed && (
-                                          <Button
-                                            size="sm"
-                                            onClick={() => {
-                                              setDocumentsViewed(prev => new Set([...prev, doc.id]));
-                                              toast({
-                                                title: "Document marked as read",
-                                                description: `You've reviewed "${doc.title}"`,
-                                              });
-                                            }}
-                                          >
-                                            <CheckCircle2 className="h-4 w-4 mr-2" />
-                                            Mark as Read
-                                          </Button>
-                                        )}
-                                      </div>
-                                    </div>
-                                  </AccordionContent>
-                                </AccordionItem>
-                              );
-                            })}
-                          </Accordion>
-                          
+                        <CardContent className="space-y-6">
+                          {/* Progress Header with Quiz Unlock Animation */}
                           {moduleDocuments.length > 0 && (
-                            <div className="mt-4 p-3 bg-muted/50 rounded-lg">
-                              <div className="flex items-center justify-between text-sm">
-                                <span className="text-muted-foreground">
-                                  Documents reviewed: {documentsViewed.size} of {moduleDocuments.length}
-                                </span>
-                                <Progress 
-                                  value={(documentsViewed.size / moduleDocuments.length) * 100} 
-                                  className="w-32 h-2"
-                                />
-                              </div>
+                            <DocumentsProgressHeader
+                              totalDocuments={moduleDocuments.length}
+                              completedDocuments={documentsViewed.size}
+                              quizUnlocked={documentsViewed.size === moduleDocuments.length}
+                            />
+                          )}
+                          
+                          {/* Document Cards with Read Tracking */}
+                          <div className="space-y-3">
+                            {moduleDocuments.map((doc) => (
+                              <DocumentReadTracker
+                                key={doc.id}
+                                document={doc}
+                                isRead={documentsViewed.has(doc.id)}
+                                onMarkAsRead={(docId) => {
+                                  setDocumentsViewed(prev => new Set([...prev, docId]));
+                                  toast({
+                                    title: "Document completed!",
+                                    description: `You've finished reading "${doc.title}"`,
+                                  });
+                                }}
+                                required={true}
+                              />
+                            ))}
+                          </div>
+                          
+                          {/* Empty state */}
+                          {moduleDocuments.length === 0 && (
+                            <div className="text-center py-8 text-muted-foreground">
+                              <FileText className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                              <p>No documents required for this module.</p>
+                              <p className="text-sm">You can proceed directly to the quiz.</p>
                             </div>
                           )}
                         </CardContent>
                       </Card>
                     </div>
-                    <div className="lg:col-span-1">
+                    
+                    <div className="lg:col-span-1 space-y-4">
+                      {/* Quiz Lock Indicator in Sidebar */}
+                      <QuizLockIndicator
+                        isLocked={moduleDocuments.length > 0 && documentsViewed.size < moduleDocuments.length}
+                        documentsRequired={moduleDocuments.length}
+                        documentsCompleted={documentsViewed.size}
+                        lockReason="Complete all required documents"
+                      />
+                      
                       <RegulatorySidebar 
                         sectionNumber={moduleData.module_number?.toString()}
                         comarReference={moduleData.comar_reference}
@@ -719,8 +685,8 @@ const EnhancedCourseModule: React.FC = () => {
                       moduleDocuments.length === 0
                         ? "Continue to Quiz"
                         : documentsViewed.size === moduleDocuments.length
-                          ? "Continue to Quiz"
-                          : `Review all ${moduleDocuments.length} documents to continue`
+                          ? "✓ All documents read — Continue to Quiz"
+                          : `Read ${moduleDocuments.length - documentsViewed.size} more document(s) to unlock Quiz`
                     }
                   />
                 </TabsContent>
