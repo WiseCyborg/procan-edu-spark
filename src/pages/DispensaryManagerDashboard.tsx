@@ -14,6 +14,7 @@ import { EmployeeInvitationForm } from '@/components/team/EmployeeInvitationForm
 import { SeatRequestManager } from '@/components/team/SeatRequestManager';
 import { PurchaseSeatsDialog } from '@/components/team/PurchaseSeatsDialog';
 import { EmployeeRosterWidget } from '@/components/team/EmployeeRosterWidget';
+import { TeamManagementPanel } from '@/components/team/TeamManagementPanel';
 import { ResumePrompt } from '@/components/journey/ResumePrompt';
 import { Building2, CreditCard, Users, FileText, Settings, ShieldCheck, Key, Copy, ShoppingCart, PartyPopper, X, RefreshCw, Check, Circle, Mail, Download } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
@@ -602,42 +603,10 @@ const DispensaryManagerDashboard = () => {
         </TabsContent>
 
         <TabsContent value="coordinators" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Training Coordinators</CardTitle>
-              <CardDescription>
-                Manage team members who coordinate employee training
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {coordinators.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-8">
-                    No training coordinators assigned yet.
-                  </p>
-                ) : (
-                  coordinators.map((coord) => (
-                    <div
-                      key={coord.user_id}
-                      className="flex items-center justify-between p-4 border rounded-lg"
-                    >
-                      <div>
-                        <p className="font-medium">
-                          {coord.profiles.first_name} {coord.profiles.last_name}
-                        </p>
-                        <p className="text-sm text-muted-foreground">{coord.profiles.email}</p>
-                      </div>
-                      <Badge>Training Coordinator</Badge>
-                    </div>
-                  ))
-                )}
-                <Button className="w-full">
-                  <Users className="w-4 h-4 mr-2" />
-                  Add Training Coordinator
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <TeamManagementPanel 
+            organizationId={organization.id} 
+            organizationName={organization.name} 
+          />
         </TabsContent>
 
         <TabsContent value="compliance" className="space-y-4">
