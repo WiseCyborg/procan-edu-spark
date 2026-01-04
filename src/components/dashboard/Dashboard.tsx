@@ -1,21 +1,28 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useOrganizationAccess } from '@/hooks/useOrganizationAccess';
+import { useUserRole } from '@/hooks/useUserRole';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, Award, Clock, CheckCircle, FileText } from 'lucide-react';
+import { BookOpen, Award, Clock, CheckCircle, FileText, Lock, Building2 } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { ProfileCompletionBanner } from '@/components/ProfileCompletionBanner';
 import { NextActionBanner } from '@/components/guidance/NextActionBanner';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+
+// RVT Course ID - requires org access
+const RVT_COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
 
 interface Course {
   id: string;
   title: string;
   description: string;
   module_count: number;
+  is_public?: boolean;
 }
 
 interface UserProgress {
@@ -27,6 +34,8 @@ interface UserProgress {
 const Dashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { isAdmin, isDispensaryManager } = useUserRole();
+  const { hasAccess: hasOrgAccess, isLoading: orgAccessLoading } = useOrganizationAccess(user?.id);
   const [courses, setCourses] = useState<Course[]>([]);
   const [progress, setProgress] = useState<UserProgress[]>([]);
   const [certificates, setCertificates] = useState<any[]>([]);
@@ -138,7 +147,17 @@ const Dashboard = () => {
     return certificates.some(cert => cert.course_id === courseId);
   };
 
-  if (loading) {
+  // Check if user can access a specific course
+  const canAccessCourse = (courseId: string): boolean => {
+    // Admins and managers always have access
+    if (isAdmin || isDispensaryManager) return true;
+    // RVT course requires org access
+    if (courseId === RVT_COURSE_ID) return hasOrgAccess;
+    // Other courses - check if public or user has paid
+    return true; // Default to allowing access for non-RVT courses
+  };
+
+  if (loading || orgAccessLoading) {
     return <div className="flex justify-center p-8">Loading...</div>;
   }
 
@@ -205,6 +224,7 @@ const Dashboard = () => {
           const progressPercent = getCourseProgress(course.id);
           const completed = isCourseCompleted(course.id);
           const certified = hasCertificate(course.id);
+          const hasAccess = canAccessCourse(course.id);
 
           return (
             <Card key={course.id}>
@@ -231,12 +251,34 @@ const Dashboard = () => {
                       </span>
                     </div>
                   </div>
-                  <Button 
-                    onClick={() => navigate('/course')}
-                    className="bg-green-600 hover:bg-green-700"
-                  >
-                    {progressPercent > 0 ? 'Continue' : 'Start Course'}
-                  </Button>
+                  
+                  {/* Conditionally render button based on access */}
+                  {hasAccess ? (
+                    <Button 
+                      onClick={() => navigate('/course')}
+                      className="bg-green-600 hover:bg-green-700"
+                    >
+                      {progressPercent > 0 ? 'Continue' : 'Start Course'}
+                    </Button>
+                  ) : (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button 
+                            variant="outline"
+                            className="border-amber-300 text-amber-700 hover:bg-amber-50"
+                            onClick={() => navigate('/course')}
+                          >
+                            <Lock className="h-4 w-4 mr-2" />
+                            Employer Access Required
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Contact your training coordinator to get access</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
                 </div>
               </CardHeader>
               <CardContent>
@@ -250,8 +292,21 @@ const Dashboard = () => {
                     {course.module_count} modules • {progressPercent === 100 ? 'Completed' : 'In Progress'}
                   </p>
                   
-                  {/* Learning path guidance */}
-                  {progressPercent === 0 && (
+                  {/* Access gate message for locked courses */}
+                  {!hasAccess && (
+                    <div className="mt-3 p-3 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-200 dark:border-amber-800">
+                      <h4 className="text-sm font-medium text-amber-800 dark:text-amber-200 mb-1 flex items-center gap-2">
+                        <Building2 className="h-4 w-4" />
+                        Employer Access Required
+                      </h4>
+                      <p className="text-xs text-amber-700 dark:text-amber-300">
+                        Ask your training coordinator to assign you a seat, or purchase individual access.
+                      </p>
+                    </div>
+                  )}
+                  
+                  {/* Learning path guidance - only show if has access */}
+                  {hasAccess && progressPercent === 0 && (
                     <div className="mt-3 p-3 bg-blue-50 rounded-lg">
                       <h4 className="text-sm font-medium text-blue-800 mb-1">
                         Getting Started
@@ -262,7 +317,7 @@ const Dashboard = () => {
                     </div>
                   )}
                   
-                  {progressPercent > 0 && progressPercent < 100 && (
+                  {hasAccess && progressPercent > 0 && progressPercent < 100 && (
                     <div className="mt-3 p-3 bg-orange-50 rounded-lg">
                       <h4 className="text-sm font-medium text-orange-800 mb-1">
                         Keep Going!
