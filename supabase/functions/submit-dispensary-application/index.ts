@@ -108,33 +108,64 @@ serve(async (req) => {
 
     const validatedData = validationResult.data;
 
-    // Check for duplicate email submission
+    // Check for duplicate email submission - use case-insensitive comparison to match constraint
     const { data: existingApp } = await supabase
       .from('dispensary_applications')
       .select('id, application_status, created_at')
-      .eq('contact_email', validatedData.contactEmail)
+      .ilike('contact_email', validatedData.contactEmail)
+      .in('application_status', ['pending', 'approved', 'under_review'])
       .maybeSingle();
 
     if (existingApp) {
       const daysSinceSubmission = (Date.now() - new Date(existingApp.created_at).getTime()) / (1000 * 60 * 60 * 24);
       
-      // Allow resubmission if application was rejected or archived AND it's been at least 7 days
-      const canResubmit = ['rejected', 'archived'].includes(existingApp.application_status) && daysSinceSubmission >= 7;
+      console.warn(`[DUPLICATE] Active application exists for ${validatedData.contactEmail} (status: ${existingApp.application_status}, days: ${Math.floor(daysSinceSubmission)})`);
+      return new Response(
+        JSON.stringify({ 
+          error: 'An application with this email is already being processed. Please check your email for updates or contact support.',
+          code: 'DUPLICATE_APPLICATION',
+          applicationId: existingApp.id,
+          status: existingApp.application_status
+        }),
+        { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Check for rejected/archived applications that might need cleanup before resubmission
+    const { data: oldApp } = await supabase
+      .from('dispensary_applications')
+      .select('id, application_status, created_at')
+      .ilike('contact_email', validatedData.contactEmail)
+      .in('application_status', ['rejected', 'archived'])
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    // If there's an old rejected/archived application, update its email to allow resubmission
+    if (oldApp) {
+      const daysSinceSubmission = (Date.now() - new Date(oldApp.created_at).getTime()) / (1000 * 60 * 60 * 24);
       
-      if (!canResubmit) {
-        console.warn(`[DUPLICATE] Application already exists for ${validatedData.contactEmail} (status: ${existingApp.application_status}, days: ${Math.floor(daysSinceSubmission)})`);
+      if (daysSinceSubmission < 7) {
+        console.warn(`[RESUBMIT_TOO_SOON] Must wait 7 days for ${validatedData.contactEmail} (days: ${Math.floor(daysSinceSubmission)})`);
         return new Response(
           JSON.stringify({ 
-            error: 'An application with this email already exists. Please check your email for updates.',
-            code: 'DUPLICATE_APPLICATION',
-            applicationId: existingApp.id,
-            status: existingApp.application_status
+            error: `Please wait ${Math.ceil(7 - daysSinceSubmission)} more days before resubmitting.`,
+            code: 'RESUBMIT_TOO_SOON',
+            daysRemaining: Math.ceil(7 - daysSinceSubmission)
           }),
-          { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
       
-      console.log(`[RESUBMISSION] Allowing resubmission for ${validatedData.contactEmail} (previous status: ${existingApp.application_status})`);
+      // Archive the old email to allow resubmission
+      console.log(`[RESUBMISSION] Archiving old application ${oldApp.id} to allow resubmission`);
+      await supabase
+        .from('dispensary_applications')
+        .update({ 
+          contact_email: `archived_${Date.now()}_${validatedData.contactEmail}`,
+          application_status: 'archived'
+        })
+        .eq('id', oldApp.id);
     }
 
     // Format phone number
@@ -166,6 +197,17 @@ serve(async (req) => {
 
     if (insertError) {
       console.error('[DATABASE ERROR]', insertError);
+      
+      // Handle unique constraint violation with better message
+      if (insertError.code === '23505') {
+        return new Response(
+          JSON.stringify({ 
+            error: 'An application with this email already exists. Please use a different email or contact support.',
+            code: 'DUPLICATE_EMAIL'
+          }),
+          { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
       
       if (insertError.code === '23514') {
         return new Response(
