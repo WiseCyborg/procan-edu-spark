@@ -22,6 +22,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { MobileBottomNav } from '@/components/navigation/MobileBottomNav';
 import Confetti from 'react-confetti';
 import { InternalChatbot } from '@/components/chat/InternalChatbot';
+import { NextActionBanner } from '@/components/guidance/NextActionBanner';
 
 const COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
 const TOTAL_MODULES = 24;
@@ -200,6 +201,9 @@ const StudentDashboard = () => {
           </Button>
         )}
       </div>
+
+      {/* Role-aware next action guidance */}
+      <NextActionBanner className="mb-4" />
 
       {/* Resume Prompt */}
       <ResumePrompt />

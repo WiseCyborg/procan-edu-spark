@@ -19,6 +19,7 @@ import { SupportRequestsPanel } from '@/components/admin/SupportRequestsPanel';
 import { E2EValidationReport } from '@/components/admin/E2EValidationReport';
 import { Loader2 } from 'lucide-react';
 import { InternalChatbot } from '@/components/chat/InternalChatbot';
+import { NextActionBanner } from '@/components/guidance/NextActionBanner';
 import { supabase } from '@/integrations/supabase/client';
 import { useEffect } from 'react';
 
@@ -105,6 +106,9 @@ const AdminMissionControl = () => {
           </div>
           <Badge variant="destructive" className="ml-auto">Admin Only</Badge>
         </div>
+
+        {/* Admin next action guidance */}
+        <NextActionBanner variant="compact" className="mb-2" />
 
         {/* Action Center - Critical Alerts */}
         {(criticalAlerts.length > 0 || warningAlerts.length > 0) && (

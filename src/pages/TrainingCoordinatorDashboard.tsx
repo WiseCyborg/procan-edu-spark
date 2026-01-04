@@ -24,6 +24,7 @@ import { AiLeanCoach } from '@/components/ailean/AiLeanCoach';
 import { MobileBottomNav } from '@/components/navigation/MobileBottomNav';
 import { ResumePrompt } from '@/components/journey/ResumePrompt';
 import { InternalChatbot } from '@/components/chat/InternalChatbot';
+import { NextActionBanner } from '@/components/guidance/NextActionBanner';
 import { EmployeePacketExportButton } from '@/components/compliance/EmployeePacketExportButton';
 import { IncidentModuleMappingAdmin } from '@/components/compliance/IncidentModuleMappingAdmin';
 import { ComplianceDashboardWidget } from '@/components/compliance/ComplianceDashboardWidget';
@@ -188,6 +189,9 @@ const TrainingCoordinatorDashboard = () => {
         <h1 className="text-2xl md:text-3xl font-bold text-foreground">Training Coordinator Portal</h1>
         <p className="text-sm md:text-base text-muted-foreground">Manage employee training and progress</p>
       </div>
+
+      {/* Role-aware next action guidance */}
+      <NextActionBanner className="mb-2" />
 
       {/* Resume Prompt */}
       <ResumePrompt />
