@@ -3,6 +3,12 @@ project_id = "zhmpwczrvitomsxjwpzc"
 [functions.configure-encryption-key]
 verify_jwt = false
 
+[functions.store-private-profile]
+verify_jwt = true
+
+[functions.get-private-profile]
+verify_jwt = true
+
 [functions.request-procann-support]
 verify_jwt = true
 
