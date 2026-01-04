@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Copy, RefreshCw, Mail, Plus, FileText, Edit, MoreVertical, Ban, Power, Trash2, Users } from 'lucide-react';
+import { Copy, RefreshCw, Mail, Plus, FileText, Edit, MoreVertical, Ban, Power, Trash2, Users, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -34,6 +34,7 @@ interface DispensaryActionsMenuProps {
   onRefetch?: () => void;
   onSuspend?: () => void;
   onDelete?: () => void;
+  onApprove?: () => void;
 }
 
 export const DispensaryActionsMenu = ({ 
@@ -42,7 +43,8 @@ export const DispensaryActionsMenu = ({
   managerRegistered = false,
   onRefetch,
   onSuspend,
-  onDelete
+  onDelete,
+  onApprove
 }: DispensaryActionsMenuProps) => {
   const [loading, setLoading] = useState<string | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -152,6 +154,7 @@ export const DispensaryActionsMenu = ({
     }
   };
 
+  const isPending = application.application_status === 'pending';
   const isApproved = application.application_status === 'approved';
   const isSuspended = application.application_status === 'suspended';
   const hasOrganization = !!application.organization_id;
@@ -239,6 +242,16 @@ export const DispensaryActionsMenu = ({
           <DropdownMenuLabel className="text-xs text-muted-foreground">
             Status
           </DropdownMenuLabel>
+          
+          {isPending && (
+            <DropdownMenuItem
+              onClick={onApprove}
+              className="text-green-600"
+            >
+              <CheckCircle className="h-4 w-4 mr-2" />
+              Approve Dispensary
+            </DropdownMenuItem>
+          )}
           
           {isApproved && hasOrganization && (
             <DropdownMenuItem
