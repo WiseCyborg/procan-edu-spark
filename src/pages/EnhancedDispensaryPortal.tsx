@@ -78,7 +78,7 @@ const EnhancedDispensaryPortal: React.FC = () => {
     try {
       // Get current user's organization_id
       const { data: userOrgId, error: orgError } = await supabase
-        .rpc('get_user_organization_id', { user_uuid: user?.id });
+        .rpc('get_user_organization_id', { _user_id: user?.id });
 
       if (orgError || !userOrgId) {
         toast.error("Access Required", {
@@ -146,7 +146,7 @@ const EnhancedDispensaryPortal: React.FC = () => {
     try {
       // Get current user's organization
       const { data: userOrgId, error: orgError } = await supabase
-        .rpc('get_user_organization_id', { user_uuid: user?.id });
+        .rpc('get_user_organization_id', { _user_id: user?.id });
 
       if (orgError || !userOrgId) {
         throw new Error('Organization not found');
