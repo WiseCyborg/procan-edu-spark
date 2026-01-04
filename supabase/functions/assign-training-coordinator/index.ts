@@ -26,11 +26,33 @@ serve(async (req) => {
 
     console.log('Assigning training coordinator:', { organization_id, user_email, assigned_by });
 
+    // SECURITY: Verify the assigner identity from JWT (don't trust assigned_by from client)
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Authorization required' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid authorization' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // SECURITY: Use verified user ID, not client-provided assigned_by
+    const verifiedAssignerId = user.id;
+
     // Verify the assigner is a dispensary manager or admin
     const { data: assignerRoles } = await supabase
       .from('user_roles')
       .select('role')
-      .eq('user_id', assigned_by);
+      .eq('user_id', verifiedAssignerId);
 
     const hasPermission = assignerRoles?.some(
       r => r.role === 'admin' || r.role === 'dispensary_manager'
@@ -39,6 +61,20 @@ serve(async (req) => {
     if (!hasPermission) {
       return new Response(
         JSON.stringify({ error: 'Unauthorized: Only managers can assign coordinators' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // SECURITY: Verify manager has access to this organization
+    const { data: accessCheck } = await supabase.rpc('validate_caller_org_access', {
+      caller_user_id: verifiedAssignerId,
+      target_org_id: organization_id
+    });
+
+    if (!accessCheck) {
+      console.warn(`Unauthorized org access attempt: user ${verifiedAssignerId} -> org ${organization_id}`);
+      return new Response(
+        JSON.stringify({ error: 'Access denied to this organization' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -95,7 +131,7 @@ serve(async (req) => {
           email: user_email,
           role: 'training_coordinator',
           invitation_token: invitationToken,
-          inviter_id: assigned_by,
+          inviter_id: verifiedAssignerId,
           expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
           metadata: {
             invited_by_role: 'dispensary_manager',

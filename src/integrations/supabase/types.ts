@@ -6928,6 +6928,39 @@ export type Database = {
         }
         Relationships: []
       }
+      token_redemptions: {
+        Row: {
+          id: string
+          ip_address: string | null
+          metadata: Json | null
+          redeemed_at: string
+          redeemed_by: string | null
+          token_hash: string
+          token_type: string
+          user_agent: string | null
+        }
+        Insert: {
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          redeemed_at?: string
+          redeemed_by?: string | null
+          token_hash: string
+          token_type: string
+          user_agent?: string | null
+        }
+        Update: {
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          redeemed_at?: string
+          redeemed_by?: string | null
+          token_hash?: string
+          token_type?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       trainer_certifications: {
         Row: {
           authorized_at: string | null
@@ -8435,6 +8468,10 @@ export type Database = {
         Returns: string
       }
       calculate_slo_metrics: { Args: never; Returns: undefined }
+      check_access_key_rate_limit: {
+        Args: { user_ip: string }
+        Returns: boolean
+      }
       check_email_circuit: {
         Args: never
         Returns: {
@@ -8598,6 +8635,19 @@ export type Database = {
           used_seats: number
         }[]
       }
+      get_certificate_secure: {
+        Args: { cert_id: string }
+        Returns: {
+          certificate_number: string
+          course_id: string
+          expiry_date: string
+          id: string
+          is_revoked: boolean
+          issue_date: string
+          status: string
+          user_id: string
+        }[]
+      }
       get_database_stats: {
         Args: never
         Returns: {
@@ -8756,6 +8806,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_org_member: {
+        Args: { check_org_id: string; check_user_id: string }
+        Returns: boolean
+      }
       is_own_profile: {
         Args: { _profile_user_id: string; _user_id: string }
         Returns: boolean
@@ -8876,6 +8930,10 @@ export type Database = {
         }
         Returns: string
       }
+      safe_error_message: {
+        Args: { internal_error: string; public_message?: string }
+        Returns: string
+      }
       safe_upsert_learning_journey: {
         Args: {
           p_current_stage?: string
@@ -8925,6 +8983,10 @@ export type Database = {
       }
       user_can_view_profile: {
         Args: { _target_user_id: string; _viewer_id: string }
+        Returns: boolean
+      }
+      validate_caller_org_access: {
+        Args: { caller_user_id: string; target_org_id: string }
         Returns: boolean
       }
       validate_join_code_has_seats: {

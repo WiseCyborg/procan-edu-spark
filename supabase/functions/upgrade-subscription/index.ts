@@ -45,6 +45,20 @@ serve(async (req) => {
       );
     }
 
+    // SECURITY: Validate caller has access to this organization
+    const { data: accessCheck } = await supabaseClient.rpc('validate_caller_org_access', {
+      caller_user_id: user.id,
+      target_org_id: organization_id
+    });
+
+    if (!accessCheck) {
+      console.warn(`Unauthorized org access attempt: user ${user.id} -> org ${organization_id}`);
+      return new Response(
+        JSON.stringify({ error: "Access denied to this organization" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Validate the new tier exists
     const { data: tierData, error: tierError } = await supabaseClient
       .from("subscription_tiers")
