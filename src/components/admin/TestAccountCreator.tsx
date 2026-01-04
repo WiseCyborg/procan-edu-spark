@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { RoleBadge } from '@/components/ui/role-badge';
 import { Building2, Plus, Trash2, Copy, Loader2, Rocket, CheckCircle } from 'lucide-react';
 import { UserRole } from '@/hooks/useUserRole';
+import { SecureAdminUserService } from '@/services/SecureAdminUserService';
 
 interface TestAccountConfig {
   role: UserRole;
@@ -41,54 +42,35 @@ const TestAccountCreator = () => {
 
   const createTestAccount = async (config: TestAccountConfig): Promise<{ success: boolean; userId?: string; message?: string }> => {
     try {
-      // 1. Create auth user via admin API
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      // 1. Create auth user via SECURE edge function (not client-side admin API)
+      const result = await SecureAdminUserService.createUser({
         email: config.email,
         password: config.password,
-        email_confirm: true,
-        user_metadata: {
+        metadata: {
           first_name: config.firstName,
           last_name: config.lastName,
           organization_id: config.organizationId
-        }
+        },
+        organizationId: config.organizationId,
+        role: config.role,
       });
 
-      if (authError) {
-        console.error('Auth error:', authError);
-        return { success: false, message: authError.message };
+      if (!result.success) {
+        console.error('Auth error:', result.error);
+        return { success: false, message: result.error };
       }
 
-      if (!authData.user) {
+      const userId = result.data?.userId;
+      if (!userId) {
         return { success: false, message: 'Failed to create user' };
       }
 
-      // 2. Insert profile
-      const { error: profileError } = await supabase.from('profiles').insert({
-        user_id: authData.user.id,
-        first_name: config.firstName,
-        last_name: config.lastName,
-        organization_id: config.organizationId
-      });
-
-      if (profileError) {
-        console.error('Profile error:', profileError);
-        return { success: false, message: `Profile error: ${profileError.message}` };
-      }
-
-      // 3. Assign role
-      const { error: roleError } = await supabase.from('user_roles').insert({
-        user_id: authData.user.id,
-        role: config.role
-      });
-
-      if (roleError) {
-        console.error('Role error:', roleError);
-        return { success: false, message: `Role error: ${roleError.message}` };
-      }
-
-      // 4. Add test metadata
+      // Note: Profile, role, and metadata are now created by the edge function
+      // The SecureAdminUserService.createUser handles organizationId and role assignment
+      
+      // 2. Add test metadata (optional, non-critical)
       const { error: metadataError } = await supabase.from('user_metadata').insert({
-        user_id: authData.user.id,
+        user_id: userId,
         department: config.role === 'admin' ? 'Administration' : 'Operations',
         employee_id: `TEST-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
         tags: ['test_account', 'auto_generated']
@@ -98,7 +80,7 @@ const TestAccountCreator = () => {
         console.warn('Metadata error (non-critical):', metadataError);
       }
 
-      return { success: true, userId: authData.user.id };
+      return { success: true, userId };
     } catch (error) {
       console.error('Error creating test account:', error);
       return { success: false, message: error instanceof Error ? error.message : 'Unknown error' };
@@ -256,9 +238,9 @@ const TestAccountCreator = () => {
 
     setIsCreating(true);
     try {
-      // Delete all accounts with test_account tag
+      // Delete all accounts via secure edge function
       for (const account of createdAccounts) {
-        await supabase.auth.admin.deleteUser(account.userId);
+        await SecureAdminUserService.deleteUser(account.userId);
       }
 
       // Delete test organization if exists

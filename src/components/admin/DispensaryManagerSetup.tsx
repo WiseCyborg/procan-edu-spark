@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { SecureAdminUserService } from '@/services/SecureAdminUserService';
 import { 
   Building2, 
   UserPlus, 
@@ -80,46 +81,26 @@ const DispensaryManagerSetup = () => {
 
     setCreatingManager(true);
     try {
-      // Create dispensary manager user
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      // Create dispensary manager user via SECURE edge function (not client-side admin API)
+      const result = await SecureAdminUserService.createUser({
         email: managerEmail,
         password: managerPassword,
-        email_confirm: true,
-        user_metadata: {
+        metadata: {
           first_name: managerName.split(' ')[0],
           last_name: managerName.split(' ').slice(1).join(' ') || '',
           organization_id: selectedOrganization.id
-        }
+        },
+        organizationId: selectedOrganization.id,
+        role: 'dispensary_manager',
       });
 
-      if (authError) throw authError;
+      if (!result.success) throw new Error(result.error);
 
-      if (authData.user) {
-        // Insert profile
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            user_id: authData.user.id,
-            first_name: managerName.split(' ')[0],
-            last_name: managerName.split(' ').slice(1).join(' ') || '',
-            organization_id: selectedOrganization.id
-          });
-
-        if (profileError) {
-          console.error('Profile creation error:', profileError);
-        }
-
-        // Assign dispensary_manager role
-        const { error: roleError } = await supabase
-          .from('user_roles')
-          .insert({
-            user_id: authData.user.id,
-            role: 'dispensary_manager'
-          });
-
-        if (roleError) {
-          console.error('Role assignment error:', roleError);
-        }
+      if (result.data?.userId) {
+        const managerId = result.data.userId;
+        
+        // Note: Profile and role are now created by the edge function
+        // The SecureAdminUserService.createUser handles organizationId and role assignment
 
         // Send welcome email using existing email service
         try {
