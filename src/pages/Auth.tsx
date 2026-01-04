@@ -76,6 +76,7 @@ const JoinCodeEntry = () => {
 
 const Auth = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const role = searchParams.get('role');
   const mode = searchParams.get('mode');
   const tabParam = searchParams.get('tab');
@@ -109,7 +110,7 @@ const Auth = () => {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue={getDefaultTab()} className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="invite" className="flex items-center gap-1 text-xs sm:text-sm">
                   <Mail className="h-4 w-4" />
                   <span className="hidden sm:inline">Email</span> Invite
@@ -117,10 +118,6 @@ const Auth = () => {
                 <TabsTrigger value="code" className="flex items-center gap-1 text-xs sm:text-sm">
                   <Key className="h-4 w-4" />
                   <span className="hidden sm:inline">Join</span> Code
-                </TabsTrigger>
-                <TabsTrigger value="accesskey" className="flex items-center gap-1 text-xs sm:text-sm">
-                  <Building2 className="h-4 w-4" />
-                  Access Key
                 </TabsTrigger>
               </TabsList>
               
@@ -138,13 +135,6 @@ const Auth = () => {
                 </div>
                 <JoinCodeEntry />
               </TabsContent>
-
-              <TabsContent value="accesskey" className="mt-4">
-                <div className="text-center mb-4 text-sm text-muted-foreground">
-                  Enter your organization's access key (format: DISP-YYYY-XXXXXXXX)
-                </div>
-                <AccessKeyEntry />
-              </TabsContent>
             </Tabs>
             
             {/* Role routing info */}
@@ -152,6 +142,88 @@ const Auth = () => {
               <Info className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
               <p className="text-xs text-muted-foreground">
                 Your dashboard will open automatically based on your role after signing in.
+              </p>
+            </div>
+            
+            {/* Manager access key link */}
+            <div className="mt-4 text-center">
+              <p className="text-xs text-muted-foreground">
+                Are you a <strong>Dispensary Manager</strong> with an access key?{' '}
+                <button 
+                  onClick={() => navigate('/auth?role=dispensary_manager&tab=accesskey')}
+                  className="text-primary hover:underline"
+                >
+                  Register here
+                </button>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+  
+  // Dispensary Manager auth with Access Key
+  if (role === 'dispensary_manager') {
+    const showAccessKey = tabParam === 'accesskey';
+    
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/5 p-4">
+        <Card className="w-full max-w-lg">
+          <CardHeader className="text-center">
+            <div className="flex justify-center mb-2">
+              <Building2 className="h-10 w-10 text-primary" />
+            </div>
+            <CardTitle className="text-2xl">Manager Portal</CardTitle>
+            <CardDescription>
+              {showAccessKey 
+                ? 'Enter your organization access key to complete registration' 
+                : 'Sign in to manage your organization\'s training'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {showAccessKey ? (
+              <>
+                <div className="text-center mb-4 text-sm text-muted-foreground">
+                  Your access key was sent in your approval email (format: DISP-YYYY-XXXXXXXX)
+                </div>
+                <AccessKeyEntry />
+              </>
+            ) : (
+              <DispensaryManagerAuthForm />
+            )}
+            
+            {/* Toggle between modes */}
+            <div className="mt-6 text-center space-y-2">
+              {showAccessKey ? (
+                <p className="text-sm text-muted-foreground">
+                  Already have an account?{' '}
+                  <button 
+                    onClick={() => navigate('/auth?role=dispensary_manager')}
+                    className="text-primary hover:underline"
+                  >
+                    Sign in here
+                  </button>
+                </p>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Have an access key?{' '}
+                  <button 
+                    onClick={() => navigate('/auth?role=dispensary_manager&tab=accesskey')}
+                    className="text-primary hover:underline"
+                  >
+                    Register with access key
+                  </button>
+                </p>
+              )}
+              <p className="text-xs text-muted-foreground">
+                Looking to register as an employee?{' '}
+                <button 
+                  onClick={() => navigate('/auth')}
+                  className="text-primary hover:underline"
+                >
+                  Go to employee registration
+                </button>
               </p>
             </div>
           </CardContent>
@@ -167,8 +239,6 @@ const Auth = () => {
         return <AdminAuthForm />;
       case 'dispensary':
         return <DispensaryAuthForm />;
-      case 'dispensary_manager':
-        return <DispensaryManagerAuthForm />;
       default:
         return <SmartAuthForm />;
     }
