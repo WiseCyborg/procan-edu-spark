@@ -1904,6 +1904,7 @@ export type Database = {
           registration_completed: boolean | null
           registration_token: string | null
           registration_token_expires_at: string | null
+          registration_token_hash: string | null
           requested_credits: number | null
           reviewed_at: string | null
           reviewed_by: string | null
@@ -1938,6 +1939,7 @@ export type Database = {
           registration_completed?: boolean | null
           registration_token?: string | null
           registration_token_expires_at?: string | null
+          registration_token_hash?: string | null
           requested_credits?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -1972,6 +1974,7 @@ export type Database = {
           registration_completed?: boolean | null
           registration_token?: string | null
           registration_token_expires_at?: string | null
+          registration_token_hash?: string | null
           requested_credits?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -4683,6 +4686,42 @@ export type Database = {
           },
         ]
       }
+      profiles_private: {
+        Row: {
+          address_encrypted: string | null
+          created_at: string
+          dob_encrypted: string | null
+          emergency_contact_encrypted: string | null
+          encryption_version: number | null
+          mca_number_encrypted: string | null
+          phone_encrypted: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address_encrypted?: string | null
+          created_at?: string
+          dob_encrypted?: string | null
+          emergency_contact_encrypted?: string | null
+          encryption_version?: number | null
+          mca_number_encrypted?: string | null
+          phone_encrypted?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address_encrypted?: string | null
+          created_at?: string
+          dob_encrypted?: string | null
+          emergency_contact_encrypted?: string | null
+          encryption_version?: number | null
+          mca_number_encrypted?: string | null
+          phone_encrypted?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       push_subscriptions: {
         Row: {
           auth_key: string
@@ -6155,6 +6194,7 @@ export type Database = {
           expires_at: string
           id: string
           invitation_token: string
+          invitation_token_hash: string | null
           inviter_id: string | null
           metadata: Json | null
           organization_id: string | null
@@ -6171,6 +6211,7 @@ export type Database = {
           expires_at?: string
           id?: string
           invitation_token: string
+          invitation_token_hash?: string | null
           inviter_id?: string | null
           metadata?: Json | null
           organization_id?: string | null
@@ -6187,6 +6228,7 @@ export type Database = {
           expires_at?: string
           id?: string
           invitation_token?: string
+          invitation_token_hash?: string | null
           inviter_id?: string | null
           metadata?: Json | null
           organization_id?: string | null
@@ -8543,6 +8585,7 @@ export type Database = {
         }[]
       }
       deallocate_seat: { Args: { seat_id_param: string }; Returns: boolean }
+      decrypt_pii: { Args: { encrypted_data: string }; Returns: string }
       delete_dispensary_application: {
         Args: { p_application_id: string }
         Returns: {
@@ -8563,6 +8606,7 @@ export type Database = {
           urgency_score: number
         }[]
       }
+      encrypt_pii: { Args: { plaintext: string }; Returns: string }
       expire_test_organizations: { Args: never; Returns: undefined }
       fix_manager_registration: {
         Args: { p_application_id: string; p_user_email: string }
@@ -8749,6 +8793,17 @@ export type Database = {
         Args: { org_id: string }
         Returns: Json
       }
+      get_private_profile: {
+        Args: { p_user_id: string }
+        Returns: {
+          address: string
+          dob: string
+          emergency_contact: string
+          mca_number: string
+          phone: string
+          user_id: string
+        }[]
+      }
       get_profile_change_history: {
         Args: { _limit?: number; _user_id: string }
         Returns: {
@@ -8794,6 +8849,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      hash_token: { Args: { token: string }; Returns: string }
       is_conversation_participant: {
         Args: { _conversation_id: string; _user_id: string }
         Returns: boolean
@@ -8981,6 +9037,17 @@ export type Database = {
         }
         Returns: Json
       }
+      upsert_private_profile: {
+        Args: {
+          p_address?: string
+          p_dob?: string
+          p_emergency_contact?: string
+          p_mca_number?: string
+          p_phone?: string
+          p_user_id: string
+        }
+        Returns: undefined
+      }
       user_can_view_profile: {
         Args: { _target_user_id: string; _viewer_id: string }
         Returns: boolean
@@ -9013,6 +9080,10 @@ export type Database = {
           issue_date: string
           status: string
         }[]
+      }
+      verify_token_hash: {
+        Args: { stored_hash: string; token: string }
+        Returns: boolean
       }
     }
     Enums: {
