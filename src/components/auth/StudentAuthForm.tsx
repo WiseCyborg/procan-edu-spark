@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { invokePublicFunction } from '@/lib/publicEdgeFunctions';
-import { Loader2, Eye, EyeOff } from 'lucide-react';
+import { Loader2, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { employeeRegistrationSchema } from '@/lib/validation-schemas';
 import { sanitizeFormData } from '@/lib/sanitization';
@@ -17,6 +17,14 @@ import { PasswordStrengthIndicator } from '@/components/ui/password-strength-ind
 import type { z } from 'zod';
 
 type FormData = z.infer<typeof employeeRegistrationSchema>;
+
+interface JoinCodeValidation {
+  valid: boolean;
+  organizationId?: string;
+  organizationName?: string;
+  error?: string;
+  message?: string;
+}
 
 const StudentAuthForm = () => {
   const [searchParams] = useSearchParams();
@@ -27,6 +35,8 @@ const StudentAuthForm = () => {
   const [isRegistering, setIsRegistering] = useState(forceRegister || !!invitationToken);
   const [isLoadingInvitation, setIsLoadingInvitation] = useState(false);
   const [invitationData, setInvitationData] = useState<any>(null);
+  const [joinCodeValidation, setJoinCodeValidation] = useState<JoinCodeValidation | null>(null);
+  const [isValidatingCode, setIsValidatingCode] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -38,6 +48,7 @@ const StudentAuthForm = () => {
   });
 
   const regPassword = watch('password');
+  const joinCode = watch('joinCode');
 
   useEffect(() => {
     // Handle invite token
@@ -58,8 +69,41 @@ const StudentAuthForm = () => {
     else if (prefilledCode) {
       setValue('joinCode', prefilledCode);
       setIsRegistering(true);
+      // Validate the prefilled code
+      validateJoinCode(prefilledCode);
     }
   }, [invitationToken, prefilledCode, setValue]);
+
+  // Validate join code when it changes (debounced)
+  useEffect(() => {
+    if (!invitationData && joinCode && joinCode.length >= 6) {
+      const timer = setTimeout(() => {
+        validateJoinCode(joinCode);
+      }, 500);
+      return () => clearTimeout(timer);
+    } else if (!joinCode || joinCode.length < 6) {
+      setJoinCodeValidation(null);
+    }
+  }, [joinCode, invitationData]);
+
+  const validateJoinCode = async (code: string) => {
+    if (!code || code.length < 6) return;
+    
+    setIsValidatingCode(true);
+    try {
+      const { data, error } = await invokePublicFunction('validate-join-code', { code: code.toUpperCase() });
+      
+      if (error) {
+        setJoinCodeValidation({ valid: false, error: 'Failed to validate code' });
+      } else {
+        setJoinCodeValidation(data as JoinCodeValidation);
+      }
+    } catch (err) {
+      setJoinCodeValidation({ valid: false, error: 'Validation error' });
+    } finally {
+      setIsValidatingCode(false);
+    }
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,15 +120,33 @@ const StudentAuthForm = () => {
   };
 
   const onSubmit = async (data: FormData) => {
+    // If using join code (not invitation), validate it first
+    if (!invitationData && data.joinCode) {
+      if (!joinCodeValidation?.valid) {
+        toast({ title: "Invalid Join Code", description: joinCodeValidation?.error || "Please enter a valid join code", variant: "destructive" });
+        return;
+      }
+    }
+
     const sanitizedData = sanitizeFormData(data);
+    
+    // Get organization data from either invitation or join code validation
+    const organizationId = invitationData?.organizationId || joinCodeValidation?.organizationId;
+    const organizationName = invitationData?.organizationName || joinCodeValidation?.organizationName;
+
+    if (!organizationId || !organizationName) {
+      toast({ title: "Registration Error", description: "Organization information is missing. Please check your join code or invitation.", variant: "destructive" });
+      return;
+    }
+
     try {
       const { data: result, error } = await invokePublicFunction('register-with-seat-allocation', {
         ...sanitizedData,
-        organizationId: invitationData?.organizationId,
-        organizationName: invitationData?.organizationName,
+        organizationId,
+        organizationName,
         invitationToken: invitationData ? invitationToken : undefined
       });
-      if (error || result?.error) throw new Error(result?.error || 'Registration failed');
+      if (error || result?.error) throw new Error(result?.error || error?.message || 'Registration failed');
       toast({ title: "Account Created!", description: "Redirecting..." });
       setTimeout(() => window.location.href = '/onboarding/profile', 2000);
     } catch (error: any) {
@@ -135,8 +197,28 @@ const StudentAuthForm = () => {
                 {errors.phone && <p className="text-sm text-destructive">{errors.phone.message}</p>}
               </div>
               {!invitationData && (
-                <div><Label>Join Code *</Label><Input {...register('joinCode')} placeholder="XXXXXXXX" className="uppercase" maxLength={8} />
+                <div>
+                  <Label>Join Code *</Label>
+                  <div className="relative">
+                    <Input {...register('joinCode')} placeholder="XXXXXXXX" className="uppercase" maxLength={12} />
+                    {isValidatingCode && (
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                      </div>
+                    )}
+                    {joinCodeValidation?.valid && (
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                        <CheckCircle2 className="h-4 w-4 text-green-600" />
+                      </div>
+                    )}
+                  </div>
                   {errors.joinCode && <p className="text-sm text-destructive">{errors.joinCode.message}</p>}
+                  {joinCodeValidation?.valid && joinCodeValidation.organizationName && (
+                    <p className="text-sm text-green-600 mt-1">✓ Joining: {joinCodeValidation.organizationName}</p>
+                  )}
+                  {joinCodeValidation && !joinCodeValidation.valid && (
+                    <p className="text-sm text-destructive mt-1">{joinCodeValidation.error || joinCodeValidation.message}</p>
+                  )}
                 </div>
               )}
               <div><Label>Password *</Label>
@@ -149,7 +231,7 @@ const StudentAuthForm = () => {
                 {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
                 <PasswordStrengthIndicator password={regPassword || ''} showRequirements={false} />
               </div>
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
+              <Button type="submit" className="w-full" disabled={isSubmitting || (!invitationData && !joinCodeValidation?.valid)}>
                 {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Registering...</> : 'Register'}
               </Button>
               <Button type="button" variant="link" className="w-full" onClick={() => setIsRegistering(false)}>Have an account? Login</Button>
