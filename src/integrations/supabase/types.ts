@@ -8503,6 +8503,10 @@ export type Database = {
           total_size: string
         }[]
       }
+      get_highest_role: {
+        Args: { p_user_id: string }
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
       get_jobs_to_process: {
         Args: { batch_size?: number }
         Returns: {
@@ -8620,6 +8624,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      has_management_role: { Args: { p_user_id: string }; Returns: boolean }
       has_permission: {
         Args: {
           _permission: Database["public"]["Enums"]["admin_permission"]
@@ -8737,6 +8742,21 @@ export type Database = {
         }[]
       }
       run_pipeline_health_check: { Args: never; Returns: Json }
+      safe_assign_role: {
+        Args: {
+          p_role: Database["public"]["Enums"]["app_role"]
+          p_user_id: string
+        }
+        Returns: boolean
+      }
+      safe_assign_seat_to_user: {
+        Args: {
+          p_course_id?: string
+          p_organization_id: string
+          p_user_id: string
+        }
+        Returns: string
+      }
       schedule_if_missing: {
         Args: { p_jobname: string; p_spec: string; p_sql: string }
         Returns: undefined
