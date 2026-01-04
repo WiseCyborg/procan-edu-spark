@@ -1,5 +1,8 @@
 project_id = "zhmpwczrvitomsxjwpzc"
 
+[functions.configure-encryption-key]
+verify_jwt = false
+
 [functions.request-procann-support]
 verify_jwt = true
 
