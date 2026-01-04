@@ -56,6 +56,7 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { EmailDeliveryStatus } from './EmailDeliveryStatus';
 import { DispensaryActionsMenu } from './DispensaryActionsMenu';
+import { RoleAssignmentSection, type RoleAssignment } from './RoleAssignmentSection';
 
 interface DispensaryApplication {
   id: string;
@@ -88,7 +89,10 @@ const DispensaryApplicationManager = () => {
     joinCode: string;
     emailSent: boolean;
     emailError: string | null;
+    invitesSent?: number;
+    invitesFailed?: number;
   } | null>(null);
+  const [roleAssignments, setRoleAssignments] = useState<RoleAssignment[]>([]);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [suspendDialogOpen, setSuspendDialogOpen] = useState(false);
   const [actionTarget, setActionTarget] = useState<DispensaryApplication | null>(null);
@@ -119,8 +123,8 @@ const DispensaryApplicationManager = () => {
     }
   };
 
-  const approveApplication = async (applicationId: string, credits: number = 10) => {
-    console.log('[APPROVAL] Starting approval process', { applicationId, credits, timestamp: new Date().toISOString() });
+  const approveApplication = async (applicationId: string, credits: number = 10, assignments: RoleAssignment[] = []) => {
+    console.log('[APPROVAL] Starting approval process', { applicationId, credits, assignments, timestamp: new Date().toISOString() });
     
     // Relaxed rate limit for bulk admin operations: 50 approvals per hour
     const securityCheckPassed = await performSecurityCheck('dispensary_approval');
@@ -162,19 +166,19 @@ const DispensaryApplicationManager = () => {
       console.log('[APPROVAL] Session valid, calling edge function');
 
       // Step 1: Creating organization via edge function
-      setApprovalStep('Creating organization...');
-      console.log('[APPROVAL] Step 1: Calling approve-application edge function');
+      setApprovalStep(assignments.length > 0 ? 'Creating organization & sending invites...' : 'Creating organization...');
+      console.log('[APPROVAL] Step 1: Calling approve-with-roles edge function');
 
       // Generate idempotency key for this approval request
       const idempotencyKey = uuidv4();
       console.log('[APPROVAL] Using idempotency key:', idempotencyKey);
 
-      // Call edge function instead of RPC directly
-      const { data, error } = await supabase.functions.invoke('approve-application', {
+      // Call the new approve-with-roles edge function
+      const { data, error } = await supabase.functions.invoke('approve-with-roles', {
         body: {
           application_id: applicationId,
-          credits,
-          idempotency_key: idempotencyKey
+          idempotency_key: idempotencyKey,
+          assignments
         }
       });
 
@@ -320,22 +324,30 @@ const DispensaryApplicationManager = () => {
         accessKey: result.access_key,
         joinCode: result.join_code || 'N/A',
         emailSent,
-        emailError
+        emailError,
+        invitesSent: result.invites_sent || 0,
+        invitesFailed: result.invites_failed || 0
       });
+
+      // Clear role assignments after successful approval
+      setRoleAssignments([]);
 
       setApprovalStep('');
       console.log('[APPROVAL] Process COMPLETE', { 
         organizationId: result.organization_id,
         purchaseId: result.purchase_id,
         emailSent,
-        hasError: !!emailError
+        hasError: !!emailError,
+        invitesSent: result.invites_sent,
+        invitesFailed: result.invites_failed
       });
       
+      const inviteMsg = result.invites_sent > 0 ? ` ${result.invites_sent} role invite(s) sent.` : '';
       toast({
         title: emailSent ? "Application Approved ✅" : "Application Approved ⚠️",
         description: emailSent 
-          ? `Organization created with ${credits} seats. Approval email sent to ${application.contact_email}.`
-          : `Organization created with ${credits} seats. Email failed - please resend manually.`,
+          ? `Organization created with ${credits} seats. Approval email sent.${inviteMsg}`
+          : `Organization created with ${credits} seats. Email failed - please resend manually.${inviteMsg}`,
         duration: emailSent ? 6000 : 10000,
       });
       
@@ -1344,16 +1356,44 @@ const DispensaryApplicationManager = () => {
                           />
                         </div>
 
+                        {/* Role Assignment Section - Only show for pending applications */}
+                        {application.application_status === 'pending' && (
+                          <div className="border rounded-lg p-4 bg-muted/30">
+                            <RoleAssignmentSection
+                              defaultEmail={application.contact_email}
+                              assignments={roleAssignments}
+                              onAssignmentsChange={setRoleAssignments}
+                              disabled={isProcessing}
+                            />
+                          </div>
+                        )}
+
+                        {/* Invites Summary in Success Card */}
+                        {approvalData && (approvalData.invitesSent || 0) > 0 && (
+                          <div className="flex items-center gap-2 text-sm text-green-700">
+                            <CheckCircle className="h-4 w-4" />
+                            <span>{approvalData.invitesSent} role invite(s) sent successfully</span>
+                            {(approvalData.invitesFailed || 0) > 0 && (
+                              <span className="text-yellow-600">
+                                ({approvalData.invitesFailed} failed)
+                              </span>
+                            )}
+                          </div>
+                        )}
+
                         <div className="flex gap-2 pt-4">
                           {application.application_status === 'pending' && (
                             <>
                               <Button
-                                onClick={() => approveApplication(application.id, 10)}
+                                onClick={() => approveApplication(application.id, application.requested_credits || 10, roleAssignments)}
                                 disabled={isProcessing}
                                 className="bg-green-600 hover:bg-green-700"
                               >
                                 <CheckCircle className="h-4 w-4 mr-1" />
-                                Approve (10 Credits)
+                                {roleAssignments.length > 0 
+                                  ? `Approve & Send ${roleAssignments.length} Invite(s)`
+                                  : `Approve (${application.requested_credits || 10} Credits)`
+                                }
                               </Button>
                               <Button
                                 variant="destructive"

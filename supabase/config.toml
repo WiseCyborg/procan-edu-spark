@@ -494,3 +494,9 @@ verify_jwt = true
 
 [functions.admin-user-management]
 verify_jwt = true
+
+[functions.approve-with-roles]
+verify_jwt = true
+
+[functions.accept-org-invite]
+verify_jwt = true
