@@ -37,6 +37,7 @@ import Certificates from "./pages/Certificates";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import Payment from "./pages/Payment";
 import Dashboard from "./components/dashboard/Dashboard";
+import SmartDashboardRouter from "./components/routing/SmartDashboardRouter";
 import Header from "./components/layout/Header";
 import DraggableVoiceAssistant from "./components/chat/DraggableVoiceAssistant";
 import PurchaseSeats from "./pages/PurchaseSeats";
