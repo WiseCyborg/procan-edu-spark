@@ -35,6 +35,7 @@ import EnhancedCourseModule from "./pages/Course/EnhancedCourseModule";
 import FinalExam from "./pages/Course/FinalExam";
 import Certificates from "./pages/Certificates";
 import PaymentSuccess from "./pages/PaymentSuccess";
+import Payment from "./pages/Payment";
 import Dashboard from "./components/dashboard/Dashboard";
 import Header from "./components/layout/Header";
 import DraggableVoiceAssistant from "./components/chat/DraggableVoiceAssistant";
@@ -296,6 +297,7 @@ const AppRoutesLayout = () => {
               </ProtectedRoute>
             } />
             <Route path="/org/apply" element={<DispensaryApplication />} />
+            <Route path="/payment" element={<Payment />} />
             <Route path="/register/manager" element={<ManagerRegistration />} />
             <Route path="/manager-registration" element={<Navigate to="/register/manager" replace />} />
             <Route path="/get-started" element={<GetStarted />} />
