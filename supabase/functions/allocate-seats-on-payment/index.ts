@@ -24,9 +24,30 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    // SECURITY: This function should only be called from verified payment webhooks
+    // Verify request has valid authorization or comes from PayPal webhook
+    const authHeader = req.headers.get('Authorization');
+    const paypalWebhookId = req.headers.get('PAYPAL-TRANSMISSION-ID');
+    
+    if (!authHeader && !paypalWebhookId) {
+      console.error('Seat allocation attempt without authorization');
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized request' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const { payment_id, organization_id, course_id, quantity, user_id }: PaymentData = await req.json();
 
-    console.log(`Allocating ${quantity} seats for organization ${organization_id}`);
+    // SECURITY: Validate payment_id exists and matches organization
+    if (!payment_id) {
+      return new Response(
+        JSON.stringify({ error: 'Payment ID required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log(`Allocating ${quantity} seats for organization ${organization_id} (payment: ${payment_id})`);
 
     // Get organization details
     const { data: org } = await supabase

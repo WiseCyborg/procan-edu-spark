@@ -16,7 +16,42 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    // SECURITY: Verify caller identity from JWT
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Authorization required' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid authorization' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const { organization_id, report_type = 'full', format = 'json' } = await req.json();
+
+    // SECURITY: Validate caller has access to requested organization
+    if (organization_id) {
+      const { data: accessCheck } = await supabase.rpc('validate_caller_org_access', {
+        caller_user_id: user.id,
+        target_org_id: organization_id
+      });
+
+      if (!accessCheck) {
+        console.warn(`Unauthorized report access attempt: user ${user.id} -> org ${organization_id}`);
+        return new Response(
+          JSON.stringify({ error: 'Access denied to this organization' }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
 
     // Generate compliance report using RPC
     const { data: reportData, error } = await supabase
