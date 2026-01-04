@@ -1,14 +1,16 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 interface ProxySession {
+  id: string;
   originalAdminId: string;
   originalAdminEmail: string;
   targetUserId: string;
   targetUserEmail: string;
   targetUserName: string;
   startedAt: Date;
+  expiresAt: Date;
 }
 
 interface AdminProxyContextType {
@@ -21,24 +23,53 @@ interface AdminProxyContextType {
 
 const AdminProxyContext = createContext<AdminProxyContextType | undefined>(undefined);
 
-const PROXY_SESSION_KEY = 'rvt_admin_proxy_session';
-
 export const AdminProxyProvider = ({ children }: { children: ReactNode }) => {
   const { toast } = useToast();
-  const [proxySession, setProxySession] = useState<ProxySession | null>(() => {
-    // Restore proxy session from sessionStorage on mount
-    const stored = sessionStorage.getItem(PROXY_SESSION_KEY);
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        return { ...parsed, startedAt: new Date(parsed.startedAt) };
-      } catch {
-        sessionStorage.removeItem(PROXY_SESSION_KEY);
-      }
-    }
-    return null;
-  });
+  const [proxySession, setProxySession] = useState<ProxySession | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Check for active proxy session on mount (server-side validation)
+  useEffect(() => {
+    const checkActiveSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user) return;
+
+        // Check if current user has an active proxy session as admin
+        const { data: activeSession } = await supabase
+          .from('admin_proxy_sessions')
+          .select('*')
+          .eq('admin_user_id', session.user.id)
+          .eq('is_active', true)
+          .gt('expires_at', new Date().toISOString())
+          .maybeSingle();
+
+        if (activeSession) {
+          // Fetch target user info
+          const { data: targetProfile } = await supabase
+            .from('profiles')
+            .select('first_name, last_name, email_cache')
+            .eq('user_id', activeSession.target_user_id)
+            .maybeSingle();
+
+          setProxySession({
+            id: activeSession.id,
+            originalAdminId: activeSession.admin_user_id,
+            originalAdminEmail: session.user.email || '',
+            targetUserId: activeSession.target_user_id,
+            targetUserEmail: targetProfile?.email_cache || '',
+            targetUserName: targetProfile ? `${targetProfile.first_name || ''} ${targetProfile.last_name || ''}`.trim() : '',
+            startedAt: new Date(activeSession.created_at),
+            expiresAt: new Date(activeSession.expires_at),
+          });
+        }
+      } catch (err) {
+        console.error('[AdminProxy] Error checking session:', err);
+      }
+    };
+
+    checkActiveSession();
+  }, []);
 
   const startProxySession = useCallback(async (targetUserId: string): Promise<boolean> => {
     setIsLoading(true);
@@ -62,6 +93,7 @@ export const AdminProxyProvider = ({ children }: { children: ReactNode }) => {
       };
 
       // Call edge function to generate impersonation session
+      // The edge function creates the server-side session record
       const { data, error } = await supabase.functions.invoke('admin-impersonate-user', {
         body: { targetUserId },
       });
@@ -76,18 +108,18 @@ export const AdminProxyProvider = ({ children }: { children: ReactNode }) => {
         return false;
       }
 
-      // Create proxy session record
+      // Create proxy session record in state (session is stored server-side by edge function)
       const newProxySession: ProxySession = {
+        id: data.session_id,
         originalAdminId: originalAdmin.id,
         originalAdminEmail: originalAdmin.email,
         targetUserId,
         targetUserEmail: data.target_email,
         targetUserName: data.target_name || data.target_email,
         startedAt: new Date(),
+        expiresAt: new Date(Date.now() + 60 * 60 * 1000), // 1 hour
       };
 
-      // Store in sessionStorage so it persists across page loads
-      sessionStorage.setItem(PROXY_SESSION_KEY, JSON.stringify(newProxySession));
       setProxySession(newProxySession);
 
       // Use verifyOtp to sign in as the target user
@@ -98,7 +130,6 @@ export const AdminProxyProvider = ({ children }: { children: ReactNode }) => {
 
       if (otpError) {
         console.error('[AdminProxy] OTP verification failed:', otpError);
-        sessionStorage.removeItem(PROXY_SESSION_KEY);
         setProxySession(null);
         toast({
           title: "Session Switch Failed",
@@ -136,11 +167,15 @@ export const AdminProxyProvider = ({ children }: { children: ReactNode }) => {
     setIsLoading(true);
     
     try {
+      // Call edge function to revoke the server-side session
+      await supabase.functions.invoke('admin-end-proxy-session', {
+        body: { sessionId: proxySession.id },
+      });
+
       // Sign out from proxied session
       await supabase.auth.signOut();
       
-      // Clear proxy session data
-      sessionStorage.removeItem(PROXY_SESSION_KEY);
+      // Clear proxy session state
       setProxySession(null);
 
       toast({

@@ -19,6 +19,7 @@ serve(async (req) => {
     // Get the authorization header
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
+      console.error('[admin-impersonate-user] Missing authorization header');
       return new Response(
         JSON.stringify({ error: 'Missing authorization header' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -72,6 +73,35 @@ serve(async (req) => {
       );
     }
 
+    // Deactivate any existing proxy sessions for this admin
+    await supabase
+      .from('admin_proxy_sessions')
+      .update({ is_active: false, revoked_at: new Date().toISOString() })
+      .eq('admin_user_id', callerUser.id)
+      .eq('is_active', true);
+
+    // Create server-side proxy session record
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+    const { data: proxySession, error: sessionError } = await supabase
+      .from('admin_proxy_sessions')
+      .insert({
+        admin_user_id: callerUser.id,
+        target_user_id: targetUserId,
+        expires_at: expiresAt.toISOString(),
+        ip_address: req.headers.get('cf-connecting-ip') || req.headers.get('x-forwarded-for') || null,
+        user_agent: req.headers.get('user-agent') || null,
+      })
+      .select('id')
+      .single();
+
+    if (sessionError) {
+      console.error('[admin-impersonate-user] Failed to create session:', sessionError);
+      return new Response(
+        JSON.stringify({ error: 'Failed to create proxy session' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Generate a magic link for impersonation (valid for 1 hour)
     const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
       type: 'magiclink',
@@ -83,6 +113,11 @@ serve(async (req) => {
 
     if (linkError || !linkData) {
       console.error('[admin-impersonate-user] Failed to generate link:', linkError);
+      // Rollback session creation
+      await supabase
+        .from('admin_proxy_sessions')
+        .delete()
+        .eq('id', proxySession.id);
       return new Response(
         JSON.stringify({ error: 'Failed to generate impersonation session' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -90,24 +125,27 @@ serve(async (req) => {
     }
 
     // Log the impersonation for audit
-    await supabase.from('api_console_audit').insert({
-      user_id: callerUser.id,
-      user_role: 'admin',
-      command: 'impersonate_user',
-      api_route: 'admin-impersonate-user',
-      request_params: { 
-        target_user_id: targetUserId,
-        target_email: targetAuth.user.email 
+    await supabase.from('admin_operations_audit').insert({
+      performed_by: callerUser.id,
+      operation_type: 'proxy_session_start',
+      target_user_id: targetUserId,
+      target_email: targetAuth.user.email,
+      ip_address: req.headers.get('cf-connecting-ip') || req.headers.get('x-forwarded-for') || null,
+      metadata: { 
+        session_id: proxySession.id,
+        expires_at: expiresAt.toISOString(),
+        user_agent: req.headers.get('user-agent'),
       },
       success: true,
     });
 
-    console.log(`[admin-impersonate-user] Admin ${callerUser.email} impersonating ${targetAuth.user.email}`);
+    console.log(`[admin-impersonate-user] Admin ${callerUser.email} impersonating ${targetAuth.user.email}, session: ${proxySession.id}`);
 
-    // Return the hashed token from the properties
+    // Return the hashed token and session ID
     return new Response(
       JSON.stringify({
         success: true,
+        session_id: proxySession.id,
         token_hash: linkData.properties?.hashed_token,
         verification_type: linkData.properties?.verification_type,
         redirect_url: linkData.properties?.redirect_to,
