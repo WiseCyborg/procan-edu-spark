@@ -20,10 +20,12 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { 
-  Users, CreditCard, Award, History, Settings, 
-  CheckCircle, Loader2, Copy, ExternalLink 
+  CreditCard, Award, History, Shield,
+  Loader2, Copy, ExternalLink 
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { OrgMembersRolesTab } from './OrgMembersRolesTab';
+import { OrgSeatsManagementTab } from './OrgSeatsManagementTab';
 
 interface OrganizationDetailDialogProps {
   organizationId: string | null;
@@ -31,32 +33,32 @@ interface OrganizationDetailDialogProps {
 }
 
 export const OrganizationDetailDialog = ({ organizationId, onClose }: OrganizationDetailDialogProps) => {
-  const [activeTab, setActiveTab] = useState('staff');
+  const [activeTab, setActiveTab] = useState('members');
 
-  const { data: employees, isLoading: loadingEmployees } = useQuery({
-    queryKey: ['org-employees', organizationId],
+  const { data: members } = useQuery({
+    queryKey: ['org-members-count', organizationId],
     queryFn: async () => {
-      if (!organizationId) return null;
-      const { data, error } = await supabase.rpc('get_organization_employees', {
-        org_id: organizationId
-      });
+      if (!organizationId) return [];
+      const { data, error } = await supabase
+        .from('organization_members')
+        .select('id')
+        .eq('organization_id', organizationId);
       if (error) throw error;
-      return data;
+      return data || [];
     },
     enabled: !!organizationId,
   });
 
-  const { data: seats, isLoading: loadingSeats } = useQuery({
-    queryKey: ['org-seats', organizationId],
+  const { data: seats } = useQuery({
+    queryKey: ['org-seats-count', organizationId],
     queryFn: async () => {
-      if (!organizationId) return null;
+      if (!organizationId) return [];
       const { data, error } = await supabase
         .from('rvt_seats')
-        .select('id, status, assigned_user_id, assigned_at, created_at')
-        .eq('organization_id', organizationId)
-        .order('created_at', { ascending: false });
+        .select('id')
+        .eq('organization_id', organizationId);
       if (error) throw error;
-      return data;
+      return data || [];
     },
     enabled: !!organizationId,
   });
@@ -88,19 +90,19 @@ export const OrganizationDetailDialog = ({ organizationId, onClose }: Organizati
         <DialogHeader>
           <DialogTitle>Organization Details</DialogTitle>
           <DialogDescription>
-            Complete overview of organization staff, seats, and certificates
+            Manage members, roles, training seats, and certificates
           </DialogDescription>
         </DialogHeader>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="staff" className="gap-2">
-              <Users className="h-4 w-4" />
-              Staff ({employees?.length || 0})
+            <TabsTrigger value="members" className="gap-2">
+              <Shield className="h-4 w-4" />
+              Members & Roles ({members?.length || 0})
             </TabsTrigger>
             <TabsTrigger value="seats" className="gap-2">
               <CreditCard className="h-4 w-4" />
-              Seats ({seats?.length || 0})
+              Training Seats ({seats?.length || 0})
             </TabsTrigger>
             <TabsTrigger value="certificates" className="gap-2">
               <Award className="h-4 w-4" />
@@ -112,149 +114,12 @@ export const OrganizationDetailDialog = ({ organizationId, onClose }: Organizati
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="staff" className="space-y-4">
-            {loadingEmployees ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
-            ) : (
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Employee</TableHead>
-                      <TableHead>Role</TableHead>
-                      <TableHead>Progress</TableHead>
-                      <TableHead>Tier</TableHead>
-                      <TableHead>Certificate</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {employees?.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                          No employees found
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      employees?.map((emp: any) => (
-                        <TableRow key={emp.user_id}>
-                          <TableCell>
-                            <div className="font-medium">{emp.first_name} {emp.last_name}</div>
-                            <div className="text-xs text-muted-foreground">{emp.email}</div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline">
-                              {emp.role?.replace('_', ' ').toUpperCase() || 'STUDENT'}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <div className="text-sm font-medium">{emp.progress_percentage}%</div>
-                              <div className="w-20 h-2 bg-secondary rounded-full overflow-hidden">
-                                <div 
-                                  className="h-full bg-primary" 
-                                  style={{ width: `${emp.progress_percentage}%` }}
-                                />
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="secondary">{emp.current_tier}</Badge>
-                          </TableCell>
-                          <TableCell>
-                            {emp.certificate_status === 'valid' ? (
-                              <Badge variant="default" className="gap-1">
-                                <CheckCircle className="h-3 w-3" />
-                                Certified
-                              </Badge>
-                            ) : (
-                              <Badge variant="secondary">{emp.certificate_status}</Badge>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
+          <TabsContent value="members" className="space-y-4">
+            <OrgMembersRolesTab organizationId={organizationId} />
           </TabsContent>
 
           <TabsContent value="seats" className="space-y-4">
-            {loadingSeats ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="rounded-lg border p-4">
-                    <div className="text-2xl font-bold text-green-600">
-                      {seats?.filter(s => s.status === 'available').length || 0}
-                    </div>
-                    <div className="text-sm text-muted-foreground">Available</div>
-                  </div>
-                  <div className="rounded-lg border p-4">
-                    <div className="text-2xl font-bold text-yellow-600">
-                      {seats?.filter(s => s.status === 'assigned').length || 0}
-                    </div>
-                    <div className="text-sm text-muted-foreground">Assigned</div>
-                  </div>
-                  <div className="rounded-lg border p-4">
-                    <div className="text-2xl font-bold text-blue-600">
-                      {seats?.filter(s => s.status === 'used').length || 0}
-                    </div>
-                    <div className="text-sm text-muted-foreground">Used</div>
-                  </div>
-                </div>
-
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Seat ID</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Assigned To</TableHead>
-                        <TableHead>Date</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {seats?.map((seat: any) => (
-                        <TableRow key={seat.id}>
-                          <TableCell className="font-mono text-xs">
-                            {seat.id.substring(0, 8)}...
-                          </TableCell>
-                          <TableCell>
-                            <Badge 
-                              variant={
-                                seat.status === 'available' ? 'default' : 
-                                seat.status === 'assigned' ? 'secondary' : 
-                                'outline'
-                              }
-                            >
-                              {seat.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            {seat.assigned_user_id ? (
-                              <span className="font-mono text-xs">
-                                {seat.assigned_user_id.substring(0, 8)}...
-                              </span>
-                            ) : (
-                              <span className="text-muted-foreground">Unassigned</span>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-sm text-muted-foreground">
-                            {new Date(seat.assigned_at || seat.created_at).toLocaleDateString()}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </div>
-            )}
+            <OrgSeatsManagementTab organizationId={organizationId} />
           </TabsContent>
 
           <TabsContent value="certificates" className="space-y-4">
