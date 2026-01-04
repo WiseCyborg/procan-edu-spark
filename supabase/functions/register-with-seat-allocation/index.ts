@@ -145,18 +145,17 @@ serve(async (req) => {
       throw new Error('No active course found');
     }
 
-    // STEP 2: ATOMICALLY ALLOCATE SEAT FIRST (using FOR UPDATE SKIP LOCKED)
-    // This is the CRITICAL step - if this fails, registration stops
-    console.log('[ATOMIC REGISTRATION] Attempting seat allocation...');
+    // STEP 2: ATOMICALLY ALLOCATE SEAT using safe function (handles duplicates)
+    console.log('[ATOMIC REGISTRATION] Attempting seat allocation via safe function...');
     
     const { data: seatId, error: seatError } = await supabaseClient
-      .rpc('allocate_seat_to_user', {
-        org_id: organizationId,
-        user_id: '00000000-0000-0000-0000-000000000000', // Temporary placeholder
-        course_id: courseData.id
+      .rpc('safe_assign_seat_to_user', {
+        p_user_id: '00000000-0000-0000-0000-000000000000', // Temporary placeholder
+        p_organization_id: organizationId,
+        p_course_id: courseData.id
       });
 
-    if (seatError || !seatId) {
+    if (seatError) {
       console.error('[ATOMIC REGISTRATION] Seat allocation failed:', seatError);
       return new Response(
         JSON.stringify({ 
@@ -168,6 +167,32 @@ serve(async (req) => {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
       );
+    }
+
+    // If no seat returned, try the fallback method
+    let finalSeatId = seatId;
+    if (!seatId) {
+      const { data: fallbackSeatId, error: fallbackError } = await supabaseClient
+        .rpc('allocate_seat_to_user', {
+          org_id: organizationId,
+          user_id: '00000000-0000-0000-0000-000000000000',
+          course_id: courseData.id
+        });
+      
+      if (fallbackError || !fallbackSeatId) {
+        console.error('[ATOMIC REGISTRATION] Fallback seat allocation failed:', fallbackError);
+        return new Response(
+          JSON.stringify({ 
+            error: 'No training seats available. Please contact your manager to purchase more seats.',
+            code: 'NO_SEATS_AVAILABLE'
+          }),
+          { 
+            status: 400, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
+      }
+      finalSeatId = fallbackSeatId;
     }
 
     console.log('[ATOMIC REGISTRATION] Seat allocated successfully:', seatId);
@@ -212,7 +237,7 @@ serve(async (req) => {
       
       // ROLLBACK: Release seat using proper RPC
       const { error: deallocError } = await supabaseClient
-        .rpc('deallocate_seat', { seat_id_param: seatId });
+        .rpc('deallocate_seat', { seat_id_param: finalSeatId });
       
       if (deallocError) {
         console.error('[ATOMIC REGISTRATION] Seat deallocation failed:', deallocError);
@@ -229,18 +254,17 @@ serve(async (req) => {
     const { error: seatUpdateError } = await supabaseClient
       .from('rvt_seats')
       .update({ assigned_user_id: authData.user.id })
-      .eq('id', seatId);
+      .eq('id', finalSeatId);
 
     if (seatUpdateError) {
       console.error('[ATOMIC REGISTRATION] Seat update failed:', seatUpdateError);
     }
 
-    // STEP 5: Assign student role
+    // STEP 5: Assign student role using safe function (handles duplicates)
     const { error: roleError } = await supabaseClient
-      .from('user_roles')
-      .insert({
-        user_id: authData.user.id,
-        role: 'student'
+      .rpc('safe_assign_role', {
+        p_user_id: authData.user.id,
+        p_role: 'student'
       });
 
     if (roleError) {

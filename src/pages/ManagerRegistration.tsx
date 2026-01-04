@@ -175,12 +175,11 @@ export default function ManagerRegistration() {
           });
         }
 
-        // Create dispensary_manager role entry
+        // Create dispensary_manager role entry using safe function (handles duplicates)
         const { error: roleError } = await supabase
-          .from('user_roles')
-          .insert({
-            user_id: authData.user.id,
-            role: 'dispensary_manager'
+          .rpc('safe_assign_role', {
+            p_user_id: authData.user.id,
+            p_role: 'dispensary_manager'
           });
           
         if (roleError) {
