@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { SecureAdminUserService } from '@/services/SecureAdminUserService';
 import { 
   Search, 
   Filter, 
@@ -89,8 +90,8 @@ export const AdvancedEmployeeManagement = () => {
       // Get additional data for each employee
       const employeesWithDetails = await Promise.all(
         (data || []).map(async (profile) => {
-          // Get user email from auth
-          const { data: authData } = await supabase.auth.admin.getUserById(profile.user_id);
+          // Get user email via secure admin service
+          const userResult = await SecureAdminUserService.getUserById(profile.user_id);
           
           // Get progress data
           const { data: progressData } = await supabase
@@ -112,7 +113,7 @@ export const AdvancedEmployeeManagement = () => {
             user_id: profile.user_id,
             first_name: profile.first_name || '',
             last_name: profile.last_name || '',
-            email: authData?.user?.email || '',
+            email: userResult.data?.email || '',
             phone: profile.phone || '',
             created_at: profile.created_at,
             progress_percentage: progressPercentage,

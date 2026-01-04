@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { SecureAdminUserService } from '@/services/SecureAdminUserService';
 
 interface BulkOperation {
   id: string;
@@ -121,29 +122,29 @@ export const EnhancedBulkOperations = () => {
     // Process each user
     for (const userData of csvData) {
       try {
-        // Check if user already exists by querying auth.users
-        const { data: users, error: listError } = await supabase.auth.admin.listUsers();
+        // Check if user already exists via secure admin service
+        const listResult = await SecureAdminUserService.listUsers();
         
-        if (listError) {
-          errors.push(`Failed to check existing users: ${listError.message}`);
+        if (!listResult.success) {
+          errors.push(`Failed to check existing users: ${listResult.error}`);
           continue;
         }
 
-        const existingUser = users?.users?.find((u: any) => u.email === userData.email);
+        const existingUser = listResult.data?.find((u: any) => u.email === userData.email);
 
         if (!existingUser) {
-          // Create user account via auth
-          const { error: authError } = await supabase.auth.admin.createUser({
+          // Create user account via secure edge function
+          const createResult = await SecureAdminUserService.createUser({
             email: userData.email,
             password: 'TempPass123!', // User will need to reset
-            user_metadata: {
+            metadata: {
               first_name: userData.firstName,
               last_name: userData.lastName
             }
           });
 
-          if (authError) {
-            errors.push(`Failed to create user ${userData.email}: ${authError.message}`);
+          if (!createResult.success) {
+            errors.push(`Failed to create user ${userData.email}: ${createResult.error}`);
             continue;
           }
         }
@@ -264,12 +265,15 @@ export const EnhancedBulkOperations = () => {
 
     for (const email of emails) {
       try {
-        // Get user by email from auth.users 
-        const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
+        // Get user by email via secure admin service
+        const listResult = await SecureAdminUserService.listUsers();
         
-        if (authError) throw authError;
+        if (!listResult.success) {
+          errors.push(`Failed to list users: ${listResult.error}`);
+          continue;
+        }
 
-        const user = authUsers?.users?.find((u: any) => u.email === email.trim());
+        const user = listResult.data?.find((u: any) => u.email === email.trim());
         if (!user) {
           errors.push(`User not found: ${email}`);
           continue;

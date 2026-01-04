@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_operations_audit: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          id: string
+          ip_address: string | null
+          metadata: Json | null
+          operation_type: string
+          performed_by: string
+          success: boolean | null
+          target_email: string | null
+          target_user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          operation_type: string
+          performed_by: string
+          success?: boolean | null
+          target_email?: string | null
+          target_user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          operation_type?: string
+          performed_by?: string
+          success?: boolean | null
+          target_email?: string | null
+          target_user_id?: string | null
+        }
+        Relationships: []
+      }
       admin_settings: {
         Row: {
           description: string | null
@@ -8719,6 +8758,10 @@ export type Database = {
       }
       is_own_profile: {
         Args: { _profile_user_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_same_organization: {
+        Args: { target_user_id: string; viewer_id: string }
         Returns: boolean
       }
       jwt_org_id: { Args: never; Returns: string }
