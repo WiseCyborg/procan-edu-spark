@@ -1097,6 +1097,7 @@ const DispensaryApplicationManager = () => {
                   <DispensaryActionsMenu
                     application={application}
                     onRefetch={fetchApplications}
+                    onApprove={() => approveApplication(application.id, application.requested_credits || 10)}
                     onSuspend={() => {
                       setActionTarget(application);
                       setSuspendDialogOpen(true);
