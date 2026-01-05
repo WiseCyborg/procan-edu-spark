@@ -1,8 +1,10 @@
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Circle, Play, Lock } from 'lucide-react';
+import { CheckCircle, Circle, Play, Lock, Award, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from '@/components/ui/sonner';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 
 interface Module {
   id: string;
@@ -19,18 +21,25 @@ interface ModuleSidebarProps {
   onModuleSelect: (moduleNumber: number) => void;
 }
 
+// RVT Required modules are 0-18 (19 total)
+const RVT_REQUIRED_MAX = 18;
+
 export const ModuleSidebar = ({
   modules,
   currentModuleNumber,
   onModuleSelect
 }: ModuleSidebarProps) => {
-  const greenModules = modules.filter(m => m.tier === 'green');
-  const yellowModules = modules.filter(m => m.tier === 'yellow');
-  const redModules = modules.filter(m => m.tier === 'red');
+  // Split into RVT Required vs Manager Track
+  const rvtRequiredModules = modules.filter(m => m.number <= RVT_REQUIRED_MAX);
+  const managerModules = modules.filter(m => m.number > RVT_REQUIRED_MAX);
+
+  const rvtCompletedCount = rvtRequiredModules.filter(m => m.isCompleted).length;
+  const managerCompletedCount = managerModules.filter(m => m.isCompleted).length;
+  
+  const isRvtComplete = rvtCompletedCount === rvtRequiredModules.length;
 
   const handleModuleClick = (module: Module) => {
     if (module.isLocked) {
-      // Find the first incomplete module
       const firstIncomplete = modules.find(m => !m.isCompleted);
       toast.error(
         `Complete Module ${firstIncomplete?.number || module.number - 1} first before accessing this module.`
@@ -74,7 +83,7 @@ export const ModuleSidebar = ({
               {isLocked && <span className="ml-1 text-muted-foreground">(Locked)</span>}
             </div>
             <div className={cn(
-              'text-sm',
+              'text-sm truncate',
               module.isCompleted && 'text-green-700 dark:text-green-400',
               isCurrent && 'font-medium',
               isLocked && 'text-muted-foreground'
@@ -90,48 +99,72 @@ export const ModuleSidebar = ({
   return (
     <aside className="hidden lg:block w-72 border-r bg-muted/5">
       <ScrollArea className="h-[calc(100vh-8rem)]">
-        <div className="p-4 space-y-6">
-          {/* Green Tier */}
+        <div className="p-4 space-y-4">
+          {/* RVT Required Section */}
           <div className="space-y-2">
-            <div className="flex items-center gap-2 px-3 py-2">
-              <span className="text-lg">🟢</span>
-              <h3 className="font-semibold text-sm">Green Tier</h3>
-              <span className="text-xs text-muted-foreground ml-auto">
-                {greenModules.filter(m => m.isCompleted).length}/{greenModules.length}
-              </span>
+            <div className="flex items-center gap-2 px-3 py-2 bg-primary/5 rounded-lg">
+              <Award className="h-5 w-5 text-primary" />
+              <div className="flex-1">
+                <h3 className="font-semibold text-sm">RVT Required</h3>
+                <p className="text-xs text-muted-foreground">Complete for certification</p>
+              </div>
+              <Badge variant={isRvtComplete ? 'default' : 'secondary'} className="text-xs">
+                {rvtCompletedCount}/{rvtRequiredModules.length}
+              </Badge>
             </div>
+            
+            {/* Green Tier */}
             <div className="space-y-1">
-              {greenModules.map(renderModuleItem)}
+              <div className="flex items-center gap-2 px-3 py-1.5">
+                <span className="text-sm">🟢</span>
+                <span className="text-xs font-medium text-muted-foreground">Green Tier</span>
+              </div>
+              {rvtRequiredModules.filter(m => m.tier === 'green').map(renderModuleItem)}
+            </div>
+
+            {/* Yellow Tier */}
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 px-3 py-1.5">
+                <span className="text-sm">🟡</span>
+                <span className="text-xs font-medium text-muted-foreground">Yellow Tier</span>
+              </div>
+              {rvtRequiredModules.filter(m => m.tier === 'yellow').map(renderModuleItem)}
+            </div>
+
+            {/* Red Tier (RVT only) */}
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 px-3 py-1.5">
+                <span className="text-sm">🔴</span>
+                <span className="text-xs font-medium text-muted-foreground">Red Tier</span>
+              </div>
+              {rvtRequiredModules.filter(m => m.tier === 'red').map(renderModuleItem)}
             </div>
           </div>
 
-          {/* Yellow Tier */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 px-3 py-2">
-              <span className="text-lg">🟡</span>
-              <h3 className="font-semibold text-sm">Yellow Tier</h3>
-              <span className="text-xs text-muted-foreground ml-auto">
-                {yellowModules.filter(m => m.isCompleted).length}/{yellowModules.length}
-              </span>
-            </div>
-            <div className="space-y-1">
-              {yellowModules.map(renderModuleItem)}
-            </div>
-          </div>
-
-          {/* Red Tier */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 px-3 py-2">
-              <span className="text-lg">🔴</span>
-              <h3 className="font-semibold text-sm">Red Tier</h3>
-              <span className="text-xs text-muted-foreground ml-auto">
-                {redModules.filter(m => m.isCompleted).length}/{redModules.length}
-              </span>
-            </div>
-            <div className="space-y-1">
-              {redModules.map(renderModuleItem)}
-            </div>
-          </div>
+          {/* Separator between tracks */}
+          {managerModules.length > 0 && (
+            <>
+              <Separator className="my-4" />
+              
+              {/* Manager Track Section */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 px-3 py-2 bg-amber-500/10 rounded-lg">
+                  <Users className="h-5 w-5 text-amber-600" />
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-sm">Manager Track</h3>
+                    <p className="text-xs text-muted-foreground">Optional leadership training</p>
+                  </div>
+                  <Badge variant="outline" className="text-xs">
+                    {managerCompletedCount}/{managerModules.length}
+                  </Badge>
+                </div>
+                
+                <div className="space-y-1">
+                  {managerModules.map(renderModuleItem)}
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </ScrollArea>
     </aside>
