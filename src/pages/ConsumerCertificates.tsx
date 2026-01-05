@@ -148,10 +148,16 @@ const ConsumerCertificates = () => {
       pdf.setFontSize(9);
       pdf.text(`Verify at: ${cert.verification_url}`, width / 2, 150, { align: 'center' });
 
+      // Disclaimer
+      pdf.setTextColor(180, 83, 9);
+      pdf.setFontSize(7);
+      pdf.text('This is a Certificate of Completion for educational purposes only.', width / 2, height - 25, { align: 'center' });
+      pdf.text('This is NOT a Maryland RVT certification and does not satisfy employee compliance requirements.', width / 2, height - 20, { align: 'center' });
+
       // Footer
       pdf.setTextColor(156, 163, 175);
       pdf.setFontSize(8);
-      pdf.text('Maryland\'s Trusted Cannabis Education Provider', width / 2, height - 15, { align: 'center' });
+      pdf.text('Maryland\'s Trusted Cannabis Education Provider', width / 2, height - 12, { align: 'center' });
 
       // Save PDF
       pdf.save(`${cert.certificate_number}-certificate.pdf`);
@@ -238,8 +244,16 @@ const ConsumerCertificates = () => {
   return (
     <div className="container mx-auto px-4 py-16">
       <div className="max-w-4xl mx-auto space-y-8">
+        {/* Disclaimer */}
+        <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+          <p className="text-sm text-amber-800 dark:text-amber-300 text-center">
+            <strong>Important:</strong> These are Certificates of Completion for consumer education. 
+            These are <strong>NOT</strong> Maryland RVT employee certifications and do not satisfy dispensary compliance requirements.
+          </p>
+        </div>
+
         <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold text-foreground">Your Certificates</h1>
+          <h1 className="text-4xl font-bold text-foreground">Your Completion Badges</h1>
           <p className="text-muted-foreground">
             Congratulations on completing your cannabis education!
           </p>
