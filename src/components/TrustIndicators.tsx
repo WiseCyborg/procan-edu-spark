@@ -72,46 +72,46 @@ export const AnimatedCounter: React.FC<CounterProps> = ({
 export const TrustStats = () => {
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
-      <Card className="p-4 text-center bg-white/10 backdrop-blur-sm border-white/20">
-        <div className="text-2xl font-bold text-white">
+      <Card className="p-4 text-center bg-primary border-primary/20">
+        <div className="text-2xl font-bold text-primary-foreground">
           <AnimatedCounter end={24} />
         </div>
-        <div className="text-sm text-white/80">Training Modules</div>
+        <div className="text-sm text-primary-foreground/80">Training Modules</div>
       </Card>
       
-      <Card className="p-4 text-center bg-white/10 backdrop-blur-sm border-white/20">
-        <div className="text-2xl font-bold text-white">
+      <Card className="p-4 text-center bg-primary border-primary/20">
+        <div className="text-2xl font-bold text-primary-foreground">
           24/24
         </div>
-        <div className="text-sm text-white/80">MD Counties</div>
+        <div className="text-sm text-primary-foreground/80">MD Counties</div>
       </Card>
       
-      <Card className="p-4 text-center bg-white/10 backdrop-blur-sm border-white/20">
-        <div className="text-2xl font-bold text-white">
+      <Card className="p-4 text-center bg-primary border-primary/20">
+        <div className="text-2xl font-bold text-primary-foreground">
           4-6
         </div>
-        <div className="text-sm text-white/80">Hours Self-Paced</div>
+        <div className="text-sm text-primary-foreground/80">Hours Self-Paced</div>
       </Card>
 
-      <Card className="p-4 text-center bg-white/10 backdrop-blur-sm border-white/20">
-        <div className="text-2xl font-bold text-white">
+      <Card className="p-4 text-center bg-primary border-primary/20">
+        <div className="text-2xl font-bold text-primary-foreground">
           $49.99
         </div>
-        <div className="text-sm text-white/80">Under MD Max</div>
+        <div className="text-sm text-primary-foreground/80">Under MD Max</div>
       </Card>
       
-      <Card className="p-4 text-center bg-white/10 backdrop-blur-sm border-white/20">
-        <div className="text-2xl font-bold text-white">
+      <Card className="p-4 text-center bg-primary border-primary/20">
+        <div className="text-2xl font-bold text-primary-foreground">
           24/7
         </div>
-        <div className="text-sm text-white/80">Access</div>
+        <div className="text-sm text-primary-foreground/80">Access</div>
       </Card>
 
-      <Card className="p-4 text-center bg-white/10 backdrop-blur-sm border-white/20">
-        <div className="text-2xl font-bold text-white">
+      <Card className="p-4 text-center bg-primary border-primary/20">
+        <div className="text-2xl font-bold text-primary-foreground">
           ∞
         </div>
-        <div className="text-sm text-white/80">Lifetime Certificate</div>
+        <div className="text-sm text-primary-foreground/80">Lifetime Certificate</div>
       </Card>
     </div>
   );
