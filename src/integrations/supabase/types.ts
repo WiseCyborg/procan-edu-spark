@@ -8625,6 +8625,10 @@ export type Database = {
       }
     }
     Functions: {
+      allocate_additional_seats: {
+        Args: { p_note?: string; p_org_id: string; p_seats_to_add: number }
+        Returns: Json
+      }
       allocate_seat_to_user: {
         Args: { course_id: string; org_id: string; user_id: string }
         Returns: string

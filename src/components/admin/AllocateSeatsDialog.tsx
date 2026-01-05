@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface AllocateSeatsDialogProps {
   open: boolean;
@@ -23,6 +24,7 @@ export const AllocateSeatsDialog = ({
 }: AllocateSeatsDialogProps) => {
   const [loading, setLoading] = useState(false);
   const [quantity, setQuantity] = useState(10);
+  const queryClient = useQueryClient();
 
   const handleAllocate = async () => {
     if (quantity < 1 || quantity > 100) {
@@ -32,53 +34,26 @@ export const AllocateSeatsDialog = ({
 
     setLoading(true);
     try {
-      // Get course ID
-      const { data: course } = await supabase
-        .from('courses')
-        .select('id')
-        .ilike('title', '%responsible vendor%')
-        .limit(1)
-        .single();
-
-      if (!course) throw new Error('Course not found');
-
-      // Create a purchase record first
-      const idempotencyKey = `admin-${organizationId}-${Date.now()}`;
-      const { data: purchase, error: purchaseError } = await supabase
-        .from('rvt_purchases')
-        .insert({
-          organization_id: organizationId,
-          quantity: quantity,
-          amount_paid: 0,
-          idempotency_key: idempotencyKey,
-          payment_method: 'admin_allocated',
-          status: 'completed',
-        })
-        .select('id')
-        .single();
-
-      if (purchaseError) throw purchaseError;
-
-      if (purchaseError) throw purchaseError;
-
-      // Create seats with purchase_id
-      const seats = Array.from({ length: quantity }, () => ({
-        organization_id: organizationId,
-        course_id: course.id,
-        purchase_id: purchase.id,
-        status: 'available',
-      }));
-
-      const { error } = await supabase
-        .from('rvt_seats')
-        .insert(seats);
+      // Use secure RPC function - handles auth, validation, audit trail
+      const { data, error } = await supabase.rpc('allocate_additional_seats', {
+        p_org_id: organizationId,
+        p_seats_to_add: quantity,
+        p_note: `Admin allocation of ${quantity} seats`
+      });
 
       if (error) throw error;
+
+      // Invalidate seat queries to refresh UI
+      queryClient.invalidateQueries({ queryKey: ['organization-seats'] });
+      queryClient.invalidateQueries({ queryKey: ['seats'] });
+      queryClient.invalidateQueries({ queryKey: ['org-seats'] });
 
       toast.success(`${quantity} seats allocated to ${organizationName}`);
       onAllocated?.();
       onOpenChange(false);
+      setQuantity(10); // Reset for next use
     } catch (error: any) {
+      console.error('Seat allocation error:', error);
       toast.error(error.message || 'Failed to allocate seats');
     } finally {
       setLoading(false);
@@ -105,6 +80,7 @@ export const AllocateSeatsDialog = ({
               max={100}
               value={quantity}
               onChange={(e) => setQuantity(parseInt(e.target.value) || 0)}
+              disabled={loading}
             />
             <p className="text-xs text-muted-foreground">
               Enter 1-100 seats to allocate
@@ -113,10 +89,13 @@ export const AllocateSeatsDialog = ({
         </div>
         
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
             Cancel
           </Button>
-          <Button onClick={handleAllocate} disabled={loading}>
+          <Button 
+            onClick={handleAllocate} 
+            disabled={loading || quantity < 1 || quantity > 100}
+          >
             {loading ? 'Allocating...' : `Allocate ${quantity} Seats`}
           </Button>
         </DialogFooter>
