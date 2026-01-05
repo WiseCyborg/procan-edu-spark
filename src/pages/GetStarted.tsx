@@ -111,7 +111,7 @@ const GetStarted = () => {
             </Card>
 
             {/* Path 3: Public Learning */}
-            <Card className="hover:shadow-xl transition-shadow cursor-pointer group border-2 border-secondary/20" onClick={() => navigate('/learn')}>
+            <Card className="hover:shadow-xl transition-shadow cursor-pointer group border-2 border-secondary/20" onClick={() => navigate('/consumer-education')}>
               <div className="absolute top-0 right-0 bg-secondary text-secondary-foreground text-xs px-3 py-1 rounded-bl-lg font-medium">
                 Free
               </div>
@@ -143,7 +143,7 @@ const GetStarted = () => {
                     <span>Completion badge (non-RVT)</span>
                   </div>
                 </div>
-                <Button className="w-full" variant="secondary">
+                <Button className="w-full" variant="secondary" onClick={(e) => { e.stopPropagation(); navigate('/consumer-education'); }}>
                   Start Free Learning
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
