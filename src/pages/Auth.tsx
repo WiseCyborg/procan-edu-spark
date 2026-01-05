@@ -131,12 +131,12 @@ const Auth = () => {
               
               <TabsContent value="code" className="mt-4">
                 <div className="text-center mb-4 text-sm text-muted-foreground">
-                  {prefilledCode 
+                  {prefilledCode && !prefilledCode.startsWith(':')
                     ? 'Complete your registration below'
                     : 'Enter the join code provided by your manager to register'}
                 </div>
-                {/* If code is prefilled, show registration form. Otherwise show code entry */}
-                {prefilledCode && forceRegister ? (
+                {/* If code is prefilled (and not a template placeholder), show registration form. Otherwise show code entry */}
+                {prefilledCode && forceRegister && !prefilledCode.startsWith(':') ? (
                   <StudentAuthForm />
                 ) : (
                   <JoinCodeEntry />

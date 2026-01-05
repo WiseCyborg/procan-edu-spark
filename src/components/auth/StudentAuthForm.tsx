@@ -66,8 +66,20 @@ const StudentAuthForm = () => {
         .finally(() => setIsLoadingInvitation(false));
     }
     // Handle prefilled join code from URL
-    // Skip if it's a template placeholder like :joinCode
-    else if (prefilledCode && !prefilledCode.startsWith(':')) {
+    else if (prefilledCode) {
+      // Guard against template links like ?code=:joinCode
+      if (prefilledCode.startsWith(':')) {
+        setIsRegistering(true);
+        setJoinCodeValidation(null);
+        setValue('joinCode', '');
+        toast({
+          title: 'Invalid registration link',
+          description: 'This link is missing a join code. Please paste a valid join code to continue.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
       setValue('joinCode', prefilledCode);
       setIsRegistering(true);
       // Validate the prefilled code
