@@ -144,12 +144,53 @@ Deno.serve(async (req: Request) => {
       throw new Error('Failed to generate certificate number');
     }
 
+    // Determine certification level based on completed modules
+    // RVT Required: modules 0-18 (module_number 0-18)
+    // Manager Track: modules 19-23 (module_number 19-23)
+    const RVT_REQUIRED_MAX = 18;
+    const MANAGER_MODULE_MIN = 19;
+    const MANAGER_MODULE_MAX = 23;
+
+    // Check user's completed modules
+    const { data: userProgress } = await supabase
+      .from('user_progress')
+      .select('module_id')
+      .eq('user_id', user.id)
+      .eq('course_id', examAttempt.course_id)
+      .eq('is_completed', true);
+
+    // Fetch module numbers for completed modules
+    let certificationLevel: 'agent' | 'manager' = 'agent';
+    let tierBadge = 'rvt';
+
+    if (userProgress && userProgress.length > 0) {
+      const moduleIds = userProgress.map(p => p.module_id);
+      const { data: completedModules } = await supabase
+        .from('course_modules')
+        .select('module_number')
+        .in('id', moduleIds);
+
+      if (completedModules) {
+        const completedNumbers = completedModules.map(m => m.module_number);
+        
+        // Check if user completed manager track modules (19-23)
+        const managerModulesCompleted = completedNumbers.filter(
+          n => n >= MANAGER_MODULE_MIN && n <= MANAGER_MODULE_MAX
+        );
+        
+        if (managerModulesCompleted.length === (MANAGER_MODULE_MAX - MANAGER_MODULE_MIN + 1)) {
+          certificationLevel = 'manager';
+          tierBadge = 'manager';
+        }
+      }
+    }
+
     // Calculate expiry date (2 years from issue)
     const issueDate = new Date();
     const expiryDate = new Date(issueDate);
     expiryDate.setFullYear(expiryDate.getFullYear() + 2);
 
-    // Create certificate record with metadata (Gate 10 fix)
+    // Create certificate record with certification level
     const { data: certificate, error: insertError } = await supabase
       .from('certificates')
       .insert({
@@ -160,12 +201,15 @@ Deno.serve(async (req: Request) => {
         issue_date: issueDate.toISOString(),
         expiry_date: expiryDate.toISOString(),
         is_revoked: false,
+        certification_level: certificationLevel,
+        tier_badge: tierBadge,
         metadata: {
           exam_score: exam_results.total_score,
           exam_time_taken: exam_results.time_taken,
           user_ip: req.headers.get('x-forwarded-for') || 'unknown',
           photo_verified: !!user_data.photo,
-          generation_timestamp: new Date().toISOString()
+          generation_timestamp: new Date().toISOString(),
+          training_track: certificationLevel === 'manager' ? 'RVT + Manager Track' : 'RVT Required'
         }
       })
       .select()
