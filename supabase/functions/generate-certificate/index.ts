@@ -144,12 +144,20 @@ Deno.serve(async (req: Request) => {
       throw new Error('Failed to generate certificate number');
     }
 
-    // Determine certification level based on completed modules
-    // RVT Required: modules 0-18 (module_number 0-18)
-    // Manager Track: modules 19-23 (module_number 19-23)
-    const RVT_REQUIRED_MAX = 18;
+    // ==========================================
+    // TWO-TRACK CERTIFICATE SYSTEM
+    // ==========================================
+    // RVT Certificate: Modules 0-18 (required for all)
+    // Manager Certificate: Modules 19-23 (optional leadership track)
+    // Manager completion NEVER blocks RVT certification
+    // ==========================================
+    
+    const RVT_MODULE_MIN = 0;
+    const RVT_MODULE_MAX = 18;
     const MANAGER_MODULE_MIN = 19;
     const MANAGER_MODULE_MAX = 23;
+    const RVT_MODULE_COUNT = 19; // 0-18 inclusive
+    const MANAGER_MODULE_COUNT = 5; // 19-23 inclusive
 
     // Check user's completed modules
     const { data: userProgress } = await supabase
@@ -159,30 +167,62 @@ Deno.serve(async (req: Request) => {
       .eq('course_id', examAttempt.course_id)
       .eq('is_completed', true);
 
-    // Fetch module numbers for completed modules
-    let certificationLevel: 'agent' | 'manager' = 'agent';
+    // Determine certificate type based on completed modules
+    let certificationType: 'rvt' | 'manager' = 'rvt';
+    let certificationLevel = 'RVT Agent';
     let tierBadge = 'rvt';
+    let trainingTrack = 'Maryland RVT Required Training';
+    let rvtComplete = false;
+    let managerComplete = false;
 
     if (userProgress && userProgress.length > 0) {
-      const moduleIds = userProgress.map(p => p.module_id);
-      const { data: completedModules } = await supabase
-        .from('course_modules')
-        .select('module_number')
-        .in('id', moduleIds);
+      const moduleIds = userProgress.map(p => p.module_id).filter(Boolean);
+      
+      if (moduleIds.length > 0) {
+        const { data: completedModules } = await supabase
+          .from('course_modules')
+          .select('module_number')
+          .in('id', moduleIds);
 
-      if (completedModules) {
-        const completedNumbers = completedModules.map(m => m.module_number);
-        
-        // Check if user completed manager track modules (19-23)
-        const managerModulesCompleted = completedNumbers.filter(
-          n => n >= MANAGER_MODULE_MIN && n <= MANAGER_MODULE_MAX
-        );
-        
-        if (managerModulesCompleted.length === (MANAGER_MODULE_MAX - MANAGER_MODULE_MIN + 1)) {
-          certificationLevel = 'manager';
-          tierBadge = 'manager';
+        if (completedModules) {
+          const completedNumbers = completedModules.map(m => m.module_number);
+          
+          // Check RVT completion (modules 0-18)
+          const rvtModulesCompleted = completedNumbers.filter(
+            n => n >= RVT_MODULE_MIN && n <= RVT_MODULE_MAX
+          );
+          rvtComplete = rvtModulesCompleted.length === RVT_MODULE_COUNT;
+          
+          // Check Manager Track completion (modules 19-23)
+          const managerModulesCompleted = completedNumbers.filter(
+            n => n >= MANAGER_MODULE_MIN && n <= MANAGER_MODULE_MAX
+          );
+          managerComplete = managerModulesCompleted.length === MANAGER_MODULE_COUNT;
+          
+          // Determine certificate type
+          // Only issue Manager certificate if both RVT AND Manager tracks are complete
+          if (rvtComplete && managerComplete) {
+            certificationType = 'manager';
+            certificationLevel = 'Manager';
+            tierBadge = 'manager';
+            trainingTrack = 'RVT Required + Manager Leadership Track';
+          } else if (rvtComplete) {
+            certificationType = 'rvt';
+            certificationLevel = 'RVT Agent';
+            tierBadge = 'rvt';
+            trainingTrack = 'Maryland RVT Required Training';
+          }
         }
       }
+    }
+
+    // Verify RVT completion is required for any certificate
+    if (!rvtComplete) {
+      console.error('RVT modules not complete - cannot issue certificate');
+      return new Response(
+        JSON.stringify({ error: 'Complete all RVT Required modules (0-18) before requesting certification.' }),
+        { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+      );
     }
 
     // Calculate expiry date (2 years from issue)
@@ -190,7 +230,7 @@ Deno.serve(async (req: Request) => {
     const expiryDate = new Date(issueDate);
     expiryDate.setFullYear(expiryDate.getFullYear() + 2);
 
-    // Create certificate record with certification level
+    // Create certificate record
     const { data: certificate, error: insertError } = await supabase
       .from('certificates')
       .insert({
@@ -209,7 +249,10 @@ Deno.serve(async (req: Request) => {
           user_ip: req.headers.get('x-forwarded-for') || 'unknown',
           photo_verified: !!user_data.photo,
           generation_timestamp: new Date().toISOString(),
-          training_track: certificationLevel === 'manager' ? 'RVT + Manager Track' : 'RVT Required'
+          certificate_type: certificationType,
+          training_track: trainingTrack,
+          rvt_complete: rvtComplete,
+          manager_complete: managerComplete
         }
       })
       .select()
@@ -271,6 +314,13 @@ Deno.serve(async (req: Request) => {
       .eq("id", examAttempt.course_id)
       .single();
 
+    // Determine email content based on certificate type
+    const emailCourseTitle = certificationType === 'manager' 
+      ? 'Maryland RVT + Manager Leadership Training'
+      : 'Maryland Responsible Vendor Training';
+    
+    const certificateUrl = `https://www.procannedu.com/verify/${certificate.certificate_number}`;
+
     // Trigger certificate email (fire-and-forget)
     supabase.functions.invoke('send-certificate-email', {
       body: {
@@ -278,12 +328,20 @@ Deno.serve(async (req: Request) => {
         firstName: profile?.first_name || 'Student',
         lastName: profile?.last_name || '',
         certificateNumber: certificate.certificate_number,
-        courseTitle: course?.title || 'Maryland Responsible Vendor Training',
+        courseTitle: emailCourseTitle,
         issueDate: new Date(certificate.issue_date).toLocaleDateString('en-US', {
           year: 'numeric',
           month: 'long',
           day: 'numeric'
-        })
+        }),
+        expiryDate: new Date(certificate.expiry_date).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        }),
+        certificateUrl: certificateUrl,
+        certificationType: certificationType,
+        trainingTrack: trainingTrack
       }
     }).catch(err => console.error('Certificate email failed:', err));
 
