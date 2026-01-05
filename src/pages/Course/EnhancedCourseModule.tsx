@@ -154,9 +154,21 @@ const EnhancedCourseModule: React.FC = () => {
     }, 300);
   };
 
-  // Reset transition state when module changes
+  // Reset state when module changes - ensures fresh start on each module
   useEffect(() => {
     setIsTransitioning(false);
+    setActiveTab('overview');
+    setOverviewComplete(false);
+    setCourseComplete(false);
+    setDocsViewed(false);
+    setDocumentsViewed(new Set());
+    setQuizComplete(false);
+    setShowQuizResults(false);
+    setShowWeakPractice(false);
+    setQuizScore(0);
+    setQuizPassed(false);
+    setWeakTopics([]);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [moduleId]);
 
   // Prerequisite check - prevent URL bypass of locked modules
