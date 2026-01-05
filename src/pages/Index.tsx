@@ -146,6 +146,142 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Three Training Paths Section */}
+      <section className={`bg-gradient-to-br from-muted/50 to-background ${isMobile ? 'py-10 px-4' : 'py-20 px-4'}`}>
+        <div className="container mx-auto max-w-6xl">
+          <div className="text-center mb-10">
+            <h2 className={`font-bold text-foreground ${isMobile ? 'text-2xl mb-3' : 'text-4xl mb-4'}`}>
+              Choose Your Training Path
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Three distinct programs designed for different needs — from compliance certification to public education
+            </p>
+          </div>
+
+          <div className={`grid ${isMobile ? 'grid-cols-1 gap-4' : 'grid-cols-3 gap-6'}`}>
+            {/* RVT Core */}
+            <div 
+              className="relative bg-white dark:bg-card border-2 border-primary/30 rounded-xl p-6 hover:shadow-xl transition-all cursor-pointer group"
+              onClick={() => navigate('/get-started')}
+            >
+              <div className="absolute -top-3 left-4 bg-primary text-primary-foreground text-xs px-3 py-1 rounded-full font-semibold">
+                Required for Employees
+              </div>
+              <div className="pt-4">
+                <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                  <CheckCircle className="h-7 w-7 text-primary" />
+                </div>
+                <h3 className="text-xl font-bold text-foreground mb-2">RVT Core Training</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Official Maryland Responsible Vendor Training certification for dispensary employees.
+                </p>
+                <div className="space-y-2 text-sm mb-4">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                    <span><strong>18 modules</strong> • 4-6 hours</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                    <span>Requires <strong>join code</strong> from employer</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                    <span>Issues <strong>RVT Certificate</strong></span>
+                  </div>
+                </div>
+                <Button className="w-full group-hover:bg-primary/90" onClick={(e) => { e.stopPropagation(); navigate('/auth?role=student'); }}>
+                  Start RVT Training
+                </Button>
+              </div>
+            </div>
+
+            {/* Manager Track */}
+            <div 
+              className="relative bg-white dark:bg-card border-2 border-amber-500/30 rounded-xl p-6 hover:shadow-xl transition-all cursor-pointer group"
+              onClick={() => navigate('/get-started')}
+            >
+              <div className="absolute -top-3 left-4 bg-amber-500 text-white text-xs px-3 py-1 rounded-full font-semibold">
+                Optional Add-On
+              </div>
+              <div className="pt-4">
+                <div className="w-14 h-14 rounded-full bg-amber-500/10 flex items-center justify-center mb-4 group-hover:bg-amber-500/20 transition-colors">
+                  <svg className="h-7 w-7 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-foreground mb-2">Manager Track</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Advanced leadership training for dispensary managers and supervisors.
+                </p>
+                <div className="space-y-2 text-sm mb-4">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                    <span><strong>5 modules</strong> • 2-3 hours</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                    <span>Requires <strong>RVT completion</strong></span>
+                  </div>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                    <span>Issues <strong>Manager Certificate</strong></span>
+                  </div>
+                </div>
+                <Button variant="outline" className="w-full border-amber-500 text-amber-600 hover:bg-amber-50" onClick={(e) => { e.stopPropagation(); navigate('/auth?role=training_coordinator'); }}>
+                  Access Manager Track
+                </Button>
+              </div>
+            </div>
+
+            {/* Public Learning */}
+            <div 
+              className="relative bg-white dark:bg-card border-2 border-secondary/30 rounded-xl p-6 hover:shadow-xl transition-all cursor-pointer group"
+              onClick={() => navigate('/learn')}
+            >
+              <div className="absolute -top-3 left-4 bg-secondary text-secondary-foreground text-xs px-3 py-1 rounded-full font-semibold">
+                Free & Open
+              </div>
+              <div className="pt-4">
+                <div className="w-14 h-14 rounded-full bg-secondary/10 flex items-center justify-center mb-4 group-hover:bg-secondary/20 transition-colors">
+                  <svg className="h-7 w-7 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-foreground mb-2">Public Learning</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Learn how Maryland dispensaries work. Open to everyone, 100% free.
+                </p>
+                <div className="space-y-2 text-sm mb-4">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <span className="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                    <span><strong>8-12 modules</strong> • Self-paced</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                    <span><strong>Open access</strong> — no account required</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                    <span>Issues <strong>Completion Badge</strong> (non-RVT)</span>
+                  </div>
+                </div>
+                <Button variant="secondary" className="w-full" onClick={(e) => { e.stopPropagation(); navigate('/learn'); }}>
+                  Start Free Learning
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Disclaimer */}
+          <div className="mt-8 text-center">
+            <p className="text-xs text-muted-foreground max-w-3xl mx-auto">
+              <strong>Note:</strong> Only RVT Core Training provides official Maryland Responsible Vendor Training certification 
+              as required by COMAR 14.17.05. Public Learning is for educational purposes only and does not satisfy employee compliance requirements.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Investment Value Section */}
       <section className={`bg-gradient-to-br from-primary/5 to-accent/10 ${isMobile ? 'py-8 px-4' : 'py-16 px-4'}`}>
         <div className="container mx-auto">
