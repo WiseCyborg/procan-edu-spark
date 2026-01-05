@@ -24,6 +24,8 @@ interface CertificateEmailRequest {
   issueDate: string;
   expiryDate?: string;
   certificateUrl?: string;
+  certificationType?: 'rvt' | 'manager';
+  trainingTrack?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -43,15 +45,32 @@ const handler = async (req: Request): Promise<Response> => {
       courseTitle, 
       issueDate,
       expiryDate,
-      certificateUrl
+      certificateUrl,
+      certificationType,
+      trainingTrack
     }: CertificateEmailRequest = await req.json();
 
-    console.log("Processing certificate email for:", email, "- Cert#:", certificateNumber);
+    console.log("Processing certificate email for:", email, "- Cert#:", certificateNumber, "- Type:", certificationType);
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !emailRegex.test(email)) {
+      console.error("Invalid email format:", email);
+      return new Response(
+        JSON.stringify({ error: 'Invalid email format' }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
 
     // Calculate expiry date if not provided (2 years from issue)
     const calculatedExpiryDate = expiryDate || new Date(
       new Date(issueDate).setFullYear(new Date(issueDate).getFullYear() + 2)
     ).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+    // Build verification URL - ensure proper formatting
+    const baseUrl = 'https://www.procannedu.com';
+    const verificationUrl = certificateUrl || `${baseUrl}/verify/${certificateNumber}`;
+    const certificatesPageUrl = `${baseUrl}/certificates`;
 
     // Load and render the certificate template
     const html = await loadEmailTemplate('certificate', {
@@ -61,7 +80,11 @@ const handler = async (req: Request): Promise<Response> => {
       CourseTitle: courseTitle,
       IssueDate: issueDate,
       ExpiryDate: calculatedExpiryDate,
-      CertificateURL: certificateUrl || 'https://www.procannedu.com/certificates',
+      CertificateURL: verificationUrl,
+      CertificatesPageURL: certificatesPageUrl,
+      CertificationType: certificationType === 'manager' ? 'Manager' : 'RVT Agent',
+      TrainingTrack: trainingTrack || courseTitle,
+      BaseURL: baseUrl
     });
 
     // Log email attempt

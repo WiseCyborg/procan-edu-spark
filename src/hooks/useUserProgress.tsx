@@ -162,6 +162,7 @@ export const useUserProgress = (courseId?: string) => {
         }
         
         // Show tier completion celebrations
+        // RVT certification uses modules 0-18 only
         if (completedCount === 6 && !localStorage.getItem('green_tier_celebrated')) {
           toast({
             title: '🟢 Green Tier Complete!',
@@ -174,12 +175,20 @@ export const useUserProgress = (courseId?: string) => {
             description: "Advanced protocols mastered. Red Tier unlocked!",
           });
           localStorage.setItem('yellow_tier_celebrated', 'true');
-        } else if (completedCount === 18 && !localStorage.getItem('red_tier_celebrated')) {
+        } else if (completedCount === 19 && !localStorage.getItem('rvt_complete_celebrated')) {
+          // RVT Complete at 19 modules (0-18)
           toast({
-            title: '🔴 Red Tier Complete!',
-            description: "All modules mastered! Ready for certification!",
+            title: '🎓 RVT Training Complete!',
+            description: "All RVT modules mastered! Ready for certification exam!",
           });
-          localStorage.setItem('red_tier_celebrated', 'true');
+          localStorage.setItem('rvt_complete_celebrated', 'true');
+        } else if (completedCount === 24 && !localStorage.getItem('manager_track_celebrated')) {
+          // Full completion including Manager Track
+          toast({
+            title: '👔 Manager Track Complete!',
+            description: "Leadership training complete! Manager certification available!",
+          });
+          localStorage.setItem('manager_track_celebrated', 'true');
         }
       }
     },
@@ -221,11 +230,16 @@ export const useUserProgress = (courseId?: string) => {
     23: 'bdbbc605-a8f8-4a65-ba9a-a2451198174c',
   };
 
-  // Module counts: employees need 0-18 (19 modules), managers need 0-23 (24 modules)
-  const EMPLOYEE_MODULE_COUNT = 19; // Modules 0-18
-  const MANAGER_MODULE_COUNT = 24; // Modules 0-23
-  const TOTAL_MODULES = isManagerRole ? MANAGER_MODULE_COUNT : EMPLOYEE_MODULE_COUNT;
-  const REQUIRED_FOR_EXAM = isManagerRole ? MANAGER_MODULE_COUNT : EMPLOYEE_MODULE_COUNT;
+  // Track separation: RVT (0-18) vs Manager (19-23)
+  const RVT_REQUIRED_MAX = 18;
+  const RVT_MODULE_COUNT = 19; // Modules 0-18 (required for RVT Certificate)
+  const MANAGER_MODULE_COUNT = 5; // Modules 19-23 (optional Manager Track)
+  const TOTAL_ALL_MODULES = 24; // Total modules in course
+  
+  // For RVT certification, only modules 0-18 are required
+  // Manager modules are optional and don't block RVT certification
+  const TOTAL_MODULES = RVT_MODULE_COUNT;
+  const REQUIRED_FOR_EXAM = RVT_MODULE_COUNT; // RVT exam requires only RVT modules
 
   // Helper functions
   const getModuleProgress = (moduleId: string): ModuleProgress | null => {
@@ -287,10 +301,10 @@ export const useUserProgress = (courseId?: string) => {
     return true;
   };
 
-  // Check if all required modules are completed (for exam access)
-  // Employees need modules 0-18 (19 modules), managers need 0-23 (24 modules)
+  // Check if all RVT required modules are completed (for RVT exam/certificate)
+  // Only modules 0-18 are required for RVT certification
   const areAllModulesCompleted = (): boolean => {
-    for (let i = 0; i < REQUIRED_FOR_EXAM; i++) {
+    for (let i = 0; i <= RVT_REQUIRED_MAX; i++) {
       if (!isModuleCompletedByNumber(i)) {
         return false;
       }
@@ -298,14 +312,46 @@ export const useUserProgress = (courseId?: string) => {
     return true;
   };
 
-  // Get first incomplete module number (within required modules)
+  // Check if all Manager Track modules are completed (for Manager certificate)
+  const areAllManagerModulesCompleted = (): boolean => {
+    for (let i = RVT_REQUIRED_MAX + 1; i <= 23; i++) {
+      if (!isModuleCompletedByNumber(i)) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  // Get RVT completed count (modules 0-18 only)
+  const getRvtCompletedCount = (): number => {
+    let count = 0;
+    for (let i = 0; i <= RVT_REQUIRED_MAX; i++) {
+      if (isModuleCompletedByNumber(i)) {
+        count++;
+      }
+    }
+    return count;
+  };
+
+  // Get Manager Track completed count (modules 19-23)
+  const getManagerCompletedCount = (): number => {
+    let count = 0;
+    for (let i = RVT_REQUIRED_MAX + 1; i <= 23; i++) {
+      if (isModuleCompletedByNumber(i)) {
+        count++;
+      }
+    }
+    return count;
+  };
+
+  // Get first incomplete module number (within RVT required modules)
   const getFirstIncompleteModule = (): number => {
-    for (let i = 0; i < REQUIRED_FOR_EXAM; i++) {
+    for (let i = 0; i <= RVT_REQUIRED_MAX; i++) {
       if (!isModuleCompletedByNumber(i)) {
         return i;
       }
     }
-    return REQUIRED_FOR_EXAM; // All required modules complete
+    return RVT_REQUIRED_MAX + 1; // All RVT modules complete, return first manager module
   };
 
   const updateProgress = async (
@@ -366,11 +412,17 @@ export const useUserProgress = (courseId?: string) => {
     getModuleUUID,
     canAccessModule,
     areAllModulesCompleted,
+    areAllManagerModulesCompleted,
+    getRvtCompletedCount,
+    getManagerCompletedCount,
     getFirstIncompleteModule,
     updateProgress,
     migrateFromLocalStorage,
     isUpdating: updateProgressMutation.isPending,
     TOTAL_MODULES,
+    RVT_MODULE_COUNT,
+    MANAGER_MODULE_COUNT,
+    RVT_REQUIRED_MAX,
     REQUIRED_FOR_EXAM,
     isManagerRole,
   };
