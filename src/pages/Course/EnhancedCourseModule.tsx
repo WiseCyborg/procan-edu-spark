@@ -705,17 +705,28 @@ const EnhancedCourseModule: React.FC = () => {
 
                 <TabsContent value="quiz" className="space-y-4">
                   {moduleData.quiz_questions.length === 0 ? (
-                    <Card>
-                      <CardContent className="p-6 text-center">
-                        <BookOpen className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                        <h3 className="text-2xl font-bold mb-2">No Quiz Available</h3>
-                        <p className="text-muted-foreground mb-4">
-                          This introductory module doesn't have a quiz. 
-                          Continue to the next module to begin your training.
-                        </p>
-                        <Button onClick={goToNext}>Continue to Module 1</Button>
-                      </CardContent>
-                    </Card>
+                    currentModuleNumber === 23 ? (
+                      // Last module - show course completion options
+                      <CourseCompletionCelebration 
+                        onTakeExam={() => navigate('/course/final-exam')}
+                        onReturnToDashboard={() => navigate('/student')}
+                      />
+                    ) : (
+                      // Introductory module without quiz - show continue
+                      <Card>
+                        <CardContent className="p-6 text-center">
+                          <BookOpen className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                          <h3 className="text-2xl font-bold mb-2">No Quiz Available</h3>
+                          <p className="text-muted-foreground mb-4">
+                            This introductory module doesn't have a quiz. 
+                            Continue to the next module to begin your training.
+                          </p>
+                          <Button onClick={goToNext} disabled={!canGoNext}>
+                            {canGoNext ? `Continue to Module ${currentModuleNumber + 1}` : 'Complete'}
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    )
                   ) : !quizComplete ? (
                     <InteractiveQuiz
                       questions={moduleData.quiz_questions.map((q, idx) => ({
