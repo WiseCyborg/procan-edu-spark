@@ -66,7 +66,8 @@ const StudentAuthForm = () => {
         .finally(() => setIsLoadingInvitation(false));
     }
     // Handle prefilled join code from URL
-    else if (prefilledCode) {
+    // Skip if it's a template placeholder like :joinCode
+    else if (prefilledCode && !prefilledCode.startsWith(':')) {
       setValue('joinCode', prefilledCode);
       setIsRegistering(true);
       // Validate the prefilled code
