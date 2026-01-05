@@ -98,8 +98,7 @@ serve(async (req) => {
               const seatsToCreate = Array.from({ length: deficit }, () => ({
                 organization_id: org.id,
                 course_id: course.id,
-                status: 'available',
-                seat_type: 'standard'
+                status: 'available'
               }));
 
               await supabase.from('rvt_seats').insert(seatsToCreate);
