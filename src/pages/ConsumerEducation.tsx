@@ -45,36 +45,50 @@ const ConsumerEducation = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Disclaimer Banner */}
+      <div className="bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-800 py-2 px-4">
+        <p className="text-center text-xs text-amber-800 dark:text-amber-300">
+          <strong>Note:</strong> This is free educational content for the public. 
+          This is <strong>NOT</strong> Maryland RVT employee certification. 
+          <button 
+            onClick={() => navigate('/get-started')} 
+            className="underline ml-1 hover:text-amber-600"
+          >
+            Need RVT certification?
+          </button>
+        </p>
+      </div>
+
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-primary/10 via-background to-secondary/10 py-16 md:py-24">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center space-y-6">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/10 text-secondary text-sm font-medium">
               <GraduationCap className="h-4 w-4" />
-              Free Cannabis Education
+              Free Public Education
             </div>
             
             <h1 className="text-4xl md:text-6xl font-bold text-foreground">
-              Ready for Your First Dispensary Visit?
+              Learn How Maryland Dispensaries Work
             </h1>
             
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              100% free, professional cannabis education for Maryland consumers. 
+              100% free cannabis education for Maryland residents. 
               Learn at your own pace, no account required.
             </p>
 
             <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <CheckCircle2 className="h-5 w-5 text-primary" />
+                <CheckCircle2 className="h-5 w-5 text-secondary" />
                 No Account Required
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <CheckCircle2 className="h-5 w-5 text-primary" />
-                No Payment
+                <CheckCircle2 className="h-5 w-5 text-secondary" />
+                100% Free
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <CheckCircle2 className="h-5 w-5 text-primary" />
-                Get Certified
+                <CheckCircle2 className="h-5 w-5 text-secondary" />
+                Earn a Completion Badge
               </div>
             </div>
           </div>
@@ -160,25 +174,37 @@ const ConsumerEducation = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-16 bg-muted/50">
+      {/* Employee CTA Section */}
+      <section className="py-16 bg-primary/5 border-y border-primary/20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center space-y-6">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
+              <Award className="h-4 w-4" />
+              Work at a Dispensary?
+            </div>
             <h2 className="text-3xl font-bold text-foreground">
-              Looking for Professional Training?
+              Need Official RVT Certification?
             </h2>
             <p className="text-muted-foreground">
-              If you work at a dispensary or training facility, check out our 
-              professional Responsible Vendor Training (RVT) certification.
+              Maryland dispensary employees are required to complete Responsible Vendor Training (RVT). 
+              Ask your manager for a join code to access the official certification program.
             </p>
-            <Button 
-              onClick={() => navigate('/course')}
-              variant="outline"
-              size="lg"
-            >
-              View RVT Certification
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Button 
+                onClick={() => navigate('/get-started')}
+                size="lg"
+              >
+                Get RVT Certified
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+              <Button 
+                onClick={() => navigate('/org/apply')}
+                variant="outline"
+                size="lg"
+              >
+                Dispensary? Apply Here
+              </Button>
+            </div>
           </div>
         </div>
       </section>
