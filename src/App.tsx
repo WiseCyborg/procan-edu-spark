@@ -88,6 +88,7 @@ import EmailDomainVerification from "./pages/admin/EmailDomainVerification";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import CertificateRenewal from "./pages/CertificateRenewal";
+import RVTComplete from "./pages/RVTComplete";
 import AdminUtilities from "./pages/AdminUtilities";
 import UATValidationPage from "./pages/UATValidationPage";
 import UATEvidenceSubmission from "./pages/UATEvidenceSubmission";
@@ -291,6 +292,18 @@ const AppRoutesLayout = () => {
             <Route path="/renew" element={
               <ProtectedRoute>
                 <CertificateRenewal />
+              </ProtectedRoute>
+            } />
+            <Route path="/rvt-complete" element={
+              <ProtectedRoute>
+                <RVTComplete />
+              </ProtectedRoute>
+            } />
+            <Route path="/exam" element={
+              <ProtectedRoute>
+                <ProtectedCourseAccess>
+                  <FinalExam />
+                </ProtectedCourseAccess>
               </ProtectedRoute>
             } />
             <Route path="/dispensary-portal" element={<Navigate to="/dispensary-manager-dashboard" replace />} />

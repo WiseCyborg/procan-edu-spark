@@ -8,13 +8,12 @@ import {
   BookOpen, 
   Award, 
   BarChart3, 
-  MessageSquare, 
   HelpCircle,
   Shield,
   Users,
-  Settings,
   Home,
-  GraduationCap
+  GraduationCap,
+  FileText
 } from 'lucide-react';
 import { HoverCallout } from '@/components/ui/hover-callout';
 
@@ -23,97 +22,167 @@ interface NavigationItem {
   label: string;
   path: string;
   icon: React.ElementType;
-  roles: string[];
   description: string;
   isActive?: boolean;
-  requiresOrganization?: boolean;
 }
+
+type RoleType = 'student' | 'manager' | 'admin' | 'public';
+
+// Role-specific navigation configurations
+const getNavigationByRole = (role: RoleType): NavigationItem[] => {
+  switch (role) {
+    case 'admin':
+      return [
+        {
+          id: 'dashboard',
+          label: 'Dashboard',
+          path: '/dashboard',
+          icon: Home,
+          description: 'System overview and key metrics'
+        },
+        {
+          id: 'team',
+          label: 'Team',
+          path: '/team-management',
+          icon: Users,
+          description: 'Manage team members and compliance'
+        },
+        {
+          id: 'training',
+          label: 'Training',
+          path: '/course',
+          icon: BookOpen,
+          description: 'Access training modules'
+        },
+        {
+          id: 'certificates',
+          label: 'Certificates',
+          path: '/certificates',
+          icon: Award,
+          description: 'View and verify certificates'
+        },
+        {
+          id: 'admin',
+          label: 'Admin',
+          path: '/enhanced-admin-dashboard',
+          icon: Shield,
+          description: 'System administration'
+        }
+      ];
+      
+    case 'manager':
+      return [
+        {
+          id: 'dashboard',
+          label: 'Dashboard',
+          path: '/dashboard',
+          icon: Home,
+          description: 'Your personalized dashboard'
+        },
+        {
+          id: 'learners',
+          label: 'Learners',
+          path: '/team-management',
+          icon: Users,
+          description: 'View and manage learner progress'
+        },
+        {
+          id: 'training',
+          label: 'Training',
+          path: '/course',
+          icon: BookOpen,
+          description: 'Access training modules'
+        },
+        {
+          id: 'reports',
+          label: 'Reports',
+          path: '/dispensary-manager-dashboard',
+          icon: BarChart3,
+          description: 'Compliance reports and analytics'
+        },
+        {
+          id: 'certificates',
+          label: 'Certificates',
+          path: '/certificates',
+          icon: Award,
+          description: 'View and download certificates'
+        }
+      ];
+      
+    case 'student':
+      return [
+        {
+          id: 'training',
+          label: 'My Training',
+          path: '/course',
+          icon: BookOpen,
+          description: 'Continue your RVT training'
+        },
+        {
+          id: 'certificates',
+          label: 'My Certificates',
+          path: '/certificates',
+          icon: Award,
+          description: 'View your earned certificates'
+        },
+        {
+          id: 'help',
+          label: 'Help',
+          path: '/faq',
+          icon: HelpCircle,
+          description: 'Get help and answers'
+        }
+      ];
+      
+    case 'public':
+    default:
+      return [
+        {
+          id: 'learn',
+          label: 'Learn',
+          path: '/consumer-education',
+          icon: GraduationCap,
+          description: 'Free cannabis education'
+        },
+        {
+          id: 'faq',
+          label: 'FAQ',
+          path: '/faq',
+          icon: HelpCircle,
+          description: 'Frequently asked questions'
+        }
+      ];
+  }
+};
 
 export const IntelligentNavigation: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { roles, isStudent, isDispensaryManager, isTrainingCoordinator, isAdmin } = useUserRole();
+  const { isStudent, isDispensaryManager, isTrainingCoordinator, isAdmin } = useUserRole();
   const { organizationId } = useOrganization();
   const { flags } = useFeatureFlags();
 
-  const navigationConfig: NavigationItem[] = [
-    {
-      id: 'home',
-      label: 'Dashboard',
-      path: '/',
-      icon: Home,
-      roles: ['student', 'dispensary_manager', 'training_coordinator', 'admin'],
-      description: 'Your personalized learning dashboard with progress tracking and course overview'
-    },
-    {
-      id: 'course',
-      label: 'Training',
-      path: '/course',
-      icon: BookOpen,
-      roles: ['student', 'dispensary_manager', 'training_coordinator', 'admin'],
-      description: 'Access your MCA-compliant cannabis training modules and continue your learning journey'
-    },
-    {
-      id: 'certificates',
-      label: 'Certificates',
-      path: '/certificates',
-      icon: Award,
-      roles: ['student', 'dispensary_manager', 'training_coordinator', 'admin'],
-      description: 'View and download your earned certificates, track completion status'
-    },
-    {
-      id: 'dispensary-portal',
-      label: 'Team Management',
-      path: '/team-management',
-      icon: BarChart3,
-      roles: ['dispensary_manager', 'training_coordinator', 'admin'],
-      description: 'Manage your team training, view compliance reports, and track employee progress',
-      requiresOrganization: true
-    },
-    {
-      id: 'admin-dashboard',
-      label: 'Admin Dashboard',
-      path: '/enhanced-admin-dashboard',
-      icon: Shield,
-      roles: ['admin'],
-      description: 'Enhanced system administration with intelligent features and AI-powered tools'
-    },
-    {
-      id: 'consumer-education',
-      label: 'Consumer Education',
-      path: '/consumer-education',
-      icon: GraduationCap,
-      roles: ['student', 'dispensary_manager', 'training_coordinator', 'admin', 'consumer'],
-      description: 'Free cannabis education for Maryland consumers and dispensary visitors'
-    },
-    {
-      id: 'faq',
-      label: 'FAQ',
-      path: '/faq',
-      icon: HelpCircle,
-      roles: ['student', 'dispensary_manager', 'training_coordinator', 'admin'],
-      description: 'Frequently asked questions and comprehensive help documentation'
-    }
-  ];
-
-  const getVisibleItems = (): NavigationItem[] => {
-    return navigationConfig.filter(item => {
-      const hasRequiredRole = item.roles.some(role => roles.includes(role as any));
-      const meetsOrgRequirement = !flags.org_nav_guard || 
-                                   !item.requiresOrganization || 
-                                   !!organizationId;
-      return hasRequiredRole && meetsOrgRequirement;
-    }).map(item => ({
-      ...item,
-      isActive: location.pathname === item.path
-    }));
+  // Determine primary role
+  const getPrimaryRole = (): RoleType => {
+    if (isAdmin) return 'admin';
+    if (isDispensaryManager || isTrainingCoordinator) return 'manager';
+    if (isStudent) return 'student';
+    return 'public';
   };
 
-  const visibleItems = getVisibleItems();
+  const role = getPrimaryRole();
+  const navigationItems = getNavigationByRole(role);
+
+  // Add active state based on current path
+  const itemsWithActiveState = navigationItems.map(item => ({
+    ...item,
+    isActive: location.pathname === item.path || 
+              (item.path !== '/' && location.pathname.startsWith(item.path))
+  }));
 
   return (
-    <nav className="flex items-center space-x-2">
-      {visibleItems.map((item) => {
+    <nav className="flex items-center space-x-1">
+      {itemsWithActiveState.map((item) => {
         const Icon = item.icon;
         return (
           <HoverCallout
