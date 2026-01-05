@@ -709,7 +709,7 @@ const EnhancedCourseModule: React.FC = () => {
                       // Last module - show course completion options
                       <CourseCompletionCelebration 
                         onTakeExam={() => navigate('/course/final-exam')}
-                        onReturnToDashboard={() => navigate('/student')}
+                        onReturnToDashboard={() => navigate('/student-dashboard')}
                       />
                     ) : (
                       // Introductory module without quiz - show continue
