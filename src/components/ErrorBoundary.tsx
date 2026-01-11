@@ -24,15 +24,12 @@ const getDashboardRoute = (): string => {
   return '/dashboard';
 };
 
-// Helper to get resume course route
+// Helper to get resume course route - uses localStorage as fallback since ErrorBoundary
+// is a class component and cannot use hooks. The actual resume uses server state.
 const getResumeRoute = (): string => {
-  try {
-    const lastModule = localStorage.getItem('lastAccessedModule');
-    if (lastModule) return `/course/part${lastModule}`;
-    return '/course';
-  } catch {
-    return '/course';
-  }
+  // ErrorBoundary can't use hooks, so we go to the course layout
+  // which will properly route to the resume target
+  return '/course';
 };
 
 export class ErrorBoundary extends Component<Props, State> {

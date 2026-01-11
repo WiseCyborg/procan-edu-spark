@@ -5,6 +5,7 @@ import { useProfileCompletion } from '@/hooks/useProfileCompletion';
 import { useUserProgress } from '@/hooks/useUserProgress';
 import { useTierProgress } from '@/hooks/useTierProgress';
 import { useStudentChecklistStatus } from '@/hooks/useStudentChecklistStatus';
+import { useCourseState } from '@/hooks/useCourseState';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -42,6 +43,7 @@ const StudentDashboard = () => {
   const { getCompletedModulesCount, getTotalScore, isLoading: progressLoading } = useUserProgress(COURSE_ID);
   const { currentTier, getNextTier, getModulesNeededForNextTier } = useTierProgress();
   const checklistStatus = useStudentChecklistStatus();
+  const { getResumeRoute } = useCourseState(COURSE_ID);
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [organizationInfo, setOrganizationInfo] = useState<{name: string, coordinator: string} | null>(null);
@@ -174,11 +176,11 @@ const StudentDashboard = () => {
           </p>
         </div>
         
-        {/* Resume Course Quick Action */}
+        {/* Resume Course Quick Action - uses server-computed resume target */}
         {completedModules < agentModules.length && completedModules > 0 && (
           <Button 
             size="lg"
-            onClick={() => navigate('/course')}
+            onClick={() => navigate(getResumeRoute())}
             className="w-full md:w-auto bg-primary hover:bg-primary/90 shadow-lg"
           >
             <BookOpen className="w-5 h-5 mr-2" />
@@ -396,7 +398,7 @@ const StudentDashboard = () => {
                 )}
               </div>
               <Button 
-                onClick={() => navigate('/course')} 
+                onClick={() => navigate(getResumeRoute())} 
                 className="w-full md:w-auto h-11 md:h-10 flex-shrink-0"
               >
                 Continue
