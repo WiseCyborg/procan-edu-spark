@@ -513,6 +513,48 @@ export type Database = {
         }
         Relationships: []
       }
+      alert_rules: {
+        Row: {
+          comparison_operator: string
+          cooldown_minutes: number | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          last_triggered_at: string | null
+          metric_name: string
+          notification_channel: string
+          recipient_emails: string[] | null
+          threshold_value: number
+          updated_at: string | null
+        }
+        Insert: {
+          comparison_operator: string
+          cooldown_minutes?: number | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_triggered_at?: string | null
+          metric_name: string
+          notification_channel: string
+          recipient_emails?: string[] | null
+          threshold_value: number
+          updated_at?: string | null
+        }
+        Update: {
+          comparison_operator?: string
+          cooldown_minutes?: number | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_triggered_at?: string | null
+          metric_name?: string
+          notification_channel?: string
+          recipient_emails?: string[] | null
+          threshold_value?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       api_console_audit: {
         Row: {
           api_route: string
@@ -659,6 +701,47 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      certificate_audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          certificate_id: string
+          created_at: string | null
+          id: string
+          ip_address: string | null
+          metadata: Json | null
+          user_agent: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          certificate_id: string
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          user_agent?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          certificate_id?: string
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certificate_audit_log_certificate_id_fkey"
+            columns: ["certificate_id"]
+            isOneToOne: false
+            referencedRelation: "certificates"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       certificates: {
         Row: {
@@ -3716,6 +3799,57 @@ export type Database = {
           },
         ]
       }
+      module_state_log: {
+        Row: {
+          course_id: string
+          created_at: string | null
+          from_state: string | null
+          id: string
+          metadata: Json | null
+          module_id: string
+          to_state: string
+          trigger_event: string
+          user_id: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string | null
+          from_state?: string | null
+          id?: string
+          metadata?: Json | null
+          module_id: string
+          to_state: string
+          trigger_event: string
+          user_id: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string | null
+          from_state?: string | null
+          id?: string
+          metadata?: Json | null
+          module_id?: string
+          to_state?: string
+          trigger_event?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_state_log_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "module_state_log_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "course_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_preferences: {
         Row: {
           created_at: string
@@ -4288,6 +4422,56 @@ export type Database = {
           order_id?: string
         }
         Relationships: []
+      }
+      payment_events: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          event_type: string
+          id: string
+          order_id: string | null
+          payload: Json | null
+          processed_at: string | null
+          session_id: string | null
+          status: string
+          stripe_event_id: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          event_type: string
+          id?: string
+          order_id?: string | null
+          payload?: Json | null
+          processed_at?: string | null
+          session_id?: string | null
+          status?: string
+          stripe_event_id: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          event_type?: string
+          id?: string
+          order_id?: string | null
+          payload?: Json | null
+          processed_at?: string | null
+          session_id?: string | null
+          status?: string
+          stripe_event_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_events_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       payments: {
         Row: {
@@ -9077,6 +9261,10 @@ export type Database = {
           success: boolean
         }[]
       }
+      reconcile_payment_status: {
+        Args: { p_session_id: string }
+        Returns: Json
+      }
       reconcile_seats: {
         Args: never
         Returns: {
@@ -9183,6 +9371,17 @@ export type Database = {
       update_enrollment_deadline: {
         Args: { deadline_date: string; user_id_param: string }
         Returns: boolean
+      }
+      update_module_progress_state: {
+        Args: {
+          p_course_id: string
+          p_metadata?: Json
+          p_module_id: string
+          p_new_state: string
+          p_trigger_event: string
+          p_user_id: string
+        }
+        Returns: Json
       }
       upgrade_subscription_tier: {
         Args: {

@@ -1,5 +1,8 @@
 project_id = "zhmpwczrvitomsxjwpzc"
 
+[functions.stripe-webhook]
+verify_jwt = false
+
 [functions.configure-encryption-key]
 verify_jwt = false
 
