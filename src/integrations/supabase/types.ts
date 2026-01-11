@@ -2896,6 +2896,76 @@ export type Database = {
         }
         Relationships: []
       }
+      entitlements: {
+        Row: {
+          course_id: string | null
+          created_at: string
+          entitlement_type: Database["public"]["Enums"]["entitlement_type"]
+          granted_by: string | null
+          id: string
+          metadata: Json | null
+          order_id: string | null
+          seat_id: string | null
+          status: Database["public"]["Enums"]["entitlement_status"]
+          updated_at: string
+          user_id: string
+          valid_from: string
+          valid_until: string | null
+        }
+        Insert: {
+          course_id?: string | null
+          created_at?: string
+          entitlement_type?: Database["public"]["Enums"]["entitlement_type"]
+          granted_by?: string | null
+          id?: string
+          metadata?: Json | null
+          order_id?: string | null
+          seat_id?: string | null
+          status?: Database["public"]["Enums"]["entitlement_status"]
+          updated_at?: string
+          user_id: string
+          valid_from?: string
+          valid_until?: string | null
+        }
+        Update: {
+          course_id?: string | null
+          created_at?: string
+          entitlement_type?: Database["public"]["Enums"]["entitlement_type"]
+          granted_by?: string | null
+          id?: string
+          metadata?: Json | null
+          order_id?: string | null
+          seat_id?: string | null
+          status?: Database["public"]["Enums"]["entitlement_status"]
+          updated_at?: string
+          user_id?: string
+          valid_from?: string
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entitlements_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entitlements_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entitlements_seat_id_fkey"
+            columns: ["seat_id"]
+            isOneToOne: false
+            referencedRelation: "rvt_seats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       escalation_log: {
         Row: {
           created_at: string | null
@@ -8969,6 +9039,7 @@ export type Database = {
       generate_dispensary_key: { Args: never; Returns: string }
       generate_dispensary_number: { Args: never; Returns: string }
       generate_invitation_token: { Args: never; Returns: string }
+      get_access_snapshot: { Args: { p_course_id?: string }; Returns: Json }
       get_active_rate_limits: {
         Args: never
         Returns: {
@@ -9032,6 +9103,7 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_course_state: { Args: { p_course_id: string }; Returns: Json }
       get_database_stats: {
         Args: never
         Returns: {
@@ -9442,6 +9514,13 @@ export type Database = {
       }
     }
     Enums: {
+      access_deny_reason:
+        | "none"
+        | "enrollment_required"
+        | "payment_required"
+        | "org_seat_required"
+        | "suspended"
+        | "expired"
       admin_permission:
         | "user_create"
         | "user_edit"
@@ -9470,6 +9549,8 @@ export type Database = {
         | "training_coordinator"
         | "consumer"
         | "trainer"
+      entitlement_status: "active" | "expired" | "suspended" | "revoked"
+      entitlement_type: "trial" | "paid" | "org_seat" | "admin_granted"
       incident_severity: "low" | "medium" | "high" | "critical"
       incident_status: "reported" | "investigating" | "resolved" | "closed"
       job_role:
@@ -9607,6 +9688,14 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      access_deny_reason: [
+        "none",
+        "enrollment_required",
+        "payment_required",
+        "org_seat_required",
+        "suspended",
+        "expired",
+      ],
       admin_permission: [
         "user_create",
         "user_edit",
@@ -9637,6 +9726,8 @@ export const Constants = {
         "consumer",
         "trainer",
       ],
+      entitlement_status: ["active", "expired", "suspended", "revoked"],
+      entitlement_type: ["trial", "paid", "org_seat", "admin_granted"],
       incident_severity: ["low", "medium", "high", "critical"],
       incident_status: ["reported", "investigating", "resolved", "closed"],
       job_role: [
