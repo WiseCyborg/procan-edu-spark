@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -13,6 +13,7 @@ import { getDocumentContent, DocumentContent } from '@/data/moduleDocuments';
 import { sanitizeHtml } from "@/utils/sanitize-html";
 import { markdownToHtml } from "@/utils/markdown-to-html";
 import { useUserProgress } from '@/hooks/useUserProgress';
+import { useResumeState } from '@/hooks/useResumeState';
 import { supabase } from '@/integrations/supabase/client';
 import { RegulatorySidebar } from '@/components/regulatory/RegulatorySidebar';
 import { SectionProgressNav } from '@/components/course/SectionProgressNav';
@@ -70,10 +71,12 @@ const COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
 
 const EnhancedCourseModule: React.FC = () => {
   const { moduleId } = useParams<{ moduleId: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const [moduleData, setModuleData] = useState<ModuleData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<string>('overview');
+  const [activeTab, setActiveTab] = useState<string>(searchParams.get('tab') || 'overview');
+  const [currentPageIndex, setCurrentPageIndex] = useState<number>(parseInt(searchParams.get('page') || '0'));
   const [overviewComplete, setOverviewComplete] = useState(false);
   const [courseComplete, setCourseComplete] = useState(false);
   const [docsViewed, setDocsViewed] = useState(false);
@@ -87,6 +90,37 @@ const EnhancedCourseModule: React.FC = () => {
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   const { updateProgress, isModuleCompletedByNumber, canAccessModule, getModuleUUID, getFirstIncompleteModule } = useUserProgress(COURSE_ID);
+  const { saveResumeState } = useResumeState(COURSE_ID);
+  
+  const currentModuleNumber = parseInt(moduleId?.replace('part', '') || '0');
+
+  // Save resume state whenever tab or page changes
+  const persistResumeState = useCallback((tab: string, pageIndex: number) => {
+    if (!moduleData) return;
+    saveResumeState({
+      moduleId: moduleData.id,
+      moduleNumber: currentModuleNumber,
+      lastTab: tab,
+      lastPageIndex: pageIndex,
+    });
+  }, [moduleData, currentModuleNumber, saveResumeState]);
+
+  // Persist on tab change
+  useEffect(() => {
+    if (moduleData) {
+      persistResumeState(activeTab, currentPageIndex);
+      // Update URL without navigation
+      const params = new URLSearchParams();
+      if (activeTab !== 'overview') params.set('tab', activeTab);
+      if (currentPageIndex > 0) params.set('page', String(currentPageIndex));
+      setSearchParams(params, { replace: true });
+    }
+  }, [activeTab, currentPageIndex, moduleData]);
+
+  // Handle page change from PaginatedContent
+  const handlePageChange = useCallback((pageIndex: number) => {
+    setCurrentPageIndex(pageIndex);
+  }, []);
   
   // Dynamic modules with actual completion status using proper UUID-based checking
   const modulesWithCompletion = useMemo(() => [
@@ -127,7 +161,6 @@ const EnhancedCourseModule: React.FC = () => {
     return docIds.map(id => getDocumentContent(id)).filter((doc): doc is DocumentContent => doc !== undefined);
   }, [moduleId]);
   
-  const currentModuleNumber = parseInt(moduleId?.replace('part', '') || '0');
   const currentModule = modulesWithCompletion.find(m => m.number === currentModuleNumber);
   
   const { goToPrevious, goToNext, canGoPrevious, canGoNext } = useModuleNavigation({
@@ -559,6 +592,7 @@ const EnhancedCourseModule: React.FC = () => {
                     <CardContent>
                       <PaginatedContent
                         content={moduleData.content || ''}
+                        onPageChange={handlePageChange}
                         onComplete={() => setOverviewComplete(true)}
                         onAllPagesViewed={() => {
                           setOverviewComplete(true);

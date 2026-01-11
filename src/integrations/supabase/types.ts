@@ -1684,6 +1684,60 @@ export type Database = {
           },
         ]
       }
+      course_resume_state: {
+        Row: {
+          course_id: string
+          created_at: string
+          id: string
+          last_activity_at: string
+          last_page_index: number
+          last_tab: string
+          module_id: string | null
+          module_number: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          id?: string
+          last_activity_at?: string
+          last_page_index?: number
+          last_tab?: string
+          module_id?: string | null
+          module_number?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          id?: string
+          last_activity_at?: string
+          last_page_index?: number
+          last_tab?: string
+          module_id?: string | null
+          module_number?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_resume_state_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_resume_state_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "course_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       courses: {
         Row: {
           completion_badge_name: string | null
@@ -9474,6 +9528,16 @@ export type Database = {
           p_user_id: string
         }
         Returns: undefined
+      }
+      upsert_resume_state: {
+        Args: {
+          p_course_id: string
+          p_last_page_index?: number
+          p_last_tab?: string
+          p_module_id?: string
+          p_module_number?: number
+        }
+        Returns: Json
       }
       user_can_view_profile: {
         Args: { _target_user_id: string; _viewer_id: string }

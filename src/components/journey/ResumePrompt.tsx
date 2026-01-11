@@ -2,18 +2,36 @@ import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, RefreshCw } from 'lucide-react';
-import { useJourneyState } from '@/hooks/useJourneyState';
+import { useCourseState, getResumeMessageFromState } from '@/hooks/useCourseState';
+import { Skeleton } from '@/components/ui/skeleton';
+
+const COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
 
 export const ResumePrompt = () => {
   const navigate = useNavigate();
-  const { getResumeMessage, incrementResumePrompt } = useJourneyState();
+  const { courseState, isLoading } = useCourseState(COURSE_ID);
   
-  const resumeInfo = getResumeMessage();
+  // Get resume message from server-computed course state
+  const resumeInfo = getResumeMessageFromState(courseState);
+
+  if (isLoading) {
+    return (
+      <Card className="p-6 bg-gradient-to-br from-primary/5 via-background to-primary/10 border-primary/20">
+        <div className="flex items-start gap-4">
+          <Skeleton className="h-12 w-12 rounded-lg" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-5 w-48" />
+            <Skeleton className="h-4 w-64" />
+            <Skeleton className="h-10 w-32 mt-4" />
+          </div>
+        </div>
+      </Card>
+    );
+  }
 
   if (!resumeInfo) return null;
 
   const handleResume = () => {
-    incrementResumePrompt();
     navigate(resumeInfo.route);
   };
 
