@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,7 +9,7 @@ import { useUserRole } from '@/hooks/useUserRole';
 import { useOrganization } from '@/hooks/useOrganization';
 import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LogOut, User, MessageSquare, BookOpen, Award, BarChart3, Users, Mail, Building2, CreditCard, ShoppingCart, Home, FileText, GraduationCap, HelpCircle, Shield, ChevronDown, Keyboard, LayoutDashboard } from 'lucide-react';
+import { LogOut, User, MessageSquare, BookOpen, Award, BarChart3, Users, Mail, Building2, CreditCard, ShoppingCart, Home, FileText, GraduationCap, HelpCircle, Shield, ChevronDown, Keyboard, LayoutDashboard, Loader2 } from 'lucide-react';
 import { CommunicationHub } from '@/components/communication/CommunicationHub';
 import { PurchaseSeatsDialog } from '@/components/team/PurchaseSeatsDialog';
 import { RoleSwitcher } from '@/components/navigation/RoleSwitcher';
@@ -18,6 +17,7 @@ import { DropdownMenuLabel } from '@/components/ui/dropdown-menu';
 import { MobileBottomNav } from '@/components/navigation/MobileBottomNav';
 import { useKeyboardShortcut } from '@/hooks/useKeyboardShortcut';
 import { useKeyboardShortcuts } from '@/contexts/KeyboardShortcutsContext';
+import { useGuardedNavigation } from '@/hooks/useGuardedNavigation';
 import { supabase } from '@/integrations/supabase/client';
 
 interface HeaderProps {
@@ -67,12 +67,18 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
 
   const { flags } = useFeatureFlags();
   const { setShortcutsDialogOpen } = useKeyboardShortcuts();
+  const { navigateToDashboard, state: navState } = useGuardedNavigation();
 
   const isMac = typeof navigator !== 'undefined' && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
 
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
+  };
+
+  // Handle guarded dashboard navigation
+  const handleGoToDashboard = async () => {
+    await navigateToDashboard();
   };
 
   React.useEffect(() => {
@@ -135,7 +141,7 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
   });
 
   return (
-    <header className="bg-white border-b shadow-sm" role={headerRole}>
+    <header className="bg-white border-b shadow-sm sticky top-0 z-50" role={headerRole}>
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <div className="flex items-center space-x-2">
           <Button 
@@ -194,13 +200,18 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                   </Button>
                 </>
               ) : (
-                /* Logged-in user on public page - show Go to Dashboard CTA */
+                /* Logged-in user on public page - show Go to Dashboard CTA with guarded navigation */
                 <Button 
-                  onClick={() => navigate(getDashboardRoute())}
+                  onClick={handleGoToDashboard}
+                  disabled={navState.isNavigating}
                   size="sm"
                   className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
                 >
-                  <LayoutDashboard className="w-4 h-4" />
+                  {navState.isNavigating ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <LayoutDashboard className="w-4 h-4" />
+                  )}
                   Go to Dashboard
                 </Button>
               )}
@@ -213,7 +224,8 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
               {/* Desktop Navigation - Dashboard, Training, Communication */}
               <nav className="hidden md:flex items-center space-x-1">
                 <Button 
-                  onClick={() => navigate(getDashboardRoute())}
+                  onClick={handleGoToDashboard}
+                  disabled={navState.isNavigating}
                   variant="ghost"
                   size="sm"
                   className="flex items-center space-x-2"
@@ -303,7 +315,7 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                   <DropdownMenuLabel className="text-xs text-muted-foreground font-semibold px-2 py-1.5">
                     QUICK LINKS
                   </DropdownMenuLabel>
-                  <DropdownMenuItem onClick={() => navigate(getDashboardRoute())}>
+                  <DropdownMenuItem onClick={handleGoToDashboard}>
                     <Home className="mr-2 h-4 w-4" />
                     <span>Dashboard</span>
                   </DropdownMenuItem>
