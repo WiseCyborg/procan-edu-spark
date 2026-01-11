@@ -96,6 +96,7 @@ import UATEvidenceSubmission from "./pages/UATEvidenceSubmission";
 import UATDispensaryOnboarding from "./pages/UATDispensaryOnboarding";
 
 import { ProtectedCourseAccess } from "./components/ProtectedCourseAccess";
+import { RequireAccess } from "./components/guards/RequireAccess";
 import { JourneyStateProvider } from "./providers/JourneyStateProvider";
 import { KeyboardShortcutsProvider } from "./contexts/KeyboardShortcutsContext";
 import { KeyboardShortcutsDialog } from "./components/help/KeyboardShortcutsDialog";
@@ -262,23 +263,29 @@ const AppRoutesLayout = () => {
             } />
             <Route path="/course" element={
               <ProtectedRoute>
-                <ProtectedCourseAccess>
-                  <CourseLayout />
-                </ProtectedCourseAccess>
+                <RequireAccess requireCourseAccess courseId="e6841a2f-4e92-47c3-9ed4-243ccc22338b">
+                  <ProtectedCourseAccess>
+                    <CourseLayout />
+                  </ProtectedCourseAccess>
+                </RequireAccess>
               </ProtectedRoute>
             } />
             <Route path="/course/:moduleId" element={
               <ProtectedRoute>
-                <ProtectedCourseAccess>
-                  <EnhancedCourseModule />
-                </ProtectedCourseAccess>
+                <RequireAccess requireCourseAccess courseId="e6841a2f-4e92-47c3-9ed4-243ccc22338b">
+                  <ProtectedCourseAccess>
+                    <EnhancedCourseModule />
+                  </ProtectedCourseAccess>
+                </RequireAccess>
               </ProtectedRoute>
             } />
             <Route path="/course/final-exam" element={
               <ProtectedRoute>
-                <ProtectedCourseAccess>
-                  <FinalExam />
-                </ProtectedCourseAccess>
+                <RequireAccess requireCourseAccess courseId="e6841a2f-4e92-47c3-9ed4-243ccc22338b">
+                  <ProtectedCourseAccess>
+                    <FinalExam />
+                  </ProtectedCourseAccess>
+                </RequireAccess>
               </ProtectedRoute>
             } />
             <Route path="/payment-success" element={
