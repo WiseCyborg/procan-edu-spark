@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useSearchParams } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { UnifiedVoiceProvider } from "@/providers/UnifiedVoiceProvider";
+import { AccessProvider } from "@/providers/AccessProvider";
 import { OrganizationProvider } from "@/contexts/OrganizationContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { SkipNavigation } from "@/components/layout/SkipNavigation";
@@ -493,28 +494,30 @@ const App = () => (
         <KeyboardShortcutsProvider>
           <UnifiedVoiceProvider>
             <AuthProvider>
-              <AdminProxyProvider>
-                <IdleTimeoutProvider>
-                  <Suspense fallback={
-                    <div className="min-h-screen flex items-center justify-center">
-                      <div className="text-center">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-                        <p className="text-muted-foreground">Loading application...</p>
+              <AccessProvider>
+                <AdminProxyProvider>
+                  <IdleTimeoutProvider>
+                    <Suspense fallback={
+                      <div className="min-h-screen flex items-center justify-center">
+                        <div className="text-center">
+                          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                          <p className="text-muted-foreground">Loading application...</p>
+                        </div>
                       </div>
-                    </div>
-                  }>
-                    <AdminProxyBanner />
-                    <OrganizationProvider>
-                      <JourneyStateProvider>
-                        <TooltipProvider>
-                          <AppRoutesLayout />
-                          <KeyboardShortcutsDialog />
-                        </TooltipProvider>
-                      </JourneyStateProvider>
-                    </OrganizationProvider>
-                  </Suspense>
-                </IdleTimeoutProvider>
-              </AdminProxyProvider>
+                    }>
+                      <AdminProxyBanner />
+                      <OrganizationProvider>
+                        <JourneyStateProvider>
+                          <TooltipProvider>
+                            <AppRoutesLayout />
+                            <KeyboardShortcutsDialog />
+                          </TooltipProvider>
+                        </JourneyStateProvider>
+                      </OrganizationProvider>
+                    </Suspense>
+                  </IdleTimeoutProvider>
+                </AdminProxyProvider>
+              </AccessProvider>
             </AuthProvider>
           </UnifiedVoiceProvider>
         </KeyboardShortcutsProvider>
