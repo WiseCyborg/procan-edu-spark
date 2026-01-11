@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { invalidateOnLogout } from '@/lib/invalidateAccess';
 
 // Constants
 const IDLE_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
@@ -19,6 +21,7 @@ interface UseIdleTimeoutReturn {
 export const useIdleTimeout = (): UseIdleTimeoutReturn => {
   const { user, signOut } = useAuth();
   const location = useLocation();
+  const queryClient = useQueryClient();
   
   const [lastActivityAt, setLastActivityAt] = useState<number>(Date.now());
   const [showWarningModal, setShowWarningModal] = useState(false);
@@ -75,6 +78,9 @@ export const useIdleTimeout = (): UseIdleTimeoutReturn => {
         console.warn('Failed to clear activity storage:', e);
       }
       
+      // Clear all cached access data before logout
+      invalidateOnLogout(queryClient);
+      
       // Sign out
       await signOut();
       
@@ -84,7 +90,7 @@ export const useIdleTimeout = (): UseIdleTimeoutReturn => {
       console.error('Idle logout failed:', e);
       setLogoutInProgress(false);
     }
-  }, [logoutInProgress, signOut]);
+  }, [logoutInProgress, signOut, queryClient]);
 
   // Check idle status
   const checkIdle = useCallback(() => {
@@ -132,13 +138,17 @@ export const useIdleTimeout = (): UseIdleTimeoutReturn => {
     
     try {
       localStorage.removeItem(STORAGE_KEY);
+      
+      // Clear all cached access data before logout
+      invalidateOnLogout(queryClient);
+      
       await signOut();
       window.location.href = '/auth?reason=manual';
     } catch (e) {
       console.error('Manual logout failed:', e);
       setLogoutInProgress(false);
     }
-  }, [logoutInProgress, signOut]);
+  }, [logoutInProgress, signOut, queryClient]);
 
   // Set up activity event listeners
   useEffect(() => {
