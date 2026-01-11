@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useOrganizationAccess } from '@/hooks/useOrganizationAccess';
@@ -13,6 +12,7 @@ import { toast } from '@/components/ui/use-toast';
 import { ProfileCompletionBanner } from '@/components/ProfileCompletionBanner';
 import { NextActionBanner } from '@/components/guidance/NextActionBanner';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { AccessPipelineHealth } from '@/components/debug/AccessPipelineHealth';
 
 // RVT Course ID - requires org access
 const RVT_COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
@@ -164,6 +164,11 @@ const Dashboard = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold text-green-700 mb-6">Learning Dashboard</h1>
+      
+      {/* DEV-only: Access Pipeline Health Monitor */}
+      <div className="mb-6">
+        <AccessPipelineHealth courseId={RVT_COURSE_ID} />
+      </div>
       
       {/* Role-aware next action guidance */}
       <NextActionBanner className="mb-6" />
