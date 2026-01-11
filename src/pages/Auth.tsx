@@ -82,12 +82,26 @@ const Auth = () => {
   const tabParam = searchParams.get('tab');
   const prefilledCode = searchParams.get('code');
   const forceRegister = searchParams.get('register') === 'true';
+  const logoutReason = searchParams.get('reason');
 
   // Determine default tab based on URL params
   const getDefaultTab = () => {
     if (tabParam === 'accesskey') return 'accesskey';
     if (tabParam === 'code' || prefilledCode) return 'code';
     return 'invite';
+  };
+
+  // Inactivity logout banner
+  const InactivityBanner = () => {
+    if (logoutReason !== 'inactive') return null;
+    
+    return (
+      <div className="mb-4 p-3 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-lg text-center">
+        <p className="text-sm text-amber-800 dark:text-amber-200">
+          You were signed out due to inactivity. Please sign in again to continue.
+        </p>
+      </div>
+    );
   };
 
   // Handle password reset mode
@@ -109,6 +123,7 @@ const Auth = () => {
             <CardDescription>Sign in or register for your organization's training</CardDescription>
           </CardHeader>
           <CardContent>
+            <InactivityBanner />
             <Tabs defaultValue={getDefaultTab()} className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="invite" className="flex items-center gap-1 text-xs sm:text-sm">
@@ -189,6 +204,7 @@ const Auth = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            <InactivityBanner />
             {showAccessKey ? (
               <>
                 <div className="text-center mb-4 text-sm text-muted-foreground">
@@ -253,7 +269,10 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/5 p-4">
-      {renderAuthForm()}
+      <div className="w-full max-w-lg">
+        <InactivityBanner />
+        {renderAuthForm()}
+      </div>
     </div>
   );
 };

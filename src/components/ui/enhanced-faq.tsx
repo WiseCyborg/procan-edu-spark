@@ -257,6 +257,48 @@ export const EnhancedFAQ: React.FC<EnhancedFAQProps> = ({
       category: 'Email Management',
       securityLevel: 'manager',
       tags: ['access', 'permissions', 'audit']
+    },
+    
+    // Session Security FAQs
+    {
+      id: 'session-1',
+      question: 'Why did I get logged out?',
+      answer: 'For your security, we automatically sign you out after 30 minutes of inactivity.',
+      category: 'Session Security',
+      securityLevel: 'public',
+      tags: ['logout', 'inactivity', 'security']
+    },
+    {
+      id: 'session-2',
+      question: 'What counts as activity?',
+      answer: 'Clicks, scrolling, typing, navigating through modules, and interacting with pages/quizzes all count as activity.',
+      category: 'Session Security',
+      securityLevel: 'public',
+      tags: ['activity', 'session']
+    },
+    {
+      id: 'session-3',
+      question: "Will I lose my progress if I'm logged out?",
+      answer: 'No. Your progress is saved as you go. After signing in again, use "Resume Course" to continue.',
+      category: 'Session Security',
+      securityLevel: 'public',
+      tags: ['progress', 'save', 'resume']
+    },
+    {
+      id: 'session-4',
+      question: 'Will I be warned before logout?',
+      answer: "Yes. You'll see a warning 5 minutes before logout with a countdown and a button to stay signed in.",
+      category: 'Session Security',
+      securityLevel: 'public',
+      tags: ['warning', 'countdown']
+    },
+    {
+      id: 'session-5',
+      question: 'I had multiple tabs open—why did I get logged out?',
+      answer: "If all tabs are inactive for 30 minutes, you'll be signed out. Activity in any open tab keeps you signed in.",
+      category: 'Session Security',
+      securityLevel: 'public',
+      tags: ['tabs', 'multiple', 'sync']
     }
   ];
 
@@ -309,7 +351,8 @@ export const EnhancedFAQ: React.FC<EnhancedFAQProps> = ({
       'Email Types': 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-100',
       'Email Troubleshooting': 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-100',
       'Email Reliability': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100',
-      'Email Management': 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100'
+      'Email Management': 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100',
+      'Session Security': 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-100'
     };
     return colors[category] || 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-100';
   };
