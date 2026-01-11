@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -8,25 +8,20 @@ interface PaymentStatus {
   orderInfo: any;
 }
 
+// Cache configuration: payment status only changes on purchase
+const PAYMENT_STALE_TIME = 5 * 60 * 1000; // 5 minutes
+const PAYMENT_GC_TIME = 30 * 60 * 1000; // 30 minutes
+
 export const usePaymentStatus = (courseId: string): PaymentStatus => {
   const { user } = useAuth();
-  const [hasPaid, setHasPaid] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [orderInfo, setOrderInfo] = useState(null);
 
-  useEffect(() => {
-    if (!user || !courseId) {
-      setIsLoading(false);
-      return;
-    }
+  const { data, isLoading } = useQuery({
+    queryKey: ['payment-status', user?.id, courseId],
+    queryFn: async () => {
+      if (!user?.id || !courseId) {
+        return { hasPaid: false, orderInfo: null };
+      }
 
-    checkPaymentStatus();
-  }, [user, courseId]);
-
-  const checkPaymentStatus = async () => {
-    if (!user || !courseId) return;
-
-    try {
       const { data, error } = await supabase
         .from('orders')
         .select('*')
@@ -38,18 +33,23 @@ export const usePaymentStatus = (courseId: string): PaymentStatus => {
 
       if (error) {
         console.error('Error checking payment status:', error);
-        return;
+        return { hasPaid: false, orderInfo: null };
       }
 
       const paid = data && data.length > 0;
-      setHasPaid(paid);
-      setOrderInfo(paid ? data[0] : null);
-    } catch (error) {
-      console.error('Error in checkPaymentStatus:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      return {
+        hasPaid: paid,
+        orderInfo: paid ? data[0] : null,
+      };
+    },
+    enabled: !!user?.id && !!courseId,
+    staleTime: PAYMENT_STALE_TIME,
+    gcTime: PAYMENT_GC_TIME,
+  });
 
-  return { hasPaid, isLoading, orderInfo };
+  return { 
+    hasPaid: data?.hasPaid ?? false, 
+    isLoading, 
+    orderInfo: data?.orderInfo ?? null,
+  };
 };

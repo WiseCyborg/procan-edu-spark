@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole, UserRole } from '@/hooks/useUserRole';
 import { supabase } from '@/integrations/supabase/client';
@@ -78,23 +79,21 @@ const defaultContext: UserContext = {
   unregistered_managers: 0,
 };
 
+// Cache configuration: context includes progress, updates more often
+const CONTEXT_STALE_TIME = 2 * 60 * 1000; // 2 minutes
+const CONTEXT_GC_TIME = 30 * 60 * 1000; // 30 minutes
+
 export const useUserContext = () => {
   const { user } = useAuth();
-  const { roles, isAdmin, isDispensaryManager, isTrainingCoordinator } = useUserRole();
+  const { roles, isAdmin, isDispensaryManager, isLoading: rolesLoading } = useUserRole();
   const location = useLocation();
-  const [context, setContext] = useState<UserContext>(defaultContext);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
 
-  const fetchUserContext = useCallback(async () => {
-    if (!user) {
-      setContext(defaultContext);
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      setIsLoading(true);
+  const { data: context = defaultContext, isLoading: contextLoading, refetch } = useQuery({
+    queryKey: ['user-context', user?.id, roles],
+    queryFn: async (): Promise<UserContext> => {
+      if (!user) {
+        return defaultContext;
+      }
 
       // Fetch profile
       const { data: profile } = await supabase
@@ -104,9 +103,7 @@ export const useUserContext = () => {
         .single();
 
       if (!profile) {
-        setContext({ ...defaultContext, user_id: user.id, email: user.email || '' });
-        setIsLoading(false);
-        return;
+        return { ...defaultContext, user_id: user.id, email: user.email || '' };
       }
 
       // Fetch organization if user has one
@@ -194,7 +191,7 @@ export const useUserContext = () => {
 
       const primaryRole = roles[0] || 'student';
 
-      setContext({
+      return {
         user_id: user.id,
         first_name: profile.first_name || '',
         last_name: profile.last_name || '',
@@ -229,28 +226,12 @@ export const useUserContext = () => {
         pending_applications: pendingApplications,
         pending_invitations: pendingInvitations,
         unregistered_managers: unregisteredManagers,
-      });
-
-      setError(null);
-    } catch (err) {
-      console.error('[useUserContext] Error fetching context:', err);
-      setError(err instanceof Error ? err : new Error('Failed to fetch user context'));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [user, roles, isAdmin, isDispensaryManager]);
-
-  // Fetch on mount and when user/roles change
-  useEffect(() => {
-    fetchUserContext();
-  }, [fetchUserContext]);
-
-  // Refresh on route change
-  useEffect(() => {
-    if (user) {
-      fetchUserContext();
-    }
-  }, [location.pathname]);
+      };
+    },
+    enabled: !!user && !rolesLoading,
+    staleTime: CONTEXT_STALE_TIME,
+    gcTime: CONTEXT_GC_TIME,
+  });
 
   // Get display greeting
   const getGreeting = useMemo(() => {
@@ -262,9 +243,9 @@ export const useUserContext = () => {
 
   return {
     context,
-    isLoading,
-    error,
-    refresh: fetchUserContext,
+    isLoading: rolesLoading || contextLoading,
+    error: null,
+    refresh: refetch,
     greeting: getGreeting,
     currentPage: location.pathname,
   };

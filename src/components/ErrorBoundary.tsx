@@ -16,17 +16,12 @@ interface State {
   errorInfo?: ErrorInfo;
 }
 
-// Helper to determine the best dashboard route based on stored user info
+// Helper to determine the dashboard route
+// NOTE: Intentionally does NOT use localStorage for role-based routing.
+// Using client-side storage for access decisions is a security vulnerability.
+// The dashboard route uses a safe default; actual routing is handled by auth flow.
 const getDashboardRoute = (): string => {
-  try {
-    const storedRole = localStorage.getItem('userRole');
-    if (storedRole === 'admin') return '/admin';
-    if (storedRole === 'coordinator') return '/coordinator';
-    if (storedRole === 'manager') return '/manager-registration';
-    return '/dashboard';
-  } catch {
-    return '/dashboard';
-  }
+  return '/dashboard';
 };
 
 // Helper to get resume course route
