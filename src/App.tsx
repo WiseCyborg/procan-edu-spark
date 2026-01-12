@@ -94,6 +94,8 @@ import AdminUtilities from "./pages/AdminUtilities";
 import UATValidationPage from "./pages/UATValidationPage";
 import UATEvidenceSubmission from "./pages/UATEvidenceSubmission";
 import UATDispensaryOnboarding from "./pages/UATDispensaryOnboarding";
+import AllCourses from "./pages/AllCourses";
+import VerifyCertificate from "./pages/VerifyCertificate";
 
 import { ProtectedCourseAccess } from "./components/ProtectedCourseAccess";
 import { RequireAccess } from "./components/guards/RequireAccess";
