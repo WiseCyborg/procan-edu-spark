@@ -1,9 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { useAccessSnapshot, DenyReason } from '@/hooks/useAccessSnapshot';
+import { DenyReason } from '@/hooks/useAccessSnapshot';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useCallback, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { TRACK_IDS, TrackId } from '@/constants/tracks';
 
 /**
  * Get the correct redirect path for access denials
@@ -32,7 +33,8 @@ interface NavigationState {
 
 interface UseGuardedNavigationReturn {
   navigateToDashboard: () => Promise<void>;
-  navigateToCourse: () => Promise<void>;
+  navigateToCourse: (courseId?: TrackId) => Promise<void>;
+  navigateToTrack: (trackId: TrackId) => Promise<void>;
   state: NavigationState;
 }
 
@@ -63,29 +65,22 @@ export const useGuardedNavigation = (): UseGuardedNavigationReturn => {
   /**
    * Verify session and fetch access snapshot directly
    */
-  const verifyAccess = async (): Promise<{
+  const verifyAccess = async (courseId?: string): Promise<{
     hasSession: boolean;
     canAccess: boolean;
     denyReason: DenyReason | null;
     error: string | null;
   }> => {
     try {
-      // Step 1: Verify session exists
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
       
       if (sessionError || !sessionData?.session) {
         console.warn('[GuardedNav] No valid session:', sessionError?.message);
-        return {
-          hasSession: false,
-          canAccess: false,
-          denyReason: null,
-          error: null,
-        };
+        return { hasSession: false, canAccess: false, denyReason: null, error: null };
       }
 
-      // Step 2: Fetch access snapshot from DB
       const { data, error } = await supabase.rpc('get_access_snapshot', {
-        p_course_id: null, // General access check
+        p_course_id: courseId || TRACK_IDS.RVT_CORE,
       });
 
       if (error) {
@@ -168,10 +163,11 @@ export const useGuardedNavigation = (): UseGuardedNavigationReturn => {
   /**
    * Navigate to course with access verification
    */
-  const navigateToCourse = useCallback(async () => {
+  const navigateToCourse = useCallback(async (courseId?: TrackId) => {
     if (authLoading) return;
 
     setState({ isNavigating: true, error: null });
+    const targetCourseId = courseId || TRACK_IDS.RVT_CORE;
 
     try {
       if (!user) {
@@ -179,28 +175,19 @@ export const useGuardedNavigation = (): UseGuardedNavigationReturn => {
         return;
       }
 
-      const access = await verifyAccess();
+      const access = await verifyAccess(targetCourseId);
 
       if (!access.hasSession) {
         navigate('/auth?reason=session_expired');
         return;
       }
 
-      if (access.error) {
-        setState({ isNavigating: false, error: access.error });
-        // Still navigate - course guard will handle it
-        navigate('/course');
-        return;
-      }
-
       if (!access.canAccess && access.denyReason && access.denyReason !== 'none') {
-        // Route to appropriate gate
         const gatePath = getGatePath(access.denyReason);
         navigate(gatePath);
         return;
       }
 
-      // Access granted - go to course
       navigate('/course');
     } catch (e) {
       console.error('[GuardedNav] Course navigation failed:', e);
@@ -211,9 +198,48 @@ export const useGuardedNavigation = (): UseGuardedNavigationReturn => {
     }
   }, [user, authLoading, navigate]);
 
+  /**
+   * Navigate to a specific training track
+   */
+  const navigateToTrack = useCallback(async (trackId: TrackId) => {
+    if (authLoading) return;
+
+    setState({ isNavigating: true, error: null });
+
+    try {
+      if (!user) {
+        navigate(`/auth?next=/course&track=${trackId}`);
+        return;
+      }
+
+      const access = await verifyAccess(trackId);
+
+      if (!access.hasSession) {
+        navigate('/auth?reason=session_expired');
+        return;
+      }
+
+      if (!access.canAccess && access.denyReason) {
+        const gatePath = getGatePath(access.denyReason);
+        navigate(gatePath);
+        return;
+      }
+
+      // Store active track and navigate
+      localStorage.setItem('active_course_id', trackId);
+      navigate('/course');
+    } catch (e) {
+      console.error('[GuardedNav] Track navigation failed:', e);
+      setState({ isNavigating: false, error: 'Navigation failed' });
+    } finally {
+      setState(prev => ({ ...prev, isNavigating: false }));
+    }
+  }, [user, authLoading, navigate]);
+
   return {
     navigateToDashboard,
     navigateToCourse,
+    navigateToTrack,
     state,
   };
 };

@@ -1751,6 +1751,8 @@ export type Database = {
           module_count: number | null
           passing_score: number | null
           payment_required: boolean | null
+          prerequisite_course_id: string | null
+          prerequisite_required: boolean | null
           price_cents: number | null
           target_audience: string | null
           title: string
@@ -1768,6 +1770,8 @@ export type Database = {
           module_count?: number | null
           passing_score?: number | null
           payment_required?: boolean | null
+          prerequisite_course_id?: string | null
+          prerequisite_required?: boolean | null
           price_cents?: number | null
           target_audience?: string | null
           title: string
@@ -1785,12 +1789,22 @@ export type Database = {
           module_count?: number | null
           passing_score?: number | null
           payment_required?: boolean | null
+          prerequisite_course_id?: string | null
+          prerequisite_required?: boolean | null
           price_cents?: number | null
           target_audience?: string | null
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "courses_prerequisite_course_id_fkey"
+            columns: ["prerequisite_course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       covered_sessions: {
         Row: {
@@ -8978,6 +8992,10 @@ export type Database = {
         Args: { user_ip: string }
         Returns: boolean
       }
+      check_course_prerequisite: {
+        Args: { p_course_id: string; p_user_id: string }
+        Returns: Json
+      }
       check_email_circuit: {
         Args: never
         Returns: {
@@ -9093,7 +9111,7 @@ export type Database = {
       generate_dispensary_key: { Args: never; Returns: string }
       generate_dispensary_number: { Args: never; Returns: string }
       generate_invitation_token: { Args: never; Returns: string }
-      get_access_snapshot: { Args: { p_course_id?: string }; Returns: Json }
+      get_access_snapshot: { Args: { p_course_id: string }; Returns: Json }
       get_active_rate_limits: {
         Args: never
         Returns: {
