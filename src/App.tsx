@@ -94,6 +94,8 @@ import AdminUtilities from "./pages/AdminUtilities";
 import UATValidationPage from "./pages/UATValidationPage";
 import UATEvidenceSubmission from "./pages/UATEvidenceSubmission";
 import UATDispensaryOnboarding from "./pages/UATDispensaryOnboarding";
+import AllCourses from "./pages/AllCourses";
+import VerifyCertificate from "./pages/VerifyCertificate";
 
 import { ProtectedCourseAccess } from "./components/ProtectedCourseAccess";
 import { RequireAccess } from "./components/guards/RequireAccess";
@@ -220,6 +222,8 @@ const AppRoutesLayout = () => {
             <Route path="/learn" element={<ConsumerEducation />} />
             <Route path="/consumer-education/:courseId" element={<ConsumerCourse />} />
             <Route path="/consumer-certificates" element={<ConsumerCertificates />} />
+            <Route path="/courses" element={<AllCourses />} />
+            <Route path="/verify" element={<VerifyCertificate />} />
             <Route path="/training-handbook" element={
               <ProtectedRoute>
                 <TrainingHandbook />
