@@ -9802,7 +9802,18 @@ export type Database = {
           organization_name: string
         }[]
       }
-      verify_certificate: { Args: { p_code: string }; Returns: Json }
+      verify_certificate:
+        | { Args: { p_code: string }; Returns: Json }
+        | {
+            Args: {
+              p_code?: string
+              p_course_id?: string
+              p_first_name?: string
+              p_last_initial?: string
+              p_year?: number
+            }
+            Returns: Json
+          }
       verify_certificate_status: {
         Args: { cert_number: string }
         Returns: {
