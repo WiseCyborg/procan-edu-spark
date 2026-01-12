@@ -180,8 +180,13 @@ const StudentDashboard = () => {
         {completedModules < agentModules.length && completedModules > 0 && (
           <Button 
             size="lg"
-            onClick={() => navigate(getResumeRoute())}
-            disabled={courseStateLoading}
+            onClick={() => {
+              // Safe navigation with fallback
+              const route = getResumeRoute();
+              console.log('[StudentDashboard] Navigating to resume route:', route);
+              navigate(route);
+            }}
+            disabled={courseStateLoading || !user}
             className="w-full md:w-auto bg-primary hover:bg-primary/90 shadow-lg"
           >
             <BookOpen className="w-5 h-5 mr-2" />
@@ -401,10 +406,15 @@ const StudentDashboard = () => {
                 )}
               </div>
               <Button 
-                onClick={() => navigate(getResumeRoute())} 
+                onClick={() => {
+                  const route = getResumeRoute();
+                  console.log('[StudentDashboard] Continue button - navigating to:', route);
+                  navigate(route);
+                }} 
+                disabled={courseStateLoading || !user}
                 className="w-full md:w-auto h-11 md:h-10 flex-shrink-0"
               >
-                Continue
+                {courseStateLoading ? 'Loading...' : 'Continue'}
               </Button>
             </div>
           ) : (

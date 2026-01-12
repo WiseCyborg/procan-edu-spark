@@ -94,37 +94,54 @@ export const useCourseState = (courseId?: string): UseCourseStateReturn => {
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['course-state', user?.id, courseId],
     queryFn: async (): Promise<CourseState> => {
+      // Guard: Return default state if missing required params
       if (!user?.id || !courseId) {
+        console.log('[CourseState] Skipping fetch - missing user or courseId', { userId: user?.id, courseId });
         return DEFAULT_COURSE_STATE;
       }
 
-      const { data, error } = await supabase.rpc('get_course_state', {
-        p_course_id: courseId,
-      });
+      try {
+        const { data, error } = await supabase.rpc('get_course_state', {
+          p_course_id: courseId,
+        });
 
-      if (error) {
-        console.error('[CourseState] RPC error:', error);
-        throw new Error(error.message);
-      }
+        if (error) {
+          console.error('[CourseState] RPC error:', error);
+          // Return default state instead of throwing to prevent crashes
+          return {
+            ...DEFAULT_COURSE_STATE,
+            course_id: courseId,
+            error: error.message,
+          };
+        }
 
-      // Parse the JSONB response - cast through unknown first for type safety
-      const state = data as unknown as CourseState;
-      
-      if (!state || state.error) {
-        console.warn('[CourseState] Invalid response:', state);
+        // Parse the JSONB response - cast through unknown first for type safety
+        const state = data as unknown as CourseState;
+        
+        if (!state || state.error) {
+          console.warn('[CourseState] Invalid response:', state);
+          return {
+            ...DEFAULT_COURSE_STATE,
+            course_id: courseId,
+            error: state?.error || 'Failed to fetch course state',
+          };
+        }
+
+        return state;
+      } catch (e) {
+        // Catch any unexpected errors and return safe default
+        console.error('[CourseState] Unexpected error:', e);
         return {
           ...DEFAULT_COURSE_STATE,
           course_id: courseId,
-          error: state?.error || 'Failed to fetch course state',
+          error: e instanceof Error ? e.message : 'Unknown error',
         };
       }
-
-      return state;
     },
     enabled: !!user?.id && !!courseId,
     staleTime: COURSE_STATE_STALE_TIME,
     gcTime: COURSE_STATE_GC_TIME,
-    retry: 2,
+    retry: 1, // Reduce retries to fail faster
   });
 
   const courseState = data ?? DEFAULT_COURSE_STATE;
@@ -144,42 +161,60 @@ export const useCourseState = (courseId?: string): UseCourseStateReturn => {
 
   /**
    * Build the resume route from course state's resume_target
+   * SAFE: Always returns a valid route, never throws
    */
   const getResumeRoute = (): string => {
-    const target = courseState.resume_target;
-    
-    if (!target) {
-      // No resume state - go to first available or in-progress module
-      const nextModule = courseState.modules.find(
-        m => m.status === 'available' || m.status === 'in_progress'
-      );
-      if (nextModule) {
-        return `/course/part${nextModule.module_number}`;
+    try {
+      // Guard: If loading or no valid state, return safe fallback
+      if (isLoading || !courseState || courseState.error) {
+        console.log('[CourseState] getResumeRoute - returning fallback (loading or error)', { isLoading, error: courseState?.error });
+        return '/course';
       }
+
+      const target = courseState.resume_target;
+      
+      if (!target || !target.module_number) {
+        // No resume state - go to first available or in-progress module
+        const nextModule = courseState.modules?.find(
+          m => m.status === 'available' || m.status === 'in_progress'
+        );
+        if (nextModule?.module_number) {
+          return `/course/part${nextModule.module_number}`;
+        }
+        return '/course';
+      }
+
+      // Validate module_number is a valid number
+      if (typeof target.module_number !== 'number' || target.module_number < 1) {
+        console.warn('[CourseState] Invalid module_number in resume_target:', target.module_number);
+        return '/course';
+      }
+
+      const moduleParam = `part${target.module_number}`;
+      const tab = target.last_tab || 'overview';
+      const page = target.last_page_index || 0;
+
+      // Build route with query params
+      let route = `/course/${moduleParam}`;
+      const params = new URLSearchParams();
+      
+      if (tab && tab !== 'overview') {
+        params.set('tab', tab);
+      }
+      if (typeof page === 'number' && page > 0) {
+        params.set('page', String(page));
+      }
+      
+      const queryString = params.toString();
+      if (queryString) {
+        route += `?${queryString}`;
+      }
+
+      return route;
+    } catch (e) {
+      console.error('[CourseState] getResumeRoute error, returning fallback:', e);
       return '/course';
     }
-
-    const moduleParam = `part${target.module_number}`;
-    const tab = target.last_tab || 'overview';
-    const page = target.last_page_index || 0;
-
-    // Build route with query params
-    let route = `/course/${moduleParam}`;
-    const params = new URLSearchParams();
-    
-    if (tab !== 'overview') {
-      params.set('tab', tab);
-    }
-    if (page > 0) {
-      params.set('page', String(page));
-    }
-    
-    const queryString = params.toString();
-    if (queryString) {
-      route += `?${queryString}`;
-    }
-
-    return route;
   };
 
   return {
@@ -227,59 +262,76 @@ export const getLockReasonMessage = (reason: ModuleLockReason, detail?: Record<s
 /**
  * Get human-readable resume message from course state
  */
-export const getResumeMessageFromState = (courseState: CourseState): {
+export const getResumeMessageFromState = (courseState: CourseState | null | undefined): {
   title: string;
   message: string;
   action: string;
   route: string;
 } | null => {
-  const target = courseState.resume_target;
-  
-  if (!target) {
-    // Check if there's an in-progress module
-    const inProgress = courseState.modules.find(m => m.status === 'in_progress');
-    if (inProgress) {
-      return {
-        title: 'Continue Your Training',
-        message: `Resume Module ${inProgress.module_number}: ${inProgress.title}`,
-        action: 'Continue Training',
-        route: `/course/part${inProgress.module_number}`,
-      };
+  try {
+    // Guard: Return null if no valid course state
+    if (!courseState || courseState.error) {
+      return null;
     }
+
+    const target = courseState.resume_target;
+    
+    if (!target || !target.module_number) {
+      // Check if there's an in-progress module
+      const inProgress = courseState.modules?.find(m => m.status === 'in_progress');
+      if (inProgress?.module_number) {
+        return {
+          title: 'Continue Your Training',
+          message: `Resume Module ${inProgress.module_number}: ${inProgress.title || 'Module'}`,
+          action: 'Continue Training',
+          route: `/course/part${inProgress.module_number}`,
+        };
+      }
+      return null;
+    }
+
+    // Validate module_number
+    if (typeof target.module_number !== 'number' || target.module_number < 1) {
+      return null;
+    }
+
+    const tabNames: Record<string, string> = {
+      overview: 'Overview',
+      course: 'Course Content',
+      documents: 'Documents',
+      quiz: 'Quiz',
+    };
+
+    const tabName = tabNames[target.last_tab] || target.last_tab || 'Overview';
+    const pageInfo = target.last_page_index && target.last_page_index > 0 
+      ? `, page ${target.last_page_index + 1}` 
+      : '';
+
+    // Build the route
+    const moduleParam = `part${target.module_number}`;
+    let route = `/course/${moduleParam}`;
+    const params = new URLSearchParams();
+    
+    if (target.last_tab && target.last_tab !== 'overview') {
+      params.set('tab', target.last_tab);
+    }
+    if (target.last_page_index && target.last_page_index > 0) {
+      params.set('page', String(target.last_page_index));
+    }
+    
+    const queryString = params.toString();
+    if (queryString) {
+      route += `?${queryString}`;
+    }
+
+    return {
+      title: 'Resume Your Training',
+      message: `Continue Module ${target.module_number} - ${tabName}${pageInfo}`,
+      action: 'Resume Training',
+      route,
+    };
+  } catch (e) {
+    console.error('[CourseState] getResumeMessageFromState error:', e);
     return null;
   }
-
-  const tabNames: Record<string, string> = {
-    overview: 'Overview',
-    course: 'Course Content',
-    documents: 'Documents',
-    quiz: 'Quiz',
-  };
-
-  const tabName = tabNames[target.last_tab] || target.last_tab;
-  const pageInfo = target.last_page_index > 0 ? `, page ${target.last_page_index + 1}` : '';
-
-  // Build the route
-  const moduleParam = `part${target.module_number}`;
-  let route = `/course/${moduleParam}`;
-  const params = new URLSearchParams();
-  
-  if (target.last_tab !== 'overview') {
-    params.set('tab', target.last_tab);
-  }
-  if (target.last_page_index > 0) {
-    params.set('page', String(target.last_page_index));
-  }
-  
-  const queryString = params.toString();
-  if (queryString) {
-    route += `?${queryString}`;
-  }
-
-  return {
-    title: 'Resume Your Training',
-    message: `Continue Module ${target.module_number} - ${tabName}${pageInfo}`,
-    action: 'Resume Training',
-    route,
-  };
 };

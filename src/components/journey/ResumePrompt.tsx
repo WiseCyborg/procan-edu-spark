@@ -9,11 +9,12 @@ const COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
 
 export const ResumePrompt = () => {
   const navigate = useNavigate();
-  const { courseState, isLoading } = useCourseState(COURSE_ID);
+  const { courseState, isLoading, isError } = useCourseState(COURSE_ID);
   
-  // Get resume message from server-computed course state
+  // Safe: getResumeMessageFromState handles null/undefined/error states
   const resumeInfo = getResumeMessageFromState(courseState);
 
+  // Show loading skeleton while fetching
   if (isLoading) {
     return (
       <Card className="p-6 bg-gradient-to-br from-primary/5 via-background to-primary/10 border-primary/20">
@@ -29,9 +30,14 @@ export const ResumePrompt = () => {
     );
   }
 
-  if (!resumeInfo) return null;
+  // Don't crash on error - just hide the component
+  if (isError || !resumeInfo) {
+    console.log('[ResumePrompt] No resume info available', { isError, hasResumeInfo: !!resumeInfo });
+    return null;
+  }
 
   const handleResume = () => {
+    console.log('[ResumePrompt] Navigating to:', resumeInfo.route);
     navigate(resumeInfo.route);
   };
 
