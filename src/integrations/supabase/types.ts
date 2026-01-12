@@ -1597,6 +1597,103 @@ export type Database = {
           },
         ]
       }
+      course_completions: {
+        Row: {
+          completed_at: string
+          completion_percent: number
+          course_id: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          passed: boolean
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string
+          completion_percent?: number
+          course_id: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          passed?: boolean
+          user_id: string
+        }
+        Update: {
+          completed_at?: string
+          completion_percent?: number
+          course_id?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          passed?: boolean
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_completions_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_credentials: {
+        Row: {
+          active: boolean
+          course_id: string
+          created_at: string
+          credential_name: string
+          credential_type: string
+          id: string
+          is_compliance_certificate: boolean
+          min_completion_percent: number
+          quiz_min_score: number | null
+          requires_quiz_pass: boolean
+          template_version: string | null
+          updated_at: string
+          verification_prefix: string
+        }
+        Insert: {
+          active?: boolean
+          course_id: string
+          created_at?: string
+          credential_name: string
+          credential_type?: string
+          id?: string
+          is_compliance_certificate?: boolean
+          min_completion_percent?: number
+          quiz_min_score?: number | null
+          requires_quiz_pass?: boolean
+          template_version?: string | null
+          updated_at?: string
+          verification_prefix: string
+        }
+        Update: {
+          active?: boolean
+          course_id?: string
+          created_at?: string
+          credential_name?: string
+          credential_type?: string
+          id?: string
+          is_compliance_certificate?: boolean
+          min_completion_percent?: number
+          quiz_min_score?: number | null
+          requires_quiz_pass?: boolean
+          template_version?: string | null
+          updated_at?: string
+          verification_prefix?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_credentials_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: true
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       course_modules: {
         Row: {
           comar_compliance_status: string | null
@@ -8143,6 +8240,59 @@ export type Database = {
         }
         Relationships: []
       }
+      user_certificates: {
+        Row: {
+          certificate_name: string
+          course_id: string
+          created_at: string
+          guest_email: string | null
+          id: string
+          issued_at: string
+          metadata: Json | null
+          pdf_url: string | null
+          recipient_name: string | null
+          status: string
+          user_id: string | null
+          verification_code: string
+        }
+        Insert: {
+          certificate_name: string
+          course_id: string
+          created_at?: string
+          guest_email?: string | null
+          id?: string
+          issued_at?: string
+          metadata?: Json | null
+          pdf_url?: string | null
+          recipient_name?: string | null
+          status?: string
+          user_id?: string | null
+          verification_code: string
+        }
+        Update: {
+          certificate_name?: string
+          course_id?: string
+          created_at?: string
+          guest_email?: string | null
+          id?: string
+          issued_at?: string
+          metadata?: Json | null
+          pdf_url?: string | null
+          recipient_name?: string | null
+          status?: string
+          user_id?: string | null
+          verification_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_certificates_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_journey_state: {
         Row: {
           created_at: string | null
@@ -9089,6 +9239,14 @@ export type Database = {
         }[]
       }
       encrypt_pii: { Args: { plaintext: string }; Returns: string }
+      evaluate_and_issue_certificate: {
+        Args: {
+          p_course_id: string
+          p_guest_email?: string
+          p_recipient_name?: string
+        }
+        Returns: Json
+      }
       expire_test_organizations: { Args: never; Returns: undefined }
       fix_manager_registration: {
         Args: { p_application_id: string; p_user_email: string }
@@ -9111,6 +9269,10 @@ export type Database = {
       generate_dispensary_key: { Args: never; Returns: string }
       generate_dispensary_number: { Args: never; Returns: string }
       generate_invitation_token: { Args: never; Returns: string }
+      generate_verification_code: {
+        Args: { p_prefix: string }
+        Returns: string
+      }
       get_access_snapshot: { Args: { p_course_id: string }; Returns: Json }
       get_active_rate_limits: {
         Args: never
@@ -9175,6 +9337,7 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_course_launch_target: { Args: { p_course_id: string }; Returns: Json }
       get_course_state: { Args: { p_course_id: string }; Returns: Json }
       get_database_stats: {
         Args: never
@@ -9580,6 +9743,7 @@ export type Database = {
           organization_name: string
         }[]
       }
+      verify_certificate: { Args: { p_code: string }; Returns: Json }
       verify_certificate_status: {
         Args: { cert_number: string }
         Returns: {
