@@ -34,21 +34,30 @@ export const useResumeState = (courseId?: string) => {
   const { data: resumeTarget, isLoading, refetch } = useQuery({
     queryKey: ['resume-state', user?.id, courseId],
     queryFn: async (): Promise<ResumeTarget | null> => {
-      if (!user?.id || !courseId) return null;
-
-      const { data, error } = await supabase
-        .from('course_resume_state')
-        .select('module_id, module_number, last_tab, last_page_index, last_activity_at')
-        .eq('user_id', user.id)
-        .eq('course_id', courseId)
-        .maybeSingle();
-
-      if (error) {
-        console.error('[ResumeState] Error fetching:', error);
+      // Guard: Return null if missing required params
+      if (!user?.id || !courseId) {
+        console.log('[ResumeState] Skipping fetch - missing user or courseId', { userId: user?.id, courseId });
         return null;
       }
 
-      return data;
+      try {
+        const { data, error } = await supabase
+          .from('course_resume_state')
+          .select('module_id, module_number, last_tab, last_page_index, last_activity_at')
+          .eq('user_id', user.id)
+          .eq('course_id', courseId)
+          .maybeSingle();
+
+        if (error) {
+          console.error('[ResumeState] Error fetching:', error);
+          return null;
+        }
+
+        return data;
+      } catch (e) {
+        console.error('[ResumeState] Unexpected error:', e);
+        return null;
+      }
     },
     enabled: !!user?.id && !!courseId,
     staleTime: RESUME_STATE_STALE_TIME,
@@ -92,33 +101,44 @@ export const useResumeState = (courseId?: string) => {
     [courseId, user?.id, upsertMutation]
   );
 
-  // Build route from resume target
+  // Build route from resume target - SAFE: always returns valid route
   const getResumeRoute = useCallback((): string => {
-    if (!resumeTarget || !courseId) {
+    try {
+      if (!resumeTarget || !courseId) {
+        return '/course';
+      }
+
+      // Validate module_number
+      if (typeof resumeTarget.module_number !== 'number' || resumeTarget.module_number < 1) {
+        console.warn('[ResumeState] Invalid module_number:', resumeTarget.module_number);
+        return '/course';
+      }
+
+      const moduleParam = `part${resumeTarget.module_number}`;
+      const tab = resumeTarget.last_tab || 'overview';
+      const page = resumeTarget.last_page_index || 0;
+
+      // Build route with query params
+      let route = `/course/${moduleParam}`;
+      const params = new URLSearchParams();
+      
+      if (tab && tab !== 'overview') {
+        params.set('tab', tab);
+      }
+      if (typeof page === 'number' && page > 0) {
+        params.set('page', String(page));
+      }
+      
+      const queryString = params.toString();
+      if (queryString) {
+        route += `?${queryString}`;
+      }
+
+      return route;
+    } catch (e) {
+      console.error('[ResumeState] getResumeRoute error:', e);
       return '/course';
     }
-
-    const moduleParam = `part${resumeTarget.module_number}`;
-    const tab = resumeTarget.last_tab || 'overview';
-    const page = resumeTarget.last_page_index || 0;
-
-    // Build route with query params
-    let route = `/course/${moduleParam}`;
-    const params = new URLSearchParams();
-    
-    if (tab !== 'overview') {
-      params.set('tab', tab);
-    }
-    if (page > 0) {
-      params.set('page', String(page));
-    }
-    
-    const queryString = params.toString();
-    if (queryString) {
-      route += `?${queryString}`;
-    }
-
-    return route;
   }, [resumeTarget, courseId]);
 
   return {
