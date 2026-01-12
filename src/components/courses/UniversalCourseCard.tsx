@@ -1,9 +1,12 @@
-import { Clock, BookOpen, Award, ArrowRight, Lock, CheckCircle2, Loader2 } from 'lucide-react';
+import { useState } from 'react';
+import { Clock, BookOpen, Award, ArrowRight, Lock, CheckCircle2, Loader2, ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useCourseLaunchTarget } from '@/hooks/useCourseLaunchTarget';
 import { useLaunchCourse } from '@/hooks/useLaunchCourse';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
 export interface CourseInfo {
@@ -31,6 +34,7 @@ export const UniversalCourseCard = ({
 }: UniversalCourseCardProps) => {
   const { data: launchTarget, isLoading } = useCourseLaunchTarget(course.id);
   const { launchCourse, getCtaLabel } = useLaunchCourse();
+  const [isPurchasing, setIsPurchasing] = useState(false);
 
   // Estimate time based on module count (assume ~6 minutes per module)
   const estimatedMinutes = (course.module_count || 0) * 6;
@@ -40,14 +44,39 @@ export const UniversalCourseCard = ({
 
   const isLocked = launchTarget && !launchTarget.can_access && launchTarget.deny_reason === 'prerequisite_required';
   const isComingSoon = launchTarget && !launchTarget.can_access && launchTarget.deny_reason === 'course_not_published';
+  const requiresPayment = launchTarget && !launchTarget.can_access && launchTarget.deny_reason === 'payment_required';
   const hasCertificate = launchTarget?.has_certificate;
+  const priceCents = (launchTarget as { price_cents?: number })?.price_cents;
+
+  const handlePurchase = async () => {
+    setIsPurchasing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('create-course-checkout', {
+        body: { course_id: course.id }
+      });
+
+      if (error) throw error;
+      if (data?.url) {
+        window.open(data.url, '_blank');
+      }
+    } catch (err) {
+      console.error('Purchase error:', err);
+      toast.error('Unable to start checkout. Please try again.');
+    } finally {
+      setIsPurchasing(false);
+    }
+  };
+
+  const formatPrice = (cents: number) => {
+    return `$${(cents / 100).toFixed(2)}`;
+  };
 
   const getButtonContent = () => {
-    if (isLoading) {
+    if (isLoading || isPurchasing) {
       return (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Loading...
+          {isPurchasing ? 'Opening checkout...' : 'Loading...'}
         </>
       );
     }
@@ -63,6 +92,15 @@ export const UniversalCourseCard = ({
 
     if (isComingSoon) {
       return 'Coming Soon';
+    }
+
+    if (requiresPayment && priceCents) {
+      return (
+        <>
+          <ShoppingCart className="mr-2 h-4 w-4" />
+          Purchase {formatPrice(priceCents)}
+        </>
+      );
     }
 
     if (hasCertificate) {
@@ -178,11 +216,11 @@ export const UniversalCourseCard = ({
 
       <CardFooter className="flex flex-col gap-2 pt-4">
         <Button 
-          onClick={() => launchCourse(course.id)}
+          onClick={() => requiresPayment ? handlePurchase() : launchCourse(course.id)}
           className="w-full"
           size="lg"
-          variant={isLocked || isComingSoon ? "outline" : hasCertificate ? "secondary" : "default"}
-          disabled={isLoading || isComingSoon}
+          variant={isLocked || isComingSoon ? "outline" : requiresPayment ? "default" : hasCertificate ? "secondary" : "default"}
+          disabled={isLoading || isComingSoon || isPurchasing}
         >
           {getButtonContent()}
         </Button>
