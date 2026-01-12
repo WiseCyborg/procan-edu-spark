@@ -10,6 +10,11 @@ const corsHeaders = {
 // Idempotency: Track processed events
 const processedEvents = new Set<string>();
 
+const log = (step: string, details?: unknown) => {
+  const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
+  console.log(`[STRIPE-WEBHOOK] ${step}${detailsStr}`);
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -32,7 +37,7 @@ serve(async (req) => {
     const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
 
     if (!signature) {
-      console.error("Missing stripe-signature header");
+      log("ERROR", { message: "Missing stripe-signature header" });
       return new Response(JSON.stringify({ error: "Missing signature" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 400,
@@ -46,7 +51,7 @@ serve(async (req) => {
       try {
         event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
       } catch (err) {
-        console.error("Webhook signature verification failed:", err);
+        log("ERROR", { message: "Webhook signature verification failed", error: err });
         return new Response(JSON.stringify({ error: "Invalid signature" }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
           status: 401,
@@ -54,35 +59,35 @@ serve(async (req) => {
       }
     } else {
       // Fallback for development - parse without verification
-      console.warn("STRIPE_WEBHOOK_SECRET not configured - skipping signature verification");
+      log("WARN", { message: "STRIPE_WEBHOOK_SECRET not configured - skipping signature verification" });
       event = JSON.parse(body);
     }
 
     // Idempotency check - skip if already processed
     if (processedEvents.has(event.id)) {
-      console.log(`Event ${event.id} already processed, skipping`);
+      log("Skipped duplicate event", { eventId: event.id });
       return new Response(JSON.stringify({ received: true, skipped: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
       });
     }
 
-    // Log the event to payment_events table
-    const { error: logError } = await supabaseService
-      .from("payment_events")
-      .insert({
-        stripe_event_id: event.id,
-        event_type: event.type,
-        session_id: (event.data.object as any).id || null,
-        status: "received",
-        payload: event.data.object,
-      });
-
-    if (logError) {
-      console.error("Error logging payment event:", logError);
+    // Log the event to payment_events table (if it exists)
+    try {
+      await supabaseService
+        .from("payment_events")
+        .insert({
+          stripe_event_id: event.id,
+          event_type: event.type,
+          session_id: (event.data.object as any).id || null,
+          status: "received",
+          payload: event.data.object,
+        });
+    } catch (logError) {
+      log("WARN", { message: "Could not log to payment_events", error: logError });
     }
 
-    console.log(`Processing Stripe event: ${event.type} (${event.id})`);
+    log("Processing event", { type: event.type, id: event.id });
 
     // Handle specific event types
     switch (event.type) {
@@ -111,7 +116,7 @@ serve(async (req) => {
       }
 
       default:
-        console.log(`Unhandled event type: ${event.type}`);
+        log("Unhandled event type", { type: event.type });
     }
 
     // Mark event as processed
@@ -130,7 +135,7 @@ serve(async (req) => {
       status: 200,
     });
   } catch (error) {
-    console.error("Webhook processing error:", error);
+    log("ERROR", { message: "Webhook processing error", error: error.message });
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
@@ -143,15 +148,97 @@ async function handleCheckoutCompleted(
   session: Stripe.Checkout.Session,
   eventId: string
 ) {
-  console.log(`Processing checkout.session.completed for session: ${session.id}`);
-
-  // Update payment event status
-  await supabase
-    .from("payment_events")
-    .update({ status: "processing" })
-    .eq("stripe_event_id", eventId);
+  log("Processing checkout.session.completed", { sessionId: session.id, metadata: session.metadata });
 
   try {
+    // Check if this is a course entitlement purchase (new flow)
+    const metadata = session.metadata || {};
+    const userId = metadata.user_id;
+    const courseId = metadata.course_id;
+    const source = metadata.source;
+
+    if (userId && courseId && source === "procannedu") {
+      // NEW FLOW: Create course entitlement
+      log("Creating course entitlement", { userId, courseId });
+      
+      // Check if entitlement already exists (idempotency)
+      const { data: existingEntitlement } = await supabase
+        .from("course_entitlements")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("course_id", courseId)
+        .maybeSingle();
+
+      if (existingEntitlement) {
+        log("Entitlement already exists", { id: existingEntitlement.id });
+        return;
+      }
+
+      // Create the entitlement
+      const { data: newEntitlement, error: insertError } = await supabase
+        .from("course_entitlements")
+        .insert({
+          user_id: userId,
+          course_id: courseId,
+          source: "stripe",
+          status: "active",
+          stripe_checkout_session_id: session.id,
+          stripe_payment_intent_id: session.payment_intent as string,
+          purchased_at: new Date().toISOString(),
+          metadata: {
+            amount_total: session.amount_total,
+            currency: session.currency,
+            customer_email: session.customer_email,
+            stripe_event_id: eventId,
+          },
+        })
+        .select()
+        .single();
+
+      if (insertError) {
+        log("ERROR", { message: "Failed to create entitlement", error: insertError.message });
+        throw new Error(`Failed to create entitlement: ${insertError.message}`);
+      }
+
+      log("Entitlement created successfully", { 
+        entitlementId: newEntitlement.id, 
+        userId, 
+        courseId 
+      });
+
+      // Send confirmation email if customer email available
+      if (session.customer_email) {
+        try {
+          // Get course title for email
+          const { data: course } = await supabase
+            .from("courses")
+            .select("title")
+            .eq("id", courseId)
+            .single();
+
+          await supabase.functions.invoke("send-payment-confirmation", {
+            body: {
+              email: session.customer_email,
+              courseTitle: course?.title || "Course",
+              amount: session.amount_total,
+            },
+          });
+          log("Confirmation email sent", { email: session.customer_email });
+        } catch (emailError) {
+          log("WARN", { message: "Failed to send confirmation email", error: emailError });
+        }
+      }
+
+      return;
+    }
+
+    // LEGACY FLOW: Handle orders table
+    // Update payment event status
+    await supabase
+      .from("payment_events")
+      .update({ status: "processing" })
+      .eq("stripe_event_id", eventId);
+
     // Find and update the order
     const { data: order, error: orderError } = await supabase
       .from("orders")
@@ -164,7 +251,7 @@ async function handleCheckoutCompleted(
     }
 
     if (!order) {
-      console.warn(`No order found for session ${session.id}`);
+      log("WARN", { message: "No order found for session", sessionId: session.id });
       await supabase
         .from("payment_events")
         .update({ status: "failed", error_message: "Order not found" })
@@ -172,7 +259,7 @@ async function handleCheckoutCompleted(
       return;
     }
 
-    // Update order status to paid - THIS IS THE ONLY WAY TO GRANT ACCESS
+    // Update order status to paid
     const { error: updateError } = await supabase
       .from("orders")
       .update({
@@ -198,7 +285,7 @@ async function handleCheckoutCompleted(
       })
       .eq("stripe_event_id", eventId);
 
-    console.log(`Order ${order.id} marked as paid via webhook`);
+    log("Order marked as paid", { orderId: order.id });
 
     // Trigger confirmation email
     if (session.customer_email) {
@@ -212,11 +299,11 @@ async function handleCheckoutCompleted(
           },
         });
       } catch (emailError) {
-        console.error("Failed to send confirmation email:", emailError);
+        log("WARN", { message: "Failed to send confirmation email", error: emailError });
       }
     }
   } catch (error) {
-    console.error("Error processing checkout completion:", error);
+    log("ERROR", { message: "Error processing checkout completion", error: error.message });
     await supabase
       .from("payment_events")
       .update({ 
@@ -232,7 +319,7 @@ async function handleCheckoutExpired(
   session: Stripe.Checkout.Session,
   eventId: string
 ) {
-  console.log(`Processing checkout.session.expired for session: ${session.id}`);
+  log("Processing checkout.session.expired", { sessionId: session.id });
 
   // Update any pending orders
   await supabase
@@ -252,7 +339,7 @@ async function handlePaymentFailed(
   paymentIntent: Stripe.PaymentIntent,
   eventId: string
 ) {
-  console.log(`Processing payment_intent.payment_failed: ${paymentIntent.id}`);
+  log("Processing payment_intent.payment_failed", { paymentIntentId: paymentIntent.id });
 
   // Find order by payment intent
   const { data: order } = await supabase
@@ -283,13 +370,39 @@ async function handleRefund(
   charge: Stripe.Charge,
   eventId: string
 ) {
-  console.log(`Processing charge.refunded: ${charge.id}`);
+  log("Processing charge.refunded", { chargeId: charge.id, paymentIntent: charge.payment_intent });
 
-  // Find order by payment intent
+  const paymentIntentId = charge.payment_intent as string;
+
+  // HANDLE NEW FLOW: Revoke course entitlement
+  const { data: entitlement } = await supabase
+    .from("course_entitlements")
+    .select("id, user_id, course_id")
+    .eq("stripe_payment_intent_id", paymentIntentId)
+    .maybeSingle();
+
+  if (entitlement) {
+    // Revoke entitlement
+    await supabase
+      .from("course_entitlements")
+      .update({ 
+        status: "revoked",
+        metadata: supabase.sql`metadata || '{"revoked_reason": "refund", "revoked_at": "${new Date().toISOString()}"}'::jsonb`
+      })
+      .eq("id", entitlement.id);
+
+    log("Entitlement revoked due to refund", { 
+      entitlementId: entitlement.id,
+      userId: entitlement.user_id,
+      courseId: entitlement.course_id
+    });
+  }
+
+  // LEGACY FLOW: Handle orders
   const { data: order } = await supabase
     .from("orders")
     .select("*")
-    .eq("payment_transaction_id", charge.payment_intent)
+    .eq("payment_transaction_id", paymentIntentId)
     .maybeSingle();
 
   if (order) {
@@ -301,8 +414,7 @@ async function handleRefund(
       })
       .eq("id", order.id);
 
-    // Log for admin review
-    console.log(`Order ${order.id} refunded - access should be revoked`);
+    log("Order refunded", { orderId: order.id });
   }
 
   await supabase
