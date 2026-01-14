@@ -5,7 +5,8 @@ import { useUserRole } from './useUserRole';
 import { useResumeState } from './useResumeState';
 
 // RVT Course ID - the main course for training
-const RVT_COURSE_ID = 'f543fad9-fb96-485c-9ca0-980564acc559';
+// NOTE: This MUST be the *course* id (not a module id) to make DB-backed resume work.
+const RVT_COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
 
 export type TrainingPath = 'rvt' | 'manager' | 'public';
 export type TrainingStatus = 'not_started' | 'in_progress' | 'rvt_complete' | 'manager_complete' | 'all_complete';

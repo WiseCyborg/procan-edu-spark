@@ -187,10 +187,19 @@ const EnhancedCourseModule: React.FC = () => {
     }, 300);
   };
 
-  // Reset state when module changes - ensures fresh start on each module
+  // Reset state when module changes - but respect deep-link (tab/page) for DB-backed resume
   useEffect(() => {
     setIsTransitioning(false);
-    setActiveTab('overview');
+
+    // Respect query params (resume/deep link). Fall back to defaults.
+    const tabFromUrl = searchParams.get('tab') || 'overview';
+    const pageFromUrlRaw = searchParams.get('page');
+    const pageFromUrl = pageFromUrlRaw ? Number.parseInt(pageFromUrlRaw, 10) : 0;
+
+    setActiveTab(tabFromUrl);
+    setCurrentPageIndex(Number.isFinite(pageFromUrl) && pageFromUrl >= 0 ? pageFromUrl : 0);
+
+    // Reset per-module completion UI state
     setOverviewComplete(false);
     setCourseComplete(false);
     setDocsViewed(false);
@@ -202,7 +211,7 @@ const EnhancedCourseModule: React.FC = () => {
     setQuizPassed(false);
     setWeakTopics([]);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [moduleId]);
+  }, [moduleId, searchParams]);
 
   // Prerequisite check - prevent URL bypass of locked modules
   useEffect(() => {
