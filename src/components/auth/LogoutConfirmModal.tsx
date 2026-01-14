@@ -40,10 +40,15 @@ export const LogoutConfirmModal = ({
     }
 
     const checkAndWait = async () => {
+      // If actively saving, wait for it
       if (saveStatus === 'saving' && flushSave) {
         setModalState('waiting');
         const success = await flushSave(5000);
         setModalState(success ? 'ready' : 'timeout');
+      } else if (saveStatus === 'dirty') {
+        // Dirty state means changes exist but haven't been flushed
+        // For now, treat as ready since saves happen on navigation
+        setModalState('ready');
       } else if (saveStatus === 'error') {
         setModalState('error');
       } else {

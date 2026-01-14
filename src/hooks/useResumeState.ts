@@ -71,24 +71,33 @@ export const useResumeState = (courseId?: string) => {
     mutationFn: async (params: UpsertResumeParams) => {
       console.log('[ResumeState] Attempting upsert:', params);
       
-      // Set saving status
+      // Set saving status BEFORE the operation starts
       saveStatusContext?.setSaving();
       
-      const { data, error } = await supabase.rpc('upsert_resume_state', {
-        p_course_id: params.courseId,
-        p_module_id: params.moduleId || null,
-        p_module_number: params.moduleNumber,
-        p_last_tab: params.lastTab,
-        p_last_page_index: params.lastPageIndex,
-      });
+      // Create the actual save operation
+      const saveOperation = async () => {
+        const { data, error } = await supabase.rpc('upsert_resume_state', {
+          p_course_id: params.courseId,
+          p_module_id: params.moduleId || null,
+          p_module_number: params.moduleNumber,
+          p_last_tab: params.lastTab,
+          p_last_page_index: params.lastPageIndex,
+        });
 
-      if (error) {
-        console.error('[ResumeState] RPC error:', error);
-        throw error;
-      }
+        if (error) {
+          console.error('[ResumeState] RPC error:', error);
+          throw error;
+        }
+        
+        console.log('[ResumeState] Upsert successful:', data);
+        return data;
+      };
       
-      console.log('[ResumeState] Upsert successful:', data);
-      return data;
+      // Create the promise and register it so flushSave can wait for it
+      const promise = saveOperation();
+      saveStatusContext?.registerSavePromise(promise);
+      
+      return promise;
     },
     onSuccess: (_, params) => {
       // Set saved status
