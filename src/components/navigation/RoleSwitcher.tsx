@@ -15,7 +15,7 @@ import { Shield, Users, BarChart3, GraduationCap, Eye } from 'lucide-react';
 const ROLE_CONFIG = {
   admin: {
     label: 'Admin',
-    path: '/admin-dashboard',
+    path: '/admin',
     icon: Shield,
   },
   dispensary_manager: {
