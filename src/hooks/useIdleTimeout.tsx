@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { invalidateOnLogout } from '@/lib/invalidateAccess';
+import { useSaveStatusOptional } from '@/hooks/useSaveStatus';
 
 // Constants
 const IDLE_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
@@ -22,6 +23,7 @@ export const useIdleTimeout = (): UseIdleTimeoutReturn => {
   const { user, signOut } = useAuth();
   const location = useLocation();
   const queryClient = useQueryClient();
+  const saveStatus = useSaveStatusOptional();
   
   const [lastActivityAt, setLastActivityAt] = useState<number>(Date.now());
   const [showWarningModal, setShowWarningModal] = useState(false);
@@ -63,19 +65,30 @@ export const useIdleTimeout = (): UseIdleTimeoutReturn => {
     }
   }, [lastActivityAt]);
 
-  // Perform idle logout
+  // Perform idle logout with auto-save
   const doIdleLogout = useCallback(async () => {
     if (logoutInProgress) return;
     setLogoutInProgress(true);
     
+    let saveSucceeded = true;
+    
     try {
       setShowWarningModal(false);
       
-      // Clear activity storage
+      // Auto-save before logout if save system is available
+      if (saveStatus?.flushSave && saveStatus?.hasUnsavedWork) {
+        console.log('[IdleTimeout] Flushing save before idle logout...');
+        saveSucceeded = await saveStatus.flushSave(5000);
+        console.log('[IdleTimeout] Save flush result:', saveSucceeded);
+      }
+      
+      // Store timeout info for login page message
       try {
+        sessionStorage.setItem('pc_timeout_logout', 'true');
+        sessionStorage.setItem('pc_timeout_saved', saveSucceeded ? 'true' : 'false');
         localStorage.removeItem(STORAGE_KEY);
       } catch (e) {
-        console.warn('Failed to clear activity storage:', e);
+        console.warn('Failed to update storage:', e);
       }
       
       // Clear all cached access data before logout
@@ -84,13 +97,14 @@ export const useIdleTimeout = (): UseIdleTimeoutReturn => {
       // Sign out
       await signOut();
       
-      // Redirect with reason
-      window.location.href = '/auth?reason=inactive';
+      // Redirect with reason and save status
+      const saveParam = saveSucceeded ? '&saved=true' : '&saved=false';
+      window.location.href = `/auth?reason=inactive${saveParam}`;
     } catch (e) {
       console.error('Idle logout failed:', e);
       setLogoutInProgress(false);
     }
-  }, [logoutInProgress, signOut, queryClient]);
+  }, [logoutInProgress, signOut, queryClient, saveStatus]);
 
   // Check idle status
   const checkIdle = useCallback(() => {
@@ -131,24 +145,42 @@ export const useIdleTimeout = (): UseIdleTimeoutReturn => {
     }
   }, [recordActivity, doIdleLogout]);
 
-  // Handle "Log out now" button
+  // Handle "Log out now" button (with auto-save)
   const handleLogoutNow = useCallback(async () => {
     if (logoutInProgress) return;
     setLogoutInProgress(true);
     
+    let saveSucceeded = true;
+    
     try {
-      localStorage.removeItem(STORAGE_KEY);
+      // Auto-save before logout if save system is available
+      if (saveStatus?.flushSave && saveStatus?.hasUnsavedWork) {
+        console.log('[IdleTimeout] Flushing save before manual logout...');
+        saveSucceeded = await saveStatus.flushSave(5000);
+        console.log('[IdleTimeout] Save flush result:', saveSucceeded);
+      }
+      
+      // Store logout info
+      try {
+        sessionStorage.setItem('pc_timeout_logout', 'true');
+        sessionStorage.setItem('pc_timeout_saved', saveSucceeded ? 'true' : 'false');
+        localStorage.removeItem(STORAGE_KEY);
+      } catch (e) {
+        console.warn('Failed to update storage:', e);
+      }
       
       // Clear all cached access data before logout
       invalidateOnLogout(queryClient);
       
       await signOut();
-      window.location.href = '/auth?reason=manual';
+      
+      const saveParam = saveSucceeded ? '&saved=true' : '&saved=false';
+      window.location.href = `/auth?reason=manual${saveParam}`;
     } catch (e) {
       console.error('Manual logout failed:', e);
       setLogoutInProgress(false);
     }
-  }, [logoutInProgress, signOut, queryClient]);
+  }, [logoutInProgress, signOut, queryClient, saveStatus]);
 
   // Set up activity event listeners
   useEffect(() => {

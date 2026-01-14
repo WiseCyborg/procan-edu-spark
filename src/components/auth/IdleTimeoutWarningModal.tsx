@@ -45,13 +45,13 @@ export const IdleTimeoutWarningModal: React.FC<IdleTimeoutWarningModalProps> = (
             <span className="font-mono font-bold text-foreground text-lg">
               {formatTime(remainingSeconds)}
             </span>{' '}
-            due to inactivity.
+            due to inactivity. Your progress will be saved automatically.
           </AlertDialogDescription>
         </AlertDialogHeader>
 
         <div className="flex items-center gap-2 p-3 bg-muted rounded-lg text-sm text-muted-foreground">
           <Shield className="h-4 w-4 flex-shrink-0" />
-          <span>Your progress is saved. You can resume after signing back in.</span>
+          <span>We'll save your progress before signing you out.</span>
         </div>
 
         <AlertDialogFooter className="flex-col sm:flex-row gap-2">
