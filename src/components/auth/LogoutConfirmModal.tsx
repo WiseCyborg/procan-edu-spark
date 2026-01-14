@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,34 +18,45 @@ interface LogoutConfirmModalProps {
   onConfirmLogout: () => void;
 }
 
+type ModalState = 'checking' | 'waiting' | 'ready' | 'error' | 'timeout';
+
 export const LogoutConfirmModal = ({
   open,
   onOpenChange,
   onConfirmLogout,
 }: LogoutConfirmModalProps) => {
   const saveStatusContext = useSaveStatusOptional();
-  const [waitingForSave, setWaitingForSave] = useState(false);
+  const [modalState, setModalState] = useState<ModalState>('checking');
   
   const saveStatus = saveStatusContext?.saveStatus ?? 'idle';
-  const isSaving = saveStatus === 'saving';
   const lastSavedAt = saveStatusContext?.lastSavedAt;
+  const flushSave = saveStatusContext?.flushSave;
 
-  // If save completes while waiting, proceed with logout
+  // When modal opens, check save status and wait if needed
   useEffect(() => {
-    if (waitingForSave && !isSaving) {
-      setWaitingForSave(false);
-      onConfirmLogout();
+    if (!open) {
+      setModalState('checking');
+      return;
     }
-  }, [waitingForSave, isSaving, onConfirmLogout]);
 
-  const handleConfirm = () => {
-    if (isSaving) {
-      // Wait for save to complete
-      setWaitingForSave(true);
-    } else {
-      onConfirmLogout();
-    }
-  };
+    const checkAndWait = async () => {
+      if (saveStatus === 'saving' && flushSave) {
+        setModalState('waiting');
+        const success = await flushSave(5000);
+        setModalState(success ? 'ready' : 'timeout');
+      } else if (saveStatus === 'error') {
+        setModalState('error');
+      } else {
+        setModalState('ready');
+      }
+    };
+
+    checkAndWait();
+  }, [open, saveStatus, flushSave]);
+
+  const handleConfirm = useCallback(() => {
+    onConfirmLogout();
+  }, [onConfirmLogout]);
 
   const formatLastSaved = () => {
     if (!lastSavedAt) return null;
@@ -57,37 +68,55 @@ export const LogoutConfirmModal = ({
   };
 
   const getIcon = () => {
-    if (waitingForSave || isSaving) {
-      return <Loader2 className="h-6 w-6 animate-spin text-primary" />;
+    switch (modalState) {
+      case 'checking':
+      case 'waiting':
+        return <Loader2 className="h-6 w-6 animate-spin text-primary" />;
+      case 'error':
+      case 'timeout':
+        return <AlertCircle className="h-6 w-6 text-destructive" />;
+      case 'ready':
+      default:
+        return <CheckCircle2 className="h-6 w-6 text-green-600" />;
     }
-    if (saveStatus === 'error') {
-      return <AlertCircle className="h-6 w-6 text-destructive" />;
-    }
-    return <CheckCircle2 className="h-6 w-6 text-green-600" />;
   };
 
   const getTitle = () => {
-    if (waitingForSave || isSaving) {
-      return 'Saving your progress…';
+    switch (modalState) {
+      case 'checking':
+        return 'Checking save status…';
+      case 'waiting':
+        return 'Saving your progress…';
+      case 'error':
+        return 'Save may have failed';
+      case 'timeout':
+        return 'Progress still saving';
+      case 'ready':
+      default:
+        return 'Progress saved';
     }
-    if (saveStatus === 'error') {
-      return 'Save may have failed';
-    }
-    return 'Progress saved';
   };
 
   const getDescription = () => {
-    if (waitingForSave || isSaving) {
-      return 'Please wait a moment while we save your progress.';
+    switch (modalState) {
+      case 'checking':
+      case 'waiting':
+        return 'Please wait a moment while we save your progress.';
+      case 'error':
+        return 'There may have been an issue saving your progress. You can still sign out, but some recent changes might not be saved.';
+      case 'timeout':
+        return "We couldn't confirm your progress was saved yet. Do you want to sign out anyway?";
+      case 'ready':
+      default:
+        const savedTime = formatLastSaved();
+        return savedTime
+          ? `Your progress was saved ${savedTime}. You can safely sign out.`
+          : 'Your progress is saved. You can safely sign out.';
     }
-    if (saveStatus === 'error') {
-      return 'There may have been an issue saving your progress. You can still log out, but some recent changes might not be saved.';
-    }
-    const savedTime = formatLastSaved();
-    return savedTime
-      ? `Your progress was saved ${savedTime}. You can safely log out.`
-      : 'Your progress is saved. You can safely log out.';
   };
+
+  const isWaiting = modalState === 'checking' || modalState === 'waiting';
+  const showWarning = modalState === 'error' || modalState === 'timeout';
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -102,19 +131,23 @@ export const LogoutConfirmModal = ({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={waitingForSave}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={isWaiting}>
+            {showWarning ? 'Stay signed in' : 'Cancel'}
+          </AlertDialogCancel>
           <AlertDialogAction
             onClick={handleConfirm}
-            disabled={waitingForSave}
-            className={saveStatus === 'error' ? 'bg-destructive hover:bg-destructive/90' : ''}
+            disabled={isWaiting}
+            className={showWarning ? 'bg-destructive hover:bg-destructive/90' : ''}
           >
-            {waitingForSave ? (
+            {isWaiting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Saving…
               </>
+            ) : showWarning ? (
+              'Sign out anyway'
             ) : (
-              'Log out'
+              'Sign out'
             )}
           </AlertDialogAction>
         </AlertDialogFooter>
