@@ -19,6 +19,8 @@ import { useKeyboardShortcut } from '@/hooks/useKeyboardShortcut';
 import { useKeyboardShortcuts } from '@/contexts/KeyboardShortcutsContext';
 import { useGuardedNavigation } from '@/hooks/useGuardedNavigation';
 import { supabase } from '@/integrations/supabase/client';
+import { LogoutConfirmModal } from '@/components/auth/LogoutConfirmModal';
+import { SaveIndicator } from '@/components/auth/SaveIndicator';
 
 interface HeaderProps {
   role?: string;
@@ -49,6 +51,7 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
   const location = useLocation();
   const [showCommunicationHub, setShowCommunicationHub] = useState(false);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [currentRoleView, setCurrentRoleView] = useState<string>('');
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -71,7 +74,12 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
 
   const isMac = typeof navigator !== 'undefined' && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
 
-  const handleSignOut = async () => {
+  const handleSignOutClick = () => {
+    setShowLogoutModal(true);
+  };
+
+  const handleConfirmLogout = async () => {
+    setShowLogoutModal(false);
     await signOut();
     navigate('/');
   };
@@ -394,10 +402,17 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                         <RoleSwitcher />
                       </div>
                     </>
-                  )}
+                   )}
                   
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleSignOut} className="text-destructive focus:text-destructive">
+                  
+                  {/* Save Status Indicator */}
+                  <div className="px-2 py-1.5">
+                    <SaveIndicator showAlways />
+                  </div>
+                  
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOutClick} className="text-destructive focus:text-destructive">
                     <LogOut className="mr-2 h-4 w-4" />
                     <span>Sign Out</span>
                   </DropdownMenuItem>
@@ -419,6 +434,13 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
           organizationId={organization.id}
         />
       )}
+
+      {/* Logout Confirmation Modal */}
+      <LogoutConfirmModal
+        open={showLogoutModal}
+        onOpenChange={setShowLogoutModal}
+        onConfirmLogout={handleConfirmLogout}
+      />
     </header>
   );
 };
