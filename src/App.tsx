@@ -106,6 +106,7 @@ import { CommunicationHubPage } from "./pages/CommunicationHubPage";
 import { AdminProxyProvider } from "./contexts/AdminProxyContext";
 import { AdminProxyBanner } from "./components/admin/AdminProxyBanner";
 import { IdleTimeoutProvider } from "./components/auth/IdleTimeoutProvider";
+import { SaveStatusProvider } from "./hooks/useSaveStatus";
 
 const queryClient = new QueryClient();
 
@@ -519,12 +520,14 @@ const App = () => (
                     }>
                       <AdminProxyBanner />
                       <OrganizationProvider>
-                        <JourneyStateProvider>
-                          <TooltipProvider>
-                            <AppRoutesLayout />
-                            <KeyboardShortcutsDialog />
-                          </TooltipProvider>
-                        </JourneyStateProvider>
+                        <SaveStatusProvider>
+                          <JourneyStateProvider>
+                            <TooltipProvider>
+                              <AppRoutesLayout />
+                              <KeyboardShortcutsDialog />
+                            </TooltipProvider>
+                          </JourneyStateProvider>
+                        </SaveStatusProvider>
                       </OrganizationProvider>
                     </Suspense>
                   </IdleTimeoutProvider>

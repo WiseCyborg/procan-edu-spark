@@ -1,7 +1,8 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useQueryClient, useMutation, useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { useSaveStatusOptional } from '@/hooks/useSaveStatus';
 
 /**
  * Resume State - Tracks where user left off in a course
@@ -29,6 +30,7 @@ const RESUME_STATE_GC_TIME = 30 * 60 * 1000; // 30 minutes
 export const useResumeState = (courseId?: string) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const saveStatusContext = useSaveStatusOptional();
 
   // Fetch resume state from DB
   const { data: resumeTarget, isLoading, refetch } = useQuery({
@@ -69,6 +71,9 @@ export const useResumeState = (courseId?: string) => {
     mutationFn: async (params: UpsertResumeParams) => {
       console.log('[ResumeState] Attempting upsert:', params);
       
+      // Set saving status
+      saveStatusContext?.setSaving();
+      
       const { data, error } = await supabase.rpc('upsert_resume_state', {
         p_course_id: params.courseId,
         p_module_id: params.moduleId || null,
@@ -86,12 +91,16 @@ export const useResumeState = (courseId?: string) => {
       return data;
     },
     onSuccess: (_, params) => {
+      // Set saved status
+      saveStatusContext?.setSaved();
       // Invalidate resume state and course state queries
       queryClient.invalidateQueries({ queryKey: ['resume-state', user?.id, params.courseId] });
       queryClient.invalidateQueries({ queryKey: ['course-state', user?.id, params.courseId] });
     },
     onError: (error) => {
       console.error('[ResumeState] Mutation error:', error);
+      // Set error status
+      saveStatusContext?.setError();
     },
   });
 
