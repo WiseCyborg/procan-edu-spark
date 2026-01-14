@@ -83,25 +83,59 @@ const Auth = () => {
   const prefilledCode = searchParams.get('code');
   const forceRegister = searchParams.get('register') === 'true';
   const logoutReason = searchParams.get('reason');
+  const savedParam = searchParams.get('saved');
+
+  // Inactivity/logout banner with save status
+  const LogoutBanner = () => {
+    if (!logoutReason) return null;
+    
+    const isInactive = logoutReason === 'inactive';
+    const isManual = logoutReason === 'manual';
+    const saveSucceeded = savedParam === 'true';
+    
+    if (!isInactive && !isManual) return null;
+    
+    // Build message based on reason and save status
+    let message = '';
+    if (isInactive) {
+      if (savedParam === 'true') {
+        message = 'You were signed out due to inactivity. Your progress was saved.';
+      } else if (savedParam === 'false') {
+        message = 'You were signed out due to inactivity. We attempted to save your progress.';
+      } else {
+        message = 'You were signed out due to inactivity. Please sign in again to continue.';
+      }
+    } else if (isManual) {
+      if (savedParam === 'true') {
+        message = 'You have been signed out. Your progress was saved.';
+      } else if (savedParam === 'false') {
+        message = 'You have been signed out. We attempted to save your progress.';
+      } else {
+        message = 'You have been signed out successfully.';
+      }
+    }
+    
+    const bgColor = saveSucceeded 
+      ? 'bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800' 
+      : 'bg-amber-50 dark:bg-amber-950 border-amber-200 dark:border-amber-800';
+    const textColor = saveSucceeded 
+      ? 'text-green-800 dark:text-green-200' 
+      : 'text-amber-800 dark:text-amber-200';
+    
+    return (
+      <div className={`mb-4 p-3 border rounded-lg text-center ${bgColor}`}>
+        <p className={`text-sm ${textColor}`}>
+          {message}
+        </p>
+      </div>
+    );
+  };
 
   // Determine default tab based on URL params
   const getDefaultTab = () => {
     if (tabParam === 'accesskey') return 'accesskey';
     if (tabParam === 'code' || prefilledCode) return 'code';
     return 'invite';
-  };
-
-  // Inactivity logout banner
-  const InactivityBanner = () => {
-    if (logoutReason !== 'inactive') return null;
-    
-    return (
-      <div className="mb-4 p-3 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-lg text-center">
-        <p className="text-sm text-amber-800 dark:text-amber-200">
-          You were signed out due to inactivity. Please sign in again to continue.
-        </p>
-      </div>
-    );
   };
 
   // Handle password reset mode
@@ -123,7 +157,7 @@ const Auth = () => {
             <CardDescription>Sign in or register for your organization's training</CardDescription>
           </CardHeader>
           <CardContent>
-            <InactivityBanner />
+            <LogoutBanner />
             <Tabs defaultValue={getDefaultTab()} className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="invite" className="flex items-center gap-1 text-xs sm:text-sm">
@@ -204,7 +238,7 @@ const Auth = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <InactivityBanner />
+            <LogoutBanner />
             {showAccessKey ? (
               <>
                 <div className="text-center mb-4 text-sm text-muted-foreground">
@@ -270,7 +304,7 @@ const Auth = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/5 p-4">
       <div className="w-full max-w-lg">
-        <InactivityBanner />
+        <LogoutBanner />
         {renderAuthForm()}
       </div>
     </div>
