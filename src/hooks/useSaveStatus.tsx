@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
+import { createContext, useContext, useState, useCallback, ReactNode, useEffect, useRef } from 'react';
 
 export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
@@ -11,6 +11,8 @@ interface SaveStatusContextType {
   setIdle: () => void;
   isSaving: boolean;
   hasUnsavedWork: boolean;
+  flushSave: (timeoutMs?: number) => Promise<boolean>;
+  registerSavePromise: (promise: Promise<unknown>) => void;
 }
 
 const SaveStatusContext = createContext<SaveStatusContextType | undefined>(undefined);
@@ -18,6 +20,8 @@ const SaveStatusContext = createContext<SaveStatusContextType | undefined>(undef
 export const SaveStatusProvider = ({ children }: { children: ReactNode }) => {
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+  const inFlightSaveRef = useRef<Promise<unknown> | null>(null);
+  const resolveWaitersRef = useRef<Array<() => void>>([]);
 
   const setSaving = useCallback(() => {
     setSaveStatus('saving');
@@ -26,6 +30,12 @@ export const SaveStatusProvider = ({ children }: { children: ReactNode }) => {
   const setSaved = useCallback(() => {
     setSaveStatus('saved');
     setLastSavedAt(new Date());
+    
+    // Notify any waiters that save completed
+    resolveWaitersRef.current.forEach(resolve => resolve());
+    resolveWaitersRef.current = [];
+    inFlightSaveRef.current = null;
+    
     // Auto-reset to idle after 3 seconds
     setTimeout(() => {
       setSaveStatus((current) => (current === 'saved' ? 'idle' : current));
@@ -34,11 +44,46 @@ export const SaveStatusProvider = ({ children }: { children: ReactNode }) => {
 
   const setError = useCallback(() => {
     setSaveStatus('error');
+    // Notify waiters even on error
+    resolveWaitersRef.current.forEach(resolve => resolve());
+    resolveWaitersRef.current = [];
+    inFlightSaveRef.current = null;
   }, []);
 
   const setIdle = useCallback(() => {
     setSaveStatus('idle');
   }, []);
+
+  // Register a save promise so we can wait for it
+  const registerSavePromise = useCallback((promise: Promise<unknown>) => {
+    inFlightSaveRef.current = promise;
+  }, []);
+
+  // Wait for any in-flight save to complete (with timeout)
+  const flushSave = useCallback(async (timeoutMs: number = 5000): Promise<boolean> => {
+    // If not currently saving, we're good
+    if (saveStatus !== 'saving') {
+      return true;
+    }
+
+    // Create a promise that resolves when save completes
+    const waitPromise = new Promise<void>((resolve) => {
+      resolveWaitersRef.current.push(resolve);
+    });
+
+    // Race against timeout
+    try {
+      await Promise.race([
+        waitPromise,
+        new Promise<void>((_, reject) => 
+          setTimeout(() => reject(new Error('save-timeout')), timeoutMs)
+        ),
+      ]);
+      return true;
+    } catch {
+      return false;
+    }
+  }, [saveStatus]);
 
   const isSaving = saveStatus === 'saving';
   const hasUnsavedWork = saveStatus === 'saving';
@@ -68,6 +113,8 @@ export const SaveStatusProvider = ({ children }: { children: ReactNode }) => {
         setIdle,
         isSaving,
         hasUnsavedWork,
+        flushSave,
+        registerSavePromise,
       }}
     >
       {children}
