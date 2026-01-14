@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useOrganizationAccess } from '@/hooks/useOrganizationAccess';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useContinueTraining } from '@/hooks/useContinueTraining';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -36,6 +37,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { isAdmin, isDispensaryManager } = useUserRole();
   const { hasAccess: hasOrgAccess, isLoading: orgAccessLoading } = useOrganizationAccess(user?.id);
+  const { continueTraining, continueUrl, ctaLabel, rvtProgress, isLoading: trainingLoading } = useContinueTraining();
   const [courses, setCourses] = useState<Course[]>([]);
   const [progress, setProgress] = useState<UserProgress[]>([]);
   const [certificates, setCertificates] = useState<any[]>([]);
@@ -260,10 +262,18 @@ const Dashboard = () => {
                   {/* Conditionally render button based on access */}
                   {hasAccess ? (
                     <Button 
-                      onClick={() => navigate('/course')}
-                      className="bg-green-600 hover:bg-green-700"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // Use resume-aware navigation for RVT course
+                        if (course.id === RVT_COURSE_ID) {
+                          continueTraining();
+                        } else {
+                          navigate('/course');
+                        }
+                      }}
+                      className="bg-green-600 hover:bg-green-700 relative z-10 pointer-events-auto"
                     >
-                      {progressPercent > 0 ? 'Continue' : 'Start Course'}
+                      {course.id === RVT_COURSE_ID && progressPercent > 0 ? ctaLabel : (progressPercent > 0 ? 'Continue' : 'Start Course')}
                     </Button>
                   ) : (
                     <TooltipProvider>
@@ -271,8 +281,11 @@ const Dashboard = () => {
                         <TooltipTrigger asChild>
                           <Button 
                             variant="outline"
-                            className="border-amber-300 text-amber-700 hover:bg-amber-50"
-                            onClick={() => navigate('/course')}
+                            className="border-amber-300 text-amber-700 hover:bg-amber-50 relative z-10 pointer-events-auto"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate('/course');
+                            }}
                           >
                             <Lock className="h-4 w-4 mr-2" />
                             Employer Access Required
