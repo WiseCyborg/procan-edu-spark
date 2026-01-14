@@ -113,7 +113,7 @@ export const SCORMStylePlayer: React.FC<SCORMStylePlayerProps> = ({
   };
 
   // Mark lesson as completed
-  const markLessonCompleted = (lessonId: string) => {
+  const markLessonCompleted = (lessonId: string, triggerCourseComplete = true) => {
     if (!completedLessonIds.includes(lessonId)) {
       const newCompleted = [...completedLessonIds, lessonId];
       setCompletedLessonIds(newCompleted);
@@ -127,16 +127,17 @@ export const SCORMStylePlayer: React.FC<SCORMStylePlayerProps> = ({
         title: "Lesson Complete!",
         description: "Progress saved. Continue to the next lesson.",
       });
+      
+      // Check if this completion results in 100% progress (all lessons now complete)
+      const allComplete = config.lessons.every(l => 
+        newCompleted.includes(l.id)
+      );
+      if (allComplete && onCourseComplete && triggerCourseComplete) {
+        onCourseComplete();
+      }
     }
   };
 
-  // Check if all lessons are complete
-  useEffect(() => {
-    const progress = getProgressPercent();
-    if (progress === 100 && onCourseComplete) {
-      onCourseComplete();
-    }
-  }, [completedLessonIds, config.lessons.length]);
 
   const activeLesson = config.lessons[activeLessonIndex];
   const progress = getProgressPercent();
