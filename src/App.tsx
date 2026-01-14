@@ -389,6 +389,7 @@ const AppRoutesLayout = () => {
               </ProtectedRoute>
             } />
             <Route path="/enhanced-admin-dashboard" element={<Navigate to="/admin" replace />} />
+            <Route path="/admin-dashboard" element={<Navigate to="/admin" replace />} />
             <Route path="/admin/realtime-operations" element={
               <ProtectedRoute>
                 <RealTimeOperationsDashboard />
