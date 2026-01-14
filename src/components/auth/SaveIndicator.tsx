@@ -28,6 +28,13 @@ export const SaveIndicator = ({ className, showAlways = false }: SaveIndicatorPr
 
   const getContent = () => {
     switch (saveStatus) {
+      case 'dirty':
+        return (
+          <>
+            <Cloud className="h-3.5 w-3.5 text-amber-500" />
+            <span className="text-amber-600">Unsaved changes</span>
+          </>
+        );
       case 'saving':
         return (
           <>

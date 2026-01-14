@@ -1,10 +1,11 @@
 import { createContext, useContext, useState, useCallback, ReactNode, useEffect, useRef } from 'react';
 
-export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
+export type SaveStatus = 'idle' | 'dirty' | 'saving' | 'saved' | 'error';
 
 interface SaveStatusContextType {
   saveStatus: SaveStatus;
   lastSavedAt: Date | null;
+  markDirty: () => void;
   setSaving: () => void;
   setSaved: () => void;
   setError: () => void;
@@ -22,6 +23,15 @@ export const SaveStatusProvider = ({ children }: { children: ReactNode }) => {
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const inFlightSaveRef = useRef<Promise<unknown> | null>(null);
   const resolveWaitersRef = useRef<Array<() => void>>([]);
+
+  // Mark content as dirty (user has made changes that need saving)
+  const markDirty = useCallback(() => {
+    setSaveStatus((current) => {
+      // Don't override saving status with dirty
+      if (current === 'saving') return current;
+      return 'dirty';
+    });
+  }, []);
 
   const setSaving = useCallback(() => {
     setSaveStatus('saving');
@@ -66,7 +76,22 @@ export const SaveStatusProvider = ({ children }: { children: ReactNode }) => {
       return true;
     }
 
-    // Create a promise that resolves when save completes
+    // If we have a registered promise, wait for it directly
+    if (inFlightSaveRef.current) {
+      try {
+        await Promise.race([
+          inFlightSaveRef.current,
+          new Promise<void>((_, reject) => 
+            setTimeout(() => reject(new Error('save-timeout')), timeoutMs)
+          ),
+        ]);
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
+    // Otherwise create a promise that resolves when save completes
     const waitPromise = new Promise<void>((resolve) => {
       resolveWaitersRef.current.push(resolve);
     });
@@ -86,12 +111,13 @@ export const SaveStatusProvider = ({ children }: { children: ReactNode }) => {
   }, [saveStatus]);
 
   const isSaving = saveStatus === 'saving';
-  const hasUnsavedWork = saveStatus === 'saving';
+  // Has unsaved work if dirty, saving, or error (potential data loss)
+  const hasUnsavedWork = saveStatus === 'dirty' || saveStatus === 'saving' || saveStatus === 'error';
 
-  // Browser close protection - only when saving
+  // Browser close protection - only when there's unsaved work
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (saveStatus === 'saving') {
+      if (hasUnsavedWork) {
         e.preventDefault();
         e.returnValue = 'Your progress is being saved. Are you sure you want to leave?';
         return e.returnValue;
@@ -100,13 +126,14 @@ export const SaveStatusProvider = ({ children }: { children: ReactNode }) => {
 
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [saveStatus]);
+  }, [hasUnsavedWork]);
 
   return (
     <SaveStatusContext.Provider
       value={{
         saveStatus,
         lastSavedAt,
+        markDirty,
         setSaving,
         setSaved,
         setError,
