@@ -1,7 +1,11 @@
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserProgress } from './useUserProgress';
 import { useUserRole } from './useUserRole';
+import { useResumeState } from './useResumeState';
+
+// RVT Course ID - the main course for training
+const RVT_COURSE_ID = 'f543fad9-fb96-485c-9ca0-980564acc559';
 
 export type TrainingPath = 'rvt' | 'manager' | 'public';
 export type TrainingStatus = 'not_started' | 'in_progress' | 'rvt_complete' | 'manager_complete' | 'all_complete';
@@ -74,6 +78,9 @@ export const useContinueTraining = (): ContinueTrainingResult => {
   const { isLoading: progressLoading, getRvtCompletedCount, getManagerCompletedCount, getFirstIncompleteModule, areAllModulesCompleted, areAllManagerModulesCompleted, RVT_MODULE_COUNT, MANAGER_MODULE_COUNT, RVT_REQUIRED_MAX } = useUserProgress();
   const { isDispensaryManager, isTrainingCoordinator, isAdmin } = useUserRole();
   
+  // Get persisted resume state - THIS IS THE KEY FIX
+  const { resumeTarget, isLoading: resumeLoading, getResumeRoute } = useResumeState(RVT_COURSE_ID);
+  
   const isManagerRole = isDispensaryManager || isTrainingCoordinator || isAdmin;
   
   const result = useMemo(() => {
@@ -114,7 +121,7 @@ export const useContinueTraining = (): ContinueTrainingResult => {
       currentPath = 'manager';
     }
     
-    // Determine next step
+    // Determine next step - USE RESUME STATE IF AVAILABLE
     let nextModuleNumber: number | null = null;
     let continueUrl = '/course';
     let ctaLabel = 'Start Training';
@@ -122,14 +129,30 @@ export const useContinueTraining = (): ContinueTrainingResult => {
     
     if (status === 'not_started') {
       nextModuleNumber = 0;
-      continueUrl = '/course/0';
+      continueUrl = '/course/part0';
       ctaLabel = 'Start Training';
       ctaDescription = 'Begin your RVT certification journey';
     } else if (status === 'in_progress') {
-      nextModuleNumber = firstIncomplete;
-      continueUrl = `/course/${firstIncomplete}`;
-      ctaLabel = 'Continue Training';
-      ctaDescription = `Module ${firstIncomplete} of ${RVT_REQUIRED_MAX} • ${ESTIMATED_MINUTES[firstIncomplete] || 15} min`;
+      // PRIORITY: Use persisted resume state if available
+      if (resumeTarget && typeof resumeTarget.module_number === 'number') {
+        nextModuleNumber = resumeTarget.module_number;
+        // Build full route with tab and page from resume state
+        continueUrl = getResumeRoute();
+        ctaLabel = 'Continue Training';
+        
+        // Build descriptive message
+        const tabName = resumeTarget.last_tab === 'course' ? 'Course Content' : 
+                       resumeTarget.last_tab === 'quiz' ? 'Quiz' : 
+                       resumeTarget.last_tab === 'documents' ? 'Documents' : 'Overview';
+        const pageInfo = resumeTarget.last_page_index > 0 ? `, page ${resumeTarget.last_page_index + 1}` : '';
+        ctaDescription = `Module ${resumeTarget.module_number} • ${tabName}${pageInfo}`;
+      } else {
+        // Fallback to first incomplete module
+        nextModuleNumber = firstIncomplete;
+        continueUrl = `/course/part${firstIncomplete}`;
+        ctaLabel = 'Continue Training';
+        ctaDescription = `Module ${firstIncomplete} of ${RVT_REQUIRED_MAX} • ${ESTIMATED_MINUTES[firstIncomplete] || 15} min`;
+      }
     } else if (status === 'rvt_complete') {
       // RVT complete - show exam or manager track
       continueUrl = '/rvt-complete';
@@ -139,7 +162,7 @@ export const useContinueTraining = (): ContinueTrainingResult => {
       if (isManagerRole && managerCompleted < MANAGER_MODULE_COUNT) {
         nextModuleNumber = RVT_REQUIRED_MAX + 1 + managerCompleted;
         if (nextModuleNumber <= 23) {
-          continueUrl = `/course/${nextModuleNumber}`;
+          continueUrl = `/course/part${nextModuleNumber}`;
           ctaLabel = 'Continue Manager Track';
           ctaDescription = `Manager Module ${managerCompleted + 1} of ${MANAGER_MODULE_COUNT}`;
         }
@@ -168,16 +191,28 @@ export const useContinueTraining = (): ContinueTrainingResult => {
       isManagerComplete,
       canTakeExam: isRvtComplete,
     };
-  }, [getRvtCompletedCount, getManagerCompletedCount, getFirstIncompleteModule, areAllModulesCompleted, areAllManagerModulesCompleted, RVT_MODULE_COUNT, MANAGER_MODULE_COUNT, RVT_REQUIRED_MAX, isManagerRole]);
+  }, [
+    getRvtCompletedCount, 
+    getManagerCompletedCount, 
+    getFirstIncompleteModule, 
+    areAllModulesCompleted, 
+    areAllManagerModulesCompleted, 
+    RVT_MODULE_COUNT, 
+    MANAGER_MODULE_COUNT, 
+    RVT_REQUIRED_MAX, 
+    isManagerRole,
+    resumeTarget,
+    getResumeRoute
+  ]);
   
-  const continueTraining = () => {
+  const continueTraining = useCallback(() => {
     navigate(result.continueUrl);
-  };
+  }, [navigate, result.continueUrl]);
   
   return {
     ...result,
     continueTraining,
-    isLoading: progressLoading,
+    isLoading: progressLoading || resumeLoading,
   };
 };
 
