@@ -393,12 +393,13 @@ const EnhancedCourseModule: React.FC = () => {
     );
   }
 
-  // Step gating logic - strict left-to-right progression
-  const canAccessCourse = overviewComplete;
-  const canAccessDocuments = overviewComplete && courseComplete;
-  // Quiz requires docs reviewed, OR no docs exist for this module
+  // Step gating logic - strict left-to-right progression, BUT unlock all tabs in review mode
+  const isModuleAlreadyCompleted = isModuleCompletedByNumber(currentModuleNumber);
+  const canAccessCourse = isModuleAlreadyCompleted || overviewComplete;
+  const canAccessDocuments = isModuleAlreadyCompleted || (overviewComplete && courseComplete);
+  // Quiz requires docs reviewed, OR no docs exist for this module, OR module already completed
   const allDocsReviewed = moduleDocuments.length === 0 || docsViewed;
-  const canAccessQuiz = overviewComplete && courseComplete && allDocsReviewed;
+  const canAccessQuiz = isModuleAlreadyCompleted || (overviewComplete && courseComplete && allDocsReviewed);
 
   const sections = [
     {
