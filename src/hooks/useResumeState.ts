@@ -67,6 +67,8 @@ export const useResumeState = (courseId?: string) => {
   // Mutation for upserting resume state
   const upsertMutation = useMutation({
     mutationFn: async (params: UpsertResumeParams) => {
+      console.log('[ResumeState] Attempting upsert:', params);
+      
       const { data, error } = await supabase.rpc('upsert_resume_state', {
         p_course_id: params.courseId,
         p_module_id: params.moduleId || null,
@@ -75,7 +77,12 @@ export const useResumeState = (courseId?: string) => {
         p_last_page_index: params.lastPageIndex,
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('[ResumeState] RPC error:', error);
+        throw error;
+      }
+      
+      console.log('[ResumeState] Upsert successful:', data);
       return data;
     },
     onSuccess: (_, params) => {
@@ -84,14 +91,23 @@ export const useResumeState = (courseId?: string) => {
       queryClient.invalidateQueries({ queryKey: ['course-state', user?.id, params.courseId] });
     },
     onError: (error) => {
-      console.error('[ResumeState] Error upserting:', error);
+      console.error('[ResumeState] Mutation error:', error);
     },
   });
 
   // Save resume state - called on tab change, page navigation
   const saveResumeState = useCallback(
     (params: Omit<UpsertResumeParams, 'courseId'>) => {
-      if (!courseId || !user?.id) return;
+      if (!courseId) {
+        console.warn('[ResumeState] Cannot save - no courseId');
+        return;
+      }
+      if (!user?.id) {
+        console.warn('[ResumeState] Cannot save - no user');
+        return;
+      }
+      
+      console.log('[ResumeState] saveResumeState called:', { courseId, ...params });
       
       upsertMutation.mutate({
         courseId,
