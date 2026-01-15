@@ -4444,6 +4444,7 @@ export type Database = {
           email: string
           id: string
           invited_by: string | null
+          member_type: Database["public"]["Enums"]["member_type"] | null
           organization_id: string
           role: string
           status: string
@@ -4455,6 +4456,7 @@ export type Database = {
           email: string
           id?: string
           invited_by?: string | null
+          member_type?: Database["public"]["Enums"]["member_type"] | null
           organization_id: string
           role: string
           status?: string
@@ -4466,6 +4468,7 @@ export type Database = {
           email?: string
           id?: string
           invited_by?: string | null
+          member_type?: Database["public"]["Enums"]["member_type"] | null
           organization_id?: string
           role?: string
           status?: string
@@ -5890,6 +5893,70 @@ export type Database = {
           role?: Database["public"]["Enums"]["app_role"]
         }
         Relationships: []
+      }
+      role_requests: {
+        Row: {
+          created_at: string
+          id: string
+          justification: string | null
+          organization_id: string | null
+          requested_member_type: Database["public"]["Enums"]["member_type"]
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["role_request_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          justification?: string | null
+          organization_id?: string | null
+          requested_member_type: Database["public"]["Enums"]["member_type"]
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["role_request_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          justification?: string | null
+          organization_id?: string | null
+          requested_member_type?: Database["public"]["Enums"]["member_type"]
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["role_request_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_requests_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "compliance_dashboard_metrics"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "role_requests_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_requests_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
+          },
+        ]
       }
       rvt_join_codes: {
         Row: {
@@ -9438,6 +9505,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      get_managed_org_ids: { Args: { _user_id: string }; Returns: string[] }
       get_modules_needing_review: {
         Args: never
         Returns: {
@@ -9533,6 +9601,13 @@ export type Database = {
           user_id: string
         }[]
       }
+      has_any_member_type: {
+        Args: {
+          _member_types: Database["public"]["Enums"]["member_type"][]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       has_any_role: {
         Args: {
           _roles: Database["public"]["Enums"]["app_role"][]
@@ -9541,6 +9616,14 @@ export type Database = {
         Returns: boolean
       }
       has_management_role: { Args: { p_user_id: string }; Returns: boolean }
+      has_member_type: {
+        Args: {
+          _member_types: Database["public"]["Enums"]["member_type"][]
+          _org_id: string
+          _user_id: string
+        }
+        Returns: boolean
+      }
       has_permission: {
         Args: {
           _permission: Database["public"]["Enums"]["admin_permission"]
@@ -9877,6 +9960,8 @@ export type Database = {
         | "manager"
         | "owner"
         | "trainer"
+      member_type: "employee" | "coordinator" | "manager" | "owner"
+      role_request_status: "pending" | "approved" | "denied"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -10055,6 +10140,8 @@ export const Constants = {
         "owner",
         "trainer",
       ],
+      member_type: ["employee", "coordinator", "manager", "owner"],
+      role_request_status: ["pending", "approved", "denied"],
     },
   },
 } as const
