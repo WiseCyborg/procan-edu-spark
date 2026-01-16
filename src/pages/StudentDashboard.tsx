@@ -12,7 +12,6 @@ import { Progress } from '@/components/ui/progress';
 import { DeadlineCountdown } from '@/components/course/DeadlineCountdown';
 import { ProfileCompletionBanner } from '@/components/ProfileCompletionBanner';
 import { ExamStatusCard } from '@/components/exam/ExamStatusCard';
-import { GettingStartedChecklist } from '@/components/student/GettingStartedChecklist';
 import { ResumePrompt } from '@/components/journey/ResumePrompt';
 import { WelcomeModal } from '@/components/onboarding/WelcomeModal';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -24,6 +23,9 @@ import { MobileBottomNav } from '@/components/navigation/MobileBottomNav';
 import Confetti from 'react-confetti';
 import { InternalChatbot } from '@/components/chat/InternalChatbot';
 import { NextActionBanner } from '@/components/guidance/NextActionBanner';
+import { TrackBadgeStrip } from '@/components/student/TrackBadgeStrip';
+import { ProgressStepsPanel } from '@/components/student/ProgressStepsPanel';
+import { ResumeTrainingButtons } from '@/components/navigation/ResumeTrainingButtons';
 
 const COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
 const TOTAL_MODULES = 24;
@@ -172,45 +174,39 @@ const StudentDashboard = () => {
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-foreground">My Training</h1>
           <p className="text-sm md:text-base text-muted-foreground mt-1">
-            {organizationInfo ? `${organizationInfo.name} • ` : ''}Maryland Cannabis Agent Certification
+            Maryland Cannabis Agent Certification
           </p>
         </div>
         
-        {/* Resume Course Quick Action - uses server-computed resume target */}
-        {completedModules < agentModules.length && completedModules > 0 && (
-          <Button 
-            size="lg"
-            onClick={() => {
-              // Safe navigation with fallback
-              const route = getResumeRoute();
-              console.log('[StudentDashboard] Navigating to resume route:', route);
-              navigate(route);
-            }}
-            disabled={courseStateLoading || !user}
-            className="w-full md:w-auto bg-primary hover:bg-primary/90 shadow-lg"
-          >
-            <BookOpen className="w-5 h-5 mr-2" />
-            {courseStateLoading ? 'Loading...' : 'Resume Training'}
-            {!courseStateLoading && (
-              <Badge variant="secondary" className="ml-2">
-                {Math.round((completedModules / agentModules.length) * 100)}% Complete
-              </Badge>
-            )}
-          </Button>
-        )}
-        
-        {completedModules >= agentModules.length && hasCertificate && (
-          <Button 
-            size="lg"
-            onClick={() => navigate('/certificates')}
-            variant="outline"
-            className="w-full md:w-auto"
-          >
-            <Award className="w-5 h-5 mr-2" />
-            Get Your Certificate
-          </Button>
-        )}
+        {/* Clear Resume vs Module List Buttons */}
+        <ResumeTrainingButtons 
+          variant="default" 
+          showModuleListButton={completedModules > 0}
+        />
       </div>
+
+      {/* Track Badge Strip - Shows which track user is enrolled in */}
+      <TrackBadgeStrip 
+        courseId={COURSE_ID}
+        organizationName={organizationInfo?.name}
+        totalModules={agentModules.length || TOTAL_MODULES}
+      />
+
+      {/* Clear Progress Steps Panel - Step 1: Modules → Step 2: Exam → Step 3: Certificate */}
+      <ProgressStepsPanel
+        completedModules={completedModules}
+        totalModules={agentModules.length || TOTAL_MODULES}
+        hasPassedExam={Boolean(checklistStatus.hasPassedExam)}
+        hasCertificate={Boolean(checklistStatus.hasCertificate)}
+        onResumeTraining={() => {
+          const route = getResumeRoute();
+          navigate(route);
+        }}
+        onViewModules={() => navigate('/course')}
+        onTakeExam={() => navigate('/exam')}
+        onViewCertificate={() => navigate('/certificates')}
+        isLoading={courseStateLoading}
+      />
 
       {/* Role-aware next action guidance */}
       <NextActionBanner className="mb-4" />
@@ -242,16 +238,7 @@ const StudentDashboard = () => {
         </Card>
       )}
 
-      {/* Getting Started Checklist */}
-      {!checklistStatus.hasCertificate && !checklistStatus.isLoading && (
-        <GettingStartedChecklist
-          profileComplete={Boolean(checklistStatus.profileComplete)}
-          hasWatchedWelcome={Boolean(checklistStatus.hasWatchedWelcome)}
-          hasStartedCourse={Boolean(checklistStatus.hasStartedCourse)}
-          hasPassedExam={Boolean(checklistStatus.hasPassedExam)}
-          hasCertificate={Boolean(checklistStatus.hasCertificate)}
-        />
-      )}
+      {/* Profile Completion Banner - only show if needed */}
 
       <ProfileCompletionBanner />
 

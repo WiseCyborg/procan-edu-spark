@@ -39,6 +39,7 @@ import { AiLeanCoach } from '@/components/ailean/AiLeanCoach';
 import { MobileBottomNav } from '@/components/navigation/MobileBottomNav';
 import { InternalChatbot } from '@/components/chat/InternalChatbot';
 import { NextActionBanner } from '@/components/guidance/NextActionBanner';
+import { CoordinatorStartPanel } from '@/components/coordinator/CoordinatorStartPanel';
 
 const DispensaryManagerDashboard = () => {
   const { user } = useAuth();
@@ -320,6 +321,17 @@ const DispensaryManagerDashboard = () => {
 
   return (
     <div className="container mx-auto p-4 md:p-6 space-y-4 md:space-y-6 pb-20 md:pb-6">
+      {/* Coordinator Start Panel - Quick snapshot of org status */}
+      <CoordinatorStartPanel
+        organizationName={organization.name}
+        totalEmployees={employees.length}
+        activeTrainees={employees.filter((e: any) => !e.hasCertificate && e.hasStarted).length}
+        completedTrainees={certificates.filter(c => !c.is_revoked).length}
+        pendingInvites={joinCodes.reduce((sum, code) => sum + (code.max_uses - code.current_uses), 0)}
+        complianceRate={employees.length > 0 ? Math.round((certificates.filter(c => !c.is_revoked).length / employees.length) * 100) : 0}
+        isLoading={loading}
+      />
+
       {/* Role-aware next action guidance */}
       <NextActionBanner className="mb-2" />
       
