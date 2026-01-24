@@ -9239,6 +9239,8 @@ export type Database = {
         }
         Returns: {
           access_key: string
+          error_code: string
+          invite_required: boolean
           join_code: string
           message: string
           organization_id: string

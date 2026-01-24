@@ -226,7 +226,7 @@ serve(async (req) => {
           message: 'Invalid response from approval function' 
         }), 
         { 
-          status: 500,
+          status: 200, // Return 200 with structured error
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       );
@@ -235,7 +235,7 @@ serve(async (req) => {
     const result = data[0];
 
     if (!result.success) {
-      console.error('[APPROVE-APPLICATION] Approval failed:', result.message);
+      console.error('[APPROVE-APPLICATION] Approval failed:', result.message, 'Code:', result.error_code);
       
       // PHASE 4: Log partial failure
       await serviceClient.from('pipeline_health_log').insert({
@@ -246,18 +246,21 @@ serve(async (req) => {
         metadata: {
           application_id,
           credits,
-          result
+          result,
+          error_code: result.error_code
         }
       });
       
+      // Return 200 with structured error (client can parse and show appropriate message)
       return new Response(
         JSON.stringify({ 
           success: false, 
-          error: 'APPROVAL_FAILED',
-          message: result.message
+          error: result.error_code || 'APPROVAL_FAILED',
+          message: result.message,
+          invite_required: result.invite_required || false
         }), 
         { 
-          status: 400,
+          status: 200, // Return 200 so client gets structured response
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       );
