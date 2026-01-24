@@ -151,7 +151,21 @@ export default function ManagerRegistration() {
         }
       });
       
-      if (authError) throw authError;
+      // Handle "user already exists" gracefully
+      if (authError) {
+        const errorMessage = authError.message.toLowerCase();
+        if (errorMessage.includes('already registered') || errorMessage.includes('already exists') || errorMessage.includes('user already')) {
+          // User exists - guide them to sign in instead
+          toast({ 
+            title: "Account Already Exists", 
+            description: "An account with this email already exists. Please sign in to join your organization.",
+          });
+          // Redirect to auth with the invite context
+          setTimeout(() => navigate(`/auth?role=dispensary_manager&existing=true&org=${encodeURIComponent(applicationData.organization_name)}`), 2000);
+          return;
+        }
+        throw authError;
+      }
 
       // Safety net: Ensure profile exists with organization_id
       if (authData.user) {
@@ -202,6 +216,7 @@ export default function ManagerRegistration() {
         state: { applicationId: applicationData.id, organizationId: applicationData.organization_id } 
       }), 2000);
     } catch (error: any) {
+      console.error('Registration error:', error);
       toast({ title: "Registration Failed", description: error.message, variant: "destructive" });
     }
   };
