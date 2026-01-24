@@ -124,18 +124,26 @@ serve(async (req) => {
 
     if (rpcError) {
       console.error('[APPROVE-WITH-ROLES] RPC error:', rpcError);
+      // Return 200 with structured error for client parsing
       return new Response(
         JSON.stringify({ success: false, error: 'RPC_ERROR', message: rpcError.message }), 
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     if (!rpcData || !Array.isArray(rpcData) || rpcData.length === 0 || !rpcData[0].success) {
       const message = rpcData?.[0]?.message || 'Approval failed';
-      console.error('[APPROVE-WITH-ROLES] Approval failed:', message);
+      const errorCode = rpcData?.[0]?.error_code || 'APPROVAL_FAILED';
+      console.error('[APPROVE-WITH-ROLES] Approval failed:', message, 'Code:', errorCode);
+      // Return 200 with structured error so client can parse and show appropriate message
       return new Response(
-        JSON.stringify({ success: false, error: 'APPROVAL_FAILED', message }), 
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ 
+          success: false, 
+          error: errorCode, 
+          message,
+          invite_required: rpcData?.[0]?.invite_required || false
+        }), 
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
