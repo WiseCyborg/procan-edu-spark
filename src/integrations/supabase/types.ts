@@ -4383,6 +4383,7 @@ export type Database = {
       org_invites: {
         Row: {
           accepted_at: string | null
+          accepted_by_user_id: string | null
           created_at: string
           email: string
           expires_at: string
@@ -4394,6 +4395,7 @@ export type Database = {
         }
         Insert: {
           accepted_at?: string | null
+          accepted_by_user_id?: string | null
           created_at?: string
           email: string
           expires_at: string
@@ -4405,6 +4407,7 @@ export type Database = {
         }
         Update: {
           accepted_at?: string | null
+          accepted_by_user_id?: string | null
           created_at?: string
           email?: string
           expires_at?: string
@@ -5204,6 +5207,9 @@ export type Database = {
           city: string | null
           created_at: string
           date_of_birth: string | null
+          deactivated_at: string | null
+          deactivated_by: string | null
+          deleted_at: string | null
           dispensary_access_key: string | null
           email_cache: string | null
           emergency_contact_name: string | null
@@ -5236,6 +5242,9 @@ export type Database = {
           city?: string | null
           created_at?: string
           date_of_birth?: string | null
+          deactivated_at?: string | null
+          deactivated_by?: string | null
+          deleted_at?: string | null
           dispensary_access_key?: string | null
           email_cache?: string | null
           emergency_contact_name?: string | null
@@ -5268,6 +5277,9 @@ export type Database = {
           city?: string | null
           created_at?: string
           date_of_birth?: string | null
+          deactivated_at?: string | null
+          deactivated_by?: string | null
+          deleted_at?: string | null
           dispensary_access_key?: string | null
           email_cache?: string | null
           emergency_contact_name?: string | null
@@ -9223,6 +9235,10 @@ export type Database = {
       }
     }
     Functions: {
+      accept_invite_for_existing_user: {
+        Args: { p_invite_token: string; p_user_id: string }
+        Returns: Json
+      }
       allocate_additional_seats: {
         Args: { p_note?: string; p_org_id: string; p_seats_to_add: number }
         Returns: Json
@@ -9352,6 +9368,10 @@ export type Database = {
           message: string
           success: boolean
         }[]
+      }
+      deprovision_user: {
+        Args: { p_deactivated_by?: string; p_user_id: string }
+        Returns: Json
       }
       detect_outdated_content: {
         Args: never
@@ -9641,6 +9661,10 @@ export type Database = {
         Returns: boolean
       }
       hash_token: { Args: { token: string }; Returns: string }
+      invalidate_pending_invites: {
+        Args: { p_email: string; p_organization_id?: string }
+        Returns: number
+      }
       is_conversation_participant: {
         Args: { _conversation_id: string; _user_id: string }
         Returns: boolean
@@ -9754,6 +9778,10 @@ export type Database = {
           message: string
           success: boolean
         }[]
+      }
+      reprovision_user: {
+        Args: { p_organization_id: string; p_role?: string; p_user_id: string }
+        Returns: Json
       }
       run_pipeline_health_check: { Args: never; Returns: Json }
       safe_assign_role: {

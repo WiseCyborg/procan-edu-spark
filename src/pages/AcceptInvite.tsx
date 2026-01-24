@@ -43,15 +43,24 @@ export default function AcceptInvite() {
     setStatus('accepting');
     
     try {
+      // First try the edge function approach
       const { data, error } = await supabase.functions.invoke('accept-org-invite', {
         body: { token }
       });
 
       if (error) {
+        // Check if it's an auth/session error - might need to use RPC fallback
+        console.error('Edge function error:', error);
         throw new Error(error.message || 'Failed to accept invitation');
       }
 
       if (!data.success) {
+        // Handle specific error codes gracefully
+        if (data.error === 'EMAIL_MISMATCH') {
+          setStatus('error');
+          setMessage(`This invitation was sent to a different email. Please sign in with the correct email address.`);
+          return;
+        }
         throw new Error(data.message || 'Failed to accept invitation');
       }
 
