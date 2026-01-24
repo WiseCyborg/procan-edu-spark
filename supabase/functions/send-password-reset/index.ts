@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { EmailRouter } from "../_shared/email-router.ts";
+import { DOMAINS } from "../_shared/domains.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -71,7 +72,7 @@ serve(async (req) => {
       expires_at: expiresAt.toISOString(),
     });
 
-    const resetUrl = `https://www.procannedu.com/auth?mode=reset&token=${token}`;
+    const resetUrl = `${DOMAINS.PRODUCTION}/auth?mode=reset&token=${token}`;
 
     const html = `
 <!DOCTYPE html>

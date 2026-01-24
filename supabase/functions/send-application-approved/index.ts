@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { loadEmailTemplate } from "../_shared/email-templates.ts";
 import { EmailService } from "../_shared/email-service.ts";
+import { DOMAINS } from "../_shared/domains.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -33,7 +34,7 @@ serve(async (req) => {
       ContactPerson: application.contact_person,
       OrganizationName: application.organization_name,
       AccessKey: application.organizations?.unique_access_key || "",
-      RegistrationURL: `https://www.procannedu.com/register/manager?token=${application.registration_token}`,
+      RegistrationURL: DOMAINS.getRegistrationUrl(application.registration_token),
     });
 
     const emailService = new EmailService();

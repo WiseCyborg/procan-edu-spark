@@ -322,8 +322,9 @@ export const StaffInvitationSystem = () => {
   };
 
   const generateInvitationLink = (invitation: StaffInvitation) => {
-    const baseUrl = window.location.origin;
-    return `${baseUrl}/auth?invitation=${invitation.invitation_token}`;
+    // Use production domain for consistent links across environments
+    const baseUrl = 'https://www.procannedu.com';
+    return `${baseUrl}/accept-invitation?token=${invitation.invitation_token}`;
   };
 
   const exportInvitations = () => {

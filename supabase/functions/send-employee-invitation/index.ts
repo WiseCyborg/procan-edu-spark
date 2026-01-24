@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.4';
 import { EmailRouter } from "../_shared/email-router.ts";
 import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
+import { DOMAINS } from "../_shared/domains.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -57,7 +58,7 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    const registrationUrl = `https://www.procannedu.com/accept-invitation?token=${invitationToken}`;
+    const registrationUrl = `${DOMAINS.PRODUCTION}/accept-invitation?token=${invitationToken}`;
 
     const router = new EmailRouter();
     const emailResult = await router.sendWithFailover({
