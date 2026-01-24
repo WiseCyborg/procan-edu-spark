@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { EmailRouter } from "../_shared/email-router.ts";
+import { DOMAINS } from "../_shared/domains.ts";
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -42,8 +43,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log(`📧 [v1.2] Sending invitation email to ${email}`, { organizationName, role, isReminder });
 
     // Build the acceptance URL - direct to accept-invitation page with token
-    const baseUrl = 'https://www.procannedu.com';
-    const acceptInvitationURL = `${baseUrl}/accept-invitation?token=${invitationToken}`;
+    const acceptInvitationURL = `${DOMAINS.PRODUCTION}/accept-invitation?token=${invitationToken}`;
     
     // Format expiry date
     const formattedExpiryDate = new Date(expiryDate).toLocaleDateString('en-US', {
