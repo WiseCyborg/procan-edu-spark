@@ -390,15 +390,22 @@ const DispensaryApplicationManager = () => {
         throw new Error('Registration token not found');
       }
 
-      // Get organization details
-      const { data: orgData } = await supabase
+      // Get organization details using organization_id (not name, which may have duplicates)
+      let { data: orgData } = await supabase
         .from('organizations')
         .select('unique_access_key')
-        .eq('name', application.organization_name)
+        .eq('id', application.organization_id)
         .single();
       
-      if (!orgData?.unique_access_key) {
-        throw new Error('Organization access key not found');
+      let accessKey = orgData?.unique_access_key;
+      
+      if (!accessKey) {
+        // Generate access key on-the-fly if missing
+        accessKey = `DISP-${new Date().getFullYear()}-${crypto.randomUUID().replace(/-/g, '').slice(0, 8).toUpperCase()}`;
+        await supabase
+          .from('organizations')
+          .update({ unique_access_key: accessKey })
+          .eq('id', application.organization_id);
       }
 
       const registrationUrl = `${window.location.origin}/register/manager?token=${appData.registration_token}`;
@@ -408,7 +415,7 @@ const DispensaryApplicationManager = () => {
           contact_email: application.contact_email,
           contact_person: application.contact_person,
           organization_name: application.organization_name,
-          access_key: orgData.unique_access_key,
+          access_key: accessKey,
           registration_url: registrationUrl,
           credits: 10
         }
