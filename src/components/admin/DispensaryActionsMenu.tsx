@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Copy, RefreshCw, Mail, Plus, FileText, Edit, MoreVertical, Ban, Power, Trash2, Users, CheckCircle } from 'lucide-react';
+import { Copy, RefreshCw, Mail, Plus, FileText, Edit, MoreVertical, Ban, Power, Trash2, Users, CheckCircle, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -49,6 +49,48 @@ export const DispensaryActionsMenu = ({
   const [loading, setLoading] = useState<string | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [allocateDialogOpen, setAllocateDialogOpen] = useState(false);
+
+  const handleActivateUser = async () => {
+    if (!application.organization_id) {
+      toast.error('Organization not found');
+      return;
+    }
+
+    setLoading('activate');
+    try {
+      // Parse contact person name
+      const nameParts = application.contact_person.trim().split(' ');
+      const firstName = nameParts[0] || application.contact_person;
+      const lastName = nameParts.slice(1).join(' ') || '';
+
+      const { data, error } = await supabase.functions.invoke('admin-activate-user', {
+        body: {
+          email: application.contact_email,
+          organization_id: application.organization_id,
+          first_name: firstName,
+          last_name: lastName,
+          role: 'dispensary_manager'
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.success) {
+        toast.success(
+          data.was_existing_user 
+            ? 'User account confirmed and password reset email sent'
+            : 'User account created and password reset email sent'
+        );
+        onRefetch?.();
+      } else {
+        throw new Error(data?.error || 'Activation failed');
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to activate user');
+    } finally {
+      setLoading(null);
+    }
+  };
 
   const handleCopyJoinCode = async () => {
     if (joinCode) {
@@ -206,6 +248,17 @@ export const DispensaryActionsMenu = ({
                 >
                   <Mail className="h-4 w-4 mr-2" />
                   Send Manager Reminder
+                </DropdownMenuItem>
+              )}
+
+              {!managerRegistered && (
+                <DropdownMenuItem 
+                  onClick={handleActivateUser}
+                  disabled={loading === 'activate'}
+                  className="text-primary font-medium"
+                >
+                  <UserPlus className={`h-4 w-4 mr-2 ${loading === 'activate' ? 'animate-spin' : ''}`} />
+                  Activate User (Bypass Token)
                 </DropdownMenuItem>
               )}
               
