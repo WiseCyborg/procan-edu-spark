@@ -327,8 +327,8 @@ serve(async (req) => {
           day: 'numeric' 
         });
         
-        // Generate payment URL
-        const paymentUrl = `https://procann-edu.lovable.app/payment?application_id=${application_id}`;
+        // Generate payment URL - use production domain
+        const paymentUrl = `https://www.procannedu.com/payment?application_id=${application_id}`;
         
         // Insert into notification queue for payment link with ALL required template variables
         await serviceClient.from('notification_queue').insert({

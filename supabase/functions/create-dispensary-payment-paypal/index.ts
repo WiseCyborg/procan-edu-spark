@@ -185,8 +185,8 @@ serve(async (req) => {
         custom_id: `purchase_${purchase.id}_org_${organization.id}_qty_${quantity}`,
       }],
       application_context: {
-        return_url: `https://procann-edu.lovable.app/payment-success?purchase_id=${purchase.id}`,
-        cancel_url: `https://procann-edu.lovable.app/purchase-seats`,
+        return_url: `https://www.procannedu.com/payment-success?purchase_id=${purchase.id}`,
+        cancel_url: `https://www.procannedu.com/purchase-seats`,
         brand_name: "ProCann Edu",
         landing_page: "BILLING",
         user_action: "PAY_NOW",
