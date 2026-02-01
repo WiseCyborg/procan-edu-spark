@@ -160,7 +160,7 @@ serve(async (req) => {
     ` : ''}
 
     <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
-      <a href="${Deno.env.get('SUPABASE_URL')?.replace('https://zhmpwczrvitomsxjwpzc.supabase.co', 'https://procann-edu.lovable.app')}/admin/exam-analytics" 
+      <a href="https://www.procannedu.com/admin/exam-analytics" 
          style="display: inline-block; background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px;">
         View Full Dashboard
       </a>

@@ -204,8 +204,8 @@ serve(async (req) => {
           continue;
         }
 
-        // Queue invite email
-        const inviteUrl = `https://procann-edu.lovable.app/accept-invite?token=${token}`;
+        // Queue invite email - use production domain
+        const inviteUrl = `https://www.procannedu.com/accept-invite?token=${token}`;
         
         await serviceClient.from('notification_queue').insert({
           recipient_email: assignment.email,
@@ -252,7 +252,7 @@ serve(async (req) => {
           Credits: credits,
           TotalAmount: `$${totalAmount.toLocaleString()}`,
           PaymentDeadline: deadline.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
-          PaymentUrl: `https://procann-edu.lovable.app/payment?application_id=${application_id}`,
+          PaymentUrl: `https://www.procannedu.com/payment?application_id=${application_id}`,
           PaymentAmount: totalAmount,
           ApplicationId: application_id
         }

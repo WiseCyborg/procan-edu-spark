@@ -73,7 +73,7 @@ serve(async (req) => {
       <h2>Hello ${profile?.first_name || 'there'}!</h2>
       <p>${message}</p>
       
-      <a href="https://procann-edu.lovable.app/course" class="button">Continue Training</a>
+      <a href="https://www.procannedu.com/course" class="button">Continue Training</a>
       
       <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
         Need help? Contact your training coordinator or email support@procannedu.com

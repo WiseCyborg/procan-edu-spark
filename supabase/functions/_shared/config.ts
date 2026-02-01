@@ -5,16 +5,10 @@
  * used across all edge functions.
  */
 
-// Environment-aware base URL
+// Environment-aware base URL - ALWAYS use production domain
 export const getBaseUrl = (): string => {
-  // Production domain (preferred)
-  const prodDomain = 'https://procann-edu.lovable.app';
-  
-  // Fallback to environment variable if set
-  const envUrl = Deno.env.get('APP_BASE_URL');
-  if (envUrl) return envUrl;
-  
-  return prodDomain;
+  // Canonical production domain - never use preview URLs
+  return 'https://www.procannedu.com';
 };
 
 // Support email
