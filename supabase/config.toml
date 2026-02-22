@@ -512,3 +512,6 @@ verify_jwt = true
 
 [functions.verify-course-payment]
 verify_jwt = true
+
+[functions.generate-compliance-delta]
+verify_jwt = true

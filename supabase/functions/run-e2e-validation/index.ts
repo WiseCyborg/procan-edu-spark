@@ -1199,7 +1199,145 @@ Deno.serve(async (req: Request) => {
     }
 
     // ==========================================
-    // ADDITIONAL SYSTEM CHECKS
+    // JOURNEY H: PAYMENT & ENROLLMENT AUDIT (BLOCKER) [TIER 1]
+    // ==========================================
+    console.log('=== Journey H: Payment & Enrollment Audit [Tier 1 - Financial] ===');
+
+    // H1: Stripe webhook edge function exists and responds
+    try {
+      const webhookUrl = `${supabaseUrl}/functions/v1/stripe-webhook`;
+      const r = await fetch(webhookUrl, { method: 'GET' });
+      await r.text(); // consume body
+      const ok = [200, 204, 401, 403, 405].includes(r.status);
+      addResult('Payment Enrollment', 'H1 Webhook Exists', 'Stripe webhook edge function responds',
+        `Status: ${r.status}`,
+        ok,
+        { is_blocker: !ok, risk_level: 'financial', journey_tier: 1, notes: 'GET returns 405/401/403 is acceptable for POST-only webhook' }
+      );
+    } catch (e: any) {
+      addResult('Payment Enrollment', 'H1 Webhook Exists', 'Stripe webhook edge function responds',
+        `Exception: ${e.message}`, false,
+        { is_blocker: true, error_meta: { code: 'EXCEPTION', message: e.message }, risk_level: 'financial', journey_tier: 1 }
+      );
+    }
+
+    // H2: course_entitlements schema intact - verify required columns exist
+    try {
+      const { data: schemaCheck, error: schemaErr } = await supabase
+        .from('course_entitlements')
+        .select('id, user_id, course_id, status, source, created_at')
+        .limit(0);
+
+      const ok = !schemaErr;
+      addResult('Payment Enrollment', 'H2 Entitlements Schema', 'course_entitlements table has required columns',
+        ok ? 'Schema intact (id, user_id, course_id, status, source, created_at)' : `Error: ${schemaErr?.message}`,
+        ok,
+        { is_blocker: !ok, risk_level: 'financial', journey_tier: 1, error_meta: schemaErr ? { code: schemaErr.code, message: schemaErr.message, table: 'course_entitlements' } : undefined }
+      );
+    } catch (e: any) {
+      addResult('Payment Enrollment', 'H2 Entitlements Schema', 'course_entitlements table has required columns',
+        `Exception: ${e.message}`, false,
+        { is_blocker: true, error_meta: { code: 'EXCEPTION', message: e.message }, risk_level: 'financial', journey_tier: 1 }
+      );
+    }
+
+    // H3: Entitlement creation logic works (insert test, verify, cleanup)
+    let testEntitlementId: string | null = null;
+    const testCourseForPayment = activeCourse?.id || null;
+
+    if (realTestUserId && testCourseForPayment) {
+      try {
+        const { data: inserted, error: insertErr } = await supabase
+          .from('course_entitlements')
+          .insert({
+            user_id: realTestUserId,
+            course_id: testCourseForPayment,
+            status: 'active',
+            source: 'e2e_audit'
+          })
+          .select('id')
+          .single();
+
+        if (insertErr) throw insertErr;
+        testEntitlementId = inserted.id;
+
+        addResult('Payment Enrollment', 'H3 Entitlement Insert', 'Test entitlement created successfully',
+          `Created entitlement: ${testEntitlementId}`,
+          true,
+          { risk_level: 'financial', journey_tier: 1 }
+        );
+
+        // Verify entitlement is queryable
+        const { data: verifyRow, error: verifyErr } = await supabase
+          .from('course_entitlements')
+          .select('id, status')
+          .eq('id', testEntitlementId)
+          .single();
+
+        addResult('Payment Enrollment', 'H3 Entitlement Verify', 'Entitlement is queryable after insert',
+          verifyErr ? `Error: ${verifyErr.message}` : `Verified: status=${verifyRow?.status}`,
+          !verifyErr && verifyRow?.status === 'active',
+          { is_blocker: !!verifyErr, risk_level: 'financial', journey_tier: 1 }
+        );
+
+        // H4: Duplicate payment prevention
+        const { error: dupErr } = await supabase
+          .from('course_entitlements')
+          .insert({
+            user_id: realTestUserId,
+            course_id: testCourseForPayment,
+            status: 'active',
+            source: 'e2e_audit_dup'
+          });
+
+        // We expect either a constraint error OR the insert succeeds (no unique constraint)
+        // If it succeeds, that means duplicates are NOT prevented — flag as WARN
+        if (dupErr) {
+          addResult('Payment Enrollment', 'H4 Duplicate Prevention', 'Duplicate entitlement prevented by constraint',
+            `Correctly prevented: ${dupErr.message}`,
+            true,
+            { risk_level: 'financial', journey_tier: 1, notes: 'Unique constraint or RLS prevents double access' }
+          );
+        } else {
+          // Duplicate was allowed — clean it up and warn
+          const { data: dups } = await supabase
+            .from('course_entitlements')
+            .select('id')
+            .eq('user_id', realTestUserId)
+            .eq('course_id', testCourseForPayment)
+            .eq('source', 'e2e_audit_dup');
+          
+          if (dups && dups.length > 0) {
+            for (const d of dups) {
+              await supabase.from('course_entitlements').delete().eq('id', d.id);
+            }
+          }
+
+          addResult('Payment Enrollment', 'H4 Duplicate Prevention', 'Duplicate entitlement prevented by constraint',
+            'WARNING: Duplicate entitlement was allowed — no unique constraint',
+            false,
+            { is_blocker: false, risk_level: 'financial', journey_tier: 1, notes: 'Consider adding unique constraint on (user_id, course_id, status)' }
+          );
+        }
+      } catch (e: any) {
+        addResult('Payment Enrollment', 'H3H4 Entitlement Logic', 'Entitlement creation + duplicate prevention',
+          `Exception: ${e.message}`, false,
+          { is_blocker: true, error_meta: { code: 'EXCEPTION', message: e.message }, risk_level: 'financial', journey_tier: 1 }
+        );
+      } finally {
+        // Cleanup test entitlement
+        if (testEntitlementId) {
+          await supabase.from('course_entitlements').delete().eq('id', testEntitlementId);
+        }
+      }
+    } else {
+      addResult('Payment Enrollment', 'H3H4 SKIPPED', 'Payment audit requires test user and active course',
+        !realTestUserId ? 'No test user' : 'No active course',
+        false,
+        { is_blocker: true, risk_level: 'financial', journey_tier: 1 }
+      );
+    }
+
     // ==========================================
     console.log('=== Additional System Checks ===');
     
@@ -1250,6 +1388,7 @@ Deno.serve(async (req: Request) => {
       { name: 'Role Transitions', tier: 1, risk_types: ['security'] },
       { name: 'Seat Enforcement', tier: 1, risk_types: ['financial'] },
       { name: 'Course Gating', tier: 1, risk_types: ['regulatory'] },
+      { name: 'Payment Enrollment', tier: 1, risk_types: ['financial'] },
       { name: 'Email', tier: 2, risk_types: ['ux'] },
       { name: 'Organizations', tier: 2, risk_types: ['financial'] },
     ];
