@@ -60,11 +60,18 @@ Deno.serve(async (req: Request) => {
     // 2) Pull regulatory content (COMAR requirements)
     const { data: regs, error: regsErr } = await supabase
       .from('regulatory_content')
-      .select('id, section_number, title, content, requirement_type')
+      .select('id, section_number, section_title, content_text')
       .order('section_number', { ascending: true });
 
     if (regsErr) throw regsErr;
 
+    if (!regs || regs.length === 0) {
+      return new Response(JSON.stringify({
+        ok: false,
+        error: 'No regulatory_content rows found. Compliance delta cannot be generated.',
+        agent: 'RVT System Auditor'
+      }), { status: 422, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
+    }
     // 3) Cross-reference
     const rows: DeltaRow[] = [];
 
@@ -72,8 +79,8 @@ Deno.serve(async (req: Request) => {
       const section = r.section_number;
       const hasMapping = section && mappedSections.has(section);
       const requirementLabel = section
-        ? `${section} — ${r.title ?? 'Requirement'}`
-        : `${r.title ?? 'Requirement'}`;
+        ? `${section} — ${r.section_title ?? 'Requirement'}`
+        : `${r.section_title ?? 'Requirement'}`;
 
       if (hasMapping) {
         const evidenceModules = moduleMappings.filter(m => m.sections.includes(section));
