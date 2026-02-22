@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FastTrackTestPanel } from '@/components/admin/FastTrackTestPanel';
 import { TestEmailSender } from '@/components/admin/TestEmailSender';
 import TestAccountCreator from '@/components/admin/TestAccountCreator';
+import RVTSystemAuditorPanel from '@/components/admin/RVTSystemAuditorPanel';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/sonner';
@@ -34,6 +35,8 @@ export function TestingTab() {
 
   return (
     <div className="space-y-6 py-6">
+      <RVTSystemAuditorPanel />
+
       <Alert>
         <Info className="h-4 w-4" />
         <AlertDescription>
