@@ -1,87 +1,340 @@
-# Fix `fast-track-dispensary-test` Schema Mismatch + Re-invoke
+# Fix UAT Seats + Organization Members
 
 ## Problem
 
-The function failed with: `Could not find the 'city' column of 'dispensary_applications' in the schema cache`
+The UAT GreenRun2 dispensary has 5 entitlements working correctly, but:
 
-The function inserts columns that don't exist in the actual tables:
+1. All 5 seats are still `status='available'` with no `assigned_user_id` -- admin seat roster looks wrong
+2. No `organization_members` rows exist -- coordinator/manager dashboards will show empty
 
-### `dispensary_applications` table
+The SQL read-query tool cannot run write operations, so we need an edge function to perform these data fixes.
 
-- Function uses: `city`, `state`, `zip_code` -- **DO NOT EXIST**
-- Actual columns: `address`, `license_number`, `compliance_affirmation`, `application_status`, `estimated_employees`, etc.
+## Plan
 
-### `organizations` table
+### 1. Create a one-shot utility edge function
 
-- Function uses: `course_credits` -- exists
-- Function uses: `license_number` -- does not exist on `organizations` (only on `dispensary_applications`)
+**File:** `supabase/functions/uat-fix-seats-members/index.ts`
 
-## Fix
+This function will:
 
-### File: `supabase/functions/fast-track-dispensary-test/index.ts`
+**A) Assign 5 available seats to the 5 employees:**
 
-**Step 1: Fix `dispensary_applications` insert (lines 32-44)**
+- Query `rvt_seats` for 5 available seats in org `511f5c69-...`
+- Update each to `status='assigned'` with `assigned_user_id` set to the corresponding employee
+- Note: `rvt_seats` has no `updated_at` column, so we skip that field
 
-Remove `city`, `state`, `zip_code` and add `estimated_employees`:
+**B) Insert 6 `organization_members` rows:**
 
-```typescript
-.insert({
-  organization_name,
-  contact_person: 'Test Manager',
-  contact_email: test_email,
-  contact_phone: '555-TEST-001',
-  license_number: `TEST-${Date.now()}`,
-  address: '123 Test Street, Baltimore, MD 21201',
-  estimated_employees: employee_count,
-  compliance_affirmation: true,
-  application_status: 'pending'
-})
-```
+- Manager (`ed19e3c1-...`) with `member_type='manager'`, `role='dispensary_manager'`
+- Emp1-5 with `member_type='employee'`, `role='employee'`
+- Uses upsert on the unique constraint `(organization_id, email, role)` to be idempotent
 
-**Step 2: Fix `organizations` insert (lines 75-88)**
+The enum `member_type` allows: `employee`, `coordinator`, `manager`, `owner`.
 
-Remove `license_number` (not a column on `organizations`):
+### 2. Deploy and invoke
 
-```typescript
-.insert({
-  name: organization_name,
-  contact_person: 'Test Manager',
-  contact_email: test_email,
-  contact_phone: '555-TEST-001',
-  address: '123 Test Street, Baltimore, MD 21201',
-  unique_access_key: accessKey,
-  course_credits: employee_count,
-  admin_approved: true,
-  payment_status: 'test'
-})
-```
+Deploy the function, invoke it once, verify the response shows no errors.
 
-**Step 3: Deploy and re-invoke**
+### 3. Verify with DB queries
 
-After fixing, deploy and call with:
-
-```json
-{
-  "test_email": "flamevape@gmail.com",
-  "organization_name": "UAT Test Dispensary",
-  "employee_count": 5,
-  "auto_complete_course": false
-}
-```
-
-**Step 4: Verify entitlements populated**
+**Seats:**
 
 ```sql
-SELECT COUNT(*) AS entitlements FROM course_entitlements;
-SELECT user_id, course_id, source, status, created_at
-FROM course_entitlements ORDER BY created_at DESC LIMIT 10;
+SELECT status, COUNT(*)
+FROM rvt_seats
+WHERE organization_id = '511f5c69-b0f8-455d-a4b7-1972f6c66a41'
+GROUP BY status;
 ```
 
-Expected: 5 rows with `source='org_seat'` and `status='active'`.
+Expected: 5 assigned, 0 available
+
+**Members:**
+
+```sql
+SELECT email, member_type, status
+FROM organization_members
+WHERE organization_id = '511f5c69-b0f8-455d-a4b7-1972f6c66a41'
+ORDER BY created_at;
+```
+
+Expected: 6 rows (1 manager + 5 employees)
+
+### 4. Clean up
+
+Delete the utility edge function after successful execution -- it's a one-shot tool.
 
 ## Files Changed
 
 
-| File                                                     | Change                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `supabase/functions/fast-track-dispensary-test/index.ts` | Remove non-existent columns (`city`, `state`, `zip_code`, `license_number` on orgs) from inserts Yep — that error message is definitive: the function is inserting columns that **don’t exist** in `dispensary_applications` (and also trying to write `license_number` onto `organizations`). Your fix plan is correct.Here’s the exact way to apply it safely, plus two extra hardening tweaks so you don’t hit a *different* schema/RLS failure right after.---✅ Patch `supabase/functions/fast-track-dispensary-test/index.ts`Step 1 — Fix `dispensary_applications` insertReplace the insert object so it only uses real columns and includes `estimated_employees`:// BEFORE: city/state/zip_code etc (remove them) const { data: app, error: appErr } = await serviceClient .from('dispensary_applications') .insert({ organization_name, contact_person: 'Test Manager', contact_email: test_email, contact_phone: '555-TEST-001', license_number: `TEST-${Date.now()}`, address: '123 Test Street, Baltimore, MD 21201', estimated_employees: employee_count, compliance_affirmation: true, application_status: 'pending', }) .select('*') .single(); if (appErr) throw appErr; Step 2 — Fix `organizations` insert (remove license_number)const { data: org, error: orgErr } = await serviceClient .from('organizations') .insert({ name: organization_name, contact_person: 'Test Manager', contact_email: test_email, contact_phone: '555-TEST-001', address: '123 Test Street, Baltimore, MD 21201', unique_access_key: accessKey, course_credits: employee_count, admin_approved: true, payment_status: 'test', }) .select('*') .single(); if (orgErr) throw orgErr; ---Two quick hardening tweaks (prevents the next “why is entitlements still 0” moment)A) Ensure you’re using **service role client** for these insertsThis function is provisioning orgs/users/seats. It must use `serviceClient` (not the anon/auth client), otherwise RLS will bite you.Sanity check: all `.from('dispensary_applications')`, `.from('organizations')`, `.from('rvt_seats')`, `.from('course_entitlements')` should be via `serviceClient`.B) Don’t depend on PostgREST schema cache immediately after a migrationIf you recently changed schema, the Supabase schema cache can lag. Your fix is about removing nonexistent columns, so you should be fine, but if you *still* get schema cache issues, the quickest operational fix is:- redeploy the function- wait 30–60 seconds- re-invoke (You don’t need code changes—just give PostgREST cache a moment.)---✅ Deploy + Re-invokeInvoke with your payload:{ "test_email": "flamevape@gmail.com", "organization_name": "UAT Test Dispensary", "employee_count": 5, "auto_complete_course": false } ---✅ Verify (DB proofs)Proof 1 — Entitlements populatedSELECT COUNT(*) AS entitlements FROM public.course_entitlements; Proof 2 — Show newest entitlements (must be org_seat)SELECT user_id, course_id, source, status, created_at FROM public.course_entitlements ORDER BY created_at DESC LIMIT 10; Expected: **5 rows** with `source='org_seat'` and `status='active'`.Proof 3 — Assigned seats match entitlementsSELECT s.organization_id, s.id AS seat_id, s.status AS seat_status, s.assigned_user_id, s.course_id, e.source AS entitlement_source, e.status AS entitlement_status FROM public.rvt_seats s LEFT JOIN public.course_entitlements e ON e.user_id = s.assigned_user_id AND e.course_id = s.course_id WHERE s.organization_id = (SELECT id FROM public.organizations WHERE name = 'UAT Test Dispensary' ORDER BY created_at DESC LIMIT 1) ORDER BY s.updated_at DESC; ---If it still fails after this patchThere are only two likely culprits:- `employee_count` **seats aren’t being created or assigned** (logic bug)- **the function is inserting into** `organizations` **but seats are tied to a different org_id** (variable mismatch)If you paste the current `fast-track-dispensary-test/index.ts` around the inserts + seat loop, I’ll point out exactly where that mismatch would be.---What you should do nextApply the two insert fixes, deploy, invoke, then paste:- the function response (even partial)- the output of the “newest entitlements” query…and I’ll tell you immediately whether you’re ready to start Louis/Danielle UAT or if there’s one more blocker. |
+| File                                                | Change                                                   |
+| --------------------------------------------------- | -------------------------------------------------------- |
+| `supabase/functions/uat-fix-seats-members/index.ts` | Create one-shot utility function (then delete after use) |
+
+
+## Technical Details
+
+- Seat IDs from DB: `52bdc470-...`, `f5c547cc-...`, `a4131f1d-...`, `d36d6434-...`, `80f5311c-...`
+- Employee IDs: Emp1 `f167e515-...`, Emp2 `af0018c3-...`, Emp3 `cf9e8145-...`, Emp4 `37fc89ae-...`, Emp5 `a1ab4593-...`
+- Manager ID: `ed19e3c1-45eb-476d-ae68-8f4baa30cc30`
+- Org ID: `511f5c69-b0f8-455d-a4b7-1972f6c66a41`
+- No `updated_at` column on `rvt_seats` (confirmed by schema error)
+- Unique constraint on `organization_members`: `(organization_id, email, role)`  
+  
+`confirm with`   
+  
+Perfect call. If your current operator path can’t run writes, a **one-shot utility edge function** is exactly the right move — and we’ll make it **idempotent**, **safe**, and **self-reporting** so you can run it once and be done.
+  Below is a production-ready `uat-fix-seats-members` edge function you can drop in, deploy, invoke, verify, then delete.
+  ---
+  ## 1) Create the edge function
+  **Path:** `supabase/functions/uat-fix-seats-members/index.ts`
+  ```ts
+  // supabase/functions/uat-fix-seats-members/index.ts
+  import { serve } from 'https://deno.land/std@0.224.0/http/server.ts';
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
+
+  type MemberSeed = {
+    user_id: string;
+    email: string;
+    role: 'dispensary_manager' | 'employee';
+    member_type: 'manager' | 'employee';
+  };
+
+  serve(async (req) => {
+    try {
+      const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
+      const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+
+      if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
+        return new Response(
+          JSON.stringify({ ok: false, error: 'Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY' }),
+          { status: 500, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const service = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
+        auth: { persistSession: false },
+      });
+
+      // ---- Hard-coded UAT GreenRun2 references (one-shot tool) ----
+      const ORG_ID = '511f5c69-b0f8-455d-a4b7-1972f6c66a41';
+      const COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
+
+      const members: MemberSeed[] = [
+        {
+          user_id: 'ed19e3c1-45eb-476d-ae68-8f4baa30cc30',
+          email: 'uat-greenrun2+manager@procannedu.com',
+          role: 'dispensary_manager',
+          member_type: 'manager',
+        },
+        {
+          user_id: 'f167e515-4fde-42a6-9fa6-77c227ffd495',
+          email: 'uat-greenrun2+emp1@procannedu.com',
+          role: 'employee',
+          member_type: 'employee',
+        },
+        {
+          user_id: 'af0018c3-ecfa-41ed-a3b0-55716ae0c3b5',
+          email: 'uat-greenrun2+emp2@procannedu.com',
+          role: 'employee',
+          member_type: 'employee',
+        },
+        {
+          user_id: 'cf9e8145-6fcb-40f8-91ea-9346d5b43b6c',
+          email: 'uat-greenrun2+emp3@procannedu.com',
+          role: 'employee',
+          member_type: 'employee',
+        },
+        {
+          user_id: '37fc89ae-7376-4457-b147-f0219e296f98',
+          email: 'uat-greenrun2+emp4@procannedu.com',
+          role: 'employee',
+          member_type: 'employee',
+        },
+        {
+          user_id: 'a1ab4593-1f5d-4644-aca8-c76c72b156e8',
+          email: 'uat-greenrun2+emp5@procannedu.com',
+          role: 'employee',
+          member_type: 'employee',
+        },
+      ];
+
+      // --------- 0) Optional payload guard (only allow POST) ----------
+      if (req.method !== 'POST') {
+        return new Response(JSON.stringify({ ok: false, error: 'Use POST' }), {
+          status: 405,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+
+      // --------- 1) Assign seats (idempotent) ----------
+      // Target: 5 seats should end up assigned to the 5 employees.
+      // Strategy:
+      // - For each employee, if they already have an assigned seat for this org/course, skip.
+      // - Otherwise, grab one available seat and assign it.
+      const employees = members.filter((m) => m.member_type === 'employee');
+
+      // Pull current seat state for org/course
+      const { data: seatRows, error: seatErr } = await service
+        .from('rvt_seats')
+        .select('id, status, assigned_user_id, organization_id, course_id')
+        .eq('organization_id', ORG_ID)
+        .eq('course_id', COURSE_ID);
+
+      if (seatErr) throw seatErr;
+
+      const seats = seatRows ?? [];
+      const availableSeats = seats.filter((s) => s.status === 'available' && !s.assigned_user_id);
+
+      const existingAssignments = new Map<string, string>(); // user_id -> seat_id
+      for (const s of seats) {
+        if (s.status === 'assigned' && s.assigned_user_id) {
+          existingAssignments.set(String(s.assigned_user_id), String(s.id));
+        }
+      }
+
+      const seatAssignments: Array<{ user_id: string; seat_id: string; action: string }> = [];
+
+      for (const emp of employees) {
+        const already = existingAssignments.get(emp.user_id);
+        if (already) {
+          seatAssignments.push({ user_id: emp.user_id, seat_id: already, action: 'already_assigned' });
+          continue;
+        }
+
+        const nextSeat = availableSeats.shift();
+        if (!nextSeat) {
+          seatAssignments.push({ user_id: emp.user_id, seat_id: '', action: 'no_available_seat' });
+          continue;
+        }
+
+        const { error: updErr } = await service
+          .from('rvt_seats')
+          .update({ status: 'assigned', assigned_user_id: emp.user_id })
+          .eq('id', nextSeat.id)
+          .eq('organization_id', ORG_ID)
+          .eq('course_id', COURSE_ID);
+
+        if (updErr) throw updErr;
+
+        seatAssignments.push({ user_id: emp.user_id, seat_id: String(nextSeat.id), action: 'assigned_now' });
+      }
+
+      // --------- 2) Upsert organization_members (idempotent) ----------
+      // Unique constraint: (organization_id, email, role)
+      const memberRows = members.map((m) => ({
+        organization_id: ORG_ID,
+        user_id: m.user_id,
+        email: m.email,
+        role: m.role,
+        status: 'active',
+        member_type: m.member_type,
+      }));
+
+      const { data: memberUpserts, error: memberErr } = await service
+        .from('organization_members')
+        .upsert(memberRows, { onConflict: 'organization_id,email,role' })
+        .select('organization_id, user_id, email, role, status, member_type');
+
+      if (memberErr) throw memberErr;
+
+      // --------- 3) Return a verification-ready summary ----------
+      const { data: seatCounts, error: seatCountErr } = await service
+        .from('rvt_seats')
+        .select('status')
+        .eq('organization_id', ORG_ID)
+        .eq('course_id', COURSE_ID);
+
+      if (seatCountErr) throw seatCountErr;
+
+      const counts = (seatCounts ?? []).reduce(
+        (acc: Record<string, number>, r: any) => {
+          acc[r.status] = (acc[r.status] || 0) + 1;
+          return acc;
+        },
+        {} as Record<string, number>
+      );
+
+      return new Response(
+        JSON.stringify({
+          ok: true,
+          org_id: ORG_ID,
+          course_id: COURSE_ID,
+          seat_status_counts: counts,
+          seat_assignments: seatAssignments,
+          members_upserted: memberUpserts?.length ?? 0,
+          members_preview: memberUpserts ?? [],
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
+      );
+    } catch (e) {
+      return new Response(JSON.stringify({ ok: false, error: String(e) }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+  });
+
+  ```
+  ### Why this version is safe
+  - **Idempotent seat assignment**: if an employee already has a seat assigned, it won’t reassign.
+  - **Idempotent membership upsert**: uses your `(organization_id, email, role)` unique constraint.
+  - **Hard-coded org/course/user IDs**: one-shot and cannot accidentally hit other orgs.
+  - **No** `updated_at` used for `rvt_seats`.
+  ---
+  ## 2) Deploy it
+  From your repo:
+  ```bash
+  supabase functions deploy uat-fix-seats-members
+
+  ```
+  ---
+  ## 3) Invoke it (once)
+  ### Curl
+  ```bash
+  curl -sS -X POST \
+    -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+    -H "Content-Type: application/json" \
+    https://<PROJECT_REF>.functions.supabase.co/uat-fix-seats-members \
+    -d '{}' | jq
+
+  ```
+  ✅ Expected response includes:
+  - `seat_status_counts` showing `assigned: 5`
+  - `members_upserted: 6`
+  ---
+  ## 4) Verify with your DB read queries
+  ### Seats
+  ```sql
+  SELECT status, COUNT(*)
+  FROM rvt_seats
+  WHERE organization_id = '511f5c69-b0f8-455d-a4b7-1972f6c66a41'
+  GROUP BY status;
+
+  ```
+  ### Members
+  ```sql
+  SELECT email, member_type, status
+  FROM organization_members
+  WHERE organization_id = '511f5c69-b0f8-455d-a4b7-1972f6c66a41'
+  ORDER BY created_at;
+
+  ```
+  ---
+  ## 5) Then proceed with Coordinator + Employee UAT
+  Once seats + members are correct, your coordinator dashboard test will behave “clean” (no empty roster surprises), and you can start:
+  - Create coordinator → request role → approve
+  - Emp1 full training + exam + cert
+  - Emp2 partial
+  - Emp3 fail exam path
+  - Emp4 revoke seat/entitlement
+  - Emp5 verify cert
+  ---
+  ## 6) Cleanup (delete the utility function)
+  After it runs successfully:
+  ```bash
+  supabase functions delete uat-fix-seats-members
+
+  ```
+  (or remove the folder + redeploy without it)
+  ---
+  If you paste the **invoke JSON response** from this function, I’ll tell you immediately whether you’re ready to start the coordinator workflow or if there’s a remaining seat/member mismatch to correct before Louis and Danielle click around.
