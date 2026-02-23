@@ -126,6 +126,32 @@ Deno.serve(async (req) => {
           console.error('[UAT Create] Seat allocation error:', seatError);
         } else {
           console.log('[UAT Create] Allocated training seat');
+
+          // Create entitlement for the assigned seat
+          const { data: seatDetails } = await supabase
+            .from('rvt_seats')
+            .select('course_id')
+            .eq('id', availableSeat.id)
+            .single();
+
+          if (seatDetails?.course_id) {
+            const { error: entError } = await supabase
+              .from('course_entitlements')
+              .upsert({
+                user_id: newUserId,
+                course_id: seatDetails.course_id,
+                source: 'org_seat',
+                status: 'active',
+                purchased_at: new Date().toISOString(),
+                metadata: { seat_id: availableSeat.id, organization_id: organizationId }
+              }, { onConflict: 'user_id,course_id' });
+
+            if (entError) {
+              console.error('[UAT Create] Entitlement creation error:', entError);
+            } else {
+              console.log('[UAT Create] Created course entitlement');
+            }
+          }
         }
       }
     }

@@ -203,6 +203,25 @@ serve(async (req) => {
 
     console.log(`✅ Created ${employeeIds.length} employee accounts`);
 
+    // STEP 8: Create entitlements for all employees
+    for (const empId of employeeIds) {
+      const { error: entError } = await supabaseClient
+        .from('course_entitlements')
+        .upsert({
+          user_id: empId,
+          course_id: course.id,
+          source: 'org_seat',
+          status: 'active',
+          purchased_at: new Date().toISOString(),
+          metadata: { organization_id: organization.id }
+        }, { onConflict: 'user_id,course_id' });
+
+      if (entError) {
+        console.warn('Entitlement creation error for', empId, entError);
+      }
+    }
+    console.log(`✅ Created ${employeeIds.length} course entitlements`);
+
     return new Response(
       JSON.stringify({
         success: true,
