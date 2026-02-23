@@ -29,18 +29,18 @@ export const LiveActivityTicker = () => {
         if (!exams || exams.length === 0) return [];
 
         // 2) Fetch profiles separately for matched user_ids
-        const userIds = [...new Set(exams.map((e: any) => e.user_id).filter(Boolean))];
-        const profileMap = new Map<string, { first_name: string | null; county: string | null }>();
+        const userIds = [...new Set(exams.map((e: any) => e.user_id).filter((v: any) => typeof v === 'string' && v.length > 0))];
+        const profileMap = new Map<string, { first_name: string | null; city: string | null }>();
 
         if (userIds.length > 0) {
           const { data: profiles, error: profilesError } = await supabase
             .from('profiles')
-            .select('user_id, first_name, county')
+            .select('user_id, first_name, city')
             .in('user_id', userIds);
 
           if (!profilesError && profiles) {
             profiles.forEach((p: any) => {
-              profileMap.set(p.user_id, { first_name: p.first_name, county: p.county });
+              profileMap.set(p.user_id, { first_name: p.first_name, city: p.city });
             });
           }
         }
@@ -48,9 +48,11 @@ export const LiveActivityTicker = () => {
         // 3) Merge into activity items
         const recentActivities: Activity[] = exams.map((exam: any) => {
           const profile = profileMap.get(exam.user_id);
+          const name = profile?.first_name || 'Someone';
+          const location = profile?.city ? `from ${profile.city}` : 'from Maryland';
           return {
             type: 'certificate' as const,
-            message: `${profile?.first_name || 'Someone'} from ${profile?.county || 'Maryland'} just earned their certificate! 🎉`,
+            message: `${name} ${location} just earned their certificate! 🎉`,
             timestamp: exam.created_at,
             icon: Trophy,
           };
@@ -58,7 +60,7 @@ export const LiveActivityTicker = () => {
 
         return recentActivities;
       } catch (error) {
-        console.log('No recent activity data available');
+        console.warn('LiveActivityTicker: failed to load activities', error);
         return [];
       }
     },
