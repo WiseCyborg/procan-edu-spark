@@ -1,434 +1,460 @@
-# Proxy Photo Check-In: Manager Verifies Employee Before Exam
+# Patch 4: Create `log_exam_identity_verification` RPC (Schema-Matched)
 
-## What Already Exists
+## Problem
 
-The exam flow (`FinalExam.tsx`) already captures a **self-service webcam photo** from the employee during the `'verification'` stage. The photo is stored as a base64 data URL in the `photo_verification_url` column of `exam_attempts`. There is also a "skip photo" option with bypass reason recorded in metadata.
+The proxy photo check-in system needs an audit trail RPC, but neither Option A nor Option B from the user's suggestion exactly matches the actual `security_audit_log` schema. Using either as-is would cause a runtime column mismatch error.
 
-However, there is **no manager/proctor involvement** -- no one verifies the employee's identity. The photo is purely self-attested.
+## Actual Schema
 
-## What We Will Build
-
-A lightweight **proctor check-in gate** where a manager must verify an employee's identity before the exam can start.
-
-```text
-Employee clicks "Start Exam"
-        |
-        v
-  [Self-service photo captured]
-        |
-        v
-  [Check-in record created: status = 'pending']
-        |
-        v
-  Employee sees: "Awaiting manager verification..."
-        |
-        v
-  Manager opens Team dashboard --> sees pending check-ins
-        |
-        v
-  Manager clicks "Verify" on employee row
-        |
-        v
-  [Check-in updated: verified = true, verified_by = manager_id]
-        |
-        v
-  Employee refreshes / real-time update --> Exam unlocks
-```
-
----
-
-## Implementation Steps
-
-### Step 1: Create `exam_checkins` table (migration)
-
-New table to record proctor verification:
+The `security_audit_log` table has these columns:
 
 - `id` (uuid, PK)
-- `user_id` (uuid, not null) -- the employee taking the exam
-- `course_id` (uuid, not null)
-- `photo_url` (text, nullable) -- the captured selfie (base64 or storage URL)
-- `verified` (boolean, default false)
-- `verified_by` (uuid, nullable) -- manager who verified
-- `verified_at` (timestamptz, nullable)
-- `bypass_reason` (text, nullable) -- if photo was skipped
-- `created_at` (timestamptz, default now())
-- Unique constraint on `(user_id, course_id)` with upsert support (so retakes create new check-ins)
+- `user_id` (uuid) -- the actor
+- `action_type` (text) -- event name
+- `table_name` (text) -- source table
+- `record_id` (uuid) -- the affected record
+- `old_values` (jsonb) -- state before
+- `new_values` (jsonb) -- state after
+- `ip_address` (text)
+- `user_agent` (text)
+- `created_at` (timestamptz)
 
-RLS policies:
+## Migration SQL
 
-- Employees can INSERT and SELECT their own rows
-- Managers/admins can SELECT and UPDATE rows for their organization's employees
+Create the RPC function that maps correctly to these columns:
 
-### Step 2: Modify `FinalExam.tsx` -- Add proctor gate after photo capture
+```sql
+CREATE OR REPLACE FUNCTION public.log_exam_identity_verification(p_checkin_id uuid)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_actor uuid := auth.uid();
+  v_target uuid;
+  v_attempt uuid;
+  v_has_photo boolean;
+BEGIN
+  IF v_actor IS NULL THEN
+    RAISE EXCEPTION 'Not authenticated';
+  END IF;
 
-After the employee completes the verification stage (captures photo or skips):
+  SELECT user_id, attempt_id, (photo_url IS NOT NULL)
+    INTO v_target, v_attempt, v_has_photo
+  FROM public.exam_checkins
+  WHERE id = p_checkin_id;
 
-1. Insert a row into `exam_checkins` with `verified = false` and the photo
-2. Change exam stage to a new `'awaiting_verification'` state
-3. Show a waiting screen: "Your identity check-in has been submitted. A manager will verify you shortly."
-4. Poll or use Supabase real-time subscription on the `exam_checkins` row
-5. When `verified = true`, automatically advance to `'ready'` stage
+  IF v_target IS NULL THEN
+    RAISE EXCEPTION 'Check-in not found: %', p_checkin_id;
+  END IF;
 
-Add a "Skip verification (self-attest)" option for cases where no manager is available, recording this in the check-in metadata.
+  INSERT INTO public.security_audit_log (
+    user_id, action_type, table_name, record_id, old_values, new_values, created_at
+  ) VALUES (
+    v_actor,
+    'exam_identity_verified',
+    'exam_checkins',
+    p_checkin_id,
+    NULL,
+    jsonb_build_object(
+      'target_user_id', v_target,
+      'attempt_id', v_attempt,
+      'has_photo', v_has_photo,
+      'verified_by', v_actor
+    ),
+    now()
+  );
+END;
+$$;
 
-### Step 3: Manager Check-In UI
+REVOKE ALL ON FUNCTION public.log_exam_identity_verification(uuid) FROM public;
+GRANT EXECUTE ON FUNCTION public.log_exam_identity_verification(uuid) TO authenticated;
+```
 
-Add a new component `ExamCheckInQueue` accessible from the manager's team dashboard:
+Key mapping decisions:
 
-- Shows a list of pending check-ins (employees who submitted photos but are not yet verified)
-- Each row shows: employee name, email, captured photo (thumbnail), timestamp
-- Manager clicks "Verify Identity" button
-- Updates `exam_checkins` row: `verified = true`, `verified_by = current_user_id`, `verified_at = now()`
-- Real-time subscription so the list updates live as employees submit check-ins
+- `user_id` = the manager (actor) who performed the verification
+- `action_type` = `'exam_identity_verified'`
+- `table_name` = `'exam_checkins'`
+- `record_id` = the check-in row ID
+- `old_values` = NULL (no prior state)
+- `new_values` = JSON with target user, attempt, and photo flag
+- `ip_address` and `user_agent` left NULL (not available server-side in RPC context)
 
-### Step 4: Audit trail integration
+## Files Changed
 
-When a check-in is verified:
 
-- Insert into `security_audit_log` with event type `exam_identity_verified`
-- Record: who was verified, by whom, timestamp, whether photo was present or bypassed
-- This feeds into the existing `unified_audit_timeline` view
+| File                                  | Change                                       |
+| ------------------------------------- | -------------------------------------------- |
+| `supabase/migrations/[timestamp].sql` | New migration with the RPC function + grants |
 
-### Step 5: Verification queries for UAT
 
-After running the flow:
+No frontend changes needed -- the existing `ExamCheckInQueue.tsx` already calls `supabase.rpc('log_exam_identity_verification', { p_checkin_id: ... })` with the correct parameter name.  
+  
+Yep — with that schema, your Patch 4 SQL is **correct** and safe to ship. The only optional improvement is to *attempt* to capture `ip_address` + `user_agent` if you decide to pass them from the frontend later (not required for UAT).
 
-```text
--- Check-in record
-SELECT user_id, verified, verified_by, verified_at, created_at
-FROM exam_checkins
-WHERE course_id = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b'
-ORDER BY created_at DESC;
+Now let’s run the **full exam flow**:
 
--- Audit trail
-SELECT event_type, actor_id, target_id, created_at
-FROM security_audit_log
-WHERE event_type = 'exam_identity_verified'
-ORDER BY created_at DESC;
+- **Emp1 = PASS → certificate issued → certificate lookup works**
+- **Emp2 = FAIL → remediation shown → retake workflow (manager + employee) → no certificate until pass**
+
+Below is the **exact step-by-step** with **DB proof queries** after each checkpoint.
+
+---
+
+# 0) Preflight (Do this once)
+
+## Confirm both employees are exam-eligible (modules 0–18 completed)
+
+```sql
+select user_id, count(*) as completed_modules
+from public.user_progress
+where user_id in (
+  'f167e515-4fde-42a6-9fa6-77c227ffd495', -- Emp1
+  'af0018c3-ecfa-41ed-a3b0-55716ae0c3b5'  -- Emp2
+)
+and course_id = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b'
+and is_completed = true
+group by user_id;
+
+```
+
+**Expected:** 19 each (modules 0–18)
+
+## Clear old attempts for clean evidence (optional)
+
+Only if you want a clean log view for UAT. Otherwise skip.
+
+```sql
+select id, created_at, is_passed, total_score
+from public.exam_attempts
+where user_id in (
+  'f167e515-4fde-42a6-9fa6-77c227ffd495',
+  'af0018c3-ecfa-41ed-a3b0-55716ae0c3b5'
+)
+order by created_at desc
+limit 10;
+
 ```
 
 ---
 
-## Files to Create/Modify
+# 1) Emp1 PASS flow (with proxy photo check-in)
 
+## Step 1A — Employee starts exam + takes selfie
 
-| File                                                       | Action                                                                           |
-| ---------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| `supabase/migrations/[timestamp].sql`                      | Create `exam_checkins` table + RLS policies                                      |
-| `src/pages/Course/FinalExam.tsx`                           | Add `'awaiting_verification'` stage, insert check-in row, real-time subscription |
-| `src/components/exam/AwaitingVerification.tsx`             | New -- waiting screen with status polling                                        |
-| `src/components/exam/ExamCheckInQueue.tsx`                 | New -- manager view to verify pending check-ins                                  |
-| `src/pages/ManagerDashboard.tsx` (or equivalent team page) | Add check-in queue tab/section                                                   |
+**Emp1 UI**
 
+1. Login Emp1
+2. Go to Course / Final Exam
+3. Click **Start Exam**
+4. Complete **Photo Verification** (take selfie + submit)
+5. Emp1 should land on **Awaiting Manager Verification** screen
 
-## Design Decisions
+### DB proof: check-in created + pending
 
-- **Real-time over polling**: Use Supabase real-time channel on `exam_checkins` so the employee sees verification instantly without refreshing
-- **Unique per attempt, not per user**: Use `(user_id, course_id, created_at)` pattern so retakes get fresh check-ins rather than overwriting
-- **Graceful fallback**: If no manager is available, employee can self-attest with a recorded reason (preserving current skip behavior), but this is flagged in the audit trail as "unverified"
-- **No storage upload for MVP**: Keep photo as base64 in the table (matching current `photo_verification_url` pattern). Storage migration can come later for production scale  
-This is a solid design. The only change I’d make up front is your **uniqueness model**: you want check-ins to be **per exam attempt**, not “per user+course.” Otherwise retakes overwrite history and you lose compliance audit fidelity.
-  Below is a production-safe MVP that still stays “lightweight,” matches your current `exam_attempts` pattern, and unlocks realtime manager verification.
-  ---
-  # 1) DB Migration: `exam_checkins` table + RLS (per-attempt)
-  ### Key choices
-  - **Per attempt**: `attempt_id` (FK → `exam_attempts.id`) is the unique key.
-  - Store the selfie in **one place** for the check-in gate (you can copy base64 from the existing capture).
-  - Status-based lifecycle: `pending → verified` (or `bypassed` if self-attested).
-  > If `exam_attempts.id` is not exposed/available at “verification stage,” we’ll create the attempt earlier (or create a lightweight attempt stub first). Most apps already create `exam_attempts` at exam start.
-  ## Migration SQL (copy/paste)
-  Create: `supabase/migrations/20260222_exam_checkins.sql`
-  ```sql
-  begin;
+```sql
+select id, attempt_id, user_id, status, bypass_reason, verified_by, verified_at, created_at
+from public.exam_checkins
+where user_id = 'f167e515-4fde-42a6-9fa6-77c227ffd495'
+order by created_at desc
+limit 1;
 
-  -- ------------------------------------------------------------
-  -- 1) Status enum (optional; use text if you prefer)
-  -- ------------------------------------------------------------
-  do $$
-  begin
-    if not exists (select 1 from pg_type where typname = 'exam_checkin_status') then
-      create type public.exam_checkin_status as enum ('pending', 'verified', 'bypassed');
-    end if;
-  end $$;
+```
 
-  -- ------------------------------------------------------------
-  -- 2) Table
-  -- ------------------------------------------------------------
-  create table if not exists public.exam_checkins (
-    id uuid primary key default gen_random_uuid(),
+**Expected:** `status='pending'`, `verified_by is null`
 
-    -- per attempt (preferred)
-    attempt_id uuid not null references public.exam_attempts(id) on delete cascade,
+---
 
-    user_id uuid not null,
-    course_id uuid not null,
+## Step 1B — Manager verifies identity
 
-    -- selfie (base64) or later storage URL
-    photo_url text null,
+**Manager UI**
 
-    status public.exam_checkin_status not null default 'pending',
-    bypass_reason text null,
+1. Login as manager
+2. Open **Exam Check-Ins** tab
+3. Find Emp1 row → click **Verify**
 
-    verified_by uuid null,
-    verified_at timestamptz null,
+Emp1 should auto-advance (real-time) to **Ready** stage.
 
-    created_at timestamptz not null default now(),
+### DB proof: check-in verified + audit entry exists
 
-    -- enforce per-attempt uniqueness (retakes => new attempt => new check-in)
-    constraint exam_checkins_attempt_unique unique (attempt_id)
-  );
+```sql
+select id, status, verified_by, verified_at
+from public.exam_checkins
+where user_id = 'f167e515-4fde-42a6-9fa6-77c227ffd495'
+order by created_at desc
+limit 1;
 
-  create index if not exists exam_checkins_user_course_idx
-    on public.exam_checkins (user_id, course_id, created_at desc);
+```
 
-  create index if not exists exam_checkins_status_idx
-    on public.exam_checkins (status, created_at desc);
+**Expected:** `status='verified'`, `verified_by=<manager_id>`, `verified_at not null`
 
-  -- ------------------------------------------------------------
-  -- 3) RLS
-  -- ------------------------------------------------------------
-  alter table public.exam_checkins enable row level security;
+Audit row:
 
-  -- Employees can create/select their own check-ins
-  drop policy if exists "exam_checkins_employee_select_own" on public.exam_checkins;
-  create policy "exam_checkins_employee_select_own"
-  on public.exam_checkins
-  for select
-  to authenticated
-  using (user_id = auth.uid());
+```sql
+select action_type, table_name, record_id, user_id, new_values, created_at
+from public.security_audit_log
+where action_type = 'exam_identity_verified'
+order by created_at desc
+limit 5;
 
-  drop policy if exists "exam_checkins_employee_insert_own" on public.exam_checkins;
-  create policy "exam_checkins_employee_insert_own"
-  on public.exam_checkins
-  for insert
-  to authenticated
-  with check (user_id = auth.uid());
+```
 
-  -- Managers/admins can view check-ins for employees in org
-  -- (This assumes organization_members + profiles mapping to org is authoritative)
-  drop policy if exists "exam_checkins_manager_select_org" on public.exam_checkins;
-  create policy "exam_checkins_manager_select_org"
-  on public.exam_checkins
-  for select
-  to authenticated
-  using (
-    exists (
-      select 1
-      from public.organization_members mgr
-      join public.organization_members emp
-        on emp.user_id = exam_checkins.user_id
-       and emp.organization_id = mgr.organization_id
-       and emp.status = 'active'
-      where mgr.user_id = auth.uid()
-        and mgr.status = 'active'
-        and (
-          mgr.member_type::text = 'manager'
-          or mgr.role in ('dispensary_admin', 'training_coordinator')
-        )
-    )
-  );
+**Expected:** newest row contains `record_id = <checkin_id>` and `new_values.target_user_id = Emp1`
 
-  -- Managers/admins can verify (update) check-ins for employees in org
-  drop policy if exists "exam_checkins_manager_update_verify" on public.exam_checkins;
-  create policy "exam_checkins_manager_update_verify"
-  on public.exam_checkins
-  for update
-  to authenticated
-  using (
-    exists (
-      select 1
-      from public.organization_members mgr
-      join public.organization_members emp
-        on emp.user_id = exam_checkins.user_id
-       and emp.organization_id = mgr.organization_id
-       and emp.status = 'active'
-      where mgr.user_id = auth.uid()
-        and mgr.status = 'active'
-        and (
-          mgr.member_type::text = 'manager'
-          or mgr.role in ('dispensary_admin', 'training_coordinator')
-        )
-    )
-  )
-  with check (
-    -- only allow verification-style updates
-    status in ('verified','bypassed')
-    and (verified_by = auth.uid() or status = 'bypassed')
-  );
+---
 
-  commit;
+## Step 1C — Emp1 takes exam and PASSES
 
-  ```
-  ### Why this is better than `(user_id, course_id)` unique
-  - You keep **every attempt** and every verification decision.
-  - Retake = new `exam_attempts.id` = new `exam_checkins` row. Clean.
-  ---
-  # 2) Backend/Audit: record identity verification in your audit timeline
-  If you already have `security_audit_log`, the cleanest approach is an RPC so you don’t fight RLS and you keep consistent formatting.
-  ## RPC: `log_exam_identity_verification(attempt_id uuid)`
-  ```sql
-  create or replace function public.log_exam_identity_verification(p_attempt_id uuid)
-  returns void
-  language plpgsql
-  security definer
-  set search_path = public
-  as $$
-  declare
-    v_actor uuid := auth.uid();
-    v_target uuid;
-    v_status text;
-  begin
-    if v_actor is null then
-      raise exception 'Not authenticated';
-    end if;
+**Emp1 UI**
 
-    select user_id, status::text
-    into v_target, v_status
-    from public.exam_checkins
-    where attempt_id = p_attempt_id;
+1. Click **Start Exam**
+2. Answer questions to achieve **>= 80%**
+3. Submit exam
+4. Results page shows **Passed**
+5. Click **Generate Certificate** (or whatever the pass CTA is)
 
-    -- (optional) ensure caller is verifier or admin
-    -- you can reuse the same org membership logic here if needed
+### DB proof: exam_attempt updated (NOT duplicated)
 
-    insert into public.security_audit_log(event_type, actor_id, target_id, event_data, created_at)
-    values (
-      'exam_identity_verified',
-      v_actor,
-      v_target,
-      jsonb_build_object('attempt_id', p_attempt_id, 'status', v_status),
-      now()
-    );
-  end;
-  $$;
+```sql
+select id, created_at, completed_at, total_score, passing_score, is_passed
+from public.exam_attempts
+where user_id = 'f167e515-4fde-42a6-9fa6-77c227ffd495'
+order by created_at desc
+limit 3;
 
-  ```
-  Then call it after the manager clicks Verify (or do it in a trigger on `exam_checkins` when status flips to verified).
-  ---
-  # 3) Frontend: FinalExam flow changes (minimal)
-  ## A) Add a new stage: `'awaiting_verification'`
-  After the employee captures webcam photo (or uses skip photo), you do:
-  1. Ensure `exam_attempts` row exists (attempt_id).
-  2. Upsert an `exam_checkins` row with:
-    - `attempt_id`
-    - `user_id`
-    - `course_id`
-    - `photo_url` (base64)
-    - `status='pending'` (or `'bypassed'` if self-attest)
-  3. Move stage to `'awaiting_verification'`
-  4. Subscribe realtime to that checkin row:
-    - when status becomes `verified` or `bypassed` → advance to `'ready'` (start exam)
-  ### Pseudocode (drop-in logic)
-  ```ts
-  // after photo capture (verification stage complete)
-  const attemptId = currentAttemptId; // from exam_attempts insert
-  await supabase.from('exam_checkins').insert({
-    attempt_id: attemptId,
-    user_id: user.id,
-    course_id: COURSE_ID,
-    photo_url: capturedPhotoDataUrl,
-    status: 'pending',
-  });
+```
 
-  setStage('awaiting_verification');
+**Expected:** latest attempt has `completed_at not null`, `is_passed=true`
 
-  // realtime subscribe
-  supabase
-    .channel(`exam-checkin-${attemptId}`)
-    .on(
-      'postgres_changes',
-      { event: 'UPDATE', schema: 'public', table: 'exam_checkins', filter: `attempt_id=eq.${attemptId}` },
-      (payload) => {
-        const status = payload.new.status;
-        if (status === 'verified' || status === 'bypassed') {
-          setStage('ready'); // unlock exam start
-        }
-      }
-    )
-    .subscribe();
+Topic scores present:
 
-  ```
-  ## B) Awaiting screen
-  Create `AwaitingVerification.tsx`:
-  - Shows “Awaiting manager verification…”
-  - Shows timestamp
-  - Optional “Request help” (call manager)
-  - Optional “Self-attest (no manager available)” which updates:
-    - `status='bypassed'`
-    - `bypass_reason`
-  > For compliance, you can **flag bypasses** on reporting and require manager verification in production.
-  ---
-  # 4) Manager UI: ExamCheckInQueue (minimal + effective)
-  ### Query for pending check-ins
-  Show pending check-ins for employees in manager’s org (RLS handles scoping):
-  ```ts
-  const { data } = await supabase
-    .from('exam_checkins')
-    .select(`
-      id, attempt_id, user_id, course_id, photo_url, status, created_at,
-      profiles:profiles!exam_checkins_user_id_fkey ( email_cache, first_name, last_name )
-    `)
-    .eq('status', 'pending')
-    .order('created_at', { ascending: true });
+```sql
+select count(*) as topic_rows
+from public.exam_topic_scores ets
+join public.exam_attempts ea on ea.id = ets.exam_attempt_id
+where ea.user_id = 'f167e515-4fde-42a6-9fa6-77c227ffd495'
+and ea.course_id = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
 
-  ```
-  If you don’t have a FK from `exam_checkins.user_id` to `profiles.user_id`, just query profiles separately by `user_id` list.
-  ### Verify button action
-  ```ts
-  await supabase
-    .from('exam_checkins')
-    .update({ status: 'verified', verified_by: user.id, verified_at: new Date().toISOString() })
-    .eq('attempt_id', attemptId);
+```
 
-  ```
-  Optional: call `log_exam_identity_verification(attemptId)` RPC after update.
-  ---
-  # 5) UAT test script (exact)
-  ## Emp1 (employee)
-  1. Login → Final Exam → Start Exam
-  2. Webcam photo capture (verification stage)
-  3. Sees “Awaiting manager verification…”
-  ## Manager
-  1. Manager dashboard → Check-In Queue
-  2. Sees Emp1 pending row + selfie thumbnail
-  3. Click “Verify Identity”
-  4. Emp1 screen unlocks automatically → Start Exam → take exam → PASS → certificate
-  ---
-  # 6) Verification queries (UAT)
-  ### Check-in record
-  ```sql
-  select attempt_id, user_id, status, verified_by, verified_at, created_at
-  from exam_checkins
-  where course_id = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b'
-  order by created_at desc
-  limit 20;
+**Expected:** > 0
 
-  ```
-  ### Attempt record includes photo (current behavior)
-  ```sql
-  select created_at, is_passed, total_score, photo_verification_url
-  from exam_attempts
-  where user_id = 'f167e515-4fde-42a6-9fa6-77c227ffd495'
-  order by created_at desc
-  limit 5;
+---
 
-  ```
-  ### Certificate issued after PASS
-  ```sql
-  select verification_code, status, issued_at, expires_at
-  from user_certificates
-  where user_id = 'f167e515-4fde-42a6-9fa6-77c227ffd495'
-  order by issued_at desc
-  limit 5;
+## Step 1D — Certificate issuance + storage + lookup
 
-  ```
-  ---
-  # Two quick corrections to your draft
-  ### ✅ Correction 1: Don’t unique on (user_id, course_id)
-  That breaks retake audit history. Use **attempt_id unique**.
-  ### ✅ Correction 2: Don’t store the selfie in two places long-term
-  For MVP it’s fine, but pick a single source:
-  - either store base64 in `exam_checkins.photo_url` **and** keep a link/flag in `exam_attempts`,
-  - or store in `exam_attempts` and only reference it from `exam_checkins`.
-  For scale, move to Supabase Storage + signed URL later.
-  ---
-  If you want, paste your current `exam_attempts` table schema (just columns) and I’ll tailor the migration + FinalExam integration so it matches exactly how attempts are created in your app (so you don’t hit “attempt_id not available yet” surprises).
+### DB proof: certificate exists + expires_at set
+
+```sql
+select verification_code, status, issued_at, expires_at
+from public.user_certificates
+where user_id = 'f167e515-4fde-42a6-9fa6-77c227ffd495'
+order by issued_at desc
+limit 3;
+
+```
+
+**Expected:** newest row `status='active'`, `issued_at not null`, `expires_at ~ 1 year later`
+
+If you also issue into `certificates`:
+
+```sql
+select certificate_number, issue_date, expiry_date, pdf_url, status
+from public.certificates
+where user_id = 'f167e515-4fde-42a6-9fa6-77c227ffd495'
+order by issue_date desc
+limit 3;
+
+```
+
+**Expected:** pdf_url populated (if your system uploads/records it)
+
+### Certificate lookup test (UI + DB)
+
+Whatever your public verify page is (commonly `/verify`), enter Emp1’s `verification_code`.
+
+DB lookup:
+
+```sql
+select uc.verification_code, uc.status, uc.issued_at, uc.expires_at, p.first_name, p.last_name
+from public.user_certificates uc
+join public.profiles p on p.user_id = uc.user_id
+where uc.verification_code = '<PASTE_VERIFICATION_CODE>';
+
+```
+
+**Expected:** returns Emp1 info + active cert
+
+✅ This proves: **completion → pass → certificate → lookup/verification**.
+
+---
+
+# 2) Emp2 FAIL flow + “what happens next” (manager + employee)
+
+## Step 2A — Emp2 starts exam + selfie + manager verifies (same as Emp1)
+
+Repeat check-in process:
+
+Check-in:
+
+```sql
+select id, attempt_id, status, verified_by, verified_at, created_at
+from public.exam_checkins
+where user_id = 'af0018c3-ecfa-41ed-a3b0-55716ae0c3b5'
+order by created_at desc
+limit 1;
+
+```
+
+---
+
+## Step 2B — Emp2 takes exam and FAILS (< 80%)
+
+**Emp2 UI**
+
+1. Start exam
+2. Answer enough wrong to get **< 80%**
+3. Submit
+4. Results page shows **Failed**
+5. Confirm remediation UI appears (topic breakdown + “Review Module” buttons)
+
+### DB proof: attempt shows failed, NO certificate created
+
+Attempt:
+
+```sql
+select id, created_at, completed_at, total_score, passing_score, is_passed
+from public.exam_attempts
+where user_id = 'af0018c3-ecfa-41ed-a3b0-55716ae0c3b5'
+order by created_at desc
+limit 3;
+
+```
+
+**Expected:** newest `is_passed=false`
+
+No certificate:
+
+```sql
+select verification_code, status, issued_at
+from public.user_certificates
+where user_id = 'af0018c3-ecfa-41ed-a3b0-55716ae0c3b5'
+order by issued_at desc
+limit 3;
+
+```
+
+**Expected:** **0 rows** (or no new rows)
+
+Topic remediation data exists:
+
+```sql
+select ets.topic_area, ets.score_percentage, ets.needs_remediation
+from public.exam_topic_scores ets
+join public.exam_attempts ea on ea.id = ets.exam_attempt_id
+where ea.user_id = 'af0018c3-ecfa-41ed-a3b0-55716ae0c3b5'
+order by ets.needs_remediation desc, ets.score_percentage asc
+limit 50;
+
+```
+
+**Expected:** some `needs_remediation=true`
+
+---
+
+# 3) FAIL handling SOP (what manager + employee do)
+
+## Employee (Emp2) actions after FAIL
+
+1. On results page, click **Review Module** for each failed topic (or “Return to Course”).
+2. Re-complete modules tied to weak topics (even if already completed, they should still be viewable).
+3. Reattempt the exam when allowed.
+
+**Evidence you want:** user activity increases + time spent + module revisits.
+
+- You’ll see updated `course_resume_state`
+- You may not create new `user_progress` rows if already completed, but resume state timestamps should move.
+
+---
+
+## Manager actions after FAIL
+
+1. Open **Team dashboard** or **At Risk** widget.
+2. Confirm Emp2 appears as **at_risk/stalled/not_started** depending on your logic.
+3. Use existing “Send Reminder” tooling (if wired) OR manual follow-up.
+4. Ensure the remediation plan is followed before retake (policy-wise).
+
+At-risk check:
+
+```sql
+select *
+from public.get_at_risk_students('511f5c69-b0f8-455d-a4b7-1972f6c66a41')
+limit 50;
+
+```
+
+---
+
+# 4) Retake behavior (what you should validate)
+
+### A) Retake cooldown enforced (if you implemented can_retake_at)
+
+Look at the attempt table:
+
+```sql
+select id, created_at, completed_at, is_passed, total_score, can_retake_at
+from public.exam_attempts
+where user_id = 'af0018c3-ecfa-41ed-a3b0-55716ae0c3b5'
+order by created_at desc
+limit 5;
+
+```
+
+**Expected:** `can_retake_at` in the future (if cooldown exists)
+
+### B) On retake: new check-in row should be created (per-attempt uniqueness)
+
+```sql
+select id, attempt_id, status, created_at
+from public.exam_checkins
+where user_id = 'af0018c3-ecfa-41ed-a3b0-55716ae0c3b5'
+order by created_at desc
+limit 5;
+
+```
+
+**Expected:** a **new** check-in row per new attempt
+
+---
+
+# 5) What “gaps” to look for during this exam UAT
+
+As you execute, watch for these (they’re the usual “gotchas”):
+
+1. **Duplicate attempts** still being inserted (should not happen now)
+  - Proof: multiple attempts created at the same timestamp during one run
+2. **Manager verify succeeds but employee doesn’t unlock**
+  - Likely realtime subscription filter mismatch (attempt_id vs id)
+  - Proof: check-in status is verified in DB but UI stays waiting
+3. **Pass shows but no certificate issued**
+  - Likely certificate issuance function not called or failing due to RLS
+  - Proof: `is_passed=true` but no `user_certificates` row
+4. **Certificate issued but lookup fails**
+  - Likely lookup function/table not wired to verification page
+  - Proof: DB returns verification_code row but UI verify page can’t find it
+
+---
+
+# Do this now (and paste results)
+
+Run Emp1 pass fully. Then paste these 5 outputs:
+
+1. Latest Emp1 `exam_checkins` row
+2. Latest Emp1 `exam_attempts` row
+3. Emp1 `user_certificates` latest row (+ verification_code)
+4. Latest `security_audit_log` row for `exam_identity_verified`
+5. Screenshot/text of the certificate lookup success (or the route + what it returns)
+
+Then we’ll run Emp2 fail + confirm remediation + retake readiness.
