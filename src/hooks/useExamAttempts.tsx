@@ -41,7 +41,7 @@ export interface ExamStats {
   can_retake_now: boolean;
 }
 
-export const useExamAttempts = (courseId: string = 'default-course-id') => {
+export const useExamAttempts = (courseId: string = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b') => {
   const { user } = useAuth();
 
   // Fetch all exam attempts for the user

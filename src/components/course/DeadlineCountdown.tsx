@@ -26,7 +26,11 @@ export function DeadlineCountdown() {
         .is("completed_at", null)
         .single();
 
-      if (error && error.code !== 'PGRST116') throw error;
+      if (error) {
+        console.warn("DeadlineCountdown: rvt_enrollments query failed (table may not exist):", error.code);
+        setLoading(false);
+        return;
+      }
 
       if (data) {
         const enrollmentData = data as any;
