@@ -17,7 +17,6 @@ export const LiveActivityTicker = () => {
     queryKey: ['live-activities'],
     queryFn: async () => {
       try {
-        // 1) Fetch recent passed exam attempts (no relationship join)
         const { data: exams, error: examsError } = await supabase
           .from('exam_attempts')
           .select('user_id, created_at, is_passed')
@@ -28,35 +27,12 @@ export const LiveActivityTicker = () => {
         if (examsError) throw examsError;
         if (!exams || exams.length === 0) return [];
 
-        // 2) Fetch profiles separately for matched user_ids
-        const userIds = [...new Set(exams.map((e: any) => e.user_id).filter((v: any) => typeof v === 'string' && v.length > 0))];
-        const profileMap = new Map<string, { first_name: string | null; city: string | null }>();
-
-        if (userIds.length > 0) {
-          const { data: profiles, error: profilesError } = await supabase
-            .from('profiles')
-            .select('user_id, first_name, city')
-            .in('user_id', userIds);
-
-          if (!profilesError && profiles) {
-            profiles.forEach((p: any) => {
-              profileMap.set(p.user_id, { first_name: p.first_name, city: p.city });
-            });
-          }
-        }
-
-        // 3) Merge into activity items
-        const recentActivities: Activity[] = exams.map((exam: any) => {
-          const profile = profileMap.get(exam.user_id);
-          const name = profile?.first_name || 'Someone';
-          const location = profile?.city ? `from ${profile.city}` : 'from Maryland';
-          return {
-            type: 'certificate' as const,
-            message: `${name} ${location} just earned their certificate! 🎉`,
-            timestamp: exam.created_at,
-            icon: Trophy,
-          };
-        });
+        const recentActivities: Activity[] = exams.map((exam: any) => ({
+          type: 'certificate' as const,
+          message: `Someone from Maryland just earned their certificate! 🎉`,
+          timestamp: exam.created_at,
+          icon: Trophy,
+        }));
 
         return recentActivities;
       } catch (error) {
