@@ -9124,6 +9124,47 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_audit_user_hint: {
+        Row: {
+          created_at: string | null
+          event_data: Json | null
+          event_type: string | null
+          extracted_email: string | null
+          extracted_user_id: string | null
+          id: string | null
+          order_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          event_data?: Json | null
+          event_type?: string | null
+          extracted_email?: never
+          extracted_user_id?: never
+          id?: string | null
+          order_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          event_data?: Json | null
+          event_type?: string | null
+          extracted_email?: never
+          extracted_user_id?: never
+          id?: string | null
+          order_id?: string | null
+        }
+        Relationships: []
+      }
+      unified_audit_timeline: {
+        Row: {
+          audit_source: string | null
+          created_at: string | null
+          event_data: Json | null
+          event_id: string | null
+          event_type: string | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
       user_exam_stats: {
         Row: {
           average_score: number | null
