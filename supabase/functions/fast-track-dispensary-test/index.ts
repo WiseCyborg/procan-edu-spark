@@ -35,10 +35,8 @@ serve(async (req) => {
         contact_email: test_email,
         contact_phone: '555-TEST-001',
         license_number: `TEST-${Date.now()}`,
-        address: '123 Test Street',
-        city: 'Baltimore',
-        state: 'MD',
-        zip_code: '21201',
+        address: '123 Test Street, Baltimore, MD 21201',
+        estimated_employees: employee_count,
         compliance_affirmation: true,
         application_status: 'pending'
       })
@@ -76,8 +74,7 @@ serve(async (req) => {
         contact_person: 'Test Manager',
         contact_email: test_email,
         contact_phone: '555-TEST-001',
-        address: '123 Test Street',
-        license_number: application.license_number,
+        address: '123 Test Street, Baltimore, MD 21201',
         unique_access_key: accessKey,
         course_credits: employee_count,
         admin_approved: true,
@@ -99,30 +96,47 @@ serve(async (req) => {
       .eq('id', application.id);
 
     // STEP 4: Create training seats
-    const { data: purchase } = await supabaseClient
+    const { data: purchase, error: purchaseError } = await supabaseClient
       .from('rvt_purchases')
       .insert({
         organization_id: organization.id,
         quantity: employee_count,
         amount_paid: 0,
         payment_method: 'test',
-        transaction_id: `TEST-${Date.now()}`
+        idempotency_key: `TEST-${Date.now()}-${Math.random().toString(36).substring(7)}`,
+        status: 'paid'
       })
       .select()
       .single();
 
-    // Get default course
-    const { data: course } = await supabaseClient
+    if (purchaseError) throw purchaseError;
+
+    // Get RVT course (the dispensary training course)
+    const { data: course, error: courseError } = await supabaseClient
       .from('courses')
       .select('id')
       .eq('is_active', true)
+      .eq('course_type', 'rvt')
       .single();
+
+    if (courseError) {
+      // Fallback: get the Maryland RVT course by title
+      const { data: fallbackCourse } = await supabaseClient
+        .from('courses')
+        .select('id')
+        .ilike('title', '%Responsible Vendor%')
+        .single();
+      if (!fallbackCourse) throw new Error('No RVT course found');
+      var courseId = fallbackCourse.id;
+    } else {
+      var courseId = course.id;
+    }
 
     // Create seats
     const seats = Array.from({ length: employee_count }, () => ({
       purchase_id: purchase.id,
       organization_id: organization.id,
-      course_id: course.id,
+      course_id: courseId,
       status: 'available'
     }));
 
@@ -209,7 +223,7 @@ serve(async (req) => {
         .from('course_entitlements')
         .upsert({
           user_id: empId,
-          course_id: course.id,
+          course_id: courseId,
           source: 'org_seat',
           status: 'active',
           purchased_at: new Date().toISOString(),
