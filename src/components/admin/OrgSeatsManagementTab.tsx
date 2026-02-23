@@ -101,6 +101,24 @@ export const OrgSeatsManagementTab = ({ organizationId }: OrgSeatsManagementTabP
 
       if (error) throw error;
 
+      // Create course entitlement for the assigned user
+      const { data: seatData } = await supabase
+        .from('rvt_seats')
+        .select('course_id')
+        .eq('id', seatId)
+        .single();
+
+      if (seatData?.course_id) {
+        await supabase.from('course_entitlements').upsert({
+          user_id: userId,
+          course_id: seatData.course_id,
+          source: 'seat_allocation',
+          status: 'active',
+          purchased_at: new Date().toISOString(),
+          metadata: { seat_id: seatId, organization_id: organizationId }
+        }, { onConflict: 'user_id,course_id' });
+      }
+
       toast.success('Seat assigned successfully');
       setAssigningSeat(null);
       setSelectedMember('');
@@ -112,6 +130,13 @@ export const OrgSeatsManagementTab = ({ organizationId }: OrgSeatsManagementTabP
 
   const handleUnassignSeat = async (seatId: string) => {
     try {
+      // Capture assigned user BEFORE clearing the seat
+      const { data: seatData } = await supabase
+        .from('rvt_seats')
+        .select('course_id, assigned_user_id')
+        .eq('id', seatId)
+        .single();
+
       const { error } = await supabase
         .from('rvt_seats')
         .update({
@@ -122,6 +147,14 @@ export const OrgSeatsManagementTab = ({ organizationId }: OrgSeatsManagementTabP
         .eq('id', seatId);
 
       if (error) throw error;
+
+      // Revoke entitlement for the previously assigned user
+      if (seatData?.assigned_user_id && seatData?.course_id) {
+        await supabase.from('course_entitlements')
+          .update({ status: 'revoked' })
+          .eq('user_id', seatData.assigned_user_id)
+          .eq('course_id', seatData.course_id);
+      }
 
       toast.success('Seat unassigned');
       queryClient.invalidateQueries({ queryKey: ['org-seats-detailed', organizationId] });

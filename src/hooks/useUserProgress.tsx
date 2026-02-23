@@ -135,6 +135,22 @@ export const useUserProgress = (courseId?: string) => {
         const completedCount = (progressData?.filter(p => p.is_completed).length || 0) + 1;
         const totalModules = 23; // Total modules in course
         const completionPercentage = Math.round((completedCount / totalModules) * 100);
+
+        // Write course_completions when RVT modules are all done (19 modules: 0-18)
+        if (completedCount >= RVT_MODULE_COUNT) {
+          try {
+            await supabase.from('course_completions').upsert({
+              user_id: user!.id,
+              course_id: variables.courseId,
+              completion_percent: Math.min(completionPercentage, 100),
+              passed: false, // Will be set to true after exam pass
+              completed_at: new Date().toISOString(),
+            }, { onConflict: 'user_id,course_id' });
+            console.log('[useUserProgress] course_completions upserted');
+          } catch (e) {
+            console.error('Failed to upsert course_completions:', e);
+          }
+        }
         
         // Update learning journey state
         try {

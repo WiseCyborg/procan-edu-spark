@@ -122,6 +122,20 @@ serve(async (req) => {
       joinCode = newCode?.code;
     }
 
+    // Write payment audit log with user-linkable data
+    await supabase.from('payment_audit_log').insert({
+      order_id: payment_id,
+      event_type: 'seats_purchased',
+      event_data: {
+        user_id,
+        organization_id,
+        quantity,
+        amount: quantity * 49.99,
+        currency: 'USD',
+        purchase_id: purchase.id
+      }
+    });
+
     // Log communication
     await supabase.from('communication_logs').insert({
       communication_type: 'seat_allocation',
