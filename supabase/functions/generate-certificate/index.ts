@@ -278,13 +278,59 @@ Deno.serve(async (req: Request) => {
 
     console.log('Certificate created successfully:', certificate.certificate_number);
 
+    // Write certificate_audit_log
+    await supabase.from('certificate_audit_log').insert({
+      certificate_id: certificate.id,
+      action: 'ISSUED',
+      actor_id: user.id,
+      ip_address: req.headers.get('x-forwarded-for') || 'unknown',
+      user_agent: req.headers.get('user-agent') || 'unknown',
+      metadata: {
+        certificate_number: certificate.certificate_number,
+        course_id: examAttempt.course_id,
+        exam_attempt_id,
+        certification_type: certificationType
+      }
+    });
+
+    // Write user_certificates with verification code
+    const verificationCode = `${certificationType === 'manager' ? 'MGR' : 'RVT'}-${new Date().toISOString().slice(0,7).replace('-','')}-${Math.random().toString(36).substring(2,8).toUpperCase()}`;
+
+    await supabase.from('user_certificates').insert({
+      user_id: user.id,
+      course_id: examAttempt.course_id,
+      certificate_name: certificationType === 'manager' ? 'Manager Leadership Certificate' : 'RVT Agent Certificate',
+      verification_code: verificationCode,
+      recipient_name: `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || user.email,
+      pdf_url: `https://procannedu.lovable.app/verify/${certificate.certificate_number}`,
+      metadata: {
+        certificate_number: certificate.certificate_number,
+        exam_score: exam_results.total_score
+      }
+    });
+
+    // Upsert course_completions as passed
+    await supabase.from('course_completions').upsert({
+      user_id: user.id,
+      course_id: examAttempt.course_id,
+      completion_percent: 100,
+      passed: true,
+      completed_at: new Date().toISOString(),
+    }, { onConflict: 'user_id,course_id' });
+
+    // Update certificate with pdf_url placeholder
+    await supabase.from('certificates')
+      .update({ pdf_url: `https://procannedu.lovable.app/verify/${certificate.certificate_number}` })
+      .eq('id', certificate.id);
+
     // Log successful certificate generation
     await supabase.rpc('log_security_event', {
       _event_type: 'certificate_generation_completed',
       _details: {
         certificate_number: certificate.certificate_number,
         exam_attempt_id,
-        course_id: examAttempt.course_id
+        course_id: examAttempt.course_id,
+        verification_code: verificationCode
       }
     });
 

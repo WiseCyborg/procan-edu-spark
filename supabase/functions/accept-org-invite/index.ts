@@ -200,6 +200,18 @@ serve(async (req) => {
 
           console.log('[ACCEPT-INVITE] ✅ Seat allocated:', availableSeat.id);
 
+          // Step 2b: Create course entitlement for the user
+          await serviceClient.from('course_entitlements').upsert({
+            user_id: user.id,
+            course_id: enrollmentResult.courseId!,
+            source: 'seat_allocation',
+            status: 'active',
+            purchased_at: new Date().toISOString(),
+            metadata: { seat_id: availableSeat.id, organization_id: invite.organization_id }
+          }, { onConflict: 'user_id,course_id' });
+
+          console.log('[ACCEPT-INVITE] ✅ Course entitlement created');
+
           // Step 3: Create/update user_learning_journey
           await serviceClient
             .from('user_learning_journey')
