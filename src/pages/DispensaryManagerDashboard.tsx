@@ -40,6 +40,7 @@ import { MobileBottomNav } from '@/components/navigation/MobileBottomNav';
 import { InternalChatbot } from '@/components/chat/InternalChatbot';
 import { NextActionBanner } from '@/components/guidance/NextActionBanner';
 import { CoordinatorStartPanel } from '@/components/coordinator/CoordinatorStartPanel';
+import { ExamCheckInQueue } from '@/components/exam/ExamCheckInQueue';
 
 const DispensaryManagerDashboard = () => {
   const { user } = useAuth();
@@ -518,6 +519,10 @@ const DispensaryManagerDashboard = () => {
           <TabsTrigger value="seat-requests">Seat Requests</TabsTrigger>
           <TabsTrigger value="invite">Invite Employees</TabsTrigger>
           <TabsTrigger value="coordinators">Team Management</TabsTrigger>
+          <TabsTrigger value="checkins">
+            <ShieldCheck className="w-4 h-4 mr-2" />
+            Exam Check-Ins
+          </TabsTrigger>
           <TabsTrigger value="compliance">Compliance Reports</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
@@ -626,6 +631,10 @@ const DispensaryManagerDashboard = () => {
             organizationId={organization.id} 
             organizationName={organization.name} 
           />
+        </TabsContent>
+
+        <TabsContent value="checkins" className="space-y-4">
+          <ExamCheckInQueue />
         </TabsContent>
 
         <TabsContent value="compliance" className="space-y-4">
