@@ -8383,6 +8383,7 @@ export type Database = {
           certificate_name: string
           course_id: string
           created_at: string
+          expires_at: string | null
           guest_email: string | null
           id: string
           issued_at: string
@@ -8397,6 +8398,7 @@ export type Database = {
           certificate_name: string
           course_id: string
           created_at?: string
+          expires_at?: string | null
           guest_email?: string | null
           id?: string
           issued_at?: string
@@ -8411,6 +8413,7 @@ export type Database = {
           certificate_name?: string
           course_id?: string
           created_at?: string
+          expires_at?: string | null
           guest_email?: string | null
           id?: string
           issued_at?: string
@@ -9124,6 +9127,40 @@ export type Database = {
         }
         Relationships: []
       }
+      org_certification_summary: {
+        Row: {
+          certificates_issued: number | null
+          certification_rate: number | null
+          completed_users: number | null
+          entitled_users: number | null
+          in_progress_users: number | null
+          organization_id: string | null
+          total_members: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_members_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "compliance_dashboard_metrics"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "organization_members_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_members_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
+          },
+        ]
+      }
       payment_audit_user_hint: {
         Row: {
           created_at: string | null
@@ -9513,6 +9550,18 @@ export type Database = {
           registration_token_expires_at: string
           total_seats: number
           used_seats: number
+        }[]
+      }
+      get_at_risk_students: {
+        Args: { p_org_id: string }
+        Returns: {
+          completion_percent: number
+          days_inactive: number
+          email: string
+          first_name: string
+          last_name: string
+          risk_level: string
+          user_id: string
         }[]
       }
       get_certificate_secure: {
