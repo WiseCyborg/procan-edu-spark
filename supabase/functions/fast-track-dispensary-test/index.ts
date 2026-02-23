@@ -158,7 +158,7 @@ serve(async (req) => {
     const managerEmail = test_email.includes('+') 
       ? test_email.replace('+', '+manager-')
       : test_email.replace('@', '+manager@');
-    const managerPassword = `Test${Date.now()}!`;
+    const managerPassword = `UATManager2025!`;
 
     const { data: managerAuth } = await supabaseClient.auth.admin.createUser({
       email: managerEmail,
@@ -187,14 +187,16 @@ serve(async (req) => {
 
     // STEP 7: Create employee accounts
     const employeeIds: string[] = [];
+    const employeePasswords: Array<{email: string; password: string}> = [];
     for (let i = 1; i <= employee_count; i++) {
       const empEmail = test_email.includes('+')
         ? test_email.replace('+', `+emp${i}-`)
         : test_email.replace('@', `+emp${i}@`);
+      const empPassword = `UATEmp${i}2025!`;
 
       const { data: empAuth } = await supabaseClient.auth.admin.createUser({
         email: empEmail,
-        password: `Test${Date.now()}${i}!`,
+        password: empPassword,
         email_confirm: true,
         user_metadata: {
           first_name: `Employee${i}`,
@@ -204,6 +206,7 @@ serve(async (req) => {
 
       if (empAuth.user) {
         employeeIds.push(empAuth.user.id);
+        employeePasswords.push({ email: empEmail, password: empPassword });
         
         await supabaseClient.from('profiles').update({
           organization_id: organization.id,
@@ -245,7 +248,8 @@ serve(async (req) => {
           manager_email: managerEmail,
           manager_password: managerPassword,
           join_code: joinCode,
-          unique_access_key: accessKey
+          unique_access_key: accessKey,
+          employee_logins: employeePasswords
         },
         emails_sent: emailsSent,
         employee_ids: employeeIds
