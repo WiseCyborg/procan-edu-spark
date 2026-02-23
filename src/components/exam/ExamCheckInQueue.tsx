@@ -115,18 +115,9 @@ export const ExamCheckInQueue: React.FC = () => {
 
       if (error) throw error;
 
-      // Log to security audit
-      await supabase.from('security_audit_log').insert({
-        user_id: checkin.user_id,
-        action_type: 'exam_identity_verified',
-        table_name: 'exam_checkins',
-        record_id: checkin.id,
-        metadata: {
-          attempt_id: checkin.attempt_id,
-          verified_by: user.id,
-          has_photo: !!checkin.photo_url,
-          verified_at: new Date().toISOString(),
-        } as any,
+      // Log to security audit via schema-matched RPC
+      await supabase.rpc('log_exam_identity_verification', {
+        p_checkin_id: checkin.id,
       });
 
       toast.success(
