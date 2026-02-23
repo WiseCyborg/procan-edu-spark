@@ -1,83 +1,251 @@
-# Harden LiveActivityTicker — 4 Small Tweaks
+# First Green Run + UAT Readiness Plan
 
-## Changes (all in `src/components/LiveActivityTicker.tsx`)
+## Phase 1: Stop the Recurring 401 (Quick Win)
 
-### 1. Stronger `userIds` filter (line 32)
+The LiveActivityTicker makes a profiles query every 30 seconds that always returns 401 for unauthenticated homepage visitors. The profiles RLS is correct (no anon access), so the fix is to skip the profiles lookup entirely and use static fallback messages.
 
-Replace `.filter(Boolean)` with an explicit type check to guarantee only valid UUID strings reach the `.in()` call:
+### Change in `src/components/LiveActivityTicker.tsx`
 
-```typescript
-const userIds = [...new Set(exams.map((e: any) => e.user_id).filter((v: any) => typeof v === 'string' && v.length > 0))];
-```
-
-### 2. Cleaner location fallback (line 53)
-
-Instead of always showing "from Maryland" when county is null, build the location string separately:
-
-```typescript
-const name = profile?.first_name || 'Someone';
-const county = profile?.county;
-const location = county ? `from ${county}` : 'from Maryland';
-// message: `${name} ${location} just earned their certificate!`
-```
-
-### 3. Better error logging (lines 60-61)
-
-Replace silent `console.log` with `console.warn` that includes the actual error for debuggability:
-
-```typescript
-console.warn('LiveActivityTicker: failed to load activities', error);
-```
-
-### 4. No other changes
-
-The existing `.in()` guard (`userIds.length > 0`) and UI rendering logic are already correct. No structural changes needed.
+- Remove the profiles query (lines 31-46)
+- Always use fallback: "Someone from Maryland just earned their certificate!"
+- This eliminates the recurring 401 without weakening RLS
+- Logged-in users don't need personalized ticker data either -- it's social proof, not a data feature
 
 ---
 
-All 4 tweaks are in a single file, no dependencies, no schema changes.  
+## Phase 2: First Green Run DB Proofs
+
+Run these 6 verification queries to confirm the pipeline is operational. No code changes needed -- just DB reads to validate what exists.
+
+### Proof 1: Organizations + Members
+
+```sql
+SELECT o.name, om.user_id, om.role, om.status
+FROM organizations o
+JOIN organization_members om ON om.organization_id = o.id
+LIMIT 10;
+```
+
+### Proof 2: Seats with purchase linkage
+
+```sql
+SELECT id, organization_id, status, assigned_user_id, course_id, purchase_id
+FROM rvt_seats
+ORDER BY updated_at DESC LIMIT 10;
+```
+
+### Proof 3: Entitlements exist and are active
+
+```sql
+SELECT user_id, course_id, source, status, created_at
+FROM course_entitlements
+ORDER BY created_at DESC LIMIT 10;
+```
+
+### Proof 4: User progress rows
+
+```sql
+SELECT user_id, module_id, is_completed, score
+FROM user_progress
+ORDER BY updated_at DESC LIMIT 10;
+```
+
+### Proof 5: Course completions
+
+```sql
+SELECT user_id, course_id, completion_percent, passed, completed_at
+FROM course_completions
+ORDER BY completed_at DESC NULLS LAST LIMIT 10;
+```
+
+### Proof 6: Certificate pipeline
+
+```sql
+SELECT certificate_number, pdf_url, status FROM certificates ORDER BY issue_date DESC LIMIT 5;
+SELECT verification_code, status FROM user_certificates ORDER BY created_at DESC LIMIT 5;
+SELECT action, actor_id FROM certificate_audit_log ORDER BY created_at DESC LIMIT 5;
+SELECT audit_source, event_type FROM unified_audit_timeline ORDER BY created_at DESC LIMIT 20;
+```
+
+These queries will be run as read-only checks -- no code or schema changes.
+
+---
+
+## Phase 3: UAT Seed Data (if tables are empty)
+
+If the proof queries return empty results, the flows haven't been exercised yet. The next step would be to either:
+
+- Exercise the flows through the UI manually, OR
+- Use the existing admin tools (TestAccountCreator, PipelineTestHarness) to create seed data
+
+This is a decision point -- no code changes until we see what the proofs return.
+
+---
+
+## Summary
+
+
+| Step                                          | Type                   | Blocking?          |
+| --------------------------------------------- | ---------------------- | ------------------ |
+| Remove profiles query from LiveActivityTicker | Code change            | No (cleanup)       |
+| Run 6 DB proof queries                        | Read-only verification | Yes (gates UAT)    |
+| Seed UAT data if needed                       | Decision after proofs  | Depends on results |
+
+
+Only one file changes: `src/components/LiveActivityTicker.tsx` (remove the profiles fetch, keep static fallback).  
   
-In your context, **“net-to-end”** (people also say **“end-to-end”** or **“net-to-end validation”**) means:
+You’re exactly right about the security posture: **401 on profiles for anon is correct**, and the *right* fix is to **stop making the request** when the session is anon. We can keep the two-step architecture for authenticated users if you ever want it later, but for your stated goal (“social proof, not a data feature”), the cleanest move is: **no profiles lookup at all** (or at least **gate it behind auth**).
 
-**You can prove the entire workflow works across every layer — not just the UI — with verifiable evidence from the network/API and the database.**
+Below are two safe options. Pick A if you want the absolute simplest “no noise ever.” Pick B if you want “no noise for anon, but still show names when logged in.”
 
-So instead of “the screen looks right,” net-to-end means “the *system* did the right things all the way through.”
+---
 
-## What it includes (typical layers)
+# Phase 1 — LiveActivityTicker: Remove recurring 401
 
-1. **UI/Client**  
-Buttons/forms behave correctly, validations fire, the user can complete the journey.
-2. **Network/API**  
-The browser/app calls the right endpoints (no 400/500s), and responses match expectations.
-3. **Backend logic**  
-Edge functions / server code runs the full business logic (seat allocation, entitlement creation, completion evaluation, certificate issuance, etc.).
-4. **Database writes (source of truth)**  
-The correct rows exist in the correct tables with correct values.
-5. **Side effects / artifacts**  
-PDFs, emails, audit logs, and “timeline” entries exist and are linkable.
+## Option A (recommended): Never query profiles (always fallback message)
 
-## In *ProCann RVT* terms, “net-to-end” is:
+This matches your plan exactly.
 
-**Manager creates/owns org → purchases seats → assigns seats → entitlements created → employee progresses → course completion recorded → certificate generated with pdf_url + verification_code → audit timeline shows events.**
+### Minimal patch inside `queryFn`
 
-And you can show proof via:
+- Remove `userIds/profileMap/profiles` entirely
+- Build messages without profile info
 
-- network calls succeeding
-- DB queries showing rows in:
-  - `rvt_seats`
-  - `course_entitlements`
-  - `user_progress`
-  - `course_completions`
-  - `certificates`
-  - `user_certificates`
-  - `certificate_audit_log`
-  - `unified_audit_timeline`
+```ts
+queryFn: async () => {
+  try {
+    const { data: exams, error: examsError } = await supabase
+      .from('exam_attempts')
+      .select('user_id, created_at, is_passed')
+      .eq('is_passed', true)
+      .order('created_at', { ascending: false })
+      .limit(5);
 
-## Why you care
+    if (examsError) throw examsError;
+    if (!exams || exams.length === 0) return [];
 
-Because for MCA/compliance (and for Danielle/Louis sanity), you need **evidence**, not vibes:
+    const recentActivities: Activity[] = exams.map((exam: any) => ({
+      type: 'certificate' as const,
+      message: `Someone from Maryland just earned their certificate! 🎉`,
+      timestamp: exam.created_at,
+      icon: Trophy,
+    }));
 
-- “It worked on screen” can still mean nothing wrote to DB (RLS blocked, missing trigger, etc.).
-- Net-to-end proves the pipeline is actually operational.
+    return recentActivities;
+  } catch (error) {
+    console.warn('LiveActivityTicker: failed to load activities', error);
+    return [];
+  }
+},
 
-If you want, I can turn your “First Green Run” into a one-page **net-to-end acceptance checklist** you can hand to Lovable/QA.
+```
+
+✅ Result: **exam_attempts 200**, **no profiles call**, **no 401 noise**, UI unchanged.
+
+---
+
+## Option B: Skip profiles lookup only when anon (still shows names when authenticated)
+
+If you’d like the “best of both” with no noise:
+
+```ts
+// BEFORE profiles lookup:
+const { data: { session } } = await supabase.auth.getSession();
+
+if (!session) {
+  // anon user: skip profiles query entirely
+  return exams.map((exam: any) => ({
+    type: 'certificate' as const,
+    message: `Someone from Maryland just earned their certificate! 🎉`,
+    timestamp: exam.created_at,
+    icon: Trophy,
+  }));
+}
+
+// else: do profiles lookup (your current two-step approach)
+
+```
+
+✅ Result: **0 recurring 401s** for marketing homepage visitors, but you keep personalization for logged-in users.
+
+---
+
+# Phase 2 — First Green Run DB Proofs (tighten two queries)
+
+Your proof queries are good. Two small edits make them more diagnostic:
+
+### Proof 1: Orgs + members (include member_type)
+
+```sql
+SELECT o.id, o.name, om.user_id, om.member_type, om.role, om.status, om.created_at
+FROM organizations o
+JOIN organization_members om ON om.organization_id = o.id
+ORDER BY om.created_at DESC
+LIMIT 20;
+
+```
+
+### Proof 6: Unified timeline (filter for certificate signal)
+
+```sql
+SELECT audit_source, event_type, created_at
+FROM unified_audit_timeline
+WHERE audit_source = 'certificate'
+ORDER BY created_at DESC
+LIMIT 20;
+
+```
+
+If this returns rows, you’ve proven the certificate audit log path is alive.
+
+---
+
+# Phase 3 — Seed UAT for Louis + Danielle (what to do next)
+
+After you run proofs:
+
+## If tables are **not empty** (you already have real writes)
+
+✅ Proceed straight to UAT scripts.
+
+## If tables are **empty**
+
+Do **one internal First Green Run** through UI (preferred), *or* use your internal tools:
+
+- **TestAccountCreator**: create Manager/Coordinator/Employees
+- **PipelineTestHarness**: create org + seed seats + assign + simulate completions (only if it writes canonical tables)
+
+Goal is one full dataset in DB that Louis/Danielle can validate without touching payment.
+
+---
+
+# Deliverables to start True UAT this week
+
+## 1) UAT Seed Package
+
+- 1 org (UAT org)
+- 3 seats (2 employees + 1 spare)
+- 1 employee fully completed + certificate issued
+
+## 2) Two UAT scripts (short)
+
+### Danielle (business/compliance)
+
+- onboarding, module UX, completion UX, certificate page, verification page
+
+### Louis (audit/compliance)
+
+- verify DB proof artifacts exist + export + unified timeline events
+
+## 3) UAT issue template
+
+- Step, expected, actual, screenshot, user/email, timestamp, blocker severity
+
+---
+
+## Do you want Option A or Option B for the ticker?
+
+If you’re optimizing for “marketing-only / zero noise,” **Option A**.  
+If you want “nice-to-have personalization for logged-in users,” **Option B**.
+
+Either way, once that’s committed, the next immediate move is: **run the 6 DB proofs and paste the row counts**—then we’ll decide whether to seed via UI or tools and I’ll generate the UAT scripts.
