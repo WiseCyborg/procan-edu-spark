@@ -39,7 +39,11 @@ export function CompletionAnalyticsWidget({ organizationId }: CompletionAnalytic
         .select("*, user_progress(*)")
         .eq("organization_id", organizationId);
 
-      if (enrollError) throw enrollError;
+      if (enrollError) {
+        console.warn("CompletionAnalyticsWidget: rvt_enrollments query failed:", enrollError.code);
+        setLoading(false);
+        return;
+      }
 
       // Get at-risk students
       const { data: atRisk, error: riskError } = await supabase

@@ -644,7 +644,7 @@ const FinalExam: React.FC = () => {
         .from('exam_attempts')
         .insert({
           user_id: userId,
-          course_id: 'default-course-id',
+          course_id: 'e6841a2f-4e92-47c3-9ed4-243ccc22338b',
           total_score: totalScore,
           passing_score: 80,
           is_passed: false, // Will update if they pass

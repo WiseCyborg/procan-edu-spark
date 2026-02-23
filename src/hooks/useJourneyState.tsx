@@ -60,7 +60,7 @@ export const useJourneyState = () => {
         if (!data) {
           const { data: newData, error: insertError } = await supabase
             .from('user_journey_state')
-            .insert({
+            .upsert({
               user_id: user.id,
               current_stage: 'new_user',
               current_wizard: null,
@@ -68,7 +68,7 @@ export const useJourneyState = () => {
               wizard_metadata: {},
               last_activity_at: new Date().toISOString(),
               stage_entered_at: new Date().toISOString(),
-            })
+            }, { onConflict: 'user_id' })
             .select()
             .single();
 
