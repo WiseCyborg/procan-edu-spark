@@ -9830,6 +9830,10 @@ export type Database = {
       }
       jwt_org_id: { Args: never; Returns: string }
       jwt_role: { Args: never; Returns: string }
+      log_exam_identity_verification: {
+        Args: { p_checkin_id: string }
+        Returns: undefined
+      }
       log_security_event: {
         Args: { _details?: Json; _event_type: string }
         Returns: undefined
