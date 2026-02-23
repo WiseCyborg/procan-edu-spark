@@ -3342,6 +3342,53 @@ export type Database = {
         }
         Relationships: []
       }
+      exam_checkins: {
+        Row: {
+          attempt_id: string
+          bypass_reason: string | null
+          course_id: string
+          created_at: string
+          id: string
+          photo_url: string | null
+          status: string
+          user_id: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          attempt_id: string
+          bypass_reason?: string | null
+          course_id: string
+          created_at?: string
+          id?: string
+          photo_url?: string | null
+          status?: string
+          user_id: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          attempt_id?: string
+          bypass_reason?: string | null
+          course_id?: string
+          created_at?: string
+          id?: string
+          photo_url?: string | null
+          status?: string
+          user_id?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_checkins_attempt_id_fkey"
+            columns: ["attempt_id"]
+            isOneToOne: true
+            referencedRelation: "exam_attempts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exam_topic_scores: {
         Row: {
           comar_section: string

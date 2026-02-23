@@ -1,5 +1,5 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,7 @@ import { CameraUnavailableDialog } from '@/components/exam/CameraUnavailableDial
 import { ProtectedCourseAccess } from '@/components/ProtectedCourseAccess';
 import { RemedialRecommendations } from '@/components/exam/RemedialRecommendations';
 import { ExamAttemptHistory } from '@/components/exam/ExamAttemptHistory';
+import { AwaitingVerification } from '@/components/exam/AwaitingVerification';
 import { useExamAttempts } from '@/hooks/useExamAttempts';
 import { useUserProgress } from '@/hooks/useUserProgress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -84,8 +85,9 @@ const FinalExam: React.FC = () => {
     ip: ''
   });
   const [examStage, setExamStage] = useState<
-    'verification' | 'ready' | 'exam' | 'results' | 'certificate'
+    'verification' | 'awaiting_verification' | 'ready' | 'exam' | 'results' | 'certificate'
   >('verification');
+  const [checkinId, setCheckinId] = useState<string | null>(null);
   const [currentSection, setCurrentSection] = useState(1);
   const [totalScore, setTotalScore] = useState(0);
   const [submittedSections, setSubmittedSections] = useState<Set<number>>(new Set());
@@ -396,6 +398,82 @@ const FinalExam: React.FC = () => {
     return 'unknown';
   };
 
+  const createCheckinAndAwait = async (photoDataUrl?: string, skipReason?: string) => {
+    try {
+      const { data: authData } = await supabase.auth.getUser();
+      const userId = authData.user?.id;
+      if (!userId) {
+        toast.error('Not authenticated');
+        return;
+      }
+
+      // Create an exam attempt stub (placeholder, will be updated on submission)
+      const { data: attemptData, error: attemptError } = await supabase
+        .from('exam_attempts')
+        .insert({
+          user_id: userId,
+          course_id: COURSE_ID,
+          total_score: 0,
+          passing_score: 80,
+          is_passed: false,
+          time_taken: 0,
+          photo_verification_url: photoDataUrl || null,
+          ip_address: userData.ip,
+          metadata: skipReason ? {
+            photo_verification_skipped: true,
+            bypass_reason: skipReason,
+            bypass_timestamp: new Date().toISOString()
+          } as any : {} as any
+        })
+        .select()
+        .single();
+
+      if (attemptError || !attemptData) {
+        console.error('Error creating exam attempt:', attemptError);
+        toast.error('Failed to create exam attempt. Please try again.');
+        return;
+      }
+
+      setExamAttemptId(attemptData.id);
+
+      // Create check-in row
+      const status = skipReason ? 'bypassed' : 'pending';
+      const { data: checkinData, error: checkinError } = await supabase
+        .from('exam_checkins')
+        .insert({
+          attempt_id: attemptData.id,
+          user_id: userId,
+          course_id: COURSE_ID,
+          photo_url: photoDataUrl || null,
+          status,
+          bypass_reason: skipReason || null,
+        })
+        .select()
+        .single();
+
+      if (checkinError) {
+        console.error('Error creating check-in:', checkinError);
+        toast.error('Failed to create identity check-in.');
+        return;
+      }
+
+      setCheckinId(checkinData.id);
+
+      if (skipReason) {
+        // Self-attested bypass — go straight to ready
+        setExamStage('ready');
+        toast.info('Photo verification skipped. Proceeding to exam.');
+      } else {
+        // Needs manager verification
+        setExamStage('awaiting_verification');
+        toast.success('Photo submitted! Awaiting manager verification.');
+      }
+    } catch (error) {
+      console.error('Check-in creation error:', error);
+      toast.error('An unexpected error occurred.');
+    }
+  };
+
   const skipPhotoAndProceed = () => {
     if (!bypassReason.trim()) {
       toast.error("Please provide a reason for skipping photo verification");
@@ -407,8 +485,7 @@ const FinalExam: React.FC = () => {
       photo: undefined 
     }));
     
-    setExamStage('ready');
-    toast.info('Photo verification skipped. Proceeding to exam.');
+    createCheckinAndAwait(undefined, bypassReason.trim());
   };
 
   const startPhotoVerification = async () => {
@@ -522,9 +599,14 @@ const FinalExam: React.FC = () => {
     }
     
     setShowPhotoPopup(false);
-    setExamStage('ready');
-    toast.success('Photo verified! You can now start the exam.');
+    
+    // Create check-in and await manager verification
+    createCheckinAndAwait(photoPreview);
   };
+
+  const handleVerificationComplete = useCallback(() => {
+    setExamStage('ready');
+  }, []);
 
   const retakePhoto = () => {
     setPhotoPreview('');
@@ -629,7 +711,7 @@ const FinalExam: React.FC = () => {
     
     setTopicScores(calculatedTopicScores);
     
-    // Record exam attempt with topic scores
+    // Update the existing exam attempt (created at check-in time) with final scores
     try {
       const { data: authData } = await supabase.auth.getUser();
       const userId = authData.user?.id;
@@ -640,36 +722,25 @@ const FinalExam: React.FC = () => {
         return;
       }
 
-      const { data: examData, error: examError } = await supabase
-        .from('exam_attempts')
-        .insert({
-          user_id: userId,
-          course_id: 'e6841a2f-4e92-47c3-9ed4-243ccc22338b',
-          total_score: totalScore,
-          passing_score: 80,
-          is_passed: false, // Will update if they pass
-          time_taken: 5400 - totalTimeLeft,
-          photo_verification_url: userData.photo,
-          ip_address: userData.ip,
-          completed_at: new Date().toISOString(),
-          topic_scores: calculatedTopicScores as any,
-          metadata: skipPhotoVerification ? {
-            photo_verification_skipped: true,
-            bypass_reason: bypassReason,
-            bypass_timestamp: new Date().toISOString()
-          } as any : {} as any
-        })
-        .select()
-        .single();
+      if (examAttemptId) {
+        // Update the stub attempt with actual results
+        const { error: updateError } = await supabase
+          .from('exam_attempts')
+          .update({
+            total_score: totalScore,
+            time_taken: 5400 - totalTimeLeft,
+            completed_at: new Date().toISOString(),
+            topic_scores: calculatedTopicScores as any,
+          })
+          .eq('id', examAttemptId);
 
-      if (examError) {
-        console.error('Error recording exam attempt:', examError);
-      } else if (examData) {
-        setExamAttemptId(examData.id);
-        
+        if (updateError) {
+          console.error('Error updating exam attempt:', updateError);
+        }
+
         // Store individual topic scores in exam_topic_scores table
         const topicScoreInserts = calculatedTopicScores.map(ts => ({
-          exam_attempt_id: examData.id,
+          exam_attempt_id: examAttemptId,
           section_number: ts.section_number,
           comar_section: ts.comar_section,
           topic_area: ts.topic_area,
@@ -1147,6 +1218,15 @@ const FinalExam: React.FC = () => {
         </div>
       )}
       
+      {/* Awaiting Manager Verification Stage */}
+      {examStage === 'awaiting_verification' && checkinId && examAttemptId && (
+        <AwaitingVerification
+          checkinId={checkinId}
+          attemptId={examAttemptId}
+          onVerified={handleVerificationComplete}
+        />
+      )}
+
       {/* Ready to Start Stage */}
       {examStage === 'ready' && (
         <div className="bg-white p-6 rounded-lg shadow-md max-w-md mx-auto text-center">
