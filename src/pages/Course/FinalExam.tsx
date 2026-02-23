@@ -436,28 +436,40 @@ const FinalExam: React.FC = () => {
 
       setExamAttemptId(attemptData.id);
 
-      // Create check-in row
-      const status = skipReason ? 'bypassed' : 'pending';
-      const { data: checkinData, error: checkinError } = await supabase
+      // Create check-in row (don't chain .select() to avoid RLS 403 on RETURNING)
+      const checkinStatus = skipReason ? 'bypassed' : 'pending';
+      const { error: checkinError } = await supabase
         .from('exam_checkins')
         .insert({
           attempt_id: attemptData.id,
           user_id: userId,
           course_id: COURSE_ID,
           photo_url: photoDataUrl || null,
-          status,
+          status: checkinStatus,
           bypass_reason: skipReason || null,
-        })
-        .select()
-        .single();
+        });
 
       if (checkinError) {
         console.error('Error creating check-in:', checkinError);
-        toast.error('Failed to create identity check-in.');
+        // ROLLBACK: delete the orphaned exam attempt stub to prevent false cooldowns
+        console.warn('[FinalExam] Rolling back orphaned exam attempt:', attemptData.id);
+        await supabase
+          .from('exam_attempts')
+          .delete()
+          .eq('id', attemptData.id);
+        toast.error('Failed to create identity check-in. Please try again.');
         return;
       }
 
-      setCheckinId(checkinData.id);
+      // Fetch the check-in ID separately (RLS-safe SELECT)
+      const { data: checkinRow } = await supabase
+        .from('exam_checkins')
+        .select('id')
+        .eq('attempt_id', attemptData.id)
+        .eq('user_id', userId)
+        .single();
+
+      setCheckinId(checkinRow?.id || null);
 
       if (skipReason) {
         // Self-attested bypass — go straight to ready
