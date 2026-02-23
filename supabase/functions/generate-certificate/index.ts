@@ -278,6 +278,19 @@ Deno.serve(async (req: Request) => {
 
     console.log('Certificate created successfully:', certificate.certificate_number);
 
+    // Fetch user profile + course details FIRST (needed for user_certificates and email)
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("first_name, last_name")
+      .eq("user_id", user.id)
+      .single();
+
+    const { data: course } = await supabase
+      .from("courses")
+      .select("title")
+      .eq("id", examAttempt.course_id)
+      .single();
+
     // Write certificate_audit_log
     await supabase.from('certificate_audit_log').insert({
       certificate_id: certificate.id,
@@ -346,19 +359,6 @@ Deno.serve(async (req: Request) => {
         at_risk_flag: false
       })
       .eq('user_id', user.id);
-
-    // Fetch user and course details for certificate email
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("first_name, last_name")
-      .eq("user_id", user.id)
-      .single();
-
-    const { data: course } = await supabase
-      .from("courses")
-      .select("title")
-      .eq("id", examAttempt.course_id)
-      .single();
 
     // Determine email content based on certificate type
     const emailCourseTitle = certificationType === 'manager' 

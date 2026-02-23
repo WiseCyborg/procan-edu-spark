@@ -9428,14 +9428,16 @@ export type Database = {
         }[]
       }
       encrypt_pii: { Args: { plaintext: string }; Returns: string }
-      evaluate_and_issue_certificate: {
-        Args: {
-          p_course_id: string
-          p_guest_email?: string
-          p_recipient_name?: string
-        }
-        Returns: Json
-      }
+      evaluate_and_issue_certificate:
+        | {
+            Args: {
+              p_course_id: string
+              p_guest_email?: string
+              p_recipient_name?: string
+            }
+            Returns: Json
+          }
+        | { Args: { p_course_id: string; p_user_id: string }; Returns: Json }
       expire_test_organizations: { Args: never; Returns: undefined }
       fix_manager_registration: {
         Args: { p_application_id: string; p_user_email: string }
