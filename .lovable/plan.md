@@ -1,64 +1,274 @@
-# UAT Login Blocker: Reset Employee Passwords + Update Seed Function
+# Fix Student Dashboard: 4 Blockers Preventing Emp1 from Seeing Training
 
-## Critical Issue Found
+## Summary
 
-The `fast-track-dispensary-test` function generates passwords using `Test${Date.now()}${i}!` -- each password includes a millisecond timestamp from creation time. These passwords were never returned in the function response (only the manager password was returned in `access_info`). **Nobody can log in as Emp1-Emp5 without resetting their passwords.**
+The student dashboard renders a blank page because of 4 independent bugs. This plan fixes all of them so employees can log in and see the RVT course.
 
-The manager password (`Test1771813531903!` from the earlier invocation) was returned, but the employee passwords were silently discarded.
+## Bug 1: `get_course_state` RPC references non-existent `started_at` column (400 error)
 
-## Plan
+**Root cause:** The `get_course_state` database function references `up.started_at` on the `user_progress` table, but that column does not exist. The table has `completed_at` and `created_at` but no `started_at`.
 
-### 1. Create a one-shot edge function to reset all 6 UAT passwords
+**Fix:** Alter the RPC function to infer "in_progress" from row existence instead of a `started_at` column:
 
-**File:** `supabase/functions/uat-reset-passwords/index.ts`
-
-This function will use `supabase.auth.admin.updateUserById()` to set a known password for all 6 UAT GreenRun2 accounts (manager + 5 employees).
-
-Password for all accounts: `UATGreen2025!`
-
-Hard-coded user IDs:
-
-- Manager: `ed19e3c1-45eb-476d-ae68-8f4baa30cc30`
-- Emp1: `f167e515-4fde-42a6-9fa6-77c227ffd495`
-- Emp2: `af0018c3-ecfa-41ed-a3b0-55716ae0c3b5`
-- Emp3: `cf9e8145-6fcb-40f8-91ea-9346d5b43b6c`
-- Emp4: `37fc89ae-7376-4457-b147-f0219e296f98`
-- Emp5: `a1ab4593-1f5d-4644-aca8-c76c72b156e8`
-
-### 2. Deploy, invoke once, then delete
-
-- Deploy `uat-reset-passwords`
-- POST invoke (empty body)
-- Verify all 6 return success
-- Delete the function
-
-### 3. Fix `fast-track-dispensary-test` to use deterministic passwords
-
-Update employee password generation (line 197) to use a predictable pattern so future UAT seeds don't have this problem:
-
-```
-// Before (unknowable):
-password: `Test${Date.now()}${i}!`
-
-// After (deterministic, returned in response):
-password: `UATEmp${i}2025!`
+```sql
+-- Change this line:
+WHEN up.started_at IS NOT NULL THEN 'in_progress'
+-- To:
+WHEN up.id IS NOT NULL AND up.completed_at IS NULL THEN 'in_progress'
 ```
 
-Also update the function response to include employee passwords in the `access_info` block, not just the manager's.
+This uses the presence of a `user_progress` row (with no `completed_at`) to mean "in progress" -- which is semantically correct since a row is only created when a user starts a module.
 
-### 4. After passwords are reset: browser-test Emp1 login + course access
+**Migration:** `CREATE OR REPLACE FUNCTION public.get_course_state(...)` with the corrected logic.
 
-Once passwords work, log in as Emp1 at `/auth`, verify:
+---
 
-- Login succeeds
-- Student dashboard loads
-- RVT course is visible (entitlement gating works)
-- Module 0 can be opened
+## Bug 2: Hardcoded `default-course-id` in exam attempts (wrong data)
+
+**Root cause:** Two files use the literal string `'default-course-id'` instead of the real course ID:
+
+1. `src/hooks/useExamAttempts.tsx` line 44 -- default parameter
+2. `src/pages/Course/FinalExam.tsx` line 647 -- insert statement
+
+**Fix:**
+
+- `useExamAttempts.tsx`: Change default from `'default-course-id'` to the constant `COURSE_ID` (`'e6841a2f-4e92-47c3-9ed4-243ccc22338b'`). Import it or inline.
+- `FinalExam.tsx`: Replace the hardcoded string with the actual course ID constant. Need to check how the course ID is available in that component (likely passed as prop or from a hook).
+
+---
+
+## Bug 3: `rvt_enrollments` table does not exist (404 error)
+
+**Root cause:** Two components query `rvt_enrollments` which doesn't exist as a table:
+
+1. `src/components/course/DeadlineCountdown.tsx` -- student deadline display
+2. `src/components/team/CompletionAnalyticsWidget.tsx` -- manager analytics
+
+**Fix:** Make both components gracefully handle the missing table:
+
+- `DeadlineCountdown.tsx`: Wrap the query in a try/catch and return `null` (hide the component) on any error, including 404. The component already returns `null` when no enrollment found, so this is safe.
+- `CompletionAnalyticsWidget.tsx`: Same pattern -- catch errors gracefully and show empty state.
+
+This is the fastest safe approach. Creating a `rvt_enrollments` view is a future enhancement but not needed to unblock UAT.
+
+---
+
+## Bug 4: `user_journey_state` insert conflict (409 error)
+
+**Root cause:** `useJourneyState.tsx` does a plain `insert` when no row exists. If the row was already created (e.g., by `AcceptInvitation.tsx`), it hits a unique constraint on `user_id`.
+
+**Fix:** Change the insert to an `upsert` with `onConflict: 'user_id'`:
+
+```typescript
+// Before:
+.insert({ user_id: user.id, ... })
+// After:
+.upsert({ user_id: user.id, ... }, { onConflict: 'user_id' })
+```
+
+This makes it idempotent -- if the row exists, it merges; if not, it creates.
+
+---
 
 ## Files Changed
 
 
-| File                                                     | Change                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `supabase/functions/uat-reset-passwords/index.ts`        | Create one-shot password reset utility (delete after use)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `supabase/functions/fast-track-dispensary-test/index.ts` | Use deterministic passwords + include employee passwords in response Perfect. This is the right fix, and it’s the exact kind of “UAT reliability” patch that prevents repeat pain.Below is **copy/paste-ready** code for the one-shot reset function **and** the minimal patch you should apply to `fast-track-dispensary-test` so it never happens again.---1) One-shot Edge Function: `uat-reset-passwords`**File:** `supabase/functions/uat-reset-passwords/index.ts`// supabase/functions/uat-reset-passwords/index.ts import { serve } from 'https://deno.land/std@0.224.0/http/server.ts'; import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4'; const corsHeaders: Record<string, string> = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type', 'Access-Control-Allow-Methods': 'POST, OPTIONS', }; type ResetTarget = { label: string; user_id: string; email: string; }; serve(async (req) => { if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders }); if (req.method !== 'POST') { return new Response(JSON.stringify({ ok: false, error: 'Use POST' }), { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' }, }); } try { const SUPABASE_URL = Deno.env.get('SUPABASE_URL'); const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'); if (!SUPABASE_URL || !SERVICE_ROLE_KEY) { return new Response( JSON.stringify({ ok: false, error: 'Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY', }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }, ); } const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, { auth: { persistSession: false }, }); const NEW_PASSWORD = 'UATGreen2025!'; const targets: ResetTarget[] = [ { label: 'manager', user_id: 'ed19e3c1-45eb-476d-ae68-8f4baa30cc30', email: 'uat-greenrun2+manager@procannedu.com' }, { label: 'emp1', user_id: 'f167e515-4fde-42a6-9fa6-77c227ffd495', email: 'uat-greenrun2+emp1@procannedu.com' }, { label: 'emp2', user_id: 'af0018c3-ecfa-41ed-a3b0-55716ae0c3b5', email: 'uat-greenrun2+emp2@procannedu.com' }, { label: 'emp3', user_id: 'cf9e8145-6fcb-40f8-91ea-9346d5b43b6c', email: 'uat-greenrun2+emp3@procannedu.com' }, { label: 'emp4', user_id: '37fc89ae-7376-4457-b147-f0219e296f98', email: 'uat-greenrun2+emp4@procannedu.com' }, { label: 'emp5', user_id: 'a1ab4593-1f5d-4644-aca8-c76c72b156e8', email: 'uat-greenrun2+emp5@procannedu.com' }, ]; const results: Array<{ label: string; user_id: string; email: string; ok: boolean; error?: string; }> = []; for (const t of targets) { const { error } = await admin.auth.admin.updateUserById(t.user_id, { password: NEW_PASSWORD, }); results.push({ label: t.label, user_id: t.user_id, email: t.email, ok: !error, error: error ? `${error.name ?? 'Error'}: ${error.message}` : undefined, }); } const okAll = results.every((r) => r.ok); return new Response( JSON.stringify({ ok: okAll, password_set_to: NEW_PASSWORD, results, }), { status: okAll ? 200 : 207, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }, ); } catch (e) { const msg = e instanceof Error ? `${e.name}: ${e.message}` : String(e); return new Response(JSON.stringify({ ok: false, error: msg }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }, }); } }); Invoke- Deploy: `supabase functions deploy uat-reset-passwords`- Invoke: `POST /functions/v1/uat-reset-passwords` (empty body)**Expected response:** `ok: true` and 6 `results` entries with `ok: true`.---2) Patch `fast-track-dispensary-test` to deterministic passwords + return themA) Replace the employee password generationFind the employee seed loop where you build each employee user (you referenced line ~197).**Before**password: `Test${Date.now()}${i}!` **After**password: `UATEmp${i}2025!` B) Add employee passwords to `access_info`Add a structure like this to the response payload (whatever you currently return):const access_info = { organization_id: ORG_ID, course_id: COURSE_ID, login_url: `${BASE_URL}/auth`, password_policy_note: 'UAT seed passwords are deterministic for test accounts only.', manager: { email: managerEmail, password: managerPassword, user_id: managerUserId, }, employees: employees.map((e, idx) => ({ label: `emp${idx + 1}`, email: e.email, password: `UATEmp${idx + 1}2025!`, user_id: e.user_id, })), }; If your function is already returning `access_info` for the manager, you’re just extending it.Keep manager deterministic too if you want (e.g., `UATManager2025!`) so all UAT seed runs are consistent.---3) After reset: Lovable UI “Emp1 success path” testUse **Incognito** so you don’t get role/session bleed.Login- Email: `uat-greenrun2+emp1@procannedu.com`- Password: `UATGreen2025!` (from reset) — or `UATEmp12025!` (future seeds)Verify in UI- Login succeeds and lands on employee dashboard- Dashboard shows org = **GreenRun2**- RVT course is visible- Open Module 0 / first lessonIf the course is NOT visible (most likely remaining blocker)Run this single check:SELECT user_id, course_id, source, status, created_at FROM course_entitlements WHERE user_id = 'f167e515-4fde-42a6-9fa6-77c227ffd495' ORDER BY created_at DESC; - If **no entitlement row exists**, your UI gating likely depends on `course_entitlements`, not `rvt_seats`. - Fix is either: seat-assignment also upserts entitlement, or UI checks both.---4) Delete the one-shot function (cleanliness)Once confirmed, remove it:- `supabase functions delete uat-reset-passwords`- delete the folder from repo---If you paste the response from `uat-reset-passwords` invocation **and** a screenshot of Emp1’s dashboard/course list after login, I’ll tell you immediately whether the last blocker is **entitlement gating**, **RLS**, or **course publish state**—and the exact fix (DB trigger vs edge sync vs UI query). |
+| File                                                | Change                                                                                                                                    |
+| --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Database migration                                  | `CREATE OR REPLACE FUNCTION get_course_state` -- replace `up.started_at IS NOT NULL` with `up.id IS NOT NULL AND up.completed_at IS NULL` |
+| `src/hooks/useExamAttempts.tsx`                     | Change default `courseId` from `'default-course-id'` to the real course ID constant                                                       |
+| `src/pages/Course/FinalExam.tsx`                    | Replace hardcoded `'default-course-id'` with real course ID                                                                               |
+| `src/components/course/DeadlineCountdown.tsx`       | Gracefully handle 404 from missing `rvt_enrollments` table                                                                                |
+| `src/components/team/CompletionAnalyticsWidget.tsx` | Gracefully handle 404 from missing `rvt_enrollments` table                                                                                |
+| `src/hooks/useJourneyState.tsx`                     | Change `.insert()` to `.upsert()` with `onConflict: 'user_id'`                                                                            |
+
+
+## Expected Outcome
+
+After these fixes:
+
+- Student dashboard renders without blank screen
+- `get_course_state` returns valid module states for Emp1
+- Exam attempts use the correct course ID
+- Deadline countdown and analytics degrade gracefully
+- Journey state creation is idempotent (no 409)  
+  
+confirm with   
+Locked in. Your plan is solid, and it’s scoped exactly right to unblock Emp1 **without inventing new schema**. Below is the “ready-to-apply” implementation pack: **SQL migration** + **TS patches** (with safe patterns so the UI never white-screens again).
+  ---
+  # 1) DB Migration: Patch `get_course_state` (remove `started_at` dependency)
+  Create a migration file (Supabase migrations folder), e.g.:
+  `supabase/migrations/20260222_fix_get_course_state.sql`
+  ### ✅ Minimal change (only swap the condition)
+  Use your exact intent: “in progress” = progress row exists and not completed.
+  > **Important:** you must edit the existing function body in-place. Below is a template approach. Replace the signature/body to match your existing function definition and just swap the CASE condition.
+  ```sql
+  -- 20260222_fix_get_course_state.sql
+
+  create or replace function public.get_course_state(
+    p_user_id uuid,
+    p_course_id uuid
+  )
+  returns table (
+    module_id uuid,
+    state text
+  )
+  language sql
+  stable
+  as $$
+    /*
+      NOTE: This is a template. Keep your existing SELECT / joins.
+      The critical change is:
+        WHEN up.id IS NOT NULL AND up.completed_at IS NULL THEN 'in_progress'
+      instead of:
+        WHEN up.started_at IS NOT NULL THEN 'in_progress'
+    */
+
+    select
+      m.id as module_id,
+      case
+        when up.completed_at is not null then 'completed'
+        when up.id is not null and up.completed_at is null then 'in_progress'
+        else 'not_started'
+      end as state
+    from public.course_modules m
+    left join public.user_progress up
+      on up.module_id = m.id
+     and up.user_id = p_user_id
+    where m.course_id = p_course_id
+    order by m.sort_order nulls last, m.created_at asc;
+  $$;
+
+  ```
+  ### Quick verification query
+  After migration:
+  ```sql
+  select * from public.get_course_state(
+    'f167e515-4fde-42a6-9fa6-77c227ffd495'::uuid,
+    'e6841a2f-4e92-47c3-9ed4-243ccc22338b'::uuid
+  ) limit 20;
+
+  ```
+  ✅ Should return module states without error.
+  ---
+  # 2) Bug 2: Remove `default-course-id` from exam attempts (2 files)
+  ## 2A) `src/hooks/useExamAttempts.tsx`
+  Replace default `'default-course-id'` with your real RVT course ID constant.
+  **Best practice:** create a single constant and import everywhere.
+  ### Add constant (if you don’t already have one)
+  Create: `src/lib/constants/courses.ts`
+  ```ts
+  // src/lib/constants/courses.ts
+  export const RVT_COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
+
+  ```
+  ### Patch hook
+  ```ts
+  // src/hooks/useExamAttempts.tsx
+  import { RVT_COURSE_ID } from '@/lib/constants/courses';
+
+  // Before (example)
+  export function useExamAttempts(courseId = 'default-course-id') { ... }
+
+  // After
+  export function useExamAttempts(courseId: string = RVT_COURSE_ID) { ... }
+
+  ```
+  ## 2B) `src/pages/Course/FinalExam.tsx`
+  Replace the hardcoded insert.
+  ### Preferred
+  Use the same `RVT_COURSE_ID` constant OR use the actual `courseId` already in context/props if available.
+  ```ts
+  import { RVT_COURSE_ID } from '@/lib/constants/courses';
+
+  // ... later where you insert:
+  const courseIdToUse = courseId ?? RVT_COURSE_ID; // if courseId exists in scope
+
+  await supabase
+    .from('exam_attempts')
+    .insert({
+      // ...
+      course_id: courseIdToUse,
+    });
+
+  ```
+  ✅ This ensures you never write rows to a bogus course.
+  ---
+  # 3) Bug 3: `rvt_enrollments` 404 — graceful degradation (2 components)
+  You’re right: **don’t create a view right now** if the goal is unblocking UAT. Handle it gracefully.
+  ## 3A) `src/components/course/DeadlineCountdown.tsx`
+  Pattern: if the fetch errors (including 404), return `null` and let the page render.
+  ```ts
+  try {
+    const { data, error } = await supabase
+      .from('rvt_enrollments')
+      .select('deadline_at') // whatever you expect
+      .eq('user_id', user.id)
+      .eq('course_id', courseId)
+      .maybeSingle();
+
+    if (error) return null;
+    if (!data?.deadline_at) return null;
+
+    // render countdown...
+  } catch {
+    return null;
+  }
+
+  ```
+  ## 3B) `src/components/team/CompletionAnalyticsWidget.tsx`
+  Same approach, but show an “empty analytics” state instead of crashing.
+  ```ts
+  let enrollments: any[] = [];
+
+  try {
+    const { data, error } = await supabase
+      .from('rvt_enrollments')
+      .select('*')
+      .eq('organization_id', orgId);
+
+    if (!error && data) enrollments = data;
+  } catch {
+    // swallow; keep enrollments empty
+  }
+
+  // Render widget; if enrollments.length === 0 show empty state
+
+  ```
+  ✅ Both components stop being fatal dependencies.
+  ---
+  # 4) Bug 4: `user_journey_state` 409 — switch insert → upsert
+  ## `src/hooks/useJourneyState.tsx`
+  ```ts
+  // Before
+  await supabase
+    .from('user_journey_state')
+    .insert({ user_id: user.id, ...payload });
+
+  // After
+  await supabase
+    .from('user_journey_state')
+    .upsert(
+      { user_id: user.id, ...payload },
+      { onConflict: 'user_id' }
+    );
+
+  ```
+  **Also do this:** treat errors as non-fatal for render. If journey state fails, dashboard should still render.
+  ---
+  # 5) Final “Emp1 unblocks” verification checklist
+  After deploying these:
+  ### Browser (incognito)
+  - Login Emp1 → `/student-dashboard` renders (no blank screen)
+  - RVT course visible
+  - Module 0 opens
+  ### Network tab must be clean of fatal blockers
+  - `get_course_state` → 200
+  - `user_journey_state` → no 409 loops
+  - `exam_attempts` → course_id is real UUID, not `default-course-id`
+  - `rvt_enrollments` → may still 404, but page must not crash
+  ---
+  # 6) One extra hardening step (prevents future white screens)
+  Even after these fixes, add a **top-level error boundary** to `/student-dashboard` route so any future query mismatch doesn’t blank the entire page. This is a 10-minute insurance policy.
+  ---
+  If you paste the **current** `get_course_state` **function definition** (or just the SELECT/CASE section), I’ll rewrite the migration so it matches your exact schema names (`course_modules`, `modules`, etc.) and won’t risk signature mismatch.
