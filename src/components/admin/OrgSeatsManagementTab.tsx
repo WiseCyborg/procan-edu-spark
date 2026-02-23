@@ -109,14 +109,15 @@ export const OrgSeatsManagementTab = ({ organizationId }: OrgSeatsManagementTabP
         .single();
 
       if (seatData?.course_id) {
-        await supabase.from('course_entitlements').upsert({
+        const { error: entError } = await supabase.from('course_entitlements').upsert({
           user_id: userId,
           course_id: seatData.course_id,
-          source: 'seat_allocation',
+          source: 'org_seat',
           status: 'active',
           purchased_at: new Date().toISOString(),
           metadata: { seat_id: seatId, organization_id: organizationId }
         }, { onConflict: 'user_id,course_id' });
+        if (entError) throw entError;
       }
 
       toast.success('Seat assigned successfully');
