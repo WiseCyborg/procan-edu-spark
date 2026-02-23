@@ -1,251 +1,162 @@
-# First Green Run + UAT Readiness Plan
+# First Green Run: Fix Entitlement Source Constraint + Remove Stale Profiles Query
 
-## Phase 1: Stop the Recurring 401 (Quick Win)
+## Current State (DB Proofs Summary)
 
-The LiveActivityTicker makes a profiles query every 30 seconds that always returns 401 for unauthenticated homepage visitors. The profiles RLS is correct (no anon access), so the fix is to skip the profiles lookup entirely and use static fallback messages.
 
-### Change in `src/components/LiveActivityTicker.tsx`
+| Table                  | Status                                                      |
+| ---------------------- | ----------------------------------------------------------- |
+| rvt_seats              | 125 available, 0 assigned, all have course_id + purchase_id |
+| course_entitlements    | EMPTY (pipeline never completed)                            |
+| user_progress          | 10 rows for admin user only                                 |
+| course_completions     | EMPTY                                                       |
+| certificates           | 1 skeleton (pdf_url = null)                                 |
+| user_certificates      | EMPTY                                                       |
+| unified_audit_timeline | Active but no certificate events                            |
 
-- Remove the profiles query (lines 31-46)
-- Always use fallback: "Someone from Maryland just earned their certificate!"
-- This eliminates the recurring 401 without weakening RLS
-- Logged-in users don't need personalized ticker data either -- it's social proof, not a data feature
+
+## Blocker Found
+
+The admin seat assignment UI in `OrgSeatsManagementTab.tsx` (line 115) inserts `source: 'seat_allocation'` into `course_entitlements`, but the database has a CHECK constraint that only allows: `'stripe', 'org_seat', 'admin_grant', 'promo_code'`.
+
+This means every seat assignment silently fails to create the entitlement -- the seat gets marked "assigned" but the entitlement row never appears. This is why `course_entitlements` is empty.
+
+## Fix (1 file change)
+
+### `src/components/admin/OrgSeatsManagementTab.tsx`
+
+Change `source: 'seat_allocation'` to `source: 'org_seat'` on line 115. This matches the DB constraint and is semantically correct (the entitlement comes from an organizational seat allocation).
+
+```typescript
+// BEFORE (line 115):
+source: 'seat_allocation',
+
+// AFTER:
+source: 'org_seat',
+```
+
+That is the only code change needed. The rest of the assignment logic (update seat status, fetch course_id, upsert entitlement) is correct.
+
+## Verification After Fix
+
+Once deployed, an admin can assign a seat in the UI, then confirm:
+
+```sql
+-- Entitlement should now exist
+SELECT user_id, course_id, source, status
+FROM course_entitlements
+ORDER BY created_at DESC LIMIT 5;
+```
+
+Expected: row with `source = 'org_seat'` and `status = 'active'`.
+
+## Note on the Second Assignment Path
+
+The `SeatAssignmentManager.tsx` component uses `supabase.rpc('allocate_seat_to_user')` which is a server-side function -- its source value is controlled in SQL and likely already correct. This fix only affects the admin-side direct assignment in `OrgSeatsManagementTab`.  
+  
+Yes — that’s the real blocker, and it’s exactly the kind of thing that makes the system “look fine” while DB stays empty: **the entitlement upsert is failing due to the CHECK constraint on** `course_entitlements.source`.
+
+## ✅ Do the 1-file fix (recommended)
+
+In `src/components/admin/OrgSeatsManagementTab.tsx`, change:
+
+- `source: 'seat_allocation'` → `source: 'org_seat'`
+
+That will immediately allow the upsert to succeed under the existing constraint values (`'stripe','org_seat','admin_grant','promo_code'`).
+
+### Patch snippet
+
+```ts
+await supabase.from('course_entitlements').upsert(
+  {
+    user_id: userId,
+    course_id: seatData.course_id,
+    source: 'org_seat', // ✅ must match DB constraint
+    status: 'active',
+    metadata: { seat_id: seatId, organization_id: organizationId },
+  },
+  { onConflict: 'user_id,course_id' }
+);
+
+```
+
+### One more small but important improvement
+
+Don’t let it fail “silently.” Capture and log the `upsert` error:
+
+```ts
+const { error: entError } = await supabase.from('course_entitlements').upsert(...);
+if (entError) throw entError;
+
+```
+
+That way, if anything else is off (missing columns, enum mismatch), you’ll see it immediately.
 
 ---
 
-## Phase 2: First Green Run DB Proofs
+## ✅ Alternative (not necessary for First Green Run): Expand the constraint
 
-Run these 6 verification queries to confirm the pipeline is operational. No code changes needed -- just DB reads to validate what exists.
+If you *want* to keep `seat_allocation` as the label, you can alter the CHECK constraint instead — but I agree with you: `org_seat` **is the correct semantic value** and matches the schema’s intent.
 
-### Proof 1: Organizations + Members
+---
 
-```sql
-SELECT o.name, om.user_id, om.role, om.status
-FROM organizations o
-JOIN organization_members om ON om.organization_id = o.id
-LIMIT 10;
-```
+# After you deploy the 1-line fix: run this exact proof loop
 
-### Proof 2: Seats with purchase linkage
+## 1) Assign one seat in UI
 
-```sql
-SELECT id, organization_id, status, assigned_user_id, course_id, purchase_id
-FROM rvt_seats
-ORDER BY updated_at DESC LIMIT 10;
-```
+Admin assigns seat to `e2e-emp1`.
 
-### Proof 3: Entitlements exist and are active
+## 2) DB proof (should now flip from empty → populated)
 
 ```sql
 SELECT user_id, course_id, source, status, created_at
 FROM course_entitlements
-ORDER BY created_at DESC LIMIT 10;
-```
-
-### Proof 4: User progress rows
-
-```sql
-SELECT user_id, module_id, is_completed, score
-FROM user_progress
-ORDER BY updated_at DESC LIMIT 10;
-```
-
-### Proof 5: Course completions
-
-```sql
-SELECT user_id, course_id, completion_percent, passed, completed_at
-FROM course_completions
-ORDER BY completed_at DESC NULLS LAST LIMIT 10;
-```
-
-### Proof 6: Certificate pipeline
-
-```sql
-SELECT certificate_number, pdf_url, status FROM certificates ORDER BY issue_date DESC LIMIT 5;
-SELECT verification_code, status FROM user_certificates ORDER BY created_at DESC LIMIT 5;
-SELECT action, actor_id FROM certificate_audit_log ORDER BY created_at DESC LIMIT 5;
-SELECT audit_source, event_type FROM unified_audit_timeline ORDER BY created_at DESC LIMIT 20;
-```
-
-These queries will be run as read-only checks -- no code or schema changes.
-
----
-
-## Phase 3: UAT Seed Data (if tables are empty)
-
-If the proof queries return empty results, the flows haven't been exercised yet. The next step would be to either:
-
-- Exercise the flows through the UI manually, OR
-- Use the existing admin tools (TestAccountCreator, PipelineTestHarness) to create seed data
-
-This is a decision point -- no code changes until we see what the proofs return.
-
----
-
-## Summary
-
-
-| Step                                          | Type                   | Blocking?          |
-| --------------------------------------------- | ---------------------- | ------------------ |
-| Remove profiles query from LiveActivityTicker | Code change            | No (cleanup)       |
-| Run 6 DB proof queries                        | Read-only verification | Yes (gates UAT)    |
-| Seed UAT data if needed                       | Decision after proofs  | Depends on results |
-
-
-Only one file changes: `src/components/LiveActivityTicker.tsx` (remove the profiles fetch, keep static fallback).  
-  
-You’re exactly right about the security posture: **401 on profiles for anon is correct**, and the *right* fix is to **stop making the request** when the session is anon. We can keep the two-step architecture for authenticated users if you ever want it later, but for your stated goal (“social proof, not a data feature”), the cleanest move is: **no profiles lookup at all** (or at least **gate it behind auth**).
-
-Below are two safe options. Pick A if you want the absolute simplest “no noise ever.” Pick B if you want “no noise for anon, but still show names when logged in.”
-
----
-
-# Phase 1 — LiveActivityTicker: Remove recurring 401
-
-## Option A (recommended): Never query profiles (always fallback message)
-
-This matches your plan exactly.
-
-### Minimal patch inside `queryFn`
-
-- Remove `userIds/profileMap/profiles` entirely
-- Build messages without profile info
-
-```ts
-queryFn: async () => {
-  try {
-    const { data: exams, error: examsError } = await supabase
-      .from('exam_attempts')
-      .select('user_id, created_at, is_passed')
-      .eq('is_passed', true)
-      .order('created_at', { ascending: false })
-      .limit(5);
-
-    if (examsError) throw examsError;
-    if (!exams || exams.length === 0) return [];
-
-    const recentActivities: Activity[] = exams.map((exam: any) => ({
-      type: 'certificate' as const,
-      message: `Someone from Maryland just earned their certificate! 🎉`,
-      timestamp: exam.created_at,
-      icon: Trophy,
-    }));
-
-    return recentActivities;
-  } catch (error) {
-    console.warn('LiveActivityTicker: failed to load activities', error);
-    return [];
-  }
-},
-
-```
-
-✅ Result: **exam_attempts 200**, **no profiles call**, **no 401 noise**, UI unchanged.
-
----
-
-## Option B: Skip profiles lookup only when anon (still shows names when authenticated)
-
-If you’d like the “best of both” with no noise:
-
-```ts
-// BEFORE profiles lookup:
-const { data: { session } } = await supabase.auth.getSession();
-
-if (!session) {
-  // anon user: skip profiles query entirely
-  return exams.map((exam: any) => ({
-    type: 'certificate' as const,
-    message: `Someone from Maryland just earned their certificate! 🎉`,
-    timestamp: exam.created_at,
-    icon: Trophy,
-  }));
-}
-
-// else: do profiles lookup (your current two-step approach)
-
-```
-
-✅ Result: **0 recurring 401s** for marketing homepage visitors, but you keep personalization for logged-in users.
-
----
-
-# Phase 2 — First Green Run DB Proofs (tighten two queries)
-
-Your proof queries are good. Two small edits make them more diagnostic:
-
-### Proof 1: Orgs + members (include member_type)
-
-```sql
-SELECT o.id, o.name, om.user_id, om.member_type, om.role, om.status, om.created_at
-FROM organizations o
-JOIN organization_members om ON om.organization_id = o.id
-ORDER BY om.created_at DESC
-LIMIT 20;
-
-```
-
-### Proof 6: Unified timeline (filter for certificate signal)
-
-```sql
-SELECT audit_source, event_type, created_at
-FROM unified_audit_timeline
-WHERE audit_source = 'certificate'
 ORDER BY created_at DESC
-LIMIT 20;
+LIMIT 5;
 
 ```
 
-If this returns rows, you’ve proven the certificate audit log path is alive.
+✅ Expected: a row appears with `source='org_seat'` and `status='active'`.
+
+## 3) Confirm seat + entitlement are aligned
+
+```sql
+SELECT s.id AS seat_id, s.assigned_user_id, s.course_id, s.status,
+       e.user_id, e.course_id, e.source, e.status AS entitlement_status
+FROM rvt_seats s
+LEFT JOIN course_entitlements e
+  ON e.user_id = s.assigned_user_id
+ AND e.course_id = s.course_id
+WHERE s.status='assigned'
+ORDER BY s.updated_at DESC
+LIMIT 10;
+
+```
+
+✅ Expected: assigned seats have matching entitlement rows.
 
 ---
 
-# Phase 3 — Seed UAT for Louis + Danielle (what to do next)
+# Quick check on your “second seat assignment path”
 
-After you run proofs:
-
-## If tables are **not empty** (you already have real writes)
-
-✅ Proceed straight to UAT scripts.
-
-## If tables are **empty**
-
-Do **one internal First Green Run** through UI (preferred), *or* use your internal tools:
-
-- **TestAccountCreator**: create Manager/Coordinator/Employees
-- **PipelineTestHarness**: create org + seed seats + assign + simulate completions (only if it writes canonical tables)
-
-Goal is one full dataset in DB that Louis/Danielle can validate without touching payment.
+You’re right: `SeatAssignmentManager.tsx` using `rpc('allocate_seat_to_user')` is likely already correct because the source is controlled in SQL. Once you fix the admin UI, you’ll have both paths working.
 
 ---
 
-# Deliverables to start True UAT this week
+# What this unlocks (immediately)
 
-## 1) UAT Seed Package
+Once `course_entitlements` populates, you can proceed to the next E2E gates:
 
-- 1 org (UAT org)
-- 3 seats (2 employees + 1 spare)
-- 1 employee fully completed + certificate issued
-
-## 2) Two UAT scripts (short)
-
-### Danielle (business/compliance)
-
-- onboarding, module UX, completion UX, certificate page, verification page
-
-### Louis (audit/compliance)
-
-- verify DB proof artifacts exist + export + unified timeline events
-
-## 3) UAT issue template
-
-- Step, expected, actual, screenshot, user/email, timestamp, blocker severity
+1. Student can see course (entitlement gating works)
+2. Completing modules writes `user_progress`
+3. Completing required modules writes `course_completions`
+4. Exam + generate certificate writes:
+  - `certificates.pdf_url`
+  - `user_certificates`
+  - `certificate_audit_log`
+  - `unified_audit_timeline` shows certificate events
 
 ---
 
-## Do you want Option A or Option B for the ticker?
+## Next best move
 
-If you’re optimizing for “marketing-only / zero noise,” **Option A**.  
-If you want “nice-to-have personalization for logged-in users,” **Option B**.
-
-Either way, once that’s committed, the next immediate move is: **run the 6 DB proofs and paste the row counts**—then we’ll decide whether to seed via UI or tools and I’ll generate the UAT scripts.
+Make that 1-line change + add the error check, deploy, then run the entitlement query above and paste the top 5 rows. That will tell us in one glance if the “First Green Run” is finally unblocked.
