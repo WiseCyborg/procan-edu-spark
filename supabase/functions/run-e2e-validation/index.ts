@@ -441,14 +441,25 @@ Deno.serve(async (req: Request) => {
       });
       
       if (submitError) {
+        // Try to extract structured error details from the response context
+        let errorDetail = submitError.message;
+        try {
+          if (typeof submitError.context === 'object' && submitError.context?.body) {
+            const bodyText = await new Response(submitError.context.body).text();
+            const parsed = JSON.parse(bodyText);
+            errorDetail = `${parsed.code || 'UNKNOWN'}: ${parsed.error || submitError.message}`;
+            if (parsed.failedFields) errorDetail += ` [fields: ${parsed.failedFields.join(', ')}]`;
+          }
+        } catch { /* ignore parse errors */ }
+        
         addResult('Dispensary Application', 'Step 4 Submit', 'Application submitted successfully',
-          `Error: ${submitError.message}`,
+          `Error: ${errorDetail}`,
           false,
           { 
             is_blocker: true, 
             error_meta: { 
               code: 'EDGE_FUNCTION_ERROR', 
-              message: submitError.message,
+              message: errorDetail,
               details: submitError
             }
           }
