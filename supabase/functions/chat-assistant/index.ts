@@ -97,7 +97,7 @@ serve(async (req) => {
       console.log('Detected regulatory query, searching COMAR database...');
       
       // Search regulatory_content for relevant Maryland COMAR sections
-      const { data: regulations, error: regError } = await supabase
+      const { data: regulations, error: regError } = await supabaseAnon
         .from('regulatory_content')
         .select('section_number, section_title, content_text')
         .eq('state', 'Maryland')
