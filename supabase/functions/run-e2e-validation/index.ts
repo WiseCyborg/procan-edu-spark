@@ -1287,7 +1287,7 @@ Deno.serve(async (req: Request) => {
             user_id: realTestUserId,
             course_id: testCourseForPayment,
             status: 'active',
-            source: 'e2e_audit_dup'
+            source: 'admin_grant'
           });
 
         // We expect either a constraint error OR the insert succeeds (no unique constraint)
