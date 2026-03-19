@@ -91,6 +91,7 @@ import TermsOfService from "./pages/TermsOfService";
 import CertificateRenewal from "./pages/CertificateRenewal";
 import RVTComplete from "./pages/RVTComplete";
 import AdminUtilities from "./pages/AdminUtilities";
+import UATTestMatrix from "./pages/admin/UATTestMatrix";
 import UATValidationPage from "./pages/UATValidationPage";
 import UATEvidenceSubmission from "./pages/UATEvidenceSubmission";
 import UATDispensaryOnboarding from "./pages/UATDispensaryOnboarding";
