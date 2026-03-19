@@ -15,7 +15,7 @@ const corsHeaders = {
 const StaffInvitationSchema = z.object({
   action: z.enum(['invite_single', 'invite_bulk', 'resend_invitation', 'cancel_invitation']),
   organizationId: z.string().uuid(),
-  inviterId: z.string().uuid(),
+  inviterId: z.string().uuid().optional(), // Ignored — derived from JWT
   email: z.string().email().max(255).optional(),
   emails: z.array(z.string().email().max(255)).max(100).optional(),
   role: z.enum(['student', 'training_coordinator', 'dispensary_manager']).optional(),
