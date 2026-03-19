@@ -8265,6 +8265,54 @@ export type Database = {
           },
         ]
       }
+      uat_test_results: {
+        Row: {
+          actual_result: string | null
+          created_at: string
+          expected_result: string | null
+          id: string
+          notes: string | null
+          role: string
+          scenario: string
+          status: string
+          steps: string | null
+          test_id: string
+          tested_at: string | null
+          tested_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          actual_result?: string | null
+          created_at?: string
+          expected_result?: string | null
+          id?: string
+          notes?: string | null
+          role: string
+          scenario: string
+          status?: string
+          steps?: string | null
+          test_id: string
+          tested_at?: string | null
+          tested_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          actual_result?: string | null
+          created_at?: string
+          expected_result?: string | null
+          id?: string
+          notes?: string | null
+          role?: string
+          scenario?: string
+          status?: string
+          steps?: string | null
+          test_id?: string
+          tested_at?: string | null
+          tested_by?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       uat_validation_checklists: {
         Row: {
           audit_readiness_section: Json | null
@@ -9926,6 +9974,10 @@ export type Database = {
         Args: { p_organization_id: string; p_role?: string; p_user_id: string }
         Returns: Json
       }
+      reset_exam_state: {
+        Args: { p_course_id?: string; p_target_user_id: string }
+        Returns: Json
+      }
       run_pipeline_health_check: { Args: never; Returns: Json }
       safe_assign_role: {
         Args: {
@@ -9975,6 +10027,16 @@ export type Database = {
           user_ids: string[]
         }
         Returns: number
+      }
+      start_exam_with_checkin: {
+        Args: {
+          p_bypass_reason?: string
+          p_course_id: string
+          p_ip_address?: string
+          p_metadata?: Json
+          p_photo_url?: string
+        }
+        Returns: Json
       }
       suspend_organization: {
         Args: { p_org_id: string; p_reason?: string }
