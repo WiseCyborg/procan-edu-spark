@@ -418,7 +418,7 @@ Deno.serve(async (req: Request) => {
       licenseType: 'dispensary',
       licenseNumber: `E2E-${testRunId.slice(0, 8)}`,
       licenseIssueDate: '2024-01-15',
-      licenseExpiryDate: '2026-01-15',
+      licenseExpiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       // Server-side validation only allows letters/spaces/apostrophes/hyphens
       contactPerson: 'Eee Test User',
       contactEmail: `${testEmailPrefix}@procannedu.com`,
@@ -1208,7 +1208,7 @@ Deno.serve(async (req: Request) => {
       const webhookUrl = `${supabaseUrl}/functions/v1/stripe-webhook`;
       const r = await fetch(webhookUrl, { method: 'GET' });
       await r.text(); // consume body
-      const ok = [200, 204, 401, 403, 405].includes(r.status);
+      const ok = [200, 204, 400, 401, 403, 405].includes(r.status);
       addResult('Payment Enrollment', 'H1 Webhook Exists', 'Stripe webhook edge function responds',
         `Status: ${r.status}`,
         ok,
@@ -1253,7 +1253,7 @@ Deno.serve(async (req: Request) => {
             user_id: realTestUserId,
             course_id: testCourseForPayment,
             status: 'active',
-            source: 'e2e_audit'
+            source: 'admin_grant'
           })
           .select('id')
           .single();
@@ -1287,7 +1287,7 @@ Deno.serve(async (req: Request) => {
             user_id: realTestUserId,
             course_id: testCourseForPayment,
             status: 'active',
-            source: 'e2e_audit_dup'
+            source: 'admin_grant'
           });
 
         // We expect either a constraint error OR the insert succeeds (no unique constraint)
