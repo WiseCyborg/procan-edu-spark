@@ -441,14 +441,25 @@ Deno.serve(async (req: Request) => {
       });
       
       if (submitError) {
+        // Try to extract structured error details from the response context
+        let errorDetail = submitError.message;
+        try {
+          if (typeof submitError.context === 'object' && submitError.context?.body) {
+            const bodyText = await new Response(submitError.context.body).text();
+            const parsed = JSON.parse(bodyText);
+            errorDetail = `${parsed.code || 'UNKNOWN'}: ${parsed.error || submitError.message}`;
+            if (parsed.failedFields) errorDetail += ` [fields: ${parsed.failedFields.join(', ')}]`;
+          }
+        } catch { /* ignore parse errors */ }
+        
         addResult('Dispensary Application', 'Step 4 Submit', 'Application submitted successfully',
-          `Error: ${submitError.message}`,
+          `Error: ${errorDetail}`,
           false,
           { 
             is_blocker: true, 
             error_meta: { 
               code: 'EDGE_FUNCTION_ERROR', 
-              message: submitError.message,
+              message: errorDetail,
               details: submitError
             }
           }
@@ -1300,12 +1311,13 @@ Deno.serve(async (req: Request) => {
           );
         } else {
           // Duplicate was allowed — clean it up and warn
+          // Delete all entitlements for this user+course except the original test one
           const { data: dups } = await supabase
             .from('course_entitlements')
             .select('id')
             .eq('user_id', realTestUserId)
             .eq('course_id', testCourseForPayment)
-            .eq('source', 'e2e_audit_dup');
+            .neq('id', testEntitlementId!);
           
           if (dups && dups.length > 0) {
             for (const d of dups) {

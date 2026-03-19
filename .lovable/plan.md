@@ -1,49 +1,76 @@
+# Fix: Exam Check-in 403 + Orphaned Stub Attempts
 
-Goal: clear the remaining blocker list by separating stale test output from real defects, then make the E2E suite deterministic.
+## Root Cause Analysis
 
-1. Re-run the current E2E suite before changing production logic
-- The current codebase already contains two of the planned fixes:
-  - `run-e2e-validation` now uses a dynamic future `licenseExpiryDate`
-  - webhook H1 now accepts `400`
-  - entitlement inserts now use `source: 'admin_grant'`
-- The blocker output and edge logs still match the older code path (`licenseExpiryDate must be in the future`), so the first step is to verify the latest function version is what actually ran.
+When Emp1 clicked "Proceed to Exam", the `createCheckinAndAwait` function:
 
-2. Tighten the E2E validator so it cannot report stale/false blockers
-- Keep the new future expiry date logic.
-- Keep `400` as acceptable for the Stripe webhook existence probe.
-- Finish the entitlement test cleanup: the fallback duplicate-cleanup query still filters by `source = 'e2e_audit_dup'`, which no longer matches the inserted test rows.
-- Update H3/H4 cleanup to remove duplicates by user/course or by collected inserted IDs instead of using the old source marker.
+1. Successfully inserted into `exam_attempts` (RLS allows it)
+2. Then tried to insert into `exam_checkins` with `.insert(...).select().single()`
+3. The `.select()` after insert triggers a SELECT query (`exam_checkins?select=*`) which hits the employee SELECT RLS policy: `user_id = auth.uid()`
+4. But the PostgREST `select()` after insert uses a broad filter, and the RLS policy returns 403
 
-3. Improve dispensary submit diagnostics in the validator
-- Right now non-2xx responses collapse into `EDGE_FUNCTION_ERROR`, which hides the real reason.
-- Update the validator to capture and record structured response details from `submit-dispensary-application` so future failures clearly show:
-  - validation error
-  - duplicate application
-  - rate limit
-  - DB constraint issue
-- This will make the test matrix actionable instead of just “non-2xx”.
+This happened 3 times (3 button clicks), creating 3 orphaned stub attempts with 24-hour cooldowns and zero check-in rows.
 
-4. Confirm the production-facing dispensary function behavior
-- The function itself looks correct for the current failure:
-  - logs confirm validation failed on `licenseExpiryDate`
-  - insert and email steps are downstream, not the root cause
-- After rerunning with the updated validator, only revisit the edge function if submission still fails with a future expiry date.
+## Fixes Required
 
-5. Refine webhook testing into clearer checks
-- Keep H1 as a route-exists health check where `200/204/400/401/403/405` are acceptable.
-- Add or plan separate webhook tests for:
-  - unsigned POST rejected correctly
-  - valid signed Stripe event accepted
-- This prevents false blockers on a POST-only endpoint.
+### Fix 1: Clean up orphaned stub attempts (migration)
 
-6. Expected outcome after implementation
-- Dispensary Application Step 4 passes
-- DB record verification runs instead of being skipped
-- Webhook H1 no longer fails on expected `400`
-- H3/H4 entitlement logic uses valid source values and cleans up correctly
-- Remaining failures, if any, will reflect real product issues rather than test harness noise
+Delete the 3 orphaned `exam_attempts` rows that have `completed_at IS NULL` and `total_score = 0` for Emp1. These are stuck stubs that block the exam with a false cooldown.
 
-Technical notes
-- Confirmed from logs: current dispensary failure is `licenseExpiryDate: License expiry date must be in the future`.
-- Confirmed in code: webhook `400` is already considered acceptable.
-- Confirmed in code: entitlement insert source is already `admin_grant`, but duplicate cleanup still references `e2e_audit_dup`, so that part is incomplete.
+```sql
+DELETE FROM public.exam_attempts
+WHERE user_id = 'f167e515-4fde-42a6-9fa6-77c227ffd495'
+  AND completed_at IS NULL
+  AND total_score = 0;
+```
+
+### Fix 2: Fix the RLS policy for exam_checkins INSERT+SELECT
+
+The issue is that `insert().select().single()` does an INSERT then a SELECT. The SELECT policy requires `user_id = auth.uid()`, but PostgREST may not be applying the filter correctly on the returning SELECT after insert.
+
+The fix: ensure the INSERT policy's `WITH CHECK` is sufficient for the returning query. Actually, the real issue might be that the `exam_checkins_employee_select_own` policy only allows `user_id = auth.uid()` but the PostgREST returning clause after insert might not match. The simplest fix is to add a RETURNING-compatible policy or ensure the insert code explicitly filters.
+
+Looking at the RLS policies:
+
+- INSERT `WITH CHECK (user_id = auth.uid())` -- correct
+- SELECT `USING (user_id = auth.uid())` -- correct
+
+The 403 is likely because PostgREST constructs the SELECT after INSERT differently. Fix: change the frontend code to not chain `.select()` on the insert, or use `.select('id, status')` with explicit column list.
+
+### Fix 3: Add transaction safety to prevent orphaned attempts
+
+Wrap the attempt creation and check-in creation in a single database function (RPC) so they succeed or fail atomically. Or, reorder: create the check-in first, then the attempt. Or better: if check-in fails, delete the attempt.
+
+## Implementation Plan
+
+### Step 1: Migration to clean orphans + fix RLS
+
+A single migration that:
+
+- Deletes the 3 orphaned exam_attempts for Emp1
+- Optionally creates or replaces the SELECT policy to be more permissive for the returning clause
+
+### Step 2: Fix FinalExam.tsx - Add error recovery
+
+In `createCheckinAndAwait`:
+
+- If the check-in insert fails, immediately delete the just-created exam attempt stub
+- This prevents orphaned attempts with false cooldowns
+
+Change the check-in insert from `.select().single()` to `.select('id, status, attempt_id').single()` to reduce RLS surface area.
+
+### Step 3: Verify the fix
+
+Re-run the exam flow and confirm:
+
+- Check-in is created successfully
+- No orphaned attempts on failure
+- Cooldown only applies after a completed attempt
+
+## Files Changed
+
+
+| File                                  | Change                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `supabase/migrations/[timestamp].sql` | Delete orphaned attempts for Emp1; potentially adjust RLS                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `src/pages/Course/FinalExam.tsx`      | Add rollback logic if check-in fails; fix `.select()` call confirm with # Fix: Exam Check-in 403 + Orphaned Stub Attempts## Root Cause AnalysisWhen Emp1 clicked "Proceed to Exam", the `createCheckinAndAwait` function:1. Successfully inserted into `exam_attempts` (RLS allows it)2. Then tried to insert into `exam_checkins` with `.insert(...).select().single()`3. The `.select()` after insert triggers a SELECT query `exam_checkins?select=*`) which hits the employee SELECT RLS policy: `user_id = auth.uid()`4. But the PostgREST `select()` after insert uses a broad filter, and the RLS policy returns 403This happened 3 times (3 button clicks), creating 3 orphaned stub attempts with 24-hour cooldowns and zero check-in rows.## Fixes Required### Fix 1: Clean up orphaned stub attempts (migration)Delete the 3 orphaned `exam_attempts` rows that have `completed_at IS NULL` and `total_score = 0` for Emp1. These are stuck stubs that block the exam with a false cooldown.```sqlDELETE FROM public.exam_attemptsWHERE user_id = 'f167e515-4fde-42a6-9fa6-77c227ffd495' AND completed_at IS NULL AND total_score = 0;```### Fix 2: Fix the RLS policy for exam_checkins INSERT+SELECTThe issue is that `insert().select().single()` does an INSERT then a SELECT. The SELECT policy requires `user_id = auth.uid()`, but PostgREST may not be applying the filter correctly on the returning SELECT after insert.The fix: ensure the INSERT policy's `WITH CHECK` is sufficient for the returning query. Actually, the real issue might be that the `exam_checkins_employee_select_own` policy only allows `user_id = auth.uid()` but the PostgREST returning clause after insert might not match. The simplest fix is to add a RETURNING-compatible policy or ensure the insert code explicitly filters.Looking at the RLS policies:- INSERT `WITH CHECK (user_id = auth.uid())` -- correct- SELECT `USING (user_id = auth.uid())` -- correctThe 403 is likely because PostgREST constructs the SELECT after INSERT differently. Fix: change the frontend code to not chain `.select()` on the insert, or use `.select('id, status')` with explicit column list.### Fix 3: Add transaction safety to prevent orphaned attemptsWrap the attempt creation and check-in creation in a single database function (RPC) so they succeed or fail atomically. Or, reorder: create the check-in first, then the attempt. Or better: if check-in fails, delete the attempt.## Implementation Plan### Step 1: Migration to clean orphans + fix RLSA single migration that:- Deletes the 3 orphaned exam_attempts for Emp1- Optionally creates or replaces the SELECT policy to be more permissive for the returning clause### Step 2: Fix FinalExam.tsx - Add error recoveryIn `createCheckinAndAwait`:- If the check-in insert fails, immediately delete the just-created exam attempt stub- This prevents orphaned attempts with false cooldownsChange the check-in insert from `.select().single()` to `.select('id, status, attempt_id').single()` to reduce RLS surface area.### Step 3: Verify the fixRe-run the exam flow and confirm:- Check-in is created successfully- No orphaned attempts on failure- Cooldown only applies after a completed attempt## Files Changed| File | Change ||------|--------|| `supabase/migrations/[timestamp].sql` | Delete orphaned attempts for Emp1; potentially adjust RLS || `src/pages/Course/FinalExam.tsx` | Add rollback logic if check-in fails; fix `.select()` call |&nbsp; |
