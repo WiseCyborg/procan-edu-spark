@@ -47,6 +47,27 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // --- JWT Authentication ---
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized', code: 'AUTH_REQUIRED' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid or expired token', code: 'AUTH_INVALID' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Derive inviterId from verified JWT — never trust client
+    const inviterId = user.id;
+
     const rawData = await req.json();
     
     // VALIDATE INPUT
@@ -71,9 +92,40 @@ const handler = async (req: Request): Promise<Response> => {
     }
     
     const validatedData = validationResult.data;
-    const { action, organizationId, inviterId, email, emails, role, invitationId, customMessage } = validatedData;
-    
-    console.log(`Processing staff invitation: ${action}`);
+    const { action, organizationId, email, emails, role, invitationId, customMessage } = validatedData;
+
+    // --- Role Authorization ---
+    const { data: callerRoles } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', inviterId);
+
+    const allowedRoles = ['admin', 'dispensary_manager', 'training_coordinator'];
+    const hasPermission = callerRoles?.some(r => allowedRoles.includes(r.role));
+    if (!hasPermission) {
+      return new Response(
+        JSON.stringify({ error: 'Insufficient permissions. Manager, Coordinator, or Admin role required.', code: 'FORBIDDEN' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Verify caller belongs to the target organization
+    const { data: membership } = await supabase
+      .from('organization_members')
+      .select('id')
+      .eq('user_id', inviterId)
+      .eq('organization_id', organizationId)
+      .limit(1)
+      .single();
+
+    if (!membership) {
+      return new Response(
+        JSON.stringify({ error: 'You are not a member of this organization', code: 'ORG_MISMATCH' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log(`Processing staff invitation: ${action} by user ${inviterId}`);
 
     // Rate limit: 50 invitations per hour per organization
     const { data: rateLimitData } = await supabase.rpc('check_rate_limit', {
