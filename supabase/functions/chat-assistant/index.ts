@@ -42,16 +42,45 @@ serve(async (req) => {
       throw new Error('Lovable API key not configured');
     }
 
-    const { message, context = {}, user_id, user_roles = [], security_level = 'student' } = await req.json() as ChatRequest;
+    const { message, context = {} } = await req.json() as ChatRequest;
 
     if (!message || !context) {
       throw new Error('Message and context are required');
     }
 
-    // Initialize Supabase client for regulatory content lookup
+    // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // --- JWT Authentication & Server-side role resolution ---
+    let user_id: string | undefined;
+    let user_roles: string[] = ['student']; // Default
+    let security_level = 'student';
+
+    const authHeader = req.headers.get('authorization');
+    if (authHeader?.startsWith('Bearer ')) {
+      const token = authHeader.replace('Bearer ', '');
+      const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+      if (!authError && user) {
+        user_id = user.id;
+        // Query actual roles from database
+        const { data: dbRoles } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id);
+        if (dbRoles && dbRoles.length > 0) {
+          user_roles = dbRoles.map(r => r.role);
+          if (user_roles.includes('admin')) security_level = 'admin';
+          else if (user_roles.includes('dispensary_manager')) security_level = 'manager';
+          else if (user_roles.includes('training_coordinator')) security_level = 'manager';
+        }
+      }
+    }
+
+    // Use ANON key for regulatory content lookup (RLS-scoped)
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const supabaseAnon = createClient(supabaseUrl, supabaseAnonKey);
 
     // Check if message is about regulations/compliance/COMAR
     const isRegulationQuery = message.toLowerCase().includes('comar') || 
