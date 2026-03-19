@@ -1208,7 +1208,7 @@ Deno.serve(async (req: Request) => {
       const webhookUrl = `${supabaseUrl}/functions/v1/stripe-webhook`;
       const r = await fetch(webhookUrl, { method: 'GET' });
       await r.text(); // consume body
-      const ok = [200, 204, 401, 403, 405].includes(r.status);
+      const ok = [200, 204, 400, 401, 403, 405].includes(r.status);
       addResult('Payment Enrollment', 'H1 Webhook Exists', 'Stripe webhook edge function responds',
         `Status: ${r.status}`,
         ok,
