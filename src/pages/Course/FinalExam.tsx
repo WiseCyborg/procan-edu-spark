@@ -400,83 +400,35 @@ const FinalExam: React.FC = () => {
 
   const createCheckinAndAwait = async (photoDataUrl?: string, skipReason?: string) => {
     try {
-      const { data: authData } = await supabase.auth.getUser();
-      const userId = authData.user?.id;
-      if (!userId) {
-        toast.error('Not authenticated');
+      // Use atomic RPC — creates both exam_attempts + exam_checkins in one transaction
+      const metadata = skipReason ? {
+        photo_verification_skipped: true,
+        bypass_reason: skipReason,
+        bypass_timestamp: new Date().toISOString()
+      } : {};
+
+      const { data, error } = await supabase.rpc('start_exam_with_checkin', {
+        p_course_id: COURSE_ID,
+        p_photo_url: photoDataUrl || null,
+        p_bypass_reason: skipReason || null,
+        p_ip_address: userData.ip || null,
+        p_metadata: metadata
+      });
+
+      if (error || !data) {
+        console.error('[FinalExam] start_exam_with_checkin error:', error);
+        toast.error('Failed to start exam. Please try again.');
         return;
       }
 
-      // Create an exam attempt stub (placeholder, will be updated on submission)
-      const { data: attemptData, error: attemptError } = await supabase
-        .from('exam_attempts')
-        .insert({
-          user_id: userId,
-          course_id: COURSE_ID,
-          total_score: 0,
-          passing_score: 80,
-          is_passed: false,
-          time_taken: 0,
-          photo_verification_url: photoDataUrl || null,
-          ip_address: userData.ip,
-          metadata: skipReason ? {
-            photo_verification_skipped: true,
-            bypass_reason: skipReason,
-            bypass_timestamp: new Date().toISOString()
-          } as any : {} as any
-        })
-        .select()
-        .single();
-
-      if (attemptError || !attemptData) {
-        console.error('Error creating exam attempt:', attemptError);
-        toast.error('Failed to create exam attempt. Please try again.');
-        return;
-      }
-
-      setExamAttemptId(attemptData.id);
-
-      // Create check-in row (don't chain .select() to avoid RLS 403 on RETURNING)
-      const checkinStatus = skipReason ? 'bypassed' : 'pending';
-      const { error: checkinError } = await supabase
-        .from('exam_checkins')
-        .insert({
-          attempt_id: attemptData.id,
-          user_id: userId,
-          course_id: COURSE_ID,
-          photo_url: photoDataUrl || null,
-          status: checkinStatus,
-          bypass_reason: skipReason || null,
-        });
-
-      if (checkinError) {
-        console.error('Error creating check-in:', checkinError);
-        // ROLLBACK: delete the orphaned exam attempt stub to prevent false cooldowns
-        console.warn('[FinalExam] Rolling back orphaned exam attempt:', attemptData.id);
-        await supabase
-          .from('exam_attempts')
-          .delete()
-          .eq('id', attemptData.id);
-        toast.error('Failed to create identity check-in. Please try again.');
-        return;
-      }
-
-      // Fetch the check-in ID separately (RLS-safe SELECT)
-      const { data: checkinRow } = await supabase
-        .from('exam_checkins')
-        .select('id')
-        .eq('attempt_id', attemptData.id)
-        .eq('user_id', userId)
-        .single();
-
-      setCheckinId(checkinRow?.id || null);
+      const result = data as unknown as { attempt_id: string; checkin_id: string; status: string; attempt_number: number };
+      setExamAttemptId(result.attempt_id);
+      setCheckinId(result.checkin_id);
 
       if (skipReason) {
-        // Self-attested bypass — go straight to ready
         setExamStage('ready');
         toast.info('Photo verification skipped. Proceeding to exam.');
       } else {
-        // Needs manager verification
         setExamStage('awaiting_verification');
         toast.success('Photo submitted! Awaiting manager verification.');
       }
