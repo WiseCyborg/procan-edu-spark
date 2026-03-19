@@ -247,11 +247,35 @@ serve(async (req) => {
   }
 
   try {
-    const { message, context = {}, user_id, user_roles = [], security_level = 'student' } = await req.json() as ChatRequest;
+    const { message, context = {} } = await req.json() as ChatRequest;
     
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // --- JWT Authentication & Server-side role resolution ---
+    let user_id: string | undefined;
+    let security_level = 'student';
+
+    const authHeader = req.headers.get('authorization');
+    if (authHeader?.startsWith('Bearer ')) {
+      const token = authHeader.replace('Bearer ', '');
+      const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+      if (!authError && user) {
+        user_id = user.id;
+        const { data: dbRoles } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id);
+        if (dbRoles && dbRoles.length > 0) {
+          const roles = dbRoles.map(r => r.role);
+          if (roles.includes('admin')) security_level = 'admin';
+          else if (roles.includes('dispensary_manager') || roles.includes('training_coordinator')) security_level = 'manager';
+        }
+      }
+    }
+
+    const user_roles = [security_level];
     
     // Classify intent
     const classification = classifyIntent(message, security_level);
