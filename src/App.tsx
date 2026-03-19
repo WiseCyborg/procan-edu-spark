@@ -482,6 +482,11 @@ const AppRoutesLayout = () => {
                 <UnifiedHealthReport />
               </ProtectedRoute>
             } />
+            <Route path="/admin/uat-test-matrix" element={
+              <ProtectedRoute>
+                <UATTestMatrix />
+              </ProtectedRoute>
+            } />
             {/* Legal Pages */}
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms-of-service" element={<TermsOfService />} />
