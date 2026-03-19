@@ -1300,12 +1300,13 @@ Deno.serve(async (req: Request) => {
           );
         } else {
           // Duplicate was allowed — clean it up and warn
+          // Delete all entitlements for this user+course except the original test one
           const { data: dups } = await supabase
             .from('course_entitlements')
             .select('id')
             .eq('user_id', realTestUserId)
             .eq('course_id', testCourseForPayment)
-            .eq('source', 'e2e_audit_dup');
+            .neq('id', testEntitlementId!);
           
           if (dups && dups.length > 0) {
             for (const d of dups) {
