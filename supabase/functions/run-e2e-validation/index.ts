@@ -1253,7 +1253,7 @@ Deno.serve(async (req: Request) => {
             user_id: realTestUserId,
             course_id: testCourseForPayment,
             status: 'active',
-            source: 'e2e_audit'
+            source: 'admin_grant'
           })
           .select('id')
           .single();
