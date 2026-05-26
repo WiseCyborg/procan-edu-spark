@@ -1258,6 +1258,14 @@ Deno.serve(async (req: Request) => {
 
     if (realTestUserId && testCourseForPayment) {
       try {
+        // Idempotent pre-cleanup: remove any residue from prior E2E runs
+        // so the insert below cannot collide with unique/check constraints.
+        await supabase
+          .from('course_entitlements')
+          .delete()
+          .eq('user_id', realTestUserId)
+          .eq('course_id', testCourseForPayment);
+
         const { data: inserted, error: insertErr } = await supabase
           .from('course_entitlements')
           .insert({
@@ -1271,6 +1279,7 @@ Deno.serve(async (req: Request) => {
 
         if (insertErr) throw insertErr;
         testEntitlementId = inserted.id;
+
 
         addResult('Payment Enrollment', 'H3 Entitlement Insert', 'Test entitlement created successfully',
           `Created entitlement: ${testEntitlementId}`,
