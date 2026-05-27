@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Activity, Mail, GitBranch, DollarSign, Heart, Shield, Wrench, Users } from 'lucide-react';
+import { Activity, Mail, GitBranch, DollarSign, Heart, Shield, Wrench, Users, ShieldCheck } from 'lucide-react';
 import { useOperationsMetrics } from '@/hooks/useOperationsMetrics';
 import { OverviewTab } from '@/components/admin/operations/OverviewTab';
 import { EmailTab } from '@/components/admin/operations/EmailTab';
@@ -11,6 +11,7 @@ import { HealthTab } from '@/components/admin/operations/HealthTab';
 import { SecurityTab } from '@/components/admin/operations/SecurityTab';
 import { TestingTab } from '@/components/admin/operations/TestingTab';
 import { UsersTab } from '@/components/admin/operations/UsersTab';
+import { RegressionTab } from '@/components/admin/operations/RegressionTab';
 
 export default function OperationsCommandCenter() {
   const { metrics, loading } = useOperationsMetrics();
@@ -61,7 +62,7 @@ export default function OperationsCommandCenter() {
 
         {/* Tabs Navigation */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-8 gap-2 bg-card border-2 p-2 h-auto">
+          <TabsList className="grid grid-cols-9 gap-2 bg-card border-2 p-2 h-auto">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <Activity className="h-4 w-4" />
               Overview
@@ -93,6 +94,10 @@ export default function OperationsCommandCenter() {
               <Wrench className="h-4 w-4" />
               Testing
             </TabsTrigger>
+            <TabsTrigger value="regression" className="flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4" />
+              Regression
+            </TabsTrigger>
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               Users
@@ -107,6 +112,7 @@ export default function OperationsCommandCenter() {
           <TabsContent value="health"><HealthTab /></TabsContent>
           <TabsContent value="security"><SecurityTab /></TabsContent>
           <TabsContent value="testing"><TestingTab /></TabsContent>
+          <TabsContent value="regression"><RegressionTab /></TabsContent>
           <TabsContent value="users"><UsersTab /></TabsContent>
         </Tabs>
       </div>
