@@ -515,3 +515,6 @@ verify_jwt = true
 
 [functions.generate-compliance-delta]
 verify_jwt = true
+
+[functions.post-migration-regression]
+verify_jwt = false
