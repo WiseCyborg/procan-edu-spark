@@ -54,21 +54,19 @@ const CertificateVerification = () => {
     setSearched(true);
 
     try {
-      // First check consumer certificates (CON-YYYY-XXXXXX format)
+      // First check consumer certificates (CON-YYYY-XXXXXX format) via public RPC
       if (certificateNumber.trim().startsWith('CON-')) {
-        const { data: consumerCert, error: consumerError } = await supabase
-          .from('consumer_certificates')
-          .select('certificate_number, badge_name, issue_date')
-          .eq('certificate_number', certificateNumber.trim())
-          .single();
+        const { data: consumerRows, error: consumerError } = await supabase
+          .rpc('verify_consumer_certificate_public', { p_code: certificateNumber.trim() });
 
+        const consumerCert = Array.isArray(consumerRows) ? consumerRows[0] : null;
         if (consumerCert && !consumerError) {
           setCertificate({
             certificate_number: consumerCert.certificate_number,
-            status: 'valid',
+            status: consumerCert.is_valid ? 'valid' : 'invalid',
             issue_date: consumerCert.issue_date,
             expiry_date: null, // Consumer certs don't expire
-            course_title: consumerCert.badge_name,
+            course_title: consumerCert.badge_name || consumerCert.course_title,
           });
           return;
         }
