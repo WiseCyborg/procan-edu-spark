@@ -5634,6 +5634,72 @@ export type Database = {
           },
         ]
       }
+      regression_runs: {
+        Row: {
+          created_at: string
+          deterministic: boolean | null
+          duration_ms: number | null
+          error: string | null
+          id: string
+          migration_version: string
+          report_path: string | null
+          run1_summary: Json | null
+          run2_summary: Json | null
+          status: string
+          triggered_by: string
+          updated_at: string
+          verdict: string | null
+        }
+        Insert: {
+          created_at?: string
+          deterministic?: boolean | null
+          duration_ms?: number | null
+          error?: string | null
+          id?: string
+          migration_version: string
+          report_path?: string | null
+          run1_summary?: Json | null
+          run2_summary?: Json | null
+          status?: string
+          triggered_by?: string
+          updated_at?: string
+          verdict?: string | null
+        }
+        Update: {
+          created_at?: string
+          deterministic?: boolean | null
+          duration_ms?: number | null
+          error?: string | null
+          id?: string
+          migration_version?: string
+          report_path?: string | null
+          run1_summary?: Json | null
+          run2_summary?: Json | null
+          status?: string
+          triggered_by?: string
+          updated_at?: string
+          verdict?: string | null
+        }
+        Relationships: []
+      }
+      regression_settings: {
+        Row: {
+          auto_enabled: boolean
+          id: number
+          updated_at: string
+        }
+        Insert: {
+          auto_enabled?: boolean
+          id?: number
+          updated_at?: string
+        }
+        Update: {
+          auto_enabled?: boolean
+          id?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       regulatory_change_notifications: {
         Row: {
           acknowledged_at: string | null
@@ -9560,6 +9626,7 @@ export type Database = {
         }[]
       }
       encrypt_pii: { Args: { plaintext: string }; Returns: string }
+      enqueue_regression_if_new: { Args: never; Returns: undefined }
       evaluate_and_issue_certificate:
         | {
             Args: {
