@@ -10120,6 +10120,14 @@ export type Database = {
           organization_name: string
         }[]
       }
+      validate_rvt_join_code_public: {
+        Args: { p_code: string }
+        Returns: {
+          has_capacity: boolean
+          is_expired: boolean
+          is_valid: boolean
+        }[]
+      }
       verify_certificate:
         | { Args: { p_code: string }; Returns: Json }
         | {
@@ -10140,6 +10148,16 @@ export type Database = {
           expiry_date: string
           issue_date: string
           status: string
+        }[]
+      }
+      verify_consumer_certificate_public: {
+        Args: { p_code: string }
+        Returns: {
+          badge_name: string
+          certificate_number: string
+          course_title: string
+          is_valid: boolean
+          issue_date: string
         }[]
       }
       verify_token_hash: {
