@@ -9864,6 +9864,12 @@ export type Database = {
           old_value: string
         }[]
       }
+      get_recent_certificate_activity: {
+        Args: { _limit?: number }
+        Returns: {
+          created_at: string
+        }[]
+      }
       get_user_organization: { Args: { _user_id: string }; Returns: string }
       get_user_organization_id: { Args: { _user_id: string }; Returns: string }
       get_user_tier: { Args: { _user_id: string }; Returns: string }
