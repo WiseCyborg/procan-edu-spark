@@ -1,263 +1,236 @@
+// Issue 1001 — REBUILT: public endpoint that takes { application_id } only.
+// - No JWT/role check (applicants have no auth user yet at this stage)
+// - Derives quantity, amount, org, contact server-side from dispensary_applications
+// - Stores application_id in rvt_purchases.metadata for the webhook to find
+// - Uses colon-delimited custom_id: "{purchaseId}:{organizationId}:{quantity}"
+//   (matches what paypal-webhook and verify-dispensary-payment-paypal parse)
+// - Idempotent on application_id: returns the existing pending order if one is open
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { getPayPalEnvForOrg, resolvePayPalCreds } from "../_shared/paypal-config.ts";
+import { DOMAINS } from "../_shared/domains.ts";
+import { PRICE_PER_SEAT, PAYMENT_CURRENCY, deriveQuantity } from "../_shared/payment-config.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+function json(body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const supabase = createClient(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+    { auth: { persistSession: false } }
+  );
+
   try {
-    // Authenticate user via JWT
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      throw new Error("Missing authorization header");
+    const body = await req.json().catch(() => ({}));
+    const application_id: string | undefined = body.application_id;
+
+    if (!application_id) {
+      return json({ success: false, error_code: "MISSING_APPLICATION_ID", error: "application_id is required" });
     }
 
-    const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-      { global: { headers: { Authorization: authHeader } } }
-    );
-
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
-    if (authError || !user) {
-      throw new Error("Unauthorized");
-    }
-
-    // Initialize service client for privileged operations
-    const supabaseService = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-      { auth: { persistSession: false } }
-    );
-
-    const { quantity, idempotencyKey } = await req.json();
-    
-    if (!quantity || !idempotencyKey) {
-      throw new Error("Quantity and idempotency key are required");
-    }
-
-    // Rate limit: 5 payment attempts per hour per IP
-    const clientIp = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
-    
-    const { data: rateLimitData } = await supabaseService.rpc('check_rate_limit', {
-      _user_id: null,
-      _action_type: `create_payment_${clientIp}`,
-      _max_requests: 5,
-      _window_minutes: 60
-    });
-
-    if (rateLimitData && rateLimitData.length > 0) {
-      const remaining = rateLimitData[0].remaining;
-      if (remaining <= 0) {
-        console.warn(`[RATE LIMIT] IP ${clientIp} exceeded payment creation limit`);
-        return new Response(
-          JSON.stringify({ 
-            error: 'Too many payment attempts. Please try again in 1 hour.',
-            code: 'RATE_LIMIT_EXCEEDED'
-          }),
-          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-    }
-
-    // Verify user role
-    const { data: hasPermission } = await supabaseService.rpc('has_any_role', {
-      _user_id: user.id,
-      _roles: ['dispensary_manager', 'training_coordinator']
-    });
-
-    if (!hasPermission) {
-      throw new Error("Insufficient permissions. Only Managers and Coordinators can purchase seats.");
-    }
-
-    // Check idempotency - prevent duplicate orders
-    const { data: existingPurchase } = await supabaseService
-      .from('rvt_purchases')
-      .select('*, paypal_order_id')
-      .eq('idempotency_key', idempotencyKey)
+    // Load the application
+    const { data: application, error: appError } = await supabase
+      .from("dispensary_applications")
+      .select(
+        "id, organization_id, organization_name, contact_person, contact_email, estimated_employees, requested_credits, application_status, payment_status"
+      )
+      .eq("id", application_id)
       .maybeSingle();
 
-    if (existingPurchase) {
-      console.log("Idempotency check: returning existing order", existingPurchase.paypal_order_id);
-      
-      // If order already exists and has PayPal order ID, return it
-      if (existingPurchase.paypal_order_id) {
-        return new Response(JSON.stringify({ 
-          orderId: existingPurchase.paypal_order_id,
-          message: "Order already exists"
-        }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 200,
-        });
+    if (appError || !application) {
+      return json({ success: false, error_code: "APPLICATION_NOT_FOUND", error: "Application not found" });
+    }
+
+    if (application.application_status !== "approved" && application.application_status !== "completed") {
+      return json({
+        success: false,
+        error_code: "APPLICATION_NOT_APPROVED",
+        error: "Application is not yet approved",
+      });
+    }
+
+    if (application.payment_status === "paid" || application.payment_status === "completed") {
+      return json({
+        success: false,
+        error_code: "ALREADY_PAID",
+        error: "This application has already been paid",
+        already_paid: true,
+      });
+    }
+
+    if (!application.organization_id) {
+      return json({
+        success: false,
+        error_code: "ORG_NOT_LINKED",
+        error: "Application is approved but no organization is linked. Contact support.",
+      });
+    }
+
+    const organization_id: string = application.organization_id;
+    const quantity = deriveQuantity({
+      estimated_employees: application.estimated_employees,
+      requested_credits: application.requested_credits,
+    });
+    const totalAmount = (quantity * PRICE_PER_SEAT).toFixed(2);
+
+    // Idempotency: reuse any pending purchase for this application
+    const idempotencyKey = `app_${application_id}`;
+    const { data: existingPurchase } = await supabase
+      .from("rvt_purchases")
+      .select("id, paypal_order_id, status, metadata")
+      .eq("idempotency_key", idempotencyKey)
+      .maybeSingle();
+
+    if (existingPurchase && existingPurchase.status === "paid") {
+      return json({
+        success: false,
+        error_code: "ALREADY_PAID",
+        error: "Payment already completed for this application",
+        already_paid: true,
+      });
+    }
+
+    // PayPal env + credentials for this org
+    const paypalEnv = await getPayPalEnvForOrg(organization_id);
+    const { id: clientId, secret: clientSecret, baseUrl } = resolvePayPalCreds(paypalEnv);
+    console.log(`[create-dispensary-payment-paypal] env=${paypalEnv} org=${organization_id} app=${application_id} qty=${quantity}`);
+
+    // Get / create purchase record FIRST so we have a stable purchase_id for custom_id
+    let purchaseId = existingPurchase?.id ?? null;
+    if (!purchaseId) {
+      const { data: inserted, error: insertError } = await supabase
+        .from("rvt_purchases")
+        .insert({
+          organization_id,
+          quantity,
+          amount_paid: totalAmount,
+          currency: PAYMENT_CURRENCY,
+          payment_method: "paypal",
+          status: "pending",
+          idempotency_key: idempotencyKey,
+          metadata: {
+            application_id,
+            contact_email: application.contact_email,
+            organization_name: application.organization_name,
+            paypal_env: paypalEnv,
+          },
+        })
+        .select("id")
+        .single();
+
+      if (insertError || !inserted) {
+        console.error("[create-dispensary-payment-paypal] purchase insert failed:", insertError);
+        return json({ success: false, error_code: "PURCHASE_INSERT_FAILED", error: insertError?.message }, 500);
       }
+      purchaseId = inserted.id;
     }
 
-    // Get user's organization
-    const { data: profile } = await supabaseService
-      .from('profiles')
-      .select('organization_id, organizations(*)')
-      .eq('user_id', user.id)
-      .single();
-
-    if (!profile?.organization_id) {
-      throw new Error("User is not associated with an organization");
-    }
-
-    const organization = profile.organizations;
-
-    if (!organization.admin_approved) {
-      throw new Error("Organization not yet approved by admin");
-    }
-
-    if (!organization.license_number) {
-      throw new Error("Organization missing license number");
-    }
-
-    // Get PayPal environment for this organization (test orgs always use sandbox)
-    const paypalEnv = await getPayPalEnvForOrg(organization.id);
-    const { id: PAYPAL_CLIENT_ID, secret: PAYPAL_CLIENT_SECRET, baseUrl: PAYPAL_API_BASE } = 
-      resolvePayPalCreds(paypalEnv);
-
-    console.log(`Using PayPal ${paypalEnv} mode for organization ${organization.id}`);
-
-    // Calculate amount
-    const unitAmount = 49.99;
-    const totalAmount = (quantity * unitAmount).toFixed(2);
-
-    // Create pending purchase record BEFORE PayPal interaction
-    const { data: purchase, error: purchaseError } = await supabaseService
-      .from('rvt_purchases')
-      .insert({
-        organization_id: organization.id,
-        quantity,
-        amount_paid: totalAmount,
-        currency: 'USD',
-        payment_method: 'paypal',
-        status: 'pending',
-        idempotency_key: idempotencyKey,
-        metadata: {
-          user_id: user.id,
-          user_email: user.email
-        }
-      })
-      .select()
-      .single();
-
-    if (purchaseError) {
-      console.error("Error creating purchase record:", purchaseError);
-      throw new Error("Failed to create purchase record");
-    }
-
-    console.log("Created purchase record:", purchase.id);
-
-    // Get PayPal access token
-    const paypalAuth = btoa(`${PAYPAL_CLIENT_ID}:${PAYPAL_CLIENT_SECRET}`);
-    
-    const tokenResponse = await fetch(`${PAYPAL_API_BASE}/v1/oauth2/token`, {
+    // PayPal access token
+    const tokenRes = await fetch(`${baseUrl}/v1/oauth2/token`, {
       method: "POST",
       headers: {
-        "Authorization": `Basic ${paypalAuth}`,
+        Authorization: `Basic ${btoa(`${clientId}:${clientSecret}`)}`,
         "Content-Type": "application/x-www-form-urlencoded",
       },
       body: "grant_type=client_credentials",
     });
-
-    const tokenData = await tokenResponse.json();
+    const tokenData = await tokenRes.json();
+    if (!tokenRes.ok || !tokenData.access_token) {
+      console.error("[create-dispensary-payment-paypal] token failed", tokenData);
+      return json({ success: false, error_code: "PAYPAL_TOKEN_FAILED", error: "PayPal auth failed" }, 502);
+    }
     const accessToken = tokenData.access_token;
 
-    // Create PayPal order with purchase_id in custom_id
+    // Use legacy underscore custom_id so verify-dispensary-payment-paypal continues parsing it.
+    const customId = `purchase_${purchaseId}_org_${organization_id}_qty_${quantity}`;
+
     const orderPayload = {
       intent: "CAPTURE",
-      purchase_units: [{
-        reference_id: purchase.id,
-        amount: {
-          currency_code: "USD",
-          value: totalAmount,
+      purchase_units: [
+        {
+          reference_id: purchaseId,
+          custom_id: customId,
+          description: `${quantity} ProCann Edu Training Seats for ${application.organization_name}`,
+          amount: {
+            currency_code: PAYMENT_CURRENCY,
+            value: totalAmount,
+          },
         },
-        description: `${quantity} ProCann Edu Training Seats for ${organization.name}`,
-        custom_id: `purchase_${purchase.id}_org_${organization.id}_qty_${quantity}`,
-      }],
+      ],
       application_context: {
-        return_url: `https://www.procannedu.com/payment-success?purchase_id=${purchase.id}`,
-        cancel_url: `https://www.procannedu.com/purchase-seats`,
         brand_name: "ProCann Edu",
         landing_page: "BILLING",
         user_action: "PAY_NOW",
+        return_url: `${DOMAINS.PRODUCTION}/payment-success?application_id=${application_id}&purchase_id=${purchaseId}`,
+        cancel_url: `${DOMAINS.PRODUCTION}/payment-cancel?application_id=${application_id}`,
       },
     };
 
-    const orderResponse = await fetch(`${PAYPAL_API_BASE}/v2/checkout/orders`, {
+    const orderRes = await fetch(`${baseUrl}/v2/checkout/orders`, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(orderPayload),
     });
+    const orderData = await orderRes.json();
 
-    const orderData = await orderResponse.json();
-
-    if (!orderResponse.ok) {
-      console.error("PayPal order creation error:", orderData);
-      
-      // Update purchase to failed
-      await supabaseService
-        .from('rvt_purchases')
-        .update({ status: 'failed', metadata: { ...purchase.metadata, paypal_error: orderData } })
-        .eq('id', purchase.id);
-      
-      throw new Error(`PayPal order creation failed: ${orderData.message || "Unknown error"}`);
+    if (!orderRes.ok) {
+      console.error("[create-dispensary-payment-paypal] order creation failed", orderData);
+      await supabase
+        .from("rvt_purchases")
+        .update({ status: "failed", metadata: { application_id, paypal_error: orderData } })
+        .eq("id", purchaseId);
+      return json({ success: false, error_code: "PAYPAL_ORDER_FAILED", error: orderData.message ?? "PayPal order failed" }, 502);
     }
 
-    // Update purchase with PayPal order ID
-    await supabaseService
-      .from('rvt_purchases')
+    await supabase
+      .from("rvt_purchases")
       .update({ paypal_order_id: orderData.id })
-      .eq('id', purchase.id);
+      .eq("id", purchaseId);
 
-    // Log audit event
-    await supabaseService
-      .from('payment_audit_log')
-      .insert({
-        order_id: orderData.id,
-        event_type: 'ORDER_CREATED',
-        event_data: {
-          purchase_id: purchase.id,
-          organization_id: organization.id,
-          quantity,
-          amount: totalAmount
-        }
-      });
+    await supabase.from("payment_events").insert({
+      application_id,
+      purchase_id: purchaseId,
+      paypal_order_id: orderData.id,
+      event_type: "ORDER_CREATED",
+      amount: totalAmount,
+      currency: PAYMENT_CURRENCY,
+      status: "created",
+      payload: { quantity, paypal_env: paypalEnv },
+    });
 
-    // Find the approval URL
-    const approvalUrl = orderData.links?.find((link: any) => link.rel === "approve")?.href;
-
+    const approvalUrl = orderData.links?.find((l: any) => l.rel === "approve")?.href;
     if (!approvalUrl) {
-      throw new Error("PayPal approval URL not found");
+      return json({ success: false, error_code: "NO_APPROVAL_URL", error: "PayPal approval URL missing" }, 502);
     }
 
-    console.log("PayPal order created successfully:", orderData.id);
-
-    return new Response(JSON.stringify({ 
+    return json({
+      success: true,
       url: approvalUrl,
+      approvalUrl, // alias for backward compatibility
       orderId: orderData.id,
-      purchaseId: purchase.id
-    }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
+      purchaseId,
+      quantity,
+      amount: totalAmount,
     });
-  } catch (error) {
-    console.error("Error in create-dispensary-payment-paypal:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 500,
-    });
+  } catch (err: any) {
+    console.error("[create-dispensary-payment-paypal] unexpected", err);
+    return json({ success: false, error_code: "INTERNAL_ERROR", error: err?.message ?? "Internal error" }, 500);
   }
 });
