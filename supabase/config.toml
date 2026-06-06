@@ -1,7 +1,5 @@
 project_id = "zhmpwczrvitomsxjwpzc"
 
-[functions.create-uat-account]
-verify_jwt = false
 
 
 
