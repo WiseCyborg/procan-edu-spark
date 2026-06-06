@@ -94,6 +94,7 @@ import AdminUtilities from "./pages/AdminUtilities";
 import UATTestMatrix from "./pages/admin/UATTestMatrix";
 import UATValidationPage from "./pages/UATValidationPage";
 import UATEvidenceSubmission from "./pages/UATEvidenceSubmission";
+import UATFeedback from "./pages/uat/UATFeedback";
 import UATDispensaryOnboarding from "./pages/UATDispensaryOnboarding";
 import AllCourses from "./pages/AllCourses";
 import VerifyCertificate from "./pages/VerifyCertificate";
@@ -418,6 +419,11 @@ const AppRoutesLayout = () => {
             <Route path="/uat/evidence" element={
               <ProtectedRoute>
                 <UATEvidenceSubmission />
+              </ProtectedRoute>
+            } />
+            <Route path="/uat/feedback" element={
+              <ProtectedRoute>
+                <UATFeedback />
               </ProtectedRoute>
             } />
             <Route path="/activate-ailean" element={<ActivateAiLean />} />
