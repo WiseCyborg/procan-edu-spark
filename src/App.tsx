@@ -37,6 +37,7 @@ import FinalExam from "./pages/Course/FinalExam";
 import Certificates from "./pages/Certificates";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import Payment from "./pages/Payment";
+import PaymentCancel from "./pages/PaymentCancel";
 import Dashboard from "./components/dashboard/Dashboard";
 import SmartDashboardRouter from "./components/routing/SmartDashboardRouter";
 import Header from "./components/layout/Header";
@@ -331,6 +332,7 @@ const AppRoutesLayout = () => {
             <Route path="/org/apply" element={<DispensaryApplication />} />
             <Route path="/payment" element={<Payment />} />
             <Route path="/payment/:applicationId" element={<Payment />} />
+            <Route path="/payment-cancel" element={<PaymentCancel />} />
             <Route path="/register/manager" element={<ManagerRegistration />} />
             <Route path="/manager-registration" element={<Navigate to="/register/manager" replace />} />
             <Route path="/get-started" element={<GetStarted />} />
