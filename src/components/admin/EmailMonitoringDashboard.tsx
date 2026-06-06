@@ -334,40 +334,17 @@ const EmailMonitoringDashboard = () => {
   };
 
   const testSMTPConnection = async () => {
-    try {
-      setSMTPHealth(prev => ({ ...prev, status: 'checking' }));
-      
-      const { data, error } = await supabase.functions.invoke('test-smtp-connection', {
-        body: {}
-      });
-
-      if (error) throw error;
-
-      setSMTPHealth({
-        status: data.success ? 'healthy' : 'unhealthy',
-        latencyMs: data.latencyMs || null,
-        lastChecked: new Date(),
-        error: data.error || null
-      });
-
-      toast({
-        title: data.success ? "SMTP Healthy" : "SMTP Connection Failed",
-        description: data.success 
-          ? `Connection successful (${data.latencyMs}ms)` 
-          : data.error || "Failed to connect",
-        variant: data.success ? "default" : "destructive"
-      });
-    } catch (error: any) {
-      console.error('Error testing SMTP connection:', error);
-      setSMTPHealth({
-        status: 'unhealthy',
-        latencyMs: null,
-        lastChecked: new Date(),
-        error: error.message
-      });
-      toast({
-        title: "SMTP Test Failed",
-        description: error.message,
+    setSMTPHealth({
+      status: 'unhealthy',
+      latencyMs: null,
+      lastChecked: new Date(),
+      error: 'SMTP self-test diagnostic retired. Use Supabase Edge Function logs to verify SMTP.',
+    });
+    toast({
+      title: "Diagnostic retired",
+      description: "The SMTP self-test endpoint has been removed.",
+    });
+  };
         variant: "destructive"
       });
     }

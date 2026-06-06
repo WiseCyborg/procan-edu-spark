@@ -49,11 +49,7 @@ export const PayPalModeToggle = () => {
       if (config?.environment) {
         setEnvironment(config.environment as 'sandbox' | 'production');
       } else {
-        // Fallback: test connection to determine mode
-        const { data: testData, error: testError } = await supabase.functions.invoke('test-paypal-connection');
-        if (!testError && testData?.details?.environment) {
-          setEnvironment(testData.details.environment);
-        }
+        // Diagnostic retired: leave environment unset rather than calling deleted edge function.
       }
     } catch (error) {
       console.error('Error fetching PayPal mode:', error);
@@ -64,31 +60,9 @@ export const PayPalModeToggle = () => {
   };
 
   const testConnection = async () => {
-    try {
-      setTesting(true);
-      toast.info('Testing PayPal connection...');
-
-      const { data, error } = await supabase.functions.invoke('test-paypal-connection');
-
-      if (error) throw error;
-
-      if (data?.success) {
-        toast.success('PayPal connection successful', {
-          description: `Connected to ${data.details?.environment || 'unknown'} environment`,
-        });
-      } else {
-        toast.error('PayPal connection failed', {
-          description: data?.error || 'Unknown error',
-        });
-      }
-    } catch (error: any) {
-      console.error('Connection test error:', error);
-      toast.error('Connection test failed', {
-        description: error.message,
-      });
-    } finally {
-      setTesting(false);
-    }
+    toast.info('PayPal self-test retired', {
+      description: 'Check Supabase Edge Function logs for paypal-webhook and create-dispensary-payment-paypal.',
+    });
   };
 
   const handleToggleRequest = (checked: boolean) => {

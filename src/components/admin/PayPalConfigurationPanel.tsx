@@ -29,44 +29,12 @@ export const PayPalConfigurationPanel = ({ onStatusChange }: PayPalConfigPanelPr
     if (onStatusChange) onStatusChange('testing');
 
     try {
-      const { data, error } = await supabase.functions.invoke('test-paypal-connection');
-      
-      if (error) throw error;
-
-      if (data?.success) {
-        setStatus('connected');
-        setEnvironment(data.details.environment);
-        
-        // Create masked credentials
-        const clientIdFirst = data.details.clientIdFirst4 || '';
-        const clientIdLast = data.details.clientIdLast4 || '';
-        const maskedId = `${clientIdFirst}${'•'.repeat(32)}${clientIdLast}`;
-        setClientIdMasked(maskedId);
-        
-        // Mask secret similarly (we don't get secret back, so use placeholder)
-        setSecretMasked(`${'•'.repeat(40)}`);
-        
-        setLastTestTime(new Date());
-        
-        if (onStatusChange) onStatusChange('connected');
-        
-        toast({
-          title: "✅ PayPal Connected",
-          description: `Successfully connected to PayPal ${data.details.environment}`,
-        });
-      } else {
-        throw new Error(data?.message || 'Connection failed');
-      }
-    } catch (err: any) {
       setStatus('error');
-      setErrorDetails(err);
-      
+      setErrorDetails({ message: 'PayPal self-test diagnostic retired. Verify via Supabase Edge Function logs.' });
       if (onStatusChange) onStatusChange('error');
-      
       toast({
-        title: "❌ Connection Failed",
-        description: err.message || "Unable to connect to PayPal",
-        variant: "destructive"
+        title: "Diagnostic retired",
+        description: "Use Supabase Edge Function logs to verify PayPal connectivity.",
       });
     } finally {
       setTestLoading(false);

@@ -91,39 +91,12 @@ export function PayPalManagementPanel() {
     setConnectionStatus("testing");
     
     try {
-      const { data, error } = await supabase.functions.invoke("test-paypal-connection");
-      
-      if (error) throw error;
-
-      if (data.success) {
-        setConnectionStatus("connected");
-        setErrorDetails(null);
-        setLastTestTime(new Date());
-        if (showToast) {
-          toast({
-            title: "Connection successful",
-            description: `PayPal ${data.environment} environment is working correctly`,
-          });
-        }
-      } else {
-        setConnectionStatus("error");
-        setErrorDetails(data.error || "Unknown error");
-        if (showToast) {
-          toast({
-            variant: "destructive",
-            title: "Connection failed",
-            description: data.error || "Failed to connect to PayPal",
-          });
-        }
-      }
-    } catch (error: any) {
       setConnectionStatus("error");
-      setErrorDetails(error.message);
+      setErrorDetails("PayPal self-test diagnostic has been retired. Verify credentials via the Edge Function logs in Supabase.");
       if (showToast) {
         toast({
-          variant: "destructive",
-          title: "Connection test failed",
-          description: error.message,
+          title: "Diagnostic retired",
+          description: "The PayPal self-test endpoint has been removed. Use Supabase Edge Function logs to verify connectivity.",
         });
       }
     } finally {
