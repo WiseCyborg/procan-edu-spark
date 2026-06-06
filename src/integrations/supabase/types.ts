@@ -8239,6 +8239,48 @@ export type Database = {
           },
         ]
       }
+      uat_task_templates: {
+        Row: {
+          created_at: string
+          deep_link: string | null
+          description: string
+          expected_result: string
+          id: string
+          priority: number
+          role_to_test: string
+          sort_order: number
+          task_code: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deep_link?: string | null
+          description: string
+          expected_result: string
+          id?: string
+          priority?: number
+          role_to_test: string
+          sort_order?: number
+          task_code: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deep_link?: string | null
+          description?: string
+          expected_result?: string
+          id?: string
+          priority?: number
+          role_to_test?: string
+          sort_order?: number
+          task_code?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       uat_tasks: {
         Row: {
           assigned_to: string | null
@@ -10110,6 +10152,16 @@ export type Database = {
           p_photo_url?: string
         }
         Returns: Json
+      }
+      start_uat_run: { Args: { p_organization_id?: string }; Returns: string }
+      submit_uat_step: {
+        Args: {
+          p_evidence_path?: string
+          p_notes?: string
+          p_result: string
+          p_task_id: string
+        }
+        Returns: undefined
       }
       suspend_organization: {
         Args: { p_org_id: string; p_reason?: string }
