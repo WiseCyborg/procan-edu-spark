@@ -51,8 +51,8 @@ export const UniversalCourseCard = ({
   const handlePurchase = async () => {
     setIsPurchasing(true);
     try {
-      const { data, error } = await supabase.functions.invoke('create-course-checkout', {
-        body: { course_id: course.id }
+      const { data, error } = await supabase.functions.invoke('create-course-payment-paypal', {
+        body: { courseId: course.id }
       });
 
       if (error) throw error;

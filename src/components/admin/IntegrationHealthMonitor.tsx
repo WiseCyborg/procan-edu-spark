@@ -41,61 +41,15 @@ export const IntegrationHealthMonitor = () => {
     }
   };
 
-  const testPayPal = async () => {
-    try {
-      const { data, error } = await supabase.functions.invoke('test-paypal-connection');
-      if (error) throw error;
-      
-      toast({
-        title: data.success ? "PayPal Connected" : "PayPal Connection Failed",
-        description: data.success ? `Latency: ${data.latencyMs}ms` : data.error,
-        variant: data.success ? "default" : "destructive",
-      });
-    } catch (error) {
-      toast({
-        title: "Test Failed",
-        description: "Unable to test PayPal connection",
-        variant: "destructive",
-      });
-    }
-  };
+  const retiredToast = () =>
+    toast({
+      title: "Diagnostic retired",
+      description: "Integration self-tests have been removed. Check Edge Function logs in Supabase instead.",
+    });
 
-  const testEmail = async () => {
-    try {
-      const { data, error } = await supabase.functions.invoke('test-email-providers');
-      if (error) throw error;
-      
-      toast({
-        title: "Email Provider Test Complete",
-        description: `Resend: ${data.resend?.status}, SMTP: ${data.smtp?.status}`,
-      });
-    } catch (error) {
-      toast({
-        title: "Test Failed",
-        description: "Unable to test email providers",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const testSMTP = async () => {
-    try {
-      const { data, error } = await supabase.functions.invoke('test-smtp-connection');
-      if (error) throw error;
-      
-      toast({
-        title: data.success ? "SMTP Connected" : "SMTP Connection Failed",
-        description: data.success ? `Latency: ${data.latencyMs}ms` : data.error,
-        variant: data.success ? "default" : "destructive",
-      });
-    } catch (error) {
-      toast({
-        title: "Test Failed",
-        description: "Unable to test SMTP connection",
-        variant: "destructive",
-      });
-    }
-  };
+  const testPayPal = retiredToast;
+  const testEmail = retiredToast;
+  const testSMTP = retiredToast;
 
   useEffect(() => {
     fetchIntegrationHealth();
