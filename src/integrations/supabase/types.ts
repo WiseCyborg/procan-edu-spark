@@ -10182,6 +10182,7 @@ export type Database = {
         }
         Returns: number
       }
+      setup_comar_scrape_cron: { Args: { secret: string }; Returns: string }
       start_exam_with_checkin: {
         Args: {
           p_bypass_reason?: string
