@@ -330,6 +330,7 @@ const AppRoutesLayout = () => {
             } />
             <Route path="/org/apply" element={<DispensaryApplication />} />
             <Route path="/payment" element={<Payment />} />
+            <Route path="/payment/:applicationId" element={<Payment />} />
             <Route path="/register/manager" element={<ManagerRegistration />} />
             <Route path="/manager-registration" element={<Navigate to="/register/manager" replace />} />
             <Route path="/get-started" element={<GetStarted />} />
