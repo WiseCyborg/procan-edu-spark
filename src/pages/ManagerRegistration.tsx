@@ -54,8 +54,9 @@ export default function ManagerRegistration() {
 
   useEffect(() => {
     if (!token) {
-      setValidationStatus('invalid');
-      setLoading(false);
+      // No token at all — likely a bookmark, typed URL, or malformed email link.
+      // Send users to the get-started flow instead of showing a scary "Invalid Link" page.
+      navigate('/get-started', { replace: true });
       return;
     }
 
