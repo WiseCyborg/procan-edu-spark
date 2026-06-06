@@ -1,92 +1,66 @@
-# Two-Priority Delivery Plan
+# Issue 1001 — Stripe/PayPal Payment Redirect Fix
 
-Both pipelines held to the same bar: **automated guarantees, not manual maintenance.** Nothing ships until each item below has a verified signal.
+## Problem
+Dispensary owner (Danielle) completed registration and landed in the authenticated dashboard **without ever being redirected to checkout**. Payment status is ambiguous; she is inside the platform but has not paid. This blocks conversion and creates a billing/audit gap.
 
----
+## Required End-to-End Flow
+```text
+Registration form submitted
+  → AUTO redirect to PayPal/Stripe Checkout (no manual "Go to Payment" button)
+  → Customer pays
+  → Webhook marks dispensary_applications.payment_status = 'paid' + creates order row
+  → AUTO redirect to success page → dashboard
+  → Coordinator account active, seats provisioned
+```
 
-## Priority 1 — COMAR Scraper: Close the Loop
+## Root Causes to Investigate & Fix
+1. **Registration submit handler does not invoke checkout.** Today the flow drops the user on the dashboard or on `/payment/:applicationId` with a manual button (`src/pages/Payment.tsx`). The submit path must call `create-dispensary-payment-paypal` and `window.location.href = approvalUrl` immediately on success.
+2. **Contract mismatch with `create-dispensary-payment-paypal`.** Payment.tsx sends `{ application_id, credits, amount, organization_name, contact_email }`; the function must accept exactly that shape and return `{ approvalUrl }`. Audit and align.
+3. **Permissions gate.** Function currently requires `dispensary_manager` role, which an applicant does not yet have. Decision needed: (a) make this endpoint accept an approved-application token instead of a role, or (b) reorder flow so manager role is granted at approval time (pre-payment) — recommend (a) to avoid privilege escalation.
+4. **Webhook → DB write.** Confirm PayPal capture webhook updates `dispensary_applications.payment_status='paid'` and inserts `orders` row idempotently. Without this, success redirect lands on an unpaid record.
+5. **Success/cancel URLs.** Must be absolute (`https://www.procannedu.com/...`), not `req.headers.origin`, so they survive PayPal's redirect chain.
 
-The `trigger-scrapers` / `monitor-comar-updates` rewrite landed and the runbook is in place. What's still missing is the **automation + alerting + proof it runs end-to-end without a human.**
+## Deliverables
 
-### 1.1 Register pg_cron jobs (06:00 / 08:00 UTC)
-Use `supabase--insert` (not migration) so the function URL + auth header stay project-scoped:
+### 1. Registration auto-redirect
+- Wire the registration form submit handler: on successful application create → immediately invoke `create-dispensary-payment-paypal` → redirect to `approvalUrl`.
+- Remove the intermediate "click to pay" screen from the happy path. Keep `/payment/:applicationId` only as a recovery route for users who bounce back from email links.
 
-- `comar-scrape-daily` — 06:00 UTC → `POST /functions/v1/trigger-scrapers`
-- `comar-compliance-check` — 08:00 UTC → `POST /functions/v1/check-comar-compliance`
+### 2. Edge function audit (`create-dispensary-payment-paypal`)
+- Accept `{ application_id }` as the sole required input; derive `credits`, `amount`, org info server-side from `dispensary_applications` (don't trust client).
+- Drop `dispensary_manager` role check; instead verify the caller's auth user matches `dispensary_applications.contact_email` OR the application is in `approved` status and an unused checkout.
+- Return `{ approvalUrl, orderId }`.
+- Use absolute production URLs for `return_url`/`cancel_url`.
 
-Both jobs send `Authorization: Bearer <CRON_SHARED_SECRET>` so `trigger-scrapers` can reject anything that isn't pg_cron. (`pg_cron` + `pg_net` extensions enabled first.)
+### 3. Webhook hardening
+- Confirm `paypal-webhook` edge function: validates signature, idempotent on `event.id`, writes `orders` row, updates `dispensary_applications.payment_status`, fires confirmation email.
+- Add structured log to `cron_job_executions` or a dedicated `payment_events` row on every webhook receipt (success + failure).
 
-### 1.2 Provision the cron secret
-Add `CRON_SHARED_SECRET` via `secrets--add_secret` and confirm `trigger-scrapers` validates it before doing any work. Reject with 401 if missing/mismatched.
+### 4. Six-scenario verification matrix
+| # | Scenario | Expected |
+|---|---|---|
+| 1 | New approved applicant submits registration | Auto-redirect to PayPal, returns paid, lands on dashboard |
+| 2 | Already-paid application revisits `/payment/:id` | Friendly "payment complete" + redirect to auth |
+| 3 | Unauthenticated visitor hits `/payment/:id` | Loads (public route), can pay via approval token |
+| 4 | Different user hits someone else's `/payment/:id` | 403 / branded error |
+| 5 | Invalid application id | Branded not-found |
+| 6 | Legacy `/payment?application_id=...` query string | Still works |
 
-### 1.3 Wire the three failure alert behaviors (explicit, not "alerting wired")
-In `trigger-scrapers`:
-1. **Scraper throws** → row in `regulatory_updates` with `change_type='scrape_error'` + Resend email to admin list.
-2. **HTTP 5xx from source** → same error row + email, with status code in metadata bag.
-3. **Partial success (1 of 2 scrapers fails)** → 207 response, error row for the failed one, success row for the other, single consolidated email.
+### 5. Deploy-readiness verdict
+Single explicit **READY** or **NOT READY** statement with blockers enumerated. No "mostly done."
 
-Confirm Resend connector + `ADMIN_ALERT_EMAILS` secret are present; add via `standard_connectors--connect` / `secrets--add_secret` if not.
+## Out of Scope (this ticket)
+- Migrating from PayPal to Stripe Checkout.
+- Refactor to dedicated `/checkout` route.
+- Retry/backoff inside the payment function.
+- Refunds UI.
 
-### 1.4 Dashboard staleness surface
-`RegulatorySyncPanel` already reads `monitor-comar-updates`. Verify the warning copy explicitly cites the **26-hour threshold** ("one missed cycle") so the operator knows red banner = automation broke, not just "old data."
+## Technical Notes
+- Files: `src/pages/Payment.tsx`, registration form component (TBD — locate dispensary registration submit handler), `supabase/functions/create-dispensary-payment-paypal/index.ts`, `supabase/functions/paypal-webhook/index.ts`, `src/App.tsx` routes.
+- Pricing constant: `PRICE_PER_SEAT = 49` lives in `Payment.tsx`; move to shared config so function + UI agree.
+- Use `DOMAINS.PRODUCTION` from `supabase/functions/_shared/domains.ts` for return URLs.
 
-### 1.5 End-to-end verification (the proof)
-Run the runbook sequence and capture results:
-1. `supabase--curl_edge_functions` POST `/trigger-scrapers` with the cron secret → expect 200, new `cron_job_executions` row, `regulatory_content.last_modified_at` advances.
-2. Force a failure (bad source URL via temporary env override OR mock 500) → expect 207, error row in `regulatory_updates`, email in `email_send_log`.
-3. GET `/monitor-comar-updates` as admin → `lastSuccessfulScrape`, `dataAgeHours`, `staleWarning` all populated.
-4. `SELECT * FROM cron.job WHERE jobname LIKE 'comar-%'` → two rows, correct schedules.
-5. Trigger `check-comar-compliance` manually → confirms it reads the freshly-scraped content.
-
-Each check either passes or blocks deploy. No "looks good."
-
----
-
-## Priority 2 — Payment Fix: Audit Before Declaring Done
-
-The route fix (`/payment/:applicationId` + dual param read) is in. Before this is deploy-ready, it has to be **audited against the full checklist and tested against all 6 scenarios.**
-
-### 2.1 Audit report (Implemented / Partial / Missing)
-Walk every checklist item against current code in `src/App.tsx`, `src/pages/Payment.tsx`, the approval email template, and the Stripe checkout edge function. Output a table:
-
-| Checklist item | Status | Evidence (file:line or test result) |
-
-Items to verify at minimum:
-- Route accepts both `/payment/:id` and `/payment?application_id=` ✓ (verify)
-- Approval email link format matches the new route
-- Unauthenticated user hitting `/payment/<id>` → redirected to `/auth` with return URL preserved
-- Application not found → branded error, not blank
-- Application already paid → friendly "already complete" state, not duplicate Stripe session
-- Application belongs to a different user → 403/branded denial (no enumeration)
-- Stripe checkout session creation still works with the id passed via params
-- Success / cancel return URLs land on correct pages
-
-### 2.2 Six-scenario test matrix
-Execute each via `supabase--curl_edge_functions` for backend paths + session replay / browser preview for UI:
-1. Logged-in owner, valid app, unpaid → reaches Stripe checkout.
-2. Logged-in owner, valid app, already paid → "already paid" state.
-3. Logged-out user with valid link → auth redirect, then resumes payment.
-4. Logged-in user, app belongs to someone else → denied, no data leak.
-5. Invalid/nonexistent application id → branded not-found.
-6. Legacy query-string link (`?application_id=`) → still works (backwards compat).
-
-Each scenario gets pass/fail + screenshot or response body.
-
-### 2.3 Deploy readiness gate
-A single explicit statement at the end: **READY** or **NOT READY**, with the blockers listed if not. No soft language.
-
----
-
-## Out of Scope (held for next sprint)
-- Migration to add native `metadata jsonb` + `success boolean` to `cron_job_executions` (JSON-in-`error_message` is the bridge).
-- Backoff/retry inside `trigger-scrapers` (pg_cron retries next cycle).
-- Per-section diff beyond current `analyze-regulatory-impact`.
-- Payment refactor to a dedicated `/checkout` flow.
-
----
-
-## Technical Details
-- **Secrets needed:** `CRON_SHARED_SECRET` (new), `ADMIN_ALERT_EMAILS` (verify), Resend connection (verify).
-- **Files touched:** none new for P1 beyond cron SQL via `supabase--insert`; P2 is verification-only unless audit surfaces a gap.
-- **Tools used:** `supabase--insert` (cron), `secrets--add_secret`, `standard_connectors--connect` (Resend if missing), `supabase--curl_edge_functions`, `supabase--read_query`, `supabase--edge_function_logs`, browser/session replay for UI scenarios.
-- **Deliverables:** (1) cron rows visible in `cron.job`, (2) verification log pasted in chat, (3) P2 audit table + 6-scenario results + READY/NOT READY verdict.
+## Confirmation Needed Before Build
+1. Keep **PayPal** as the processor, or migrate to Stripe Checkout (Lovable's built-in Stripe is available)?
+2. Confirm flow choice for permissions: **(a)** application-token-based checkout (recommended), or **(b)** grant `dispensary_manager` role at approval time so existing role check passes?
+3. Confirm `paypal-webhook` edge function exists and is the source of truth for marking `payment_status='paid'`.
