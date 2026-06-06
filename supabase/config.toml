@@ -183,8 +183,6 @@ verify_jwt = true
 [functions.send-application-confirmation]
 verify_jwt = false
 
-[functions.send-test-emails]
-verify_jwt = false
 
 [functions.staff-invitation-manager]
 verify_jwt = false
@@ -498,8 +496,6 @@ verify_jwt = true
 [functions.admin-impersonate-user]
 verify_jwt = true
 
-[functions.email-preview]
-verify_jwt = true
 
 [functions.admin-user-management]
 verify_jwt = true
