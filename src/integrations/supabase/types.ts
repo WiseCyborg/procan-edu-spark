@@ -743,6 +743,45 @@ export type Database = {
           },
         ]
       }
+      certificate_generation_errors: {
+        Row: {
+          attempt_number: number
+          certificate_id: string | null
+          course_id: string | null
+          created_at: string
+          error_detail: Json | null
+          error_message: string
+          exam_attempt_id: string | null
+          id: string
+          source: string
+          user_id: string | null
+        }
+        Insert: {
+          attempt_number?: number
+          certificate_id?: string | null
+          course_id?: string | null
+          created_at?: string
+          error_detail?: Json | null
+          error_message: string
+          exam_attempt_id?: string | null
+          id?: string
+          source: string
+          user_id?: string | null
+        }
+        Update: {
+          attempt_number?: number
+          certificate_id?: string | null
+          course_id?: string | null
+          created_at?: string
+          error_detail?: Json | null
+          error_message?: string
+          exam_attempt_id?: string | null
+          id?: string
+          source?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       certificates: {
         Row: {
           certificate_number: string
