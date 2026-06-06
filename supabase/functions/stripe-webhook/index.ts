@@ -7,8 +7,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, stripe-signature",
 };
 
-// Idempotency: Track processed events
-const processedEvents = new Set<string>();
+// Idempotency is enforced via a DB lookup against payment_events.stripe_event_id
+// (unique index). In-memory state cannot be trusted across cold starts.
 
 const log = (step: string, details?: unknown) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
@@ -63,26 +63,38 @@ serve(async (req) => {
       event = JSON.parse(body);
     }
 
-    // Idempotency check - skip if already processed
-    if (processedEvents.has(event.id)) {
-      log("Skipped duplicate event", { eventId: event.id });
+    // Persistent idempotency: check if this Stripe event has already been recorded.
+    // payment_events.stripe_event_id has a UNIQUE constraint, so we use it as the
+    // single source of truth — durable across cold starts.
+    const { data: existingEvent } = await supabaseService
+      .from("payment_events")
+      .select("id, status")
+      .eq("stripe_event_id", event.id)
+      .maybeSingle();
+
+    if (existingEvent && ["completed", "processing"].includes(existingEvent.status)) {
+      log("Skipped duplicate event", { eventId: event.id, status: existingEvent.status });
       return new Response(JSON.stringify({ received: true, skipped: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
       });
     }
 
-    // Log the event to payment_events table (if it exists)
+    // Record the event. Use upsert so concurrent retries can't both insert;
+    // ignoreDuplicates relies on the existing UNIQUE(stripe_event_id) index.
     try {
       await supabaseService
         .from("payment_events")
-        .insert({
-          stripe_event_id: event.id,
-          event_type: event.type,
-          session_id: (event.data.object as any).id || null,
-          status: "received",
-          payload: event.data.object,
-        });
+        .upsert(
+          {
+            stripe_event_id: event.id,
+            event_type: event.type,
+            session_id: (event.data.object as any).id || null,
+            status: "received",
+            payload: event.data.object,
+          },
+          { onConflict: "stripe_event_id", ignoreDuplicates: true }
+        );
     } catch (logError) {
       log("WARN", { message: "Could not log to payment_events", error: logError });
     }
