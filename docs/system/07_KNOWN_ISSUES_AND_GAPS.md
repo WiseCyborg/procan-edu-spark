@@ -1,5 +1,21 @@
 # 07 — Known Issues, Gaps & Next-Step Ranking
 
+## 2026-06-06 — Reconciliation of externally-supplied gap list
+
+An external "9 known gaps" list (uploaded `07_KNOWN_ISSUES_AND_GAPS.md`) was mapped against the live schema. Most referenced tables (`chat_sessions`, `chat_messages`, `stripe_events`, `exam_answers`, `compliance_records`, `audit_log`, `profile_complete`/`completeness_pct`, `certificate_generation_errors`) did **not** exist in this codebase. Outcome:
+
+| Ext. gap | Verdict | Action taken |
+|---|---|---|
+| 1 `has_role` deploy order | Non-issue (function present, widely used) | None |
+| 2 Cert PDF silent failure | Partially real — retry fn exists, no error log | **Fixed**: added `certificate_generation_errors` table; `generate-certificate` and `generate-certificate-retry` now insert a row on final failure |
+| 3 Stripe webhook idempotency | Real — was in-memory `Set`, lost on cold start | **Fixed**: now checks `payment_events.stripe_event_id` (existing unique index) + upsert with `ignoreDuplicates` |
+| 4 Chat persistence | Tables don't exist — feature, not bug | Deferred |
+| 5 `exam_answers` cleanup | Table doesn't exist | N/A |
+| 6 `compliance_records` refresh | Table doesn't exist | N/A |
+| 7 `uat-screenshots` bucket policy | Manual dashboard step | Verify per env |
+| 8 `profile_complete` mismatch | Columns don't exist | N/A |
+| 9 `audit_log` indexes | Table doesn't exist; real audit tables do | **Fixed**: added composite indexes on `admin_operations_audit`, `security_audit_log`, `certificate_audit_log` |
+
 ## Open structural risks
 
 | # | Area | Risk | Suggested fix | Effort |
