@@ -3,8 +3,6 @@ project_id = "zhmpwczrvitomsxjwpzc"
 
 
 
-[functions.stripe-webhook]
-verify_jwt = false
 
 [functions.configure-encryption-key]
 verify_jwt = false
@@ -99,8 +97,6 @@ verify_jwt = false
 [functions.check-email-exists]
 verify_jwt = false
 
-[functions.test-paypal-connection]
-verify_jwt = false
 
 [functions.check-paypal-secrets]
 verify_jwt = false
@@ -147,8 +143,6 @@ verify_jwt = false
 [functions.notify-profile-changes]
 verify_jwt = true
 
-[functions.test-smtp-connection]
-verify_jwt = true
 
 [functions.notify-application-status]
 verify_jwt = false
@@ -202,8 +196,6 @@ verify_jwt = false
 [functions.generate-compliance-report]
 verify_jwt = false
 
-[functions.diagnostic-email]
-verify_jwt = false
 
 [functions.email-health-check]
 verify_jwt = false
@@ -337,8 +329,6 @@ verify_jwt = false
 [functions.check-certificate-expiry]
 verify_jwt = false
 
-[functions.test-email-providers]
-verify_jwt = false
 
 [functions.reconcile-seats]
 verify_jwt = true
@@ -346,8 +336,6 @@ verify_jwt = true
 [functions.batch-regenerate-tokens]
 verify_jwt = true
 
-[functions.diagnose-email-system]
-verify_jwt = false
 
 [functions.reset-email-circuit-breaker]
 verify_jwt = true
@@ -509,11 +497,7 @@ verify_jwt = true
 [functions.admin-end-proxy-session]
 verify_jwt = true
 
-[functions.create-course-checkout]
-verify_jwt = true
 
-[functions.verify-course-payment]
-verify_jwt = true
 
 [functions.generate-compliance-delta]
 verify_jwt = true
