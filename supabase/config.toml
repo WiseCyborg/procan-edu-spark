@@ -521,6 +521,3 @@ verify_jwt = true
 
 [functions.post-migration-regression]
 verify_jwt = false
-
-[functions.setup-comar-cron]
-verify_jwt = true
