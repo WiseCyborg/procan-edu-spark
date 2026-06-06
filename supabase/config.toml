@@ -1,7 +1,8 @@
 project_id = "zhmpwczrvitomsxjwpzc"
 
-[functions.seed-uat-credentials-louis-dani]
+[functions.create-uat-account]
 verify_jwt = false
+
 
 
 [functions.stripe-webhook]
