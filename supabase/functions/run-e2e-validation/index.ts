@@ -1214,19 +1214,19 @@ Deno.serve(async (req: Request) => {
     // ==========================================
     console.log('=== Journey H: Payment & Enrollment Audit [Tier 1 - Financial] ===');
 
-    // H1: Stripe webhook edge function exists and responds
+    // H1: PayPal webhook edge function exists and responds
     try {
-      const webhookUrl = `${supabaseUrl}/functions/v1/stripe-webhook`;
+      const webhookUrl = `${supabaseUrl}/functions/v1/paypal-webhook`;
       const r = await fetch(webhookUrl, { method: 'GET' });
       await r.text(); // consume body
       const ok = [200, 204, 400, 401, 403, 405].includes(r.status);
-      addResult('Payment Enrollment', 'H1 Webhook Exists', 'Stripe webhook edge function responds',
+      addResult('Payment Enrollment', 'H1 Webhook Exists', 'PayPal webhook edge function responds',
         `Status: ${r.status}`,
         ok,
         { is_blocker: !ok, risk_level: 'financial', journey_tier: 1, notes: 'GET returns 405/401/403 is acceptable for POST-only webhook' }
       );
     } catch (e: any) {
-      addResult('Payment Enrollment', 'H1 Webhook Exists', 'Stripe webhook edge function responds',
+      addResult('Payment Enrollment', 'H1 Webhook Exists', 'PayPal webhook edge function responds',
         `Exception: ${e.message}`, false,
         { is_blocker: true, error_meta: { code: 'EXCEPTION', message: e.message }, risk_level: 'financial', journey_tier: 1 }
       );

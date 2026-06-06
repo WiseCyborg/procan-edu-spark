@@ -392,7 +392,7 @@ export default function OwnersIntelligence() {
               description="Tracks email deliverability and performance"
               lastRun={agentRuns?.find(r => r.agent_name.includes('Email'))?.created_at}
               status="active"
-              onRun={() => handleRunAgent('test-email-providers')}
+              onRun={() => handleRunAgent('email-health-agent')}
             />
           </div>
 
