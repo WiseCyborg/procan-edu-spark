@@ -407,8 +407,22 @@ Deno.serve(async (req: Request) => {
 
   } catch (error: any) {
     console.error('Error generating certificate:', error);
+    try {
+      await supabase.from('certificate_generation_errors').insert({
+        source: 'generate-certificate',
+        attempt_number: 1,
+        error_message: error?.message || 'Unknown error',
+        error_detail: { stack: error?.stack || null },
+      });
+    } catch (logErr) {
+      console.error('Failed to log certificate_generation_error:', logErr);
+    }
     return new Response(
       JSON.stringify({ error: error.message }),
+      { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+    );
+  }
+});
       {
         status: 500,
         headers: { 'Content-Type': 'application/json', ...corsHeaders },
