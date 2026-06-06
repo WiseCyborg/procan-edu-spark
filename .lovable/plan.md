@@ -1,115 +1,72 @@
-# Issue 1001 — PayPal Payment Flow Rebuild
+# Edge Function Cleanup — Verified Scope
 
-## Decisions locked in
-1. **Processor:** PayPal (fix contract, keep existing webhook scaffold)
-2. **Permissions:** Grant `dispensary_manager` role + org membership at admin approval time (existing `has_any_role` check stays)
-3. **Provisioning:** Webhook is the source of truth — auth user + seats + entitlements + welcome email all created after PayPal capture
+Goal: free slots against the 205-function quota without breaking the admin dashboard or other edge functions.
 
-## Architecture
+## What changed after verification
 
-```text
-DispensaryApplication ──► admin approves ──► trigger:
-                                             • create organization (if not exists)
-                                             • create profiles row (pending, no auth user yet)
-                                             • grant dispensary_manager role
-                                             • create org_membership
-                                             • send approval email w/ /payment/:applicationId link
-                                                            │
-                                                            ▼
-                                       Payment.tsx auto-invokes create-dispensary-payment-paypal
-                                                            │
-                                                            ▼
-                                                  PayPal Checkout
-                                                            │
-                                          ┌─────────────────┴─────────────────┐
-                                          ▼                                   ▼
-                                    return_url                          cancel_url
-                                 /payment-success                      /payment-cancel
-                                          │                                   │
-                                          │   (parallel)                      └─► retry CTA
-                                          ▼
-                                  paypal-webhook (idempotent)
-                                  • mark application paid
-                                  • create auth user (admin API)
-                                  • issue rvt_seats (qty)
-                                  • trigger auto-creates course_entitlements (org_seat)
-                                  • send ManagerRegistration token email
-                                  • write payment_events row
-```
+I grepped `src/`, `supabase/functions/`, `supabase/config.toml`, and `supabase/migrations/` for every candidate. Most of category A and all of B + C are still referenced — deleting them now would break admin panels, payment UI, or other edge functions.
 
-## Build steps
+## Safe to delete now (8 functions)
 
-### 1. Migration — `payment_events` audit table + approval trigger
-- Create `public.payment_events` (`id`, `application_id`, `paypal_event_id UNIQUE`, `event_type`, `amount`, `status`, `error_message`, `payload jsonb`, `created_at`); GRANT to `service_role` + admin SELECT policy.
-- Add columns to `dispensary_applications` if missing: `payment_completed_at timestamptz`, `coordinator_user_id uuid`.
-- Trigger `on_application_approved` (AFTER UPDATE when `application_status` flips to `approved`):
-  - Insert `organizations` row (idempotent on license_number)
-  - Insert `user_roles (user_id=NULL placeholder via deferred)` — actually defer role grant until webhook (user doesn't exist yet)
-  - **Correction:** role + org_membership creation moves to webhook step (Decision 3 means no auth user at approval). Approval trigger only creates `organizations` row + sends approval email via `pg_net` → `send-approval-email`.
+These have **zero references** outside their own folder (no UI, no other functions, no config beyond their own `config.toml` block):
 
-### 2. Edge function rebuild — `create-dispensary-payment-paypal`
-- Switch to **public** function (`verify_jwt = false`) — applicant has no auth yet.
-- Input: `{ application_id }` only.
-- Server-side: load `dispensary_applications` by id, verify `application_status='approved'` AND `payment_status` not in (`paid`,`completed`).
-- Derive `quantity = estimated_employees || requested_credits || 10`, `amount = quantity * 49`.
-- Derive org via `license_number` lookup → `organizations` row (created by approval trigger).
-- Use `getPayPalEnvForOrg` for sandbox vs live.
-- Create `rvt_purchases` row (org_id, qty, status=pending, idempotency_key=application_id).
-- Return `{ url, orderId, purchaseId }`. PayPal `return_url = ${DOMAINS.PRODUCTION}/payment-success?application_id=${id}&purchase_id=${purchaseId}`, `cancel_url = ${DOMAINS.PRODUCTION}/payment-cancel?application_id=${id}`.
-- Rate limit by `application_id` (5/hour).
+**Category A — orphaned test/diagnostic:**
+1. `test-complete-pipeline`
+2. `test-dispensary-pipeline`
+3. `send-test-emails`
+4. `email-preview`
 
-### 3. `Payment.tsx` — auto-redirect
-- Accept both `/payment/:applicationId` and `?application_id=` (back-compat scenario 6).
-- On mount: fetch application via `invokePublicFunction('get-application-payment-status', { application_id })` (new tiny public function — no auth needed, returns only safe fields + payment_status).
-- States:
-  - `approved + unpaid` → immediately call `create-dispensary-payment-paypal`, `window.location.href = url`. Show spinner only.
-  - `paid|completed` → confirmation card + auto-redirect to `/auth?role=dispensary_manager&tab=accesskey` after 3s.
-  - `not_approved` / `not_found` → branded error.
-- Manual "Retry payment" button only surfaces if auto-redirect fails (network error).
+**One-shot/legacy (verified unused):**
+5. (none from B safe — all Stripe functions still referenced)
+6. (none from C safe — both legacy dispensary functions still referenced)
 
-### 4. `paypal-webhook` — provisioning
-Add `CHECKOUT.ORDER.APPROVED` / `PAYMENT.CAPTURE.COMPLETED` branch for dispensary application orders (detect via `purchase_units[0].reference_id` = purchase_id; join `rvt_purchases.metadata` → `application_id`):
-1. **Idempotency:** insert into `payment_events` with `paypal_event_id` UNIQUE — if conflict, return 200 (no-op).
-2. Mark `dispensary_applications`: `payment_status='paid'`, `payment_completed_at=now()`.
-3. Mark `rvt_purchases.status='completed'`, `payment_completed_at=now()`.
-4. **Create auth user** via `supabase.auth.admin.createUser({ email: contact_email, email_confirm: false })`; store `coordinator_user_id` on application + `profiles.user_id` + `profiles.organization_id`.
-5. Insert `user_roles (user_id, role='dispensary_manager')`.
-6. Insert `organization_members (org_id, user_id, role='manager')`.
-7. Insert `rvt_seats` × quantity with `source='org_seat'` (trigger auto-creates `course_entitlements`).
-8. Enqueue `send-manager-registration-token` email (existing function) with magic-link to `/register/manager?token=...`.
-9. On any failure: update `payment_events.status='failed'`, `error_message`; enqueue admin alert job. Do not throw 500 (return 200 so PayPal doesn't retry-storm) — PayPal will retry only on 5xx.
-10. Validate PayPal webhook signature (existing helper).
+Only 4 are truly safe. That barely dents the quota.
 
-### 5. Routes + pages — `App.tsx`
-- Confirm `/payment/:applicationId` mounted (it is).
-- Add `/payment-success` → new `PaymentSuccess.tsx`: polls `get-application-payment-status` until `payment_status='paid'` (max 30s), then redirects to `/auth?role=dispensary_manager&tab=accesskey`. Branded loader + receipt summary.
-- Add `/payment-cancel` → new `PaymentCancel.tsx`: explains cancellation, "Retry payment" button back to `/payment/:applicationId`, "Contact support" link.
+## Blocked — referenced by admin UI or other functions
 
-### 6. Shared constants
-- Create `supabase/functions/_shared/config.ts` exporting `PRICE_PER_SEAT = 49` and `DEFAULT_QUANTITY = 10`. Import in `Payment.tsx` (via a parallel `src/config/payment.ts` mirror) and the edge function.
+Cannot delete without first removing the caller. Listed with their bindings so you can decide whether to also remove the UI:
 
-### 7. `supabase/config.toml`
-- `[functions.create-dispensary-payment-paypal] verify_jwt = false`
-- `[functions.get-application-payment-status] verify_jwt = false`
-- Keep `paypal-webhook` as-is (PayPal calls it unauthenticated).
+**A (admin UI bound):**
+- `test-paypal-connection` → `IntegrationHealthMonitor`, `PayPalManagementPanel`, `PayPalModeToggle`, `PayPalConfigurationPanel`
+- `test-smtp-connection` → `IntegrationHealthMonitor`, `EmailMonitoringDashboard`
+- `test-email-providers` → `IntegrationHealthMonitor`, `EmailProviderSettings`, `EnhancedEmailHealthDashboard`, `OwnersIntelligence`
+- `diagnostic-email` → `EmailDomainVerification`, also called by `email-health-check` function
+- `diagnose-email-system` → `EmailSystemDiagnostics`
+- `fast-track-dispensary-test` + `cleanup-fast-track-tests` → `FastTrackTestPanel`
+- `create-demo-accounts` → `TestAccountCreator`
+- `render-template-preview` → `EmailTemplateManager`
 
-## Verification matrix (must pass before READY)
+**B (Stripe — still wired):**
+- `stripe-webhook` → called by `run-e2e-validation` edge function
+- `create-course-checkout` → `UniversalCourseCard`
+- `create-course-payment` → `CoursePaymentGate`, also called by `create-course-payment-paypal`
+- `verify-course-payment` → only in config.toml (orphan candidate — see note)
+- `verify-payment` → `PaymentSuccess.tsx`, also called by `verify-payment-paypal`
 
-| # | Scenario | Pass criteria |
-|---|---|---|
-| 1 | Approved applicant clicks email link | Auto-redirect to PayPal, no button click; webhook fires; `payment_status='paid'`; manager email arrives |
-| 2 | Already-paid revisits `/payment/:id` | Confirmation + redirect to /auth; zero new PayPal order; no duplicate `rvt_purchases` |
-| 3 | Unauthenticated visit | Public route loads; payment proceeds via application_id |
-| 4 | Wrong logged-in user opens someone else's link | Public flow ignores auth user; pay still scoped to application_id; no cross-account leak (no PII beyond org_name shown) |
-| 5 | Invalid application_id | Branded 404 page, no stack trace |
-| 6 | Legacy `?application_id=` query | Same flow as path param |
-| 7 | Webhook capture success | `payment_events` row, `dispensary_applications.payment_status='paid'`, auth user + role + seats + entitlements created, welcome email sent |
-| 8 | Webhook fires twice (same event_id) | UNIQUE constraint blocks; one provisioning; one email |
-| 9 | Provisioning step fails mid-webhook | `payment_events.status='failed'`, admin alert job enqueued, idempotent retry possible |
-| 10 | User cancels on PayPal | Lands `/payment-cancel`, retry button works, no account created |
+**C (legacy dispensary):**
+- `create-dispensary-payment` → `PurchaseSeats`, `Payment`, `DispensaryApplicationManager`, `PurchaseSeatsDialog`, plus `create-dispensary-payment-paypal`
+- `verify-dispensary-payment` → `PaymentSuccess`, `PaymentReconciliationDashboard`, plus two PayPal functions
+
+## Recommendation
+
+Two-phase approach:
+
+**Phase 1 (this PR):** Delete the 4 safe-verified orphans only:
+- `test-complete-pipeline`, `test-dispensary-pipeline`, `send-test-emails`, `email-preview`
+- Remove their entries from `supabase/config.toml`
+- Call `supabase--delete_edge_functions` to remove the deployed versions
+
+**Phase 2 (follow-up, needs your call per item):** For each blocked function above, decide:
+- **Remove the UI caller too** (kills the admin diagnostic), then delete the function, or
+- **Keep both** (function stays, costs a quota slot)
+
+I'll do Phase 2 only after you tell me which admin diagnostics / Stripe UI you're willing to drop. The Stripe + legacy-dispensary cleanup in particular needs the PayPal migration fully validated in production first (the PayPal functions still fall back to calling the Stripe/legacy versions in some paths — that fallback has to be removed first or you'll break checkouts).
 
 ## Out of scope
-Refunds UI, automated retry/backoff inside edge function, `/checkout` route refactor, COMAR scraper (separate ticket), `DispensaryApplication.tsx` / `ManagerRegistration.tsx` UI changes.
+- Categories D (one-shot migrations) and E (security utilities) — you asked to hold.
+- Any UI / business-logic changes. This PR is delete-only.
 
-## Final deliverable format
-After build I will return one READY / NOT READY verdict per fix (1–6) plus per-scenario pass/fail with edge-function-log excerpts.
+## Verification after Phase 1
+- Confirm `ls supabase/functions | wc -l` drops from 206 to 202.
+- Confirm `supabase/config.toml` no longer references the four names.
+- Re-deploy `paypal-webhook` and `create-dispensary-payment-paypal` (the previously-blocked deploys) and verify they succeed.
