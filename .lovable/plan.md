@@ -1,88 +1,53 @@
-# System Visibility Pack
+# Fix the 9 listed gaps — reality-checked against the real schema
 
-Deliver one authoritative snapshot of the implementation state so an external lead (or you) can audit ProCannEdu without guessing. Output is generated from real artifacts: the React route tree, Supabase schema/RLS via `pg_catalog`, edge function directory, and current UAT tables.
+The uploaded `07_KNOWN_ISSUES_AND_GAPS.md` was written against a simplified, partially-imagined version of this app. Before implementing anything I mapped every gap to the live database and codebase.
 
-## What gets produced
+## Gap-by-gap reconciliation
 
-1. **`/mnt/documents/PROCANNEDU_SYSTEM_VISIBILITY.pdf`** — single shareable PDF, ~25–40 pages.
-2. **`/docs/system/` markdown bundle** in the repo, diffable per release:
-   - `01_ROUTE_MAP.md`
-   - `02_ROLES_MATRIX.md`
-   - `03_SCHEMA_AND_RLS.md`
-   - `04_EDGE_FUNCTIONS.md`
-   - `05_CHATBOT_ARCHITECTURE.md`
-   - `06_UAT_STATE.md`
-   - `07_KNOWN_ISSUES_AND_GAPS.md`
-   - `README.md` (index + how to regenerate)
-3. **`scripts/generate-system-pack.ts`** — re-runnable generator so the pack stays current.
+| # | Uploaded gap | Real status | Action |
+|---|---|---|---|
+| 1 | `has_role()` deploy order | `has_role` exists and is widely used. No deploy-order bug in current code. | **Skip** — non-issue. |
+| 2 | Cert PDF generation has no retry, `pdf_path` stays NULL silently | Real column is `pdf_url`. A `generate-certificate-retry` edge function already exists. What's missing: a persistent error row + admin visibility when both attempts fail. | **Fix (light)** — add `certificate_generation_errors` table + write a row on final failure in `generate-certificate` / `generate-certificate-retry`. |
+| 3 | `stripe-webhook` has no idempotency on `stripe_events` | Table is `payment_events` (already has `UNIQUE(stripe_event_id)`). Webhook uses an **in-memory Set** for idempotency — lost on every cold start, so duplicate Stripe retries CAN double-process. | **Fix** — replace the in-memory check with a DB lookup against `payment_events.stripe_event_id` before processing; rely on the existing unique index. |
+| 4 | `chat_sessions` / `chat_messages` never persisted | **Neither table exists.** Fabricated against an imagined schema. The real internal chatbot is stateless by design. | **Skip** — non-applicable. Persisting chat is a feature, not a bug fix; out of scope here. |
+| 5 | `exam_answers` not deleted on reset | **`exam_answers` table does not exist.** Answers live inside `exam_attempts` JSONB. `reset_exam_state` RPC already exists. | **Skip** — non-applicable. |
+| 6 | `compliance_records` refresh is nightly | **`compliance_records` table does not exist.** Real tables are `compliance_metrics`, `compliance_alerts`, `compliance_incidents`; certificate issuance already updates them via triggers. | **Skip** — non-applicable. |
+| 7 | `uat-screenshots` bucket policy unverified | Storage-dashboard check, not a code change. | **Skip in code** — note it in `docs/system/07_KNOWN_ISSUES_AND_GAPS.md` as an env-verification task. |
+| 8 | `profile_complete` vs `completeness_pct` mismatch | **Neither column exists on `profiles`.** Completeness is computed via a different mechanism (`useProfileCompletion`). | **Skip** — non-applicable. |
+| 9 | `audit_log` missing indexes | **`audit_log` does not exist.** Real tables are `admin_operations_audit`, `security_audit_log`, `certificate_audit_log`. Quick check shows these have PK + a couple of single-column indexes but no `(user_id, created_at)` composite. | **Fix** — add composite indexes on the three real audit tables to keep admin filters fast. |
 
-## Section contents
+**Net: 3 actionable fixes (gaps 2, 3, 9), 6 not applicable.**
 
-### 1. Route map
-Parsed from `src/App.tsx`. For each route: path, page component, guard (`ProtectedRouteGuard`, `AdminRouteGuard`, `ManagerGuard`, `CoordinatorGuard`, `MemberTypeGuard`, `RequireAccess`), allowed roles/member types, and a one-line purpose. Grouped: Public, Auth, Student, Manager, Coordinator, Admin, UAT, Compliance.
+## What I will implement
 
-### 2. Roles & permissions matrix
-Three layers documented side-by-side:
-- **Supabase Auth** — anonymous vs authenticated.
-- **`organization_members.member_type`** — employee / coordinator / manager / owner.
-- **`user_roles.role`** — student / dispensary_manager / training_coordinator / admin / trainer / consumer / mca_inspector.
+### 1. Stripe webhook persistent idempotency (gap 3)
+In `supabase/functions/stripe-webhook/index.ts`:
+- Remove the `processedEvents` in-memory Set.
+- Before the switch, `SELECT id, status FROM payment_events WHERE stripe_event_id = $1`. If the row exists with `status IN ('completed','processing')`, return `{received:true, skipped:true}` immediately.
+- Change the initial insert to use `.upsert({...}, { onConflict: 'stripe_event_id', ignoreDuplicates: true })` so concurrent retries can't both insert.
+- No schema change required (unique index already exists).
 
-Plus the `role_permissions` table (admin permission flags) and the `get_access_snapshot` RPC output fields. Cross-table matrix: Role × (page access, course access, admin tools, billing, audit log, chatbot scope).
+### 2. Certificate generation error log (gap 2)
+- **Migration:** create `public.certificate_generation_errors(id, certificate_id, user_id, course_id, attempt_number, error_message, error_detail jsonb, created_at)` with GRANTs + RLS (admin read, service_role all).
+- In `generate-certificate` and `generate-certificate-retry`, when the final attempt fails, insert one row before returning the error response. Existing happy paths untouched.
+- Surface in the admin UI later (out of scope here — log only, no UI).
 
-### 3. Schema & RLS
-Auto-extracted from `information_schema` + `pg_policies`:
-- All ~170 public tables grouped by domain (Auth & Identity, Training, Certificates, Exams, Payments, Comms, UAT, Ops/Health, AI/Agents, Compliance).
-- Per table: columns + types, FK targets, RLS on/off, policy names + USING/WITH CHECK expressions, GRANTs.
-- Dedicated subsection for `SECURITY DEFINER` functions (`has_role`, `get_access_snapshot`, `start_uat_run`, `submit_uat_step`, etc.) with signature and purpose.
-- Storage buckets and their policies.
+### 3. Audit-log composite indexes (gap 9)
+- **Migration:** `CREATE INDEX CONCURRENTLY IF NOT EXISTS` on:
+  - `admin_operations_audit (admin_user_id, created_at DESC)`
+  - `security_audit_log (user_id, created_at DESC)` and `(event_type, created_at DESC)`
+  - `certificate_audit_log (action, created_at DESC)`
+- Read-only impact, no policy changes.
 
-### 4. Edge functions
-Enumerated from `supabase/functions/`. Per function: name, `verify_jwt` setting (from `config.toml`), purpose, secrets it reads, callers in the frontend. Highlights public vs authenticated functions.
+### 4. Update `docs/system/07_KNOWN_ISSUES_AND_GAPS.md`
+Replace the fabricated-table entries with this reconciled table so the doc reflects reality, and mark gaps 2/3/9 as fixed once the migrations land.
 
-### 5. Chatbot architecture
-Traced from `InternalChatbot.tsx` + `internal-chat-assistant` edge function:
-- Provider (Lovable AI Gateway / model), prompt assembly, role + page context injected, conversation history window, escalation path via `RequestSupportButton`, persistence (or lack thereof).
-- Gaps: no long-term memory, no progress-tracking yet, no role-scoped tool calls.
+## Out of scope (explicit)
+- Persisting chatbot conversations (gap 4) — that's a product feature, ask separately if you want it built.
+- Storage bucket dashboard verification (gap 7) — manual step in Supabase.
+- Any change involving `chat_sessions`, `chat_messages`, `exam_answers`, `compliance_records`, `audit_log`, `profile_complete`, `completeness_pct` — none of these exist.
 
-### 6. UAT state
-Live snapshot of current tables:
-- `uat_task_templates` (36 seeded steps × 4 roles)
-- `uat_runs`, `uat_tasks`, `uat_evidence` row counts
-- Status of `/uat/feedback` page, `start_uat_run` / `submit_uat_step` RPCs
-- `uat_accounts` allowlist
-- Existing artifacts: `UAT_TESTER_CHECKLIST.pdf`, `docs/UAT_TESTER_GUIDE.md`
-- Reconciliation table: uploaded `LOVABLE_BUILD_PROMPT.md` items → "Already shipped" / "Delta to apply" / "Out of scope".
-
-### 7. Known issues & gaps
-Pulled from `PIPELINE_FIX_SUMMARY.md`, `docs/SECURITY_FIX_IMPLEMENTATION.md`, recent migrations, and Supabase linter output. Plus the four next-step initiatives from your message (UAT Control Center, Operational Readiness Layer, Security Visibility Dashboard, AI Support Agent) ranked with effort estimates.
-
-## Technical approach
-
-```text
-scripts/generate-system-pack.ts
-  ├─ parseRoutes(src/App.tsx)            → 01_ROUTE_MAP.md
-  ├─ parseGuards + role_permissions      → 02_ROLES_MATRIX.md
-  ├─ psql introspection                  → 03_SCHEMA_AND_RLS.md
-  │     • information_schema.columns
-  │     • pg_policies
-  │     • pg_proc (SECURITY DEFINER)
-  │     • storage.buckets + policies
-  ├─ scan supabase/functions/* + config  → 04_EDGE_FUNCTIONS.md
-  ├─ trace chatbot files                 → 05_CHATBOT_ARCHITECTURE.md
-  ├─ query uat_* tables                  → 06_UAT_STATE.md
-  └─ collate fix summaries + linter      → 07_KNOWN_ISSUES_AND_GAPS.md
-
-python3 /tmp/make_visibility_pdf.py
-  → /mnt/documents/PROCANNEDU_SYSTEM_VISIBILITY.pdf
-  (reportlab; QA via pdftoppm)
-```
-
-The generator runs read-only — no migrations, no schema changes. PDF is rebuilt from the markdown so the two stay in sync.
-
-## Open decisions (please pick before I switch to build mode)
-
-1. **Sensitivity** — include real row counts, org names, and recent UAT activity, or keep it structure-only so it's safe to share with outside reviewers?
-2. **Depth of schema section** — summary (table + RLS flag), medium (+ every policy expression), or full (+ all columns, FKs, triggers, SECURITY DEFINER bodies)? Full will push the PDF to ~80 pages.
-3. **Live dashboard** — also build `/admin/visibility` that renders all of this from real data on demand? Adds ~1 extra build step but means no more stale PDFs.
-
-Once you confirm those three, I'll switch to build mode and ship the markdown + PDF in one pass.
+## Technical notes
+- All schema changes go through `supabase--migration` (single migration with `CREATE TABLE` + `GRANT` + `ENABLE RLS` + `CREATE POLICY` for the new errors table; separate index migration for gap 9).
+- Stripe webhook change is a small in-file refactor; will deploy via `supabase--deploy_edge_functions` after edit.
+- No changes to frontend code.
