@@ -132,29 +132,10 @@ export const EnhancedEmailHealthDashboard = () => {
   };
 
   const testProviders = async () => {
-    try {
-      toast({
-        title: 'Testing Providers',
-        description: 'Testing Resend and SMTP connections...',
-      });
-
-      const { data, error } = await supabase.functions.invoke('test-email-providers');
-
-      if (error) throw error;
-
-      toast({
-        title: 'Test Complete',
-        description: `Resend: ${data.resend.status}, SMTP: ${data.smtp.status}`,
-      });
-
-      await fetchProviderHealth();
-    } catch (error) {
-      toast({
-        title: 'Test Failed',
-        description: 'Could not test email providers',
-        variant: 'destructive',
-      });
-    }
+    toast({
+      title: 'Diagnostic retired',
+      description: 'The provider self-test endpoint has been removed. Check Supabase Edge Function logs instead.',
+    });
   };
 
   const searchEmailHistory = async () => {

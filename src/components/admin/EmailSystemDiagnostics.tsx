@@ -34,31 +34,11 @@ export const EmailSystemDiagnostics = () => {
   const { toast } = useToast();
 
   const runDiagnostics = async () => {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('diagnose-email-system', {
-        body: {},
-      });
-
-      if (error) throw error;
-
-      setResults(data);
-      
-      toast({
-        title: 'Diagnostics Complete',
-        description: `System health: ${data.health}`,
-        variant: data.health === 'CRITICAL' ? 'destructive' : 'default',
-      });
-    } catch (error: any) {
-      console.error('Diagnostic error:', error);
-      toast({
-        title: 'Diagnostic Failed',
-        description: error.message,
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
+    toast({
+      title: 'Diagnostic retired',
+      description: 'The email-system diagnostic endpoint has been removed. Check Supabase Edge Function logs and email_provider_health for status.',
+      variant: 'destructive',
+    });
   };
 
   const getHealthIcon = (health: string) => {

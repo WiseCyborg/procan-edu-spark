@@ -64,21 +64,11 @@ export const EmailProviderSettings = () => {
   };
 
   const testAllProviders = async () => {
-    setTesting(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('test-email-providers');
-      if (error) throw error;
-      toast({
-        title: "✅ Tests Complete",
-        description: `Resend: ${data?.results?.resend?.responseTime || 0}ms | SMTP: ${data?.results?.smtp?.responseTime || 0}ms`,
-      });
-      await checkProviderStatus();
-    } catch (error: any) {
-      toast({ title: "Test Failed", description: error.message, variant: "destructive" });
-    } finally {
-      setTesting(false);
-      setLastTestTime(new Date());
-    }
+    toast({
+      title: "Diagnostic retired",
+      description: "The provider self-test endpoint has been removed.",
+    });
+    setLastTestTime(new Date());
   };
 
   const runAutoRetry = async () => {
