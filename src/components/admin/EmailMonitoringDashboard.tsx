@@ -345,10 +345,6 @@ const EmailMonitoringDashboard = () => {
       description: "The SMTP self-test endpoint has been removed.",
     });
   };
-        variant: "destructive"
-      });
-    }
-  };
 
   const failedEmails = emailLogs.filter(log => log.status === 'failed');
   const uniqueTypes = [...new Set(emailLogs.map(log => log.email_type))];

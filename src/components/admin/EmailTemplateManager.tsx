@@ -174,36 +174,15 @@ export const EmailTemplateManager = () => {
   };
 
   const testTemplate = async (template: EmailTemplate) => {
-    try {
-      toast({
-        title: 'Testing Template',
-        description: 'Sending test email...',
-      });
-
-      const { error } = await supabase.functions.invoke('render-template-preview', {
-        body: { template_id: template.id, test: true }
-      });
-
-      if (error) throw error;
-
-      await supabase
-        .from('email_templates')
-        .update({ last_tested_at: new Date().toISOString() })
-        .eq('id', template.id);
-
-      toast({
-        title: 'Test Sent',
-        description: 'Check your email inbox',
-      });
-
-      fetchTemplates();
-    } catch (error) {
-      toast({
-        title: 'Test Failed',
-        description: 'Could not send test email',
-        variant: 'destructive',
-      });
-    }
+    toast({
+      title: 'Preview retired',
+      description: 'The template render-preview endpoint has been removed. Send a real test from the production email pipeline instead.',
+    });
+    await supabase
+      .from('email_templates')
+      .update({ last_tested_at: new Date().toISOString() })
+      .eq('id', template.id);
+    fetchTemplates();
   };
 
   const validateTemplate = (content: string, variables: any) => {
