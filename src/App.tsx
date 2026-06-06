@@ -296,11 +296,7 @@ const AppRoutesLayout = () => {
                 </RequireAccess>
               </ProtectedRoute>
             } />
-            <Route path="/payment-success" element={
-              <ProtectedRoute>
-                <PaymentSuccess />
-              </ProtectedRoute>
-            } />
+            <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/certificates" element={
               <ProtectedRoute>
                 <Certificates />

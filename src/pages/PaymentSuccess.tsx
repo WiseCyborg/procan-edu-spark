@@ -29,6 +29,51 @@ const PaymentSuccess: React.FC = () => {
   const [inviteEmails, setInviteEmails] = useState('');
   const [inviteLoading, setInviteLoading] = useState(false);
 
+  // Issue 1001 — new dispensary application flow: webhook provisions the account
+  // and sends the manager-registration token email. Here we just poll status and
+  // tell the user to check their email.
+  const applicationId = searchParams.get('application_id');
+  const [appPaymentReady, setAppPaymentReady] = useState<null | { organizationName: string; contactEmailMasked: string }>(null);
+  const [appPolling, setAppPolling] = useState<boolean>(!!applicationId);
+
+  useEffect(() => {
+    if (!applicationId) return;
+    let cancelled = false;
+    let attempts = 0;
+    const poll = async () => {
+      while (!cancelled && attempts < 30) {
+        attempts++;
+        try {
+          const { invokePublicFunction } = await import('@/lib/publicEdgeFunctions');
+          const { data } = await invokePublicFunction<any>('get-application-payment-status', {
+            application_id: applicationId,
+          });
+          const a = data?.application;
+          if (a && (a.payment_status === 'paid' || a.payment_status === 'completed')) {
+            if (!cancelled) {
+              setAppPaymentReady({
+                organizationName: a.organization_name,
+                contactEmailMasked: a.contact_email_masked,
+              });
+              setShowConfetti(true);
+              setTimeout(() => setShowConfetti(false), 4000);
+              setAppPolling(false);
+            }
+            return;
+          }
+        } catch (e) {
+          console.warn('payment status poll error', e);
+        }
+        await new Promise((r) => setTimeout(r, 2000));
+      }
+      if (!cancelled) setAppPolling(false);
+    };
+    void poll();
+    return () => {
+      cancelled = true;
+    };
+  }, [applicationId]);
+
   useEffect(() => {
     const verifyPayment = async () => {
       const token = searchParams.get('token');
