@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { EmailFlowDiagram } from '@/components/admin/EmailFlowDiagram';
 import { EdgeFunctionsStatus } from '@/components/admin/EdgeFunctionsStatus';
 import { IntegrationHealthMonitor } from '@/components/admin/IntegrationHealthMonitor';
+import { RegulatorySyncPanel } from '@/components/admin/RegulatorySyncPanel';
 import { DispensaryPipelineMonitor } from '@/components/admin/DispensaryPipelineMonitor';
 
 const SystemHealthDashboard = () => {
@@ -207,7 +208,10 @@ const SystemHealthDashboard = () => {
       
       {/* Integration Health Monitor */}
       <IntegrationHealthMonitor />
-      
+
+      {/* Regulatory Sync (COMAR + Federal) */}
+      <RegulatorySyncPanel />
+
       {/* Dispensary Pipeline Monitor */}
       <DispensaryPipelineMonitor />
     </div>
