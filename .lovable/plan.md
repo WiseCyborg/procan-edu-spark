@@ -1,66 +1,115 @@
-# Issue 1001 — Stripe/PayPal Payment Redirect Fix
+# Issue 1001 — PayPal Payment Flow Rebuild
 
-## Problem
-Dispensary owner (Danielle) completed registration and landed in the authenticated dashboard **without ever being redirected to checkout**. Payment status is ambiguous; she is inside the platform but has not paid. This blocks conversion and creates a billing/audit gap.
+## Decisions locked in
+1. **Processor:** PayPal (fix contract, keep existing webhook scaffold)
+2. **Permissions:** Grant `dispensary_manager` role + org membership at admin approval time (existing `has_any_role` check stays)
+3. **Provisioning:** Webhook is the source of truth — auth user + seats + entitlements + welcome email all created after PayPal capture
 
-## Required End-to-End Flow
+## Architecture
+
 ```text
-Registration form submitted
-  → AUTO redirect to PayPal/Stripe Checkout (no manual "Go to Payment" button)
-  → Customer pays
-  → Webhook marks dispensary_applications.payment_status = 'paid' + creates order row
-  → AUTO redirect to success page → dashboard
-  → Coordinator account active, seats provisioned
+DispensaryApplication ──► admin approves ──► trigger:
+                                             • create organization (if not exists)
+                                             • create profiles row (pending, no auth user yet)
+                                             • grant dispensary_manager role
+                                             • create org_membership
+                                             • send approval email w/ /payment/:applicationId link
+                                                            │
+                                                            ▼
+                                       Payment.tsx auto-invokes create-dispensary-payment-paypal
+                                                            │
+                                                            ▼
+                                                  PayPal Checkout
+                                                            │
+                                          ┌─────────────────┴─────────────────┐
+                                          ▼                                   ▼
+                                    return_url                          cancel_url
+                                 /payment-success                      /payment-cancel
+                                          │                                   │
+                                          │   (parallel)                      └─► retry CTA
+                                          ▼
+                                  paypal-webhook (idempotent)
+                                  • mark application paid
+                                  • create auth user (admin API)
+                                  • issue rvt_seats (qty)
+                                  • trigger auto-creates course_entitlements (org_seat)
+                                  • send ManagerRegistration token email
+                                  • write payment_events row
 ```
 
-## Root Causes to Investigate & Fix
-1. **Registration submit handler does not invoke checkout.** Today the flow drops the user on the dashboard or on `/payment/:applicationId` with a manual button (`src/pages/Payment.tsx`). The submit path must call `create-dispensary-payment-paypal` and `window.location.href = approvalUrl` immediately on success.
-2. **Contract mismatch with `create-dispensary-payment-paypal`.** Payment.tsx sends `{ application_id, credits, amount, organization_name, contact_email }`; the function must accept exactly that shape and return `{ approvalUrl }`. Audit and align.
-3. **Permissions gate.** Function currently requires `dispensary_manager` role, which an applicant does not yet have. Decision needed: (a) make this endpoint accept an approved-application token instead of a role, or (b) reorder flow so manager role is granted at approval time (pre-payment) — recommend (a) to avoid privilege escalation.
-4. **Webhook → DB write.** Confirm PayPal capture webhook updates `dispensary_applications.payment_status='paid'` and inserts `orders` row idempotently. Without this, success redirect lands on an unpaid record.
-5. **Success/cancel URLs.** Must be absolute (`https://www.procannedu.com/...`), not `req.headers.origin`, so they survive PayPal's redirect chain.
+## Build steps
 
-## Deliverables
+### 1. Migration — `payment_events` audit table + approval trigger
+- Create `public.payment_events` (`id`, `application_id`, `paypal_event_id UNIQUE`, `event_type`, `amount`, `status`, `error_message`, `payload jsonb`, `created_at`); GRANT to `service_role` + admin SELECT policy.
+- Add columns to `dispensary_applications` if missing: `payment_completed_at timestamptz`, `coordinator_user_id uuid`.
+- Trigger `on_application_approved` (AFTER UPDATE when `application_status` flips to `approved`):
+  - Insert `organizations` row (idempotent on license_number)
+  - Insert `user_roles (user_id=NULL placeholder via deferred)` — actually defer role grant until webhook (user doesn't exist yet)
+  - **Correction:** role + org_membership creation moves to webhook step (Decision 3 means no auth user at approval). Approval trigger only creates `organizations` row + sends approval email via `pg_net` → `send-approval-email`.
 
-### 1. Registration auto-redirect
-- Wire the registration form submit handler: on successful application create → immediately invoke `create-dispensary-payment-paypal` → redirect to `approvalUrl`.
-- Remove the intermediate "click to pay" screen from the happy path. Keep `/payment/:applicationId` only as a recovery route for users who bounce back from email links.
+### 2. Edge function rebuild — `create-dispensary-payment-paypal`
+- Switch to **public** function (`verify_jwt = false`) — applicant has no auth yet.
+- Input: `{ application_id }` only.
+- Server-side: load `dispensary_applications` by id, verify `application_status='approved'` AND `payment_status` not in (`paid`,`completed`).
+- Derive `quantity = estimated_employees || requested_credits || 10`, `amount = quantity * 49`.
+- Derive org via `license_number` lookup → `organizations` row (created by approval trigger).
+- Use `getPayPalEnvForOrg` for sandbox vs live.
+- Create `rvt_purchases` row (org_id, qty, status=pending, idempotency_key=application_id).
+- Return `{ url, orderId, purchaseId }`. PayPal `return_url = ${DOMAINS.PRODUCTION}/payment-success?application_id=${id}&purchase_id=${purchaseId}`, `cancel_url = ${DOMAINS.PRODUCTION}/payment-cancel?application_id=${id}`.
+- Rate limit by `application_id` (5/hour).
 
-### 2. Edge function audit (`create-dispensary-payment-paypal`)
-- Accept `{ application_id }` as the sole required input; derive `credits`, `amount`, org info server-side from `dispensary_applications` (don't trust client).
-- Drop `dispensary_manager` role check; instead verify the caller's auth user matches `dispensary_applications.contact_email` OR the application is in `approved` status and an unused checkout.
-- Return `{ approvalUrl, orderId }`.
-- Use absolute production URLs for `return_url`/`cancel_url`.
+### 3. `Payment.tsx` — auto-redirect
+- Accept both `/payment/:applicationId` and `?application_id=` (back-compat scenario 6).
+- On mount: fetch application via `invokePublicFunction('get-application-payment-status', { application_id })` (new tiny public function — no auth needed, returns only safe fields + payment_status).
+- States:
+  - `approved + unpaid` → immediately call `create-dispensary-payment-paypal`, `window.location.href = url`. Show spinner only.
+  - `paid|completed` → confirmation card + auto-redirect to `/auth?role=dispensary_manager&tab=accesskey` after 3s.
+  - `not_approved` / `not_found` → branded error.
+- Manual "Retry payment" button only surfaces if auto-redirect fails (network error).
 
-### 3. Webhook hardening
-- Confirm `paypal-webhook` edge function: validates signature, idempotent on `event.id`, writes `orders` row, updates `dispensary_applications.payment_status`, fires confirmation email.
-- Add structured log to `cron_job_executions` or a dedicated `payment_events` row on every webhook receipt (success + failure).
+### 4. `paypal-webhook` — provisioning
+Add `CHECKOUT.ORDER.APPROVED` / `PAYMENT.CAPTURE.COMPLETED` branch for dispensary application orders (detect via `purchase_units[0].reference_id` = purchase_id; join `rvt_purchases.metadata` → `application_id`):
+1. **Idempotency:** insert into `payment_events` with `paypal_event_id` UNIQUE — if conflict, return 200 (no-op).
+2. Mark `dispensary_applications`: `payment_status='paid'`, `payment_completed_at=now()`.
+3. Mark `rvt_purchases.status='completed'`, `payment_completed_at=now()`.
+4. **Create auth user** via `supabase.auth.admin.createUser({ email: contact_email, email_confirm: false })`; store `coordinator_user_id` on application + `profiles.user_id` + `profiles.organization_id`.
+5. Insert `user_roles (user_id, role='dispensary_manager')`.
+6. Insert `organization_members (org_id, user_id, role='manager')`.
+7. Insert `rvt_seats` × quantity with `source='org_seat'` (trigger auto-creates `course_entitlements`).
+8. Enqueue `send-manager-registration-token` email (existing function) with magic-link to `/register/manager?token=...`.
+9. On any failure: update `payment_events.status='failed'`, `error_message`; enqueue admin alert job. Do not throw 500 (return 200 so PayPal doesn't retry-storm) — PayPal will retry only on 5xx.
+10. Validate PayPal webhook signature (existing helper).
 
-### 4. Six-scenario verification matrix
-| # | Scenario | Expected |
+### 5. Routes + pages — `App.tsx`
+- Confirm `/payment/:applicationId` mounted (it is).
+- Add `/payment-success` → new `PaymentSuccess.tsx`: polls `get-application-payment-status` until `payment_status='paid'` (max 30s), then redirects to `/auth?role=dispensary_manager&tab=accesskey`. Branded loader + receipt summary.
+- Add `/payment-cancel` → new `PaymentCancel.tsx`: explains cancellation, "Retry payment" button back to `/payment/:applicationId`, "Contact support" link.
+
+### 6. Shared constants
+- Create `supabase/functions/_shared/config.ts` exporting `PRICE_PER_SEAT = 49` and `DEFAULT_QUANTITY = 10`. Import in `Payment.tsx` (via a parallel `src/config/payment.ts` mirror) and the edge function.
+
+### 7. `supabase/config.toml`
+- `[functions.create-dispensary-payment-paypal] verify_jwt = false`
+- `[functions.get-application-payment-status] verify_jwt = false`
+- Keep `paypal-webhook` as-is (PayPal calls it unauthenticated).
+
+## Verification matrix (must pass before READY)
+
+| # | Scenario | Pass criteria |
 |---|---|---|
-| 1 | New approved applicant submits registration | Auto-redirect to PayPal, returns paid, lands on dashboard |
-| 2 | Already-paid application revisits `/payment/:id` | Friendly "payment complete" + redirect to auth |
-| 3 | Unauthenticated visitor hits `/payment/:id` | Loads (public route), can pay via approval token |
-| 4 | Different user hits someone else's `/payment/:id` | 403 / branded error |
-| 5 | Invalid application id | Branded not-found |
-| 6 | Legacy `/payment?application_id=...` query string | Still works |
+| 1 | Approved applicant clicks email link | Auto-redirect to PayPal, no button click; webhook fires; `payment_status='paid'`; manager email arrives |
+| 2 | Already-paid revisits `/payment/:id` | Confirmation + redirect to /auth; zero new PayPal order; no duplicate `rvt_purchases` |
+| 3 | Unauthenticated visit | Public route loads; payment proceeds via application_id |
+| 4 | Wrong logged-in user opens someone else's link | Public flow ignores auth user; pay still scoped to application_id; no cross-account leak (no PII beyond org_name shown) |
+| 5 | Invalid application_id | Branded 404 page, no stack trace |
+| 6 | Legacy `?application_id=` query | Same flow as path param |
+| 7 | Webhook capture success | `payment_events` row, `dispensary_applications.payment_status='paid'`, auth user + role + seats + entitlements created, welcome email sent |
+| 8 | Webhook fires twice (same event_id) | UNIQUE constraint blocks; one provisioning; one email |
+| 9 | Provisioning step fails mid-webhook | `payment_events.status='failed'`, admin alert job enqueued, idempotent retry possible |
+| 10 | User cancels on PayPal | Lands `/payment-cancel`, retry button works, no account created |
 
-### 5. Deploy-readiness verdict
-Single explicit **READY** or **NOT READY** statement with blockers enumerated. No "mostly done."
+## Out of scope
+Refunds UI, automated retry/backoff inside edge function, `/checkout` route refactor, COMAR scraper (separate ticket), `DispensaryApplication.tsx` / `ManagerRegistration.tsx` UI changes.
 
-## Out of Scope (this ticket)
-- Migrating from PayPal to Stripe Checkout.
-- Refactor to dedicated `/checkout` route.
-- Retry/backoff inside the payment function.
-- Refunds UI.
-
-## Technical Notes
-- Files: `src/pages/Payment.tsx`, registration form component (TBD — locate dispensary registration submit handler), `supabase/functions/create-dispensary-payment-paypal/index.ts`, `supabase/functions/paypal-webhook/index.ts`, `src/App.tsx` routes.
-- Pricing constant: `PRICE_PER_SEAT = 49` lives in `Payment.tsx`; move to shared config so function + UI agree.
-- Use `DOMAINS.PRODUCTION` from `supabase/functions/_shared/domains.ts` for return URLs.
-
-## Confirmation Needed Before Build
-1. Keep **PayPal** as the processor, or migrate to Stripe Checkout (Lovable's built-in Stripe is available)?
-2. Confirm flow choice for permissions: **(a)** application-token-based checkout (recommended), or **(b)** grant `dispensary_manager` role at approval time so existing role check passes?
-3. Confirm `paypal-webhook` edge function exists and is the source of truth for marking `payment_status='paid'`.
+## Final deliverable format
+After build I will return one READY / NOT READY verdict per fix (1–6) plus per-scenario pass/fail with edge-function-log excerpts.

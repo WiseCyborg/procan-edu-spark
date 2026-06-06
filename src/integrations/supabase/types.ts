@@ -4811,39 +4811,57 @@ export type Database = {
       }
       payment_events: {
         Row: {
+          amount: number | null
+          application_id: string | null
           created_at: string | null
+          currency: string | null
           error_message: string | null
           event_type: string
           id: string
           order_id: string | null
           payload: Json | null
+          paypal_event_id: string | null
+          paypal_order_id: string | null
           processed_at: string | null
+          purchase_id: string | null
           session_id: string | null
           status: string
           stripe_event_id: string
           user_id: string | null
         }
         Insert: {
+          amount?: number | null
+          application_id?: string | null
           created_at?: string | null
+          currency?: string | null
           error_message?: string | null
           event_type: string
           id?: string
           order_id?: string | null
           payload?: Json | null
+          paypal_event_id?: string | null
+          paypal_order_id?: string | null
           processed_at?: string | null
+          purchase_id?: string | null
           session_id?: string | null
           status?: string
           stripe_event_id: string
           user_id?: string | null
         }
         Update: {
+          amount?: number | null
+          application_id?: string | null
           created_at?: string | null
+          currency?: string | null
           error_message?: string | null
           event_type?: string
           id?: string
           order_id?: string | null
           payload?: Json | null
+          paypal_event_id?: string | null
+          paypal_order_id?: string | null
           processed_at?: string | null
+          purchase_id?: string | null
           session_id?: string | null
           status?: string
           stripe_event_id?: string
@@ -4851,10 +4869,24 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "payment_events_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "dispensary_applications"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "payment_events_order_id_fkey"
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_events_purchase_id_fkey"
+            columns: ["purchase_id"]
+            isOneToOne: false
+            referencedRelation: "rvt_purchases"
             referencedColumns: ["id"]
           },
         ]

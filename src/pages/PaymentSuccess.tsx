@@ -29,6 +29,51 @@ const PaymentSuccess: React.FC = () => {
   const [inviteEmails, setInviteEmails] = useState('');
   const [inviteLoading, setInviteLoading] = useState(false);
 
+  // Issue 1001 — new dispensary application flow: webhook provisions the account
+  // and sends the manager-registration token email. Here we just poll status and
+  // tell the user to check their email.
+  const applicationId = searchParams.get('application_id');
+  const [appPaymentReady, setAppPaymentReady] = useState<null | { organizationName: string; contactEmailMasked: string }>(null);
+  const [appPolling, setAppPolling] = useState<boolean>(!!applicationId);
+
+  useEffect(() => {
+    if (!applicationId) return;
+    let cancelled = false;
+    let attempts = 0;
+    const poll = async () => {
+      while (!cancelled && attempts < 30) {
+        attempts++;
+        try {
+          const { invokePublicFunction } = await import('@/lib/publicEdgeFunctions');
+          const { data } = await invokePublicFunction<any>('get-application-payment-status', {
+            application_id: applicationId,
+          });
+          const a = data?.application;
+          if (a && (a.payment_status === 'paid' || a.payment_status === 'completed')) {
+            if (!cancelled) {
+              setAppPaymentReady({
+                organizationName: a.organization_name,
+                contactEmailMasked: a.contact_email_masked,
+              });
+              setShowConfetti(true);
+              setTimeout(() => setShowConfetti(false), 4000);
+              setAppPolling(false);
+            }
+            return;
+          }
+        } catch (e) {
+          console.warn('payment status poll error', e);
+        }
+        await new Promise((r) => setTimeout(r, 2000));
+      }
+      if (!cancelled) setAppPolling(false);
+    };
+    void poll();
+    return () => {
+      cancelled = true;
+    };
+  }, [applicationId]);
+
   useEffect(() => {
     const verifyPayment = async () => {
       const token = searchParams.get('token');
@@ -212,6 +257,56 @@ const PaymentSuccess: React.FC = () => {
       setInviteLoading(false);
     }
   };
+
+  // Issue 1001 — Dispensary application payment success (account being provisioned by webhook)
+  if (applicationId) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
+        {showConfetti && (
+          <Confetti width={window.innerWidth} height={window.innerHeight} recycle={false} numberOfPieces={400} />
+        )}
+        <Card className="max-w-xl w-full">
+          <CardHeader className="text-center">
+            <div className="flex justify-center mb-3">
+              <CheckCircle className="h-16 w-16 text-green-500" />
+            </div>
+            <CardTitle className="text-2xl">
+              {appPaymentReady ? 'Payment Confirmed!' : 'Processing your payment…'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            {appPolling && !appPaymentReady && (
+              <p className="text-center text-muted-foreground text-sm">
+                Waiting for PayPal to confirm your payment. This usually takes a few seconds…
+              </p>
+            )}
+            {appPaymentReady && (
+              <>
+                <div className="bg-green-50 p-5 rounded-lg space-y-2">
+                  <p className="font-semibold text-green-800">{appPaymentReady.organizationName}</p>
+                  <p className="text-sm text-green-700">
+                    We've sent your manager registration link to <span className="font-mono">{appPaymentReady.contactEmailMasked}</span>.
+                  </p>
+                  <p className="text-sm text-green-700">
+                    Open that email and click the link to set your password and access your dashboard.
+                  </p>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <Button onClick={() => navigate('/auth')} className="w-full">Go to sign-in</Button>
+                  <Button onClick={() => navigate('/')} variant="outline" className="w-full">Back to home</Button>
+                </div>
+              </>
+            )}
+            {!appPolling && !appPaymentReady && (
+              <div className="bg-orange-50 p-4 rounded-lg text-sm text-orange-800">
+                We haven't received the payment confirmation yet. If you completed the PayPal checkout, please refresh this page in a minute or contact support.
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   // Seat purchase success view
   if (seatPurchaseData) {

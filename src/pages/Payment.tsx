@@ -1,35 +1,35 @@
-import React, { useEffect, useState } from 'react';
+// Issue 1001 — Auto-redirect to PayPal. No manual click required in the happy path.
+import React, { useEffect, useRef, useState } from 'react';
 import { useSearchParams, useNavigate, useParams } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, CreditCard, Users, Building2, CheckCircle2, AlertCircle } from 'lucide-react';
-import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Loader2, AlertCircle, CheckCircle2, CreditCard, Building2 } from 'lucide-react';
+import { invokePublicFunction } from '@/lib/publicEdgeFunctions';
 
-interface ApplicationData {
+type AppStatus = {
   id: string;
   organization_name: string;
-  contact_person: string;
-  contact_email: string;
-  estimated_employees: number | null;
-  requested_credits: number | null;
-  payment_status: string | null;
+  contact_person_initial: string;
+  contact_email_masked: string;
   application_status: string;
-}
-
-const PRICE_PER_SEAT = 49;
+  payment_status: string | null;
+  quantity: number;
+  price_per_seat: number;
+  total_amount: number;
+};
 
 const Payment: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const params = useParams<{ applicationId?: string }>();
-  // Accept both /payment/:applicationId (from approval email links) and /payment?application_id=...
   const applicationId = params.applicationId || searchParams.get('application_id');
-  
+
   const [loading, setLoading] = useState(true);
-  const [processing, setProcessing] = useState(false);
-  const [application, setApplication] = useState<ApplicationData | null>(null);
+  const [app, setApp] = useState<AppStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [redirecting, setRedirecting] = useState(false);
+  const [retryable, setRetryable] = useState(false);
+  const triggered = useRef(false);
 
   useEffect(() => {
     if (!applicationId) {
@@ -37,229 +37,140 @@ const Payment: React.FC = () => {
       setLoading(false);
       return;
     }
-
-    fetchApplication();
+    void load();
   }, [applicationId]);
 
-  const fetchApplication = async () => {
-    try {
-      const { data, error: fetchError } = await supabase
-        .from('dispensary_applications')
-        .select('id, organization_name, contact_person, contact_email, estimated_employees, requested_credits, payment_status, application_status')
-        .eq('id', applicationId)
-        .single();
-
-      if (fetchError || !data) {
-        setError('Application not found. Please check your link or contact support.');
-        setLoading(false);
-        return;
+  const load = async () => {
+    setLoading(true);
+    const { data, error: fnError } = await invokePublicFunction<{ success: boolean; application?: AppStatus; error_code?: string }>(
+      'get-application-payment-status',
+      { application_id: applicationId }
+    );
+    if (fnError || !data?.success || !data.application) {
+      if (data?.error_code === 'NOT_FOUND') {
+        setError("We couldn't find that application. Double-check the link from your approval email.");
+      } else {
+        setError('Unable to load your application. Please try again or contact support.');
       }
-
-      if (data.application_status !== 'approved') {
-        setError('This application has not been approved yet. Please wait for admin approval.');
-        setLoading(false);
-        return;
-      }
-
-      if (data.payment_status === 'paid' || data.payment_status === 'completed') {
-        // Already paid - redirect to registration
-        toast.success('Payment already completed!', {
-          description: 'Redirecting to registration...'
-        });
-        setTimeout(() => {
-          navigate('/auth?role=dispensary_manager&tab=accesskey');
-        }, 2000);
-        return;
-      }
-
-      setApplication(data);
       setLoading(false);
-    } catch (err) {
-      console.error('Error fetching application:', err);
-      setError('Failed to load application details. Please try again.');
-      setLoading(false);
+      return;
     }
+    const a = data.application;
+    setApp(a);
+    setLoading(false);
+
+    if (a.application_status !== 'approved' && a.application_status !== 'completed') {
+      setError('This application has not been approved yet. Please wait for admin approval.');
+      return;
+    }
+    if (a.payment_status === 'paid' || a.payment_status === 'completed') {
+      // Already paid — go to success page (which polls + routes to /auth)
+      navigate(`/payment-success?application_id=${a.id}`, { replace: true });
+      return;
+    }
+    // Auto-trigger payment
+    void startPayment();
   };
 
-  const handlePayment = async () => {
-    if (!application) return;
-
-    setProcessing(true);
-    try {
-      const credits = application.estimated_employees || application.requested_credits || 10;
-      const totalAmount = credits * PRICE_PER_SEAT;
-
-      const { data, error: paymentError } = await supabase.functions.invoke('create-dispensary-payment-paypal', {
-        body: {
-          application_id: application.id,
-          credits,
-          amount: totalAmount,
-          organization_name: application.organization_name,
-          contact_email: application.contact_email
-        }
-      });
-
-      if (paymentError || !data?.approvalUrl) {
-        throw new Error(paymentError?.message || 'Failed to create payment session');
+  const startPayment = async () => {
+    if (triggered.current) return;
+    triggered.current = true;
+    setRedirecting(true);
+    setError(null);
+    const { data, error: fnError } = await invokePublicFunction<{ success: boolean; url?: string; error?: string; error_code?: string; already_paid?: boolean }>(
+      'create-dispensary-payment-paypal',
+      { application_id: applicationId }
+    );
+    if (fnError || !data?.success || !data.url) {
+      if (data?.already_paid) {
+        navigate(`/payment-success?application_id=${applicationId}`, { replace: true });
+        return;
       }
-
-      // Store payment info for return
-      sessionStorage.setItem('pending_payment', JSON.stringify({
-        application_id: application.id,
-        credits,
-        amount: totalAmount
-      }));
-
-      // Redirect to PayPal
-      window.location.href = data.approvalUrl;
-    } catch (err: any) {
-      console.error('Payment error:', err);
-      toast.error('Payment Failed', {
-        description: err.message || 'Unable to process payment. Please try again.'
-      });
-      setProcessing(false);
+      setError(data?.error || fnError?.message || 'Unable to start payment. Please try again.');
+      setRedirecting(false);
+      setRetryable(true);
+      triggered.current = false;
+      return;
     }
+    window.location.href = data.url;
   };
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/5">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="text-center space-y-3">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
+          <p className="text-sm text-muted-foreground">Loading your application…</p>
+        </div>
       </div>
     );
   }
 
-  if (error) {
+  if (error && !retryable) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/5 p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-2" />
-            <CardTitle>Payment Error</CardTitle>
+            <CardTitle>Payment Unavailable</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-center text-muted-foreground">{error}</p>
-            <div className="flex gap-3">
-              <Button variant="outline" onClick={() => navigate('/')} className="flex-1">
-                Go Home
-              </Button>
-              <Button onClick={() => window.location.reload()} className="flex-1">
-                Try Again
-              </Button>
-            </div>
+            <Button onClick={() => navigate('/')} variant="outline" className="w-full">
+              Go Home
+            </Button>
           </CardContent>
         </Card>
       </div>
     );
   }
 
-  if (!application) return null;
-
-  const credits = application.estimated_employees || application.requested_credits || 10;
-  const totalAmount = credits * PRICE_PER_SEAT;
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary/5 py-12 px-4">
-      <div className="max-w-2xl mx-auto space-y-6">
-        {/* Header */}
+      <div className="max-w-xl mx-auto space-y-6">
         <div className="text-center">
-          <CheckCircle2 className="h-16 w-16 text-green-600 mx-auto mb-4" />
-          <h1 className="text-3xl font-bold text-foreground">Application Approved!</h1>
-          <p className="text-muted-foreground mt-2">
-            Complete payment to activate your organization's training program
+          <CheckCircle2 className="h-12 w-12 text-green-600 mx-auto mb-3" />
+          <h1 className="text-2xl font-bold">Application Approved</h1>
+          <p className="text-muted-foreground mt-1">
+            Completing your secure PayPal checkout…
           </p>
         </div>
 
-        {/* Organization Info */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Building2 className="h-5 w-5" />
-              {application.organization_name}
-            </CardTitle>
-            <CardDescription>
-              Contact: {application.contact_person} ({application.contact_email})
-            </CardDescription>
-          </CardHeader>
-        </Card>
+        {app && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Building2 className="h-5 w-5" /> {app.organization_name}
+              </CardTitle>
+              <CardDescription>{app.contact_email_masked}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2 text-sm">
+              <div className="flex justify-between"><span className="text-muted-foreground">Seats</span><span className="font-medium">{app.quantity}</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground">Price / seat</span><span className="font-medium">${app.price_per_seat}</span></div>
+              <div className="flex justify-between pt-2 border-t"><span className="font-semibold">Total</span><span className="font-bold text-primary text-lg">${app.total_amount.toLocaleString()}</span></div>
+            </CardContent>
+          </Card>
+        )}
 
-        {/* Payment Summary */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              Training Seats
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex justify-between items-center py-2 border-b">
-              <span className="text-muted-foreground">Number of Seats</span>
-              <span className="font-semibold">{credits}</span>
-            </div>
-            <div className="flex justify-between items-center py-2 border-b">
-              <span className="text-muted-foreground">Price per Seat</span>
-              <span className="font-semibold">${PRICE_PER_SEAT}</span>
-            </div>
-            <div className="flex justify-between items-center py-3 bg-primary/5 rounded-lg px-3">
-              <span className="font-semibold text-lg">Total</span>
-              <span className="font-bold text-2xl text-primary">${totalAmount.toLocaleString()}</span>
-            </div>
-          </CardContent>
-        </Card>
+        {redirecting && (
+          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" /> Redirecting you to PayPal…
+          </div>
+        )}
 
-        {/* What's Included */}
-        <Card>
-          <CardHeader>
-            <CardTitle>What's Included</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-2 text-sm">
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                <span>{credits} employee training seats for Maryland Cannabis Compliance</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                <span>Full 23-module curriculum with COMAR compliance certification</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                <span>Manager dashboard for tracking employee progress</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                <span>Printable certificates for each certified employee</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                <span>1 year of access from activation</span>
-              </li>
-            </ul>
-          </CardContent>
-        </Card>
-
-        {/* Payment Button */}
-        <Button 
-          onClick={handlePayment} 
-          disabled={processing}
-          size="lg"
-          className="w-full h-14 text-lg"
-        >
-          {processing ? (
-            <>
-              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              Processing...
-            </>
-          ) : (
-            <>
-              <CreditCard className="mr-2 h-5 w-5" />
-              Pay ${totalAmount.toLocaleString()} with PayPal
-            </>
-          )}
-        </Button>
+        {error && retryable && (
+          <Card className="border-destructive/30">
+            <CardContent className="pt-6 space-y-3">
+              <p className="text-sm text-destructive">{error}</p>
+              <Button onClick={startPayment} className="w-full">
+                <CreditCard className="h-4 w-4 mr-2" /> Retry payment
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         <p className="text-center text-xs text-muted-foreground">
-          Secure payment processed by PayPal. You'll be redirected to complete payment.
+          Secure payment processed by PayPal. You'll be redirected automatically.
         </p>
       </div>
     </div>
