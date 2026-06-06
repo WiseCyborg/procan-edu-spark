@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -22,7 +22,9 @@ const PRICE_PER_SEAT = 49;
 const Payment: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const applicationId = searchParams.get('application_id');
+  const params = useParams<{ applicationId?: string }>();
+  // Accept both /payment/:applicationId (from approval email links) and /payment?application_id=...
+  const applicationId = params.applicationId || searchParams.get('application_id');
   
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
