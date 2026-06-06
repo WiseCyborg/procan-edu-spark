@@ -1,78 +1,88 @@
-# UAT Tester Form — Step-by-Step Checklist (All Roles)
+# System Visibility Pack
 
-Both testers (Louis & Dani) will run through every role. We already have `uat_runs`, `uat_tasks`, and `uat_evidence` tables — we'll seed them with a canonical task catalog and build a dedicated tester page on top.
+Deliver one authoritative snapshot of the implementation state so an external lead (or you) can audit ProCannEdu without guessing. Output is generated from real artifacts: the React route tree, Supabase schema/RLS via `pg_catalog`, edge function directory, and current UAT tables.
 
-## Scope
+## What gets produced
 
-**Roles covered** (each tester runs all four):
-1. **Public Visitor** — marketing site, signup, certificate verification
-2. **Org Manager** — org setup, seat purchase, invites, dashboards, compliance
-3. **Employee / Student** — accept invite, profile, courses, exam, certificate
-4. **Platform Admin** — admin console, approvals, mission control, audit
+1. **`/mnt/documents/PROCANNEDU_SYSTEM_VISIBILITY.pdf`** — single shareable PDF, ~25–40 pages.
+2. **`/docs/system/` markdown bundle** in the repo, diffable per release:
+   - `01_ROUTE_MAP.md`
+   - `02_ROLES_MATRIX.md`
+   - `03_SCHEMA_AND_RLS.md`
+   - `04_EDGE_FUNCTIONS.md`
+   - `05_CHATBOT_ARCHITECTURE.md`
+   - `06_UAT_STATE.md`
+   - `07_KNOWN_ISSUES_AND_GAPS.md`
+   - `README.md` (index + how to regenerate)
+3. **`scripts/generate-system-pack.ts`** — re-runnable generator so the pack stays current.
 
-**Detail level: 3/5** — ~8–12 steps per role (medium), each step has: action, deep link, expected result, pass/fail, notes, optional screenshot.
+## Section contents
 
-## Deliverables
+### 1. Route map
+Parsed from `src/App.tsx`. For each route: path, page component, guard (`ProtectedRouteGuard`, `AdminRouteGuard`, `ManagerGuard`, `CoordinatorGuard`, `MemberTypeGuard`, `RequireAccess`), allowed roles/member types, and a one-line purpose. Grouped: Public, Auth, Student, Manager, Coordinator, Admin, UAT, Compliance.
 
-### 1. Seed task catalog (migration + seed)
-Insert ~40 canonical `uat_tasks` rows (one template run per tester) grouped by `role_to_test`. Each row: `task_code`, `title`, `description` (the step instructions), `role_to_test`, `deep_link`, `expected_result`, `priority`.
+### 2. Roles & permissions matrix
+Three layers documented side-by-side:
+- **Supabase Auth** — anonymous vs authenticated.
+- **`organization_members.member_type`** — employee / coordinator / manager / owner.
+- **`user_roles.role`** — student / dispensary_manager / training_coordinator / admin / trainer / consumer / mca_inspector.
 
-Example task codes:
-- `PUB-01` Visit homepage and verify hero loads
-- `PUB-02` Submit contact form → check confirmation email
-- `PUB-03` Verify a known certificate via QR/code
-- `MGR-01` Sign in as Louis, land on org dashboard
-- `MGR-02` Purchase seats (Stripe test mode)
-- `MGR-03` Invite an employee → email delivered
-- `MGR-04` Assign a course to a seat
-- `STU-01` Accept invite via email link
-- `STU-02` Complete profile to 100%
-- `STU-03` Start course, complete module, verify resume state
-- `STU-04` Take exam, pass, receive certificate
-- `ADM-01` Approve a pending org application
-- `ADM-02` Reset a user's exam state
-- `ADM-03` Verify mission control metrics match DB
+Plus the `role_permissions` table (admin permission flags) and the `get_access_snapshot` RPC output fields. Cross-table matrix: Role × (page access, course access, admin tools, billing, audit log, chatbot scope).
 
-### 2. In-app tester form — `/uat/feedback`
-A new authenticated page only visible to users in `uat_accounts`:
-- **Header**: tester name, current run code, progress (e.g. "12 / 38 complete"), "Start New Run" button
-- **Role tabs**: Public · Manager · Student · Admin
-- **Per-step card**: title, instructions, "Open deep link" button, expected result, Pass/Fail/Skip toggle, notes textarea, optional screenshot upload (Supabase storage), auto-save on blur
-- **Submit run** button at the bottom → marks `uat_runs.status='completed'`, computes summary metrics (pass rate per role), and emails a summary to admin
-- Writes to existing `uat_tasks` (status, completed_by, completed_at, evidence) and `uat_evidence` (one row per step with screenshot/notes)
+### 3. Schema & RLS
+Auto-extracted from `information_schema` + `pg_policies`:
+- All ~170 public tables grouped by domain (Auth & Identity, Training, Certificates, Exams, Payments, Comms, UAT, Ops/Health, AI/Agents, Compliance).
+- Per table: columns + types, FK targets, RLS on/off, policy names + USING/WITH CHECK expressions, GRANTs.
+- Dedicated subsection for `SECURITY DEFINER` functions (`has_role`, `get_access_snapshot`, `start_uat_run`, `submit_uat_step`, etc.) with signature and purpose.
+- Storage buckets and their policies.
 
-Reuses: `react-hook-form` + `zod`, `RequireAccess`, TanStack Query, existing storage bucket pattern.
+### 4. Edge functions
+Enumerated from `supabase/functions/`. Per function: name, `verify_jwt` setting (from `config.toml`), purpose, secrets it reads, callers in the frontend. Highlights public vs authenticated functions.
 
-### 3. Printable PDF backup
-Extend the existing UAT PDF generator (`/tmp/make_uat_pdf.py`) to produce `UAT_TESTER_CHECKLIST.pdf`:
-- One section per role with numbered steps, expected result, and a checkbox + notes line per step
-- Same content as the in-app form so a tester can do it offline and transcribe later
-- Saved to `/mnt/documents/UAT_TESTER_CHECKLIST.pdf` with QA pass via `pdftoppm`
+### 5. Chatbot architecture
+Traced from `InternalChatbot.tsx` + `internal-chat-assistant` edge function:
+- Provider (Lovable AI Gateway / model), prompt assembly, role + page context injected, conversation history window, escalation path via `RequestSupportButton`, persistence (or lack thereof).
+- Gaps: no long-term memory, no progress-tracking yet, no role-scoped tool calls.
 
-## Technical details
+### 6. UAT state
+Live snapshot of current tables:
+- `uat_task_templates` (36 seeded steps × 4 roles)
+- `uat_runs`, `uat_tasks`, `uat_evidence` row counts
+- Status of `/uat/feedback` page, `start_uat_run` / `submit_uat_step` RPCs
+- `uat_accounts` allowlist
+- Existing artifacts: `UAT_TESTER_CHECKLIST.pdf`, `docs/UAT_TESTER_GUIDE.md`
+- Reconciliation table: uploaded `LOVABLE_BUILD_PROMPT.md` items → "Already shipped" / "Delta to apply" / "Out of scope".
 
-### Database
-- **No schema changes.** Use existing tables.
-- One migration to **seed the canonical task catalog** as a reusable template (insert into `uat_tasks` with `run_id = NULL` acting as templates, or into a new lightweight `uat_task_templates` if we prefer to keep template vs run rows separate — recommend the latter, single small table).
-- RPC `start_uat_run(tester_user_id)` → inserts a `uat_runs` row and clones template tasks into `uat_tasks` for that run.
-- RPC `submit_uat_step(task_id, status, notes, evidence_path)` → updates `uat_tasks` + inserts `uat_evidence`.
+### 7. Known issues & gaps
+Pulled from `PIPELINE_FIX_SUMMARY.md`, `docs/SECURITY_FIX_IMPLEMENTATION.md`, recent migrations, and Supabase linter output. Plus the four next-step initiatives from your message (UAT Control Center, Operational Readiness Layer, Security Visibility Dashboard, AI Support Agent) ranked with effort estimates.
 
-### Frontend
+## Technical approach
+
+```text
+scripts/generate-system-pack.ts
+  ├─ parseRoutes(src/App.tsx)            → 01_ROUTE_MAP.md
+  ├─ parseGuards + role_permissions      → 02_ROLES_MATRIX.md
+  ├─ psql introspection                  → 03_SCHEMA_AND_RLS.md
+  │     • information_schema.columns
+  │     • pg_policies
+  │     • pg_proc (SECURITY DEFINER)
+  │     • storage.buckets + policies
+  ├─ scan supabase/functions/* + config  → 04_EDGE_FUNCTIONS.md
+  ├─ trace chatbot files                 → 05_CHATBOT_ARCHITECTURE.md
+  ├─ query uat_* tables                  → 06_UAT_STATE.md
+  └─ collate fix summaries + linter      → 07_KNOWN_ISSUES_AND_GAPS.md
+
+python3 /tmp/make_visibility_pdf.py
+  → /mnt/documents/PROCANNEDU_SYSTEM_VISIBILITY.pdf
+  (reportlab; QA via pdftoppm)
 ```
-src/pages/uat/UATFeedback.tsx        # main page, tabs per role
-src/components/uat/UATStepCard.tsx   # single step row
-src/components/uat/UATRunHeader.tsx  # progress + run controls
-src/hooks/useUATRun.ts                # fetch/start run, mutations
-```
-Route added under `App.tsx` guarded by `RequireAccess` + `uat_accounts` check.
 
-### PDF
-Extend existing reportlab script. Render four `Heading1` sections; per step use a Paragraph with `☐` glyph (Helvetica supports it) + notes underline. QA with `pdftoppm -jpeg -r 150`.
+The generator runs read-only — no migrations, no schema changes. PDF is rebuilt from the markdown so the two stay in sync.
 
-## Out of scope
-- Mobile-specific UI polish (works responsive but not redesigned for phone)
-- Auto-screenshot capture (testers upload manually)
-- Re-running individual failed steps without starting a fresh run (can add later)
+## Open decisions (please pick before I switch to build mode)
 
-## Approval needed
-Confirm the role list (4 roles above) and that seeding ~40 steps total is the right granularity, then I'll switch to build mode and ship migration + page + PDF together.
+1. **Sensitivity** — include real row counts, org names, and recent UAT activity, or keep it structure-only so it's safe to share with outside reviewers?
+2. **Depth of schema section** — summary (table + RLS flag), medium (+ every policy expression), or full (+ all columns, FKs, triggers, SECURITY DEFINER bodies)? Full will push the PDF to ~80 pages.
+3. **Live dashboard** — also build `/admin/visibility` that renders all of this from real data on demand? Adds ~1 extra build step but means no more stale PDFs.
+
+Once you confirm those three, I'll switch to build mode and ship the markdown + PDF in one pass.
