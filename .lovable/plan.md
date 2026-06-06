@@ -1,53 +1,103 @@
-# Fix the 9 listed gaps — reality-checked against the real schema
+# COMAR Scraper Deploy — 5 Items
 
-The uploaded `07_KNOWN_ISSUES_AND_GAPS.md` was written against a simplified, partially-imagined version of this app. Before implementing anything I mapped every gap to the live database and codebase.
+Five-item deploy to wire the regulatory scrapers to a daily cycle with alerting and admin visibility. Schema-adapted to existing `regulatory_updates` and `cron_job_executions` tables (no migration).
 
-## Gap-by-gap reconciliation
+## 1. Adapt `trigger-scrapers/index.ts`
 
-| # | Uploaded gap | Real status | Action |
-|---|---|---|---|
-| 1 | `has_role()` deploy order | `has_role` exists and is widely used. No deploy-order bug in current code. | **Skip** — non-issue. |
-| 2 | Cert PDF generation has no retry, `pdf_path` stays NULL silently | Real column is `pdf_url`. A `generate-certificate-retry` edge function already exists. What's missing: a persistent error row + admin visibility when both attempts fail. | **Fix (light)** — add `certificate_generation_errors` table + write a row on final failure in `generate-certificate` / `generate-certificate-retry`. |
-| 3 | `stripe-webhook` has no idempotency on `stripe_events` | Table is `payment_events` (already has `UNIQUE(stripe_event_id)`). Webhook uses an **in-memory Set** for idempotency — lost on every cold start, so duplicate Stripe retries CAN double-process. | **Fix** — replace the in-memory check with a DB lookup against `payment_events.stripe_event_id` before processing; rely on the existing unique index. |
-| 4 | `chat_sessions` / `chat_messages` never persisted | **Neither table exists.** Fabricated against an imagined schema. The real internal chatbot is stateless by design. | **Skip** — non-applicable. Persisting chat is a feature, not a bug fix; out of scope here. |
-| 5 | `exam_answers` not deleted on reset | **`exam_answers` table does not exist.** Answers live inside `exam_attempts` JSONB. `reset_exam_state` RPC already exists. | **Skip** — non-applicable. |
-| 6 | `compliance_records` refresh is nightly | **`compliance_records` table does not exist.** Real tables are `compliance_metrics`, `compliance_alerts`, `compliance_incidents`; certificate issuance already updates them via triggers. | **Skip** — non-applicable. |
-| 7 | `uat-screenshots` bucket policy unverified | Storage-dashboard check, not a code change. | **Skip in code** — note it in `docs/system/07_KNOWN_ISSUES_AND_GAPS.md` as an env-verification task. |
-| 8 | `profile_complete` vs `completeness_pct` mismatch | **Neither column exists on `profiles`.** Completeness is computed via a different mechanism (`useProfileCompletion`). | **Skip** — non-applicable. |
-| 9 | `audit_log` missing indexes | **`audit_log` does not exist.** Real tables are `admin_operations_audit`, `security_audit_log`, `certificate_audit_log`. Quick check shows these have PK + a couple of single-column indexes but no `(user_id, created_at)` composite. | **Fix** — add composite indexes on the three real audit tables to keep admin filters fast. |
+Rewrite the orchestrator with:
 
-**Net: 3 actionable fixes (gaps 2, 3, 9), 6 not applicable.**
+- **runId** (uuid) generated per invocation, included in every log row and the response.
+- **Per-scraper try/catch** invoking `scrape-regulations` then `scrape-federal-regulations`, capturing duration + error per call.
+- **`logExecution()`** → insert into `cron_job_executions`:
+  - `job_name`: `'trigger-scrapers'`
+  - `executed_at`: invocation start
+  - `status`: `'success'` if all scrapers ok, `'partial'` if some failed, `'error'` if all failed
+  - `execution_time_ms`: total wall time
+  - `error_message`: JSON string `{ runId, results: [...] }` (used as metadata bag since column doesn't exist)
+- **`logRegulatoryError()`** on any scraper failure → insert into `regulatory_updates`:
+  - `section_number`: `'scraper:<name>'`
+  - `change_type`: `'scrape_error'`
+  - `new_content`: error message + stack
+  - `review_status`: `'error'`
+  - `detected_at`: now()
+- **Failure email**: on any scraper failure, invoke existing `send-email` (or whatever transactional sender the project uses) addressed to admin list with subject `[ProCannEdu] Regulatory scraper failure — <runId>` and body summarizing which scraper(s) failed.
+- **Response**: 200 on full success, 207 on partial/total failure, JSON `{ success, runId, results, durationMs }`.
+- **Auth gate**: accept either the `pg_cron` invocation header `x-invoked-by: pg_cron` (validated against a shared secret) or an authenticated admin JWT. Reject anonymous.
 
-## What I will implement
+## 2. Adapt `monitor-comar-updates/index.ts`
 
-### 1. Stripe webhook persistent idempotency (gap 3)
-In `supabase/functions/stripe-webhook/index.ts`:
-- Remove the `processedEvents` in-memory Set.
-- Before the switch, `SELECT id, status FROM payment_events WHERE stripe_event_id = $1`. If the row exists with `status IN ('completed','processing')`, return `{received:true, skipped:true}` immediately.
-- Change the initial insert to use `.upsert({...}, { onConflict: 'stripe_event_id', ignoreDuplicates: true })` so concurrent retries can't both insert.
-- No schema change required (unique index already exists).
+Retarget reads to actual columns:
 
-### 2. Certificate generation error log (gap 2)
-- **Migration:** create `public.certificate_generation_errors(id, certificate_id, user_id, course_id, attempt_number, error_message, error_detail jsonb, created_at)` with GRANTs + RLS (admin read, service_role all).
-- In `generate-certificate` and `generate-certificate-retry`, when the final attempt fails, insert one row before returning the error response. Existing happy paths untouched.
-- Surface in the admin UI later (out of scope here — log only, no UI).
+- `lastSuccessfulScrape` = `MAX(executed_at)` from `cron_job_executions` where `job_name='trigger-scrapers'` and `status IN ('success','partial')`.
+- `lastRunSuccess` = boolean from latest row's `status='success'`.
+- `dataAgeHours` = `(now - last_modified_at)` from `regulatory_content`.
+- `staleWarning` = `dataAgeHours > 26` (one missed cycle threshold).
+- Recent errors = last 10 rows from `regulatory_updates` where `change_type='scrape_error'`.
+- Keep admin gate (JWT + `has_role(uid,'admin')`).
 
-### 3. Audit-log composite indexes (gap 9)
-- **Migration:** `CREATE INDEX CONCURRENTLY IF NOT EXISTS` on:
-  - `admin_operations_audit (admin_user_id, created_at DESC)`
-  - `security_audit_log (user_id, created_at DESC)` and `(event_type, created_at DESC)`
-  - `certificate_audit_log (action, created_at DESC)`
-- Read-only impact, no policy changes.
+## 3. Schedule pg_cron jobs
 
-### 4. Update `docs/system/07_KNOWN_ISSUES_AND_GAPS.md`
-Replace the fabricated-table entries with this reconciled table so the doc reflects reality, and mark gaps 2/3/9 as fixed once the migrations land.
+Via `supabase--insert` (not migration — contains URL + anon key):
 
-## Out of scope (explicit)
-- Persisting chatbot conversations (gap 4) — that's a product feature, ask separately if you want it built.
-- Storage bucket dashboard verification (gap 7) — manual step in Supabase.
-- Any change involving `chat_sessions`, `chat_messages`, `exam_answers`, `compliance_records`, `audit_log`, `profile_complete`, `completeness_pct` — none of these exist.
+- **`comar-scrape-daily`**: `0 6 * * *` → POST `/functions/v1/trigger-scrapers` with `x-invoked-by: pg_cron` + anon key apikey header.
+- **`comar-compliance-check`**: `0 8 * * *` → POST `/functions/v1/check-comar-compliance` (two hours after scrape so it reads fresh content).
 
-## Technical notes
-- All schema changes go through `supabase--migration` (single migration with `CREATE TABLE` + `GRANT` + `ENABLE RLS` + `CREATE POLICY` for the new errors table; separate index migration for gap 9).
-- Stripe webhook change is a small in-file refactor; will deploy via `supabase--deploy_edge_functions` after edit.
-- No changes to frontend code.
+## 4. Dashboard warning surface
+
+In the existing COMAR/admin health surface that consumes `monitor-comar-updates`:
+
+- If `staleWarning === true` → red banner: "Regulatory content has not refreshed in >26h (one missed scrape cycle). Last successful scrape: <ts>."
+- If `lastRunSuccess === false` → amber banner with error excerpt + link to `regulatory_updates` error rows.
+
+(Surface-only change; no business-logic edit.)
+
+## 5. Runbook update
+
+Append to `docs/system/comar-scraper-runbook.md` (or create if missing):
+
+- Cron schedule table (06:00 / 08:00 UTC)
+- Env var table noting service role key never appears in cron body (only anon key + `x-invoked-by` header)
+- Failure-mode matrix: one scraper down (207 + email), all scrapers down (207 + email + amber dashboard), missed cycle (red dashboard at 26h)
+- Verification sequence: cURL trigger-scrapers → inspect `regulatory_content.last_modified_at` → force a failure → confirm error email → verify 08:00 `check-comar-compliance` reads new content
+
+---
+
+## Technical Details
+
+**Schema mapping (no migration):**
+
+| Logical field | Actual column |
+|---|---|
+| run metadata | `cron_job_executions.error_message` (JSON-encoded) |
+| scraper error | `regulatory_updates` with `change_type='scrape_error'` |
+| last refresh | `regulatory_content.last_modified_at` |
+
+**Files touched:**
+- `supabase/functions/trigger-scrapers/index.ts` (rewrite)
+- `supabase/functions/monitor-comar-updates/index.ts` (rewrite reads + remove TODO)
+- `supabase/config.toml` (confirm `trigger-scrapers` stays `verify_jwt = false`; header-based auth inside)
+- Dashboard component consuming `monitor-comar-updates` (banner)
+- `docs/system/comar-scraper-runbook.md`
+- pg_cron via `supabase--insert` (two `cron.schedule` calls)
+
+**Secrets needed:**
+- `CRON_SHARED_SECRET` (new) — validated against `x-invoked-by`/header signature
+- Admin alert recipient list — reuse existing admin email config if present, else add `ADMIN_ALERT_EMAILS`
+
+**Out of scope (next sprint):**
+- Migration to add native `metadata jsonb` + `success boolean` columns
+- Sentinel `regulations` table + FK for error rows
+- Scraper backoff/retry logic
+- Per-section diff summarization beyond current `analyze-regulatory-impact` invoke
+
+---
+
+## Verification (post-deploy checklist)
+
+1. `curl POST /trigger-scrapers` with `x-invoked-by: pg_cron` + shared secret → expect 200 + structured `results[]`, new `cron_job_executions` row (`status='success'`), `regulatory_content.last_modified_at` advances.
+2. Temporarily break `scrape-regulations` URL → expect 207, `regulatory_updates` error row, admin email delivered.
+3. GET `/monitor-comar-updates` as admin → fields populated, `staleWarning=false`.
+4. `SELECT * FROM cron.job WHERE jobname IN ('comar-scrape-daily','comar-compliance-check')` → two rows.
+5. Wait for 08:00 UTC run → confirm `check-comar-compliance` logs new run.
+
+**Confirm before build:** (a) admin alert recipient(s) — single address or list? (b) reuse existing transactional sender function name, or new wrapper?

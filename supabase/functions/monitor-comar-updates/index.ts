@@ -1,192 +1,119 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
+// monitor-comar-updates
+// Admin-only health endpoint for the regulatory scraping pipeline.
+// Returns last successful scrape, last-run status, data-age, and recent scraper errors.
+
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-interface COMARChange {
-  section_reference: string;
-  change_detected: boolean;
-  change_summary?: string;
-  effective_date?: string;
-  content?: string;
-}
+const STALE_THRESHOLD_HOURS = 26; // one missed daily cycle
 
 Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
     const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
-    // Verify JWT and check admin role
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      return new Response(
-        JSON.stringify({ error: 'Missing authorization header' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    // ---- Admin auth gate ----
+    const authHeader = req.headers.get("Authorization") ?? "";
+    const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+    if (!token) {
+      return json({ success: false, error_code: "unauthorized" }, 401);
     }
-
-    const token = authHeader.replace('Bearer ', '');
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    
     if (authError || !user) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return json({ success: false, error_code: "unauthorized" }, 401);
     }
-
-    // Check if user has admin role
     const { data: roles } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', user.id);
-    
-    if (!roles?.some(r => r.role === 'admin')) {
-      return new Response(
-        JSON.stringify({ error: 'Admin access required' }),
-        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id);
+    if (!roles?.some((r) => r.role === "admin")) {
+      return json({ success: false, error_code: "forbidden" }, 403);
     }
 
-    console.log('🔍 Starting COMAR monitoring check...');
+    // ---- Latest scraper execution (any status) ----
+    const { data: latestRun } = await supabase
+      .from("cron_job_executions")
+      .select("executed_at, status, execution_time_ms, error_message")
+      .eq("job_name", "trigger-scrapers")
+      .order("executed_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
-    // Maryland COMAR sections we care about
-    const monitoredSections = [
-      'COMAR 14.17.05', // RVT regulations
-      'COMAR 21.11.08.03', // Drug-Free Workplace
-    ];
+    // ---- Last successful or partial scrape ----
+    const { data: lastOk } = await supabase
+      .from("cron_job_executions")
+      .select("executed_at, status")
+      .eq("job_name", "trigger-scrapers")
+      .in("status", ["success", "partial"])
+      .order("executed_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
-    const changes: COMARChange[] = [];
+    // ---- Freshness from regulatory_content ----
+    const { data: freshest } = await supabase
+      .from("regulatory_content")
+      .select("section_number, last_modified_at")
+      .order("last_modified_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
-    // TODO: In production, this would scrape Maryland Register
-    // For now, we'll check our regulatory_updates table for recent changes
-    const { data: recentUpdates, error: updatesError } = await supabase
-      .from('regulatory_updates')
-      .select('*')
-      .gte('detected_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
-      .order('detected_at', { ascending: false });
+    const lastModified = freshest?.last_modified_at ? new Date(freshest.last_modified_at) : null;
+    const dataAgeHours = lastModified
+      ? (Date.now() - lastModified.getTime()) / 36e5
+      : null;
+    const staleWarning = dataAgeHours === null ? true : dataAgeHours > STALE_THRESHOLD_HOURS;
 
-    if (updatesError) {
-      console.error('Error fetching regulatory updates:', updatesError);
+    // ---- Recent scraper errors ----
+    const { data: recentErrors } = await supabase
+      .from("regulatory_updates")
+      .select("id, section_number, new_content, detected_at, review_status")
+      .eq("change_type", "scrape_error")
+      .order("detected_at", { ascending: false })
+      .limit(10);
+
+    // ---- Latest run metadata (parse JSON embedded in error_message) ----
+    let latestRunPayload: unknown = null;
+    if (latestRun?.error_message) {
+      try { latestRunPayload = JSON.parse(latestRun.error_message); } catch { /* not json */ }
     }
 
-    // Check for COMAR version updates
-    for (const section of monitoredSections) {
-      const { data: currentVersion, error: versionError } = await supabase
-        .from('comar_versions')
-        .select('*')
-        .eq('section_reference', section)
-        .order('effective_date', { ascending: false })
-        .limit(1)
-        .single();
-
-      if (versionError && versionError.code !== 'PGRST116') {
-        console.error(`Error checking ${section}:`, versionError);
-        continue;
-      }
-
-      // Check if any recent updates affect this section
-      const relevantUpdates = recentUpdates?.filter(update => 
-        update.section_number?.includes(section.replace('COMAR ', ''))
-      ) || [];
-
-      if (relevantUpdates.length > 0) {
-        console.log(`📢 Found ${relevantUpdates.length} updates for ${section}`);
-        
-        for (const update of relevantUpdates) {
-          changes.push({
-            section_reference: section,
-            change_detected: true,
-            change_summary: update.ai_summary || 'Regulatory change detected',
-            effective_date: update.detected_at,
-          });
-
-          // Flag affected modules for review
-          if (update.affected_modules && Array.isArray(update.affected_modules)) {
-            const { data: affectedModules } = await supabase
-              .from('course_modules')
-              .select('id, title')
-              .or(
-                update.affected_modules
-                  .map((mod: string) => `title.ilike.%${mod}%`)
-                  .join(',')
-              );
-
-            if (affectedModules && affectedModules.length > 0) {
-              console.log(`⚠️ Flagging ${affectedModules.length} modules for review`);
-              
-              await supabase
-                .from('course_modules')
-                .update({ 
-                  comar_compliance_status: 'needs_review',
-                  last_comar_review_date: new Date().toISOString()
-                })
-                .in('id', affectedModules.map(m => m.id));
-
-              // Create content review tasks
-              const reviewTasks = affectedModules.map(module => ({
-                content_type: 'course_module',
-                content_id: module.id,
-                location: `Module: ${module.title}`,
-                urgency: update.urgency || 'medium',
-                status: 'pending',
-                ai_suggested_change: `Review for COMAR ${section} compliance based on recent regulatory update`,
-                regulatory_update_id: update.id,
-                due_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(), // 14 days
-              }));
-
-              await supabase
-                .from('content_review_queue')
-                .insert(reviewTasks);
-            }
+    return json({
+      success: true,
+      timestamp: new Date().toISOString(),
+      lastRun: latestRun
+        ? {
+            executedAt: latestRun.executed_at,
+            status: latestRun.status,
+            executionTimeMs: latestRun.execution_time_ms,
+            payload: latestRunPayload,
           }
-        }
-      }
-    }
-
-    // Alert admin if critical changes detected
-    const criticalChanges = changes.filter(c => c.change_detected);
-    if (criticalChanges.length > 0) {
-      console.log(`🚨 ${criticalChanges.length} critical COMAR changes detected`);
-      
-      await supabase.functions.invoke('queue_job', {
-        body: {
-          job_type: 'admin_alert',
-          payload: {
-            alert_type: 'comar_changes_detected',
-            changes: criticalChanges,
-            timestamp: new Date().toISOString(),
-          },
-        },
-      });
-    }
-
-    return new Response(
-      JSON.stringify({
-        success: true,
-        changes_detected: changes.length,
-        changes: changes,
-        timestamp: new Date().toISOString(),
-      }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
-
-  } catch (error) {
-    console.error('Error in COMAR monitoring:', error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { 
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      }
-    );
+        : null,
+      lastRunSuccess: latestRun?.status === "success",
+      lastSuccessfulScrape: lastOk?.executed_at ?? null,
+      lastSuccessfulScrapeStatus: lastOk?.status ?? null,
+      dataAgeHours: dataAgeHours === null ? null : Number(dataAgeHours.toFixed(2)),
+      staleWarning,
+      staleThresholdHours: STALE_THRESHOLD_HOURS,
+      freshestSection: freshest?.section_number ?? null,
+      recentErrors: recentErrors ?? [],
+    });
+  } catch (e) {
+    console.error("monitor-comar-updates error:", e);
+    return json({ success: false, error_code: "internal_error", message: (e as Error).message }, 500);
   }
 });
+
+function json(body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
