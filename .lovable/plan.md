@@ -1,72 +1,81 @@
-# Edge Function Cleanup — Verified Scope
+# Phase 2 — Conservative Edge Function Cleanup
 
-Goal: free slots against the 205-function quota without breaking the admin dashboard or other edge functions.
+Goal: free 11 more function slots and remove their UI/edge callers without breaking PayPal, admin dashboards, or scheduled jobs.
 
-## What changed after verification
+## Verified caller map (word-boundary grep)
 
-I grepped `src/`, `supabase/functions/`, `supabase/config.toml`, and `supabase/migrations/` for every candidate. Most of category A and all of B + C are still referenced — deleting them now would break admin panels, payment UI, or other edge functions.
+### Stripe — 5 functions
 
-## Safe to delete now (8 functions)
+| Function | Real callers | Action |
+|---|---|---|
+| `stripe-webhook` | `run-e2e-validation/index.ts` H1 check (lines 1218-1233) | Rewrite H1 to probe `paypal-webhook` instead |
+| `create-course-checkout` | `src/components/courses/UniversalCourseCard.tsx:54` | Repoint to `create-course-payment-paypal` (same shape) |
+| `create-course-payment` | none (earlier matches were `create-course-payment-paypal` substring) | Delete only |
+| `verify-course-payment` | none | Delete only |
+| `verify-payment` | none (earlier matches were `verify-payment-paypal` substring) | Delete only |
 
-These have **zero references** outside their own folder (no UI, no other functions, no config beyond their own `config.toml` block):
+### Admin diagnostics — 6 functions
 
-**Category A — orphaned test/diagnostic:**
-1. `test-complete-pipeline`
-2. `test-dispensary-pipeline`
-3. `send-test-emails`
-4. `email-preview`
+| Function | Real callers | Action |
+|---|---|---|
+| `test-paypal-connection` | `IntegrationHealthMonitor.tsx`, `PayPalManagementPanel.tsx`, `PayPalModeToggle.tsx`, `PayPalConfigurationPanel.tsx` | Remove the "Test PayPal" button + handler from each |
+| `test-smtp-connection` | `IntegrationHealthMonitor.tsx`, `EmailMonitoringDashboard.tsx` | Remove SMTP test button + handler |
+| `test-email-providers` | `IntegrationHealthMonitor.tsx`, `EnhancedEmailHealthDashboard.tsx`, `EmailProviderSettings.tsx`, `OwnersIntelligence.tsx` | Remove provider test button + handler |
+| `diagnostic-email` | none — UI references use `_diagnostic-email` (a different, already-non-existent name) | Delete only |
+| `diagnose-email-system` | `EmailSystemDiagnostics.tsx` | Remove component's diagnostic run button |
+| `render-template-preview` | `EmailTemplateManager.tsx` | Remove "Preview rendered" action |
 
-**One-shot/legacy (verified unused):**
-5. (none from B safe — all Stripe functions still referenced)
-6. (none from C safe — both legacy dispensary functions still referenced)
+### Holds (per your direction — not touched)
+- `check-paypal-secrets`, `configure-encryption-key`
+- All migration / population functions
+- COMAR automation, pg_cron, audit trail, coach grounding, certificate, and payment-verification functions
 
-Only 4 are truly safe. That barely dents the quota.
+## Implementation steps
 
-## Blocked — referenced by admin UI or other functions
+1. **Stripe wiring changes**
+   - `UniversalCourseCard.tsx`: change `supabase.functions.invoke('create-course-checkout', ...)` to `'create-course-payment-paypal'`. Keep payload shape; if it diverges, log and surface a branded error.
+   - `run-e2e-validation/index.ts` H1: change probe URL from `/functions/v1/stripe-webhook` to `/functions/v1/paypal-webhook`. Update label `H1 Webhook Exists` description from "Stripe" → "PayPal" so the audit report stays truthful.
 
-Cannot delete without first removing the caller. Listed with their bindings so you can decide whether to also remove the UI:
+2. **Admin-UI button removals** (UI-only; no business logic touched)
+   - `IntegrationHealthMonitor.tsx`: drop the PayPal/SMTP/email-provider test cards. If the file becomes empty, leave a stub placeholder card "Integration tests retired".
+   - `PayPalManagementPanel.tsx`, `PayPalModeToggle.tsx`, `PayPalConfigurationPanel.tsx`: remove "Test connection" buttons + state + the `invoke` call. Keep the rest of the panel (config edit, env toggle) intact.
+   - `EmailMonitoringDashboard.tsx`: remove SMTP test button.
+   - `EnhancedEmailHealthDashboard.tsx`, `EmailProviderSettings.tsx`, `OwnersIntelligence.tsx`: remove provider test button + its handler. In `OwnersIntelligence.tsx` drop the `'test-email-providers'` entry from the agent list rather than removing the whole agent runner.
+   - `EmailSystemDiagnostics.tsx`: remove the diagnostic-run button. If the component becomes empty, delete the route mount too (will check before deleting).
+   - `EmailTemplateManager.tsx`: remove "Preview rendered" action; keep raw-source preview.
 
-**A (admin UI bound):**
-- `test-paypal-connection` → `IntegrationHealthMonitor`, `PayPalManagementPanel`, `PayPalModeToggle`, `PayPalConfigurationPanel`
-- `test-smtp-connection` → `IntegrationHealthMonitor`, `EmailMonitoringDashboard`
-- `test-email-providers` → `IntegrationHealthMonitor`, `EmailProviderSettings`, `EnhancedEmailHealthDashboard`, `OwnersIntelligence`
-- `diagnostic-email` → `EmailDomainVerification`, also called by `email-health-check` function
-- `diagnose-email-system` → `EmailSystemDiagnostics`
-- `fast-track-dispensary-test` + `cleanup-fast-track-tests` → `FastTrackTestPanel`
-- `create-demo-accounts` → `TestAccountCreator`
-- `render-template-preview` → `EmailTemplateManager`
+3. **Delete edge function folders** (after UI is decoupled)
+   ```
+   stripe-webhook
+   create-course-checkout
+   create-course-payment
+   verify-course-payment
+   verify-payment
+   test-paypal-connection
+   test-smtp-connection
+   test-email-providers
+   diagnostic-email
+   diagnose-email-system
+   render-template-preview
+   ```
+   Strip their `[functions.<name>]` blocks from `supabase/config.toml`.
 
-**B (Stripe — still wired):**
-- `stripe-webhook` → called by `run-e2e-validation` edge function
-- `create-course-checkout` → `UniversalCourseCard`
-- `create-course-payment` → `CoursePaymentGate`, also called by `create-course-payment-paypal`
-- `verify-course-payment` → only in config.toml (orphan candidate — see note)
-- `verify-payment` → `PaymentSuccess.tsx`, also called by `verify-payment-paypal`
+4. **Remote deletion**: call `supabase--delete_edge_functions` for the 11 names.
 
-**C (legacy dispensary):**
-- `create-dispensary-payment` → `PurchaseSeats`, `Payment`, `DispensaryApplicationManager`, `PurchaseSeatsDialog`, plus `create-dispensary-payment-paypal`
-- `verify-dispensary-payment` → `PaymentSuccess`, `PaymentReconciliationDashboard`, plus two PayPal functions
+5. **Redeploy PayPal pipeline**: `supabase--deploy_edge_functions` for `paypal-webhook`, `create-dispensary-payment-paypal`, `create-course-payment-paypal`, `verify-payment-paypal`, `verify-dispensary-payment-paypal`, `get-application-payment-status` — these were blocked by the 205 cap.
 
-## Recommendation
+6. **Smoke test (read-only)**
+   - `ls supabase/functions | wc -l` → expect 191 (was 202 after Phase 1).
+   - `supabase--curl_edge_functions` GET `/paypal-webhook` → expect 200/401/405.
+   - `supabase--curl_edge_functions` POST `/create-course-payment-paypal` with a known course_id (no checkout completion, just verify it returns a URL or a structured error).
+   - Verify no remaining src/* reference to any of the 11 deleted names (`rg -nw "<name>" src supabase/functions`).
 
-Two-phase approach:
+## Not in scope
+- No DB migrations.
+- No removal of secrets (`STRIPE_*` env vars stay — they're harmless after function deletion and may be reused later; user explicitly asked to hold on secret cleanup).
+- No changes to `run-e2e-validation` beyond the H1 URL swap.
+- No COMAR / cron / audit / certificate / payment-verification function touches.
 
-**Phase 1 (this PR):** Delete the 4 safe-verified orphans only:
-- `test-complete-pipeline`, `test-dispensary-pipeline`, `send-test-emails`, `email-preview`
-- Remove their entries from `supabase/config.toml`
-- Call `supabase--delete_edge_functions` to remove the deployed versions
-
-**Phase 2 (follow-up, needs your call per item):** For each blocked function above, decide:
-- **Remove the UI caller too** (kills the admin diagnostic), then delete the function, or
-- **Keep both** (function stays, costs a quota slot)
-
-I'll do Phase 2 only after you tell me which admin diagnostics / Stripe UI you're willing to drop. The Stripe + legacy-dispensary cleanup in particular needs the PayPal migration fully validated in production first (the PayPal functions still fall back to calling the Stripe/legacy versions in some paths — that fallback has to be removed first or you'll break checkouts).
-
-## Out of scope
-- Categories D (one-shot migrations) and E (security utilities) — you asked to hold.
-- Any UI / business-logic changes. This PR is delete-only.
-
-## Verification after Phase 1
-- Confirm `ls supabase/functions | wc -l` drops from 206 to 202.
-- Confirm `supabase/config.toml` no longer references the four names.
-- Re-deploy `paypal-webhook` and `create-dispensary-payment-paypal` (the previously-blocked deploys) and verify they succeed.
+## Risk notes
+- The Stripe webhook endpoint at `…/functions/v1/stripe-webhook` will return 404 after delete. If Stripe still has any webhook subscription pointing there, those deliveries will fail silently. Recommend (separately) removing the webhook in the Stripe dashboard — flagged in the closing message, not done here.
+- `UniversalCourseCard` payload may have differed between `create-course-checkout` and `create-course-payment-paypal`. Will diff both function signatures before swapping; if incompatible, will adapt the payload in the card rather than the function.
