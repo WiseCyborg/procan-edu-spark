@@ -69,6 +69,36 @@ serve(async (req) => {
 
   console.log(`[trigger-scrapers] runId=${runId} invoker=${isCron ? "cron" : "admin"}`);
 
+  // ---- Admin-only one-shot cron self-registration mode ----
+  // POST {"setup_cron": true} as an admin → schedules comar-scrape-daily
+  // at 06:00 UTC using CRON_SHARED_SECRET. Idempotent.
+  if (isAdmin && !isCron) {
+    try {
+      const body = await req.clone().json().catch(() => ({} as Record<string, unknown>));
+      if (body?.setup_cron === true) {
+        if (!cronSecret || cronSecret.length < 16) {
+          return new Response(
+            JSON.stringify({ success: false, error_code: "missing_cron_secret", runId }),
+            { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+          );
+        }
+        const { data, error } = await supabase.rpc("setup_comar_scrape_cron", { secret: cronSecret });
+        if (error) {
+          return new Response(
+            JSON.stringify({ success: false, error_code: "rpc_failed", message: error.message, runId }),
+            { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+          );
+        }
+        return new Response(
+          JSON.stringify({ success: true, message: data, runId }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+    } catch (_e) { /* fall through */ }
+  }
+
+
+
   // ---- Invoke each scraper ----
   const results: ScraperResult[] = [];
   for (const name of SCRAPERS) {
