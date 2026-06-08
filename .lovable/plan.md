@@ -1,29 +1,26 @@
-## Make `COMARBanner` reflect live review date
+## Auto-refresh COMAR banner
 
-### Problem
-`src/components/layout/COMARBanner.tsx` line 20 hardcodes **"Last reviewed: January 2025"**. The COMAR Compliance Monitor agent has run successfully 13 times in the last 14 days (most recent today, 2026-06-08 08:00) but none of that is reflected in the banner.
+Two-layer freshness on `useLastComarReview`:
 
-### Fix
-Replace the static string with a live timestamp sourced from the latest successful `COMAR Compliance Monitor` run in `ai_agent_runs`.
+### 1. On page load
+Already covered — TanStack `useQuery` refetches on mount when cache is stale. Tighten so every fresh mount triggers a refetch regardless of cache:
+- Add `refetchOnMount: 'always'` and `refetchOnWindowFocus: true`.
+- Keep `staleTime: 5 * 60 * 1000` so we don't hammer the DB while a tab stays open.
 
-**Implementation:**
-1. New tiny hook `src/hooks/useLastComarReview.ts`:
-   - TanStack `useQuery` (key: `['comar-last-review']`, 5-min staleTime per project convention).
-   - Query: `select created_at from ai_agent_runs where agent_name = 'COMAR Compliance Monitor' and execution_status = 'success' order by created_at desc limit 1`.
-   - Returns `{ lastReviewed: Date | null, isLoading }`.
-2. Update `COMARBanner.tsx`:
-   - Call the hook.
-   - Format with `Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' })` → e.g. "June 2026".
-   - Fallback to `"January 2025"` only while loading or if null (keeps current copy as a graceful fallback so the UI never looks broken).
-   - Optional micro-touch: a small `text-xs text-muted-foreground` "auto-synced" subscript so users understand it's live. (Skip if you'd rather keep the banner identical.)
+### 2. After each successful agent run
+Add a Realtime subscription inside the hook:
+- `supabase.channel('comar-review-runs')` subscribed to `postgres_changes` on `public.ai_agent_runs`, event `INSERT`, filter `agent_name=eq.COMAR Compliance Monitor`.
+- On any matching row where `execution_status === 'success'`, call `queryClient.invalidateQueries({ queryKey: ['comar-last-review'] })`.
+- Clean up channel on unmount (`supabase.removeChannel`).
+
+### Files
+- Edit only `src/hooks/useLastComarReview.ts`. No other files touched.
 
 ### Out of scope
-- Not changing the `useCOMARVersion` hook or `site_content_metadata` table (could be wired later, but agent-run timestamp is the closest thing to ground truth right now).
-- Not touching banner copy itself, only the date suffix.
-- No DB migration, no edge-function changes.
+- No DB migration. `ai_agent_runs` Realtime publication: if INSERTs aren't broadcast yet, the on-mount + window-focus refetch still keeps the banner fresh within a few minutes. Will note this in chat if a follow-up DB enablement is needed.
+- No changes to `COMARBanner.tsx`, agents, or edge functions.
 
 ### Verification
-- Reload `/` (banner appears in shared layout). Confirm text reads "Last reviewed: June 2026".
-- Confirm no console errors.
-
-Want the "auto-synced" subscript or keep the line identical to today?
+- Reload `/` → banner refetches (Network: one `ai_agent_runs` request).
+- Switch tabs away/back → refetch fires.
+- After the COMAR Compliance Monitor agent next succeeds, banner updates without reload (if Realtime publication is enabled for `ai_agent_runs`).
