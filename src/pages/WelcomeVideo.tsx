@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle, ArrowRight, Play } from 'lucide-react';
 import { toast } from 'sonner';
+import { SecureVideoPlayer } from '@/components/video/SecureVideoPlayer';
 
 const WelcomeVideo = () => {
   const { user } = useAuth();
