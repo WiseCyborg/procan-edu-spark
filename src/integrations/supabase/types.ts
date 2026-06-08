@@ -9069,51 +9069,70 @@ export type Database = {
       }
       video_assets: {
         Row: {
+          access_level: string
           asset_key: string
+          bucket_id: string
+          course_id: string | null
           created_at: string | null
           description: string | null
           duration_seconds: number | null
           file_size_mb: number | null
           id: string
           is_active: boolean | null
+          mime_type: string
           module_id: string | null
-          public_url: string
-          storage_path: string
+          public_url: string | null
+          storage_path: string | null
           thumbnail_url: string | null
           title: string
           updated_at: string | null
         }
         Insert: {
+          access_level?: string
           asset_key: string
+          bucket_id?: string
+          course_id?: string | null
           created_at?: string | null
           description?: string | null
           duration_seconds?: number | null
           file_size_mb?: number | null
           id?: string
           is_active?: boolean | null
+          mime_type?: string
           module_id?: string | null
-          public_url: string
-          storage_path: string
+          public_url?: string | null
+          storage_path?: string | null
           thumbnail_url?: string | null
           title: string
           updated_at?: string | null
         }
         Update: {
+          access_level?: string
           asset_key?: string
+          bucket_id?: string
+          course_id?: string | null
           created_at?: string | null
           description?: string | null
           duration_seconds?: number | null
           file_size_mb?: number | null
           id?: string
           is_active?: boolean | null
+          mime_type?: string
           module_id?: string | null
-          public_url?: string
-          storage_path?: string
+          public_url?: string | null
+          storage_path?: string | null
           thumbnail_url?: string | null
           title?: string
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "video_assets_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "video_assets_module_id_fkey"
             columns: ["module_id"]
