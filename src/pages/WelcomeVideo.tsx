@@ -86,7 +86,7 @@ const WelcomeVideo = () => {
               {/* Video Embed - Using Vimeo for best iOS Safari compatibility */}
               <div className="relative w-full aspect-video bg-gray-900 rounded-lg overflow-hidden mb-6">
                 <iframe
-                  src="https://player.vimeo.com/video/1050355764?badge=0&autopause=0&player_id=0&app_id=58479"
+                  src="https://player.vimeo.com/video/1096146284?h=e90b8e5dfc&badge=0&autopause=0&player_id=0&app_id=58479"
                   className="absolute inset-0 w-full h-full"
                   frameBorder="0"
                   allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
