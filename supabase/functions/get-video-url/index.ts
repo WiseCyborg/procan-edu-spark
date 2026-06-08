@@ -103,6 +103,21 @@ Deno.serve(async (req) => {
     }
 
     const bucket = asset.bucket_id || "training-videos";
+
+    // Lazy bucket creation (idempotent) — storage.buckets cannot be inserted via SQL
+    const { data: existing } = await admin.storage.getBucket(bucket);
+    if (!existing) {
+      const { error: createErr } = await admin.storage.createBucket(bucket, {
+        public: false,
+        fileSizeLimit: 5_368_709_120,
+        allowedMimeTypes: ["video/mp4", "video/webm", "video/quicktime"],
+      });
+      if (createErr && !/already exists/i.test(createErr.message)) {
+        console.error("createBucket failed", createErr);
+        return json({ success: false, error_code: "bucket_unavailable" }, 200);
+      }
+    }
+
     const { data: signed, error: signError } = await admin
       .storage
       .from(bucket)
