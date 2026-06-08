@@ -7,6 +7,9 @@ project_id = "zhmpwczrvitomsxjwpzc"
 [functions.configure-encryption-key]
 verify_jwt = false
 
+[functions.get-video-url]
+verify_jwt = true
+
 [functions.store-private-profile]
 verify_jwt = true
 
