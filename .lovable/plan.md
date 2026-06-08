@@ -1,26 +1,46 @@
-## Auto-refresh COMAR banner
+# Fix COMAR banner showing stale "January 2025"
 
-Two-layer freshness on `useLastComarReview`:
+## Root cause
 
-### 1. On page load
-Already covered — TanStack `useQuery` refetches on mount when cache is stale. Tighten so every fresh mount triggers a refetch regardless of cache:
-- Add `refetchOnMount: 'always'` and `refetchOnWindowFocus: true`.
-- Keep `staleTime: 5 * 60 * 1000` so we don't hammer the DB while a tab stays open.
+`ai_agent_runs` RLS only allows `admin` role to SELECT. The `COMARBanner` renders on the public homepage `/` for anon/unauthenticated visitors, so the TanStack query returns `null` and the component falls back to the hardcoded `'January 2025'` string. Data is fine (latest successful run: `2026-06-08`).
 
-### 2. After each successful agent run
-Add a Realtime subscription inside the hook:
-- `supabase.channel('comar-review-runs')` subscribed to `postgres_changes` on `public.ai_agent_runs`, event `INSERT`, filter `agent_name=eq.COMAR Compliance Monitor`.
-- On any matching row where `execution_status === 'success'`, call `queryClient.invalidateQueries({ queryKey: ['comar-last-review'] })`.
-- Clean up channel on unmount (`supabase.removeChannel`).
+## Fix
 
-### Files
-- Edit only `src/hooks/useLastComarReview.ts`. No other files touched.
+### 1. Database migration
+
+Create a SECURITY DEFINER function that returns only the latest successful COMAR Compliance Monitor run timestamp — no other columns, no PII — and grant EXECUTE to `anon` and `authenticated`.
+
+```sql
+CREATE OR REPLACE FUNCTION public.get_last_comar_review()
+RETURNS timestamptz
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT created_at
+  FROM public.ai_agent_runs
+  WHERE agent_name = 'COMAR Compliance Monitor'
+    AND execution_status = 'success'
+  ORDER BY created_at DESC
+  LIMIT 1
+$$;
+
+GRANT EXECUTE ON FUNCTION public.get_last_comar_review() TO anon, authenticated;
+```
+
+### 2. Update `src/hooks/useLastComarReview.ts`
+
+Replace the direct `.from('ai_agent_runs')` query with `.rpc('get_last_comar_review')`. Keep everything else (staleTime, `refetchOnMount: 'always'`, `refetchOnWindowFocus`, Realtime subscription, query key).
 
 ### Out of scope
-- No DB migration. `ai_agent_runs` Realtime publication: if INSERTs aren't broadcast yet, the on-mount + window-focus refetch still keeps the banner fresh within a few minutes. Will note this in chat if a follow-up DB enablement is needed.
-- No changes to `COMARBanner.tsx`, agents, or edge functions.
 
-### Verification
-- Reload `/` → banner refetches (Network: one `ai_agent_runs` request).
-- Switch tabs away/back → refetch fires.
-- After the COMAR Compliance Monitor agent next succeeds, banner updates without reload (if Realtime publication is enabled for `ai_agent_runs`).
+- No changes to `COMARBanner.tsx` (fallback string stays as-is for the brief loading flash).
+- No changes to the underlying RLS policies on `ai_agent_runs` (admin-only reads remain).
+- No edge function or agent changes.
+
+## Verification
+
+1. Reload `/` as anonymous visitor → banner reads **"Last reviewed: June 2026"**.
+2. Network tab shows a single `rpc/get_last_comar_review` POST returning the ISO timestamp.
+3. After next COMAR Compliance Monitor success, Realtime invalidation refetches and the month auto-advances.

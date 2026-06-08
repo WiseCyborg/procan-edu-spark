@@ -10,16 +10,9 @@ export const useLastComarReview = () => {
   const { data, isLoading } = useQuery({
     queryKey: QUERY_KEY,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('ai_agent_runs')
-        .select('created_at')
-        .eq('agent_name', 'COMAR Compliance Monitor')
-        .eq('execution_status', 'success')
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      const { data, error } = await supabase.rpc('get_last_comar_review');
       if (error) throw error;
-      return data?.created_at ? new Date(data.created_at) : null;
+      return data ? new Date(data as string) : null;
     },
     staleTime: 5 * 60 * 1000,
     refetchOnMount: 'always',
