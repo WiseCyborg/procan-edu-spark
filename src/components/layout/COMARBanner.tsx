@@ -1,8 +1,15 @@
 import React from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Info } from 'lucide-react';
+import { useLastComarReview } from '@/hooks/useLastComarReview';
+
+const formatMonthYear = (d: Date) =>
+  new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(d);
 
 export const COMARBanner = () => {
+  const { lastReviewed } = useLastComarReview();
+  const reviewed = lastReviewed ? formatMonthYear(lastReviewed) : 'January 2025';
+
   return (
     <Alert className="border-primary/20 bg-primary/5 mb-4">
       <Info className="h-4 w-4 text-primary" />
@@ -16,8 +23,8 @@ export const COMARBanner = () => {
         >
           MCA Responsible Vendor Training
         </a>{' '}
-        standards (COMAR 14.17.05). Includes Drug-Free Workplace Policy (COMAR 21.11.08.03), 
-        Diversion Prevention, and Standard Operating Procedures. Last reviewed: January 2025
+        standards (COMAR 14.17.05). Includes Drug-Free Workplace Policy (COMAR 21.11.08.03),
+        Diversion Prevention, and Standard Operating Procedures. Last reviewed: {reviewed}
       </AlertDescription>
     </Alert>
   );
