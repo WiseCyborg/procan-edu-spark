@@ -9894,6 +9894,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      get_last_comar_review: { Args: never; Returns: string }
       get_managed_org_ids: { Args: { _user_id: string }; Returns: string[] }
       get_modules_needing_review: {
         Args: never
