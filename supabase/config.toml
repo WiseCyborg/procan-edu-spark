@@ -7,9 +7,6 @@ project_id = "zhmpwczrvitomsxjwpzc"
 [functions.configure-encryption-key]
 verify_jwt = false
 
-[functions.setup-training-videos-bucket]
-verify_jwt = false
-
 [functions.get-video-url]
 verify_jwt = true
 
