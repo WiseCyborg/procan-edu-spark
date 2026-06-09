@@ -1,82 +1,49 @@
-## Goal
-Replace Vimeo with self-hosted videos on Supabase Storage. Videos stream through an HTML5 player using short-lived signed URLs, only issued to users with valid enrollment/entitlement for that video's course.
+# Free Edge Function Slots for `get-video-url`
 
-## Architecture
+You're at the 200-function plan cap. I scanned all 191 functions and ranked them by how many places (frontend + other edge functions + config) reference each name.
 
-```text
-Browser (<video>)  ──▶  Edge Function: get-video-url  ──▶  Supabase Storage (private bucket)
-                              │                                       │
-                              ├─ verifies JWT (supabase.auth.getUser) │
-                              ├─ looks up video_assets row            │
-                              ├─ checks course_entitlements / public  │
-                              └─ returns signed URL (10 min TTL)  ◀───┘
-```
+## Tier 1 — Zero references anywhere (safest to delete)
 
-No video URLs are ever embedded in the page source. Each playback request is authorized server-side.
+These have no caller in the frontend, no caller in any other edge function, and no entry in `supabase/config.toml`. They're effectively dead code.
 
-## Step 1 — Storage bucket
-Create private bucket **`training-videos`** (50 MB → 5 GB per-file cap, MIME `video/*`) via `storage_create_bucket(public=false)`. The existing public `ProCannVideos` bucket stays untouched for now and can be migrated later.
+| Function | Likely purpose | Notes |
+|---|---|---|
+| `ai-competitor-monitor` | Superseded by `ai-rvt-competitor-monitor` which IS wired up | Old version |
+| `check-ssl-status` | One-off ops check | No cron, no caller |
+| `send-owner-digest-email` | Old digest email | Not in cron or UI |
+| `send-payment-link` | Manual payment-link sender | Not referenced; payments go through PayPal/Stripe flows |
 
-## Step 2 — Database migration
-Extend the existing `video_assets` table (no new table needed):
-- Add `course_id uuid` (nullable — null means "any authenticated user can watch", used for the welcome video)
-- Add `access_level text` enum-like column: `'public' | 'authenticated' | 'enrolled'` default `'enrolled'`
-- Add `bucket_id text` default `'training-videos'`
-- Add `mime_type text` default `'video/mp4'`
-- Keep `storage_path`; `public_url` becomes optional (only used for `public` access_level)
+Deleting these 4 frees 4 slots — enough to deploy `get-video-url` with room to spare.
 
-RLS on `video_assets`: anyone authenticated can `SELECT` metadata (title, duration, thumbnail). Only admins can write.
+## Tier 2 — Single reference (only config.toml or one stale call site)
 
-RLS on `storage.objects` for bucket `training-videos`: **no direct client access**. Reads happen exclusively via signed URLs minted by the edge function (service role).
+Optional extras if you want more headroom. Each needs a 10-second confirm before I pull the trigger:
 
-## Step 3 — Edge function `get-video-url`
-Secure function (default `verify_jwt = true`):
-1. `supabase.auth.getUser()` → 401 if no session.
-2. Input: `{ assetKey: string }`.
-3. Load `video_assets` row by `asset_key`; 404 if missing or `is_active=false`.
-4. Authorization:
-   - `access_level='public'` → allow.
-   - `access_level='authenticated'` → allow (any signed-in user). Used for the welcome video.
-   - `access_level='enrolled'` → check `course_entitlements` for `(user_id, course_id)` with valid status.
-5. If allowed, mint a 600-second signed URL via service role: `storage.from(bucket).createSignedUrl(path, 600)`.
-6. Return `{ url, expiresAt, title, duration }`. Logical denials return 200 + `{ success: false, error_code }` per project convention.
+- `ai-faq-generator`, `database-integrity-fix`, `email-personalization-agent`, `export-health-report`
+- `fast-track-dispensary-test`, `cleanup-fast-track-tests` (paired UAT helpers — delete together)
+- `migrate-email-templates` (one-shot migration, probably already run)
+- `notify-expiring-tokens`, `notify-failed-emails` (superseded by `auto-retry-failed-emails` + cron)
+- `recover-join-code` (UI has `validate-join-code` + `generate-join-code` instead)
+- `schedule-onboarding-sequences`, `schedule-training-reminders` (cron-style, verify no pg_cron entry first)
+- `send-payment-failed`, `send-escalation-email`, `send-reminder-email`, `send-employee-progress-milestone`, `send-employee-course-stalled`, `send-application-rejected` (email senders — verify nothing in `automated-notifications` / `process-notification-queue` enqueues them)
+- `forecast-recommendation-roi`, `analyze-at-risk-students`, `process-call-recording`, `process-scheduled-calls`, `track-certificate-verification`, `trigger-manager-welcome`, `resend-invitation` (only referenced once, possibly only by themselves)
 
-## Step 4 — Frontend: `<SecureVideoPlayer>`
-New component `src/components/video/SecureVideoPlayer.tsx`:
-- Props: `assetKey`, `title`, optional `onComplete`, `requiredWatchPercentage`.
-- Uses TanStack Query to call the edge function; refreshes the URL ~30 s before expiry while playing.
-- Renders native `<video controls playsInline>` with poster from `thumbnail_url`.
-- Handles 4 states: loading, denied (clear message + link to enroll/purchase), error (retry), playing.
-- Tracks `timeupdate` to compute watched %; calls `onComplete` at threshold — mirrors existing `VimeoPlayer` contract so it's a drop-in.
+I would NOT delete Tier 2 without spot-checking pg_cron and the notification queue dispatcher for each — happy to do that.
 
-New hook `src/hooks/useSignedVideoUrl.ts` wrapping the edge function call with auto-refresh.
+## Recommended action
 
-## Step 5 — Replace the broken Vimeo welcome video
-- Seed one `video_assets` row with `asset_key='welcome-intro'`, `access_level='authenticated'`, `course_id=null`, empty `storage_path` (to be filled when uploaded).
-- `src/components/WelcomeVideoSection.tsx` and `src/pages/WelcomeVideo.tsx`: swap the `<iframe>` for `<SecureVideoPlayer assetKey="welcome-intro" />`.
-- Until you upload the new MP4, the player shows a clean "Video coming soon" placeholder instead of Vimeo's "unavailable" frame.
+1. **Delete the 4 Tier-1 functions** (zero risk, zero references).
+2. **Deploy `get-video-url`** — should succeed immediately.
+3. (Optional) After deploy, do a targeted pg_cron + `process-notification-queue` audit on Tier 2 and prune another 5-10 to give you long-term headroom.
 
-Existing course `VimeoPlayer` is **not** touched in this pass — the 5 Training Handbook videos still work on Vimeo. Migration of those is a follow-up once a new MP4 is ready for each.
+## Technical detail
 
-## Step 6 — Admin upload (minimal)
-Add `src/pages/admin/VideoAssetsAdmin.tsx` reachable from `/admin` → "Video Assets":
-- Lists all `video_assets` rows.
-- Upload form: pick file (≤2 GB, `video/mp4`), set title, access_level, course_id (when enrolled). Uploads via authed Supabase JS client (admin-only RLS write policy) to `training-videos/{uuid}/{filename}` and inserts the row.
-- Replace / deactivate / delete actions.
+- Deletion uses the `supabase--delete_edge_functions` tool + `rm -rf supabase/functions/<name>` + cleanup of any `[functions.<name>]` block in `supabase/config.toml`.
+- None of the Tier-1 candidates appear in `config.toml`, so no config edits required for step 1.
+- `get-video-url` is already coded and configured (`verify_jwt = true`); only the deploy is blocked.
 
-This is the part that lets you avoid ever opening Vimeo again.
+## Out of scope
 
-## Cost
-Supabase Storage: $0.021/GB/month storage, $0.09/GB egress. Your $25 free monthly Cloud balance covers ~1 TB stored + ~270 GB streamed before any charge — effectively free at your current scale.
-
-## Out of scope (call-outs)
-- No HLS / adaptive bitrate. Single MP4 per video. Fine for desktop and decent mobile; weak 3G may buffer. If that becomes a problem we add Cloudflare Stream later behind the same component contract.
-- No DRM, no watermarking. Signed URLs expire in 10 min but a determined viewer with the URL can re-share within that window. Standard for training video.
-- No automatic transcoding. Upload the final MP4 (H.264 + AAC) you want served.
-- The existing course `VimeoPlayer` stays in place for the 5 Training Handbook videos.
-
-## Verification
-1. As anonymous visitor on `/`, the welcome section shows the "Video coming soon" placeholder (or video if uploaded), never a Vimeo error.
-2. As authenticated user, `<SecureVideoPlayer assetKey='welcome-intro'>` calls `get-video-url`, network shows a short-lived signed-URL response, `<video>` plays.
-3. As unauthenticated user on a future enrolled video, edge function returns `{ success: false, error_code: 'not_authorized' }` and the player shows the enrollment CTA.
-4. Manually expire the URL (wait 11 min) — auto-refresh keeps playback going.
+- No changes to working functions.
+- No database changes.
+- No frontend changes.
