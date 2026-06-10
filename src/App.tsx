@@ -93,6 +93,7 @@ import CertificateRenewal from "./pages/CertificateRenewal";
 import RVTComplete from "./pages/RVTComplete";
 import AdminUtilities from "./pages/AdminUtilities";
 import UATTestMatrix from "./pages/admin/UATTestMatrix";
+import VideoLibrary from "./pages/admin/VideoLibrary";
 import UATValidationPage from "./pages/UATValidationPage";
 import UATEvidenceSubmission from "./pages/UATEvidenceSubmission";
 import UATFeedback from "./pages/uat/UATFeedback";
@@ -388,6 +389,11 @@ const AppRoutesLayout = () => {
             <Route path="/admin/demo-setup" element={
               <ProtectedRoute>
                 <DemoAccountsSetup />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/video-library" element={
+              <ProtectedRoute>
+                <VideoLibrary />
               </ProtectedRoute>
             } />
             <Route path="/enhanced-admin-dashboard" element={<Navigate to="/admin" replace />} />
