@@ -1,9 +1,5 @@
 project_id = "zhmpwczrvitomsxjwpzc"
 
-
-
-
-
 [functions.configure-encryption-key]
 verify_jwt = false
 
@@ -52,12 +48,6 @@ verify_jwt = false
 [functions.openai-avatar-voice]
 verify_jwt = false
 
-[functions.check-employee-course-stalls]
-verify_jwt = false
-
-[functions.check-manager-registration-expiry]
-verify_jwt = false
-
 [functions.comprehensive-health-check]
 verify_jwt = false
 
@@ -69,9 +59,6 @@ verify_jwt = false
 
 [functions.approve-application]
 verify_jwt = true
-
-[functions.chat-assistant-enhanced]
-verify_jwt = false
 
 [functions.enroll-dispensary-contact]
 verify_jwt = false
@@ -99,7 +86,6 @@ verify_jwt = false
 
 [functions.check-email-exists]
 verify_jwt = false
-
 
 [functions.check-paypal-secrets]
 verify_jwt = false
@@ -146,7 +132,6 @@ verify_jwt = false
 [functions.notify-profile-changes]
 verify_jwt = true
 
-
 [functions.notify-application-status]
 verify_jwt = false
 
@@ -180,7 +165,6 @@ verify_jwt = true
 [functions.send-application-confirmation]
 verify_jwt = false
 
-
 [functions.staff-invitation-manager]
 verify_jwt = false
 
@@ -190,15 +174,11 @@ verify_jwt = false
 [functions.validate-invitation]
 verify_jwt = false
 
-[functions.analyze-at-risk-students]
-verify_jwt = false
-
 [functions.track-certificate-verification]
 verify_jwt = false
 
 [functions.generate-compliance-report]
 verify_jwt = false
-
 
 [functions.email-health-check]
 verify_jwt = false
@@ -224,9 +204,6 @@ verify_jwt = false
 [functions.monitor-comar-updates]
 verify_jwt = true
 
-[functions.forecast-recommendation-roi]
-verify_jwt = false
-
 [functions.check-pipeline-health]
 verify_jwt = true
 
@@ -240,9 +217,6 @@ verify_jwt = false
 verify_jwt = true
 
 [functions.populate-comar-content]
-verify_jwt = true
-
-[functions.update-comar-references]
 verify_jwt = true
 
 [functions.send-all-manager-reminders]
@@ -273,9 +247,6 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.send-escalation-email]
-verify_jwt = false
-
-[functions.recover-join-code]
 verify_jwt = false
 
 [functions.schedule-onboarding-sequences]
@@ -332,13 +303,11 @@ verify_jwt = false
 [functions.check-certificate-expiry]
 verify_jwt = false
 
-
 [functions.reconcile-seats]
 verify_jwt = true
 
 [functions.batch-regenerate-tokens]
 verify_jwt = true
-
 
 [functions.reset-email-circuit-breaker]
 verify_jwt = true
@@ -403,9 +372,6 @@ verify_jwt = true
 [functions.process-call-recording]
 verify_jwt = false
 
-[functions.setup-louis-account]
-verify_jwt = true
-
 [functions.check-seat-capacity]
 verify_jwt = true
 
@@ -428,9 +394,6 @@ verify_jwt = true
 verify_jwt = true
 
 [functions.email-health-agent]
-verify_jwt = true
-
-[functions.email-personalization-agent]
 verify_jwt = true
 
 [functions.process-session]
@@ -472,21 +435,11 @@ verify_jwt = true
 [functions.paypal-webhook]
 verify_jwt = false
 
-[functions.seed-uat-test-data]
-verify_jwt = true
-
-[functions.generate-uat-tasks]
-verify_jwt = true
-
 [functions.send-uat-digest]
-verify_jwt = true
-
-[functions.generate-uat-completion-report]
 verify_jwt = true
 
 [functions.admin-impersonate-user]
 verify_jwt = true
-
 
 [functions.admin-user-management]
 verify_jwt = true
@@ -499,8 +452,6 @@ verify_jwt = true
 
 [functions.admin-end-proxy-session]
 verify_jwt = true
-
-
 
 [functions.generate-compliance-delta]
 verify_jwt = true
