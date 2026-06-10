@@ -112,7 +112,7 @@ export const SecureVideoPlayer: React.FC<SecureVideoPlayerProps> = ({
       icon = <Lock className="h-8 w-8" />;
     } else if (code === 'not_uploaded') {
       title = 'Video coming soon';
-      message = 'This video is being prepared and will be available shortly.';
+      message = 'This video is being re-encoded for our new private host. It will be available within the next few days — your access is already in place.';
       icon = <Upload className="h-8 w-8" />;
     } else if (code === 'not_found') {
       title = 'Video not found';

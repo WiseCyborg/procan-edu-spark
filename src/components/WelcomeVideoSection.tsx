@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { SecureVideoPlayer } from '@/components/video/SecureVideoPlayer';
+import welcomePoster from '@/assets/welcome-video-poster.jpg';
 
 interface WelcomeVideoSectionProps {
   /** Legacy prop, retained for backwards compatibility — ignored. */
@@ -33,7 +34,7 @@ export const WelcomeVideoSection: React.FC<WelcomeVideoSectionProps> = ({
 
       <Card className={`overflow-hidden shadow-2xl border-white/20 bg-black/30 backdrop-blur-sm ${isMobile ? 'border rounded-lg' : 'border-2'}`}>
         <CardContent className="p-0">
-          <SecureVideoPlayer assetKey={assetKey} />
+          <SecureVideoPlayer assetKey={assetKey} poster={welcomePoster} />
         </CardContent>
       </Card>
 
