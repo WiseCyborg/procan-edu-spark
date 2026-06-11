@@ -8310,6 +8310,33 @@ export type Database = {
           },
         ]
       }
+      uat_seed_entities: {
+        Row: {
+          created_at: string
+          entity_id: string
+          entity_table: string
+          id: string
+          notes: string | null
+          seed_batch: string
+        }
+        Insert: {
+          created_at?: string
+          entity_id: string
+          entity_table: string
+          id?: string
+          notes?: string | null
+          seed_batch?: string
+        }
+        Update: {
+          created_at?: string
+          entity_id?: string
+          entity_table?: string
+          id?: string
+          notes?: string | null
+          seed_batch?: string
+        }
+        Relationships: []
+      }
       uat_task_templates: {
         Row: {
           created_at: string
@@ -10054,6 +10081,10 @@ export type Database = {
         Returns: boolean
       }
       hash_token: { Args: { token: string }; Returns: string }
+      install_regression_vault_secret: {
+        Args: { _value: string }
+        Returns: string
+      }
       invalidate_pending_invites: {
         Args: { p_email: string; p_organization_id?: string }
         Returns: number
@@ -10116,6 +10147,7 @@ export type Database = {
         Returns: string
       }
       move_to_deadletter: { Args: { p_job_id: string }; Returns: undefined }
+      purge_uat_seed_entities: { Args: { _batch?: string }; Returns: Json }
       queue_job: {
         Args: {
           p_idempotency_key?: string

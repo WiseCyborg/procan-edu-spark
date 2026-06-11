@@ -94,6 +94,7 @@ import RVTComplete from "./pages/RVTComplete";
 import AdminUtilities from "./pages/AdminUtilities";
 import UATTestMatrix from "./pages/admin/UATTestMatrix";
 import VideoLibrary from "./pages/admin/VideoLibrary";
+import UATControls from "./pages/admin/UATControls";
 import UATValidationPage from "./pages/UATValidationPage";
 import UATEvidenceSubmission from "./pages/UATEvidenceSubmission";
 import UATFeedback from "./pages/uat/UATFeedback";
@@ -394,6 +395,11 @@ const AppRoutesLayout = () => {
             <Route path="/admin/video-library" element={
               <ProtectedRoute>
                 <VideoLibrary />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/uat-controls" element={
+              <ProtectedRoute>
+                <UATControls />
               </ProtectedRoute>
             } />
             <Route path="/enhanced-admin-dashboard" element={<Navigate to="/admin" replace />} />
