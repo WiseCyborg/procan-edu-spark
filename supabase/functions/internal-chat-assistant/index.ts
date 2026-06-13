@@ -1,5 +1,11 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
+import {
+  GUARDRAIL_BLOCK,
+  filterOutput,
+  verifiedFactsBlock,
+  todayISO,
+} from "../_shared/prompt-guardrail.ts";
 
 const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
 
