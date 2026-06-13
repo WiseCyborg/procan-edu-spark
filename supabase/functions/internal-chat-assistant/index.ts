@@ -178,7 +178,11 @@ function buildPersonalizedPrompt(context: UserContext): string {
   const roleName = getRoleDisplayName(context.role);
   const firstName = context.first_name || 'User';
   
-  let basePrompt = `You are ProCann Assist, a direct and operational assistant for ${firstName}.
+  let basePrompt = `${GUARDRAIL_BLOCK}
+
+${verifiedFactsBlock(todayISO())}
+
+You are ProCann Assist, a direct and operational assistant for ${firstName}.
 
 **YOUR STYLE:**
 - Address ${firstName} by first name in EVERY response
