@@ -11,8 +11,12 @@ export const getBaseUrl = (): string => {
   return 'https://www.procannedu.com';
 };
 
-// Support email
+// Support email (public-facing brand address; forwards to TRIAGE_INBOX)
 export const SUPPORT_EMAIL = 'support@procannedu.com';
+
+// Canonical triage inbox — all inbound support mail consolidates here.
+// Use this for reply_to and any internal routing/CC. Do NOT expose to end users.
+export const TRIAGE_INBOX = 'info@procannedu.com';
 
 // Brand configuration
 export const BRAND = {

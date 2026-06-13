@@ -76,7 +76,7 @@ export class EmailRouter {
         subject: options.subject,
         html: options.html,
         text: extractTextFromHtml(options.html),
-        reply_to: "support@procannedu.com",
+        reply_to: "info@procannedu.com",
         headers: {
           "List-Unsubscribe": "<mailto:unsubscribe@procannedu.com>",
           "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",

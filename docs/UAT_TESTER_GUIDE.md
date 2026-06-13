@@ -62,9 +62,12 @@ For every issue, capture:
 **Primary path:** in-app feedback form at `/uat/feedback` (writes directly to `uat_evidence`).
 
 **Backup path (email):**
-- `bugs@procannedu.com` — bug reports (monitored; forwards to `info@procannedu.com`)
-- `support@procannedu.com` — general help (forwards to `info@procannedu.com`)
-- Personal aliases also live: `danielle@procannedu.com`, `louis@procannedu.com`, `william@procannedu.com`
+**Backup path (email):** all of the addresses below forward into the single triage mailbox **info@procannedu.com**. There are **no Gmail filters** that auto-route by alias — the team triages manually during UAT.
+- `bugs@procannedu.com` — bug reports
+- `support@procannedu.com` — general help
+- Personal aliases also live: `danielle@procannedu.com`, `louis@procannedu.com`, `william@procannedu.com` (forwarded to info@ + visibility copies)
+
+See `docs/SUPPORT_ROUTING_MODEL.md` for the full routing model.
 
 Subject line: `[UAT] <short title>`.
 

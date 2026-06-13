@@ -267,7 +267,7 @@ export const EmailOpsConsole = () => {
                 <div className="w-2 h-2 rounded-full bg-yellow-500" />
                 <span className="font-medium">Response Agent</span>
               </div>
-              <Badge variant="secondary">Inbox Not Connected</Badge>
+              <Badge variant="secondary" title="Inbound inbox: info@procannedu.com (Gmail). Connection pending — triage is manual.">Inbox: info@procannedu.com (manual)</Badge>
             </div>
           </CardContent>
         </Card>
