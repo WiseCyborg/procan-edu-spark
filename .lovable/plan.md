@@ -1,70 +1,53 @@
-## Parallel plan — email tests today + Levels audit pack this week
+# Centralized Support Routing — Remove Gmail-Filter Assumptions
 
-### Track 1: Email test matrix (today)
+## Context
+All support aliases (`support@`, `bugs@`, `danielle@`, `louis@`, `william@`, `noreply@`) now forward into a single mailbox: **info@procannedu.com**. Team members get visibility via Gmail forwarding. No category-based Gmail filters auto-assign tickets to individuals. Triage is manual through UAT.
 
-Send 3 templates × 6 aliases = **18 real sends** via existing `email-router` → Resend, then return a results table.
+## Findings — Where the old assumption lives
+Good news: the codebase has **no automatic per-person routing logic**. There is no code that assigns tickets to Danielle/Louis/William based on the destination alias. The cleanup is mostly documentation + small UX clarifications.
 
-- Recipients: `bugs@`, `danielle@`, `louis@`, `support@`, `william@`, `info@` `procannedu.com`
-- Templates (already wired): welcome, certificate-issued, employee-invitation
-- For each send, capture: Resend `provider_id`, status, timestamp, error if any
-- After sends, query `email_logs` (dedup by id) and post a single table in chat
-- One attempt per cell — no retries — so the report reflects reality. You forward to Danielle/Louis to confirm inbox arrival; Resend `sent` only proves handoff, not inbox delivery (especially for GoDaddy-forwarded aliases)
+| Location | Current state | Action |
+|---|---|---|
+| `supabase/functions/_shared/email-router.ts` (`reply_to: "support@procannedu.com"`) | Outbound `reply_to` points at `support@` (which now forwards to info@). Works, but indirect. | Change `reply_to` to `info@procannedu.com` (one source of truth). |
+| `supabase/functions/_shared/config.ts` (`SUPPORT_EMAIL`, `FROM.support`) | Used in outbound templates. | Keep `support@` as the **public-facing** address (brand), but add a `TRIAGE_INBOX = 'info@procannedu.com'` constant and use it for any internal routing/CC. |
+| `supabase/functions/_shared/unified-email-service.ts` (default `SupportEmail` var) | Injected into templates. | No change — public address stays `support@`. |
+| `email-templates/*.html` (~25 files reference `support@procannedu.com`) | Public contact address. | **Leave as-is.** `support@` forwards to info@. Customers should never see info@. |
+| `docs/UAT_TESTER_GUIDE.md` lines 65–67 | Already lists aliases as forwarding to info@. | Add a one-line note: "All inbound mail consolidates into info@; team triages manually during UAT." |
+| `src/components/admin/SupportRequestsPanel.tsx` | In-app support queue. Status filter only; **no auto-assignment by category**. | Add a small banner: "Inbound email is centralized at info@procannedu.com. Assign owners manually." |
+| `src/components/admin/communications/EmailOpsConsole.tsx` line 270 ("Inbox Not Connected") | Placeholder for future inbox integration. | Update copy to: "Inbound inbox: info@procannedu.com (Gmail). Connection pending." |
+| `docs/system/04_EDGE_FUNCTIONS.md`, `docs/OPERATIONS_RUNBOOK.md` | Email/ops runbooks. | Add a "Support Routing Model" section documenting the centralized approach. |
+| `.lovable/plan.md` | Has prior test-email matrix. | Append note: per-alias filters deprecated. |
 
-### Track 2: Launch readiness audit pack (deliverable by June 20)
+## Changes to make
 
-Deliverable location: `docs/launch-audit/` — one folder per domain, plus a top-level `00_TABLE_NAME_MAPPING.md` so Levels can read their doc against our schema.
+### 1. Code (small, presentation-only)
+- `supabase/functions/_shared/config.ts` — add `export const TRIAGE_INBOX = 'info@procannedu.com';` (no behavior change yet).
+- `supabase/functions/_shared/email-router.ts` — switch `reply_to` from `support@` to `info@procannedu.com` so replies land directly in the triage mailbox without the extra forward hop. Redeploy `email-router`.
+- `src/components/admin/SupportRequestsPanel.tsx` — add a one-line info banner above the queue: "All inbound support email forwards to **info@procannedu.com**. Owners are assigned manually during triage."
+- `src/components/admin/communications/EmailOpsConsole.tsx` — change "Inbox Not Connected" badge tooltip/subtext to name `info@procannedu.com` as the destination.
 
-**Table name mapping (Levels → ours)**
-| Levels' name | Our table |
-|---|---|
-| `enrollments` | `course_entitlements` (+ `consumer_enrollments` for consumer track) |
-| `payments` | `payments` + `payment_events` + `orders` |
-| `user_profiles` | `profiles` (+ `profiles_private` for PII) |
-| `quiz_results` | `exam_attempts` + `exam_topic_scores` |
-| `video_progress` | `user_progress` + `course_resume_state` |
-| `comar_compliance_records` | `comar_versions` + `compliance_incidents` + `compliance_metrics` + `regulatory_content` |
-| `video_access_log` | `admin_operations_audit` (URL signing events; we don't currently log every video request — gap to flag) |
+### 2. Docs
+- **New**: `docs/SUPPORT_ROUTING_MODEL.md` — one page covering:
+  - Public addresses (`support@`, `bugs@`) → forwarded to `info@procannedu.com`.
+  - Personal aliases (`danielle@`, `louis@`, `william@`) → forwarded to `info@`, plus Gmail forwarding gives each person visibility copies.
+  - Triage is manual via Gmail labels + the in-app Support Requests panel.
+  - No Gmail filters auto-route by category. AI routing is a future option, not a current dependency.
+- **Edit**: `docs/UAT_TESTER_GUIDE.md`, `docs/OPERATIONS_RUNBOOK.md`, `docs/system/04_EDGE_FUNCTIONS.md` — link to the new doc and remove any language suggesting per-alias auto-assignment.
 
-**Domain 1 — RLS (`docs/launch-audit/01_rls/`)**
-- `policies.sql` — full RLS policy dump for the mapped tables via `pg_policies`
-- `grants.sql` — GRANT statements per table
-- `test-script.ts` — Deno script that logs in as 3 personas (student A, student B, admin) and runs each cross-access query; writes `results.md` with pass/fail per case
-- Run against preview Supabase, paste results
+### 3. Recommended centralized model (for the doc)
+- **Single inbox**: `info@procannedu.com` is the canonical triage queue.
+- **Public addresses**: keep `support@` on the website and email templates (brand consistency); it forwards in.
+- **Gmail labels** (manual): `triage`, `bug`, `billing`, `compliance`, `assigned/danielle|louis|william`, `done`. Set up shared Gmail multiple-inbox view filtered on `is:unread label:triage` for the daily standup.
+- **In-app**: `support_requests` table remains the source of truth for tickets created from the app. Manual owner assignment via a new `assigned_to` dropdown (optional, can defer to post-UAT).
+- **Future option (not built now)**: edge function `ingest-support-email` + LLM classifier that writes into `support_requests` with a suggested owner. Documented as "deferred" so we don't accidentally build dependencies on it.
 
-**Domain 2 — Payment integrity (`docs/launch-audit/02_payments/`)**
-- `webhook-handler.md` — link + extracted source of `stripe-webhook` edge function with idempotency notes (see `mem://infrastructure/payments/unified-stripe-webhook-logic`)
-- `state-machine.md` — pending → paid → entitlement-issued → active, with the trigger that auto-mints `course_entitlements`
-- `scenarios.md` — manual replay results for: A (normal), B (duplicate webhook), C (frontend-late), D (handler failure + Stripe retry). Use Stripe CLI `trigger` or replay an existing event ID against the preview webhook
-- Schema excerpt for `payments`, `payment_events`, `orders`, `course_entitlements`
+## Explicitly out of scope
+- No Gmail API integration this round.
+- No automatic ticket assignment, no inbox sync, no classifier.
+- No changes to outbound email templates beyond the `reply_to` swap.
+- No new tables or migrations.
 
-**Domain 3 — Email verification (`docs/launch-audit/03_email/`)**
-- Token gen/validation code excerpt (`email_verification_codes` table) with crypto-random proof, 24h expiry, one-time-use enforcement
-- Resend domain verification screenshot + DNS check output (`dig TXT procannedu.com` for SPF/DKIM/DMARC)
-- Brute-force test result (10 random tokens via curl), reuse test, expired-token test
-- **Gap to flag honestly:** current token length and rate-limit posture — if it doesn't meet the 32-char/5-per-hour bar in the doc, list it as a finding, not paper over
-
-**Domain 4 — Video access control (`docs/launch-audit/04_video/`)**
-- `get-video-url` edge function source + 1h signed URL expiry config
-- Storage bucket policy dump for `ProCannVideos` (currently public per `03_SCHEMA_AND_RLS.md` — **major gap to flag**; recommend flipping to private + signed-URL-only before launch)
-- Cross-student URL test, expired URL test, direct bucket access test, RLS bypass attempt
-
-**Domain 5 — Data governance (`docs/launch-audit/05_governance/`)**
-- Schema diagram (auto-generated from `pg_catalog`)
-- Retention policy doc — what we keep, how long, what's anonymized
-- PII audit — confirm no PAN/SSN plaintext; `profiles_private` uses pgcrypto `encrypt_pii`/`decrypt_pii`
-- Admin access trail — `admin_operations_audit`, `certificate_audit_log`, `payment_audit_log`, `security_audit_log` shown as immutable append-only
-- Backup/DR — note Supabase managed backups; flag if no recent restore test
-
-**Deliverables to Levels**
-- Single PDF compiled from the markdown in `docs/launch-audit/` (I'll generate via the artifact pipeline)
-- Raw evidence files alongside
-
-### Sequence
-1. Run Track 1 sends → return results table in chat (~5 min)
-2. Start Track 2 with Domain 1 (RLS dump + test script) → post when ready
-3. Domains 2–5 in subsequent passes, prioritizing the gaps I expect to find: public video bucket, video access log coverage, email token strength/rate limit
-
-### Explicitly out of scope
-- Changing any RLS, payment, or video code as part of the audit — audit first, fix in a separate plan after we see findings
-- New backend infra
-- Anything outside the 5 domains in the handover
+## Verification
+- Redeploy `email-router`; send one test from the admin Test Emails panel; reply to it from Gmail and confirm it lands in info@.
+- Open `/admin` → Communications → Ops Console and confirm the updated copy reads `info@procannedu.com`.
+- Open Support Requests panel and confirm the new banner renders.
