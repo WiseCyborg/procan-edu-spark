@@ -59,8 +59,14 @@ For every issue, capture:
 - **Expected vs actual**
 - **Console errors** (DevTools → Console) and **screenshot**
 
-Send to: `bugs@procannedu.com` with subject `[UAT] <short title>`.
-You can also use the in-app feedback page at `/uat/feedback`.
+**Primary path:** in-app feedback form at `/uat/feedback` (writes directly to `uat_evidence`).
+
+**Backup path (email):**
+- `bugs@procannedu.com` — bug reports (monitored; forwards to `info@procannedu.com`)
+- `support@procannedu.com` — general help (forwards to `info@procannedu.com`)
+- Personal aliases also live: `danielle@procannedu.com`, `louis@procannedu.com`, `william@procannedu.com`
+
+Subject line: `[UAT] <short title>`.
 
 ## 8. Known Issues / Weekend Caveats
 

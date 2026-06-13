@@ -27,9 +27,17 @@ export function EmailTab() {
   });
 
   // Check if domain verification error exists
-  const hasDomainError = emailHealth?.errors?.some((error: string) => 
-    error.includes('domain') || error.includes('verified') || error.includes('procannedu.com')
-  );
+  // Only fire the urgent banner on a genuine Resend verification failure,
+  // not on any error string that happens to mention the domain.
+  const hasDomainError = emailHealth?.errors?.some((error: string) => {
+    const e = error.toLowerCase();
+    return (
+      e.includes('domain_not_verified') ||
+      e.includes('domain not verified') ||
+      e.includes('not verified with resend') ||
+      (e.includes('resend') && e.includes('403'))
+    );
+  });
 
   return (
     <div className="space-y-6 py-6">
