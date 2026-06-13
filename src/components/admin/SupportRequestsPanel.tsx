@@ -197,6 +197,9 @@ export const SupportRequestsPanel = () => {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        <div className="rounded-md border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
+          All inbound support email forwards to <span className="font-mono font-semibold text-foreground">info@procannedu.com</span>. Owners are assigned manually during triage — Gmail filters do not auto-route by alias.
+        </div>
         {requests.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <CheckCircle className="h-12 w-12 mx-auto mb-2 opacity-50" />
