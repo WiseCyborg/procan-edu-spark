@@ -1,6 +1,12 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import {
+  GUARDRAIL_BLOCK,
+  filterOutput,
+  verifiedFactsBlock,
+  todayISO,
+} from "../_shared/prompt-guardrail.ts";
 
 const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
 
@@ -160,7 +166,12 @@ IMPORTANT: When citing these regulations:
     }
 
     // Enhanced system prompt with Baltimore personality and local cannabis industry knowledge
-    const enhancedSystemPrompt = `${context.systemPrompt}
+    // GUARDRAIL_BLOCK and verifiedFactsBlock are prepended to close CHATBOT-SEC-01 and CHATBOT-ACC-01/02.
+    const enhancedSystemPrompt = `${GUARDRAIL_BLOCK}
+
+${verifiedFactsBlock(todayISO())}
+
+${context.systemPrompt ?? ''}
 ${regulatoryContext}
 
     Additional context:
@@ -286,7 +297,8 @@ ${regulatoryContext}
     }
 
     const data = await response.json();
-    const assistantResponse = data.choices[0].message.content;
+    const rawResponse = data.choices[0].message.content;
+    const assistantResponse = filterOutput(rawResponse, { fn: 'chat-assistant', userId: user_id });
 
     console.log('Chat interaction:', {
       user_id,
