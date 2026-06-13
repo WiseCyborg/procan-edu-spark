@@ -148,6 +148,26 @@ export const TestEmailSender = () => {
               value={testEmail}
               onChange={(e) => setTestEmail(e.target.value)}
             />
+            <div className="flex flex-wrap gap-2 pt-1">
+              <span className="text-xs text-muted-foreground self-center">Quick presets:</span>
+              {[
+                'bugs@procannedu.com',
+                'danielle@procannedu.com',
+                'louis@procannedu.com',
+                'support@procannedu.com',
+                'info@procannedu.com',
+              ].map((addr) => (
+                <Button
+                  key={addr}
+                  type="button"
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => setTestEmail(addr)}
+                >
+                  {addr}
+                </Button>
+              ))}
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
