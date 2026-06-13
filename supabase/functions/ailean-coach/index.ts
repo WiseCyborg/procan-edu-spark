@@ -1,6 +1,12 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.4';
+import {
+  GUARDRAIL_BLOCK,
+  filterOutput,
+  verifiedFactsBlock,
+  todayISO,
+} from "../_shared/prompt-guardrail.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -68,7 +74,11 @@ serve(async (req) => {
     // AiLean system prompt - Management coaching personality
     // NOTE: Keep this prompt synced with the ChatGPT GPT instructions at:
     // https://chatgpt.com/g/g-690d46d786fc81918e9193318d1c9e55-ailean
-    const systemPrompt = `You are AiLean, a workplace coaching AI for cannabis dispensary managers in Maryland.
+    const systemPrompt = `${GUARDRAIL_BLOCK}
+
+${verifiedFactsBlock(todayISO())}
+
+You are AiLean, a workplace coaching AI for cannabis dispensary managers in Maryland.
 
 PERSONALITY:
 - Supportive but direct workplace coach
@@ -168,7 +178,8 @@ When users ask about specific situations, gather enough context to provide relev
     }
 
     const data = await response.json();
-    const reply = data.choices[0].message.content;
+    const rawReply = data.choices[0].message.content;
+    const reply = filterOutput(rawReply, { fn: 'ailean-coach', userId: user.id });
 
     return new Response(
       JSON.stringify({ reply }),
