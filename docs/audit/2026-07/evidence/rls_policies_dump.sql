@@ -1,0 +1,51 @@
+-- RLS policy dump for the 7 sensitive table groups
+-- Generated for ProCann Edu Launch Readiness Audit (July 1, 2026)
+--
+-- To regenerate live, run this in the Supabase SQL editor:
+--
+--   SELECT tablename, policyname, cmd, array_to_string(roles, ',') AS roles,
+--          coalesce(qual, '')        AS using_clause,
+--          coalesce(with_check, '')  AS with_check_clause
+--   FROM   pg_policies
+--   WHERE  schemaname = 'public'
+--   AND    tablename IN (
+--            'profiles','profiles_private',
+--            'course_entitlements','consumer_enrollments','rvt_seats',
+--            'payments','orders','payment_events','payment_audit_log',
+--            'exam_attempts','exam_topic_scores','user_progress','course_resume_state',
+--            'module_attestations','module_compliance_reviews',
+--            'certificates','user_certificates','comar_versions',
+--            'admin_operations_audit','security_audit_log','certificate_audit_log',
+--            'user_operation_logs','user_activity_log'
+--          )
+--   ORDER BY tablename, cmd, policyname;
+--
+-- Summary of the dump (37 policies total across 22 tables; full text in docs/system/03_SCHEMA_AND_RLS.md):
+--
+-- admin_operations_audit ........ admin INSERT + admin SELECT (immutable for non-admins)
+-- certificate_audit_log ......... admin SELECT + owner SELECT via certificates FK (no UPDATE/DELETE)
+-- certificates .................. owner SELECT, admin SELECT-all, org-manager scoped SELECT, service_role ALL
+-- comar_versions ................ admin ALL + public SELECT (intentional regulatory transparency)
+-- consumer_enrollments .......... owner SELECT/INSERT/UPDATE, service_role ALL
+-- course_entitlements ........... owner SELECT, role-gated INSERT/UPDATE (admin/manager/coordinator), service_role ALL
+-- exam_attempts ................. owner SELECT/INSERT/UPDATE, admin SELECT-all (no DELETE)
+-- exam_topic_scores ............. owner SELECT via exam_attempts, admin SELECT-all
+-- module_attestations ........... owner SELECT/INSERT, trainer SELECT, admin SELECT (no UPDATE/DELETE → append-only)
+-- module_compliance_reviews ..... admin manage + owner SELECT
+-- orders ........................ owner SELECT, service_role ALL
+-- payment_audit_log ............. admin SELECT + service_role ALL (immutable)
+-- payment_events ................ admin/service_role only
+-- payments ...................... owner SELECT, service_role ALL
+-- profiles ...................... owner SELECT/UPDATE, admin SELECT-all
+-- profiles_private .............. owner SELECT/INSERT/UPDATE via SECURITY DEFINER fns; pgcrypto-encrypted columns
+-- rvt_seats ..................... seat-holder SELECT, manager INSERT/UPDATE, service_role ALL
+-- security_audit_log ............ admin SELECT only + service_role INSERT
+-- user_activity_log ............. owner SELECT + admin SELECT-all
+-- user_certificates ............. owner SELECT, admin SELECT-all
+-- user_operation_logs ........... admin SELECT only
+-- user_progress ................. owner SELECT/INSERT/UPDATE, admin SELECT-all (no DELETE)
+-- course_resume_state ........... owner SELECT/INSERT/UPDATE, service_role ALL
+--
+-- NOTES (cross-referenced from 01_AUTH_AND_RLS.md findings):
+--   AUTH-01  certificates.'Admins can view all certificates' is granted to role `public`; body still gates with user_roles.
+--   AUTH-02  course_entitlements.'Service role can manage entitlements' uses auth.jwt() check granted to `public` (functionally equivalent to TO service_role).
