@@ -120,7 +120,11 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    const assistantResponse = data.choices[0].message.content;
+    const rawResponse = data.choices[0].message.content;
+    const assistantResponse = filterOutput(rawResponse, {
+      fn: 'internal-chat-assistant',
+      userId: userContext.user_id,
+    });
 
     console.log('Internal chat interaction:', {
       user: userContext.first_name,
