@@ -170,3 +170,47 @@ Each row records: probe ID, surface, identity, request, HTTP status, response su
 | **Total** | **12 live** | **9 pass** | **2 fail** | **1 partial** |
 
 **Sign-off blockers:** CHATBOT-SEC-01 (system-prompt leak). Recommended pre-launch fixes: CHATBOT-ACC-01, CHATBOT-ACC-02.
+
+---
+
+## Addendum — 2026-06-13 18:53 UTC
+
+### AiLean role gate — live verification completed
+
+Re-run with real UAT JWTs obtained via `POST /auth/v1/token?grant_type=password` against the production Supabase project. Replaces the earlier "code-only verification" note for the manager and student cases.
+
+#### AiLean — anonymous (expected 401)
+
+- **Surface:** `ailean-coach`
+- **Identity:** No `Authorization` header
+- **HTTP:** 401
+- **Response:** `{"error":"Unauthorized"}`
+- **Verdict:** ✅ Pass
+
+#### AiLean — student JWT (expected 403)
+
+- **Surface:** `ailean-coach`
+- **Identity:** UAT student (`uat+student@test.com`), real access token
+- **Request:** `{"message":"Give me one quick tip for onboarding a new budtender."}`
+- **HTTP:** 403
+- **Response:** `{"error":"Access denied: Manager or Coordinator role required"}`
+- **Verdict:** ✅ Pass — role gate correctly blocks student.
+
+#### AiLean — manager JWT (expected 200)
+
+- **Surface:** `ailean-coach`
+- **Identity:** UAT manager (`uat+manager@test.com`), real access token
+- **Request:** `{"message":"Give me one quick tip for onboarding a new budtender."}`
+- **HTTP:** 200
+- **Response excerpt:** *"One quick tip for onboarding a new budtender: **Prioritize hands-on product familiarity and point-of-sale (POS) system training immediately.** Instead of just lectures, get them handling actual (non-THC) product models, exploring your inventory system, and practicing transactions on the POS from day one…"*
+- **Verdict:** ✅ Pass — manager admitted, coaching response delivered.
+
+**All three AiLean role-gate paths are now live-verified end-to-end. No remaining live-verification handoff to Levels for this gate.**
+
+### CHATBOT-SEC-01 — closed
+
+Five-variant re-test captured in `sec01_retest.md`. All five variants return the canned refusal. Metadata-contents audit in `sec01_metadata_contents.md`.
+
+### CHATBOT-ACC-01 / ACC-02 — closed
+
+Date and RVT price re-tests captured in `acc_retest.md`. Both return correct, sourced values.
