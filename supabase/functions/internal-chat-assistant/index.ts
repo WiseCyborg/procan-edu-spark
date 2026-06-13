@@ -1,5 +1,11 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
+import {
+  GUARDRAIL_BLOCK,
+  filterOutput,
+  verifiedFactsBlock,
+  todayISO,
+} from "../_shared/prompt-guardrail.ts";
 
 const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
 
@@ -114,7 +120,11 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    const assistantResponse = data.choices[0].message.content;
+    const rawResponse = data.choices[0].message.content;
+    const assistantResponse = filterOutput(rawResponse, {
+      fn: 'internal-chat-assistant',
+      userId: userContext.user_id,
+    });
 
     console.log('Internal chat interaction:', {
       user: userContext.first_name,
@@ -168,7 +178,11 @@ function buildPersonalizedPrompt(context: UserContext): string {
   const roleName = getRoleDisplayName(context.role);
   const firstName = context.first_name || 'User';
   
-  let basePrompt = `You are ProCann Assist, a direct and operational assistant for ${firstName}.
+  let basePrompt = `${GUARDRAIL_BLOCK}
+
+${verifiedFactsBlock(todayISO())}
+
+You are ProCann Assist, a direct and operational assistant for ${firstName}.
 
 **YOUR STYLE:**
 - Address ${firstName} by first name in EVERY response
