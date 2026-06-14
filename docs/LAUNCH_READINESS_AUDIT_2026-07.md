@@ -15,11 +15,13 @@ Five domains: Auth/RLS · Payment integrity · Email verification · Video acces
 | Domain | Status | Notes |
 |---|---|---|
 | 1. Auth & RLS | ✅ Pass with notes | All 7 sensitive table groups RLS-enforced via `has_role()` + `auth.uid()`. See [01](audit/2026-07/01_AUTH_AND_RLS.md). |
-| 2. Payment integrity | ⚠️ Map first | Production processor is **PayPal**, not Stripe. Stripe only services dispensary applications. See [02](audit/2026-07/02_PAYMENT_INTEGRITY.md). |
+| 2. Payment integrity | ✅ **Cleared** | Production processor is **PayPal** (course purchases) + **Stripe** (dispensary application fee only). State-machine doc rewritten 2026-06-14 to match deployed code (`rvt_purchases → rvt_seats → trigger → course_entitlements`). PAYMENT-DRIFT-01 closed. See [02](audit/2026-07/02_PAYMENT_INTEGRITY.md). |
 | 3. Email verification | ✅ Pass with notes | `email_verification_codes` w/ `expires_at`. Resend reply_to consolidated to `info@`. See [03](audit/2026-07/03_EMAIL_VERIFICATION.md). |
 | 4. Video access control | ✅ Pass | 10-minute signed URLs, server-side `course_entitlements` gate. See [04](audit/2026-07/04_VIDEO_ACCESS_CONTROL.md). |
 | 5. Data governance | ✅ Pass with notes | PII in `profiles_private` is pgcrypto-encrypted. Passwords in `auth.users` (bcrypt, Supabase-managed). See [05](audit/2026-07/05_DATA_GOVERNANCE.md). |
-| 6. Chatbot architecture | ✅ **Cleared** | SEC-01, ACC-01, ACC-02 all closed with live evidence (2026-06-13). AiLean role gate fully live-verified (401/403/200). Payment-doc drift flagged as doc-only. See [06](audit/2026-07/06_CHATBOT_ARCHITECTURE.md). |
+| 6. Chatbot architecture | ✅ **Cleared** | SEC-01, ACC-01, ACC-02 all closed with live evidence (2026-06-13). AiLean role gate fully live-verified (401/403/200). SEC-02 and G3 accepted as post-launch deferrals (2026-06-14). See [06](audit/2026-07/06_CHATBOT_ARCHITECTURE.md). |
+
+**Pre-call sign-off sheet (2026-06-14):** [`PRE_CALL_SIGNOFF_2026-06-14.md`](audit/2026-07/PRE_CALL_SIGNOFF_2026-06-14.md)
 
 ## Documents
 
