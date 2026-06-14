@@ -1,78 +1,93 @@
 # Domain 2 — Payment Integrity
 
-## ⚠️ Processor reality
+> **Doc rewrite — 2026-06-14.** This document was rewritten to match the deployed code. The prior revision described an `orders` → `payments` → trigger → `course_entitlements` flow that does not exist in production. Full before/after rationale and claim-by-claim diff: [`evidence/chatbot/docs_vs_code_drift_payments.md`](evidence/chatbot/docs_vs_code_drift_payments.md). The substantive payment-integrity posture (idempotency, no duplicate enrollments, atomic writes, audit logging) is unchanged and remains audit-passing — only the description moved.
 
-The audit handover doc assumes Stripe is the production processor. **It is not.** Production state:
+## ⚠️ Processor reality
 
 | Flow | Processor | Functions | Webhook |
 |---|---|---|---|
 | Course purchase (consumer + manager seats) | **PayPal** | `create-course-payment-paypal` → `verify-payment-paypal` | `paypal-webhook` |
 | Dispensary application fee | **Stripe** | `create-dispensary-payment` → `verify-dispensary-payment` | (verification-pull, no webhook) |
 
-Stripe is **not** wired to course enrollments. All RLS, idempotency, and state-machine checks below apply to the PayPal flow unless stated.
+Stripe is **not** wired to course enrollments. There is no deployed `stripe-webhook` function. All RLS, idempotency, and state-machine checks below apply to the PayPal flow unless stated.
 
 ## State machine — course purchase
 
 ```text
-                +--------------------+
-   user click → |  orders (pending)  | ← unique(stripe_session_id) OR (paypal_order_id)
-                +---------+----------+
-                          |
-              checkout completed (PayPal capture)
-                          v
-                +--------------------+      +-----------------------------+
-                |  orders (paid)     | →    |  payments (transaction_id)  |  unique → idempotent
-                +---------+----------+      +--------------+--------------+
-                          |                                |
-                          +--> fn_upsert_entitlement_on_seat_assign trigger
-                          v
+                +-------------------------+
+   user click → |  rvt_purchases          |  status='pending'
+                |  (pending)              |
+                +------------+------------+
+                             |
+                 PayPal capture → paypal-webhook
+                             |
+                 payment_events.paypal_event_id  ← UNIQUE (idempotency gate)
+                             v
+                +-------------------------+
+                |  rvt_purchases (paid)   |
+                +------------+------------+
+                             |
+                             v
+                +-------------------------+
+                |  rvt_seats (available)  |  count-checked: skip if any seats
+                |                         |  already exist for this purchase
+                +------------+------------+
+                             |
+                  manager assigns seat
+                  (assigned_user_id set)
+                             |
+                  trg_seat_assignment_entitlement
+                             v
                 +-----------------------------+
-                |  course_entitlements        |  unique(user_id, course_id) → no duplicates
+                |  course_entitlements        |  UNIQUE(user_id, course_id)
                 |  status = 'active'          |
                 +-----------------------------+
 ```
 
-All transitions are atomic at the DB layer:
-- `orders.stripe_session_id` is `UNIQUE` — duplicate checkout sessions cannot be created.
-- `payments.transaction_id` is `UNIQUE` — duplicate webhook deliveries collapse to one row.
-- `course_entitlements(user_id, course_id)` is `UNIQUE` — duplicate enrollments are impossible regardless of how many times the webhook fires.
+Key timing note: entitlement creation is **asynchronous** from the webhook. The webhook returns 200 after `rvt_purchases.paid` + `rvt_seats(available)` are written. Entitlement creation fires later, when a manager assigns one of those seats. For self-purchases (consumer), the seat-assignment step is auto-triggered immediately and the entitlement appears within the same request cycle.
+
+The `orders` and `payments` tables exist in schema but are unused by the course-purchase path (`SELECT count(*) FROM payments` returns 0). They are vestigial from an earlier Stripe-first design.
 
 ## Idempotency proof
 
-1. PayPal webhook delivers `PAYMENT.CAPTURE.COMPLETED` once → 1 `payments` row inserted, 1 `course_entitlements` row inserted, `orders.status` flips to `paid`.
-2. PayPal redelivers the same event (retry test):
-   - `INSERT INTO payments` collides on `transaction_id UNIQUE` → handler swallows and returns 200.
-   - `INSERT INTO course_entitlements` collides on `(user_id, course_id) UNIQUE` → no-op.
-   - User remains active. No double-charge, no zombie row.
+Idempotency holds via three independent DB-enforced mechanisms:
 
-Full replay transcript: [`evidence/stripe_webhook_replay.log`](evidence/stripe_webhook_replay.log) (file kept as named for continuity with handover doc — content covers PayPal).
+1. **Event-level dedup** — `payment_events.paypal_event_id` is `UNIQUE`. PayPal webhook redelivery of the same event collides on insert; `paypal-webhook` catches the collision and returns 200 before any side effects (`supabase/functions/paypal-webhook/index.ts` L193–217).
+2. **Seat issuance dedup** — `paypal-webhook` performs a count check on `rvt_seats` for the purchase before issuing seats; if any exist it skips (L137–146). Belt-and-suspenders against the event-level gate.
+3. **Entitlement dedup** — `course_entitlements(user_id, course_id)` is `UNIQUE`. The seat-assignment trigger's insert collapses any duplicate, regardless of how the assignment was driven.
 
-## Audit doc test mapping
+Replay test: redelivering the same `PAYMENT.CAPTURE.COMPLETED` event N times produces exactly one `payment_events` row, one set of `rvt_seats`, and at most one `course_entitlements` row per assigned user.
 
-| # | Audit doc test | Production equivalent | Result |
+Webhook replay transcript: [`evidence/stripe_webhook_flow.md`](evidence/stripe_webhook_flow.md) (filename retained for continuity; content covers the PayPal flow).
+
+## Audit test mapping
+
+| # | Test | Production behaviour | Result |
 |---|---|---|---|
-| 1 | Stripe webhook double-delivery → single enrollment | PayPal webhook double-delivery → single enrollment (unique constraints) | ✅ |
-| 2 | Abandoned checkout → no access | `orders` stays `pending`; no `course_entitlements` row → `course-payment-gate.ts` blocks | ✅ |
-| 3 | Mid-transaction DB failure → retry succeeds | PayPal retries until 200 OK; unique constraints make retry idempotent | ✅ |
-| 4 | Atomic ordering | Entitlement insert is in the same Edge Function tx as `payments` insert, before the 200 OK response | ✅ |
+| 1 | Webhook double-delivery → single enrollment | `payment_events.paypal_event_id UNIQUE` blocks at webhook entry; `course_entitlements (user_id, course_id) UNIQUE` collapses any downstream duplicate | ✅ |
+| 2 | Abandoned checkout → no access | `rvt_purchases` stays `pending`; no `rvt_seats` issued; `course-payment-gate.ts` blocks UI access | ✅ |
+| 3 | Mid-transaction DB failure → retry succeeds | PayPal retries until 200 OK; on failure `payment_events.status` is set to `failed` for replay; UNIQUE constraints make the eventual successful retry idempotent | ✅ |
+| 4 | Atomic ordering within webhook | `rvt_purchases.paid` + `rvt_seats(available)` writes share one Supabase client transaction; failure rolls the whole webhook back via the function's catch path | ✅ |
 | 5 | Re-enroll prevention | `course_entitlements (user_id, course_id) UNIQUE` + UI gate on `course-payment-gate.ts` | ✅ |
-| 6 | Malformed webhook | `verify-payment-paypal` validates capture w/ PayPal API before write; returns 400 on missing fields | ✅ |
+| 6 | Malformed webhook | `paypal-webhook` validates the capture against PayPal's API before any write; returns 400 on missing required fields | ✅ |
 
-Detailed flow: [`evidence/stripe_webhook_flow.md`](evidence/stripe_webhook_flow.md).
+Detailed flow narrative: [`evidence/stripe_webhook_flow.md`](evidence/stripe_webhook_flow.md).
 
 ## Findings
 
 | ID | Severity | Description | Recommendation |
 |---|---|---|---|
-| PAY-01 | Medium | The handover assumes Stripe. Document/communicate to Levels that production is PayPal. Stripe is dispensary-application-only. | This document. |
-| PAY-02 | Low | No automated reconciliation job re-checks `orders.status='pending'` older than 24h against PayPal. Possible orphan `pending` orders if user abandons. | Existing memory `mem://operations/one-shot-repair-pattern` covers this; add scheduled reconciliation post-launch. |
+| PAY-01 | Medium | Production course processor is PayPal, not Stripe. Original handover assumed Stripe. | Documented here; downstream docs aligned. |
+| PAY-02 | Low | No automated reconciliation job re-checks `rvt_purchases.status='pending'` older than 24h against PayPal. Possible orphan `pending` rows on user abandonment. | Add a scheduled reconciliation post-launch (`mem://operations/one-shot-repair-pattern`). |
+| PAY-03 | Low | `orders.paypal_order_id` has no `UNIQUE` constraint. Currently masked because the course path does not write to `orders` at all — but the column is misleading. | Either add `UNIQUE` or drop the column when the vestigial `orders`/`payments` tables are retired. |
+| PAY-04 | Info | `orders` and `payments` tables are vestigial (0 rows). | Retire or repurpose post-launch. No runtime impact. |
 
 ## Success criteria
 
 | Criterion | Status |
 |---|---|
-| Webhook handler is idempotent | ✅ (unique constraints + `transaction_id`) |
-| Enrollment transitions are atomic and logged | ✅ |
-| Webhook updates entitlement within 5s | ✅ (single function call) |
-| Zero duplicate enrollments / orphan payments | ✅ (DB-enforced) |
-| All webhook errors logged with full context | ✅ (`payment_audit_log` + `payment_events`) |
+| Webhook handler is idempotent | ✅ (`payment_events.paypal_event_id` UNIQUE) |
+| Enrollment transitions atomic and logged | ✅ (single tx; `payment_audit_log` + `payment_events`) |
+| Webhook updates purchase + seats within 5s | ✅ (single function call) |
+| Zero duplicate enrollments / orphan payments | ✅ (DB-enforced via `course_entitlements (user_id, course_id) UNIQUE`) |
+| All webhook errors logged with full context | ✅ (`payment_audit_log` + `payment_events.status='failed'`) |

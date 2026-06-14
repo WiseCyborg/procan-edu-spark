@@ -16,7 +16,9 @@ Rules from project memory:
 `submit-dispensary-application` · `enroll-dispensary-contact`
 
 ### Payments (public — webhook + diagnostics)
-`stripe-webhook` · `test-paypal-connection` · `check-paypal-secrets`
+`paypal-webhook` (course-purchase webhook entry point) · `test-paypal-connection` · `check-paypal-secrets`
+
+> Doc rewrite — 2026-06-14. The prior revision listed `stripe-webhook` here. No such function is deployed. Production course payments run through PayPal (`create-course-payment-paypal` → `verify-payment-paypal` → `paypal-webhook`). Stripe is wired only to dispensary applications via `create-dispensary-payment` / `verify-dispensary-payment`, with no webhook (verification-pull). See [`docs/audit/2026-07/evidence/chatbot/docs_vs_code_drift_payments.md`](../audit/2026-07/evidence/chatbot/docs_vs_code_drift_payments.md).
 
 ### AI agents (public, scheduled / cron)
 `ai-at-risk-agent` · `ai-seat-utilization-agent` · `ai-rvt-renewal-monitor` · `ai-rvt-competitor-monitor` · `ai-competitor-monitor` · `ai-content-optimizer` · `ai-curriculum-optimizer` · `ai-faq-generator` · `chat-assistant-enhanced` · `enrollment-lifecycle-agent` · `avatar-agent`
@@ -69,4 +71,4 @@ The 37 functions without an explicit declaration inherit Supabase's secure defau
 
 - **Service role bypass.** Only edge functions read `SUPABASE_SERVICE_ROLE_KEY` from `Deno.env`; never exposed to the frontend.
 - **One-shot data repair.** Mutating data fixes use throw-away service-role functions (see `mem://operations/one-shot-repair-pattern`) which are deleted after run.
-- **Idempotent webhooks.** `stripe-webhook` uses `payment_events` event-id de-duplication.
+- **Idempotent webhooks.** `paypal-webhook` uses `payment_events.paypal_event_id` UNIQUE for event-level dedup (collision at webhook entry returns 200 before any side effects). Seat issuance is additionally guarded by a count-check on `rvt_seats` per purchase, and `course_entitlements (user_id, course_id)` UNIQUE collapses any downstream duplicate. The `payment_events.stripe_event_id` UNIQUE column exists but is unused — no `stripe-webhook` function is deployed.
