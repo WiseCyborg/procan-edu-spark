@@ -1,8 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
+import Player from '@vimeo/player';
 import { Play, Lock, AlertCircle, Loader2, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSignedVideoUrl } from '@/hooks/useSignedVideoUrl';
 import { cn } from '@/lib/utils';
+
 
 interface SecureVideoPlayerProps {
   assetKey: string;
