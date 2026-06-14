@@ -6,11 +6,15 @@ export interface SignedVideoResponse {
   success: boolean;
   error_code?: string;
   url?: string;
+  provider?: 'supabase' | 'vimeo';
+  vimeo_id?: string;
+  vimeo_hash?: string | null;
   expires_at?: string | null;
   title?: string;
   thumbnail_url?: string | null;
   duration_seconds?: number | null;
 }
+
 
 async function fetchSignedUrl(assetKey: string): Promise<SignedVideoResponse> {
   const { data, error } = await supabase.functions.invoke('get-video-url', {

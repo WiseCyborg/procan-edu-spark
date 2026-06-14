@@ -1,8 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
+import Player from '@vimeo/player';
 import { Play, Lock, AlertCircle, Loader2, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSignedVideoUrl } from '@/hooks/useSignedVideoUrl';
 import { cn } from '@/lib/utils';
+
 
 interface SecureVideoPlayerProps {
   assetKey: string;
@@ -128,7 +130,20 @@ export const SecureVideoPlayer: React.FC<SecureVideoPlayerProps> = ({
     );
   }
 
-  // 5. Play
+  // 5a. Vimeo fallback (used until asset is migrated to Supabase Storage)
+  if (data.provider === 'vimeo' && data.vimeo_id) {
+    return (
+      <VimeoIframe
+        vimeoId={data.vimeo_id}
+        vimeoHash={data.vimeo_hash ?? null}
+        className={cn(aspect, className)}
+        completionThreshold={completionThreshold}
+        onComplete={onComplete}
+      />
+    );
+  }
+
+  // 5b. Play (Supabase Storage signed URL)
   return (
     <div className={cn(aspect, className)}>
       <video
@@ -144,3 +159,66 @@ export const SecureVideoPlayer: React.FC<SecureVideoPlayerProps> = ({
     </div>
   );
 };
+
+interface VimeoIframeProps {
+  vimeoId: string;
+  vimeoHash: string | null;
+  className?: string;
+  completionThreshold: number;
+  onComplete?: () => void;
+}
+
+const VimeoIframe: React.FC<VimeoIframeProps> = ({
+  vimeoId,
+  vimeoHash,
+  className,
+  completionThreshold,
+  onComplete,
+}) => {
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
+  const completedRef = useRef(false);
+
+  useEffect(() => {
+    if (!iframeRef.current || !onComplete) return;
+    const player = new Player(iframeRef.current);
+    const handler = (data: { seconds: number; duration: number }) => {
+      if (completedRef.current) return;
+      if (data.duration > 0 && data.seconds / data.duration >= completionThreshold) {
+        completedRef.current = true;
+        onComplete();
+      }
+    };
+    player.on('timeupdate', handler);
+    player.on('ended', () => {
+      if (!completedRef.current) {
+        completedRef.current = true;
+        onComplete();
+      }
+    });
+    return () => {
+      try {
+        player.off('timeupdate', handler);
+        player.destroy();
+      } catch {
+        // ignore
+      }
+    };
+  }, [vimeoId, completionThreshold, onComplete]);
+
+  const src = `https://player.vimeo.com/video/${vimeoId}?${vimeoHash ? `h=${vimeoHash}&` : ''}badge=0&autopause=0&player_id=0&app_id=58479`;
+
+  return (
+    <div className={className}>
+      <iframe
+        ref={iframeRef}
+        src={src}
+        className="absolute inset-0 w-full h-full"
+        frameBorder={0}
+        allow="autoplay; fullscreen; picture-in-picture"
+        allowFullScreen
+        title="Video player"
+      />
+    </div>
+  );
+};
+

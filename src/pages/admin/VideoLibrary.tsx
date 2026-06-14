@@ -96,10 +96,11 @@ const VideoLibrary: React.FC = () => {
 
   const fileStatus = (row: VideoAssetRow): { label: string; tone: 'ok' | 'warn' | 'pending' | 'unknown'; detail?: string } => {
     if (!row.storage_path) return { label: 'No file mapped', tone: 'pending' };
-    // Vimeo placeholder paths from legacy data
+    // Vimeo refs play via embed fallback while migration is in progress
     if (row.storage_path.startsWith('vimeo/')) {
-      return { label: 'Legacy Vimeo ref', tone: 'warn', detail: 'Re-upload as MP4 to Supabase' };
+      return { label: 'Playing via Vimeo (migration pending)', tone: 'ok', detail: 'Re-upload as MP4 to Supabase to cut over' };
     }
+
     if (!bucketIndex) return { label: 'Bucket not yet created', tone: 'unknown', detail: 'Will be created on first signed-URL request' };
     const exists = bucketIndex[row.storage_path];
     if (exists) {
