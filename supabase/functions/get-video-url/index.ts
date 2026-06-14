@@ -102,7 +102,26 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Vimeo fallback — used while migration to Supabase Storage is in progress.
+    // storage_path format: "vimeo/<id>" or "vimeo/<id>?h=<hash>"
+    if (asset.storage_path.startsWith("vimeo/")) {
+      const ref = asset.storage_path.slice("vimeo/".length);
+      const [id, query] = ref.split("?");
+      const hash = new URLSearchParams(query ?? "").get("h");
+      return json({
+        success: true,
+        provider: "vimeo",
+        vimeo_id: id,
+        vimeo_hash: hash,
+        expires_at: null,
+        title: asset.title,
+        thumbnail_url: asset.thumbnail_url,
+        duration_seconds: asset.duration_seconds,
+      });
+    }
+
     const bucket = asset.bucket_id || "training-videos";
+
 
     // Lazy bucket creation (idempotent) — storage.buckets cannot be inserted via SQL
     const { data: existing } = await admin.storage.getBucket(bucket);
