@@ -1,0 +1,31 @@
+# ProCann Edu
+
+> Maryland's AI-powered Responsible Vendor Training (RVT) platform — state-aligned cannabis dispensary certification, team management, and compliance reporting.
+
+ProCann Edu provides verifiable Maryland RVT certification for dispensary employees, a consumer cannabis-education track, multi-method certificate verification, and dispensary-manager tools for enrolling staff, tracking compliance, and renewing certificates.
+
+## Pages
+
+- [Home](/): Overview of the platform, certification tracks, and what's included.
+- [Courses](/courses): Full catalog of cannabis-education courses and required compliance training.
+- [Consumer Education](/consumer-education): Free public learning track for Maryland cannabis consumers.
+- [FAQ](/faq): Answers about accounts, exams, certificates, dispensary enrollment, and team management.
+- [Get Started](/get-started): How to begin training as a student.
+- [For Employers](/employers): Dispensary-manager and training-coordinator overview.
+- [Apply (Dispensary)](/org/apply): Start a dispensary application.
+- [Verify a Certificate](/verify): Public certificate verification portal.
+- [Stoplight Standard](/stoplight-standard): How ProCann grades regulatory readiness.
+- [Why ProCann](/why-procann): Comparison against other training options.
+- [Success Stories](/success-stories): Case studies from Maryland dispensaries.
+- [Regulatory Explorer](/regulatory-explorer): Searchable Maryland COMAR cannabis regulations.
+- [Impact](/impact): Aggregate platform impact metrics.
+- [ROI Calculator](/roi-calculator-public): Estimate compliance-training ROI for a dispensary.
+- [Live Sessions](/live): Schedule of upcoming live training and Q&A sessions.
+- [About the Team](/about/team): The people behind ProCann Edu.
+- [State Officials](/state-officials): Resources for Maryland regulators and policy stakeholders.
+- [Accessibility](/accessibility): Accessibility statement and accommodations.
+
+## Optional
+
+- [Welcome](/welcome): Optional onboarding landing.
+- [Certificate Verification (alt URL)](/verify-certificate): Alternate verification entry point.
