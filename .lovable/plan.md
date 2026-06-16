@@ -1,67 +1,71 @@
-# End-to-End Regression + Welcome Video Backfill (v2)
+# End-to-End Regression + Welcome Video Backfill (v3 — embedded ephemeral token)
 
 ## Goal
-Get a defensible GO/NO-GO verdict for Danielle & Louis with every video playable, by (a) backfilling `welcome-intro` and (b) running a one-shot service-role function that refreshes `pipeline_health_snapshot` + executes the regression harness, with an explicit pass threshold, verified cleanup, and migration-track coordination.
+Defensible GO/NO-GO for Danielle & Louis with every video playable. No new persisted secret; the one-shot privileged endpoint dies with its function bundle.
 
-## 1. Welcome-intro backfill (unchanged, low risk)
-- Migration: `UPDATE public.video_assets SET storage_path = 'vimeo/1096146284?h=e90b8e5dfc', updated_at = now() WHERE asset_key = 'welcome-intro';`
-- Source: `src/pages/Index.tsx` already references `https://vimeo.com/1096146284/e90b8e5dfc`.
-- `get-video-url` already parses `vimeo/<id>?h=<hash>` (line 106) — no code change.
-- Verify: curl `get-video-url` for `welcome-intro` → expect `provider: "vimeo"`, `vimeo_id: "1096146284"`, `vimeo_hash: "e90b8e5dfc"`.
+## 1. Welcome-intro backfill (already executed in v2 run)
+- `UPDATE public.video_assets SET storage_path = 'vimeo/1096146284?h=e90b8e5dfc', updated_at = now() WHERE asset_key = 'welcome-intro';` — done.
+- Re-verify post-run via `get-video-url` smoke check (section 2, check #4).
 
-## 2. Explicit pass/fail threshold (the verdict contract)
-The one-shot function returns `verdict: "GO" | "NO-GO"`. `GO` requires **all** of the following — if any single check fails, verdict is `NO-GO` with the failing items enumerated:
+## 2. Pass/fail threshold (verdict contract)
+`verdict = "GO"` only if **every** check below passes. Any failure ⇒ `NO-GO` with the failing items enumerated in chat and the evidence file.
 
 | # | Check | Pass criterion |
 |---|---|---|
-| 1 | `post-migration-regression` HTTP response | status 200 AND body `success === true` AND `failures.length === 0` |
-| 2 | Regression sub-checks | every item in `results[]` has `status === "pass"`; any `"fail"` or `"error"` ⇒ NO-GO |
-| 3 | `pipeline_health_snapshot` refresh | a new row inserted in the last 60 s AND `pipelines_healthy === pipelines_total` (currently 7/7) |
-| 4 | Video smoke — welcome-intro | 200, `provider === "vimeo"`, `vimeo_id` + `vimeo_hash` populated |
+| 1 | `post-migration-regression` HTTP | status 200 AND body `success === true` |
+| 2 | Regression verdict | `verdict === "SHIPPABLE"` AND `deterministic === true` (run1 + run2 both zero failures, signatures match) |
+| 3 | `pipeline_health_snapshot` refresh | new row id (≠ pre-run id) AND `last_run_at` within 120 s AND `pipelines_healthy === pipelines_total` |
+| 4 | Video smoke — `welcome-intro` | 200, `provider === "vimeo"`, `vimeo_id === "1096146284"`, `vimeo_hash === "e90b8e5dfc"` |
 | 5 | Video smoke — one `section_*` Vimeo asset | 200, `provider === "vimeo"` |
-| 6 | Video smoke — one MP4 (`training-videos`) asset, if any exist | 200, `provider === "supabase"`, signed URL returned |
-| 7 | `regression_runs` insert | row written with `verdict` + full payload |
+| 6 | Video smoke — first MP4 asset in `video_assets` (if any) | 200, `provider === "supabase"`, signed URL returned. Skipped (and noted) only if zero MP4 rows exist. |
+| 7 | `regression_runs` row | inserted by `post-migration-regression` with status `complete` |
 
-A function that merely "ran without erroring" is explicitly **NO-GO**. The verdict line in the sign-off doc cites the exact check counts (e.g. `GO — 7/7 pipelines healthy, 24/24 regression checks pass, 3/3 video smoke pass`).
+"Function ran without throwing" is explicitly **NO-GO**.
 
-## 3. One-shot function `ops-run-e2e-regression`
-- New edge function, service-role internally, guarded by header `x-ops-token` matching new runtime secret `OPS_REGRESSION_TOKEN`.
-- Performs steps 1–7 above and returns the verdict payload.
-- Called exactly once via `supabase--curl_edge_functions`.
+## 3. One-shot function `ops-run-e2e-regression` (revised auth)
+- Replace JWT/service-role auth check with a constant-time compare against a 32-byte hex token **defined as a `const` at the top of `index.ts`**.
+- Token is generated fresh for this run, never written to the secrets store, never echoed in chat after the call, and disappears with the function file in step 4.
+- Endpoint requires `x-ops-token: <embedded_token>`; missing/wrong header ⇒ 401.
+- Otherwise identical to v2: snapshot refresh → regression → 3 video smokes → JSON verdict payload.
+- Deploy via `supabase--deploy_edge_functions`.
+- Call exactly once via `supabase--curl_edge_functions` with the header.
 
-## 4. Cleanup with verified deletion (not asserted)
-After the run, in this order, with evidence captured at each step:
-1. `supabase--delete_edge_functions(["ops-run-e2e-regression"])` → capture response.
-2. `secrets--delete_secret(["OPS_REGRESSION_TOKEN"])` → capture response.
-3. **Verification probe:** `curl` the deleted function URL → expect 404/`FUNCTION_NOT_FOUND`. Record status code + body in evidence.
-4. **Verification probe:** `secrets--fetch_secrets` → confirm `OPS_REGRESSION_TOKEN` is absent. Record listing.
-5. If either probe shows the function or secret still exists, the evidence file is marked `CLEANUP_FAILED` and the chat verdict is downgraded to `NO-GO — cleanup failed, privileged endpoint still live`. We do not proceed until manual removal succeeds.
+## 4. Verified cleanup (token dies with the function)
+Run in this order, capture each response in the evidence file:
+1. `supabase--delete_edge_functions(["ops-run-e2e-regression"])` → record response.
+2. Delete the local files `supabase/functions/ops-run-e2e-regression/{index.ts,deno.json}` via `rm`.
+3. **Probe:** `curl` `https://<ref>.supabase.co/functions/v1/ops-run-e2e-regression` with the (now-orphaned) token header → expect 404 / `FUNCTION_NOT_FOUND`. Record status + body.
+4. **Probe:** `secrets--fetch_secrets` → confirm no `OPS_*` secret was ever added. Record listing.
+5. If either probe shows the function still resolves, mark evidence `CLEANUP_FAILED` and downgrade chat verdict to `NO-GO — privileged endpoint still live`.
+
+No secrets-store interaction at any point. Token only ever existed in (a) the deployed function bundle and (b) the single `x-ops-token` header value used to call it; both are gone after step 1.
 
 ## 5. Migration-track coordination
-- Add a `MIGRATION_COORDINATION` block to the evidence file noting: "welcome-intro currently uses `vimeo/1096146284?h=e90b8e5dfc`. When the Vimeo → Supabase Storage migration runs, the migration script must (a) re-upload this asset to `training-videos/welcome-intro.mp4`, (b) overwrite `storage_path` only after the upload succeeds, and (c) preserve the Vimeo reference until the new signed URL is verified playable."
-- Append the same note as a checklist item in `docs/VIDEO_ENCODING_RUNBOOK.md` so the migration owner sees it before running.
-- No code-level guard is added; this is procedural coordination only.
+Add a `MIGRATION_COORDINATION` block to the evidence file and append a matching checklist line to `docs/VIDEO_ENCODING_RUNBOOK.md`:
+
+> `welcome-intro.storage_path` is currently `vimeo/1096146284?h=e90b8e5dfc`. The Vimeo → Supabase Storage migration must (a) upload the source to `training-videos/welcome-intro.mp4`, (b) overwrite `storage_path` **only after** the upload succeeds, (c) keep the Vimeo reference in a recovery column until a signed URL plays end-to-end. Do not run the migration's bulk UPDATE without this guard or it will silently break `/welcome-video`.
+
+No code-level guard added — procedural only.
 
 ## 6. Evidence & verdict
 Write `docs/audit/2026-07/evidence/e2e_run_2026-06-16.md` containing:
-- Pass-criteria table (section 2) with actual values per check.
-- `pipeline_health_snapshot` row.
-- `regression_runs` row id + payload excerpt.
+- Pass-criteria table (section 2) with actual values.
+- `pipeline_health_snapshot` before/after rows.
+- `regression_runs` row id + run1/run2 summaries + signature hashes.
 - Video smoke table.
-- **Cleanup section**: deletion responses + 404 probe + secret-listing probe.
+- **Cleanup section**: delete responses, 404 probe, secrets listing.
 - Migration-coordination note (section 5).
 
-Append one line to `docs/audit/2026-07/PRE_CALL_SIGNOFF_2026-06-14.md`:
-`2026-06-16 18:xx UTC — <GO|NO-GO> — pipelines x/7, regression x/x, video x/3, cleanup verified <yes|no>`
-
-Post the same line back in chat.
+Append one line to `docs/audit/2026-07/PRE_CALL_SIGNOFF_2026-06-14.md` and post the same line in chat:
+`2026-06-16 HH:MM UTC — <GO|NO-GO> — pipelines x/7, regression SHIPPABLE/det=<y|n>, video x/3, cleanup verified <yes|no>`
 
 ## Out of scope
-- Schema changes beyond the one `video_assets` row.
-- Vimeo → Storage migration itself (tracked separately; coordination note only).
-- Player code, RLS, or auth changes.
+- Vimeo → Storage migration itself.
+- Schema changes beyond the one `video_assets` row (already done).
+- Player code, RLS, auth changes.
+- New persisted secrets.
 
 ## Technical notes
-- Vimeo id/hash sourced from public code; no new third-party credentials.
-- Service-role usage stays inside the edge function; anon caller only sees the JSON verdict.
+- Token generated with `crypto.getRandomValues(new Uint8Array(32))` → hex; lives only in the deploy bundle.
+- Constant-time compare to avoid timing leaks (defense in depth; bundle is deleted within minutes regardless).
 - Wall time ≈ 3–5 min including cleanup probes.
