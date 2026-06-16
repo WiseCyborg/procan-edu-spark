@@ -63,3 +63,11 @@ Example: `welcome-intro.mp4` for the `welcome-intro` asset key. Use the admin Vi
 ## Why this matters
 
 The project hit Supabase's egress quota during the prior billing cycle. A single uncompressed 168 MB video served from a public bucket can burn through gigabytes of egress in a day. Re-encoding existing videos to the targets above, plus moving everything behind signed URLs (so search bots and unauthenticated hotlinks can't replay them), is the single biggest egress-reduction lever we have.
+
+## Vimeo → Storage migration coordination (added 2026-06-16)
+
+`video_assets` currently contains Vimeo-pointer rows (`storage_path = 'vimeo/<id>'` or `'vimeo/<id>?h=<hash>'`) so videos remain playable during the migration. **Specifically, `welcome-intro.storage_path = 'vimeo/1096146284?h=e90b8e5dfc'`**, backfilled 2026-06-16. Before the bulk Vimeo → Storage migration runs:
+
+1. Upload each source first (e.g. `training-videos/welcome-intro.mp4`).
+2. Overwrite `storage_path` **only after** the upload succeeds AND `SecureVideoPlayer` plays the signed URL end-to-end.
+3. Preserve the Vimeo reference (e.g. add `legacy_storage_path` or snapshot table) until the new URL is verified — do not run a blind bulk `UPDATE` that clobbers Vimeo paths or `/welcome-video` and the 19 `section_*` modules will revert to "coming soon".

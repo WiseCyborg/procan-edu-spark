@@ -46,3 +46,7 @@ One-page summary of where the launch-readiness audit stands going into today's c
 | 6. Chatbot architecture | ✅ Cleared |
 
 No open blockers for July 1.
+
+---
+
+2026-06-16 19:55 UTC — **NO-GO** — pipelines 0/7 (snapshot writer crashed on pre-existing `supabase.sql` bug at `pipeline-health-agent` L261-262), regression not executed (orchestrator timed out before invoke), video 2/2 verified at DB+code level (welcome-intro Vimeo backfilled, section_* paths intact; no MP4 assets to smoke), cleanup verified yes (function deleted, 404 probe confirmed, no `OPS_*` secret persisted). Evidence: `evidence/e2e_run_2026-06-16.md`.
