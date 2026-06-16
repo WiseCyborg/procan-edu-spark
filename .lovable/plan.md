@@ -1,65 +1,65 @@
-## Two follow-up plans (pick one or both to greenlight)
+# Pre-Launch Verification & B1 Filter
 
-Both are pre-existing issues uncovered by the 2026-06-16 regression. They are independent and can run in either order, but Plan A should land first because the 75 findings can't be trusted until the agent stops crashing mid-run.
+Four steps, in order. Nothing here writes production data except the detector-filter code change (read-only effect on `issues_detected`) and a doc update routing the license-pair decision to a named person.
 
----
+## Step 1 — Verify Plan A actually increments counters
 
-### Plan A — Fix `pipeline-health-agent` crash (`supabase.sql` template tags)
+The patch is deployed but unverified. "Applied ≠ verified."
 
-**Scope:** One file, one function, no schema change, no behavior change beyond "agent no longer throws."
+- Trigger one agent run via Admin → Pipeline Health → **Run Agent** (or `supabase--curl_edge_functions` POST to `/pipeline-health-agent` if the UI is inconvenient).
+- Read `agent_configs` for `agent_name = 'pipeline-health-agent'` immediately before and after. Confirm:
+  - `run_count` increments by exactly 1
+  - `success_count` increments by exactly 1 (assuming no thrown error)
+  - `last_run_at` is non-null and within the last 60s
+- Confirm a fresh row appears in `pipeline_health_snapshot` with a matching `created_at`.
+- Capture before/after values into `docs/audit/2026-07/evidence/e2e_run_2026-06-16.md` under a new "Plan A verification" subsection.
 
-**Root cause:** `supabase/functions/pipeline-health-agent/index.ts` lines ~261–262 use `supabase.sql\`run_count + 1\`` and `supabase.sql\`success_count + 1\``. `supabase-js` v2 has no `.sql` tagged template — that's Drizzle/pg syntax. The call throws, the agent never writes `agent_configs`, and the snapshot row that downstream UI reads is left stale.
+Race-condition note (file-and-forget): read-modify-write on the counter can lose an increment under truly concurrent runs. Acceptable because the agent runs on a schedule, not concurrently. Documented in the evidence file as a known limitation, not a bug to fix now.
 
-**Fix:** Replace the two tagged-template increments with a read-modify-write that uses values already in scope, OR with a Postgres RPC. Lowest-risk option is the in-function increment because it avoids a new DB object:
+**Exit:** Plan A is closed only when counters are observed ticking. If they don't tick, stop and diagnose before touching Step 2+.
 
-1. Before the `agent_configs` update, fetch current counters:
-   `const { data: cfg } = await supabase.from('agent_configs').select('run_count, success_count').eq('agent_type','pipeline_health').maybeSingle();`
-2. Replace the two `supabase.sql\`...\`` expressions with `(cfg?.run_count ?? 0) + 1` and `(cfg?.success_count ?? 0) + 1`.
-3. Leave the rest of the update payload untouched.
+## Step 2 — Spot-check the "33 auto-fixed" bucket
 
-**Race-condition note:** The agent runs on a cron with no overlap, so a read-modify-write is safe. If we ever fan it out, swap to a `SECURITY DEFINER` RPC `increment_agent_run_counters(agent_type text, success boolean)` — noted as a follow-up, not in this plan.
+This is the load-bearing number in the reframe. Trust but verify, especially since the agent we just patched is in the same neighborhood as the auto-fix path.
 
-**Verification:**
-- Redeploy, invoke the function once from Admin → Pipeline Health "Run Agent".
-- Confirm `agent_configs.run_count` advances by 1 and `pipeline_health_snapshot.last_run_at` is fresh (< 60s).
-- Tail edge logs for the correlation ID — expect no `supabase.sql is not a function` error.
+- Pull the 33 events from `pipeline_health_events` where the triage doc classified them as auto-fixed. Sort by recency, pick 3 across different dimensions (apps / orgs / seats) to maximize coverage.
+- For each of the 3, follow the event's `entity_id` into the underlying production table (`dispensary_applications`, `organizations`, or `org_seat`-related rows) and confirm the actual state matches "fixed" — not just that the event row is flagged resolved.
+  - Example: if event says "org missing manager → auto-assigned", confirm `organization_members` actually contains a manager row for that org.
+- Record the 3 entity IDs, expected state, observed state, and pass/fail in the evidence file.
 
-**Out of scope:** Triaging the findings the agent produces (that's Plan B), refactoring the agent, RPC introduction.
+**Exit:** 3/3 confirm fixed → trust the 33 bucket, proceed. Any fail → expand to 5 more; if any of those fail, the 33 bucket is suspect and the reframe loses that line — escalate before the launch call.
 
-**Wall time:** ~5 min including verification.
+## Step 3 — Ship B1 (detector filter for UAT/E2E residue)
 
----
+Read-only effect on what counts toward `issues_detected`. No data writes.
 
-### Plan B — Triage the 75 health-agent findings (23 apps / 23 orgs / 29 seats)
+- Locate the detector queries inside `pipeline-health-agent` (and any sibling detectors flagged in the triage doc) that emit `apps` / `orgs` / `seats` findings.
+- Add a filter excluding rows whose name matches the test-residue patterns documented in `docs/audit/2026-07/evidence/health_findings_triage_2026-06-16.md`:
+  - `UAT Test Dispensary%`, `UAT Final%`, `E2E Test Org %`, and the specific `ABC` test record (by `id`, not by name, to avoid filtering the real `ABC` org from Step 4).
+- Use a single shared constant / helper rather than inlining the patterns in each detector.
+- Re-deploy, trigger one run, confirm `issues_detected` drops from 23 admin-attention items to ~5 (and the snapshot reflects it). Capture before/after numbers in the evidence file.
 
-**Scope:** Read-only investigation first, then a categorized remediation plan. No data writes in this plan — writes get their own one-shot plan(s) once categories are known, same pattern as the Vimeo backfill.
+**Exit:** Visible list shrinks to the ~5 real items. Hold B2–B6 until this is eyeballed and approved.
 
-**Step 1 — Pull the findings (read-only):**
-- `pipeline_health_events` for the latest run's `correlation_id`, grouped by `pipeline_type` (application / organization / seat) and `severity`.
-- `pipeline_health_snapshot` for the per-dimension counters that produced the 23/23/29 totals.
-- For each dimension, the underlying detector query (already in `child agents` under `supabase/functions/pipeline-health-agent/agents/`) so we know exactly which rows are flagged and why.
+## Step 4 — Route the 3 duplicate-license pairs to a human
 
-**Step 2 — Bucket the 75 into categories.** Expected buckets based on prior audits:
-- **Orphans** (e.g. application without profile, seat without entitlement, org without owner).
-- **State drift** (e.g. `status='approved'` but no downstream artifact created).
-- **Stale/abandoned** (e.g. application > N days in `submitted`).
-- **Test/UAT residue** that shouldn't be counted at all → filter rule, not a data fix.
+Not a code change — a routing/ownership change so this doesn't get lost.
 
-Output of Step 2 is a single markdown table in `docs/audit/2026-07/evidence/health_findings_triage_2026-06-16.md` with: bucket, count, sample IDs, proposed action (auto-fix / manual review / ignore-with-rule), and blast radius.
+- In `docs/audit/2026-07/PRE_CALL_SIGNOFF_2026-06-14.md`, add a "Human Decisions Required Before GO" section listing the 3 pairs (`DA-23-12345`, `DA-25-12345`, `123456689`) with: the two candidate record IDs per pair, who created each, last activity timestamps, and a blank "Canonical: ____  Decided by: ____  Date: ____" line.
+- Name the owner explicitly (Danielle or Louis — confirm which before writing, see Question below). This is a business decision, not an automation candidate.
 
-**Step 3 — Per-bucket remediation plans.** Each bucket that needs writes gets its own short plan you approve separately, executed via the same one-shot service-role pattern we just used (deploy → invoke → delete → 404 probe → evidence). UAT residue gets a detector-filter PR instead of a data write.
+## Out of scope (explicit)
 
-**Verification at the end:** Re-run `ops-run-e2e-regression` (or its successor). GO requires `issues_detected` to drop to whatever the agreed steady-state floor is (likely 0 for orphans, non-zero allowed for "stale" if we keep that as informational).
+- B2–B6 remediation plans (token issuance, stale-org triage, etc.) — held until Step 3 result is reviewed.
+- Any data writes against the 23/29/23 buckets.
+- Refactoring the agent counter to be race-safe (documented as known, not fixing).
+- Touching the real `ABC` org from 134 days ago — that's a B-series item, not part of this plan.
 
-**Out of scope:** Any data writes in this plan. Changing detector thresholds without evidence. Touching the agent code (that's Plan A).
+## Technical details
 
-**Wall time:** ~15–20 min for Steps 1–2; per-bucket plans sized when we see the table.
+- Tools used: `supabase--curl_edge_functions` (trigger agent), `supabase--read_query` (counters, events, entity spot-checks), code edits to `supabase/functions/pipeline-health-agent/index.ts` for the B1 filter, doc edits to two existing files. No migrations.
+- Evidence trail: all four steps append to `docs/audit/2026-07/evidence/e2e_run_2026-06-16.md` and (for Step 4) `PRE_CALL_SIGNOFF_2026-06-14.md`.
 
----
+## Question before I start
 
-### What I need from you
-
-Reply with one of:
-- `Plan A` — fix the crash only
-- `Plan B` — triage the 75 only
-- `Both` — A first, then B (recommended; B's output is meaningless while the agent is throwing)
+Who owns the duplicate-license decision — Danielle, Louis, or both jointly? I'll write the named owner into the sign-off doc rather than leaving a `TBD`.
