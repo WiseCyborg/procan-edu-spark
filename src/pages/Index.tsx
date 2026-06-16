@@ -51,6 +51,28 @@ const Index = () => {
     }]
   });
   return <div className="min-h-screen">
+      <Seo
+        title="ProCann Edu — Maryland RVT Certification Training"
+        description="Maryland's AI-powered Responsible Vendor Training. State-aligned cannabis dispensary certification, team management, and compliance reporting in one platform."
+        path="/"
+        jsonLd={[
+          {
+            '@context': 'https://schema.org',
+            '@type': 'Organization',
+            name: 'ProCann Edu',
+            url: 'https://www.procannedu.com/',
+            logo: 'https://www.procannedu.com/favicon-procann.jpg',
+            sameAs: ['https://procannedu.com'],
+          },
+          {
+            '@context': 'https://schema.org',
+            '@type': 'WebSite',
+            name: 'ProCann Edu',
+            url: 'https://www.procannedu.com/',
+          },
+        ]}
+      />
+
       <AccessibilityToolbar />
       
       {/* Mobile-First Optimized Hero Section - Above Fold */}
