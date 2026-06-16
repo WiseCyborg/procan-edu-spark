@@ -1,6 +1,8 @@
 
 # What's Missing — Deep Dive for UAT / Go-Live
 
+> **STATUS — 2026-06-16 implementation pass landed.** A2, A3 (application_state + organization_integrity), B1, P1, P2, P3, and the config.toml block are deployed. P4, P5, B2/B3, email-domain check, and UAT-Pass remain. See `docs/audit/2026-07/evidence/go_live_batch_2026-06-16.md` for the deploy-by-deploy record.
+
 Two parallel audits ran (payment flow end-to-end, and non-payment readiness). Net verdict: **NO-GO** today. The architecture is sound; the blockers are concentrated in (a) one broken agent that publishes phantom health data, (b) **five payment blockers — including one that lets anyone forge a paid order**, (c) zero executed UAT evidence, and (d) three unresolved data-integrity items waiting on a named human decision.
 
 This plan is the **inventory and the fix order**. Each block below is an executable sub-plan I'll come back with separately once you greenlight scope.
