@@ -198,10 +198,11 @@ serve(async (req) => {
           status: "pending",
           idempotency_key: idempotencyKey,
           metadata: {
-            application_id,
-            contact_email: application.contact_email,
-            organization_name: application.organization_name,
+            application_id: applicationIdForMetadata,
+            contact_email: contactEmail,
+            organization_name: orgName,
             paypal_env: paypalEnv,
+            mode: isTopUp ? "topup" : "application",
           },
         })
         .select("id")
@@ -239,7 +240,7 @@ serve(async (req) => {
         {
           reference_id: purchaseId,
           custom_id: customId,
-          description: `${quantity} ProCann Edu Training Seats for ${application.organization_name}`,
+          description: `${quantity} ProCann Edu Training Seats for ${orgName ?? "your organization"}`,
           amount: {
             currency_code: PAYMENT_CURRENCY,
             value: totalAmount,
@@ -250,8 +251,12 @@ serve(async (req) => {
         brand_name: "ProCann Edu",
         landing_page: "BILLING",
         user_action: "PAY_NOW",
-        return_url: `${DOMAINS.PRODUCTION}/payment-success?application_id=${application_id}&purchase_id=${purchaseId}`,
-        cancel_url: `${DOMAINS.PRODUCTION}/payment-cancel?application_id=${application_id}`,
+        return_url: isTopUp
+          ? `${DOMAINS.PRODUCTION}/payment-success?purchase_id=${purchaseId}&topup=1`
+          : `${DOMAINS.PRODUCTION}/payment-success?application_id=${applicationIdForMetadata}&purchase_id=${purchaseId}`,
+        cancel_url: isTopUp
+          ? `${DOMAINS.PRODUCTION}/payment-cancel?purchase_id=${purchaseId}&topup=1`
+          : `${DOMAINS.PRODUCTION}/payment-cancel?application_id=${applicationIdForMetadata}`,
       },
     };
 
@@ -269,7 +274,7 @@ serve(async (req) => {
       console.error("[create-dispensary-payment-paypal] order creation failed", orderData);
       await supabase
         .from("rvt_purchases")
-        .update({ status: "failed", metadata: { application_id, paypal_error: orderData } })
+        .update({ status: "failed", metadata: { application_id: applicationIdForMetadata, paypal_error: orderData } })
         .eq("id", purchaseId);
       return json({ success: false, error_code: "PAYPAL_ORDER_FAILED", error: orderData.message ?? "PayPal order failed" }, 502);
     }
@@ -280,14 +285,14 @@ serve(async (req) => {
       .eq("id", purchaseId);
 
     await supabase.from("payment_events").insert({
-      application_id,
+      application_id: applicationIdForMetadata,
       purchase_id: purchaseId,
       paypal_order_id: orderData.id,
       event_type: "ORDER_CREATED",
       amount: totalAmount,
       currency: PAYMENT_CURRENCY,
       status: "created",
-      payload: { quantity, paypal_env: paypalEnv },
+      payload: { quantity, paypal_env: paypalEnv, mode: isTopUp ? "topup" : "application" },
     });
 
     const approvalUrl = orderData.links?.find((l: any) => l.rel === "approve")?.href;
