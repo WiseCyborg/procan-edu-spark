@@ -78,3 +78,13 @@ Files touched:
 - `docs/audit/2026-07/evidence/go_live_batch_2026-06-16.md` (append results)
 
 No database migrations.
+
+---
+
+## Status update — 2026-06-16
+
+- **P4** — DONE. `verify-dispensary-payment-paypal` is read-only; `PaymentSuccess.tsx` polls `pending_webhook`.
+- **P5** — DONE. `usePaymentStatus` reads `course_entitlements` then `rvt_seats`; `orders` table no longer consulted.
+- **B2/B3** — Scaffolded. New `resolve-duplicate-license` edge function (admin-only) + sign-off worksheet at `docs/audit/2026-07/evidence/duplicate_license_signoff_2026-06-16.md`. Awaiting Danielle/Louis sign-off before execution.
+
+See `docs/audit/2026-07/evidence/go_live_batch_2026-06-16.md` for the full evidence trail.
