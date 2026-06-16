@@ -251,15 +251,21 @@ serve(async (req) => {
       })
       .not('id', 'is', null);
 
-    // Update agent config
+    // Update agent config (read-modify-write; cron is non-overlapping)
+    const { data: cfgRow } = await supabase
+      .from('agent_configs')
+      .select('run_count, success_count')
+      .eq('agent_type', 'pipeline_health')
+      .maybeSingle();
+
     await supabase
       .from('agent_configs')
       .update({
         last_run_at: new Date().toISOString(),
         last_run_duration_ms: duration,
         last_run_status: brokenCount > 0 ? 'critical' : degradedCount > 0 ? 'degraded' : 'healthy',
-        run_count: supabase.sql`run_count + 1`,
-        success_count: supabase.sql`success_count + 1`,
+        run_count: (cfgRow?.run_count ?? 0) + 1,
+        success_count: (cfgRow?.success_count ?? 0) + 1,
         updated_at: new Date().toISOString()
       })
       .eq('agent_type', 'pipeline_health');
