@@ -37,58 +37,133 @@ serve(async (req) => {
   try {
     const body = await req.json().catch(() => ({}));
     const application_id: string | undefined = body.application_id;
+    const topup_organization_id: string | undefined = body.organization_id;
+    const topup_quantity: number | undefined = body.quantity;
+    const client_idem_key: string | undefined = body.idempotencyKey ?? body.idempotency_key;
 
-    if (!application_id) {
-      return json({ success: false, error_code: "MISSING_APPLICATION_ID", error: "application_id is required" });
-    }
+    // ===== Mode resolution =====
+    // Mode A (original): application_id only — applicant has no auth yet.
+    // Mode B (P1 fix): organization_id + quantity — authenticated manager/coordinator top-up.
+    const isTopUp = !application_id && !!topup_organization_id && !!topup_quantity;
 
-    // Load the application
-    const { data: application, error: appError } = await supabase
-      .from("dispensary_applications")
-      .select(
-        "id, organization_id, organization_name, contact_person, contact_email, estimated_employees, requested_credits, application_status, payment_status"
-      )
-      .eq("id", application_id)
-      .maybeSingle();
-
-    if (appError || !application) {
-      return json({ success: false, error_code: "APPLICATION_NOT_FOUND", error: "Application not found" });
-    }
-
-    if (application.application_status !== "approved" && application.application_status !== "completed") {
+    if (!application_id && !isTopUp) {
       return json({
         success: false,
-        error_code: "APPLICATION_NOT_APPROVED",
-        error: "Application is not yet approved",
+        error_code: "MISSING_APPLICATION_ID",
+        error: "application_id is required, or pass { organization_id, quantity } for an authenticated top-up",
       });
     }
 
-    if (application.payment_status === "paid" || application.payment_status === "completed") {
-      return json({
-        success: false,
-        error_code: "ALREADY_PAID",
-        error: "This application has already been paid",
-        already_paid: true,
+    let organization_id: string;
+    let quantity: number;
+    let totalAmount: string;
+    let idempotencyKey: string;
+    let contactEmail: string | null = null;
+    let orgName: string | null = null;
+    let applicationIdForMetadata: string | null = application_id ?? null;
+
+    if (isTopUp) {
+      // ===== Mode B: authenticated top-up =====
+      const authHeader = req.headers.get("Authorization");
+      if (!authHeader?.startsWith("Bearer ")) {
+        return json({ success: false, error_code: "UNAUTHORIZED", error: "Authentication required for top-up" }, 401);
+      }
+      const userClient = createClient(
+        Deno.env.get("SUPABASE_URL") ?? "",
+        Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+        { global: { headers: { Authorization: authHeader } } }
+      );
+      const { data: claimsData, error: claimsErr } = await userClient.auth.getClaims(
+        authHeader.replace("Bearer ", "")
+      );
+      if (claimsErr || !claimsData?.claims?.sub) {
+        return json({ success: false, error_code: "UNAUTHORIZED", error: "Invalid auth token" }, 401);
+      }
+      const userId = claimsData.claims.sub as string;
+
+      // Validate the caller belongs to the org they're topping up AND has manager/coordinator role
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("organization_id, email, organizations(name, admin_approved, is_active)")
+        .eq("user_id", userId)
+        .maybeSingle();
+      if (!profile || profile.organization_id !== topup_organization_id) {
+        return json({ success: false, error_code: "FORBIDDEN", error: "Not a member of this organization" }, 403);
+      }
+      const org = (profile as any).organizations;
+      if (!org?.admin_approved || !org?.is_active) {
+        return json({ success: false, error_code: "ORG_NOT_ACTIVE", error: "Organization is not active" }, 403);
+      }
+
+      const { data: roleRow } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .in("role", ["dispensary_manager", "training_coordinator"]);
+      if (!roleRow || roleRow.length === 0) {
+        return json({ success: false, error_code: "FORBIDDEN", error: "Only Managers and Coordinators can purchase seats" }, 403);
+      }
+
+      organization_id = topup_organization_id!;
+      quantity = Math.max(1, Math.floor(topup_quantity!));
+      totalAmount = (quantity * PRICE_PER_SEAT).toFixed(2);
+      // Per-request idempotency for top-ups (caller passes UUID; never reuses across attempts)
+      idempotencyKey = `topup_${organization_id}_${client_idem_key ?? crypto.randomUUID()}`;
+      contactEmail = profile.email ?? null;
+      orgName = org.name ?? "your organization";
+      applicationIdForMetadata = null;
+    } else {
+      // ===== Mode A: application-fee flow (unchanged) =====
+      const { data: application, error: appError } = await supabase
+        .from("dispensary_applications")
+        .select(
+          "id, organization_id, organization_name, contact_person, contact_email, estimated_employees, requested_credits, application_status, payment_status"
+        )
+        .eq("id", application_id!)
+        .maybeSingle();
+
+      if (appError || !application) {
+        return json({ success: false, error_code: "APPLICATION_NOT_FOUND", error: "Application not found" });
+      }
+
+      if (application.application_status !== "approved" && application.application_status !== "completed") {
+        return json({
+          success: false,
+          error_code: "APPLICATION_NOT_APPROVED",
+          error: "Application is not yet approved",
+        });
+      }
+
+      if (application.payment_status === "paid" || application.payment_status === "completed") {
+        return json({
+          success: false,
+          error_code: "ALREADY_PAID",
+          error: "This application has already been paid",
+          already_paid: true,
+        });
+      }
+
+      if (!application.organization_id) {
+        return json({
+          success: false,
+          error_code: "ORG_NOT_LINKED",
+          error: "Application is approved but no organization is linked. Contact support.",
+        });
+      }
+
+      organization_id = application.organization_id;
+      quantity = deriveQuantity({
+        estimated_employees: application.estimated_employees,
+        requested_credits: application.requested_credits,
       });
+      totalAmount = (quantity * PRICE_PER_SEAT).toFixed(2);
+      idempotencyKey = `app_${application_id}`;
+      contactEmail = application.contact_email;
+      orgName = application.organization_name;
+      applicationIdForMetadata = application_id!;
     }
 
-    if (!application.organization_id) {
-      return json({
-        success: false,
-        error_code: "ORG_NOT_LINKED",
-        error: "Application is approved but no organization is linked. Contact support.",
-      });
-    }
-
-    const organization_id: string = application.organization_id;
-    const quantity = deriveQuantity({
-      estimated_employees: application.estimated_employees,
-      requested_credits: application.requested_credits,
-    });
-    const totalAmount = (quantity * PRICE_PER_SEAT).toFixed(2);
-
-    // Idempotency: reuse any pending purchase for this application
-    const idempotencyKey = `app_${application_id}`;
+    // Idempotency: reuse any pending purchase for this app/top-up
     const { data: existingPurchase } = await supabase
       .from("rvt_purchases")
       .select("id, paypal_order_id, status, metadata")
@@ -99,7 +174,7 @@ serve(async (req) => {
       return json({
         success: false,
         error_code: "ALREADY_PAID",
-        error: "Payment already completed for this application",
+        error: "Payment already completed",
         already_paid: true,
       });
     }
@@ -107,7 +182,7 @@ serve(async (req) => {
     // PayPal env + credentials for this org
     const paypalEnv = await getPayPalEnvForOrg(organization_id);
     const { id: clientId, secret: clientSecret, baseUrl } = resolvePayPalCreds(paypalEnv);
-    console.log(`[create-dispensary-payment-paypal] env=${paypalEnv} org=${organization_id} app=${application_id} qty=${quantity}`);
+    console.log(`[create-dispensary-payment-paypal] env=${paypalEnv} org=${organization_id} app=${applicationIdForMetadata} qty=${quantity} mode=${isTopUp ? "topup" : "application"}`);
 
     // Get / create purchase record FIRST so we have a stable purchase_id for custom_id
     let purchaseId = existingPurchase?.id ?? null;
@@ -123,10 +198,11 @@ serve(async (req) => {
           status: "pending",
           idempotency_key: idempotencyKey,
           metadata: {
-            application_id,
-            contact_email: application.contact_email,
-            organization_name: application.organization_name,
+            application_id: applicationIdForMetadata,
+            contact_email: contactEmail,
+            organization_name: orgName,
             paypal_env: paypalEnv,
+            mode: isTopUp ? "topup" : "application",
           },
         })
         .select("id")
@@ -164,7 +240,7 @@ serve(async (req) => {
         {
           reference_id: purchaseId,
           custom_id: customId,
-          description: `${quantity} ProCann Edu Training Seats for ${application.organization_name}`,
+          description: `${quantity} ProCann Edu Training Seats for ${orgName ?? "your organization"}`,
           amount: {
             currency_code: PAYMENT_CURRENCY,
             value: totalAmount,
@@ -175,8 +251,12 @@ serve(async (req) => {
         brand_name: "ProCann Edu",
         landing_page: "BILLING",
         user_action: "PAY_NOW",
-        return_url: `${DOMAINS.PRODUCTION}/payment-success?application_id=${application_id}&purchase_id=${purchaseId}`,
-        cancel_url: `${DOMAINS.PRODUCTION}/payment-cancel?application_id=${application_id}`,
+        return_url: isTopUp
+          ? `${DOMAINS.PRODUCTION}/payment-success?purchase_id=${purchaseId}&topup=1`
+          : `${DOMAINS.PRODUCTION}/payment-success?application_id=${applicationIdForMetadata}&purchase_id=${purchaseId}`,
+        cancel_url: isTopUp
+          ? `${DOMAINS.PRODUCTION}/payment-cancel?purchase_id=${purchaseId}&topup=1`
+          : `${DOMAINS.PRODUCTION}/payment-cancel?application_id=${applicationIdForMetadata}`,
       },
     };
 
@@ -194,7 +274,7 @@ serve(async (req) => {
       console.error("[create-dispensary-payment-paypal] order creation failed", orderData);
       await supabase
         .from("rvt_purchases")
-        .update({ status: "failed", metadata: { application_id, paypal_error: orderData } })
+        .update({ status: "failed", metadata: { application_id: applicationIdForMetadata, paypal_error: orderData } })
         .eq("id", purchaseId);
       return json({ success: false, error_code: "PAYPAL_ORDER_FAILED", error: orderData.message ?? "PayPal order failed" }, 502);
     }
@@ -205,14 +285,14 @@ serve(async (req) => {
       .eq("id", purchaseId);
 
     await supabase.from("payment_events").insert({
-      application_id,
+      application_id: applicationIdForMetadata,
       purchase_id: purchaseId,
       paypal_order_id: orderData.id,
       event_type: "ORDER_CREATED",
       amount: totalAmount,
       currency: PAYMENT_CURRENCY,
       status: "created",
-      payload: { quantity, paypal_env: paypalEnv },
+      payload: { quantity, paypal_env: paypalEnv, mode: isTopUp ? "topup" : "application" },
     });
 
     const approvalUrl = orderData.links?.find((l: any) => l.rel === "approve")?.href;

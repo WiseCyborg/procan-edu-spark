@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { filterOutTestOrgs } from "../_shared/test-org-filter.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -78,8 +79,10 @@ serve(async (req) => {
       .eq('admin_approved', true)
       .eq('is_active', true);
 
-    if (orgs) {
-      for (const org of orgs) {
+    // B1: filter UAT/E2E/smoke test residue
+    const realOrgs = filterOutTestOrgs(orgs);
+    if (realOrgs.length) {
+      for (const org of realOrgs) {
         const profiles = org.profiles || [];
         const app = org.dispensary_applications?.[0];
         
@@ -93,32 +96,46 @@ serve(async (req) => {
             const daysUntilExpiry = Math.ceil((tokenExpiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
             
             if (tokenExpiry < now) {
-              // Token expired - auto-fix by regenerating
+              // Token expired - auto-fix by regenerating (A3 — checked write)
               const newToken = crypto.randomUUID().replace(/-/g, '');
               const newExpiry = new Date(Date.now() + tokenExpiryDays * 24 * 60 * 60 * 1000).toISOString();
-              
-              await supabase
+
+              const { data: updated, error: updErr } = await supabase
                 .from('dispensary_applications')
                 .update({
                   registration_token: newToken,
                   registration_token_expires_at: newExpiry
                 })
-                .eq('id', app.id);
+                .eq('id', app.id)
+                .select('id')
+                .single();
 
-              issues.push({
-                issue_type: 'expired_registration_token',
-                severity: 'warning',
-                description: `Regenerated expired token for "${org.name}"`,
-                organization_id: org.id,
-                auto_fixed: true,
-                fix_action: `Generated new token expiring ${newExpiry}`,
-                metadata: { 
-                  old_expiry: app.registration_token_expires_at,
-                  new_expiry: newExpiry,
-                  contact_email: app.contact_email
-                }
-              });
-              autoFixedCount++;
+              if (updErr || !updated) {
+                console.error(`[OIA-${correlationId}] Failed to regenerate token for app ${app.id}:`, updErr);
+                issues.push({
+                  issue_type: 'expired_registration_token',
+                  severity: 'critical',
+                  description: `Failed to regenerate expired token for "${org.name}": ${updErr?.message ?? 'unknown error'}`,
+                  organization_id: org.id,
+                  auto_fixed: false,
+                  metadata: { error: updErr?.message }
+                });
+              } else {
+                issues.push({
+                  issue_type: 'expired_registration_token',
+                  severity: 'warning',
+                  description: `Regenerated expired token for "${org.name}"`,
+                  organization_id: org.id,
+                  auto_fixed: true,
+                  fix_action: `Generated new token expiring ${newExpiry}`,
+                  metadata: {
+                    old_expiry: app.registration_token_expires_at,
+                    new_expiry: newExpiry,
+                    contact_email: app.contact_email
+                  }
+                });
+                autoFixedCount++;
+              }
             } else if (daysUntilExpiry <= reminderDays) {
               // Token expiring soon
               issues.push({

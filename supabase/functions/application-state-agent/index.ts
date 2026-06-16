@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { filterOutTestOrgs, isTestOrg } from "../_shared/test-org-filter.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -79,8 +80,10 @@ serve(async (req) => {
       .eq('application_status', 'pending')
       .lt('created_at', stuckThreshold.toISOString());
 
-    if (stuckPending && stuckPending.length > 0) {
-      for (const app of stuckPending) {
+    // B1: drop UAT/E2E/smoke test residue
+    const realStuckPending = (stuckPending ?? []).filter((a: any) => !isTestOrg(a.organization_name));
+    if (realStuckPending.length > 0) {
+      for (const app of realStuckPending) {
         const daysPending = Math.floor((Date.now() - new Date(app.created_at).getTime()) / (1000 * 60 * 60 * 24));
         
         issues.push({
@@ -108,8 +111,12 @@ serve(async (req) => {
       .select('*, organizations!dispensary_applications_organization_id_fkey(*)')
       .eq('application_status', 'approved');
 
-    if (approvedApps) {
-      for (const app of approvedApps) {
+    // B1: drop UAT/E2E/smoke test residue from approved-but-stuck checks
+    const realApprovedApps = (approvedApps ?? []).filter(
+      (a: any) => !isTestOrg(a.organization_name) && !isTestOrg(a.organizations?.name)
+    );
+    if (realApprovedApps.length) {
+      for (const app of realApprovedApps) {
         const org = app.organizations;
         
         // Check if org was created
@@ -127,31 +134,46 @@ serve(async (req) => {
           continue;
         }
 
-        // Check registration token
+        // Check registration token (A3 — checked write so we never emit a phantom auto-fix)
         if (!app.registration_token) {
-          // Auto-fix: Generate token
           const newToken = crypto.randomUUID().replace(/-/g, '');
           const newExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
           
-          await supabase
+          const { data: tokenUpdate, error: tokenErr } = await supabase
             .from('dispensary_applications')
             .update({
               registration_token: newToken,
               registration_token_expires_at: newExpiry
             })
-            .eq('id', app.id);
+            .eq('id', app.id)
+            .select('id')
+            .single();
 
-          issues.push({
-            issue_type: 'missing_registration_token',
-            severity: 'warning',
-            description: `Generated missing registration token for "${app.organization_name}"`,
-            application_id: app.id,
-            organization_id: app.organization_id,
-            current_state: 'APPROVED',
-            auto_fixed: true,
-            fix_action: 'Generated registration token with 7-day expiry'
-          });
-          autoFixedCount++;
+          if (tokenErr || !tokenUpdate) {
+            console.error(`[ASA-${correlationId}] Failed to generate registration token for app ${app.id}:`, tokenErr);
+            issues.push({
+              issue_type: 'missing_registration_token',
+              severity: 'critical',
+              description: `Failed to auto-generate registration token for "${app.organization_name}": ${tokenErr?.message ?? 'unknown error'}`,
+              application_id: app.id,
+              organization_id: app.organization_id,
+              current_state: 'APPROVED',
+              auto_fixed: false,
+              metadata: { error: tokenErr?.message }
+            });
+          } else {
+            issues.push({
+              issue_type: 'missing_registration_token',
+              severity: 'warning',
+              description: `Generated missing registration token for "${app.organization_name}"`,
+              application_id: app.id,
+              organization_id: app.organization_id,
+              current_state: 'APPROVED',
+              auto_fixed: true,
+              fix_action: 'Generated registration token with 7-day expiry'
+            });
+            autoFixedCount++;
+          }
         }
 
         // Check if manager registered
@@ -283,19 +305,31 @@ serve(async (req) => {
     }
 
     // ========== UPDATE AGENT CONFIG ==========
+    // A3 — read-modify-write counter (same pattern as pipeline-health-agent fix).
+    // Passing supabase.rpc(...) PromiseLikes as column values silently fails the UPDATE.
     const duration = Date.now() - startTime;
-    
-    await supabase
+
+    const { data: prevCfg } = await supabase
+      .from('agent_configs')
+      .select('run_count, success_count')
+      .eq('agent_type', 'application_state')
+      .single();
+
+    const { error: cfgErr } = await supabase
       .from('agent_configs')
       .update({
         last_run_at: new Date().toISOString(),
         last_run_duration_ms: duration,
         last_run_status: issues.length > 0 ? 'issues_found' : 'healthy',
-        run_count: supabase.rpc('increment_agent_run_count', { agent: 'application_state' }),
-        success_count: supabase.rpc('increment_agent_success_count', { agent: 'application_state' }),
+        run_count: (prevCfg?.run_count ?? 0) + 1,
+        success_count: (prevCfg?.success_count ?? 0) + 1,
         updated_at: new Date().toISOString()
       })
       .eq('agent_type', 'application_state');
+
+    if (cfgErr) {
+      console.error(`[ASA-${correlationId}] Failed to update agent_configs:`, cfgErr);
+    }
 
     // ========== LOG COMPLETION EVENT ==========
     await supabase.from('agent_events').insert({
