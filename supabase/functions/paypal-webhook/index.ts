@@ -204,7 +204,9 @@ serve(async (req) => {
       });
     }
 
-    // Signature verification (best-effort: only when PAYPAL_WEBHOOK_ID is set)
+    // P2 — Signature verification. In production the webhook ID MUST be present;
+    // otherwise we reject the request so forged events cannot trigger provisioning.
+    // In sandbox we log a warning and continue (developer ergonomics).
     const webhookId = Deno.env.get("PAYPAL_WEBHOOK_ID");
     const env = await getActivePayPalEnv();
     const { id: clientId, secret: clientSecret, baseUrl } = resolvePayPalCreds(env);
@@ -223,10 +225,30 @@ serve(async (req) => {
           });
         }
       } catch (e) {
-        console.warn("[paypal-webhook] signature check threw; continuing", e);
+        console.error("[paypal-webhook] signature check threw", e);
+        if (env === "production") {
+          await supabase
+            .from("payment_events")
+            .update({ status: "signature_check_error" })
+            .eq("paypal_event_id", event.id);
+          return new Response(JSON.stringify({ error: "signature verification failed" }), {
+            status: 401,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
       }
+    } else if (env === "production") {
+      console.error("[paypal-webhook] PAYPAL_WEBHOOK_ID missing in production — rejecting event");
+      await supabase
+        .from("payment_events")
+        .update({ status: "missing_webhook_id" })
+        .eq("paypal_event_id", event.id);
+      return new Response(JSON.stringify({ error: "webhook signature verification not configured" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     } else {
-      console.warn("[paypal-webhook] PAYPAL_WEBHOOK_ID not set — skipping signature verification");
+      console.warn("[paypal-webhook] PAYPAL_WEBHOOK_ID not set (sandbox) — skipping signature verification");
     }
 
     // Route by event type
@@ -288,24 +310,49 @@ serve(async (req) => {
               currency,
             })
             .eq("paypal_event_id", event.id);
-        } else if (customId?.startsWith("course:")) {
-          // Course payment branch (legacy, untouched)
-          const [, userId, courseId] = customId.split(":");
-          await supabase
-            .from("orders")
-            .update({
-              status: "completed",
-              paypal_order_id: orderId,
-              paid_at: new Date().toISOString(),
-            })
-            .eq("user_id", userId)
-            .eq("course_id", courseId)
-            .eq("status", "pending");
+        } else if (customId?.startsWith("course:") || customId?.startsWith("course_")) {
+          // P3 — Course payment branch. Accept both formats:
+          //   "course:{userId}:{courseId}"           (legacy)
+          //   "course_{courseId}_user_{userId}"      (create-course-payment-paypal current)
+          let userId: string | undefined;
+          let courseId: string | undefined;
 
-          await supabase
-            .from("payment_events")
-            .update({ status: "processed", paypal_order_id: orderId })
-            .eq("paypal_event_id", event.id);
+          if (customId.startsWith("course:")) {
+            const [, u, c] = customId.split(":");
+            userId = u;
+            courseId = c;
+          } else {
+            // "course_{courseId}_user_{userId}"
+            const m = customId.match(/^course_([^_]+(?:-[^_]+)*)_user_(.+)$/);
+            if (m) {
+              courseId = m[1];
+              userId = m[2];
+            }
+          }
+
+          if (userId && courseId) {
+            await supabase
+              .from("orders")
+              .update({
+                status: "completed",
+                paypal_order_id: orderId,
+                paid_at: new Date().toISOString(),
+              })
+              .eq("user_id", userId)
+              .eq("course_id", courseId)
+              .eq("status", "pending");
+
+            await supabase
+              .from("payment_events")
+              .update({ status: "processed", paypal_order_id: orderId })
+              .eq("paypal_event_id", event.id);
+          } else {
+            console.warn("[paypal-webhook] could not parse course custom_id", customId);
+            await supabase
+              .from("payment_events")
+              .update({ status: "unrecognized" })
+              .eq("paypal_event_id", event.id);
+          }
         } else {
           console.warn("[paypal-webhook] unrecognized custom_id format", customId);
           await supabase

@@ -457,4 +457,76 @@ verify_jwt = true
 verify_jwt = true
 
 [functions.post-migration-regression]
+verify_jwt = true
+
+# ===== Added per audit 2026-06-16 (missing function entries) =====
+# Admin / management — verify_jwt = true
+[functions.admin-activate-user]
+verify_jwt = true
+
+[functions.create-user]
+verify_jwt = true
+
+[functions.install-regression-vault-secret]
+verify_jwt = true
+
+[functions.seed-uat-dataset]
+verify_jwt = true
+
+[functions.purge-uat-seed-dataset]
+verify_jwt = true
+
+[functions.request-additional-seats]
+verify_jwt = true
+
+[functions.analyze-payment-patterns]
+verify_jwt = true
+
+[functions.analyze-regulatory-impact]
+verify_jwt = true
+
+[functions.audit-site-images]
+verify_jwt = true
+
+[functions.send-payment-confirmation]
+verify_jwt = true
+
+[functions.send-outdated-content-alerts]
+verify_jwt = true
+
+[functions.trigger-certificate-email]
+verify_jwt = true
+
+[functions.trigger-manager-welcome]
+verify_jwt = true
+
+[functions.schedule-training-reminders]
+verify_jwt = true
+
+[functions.execute-workflow-automations]
+verify_jwt = true
+
+[functions.generate-daily-digest]
+verify_jwt = true
+
+[functions.generate-certificate-retry]
+verify_jwt = true
+
+# Public/system (cron, scraper, retry) — verify_jwt = false explicitly
+[functions.health-check]
+verify_jwt = false
+
+[functions.scrape-federal-regulations]
+verify_jwt = false
+
+[functions.scrape-regulations]
+verify_jwt = false
+
+[functions.auto-retry-failed-emails]
+verify_jwt = false
+
+[functions.retry-failed-email]
+verify_jwt = false
+
+[functions.ai-curriculum-optimizer]
 verify_jwt = false
