@@ -4,6 +4,8 @@ import { GraduationCap, Shield, Award, BookOpen, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { UniversalCourseCard, CourseInfo } from '@/components/courses/UniversalCourseCard';
 import { Button } from '@/components/ui/button';
+import { Seo } from '@/components/Seo';
+
 
 const AllCourses = () => {
   const navigate = useNavigate();
@@ -56,6 +58,12 @@ const AllCourses = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Seo
+        title="Cannabis Education Courses | ProCann Edu"
+        description="Browse Maryland Responsible Vendor Training and advanced cannabis education programs. State-aligned, certificate-issuing courses for dispensary staff and consumers."
+        path="/courses"
+      />
+
       {/* Hero */}
       <section className="bg-gradient-to-br from-primary/10 via-background to-secondary/10 py-16">
         <div className="container mx-auto px-4 text-center">
