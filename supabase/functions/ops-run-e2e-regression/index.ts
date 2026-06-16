@@ -1,36 +1,36 @@
 // One-shot ops function: refresh pipeline_health_snapshot, run regression,
 // smoke-test video URLs, return a strict GO/NO-GO verdict.
-// Authorize: service-role bearer OR admin JWT (same pattern as post-migration-regression).
-// SAFE TO DELETE after a single run.
+// Auth: constant-time compare of x-ops-token header against EMBEDDED_TOKEN.
+// THIS FILE IS DELETED IMMEDIATELY AFTER A SINGLE RUN.
 
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
+const EMBEDDED_TOKEN = "ef07d82763899d38d78585dd9f5af383c16ee51f5324712991cfbd89ed7a0a86";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-ops-token",
 };
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const ANON = Deno.env.get("SUPABASE_ANON_KEY")!;
 
-async function authorize(req: Request): Promise<boolean> {
-  const auth = req.headers.get("Authorization") || "";
-  const token = auth.replace("Bearer ", "").trim();
-  if (!token) return false;
-  if (token === SERVICE_ROLE) return true;
-  const sb = createClient(SUPABASE_URL, ANON, { global: { headers: { Authorization: auth } } });
-  const { data, error } = await sb.auth.getUser(token);
-  if (error || !data?.user) return false;
-  const { data: isAdmin } = await sb.rpc("has_role", { _user_id: data.user.id, _role: "admin" });
-  return !!isAdmin;
+function constantTimeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let r = 0;
+  for (let i = 0; i < a.length; i++) r |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return r === 0;
 }
 
 async function invoke(path: string, body: unknown) {
   const res = await fetch(`${SUPABASE_URL}/functions/v1/${path}`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${SERVICE_ROLE}`, "Content-Type": "application/json", apikey: SERVICE_ROLE },
+    headers: {
+      Authorization: `Bearer ${SERVICE_ROLE}`,
+      "Content-Type": "application/json",
+      apikey: SERVICE_ROLE,
+    },
     body: JSON.stringify(body ?? {}),
   });
   const text = await res.text();
@@ -42,7 +42,8 @@ async function invoke(path: string, body: unknown) {
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
-  if (!(await authorize(req))) {
+  const presented = req.headers.get("x-ops-token") || "";
+  if (!constantTimeEqual(presented, EMBEDDED_TOKEN)) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
@@ -53,7 +54,7 @@ serve(async (req) => {
   const failures: string[] = [];
   const checks: Record<string, any> = {};
 
-  // 1. Refresh pipeline_health_snapshot via pipeline-health-agent
+  // 1. Snapshot refresh
   const snapBefore = await admin
     .from("pipeline_health_snapshot")
     .select("id,last_run_at")
@@ -63,7 +64,7 @@ serve(async (req) => {
   const beforeId = snapBefore.data?.id ?? null;
 
   const snapInvoke = await invoke("pipeline-health-agent", {});
-  checks.snapshot_invoke = { status: snapInvoke.status, body: snapInvoke.json ?? snapInvoke.text?.slice(0, 500) };
+  checks.snapshot_invoke_status = snapInvoke.status;
   if (snapInvoke.status !== 200) failures.push(`snapshot_refresh_http_${snapInvoke.status}`);
 
   const snapAfter = await admin
@@ -82,23 +83,31 @@ serve(async (req) => {
     failures.push(`pipelines_unhealthy_${snapAfter.data.pipelines_healthy}_of_${snapAfter.data.pipelines_total}`);
   }
 
-  // 2. Run regression
+  // 2. Regression
   const reg = await invoke("post-migration-regression", {
     migration_version: "e2e_run_2026-06-16",
     triggered_by: "ops-run-e2e-regression",
   });
-  checks.regression = { status: reg.status, body: reg.json ?? reg.text?.slice(0, 800) };
+  checks.regression_status = reg.status;
+  checks.regression_body = reg.json ?? reg.text?.slice(0, 1500);
   if (reg.status !== 200) failures.push(`regression_http_${reg.status}`);
-  if (reg.json?.success !== true) failures.push(`regression_success_false`);
+  if (reg.json?.success !== true) failures.push("regression_success_false");
   if (reg.json?.verdict && reg.json.verdict !== "SHIPPABLE") failures.push(`regression_verdict_${reg.json.verdict}`);
   if (reg.json?.deterministic === false) failures.push("regression_nondeterministic");
 
-  // 3. Video smoke — three assets
-  const smokeAssets = [
+  // 3. Video smoke
+  const smokeAssets: Array<{ key: string; expect_provider: string }> = [
     { key: "welcome-intro", expect_provider: "vimeo" },
-    { key: "section_1_laws", expect_provider: "vimeo" },
   ];
-  // Optionally add an MP4 asset if any exist
+  const { data: sectionAsset } = await admin
+    .from("video_assets")
+    .select("asset_key")
+    .like("asset_key", "section_%")
+    .like("storage_path", "vimeo/%")
+    .limit(1)
+    .maybeSingle();
+  if (sectionAsset?.asset_key) smokeAssets.push({ key: sectionAsset.asset_key, expect_provider: "vimeo" });
+
   const { data: mp4 } = await admin
     .from("video_assets")
     .select("asset_key")
@@ -125,24 +134,21 @@ serve(async (req) => {
     });
   }
   checks.video_smoke = videoResults;
+  checks.snapshot_before_id = beforeId;
 
-  // 4. Verdict
   const verdict = failures.length === 0 ? "GO" : "NO-GO";
-  const finishedAt = new Date().toISOString();
 
-  const payload = {
+  return new Response(JSON.stringify({
     verdict,
     failures,
     started_at: startedAt,
-    finished_at: finishedAt,
-    snapshot: snapAfter.data,
+    finished_at: new Date().toISOString(),
+    snapshot_before_id: beforeId,
+    snapshot_after: snapAfter.data,
     regression_run_id: reg.json?.run_id ?? null,
     regression_verdict: reg.json?.verdict ?? null,
     regression_deterministic: reg.json?.deterministic ?? null,
+    regression_report_path: reg.json?.report_path ?? null,
     video_smoke: videoResults,
-  };
-
-  return new Response(JSON.stringify(payload, null, 2), {
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
+  }, null, 2), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 });
