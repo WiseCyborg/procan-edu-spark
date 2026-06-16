@@ -20,7 +20,9 @@ import { InvestmentValueCard } from '@/components/InvestmentValueCard';
 import { ComplianceDisclaimer } from '@/components/ComplianceDisclaimer';
 import { SwipeUpIndicator } from '@/components/SwipeUpIndicator';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Seo } from '@/components/Seo';
 const Index = () => {
+
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [isRoleSelectorOpen, setIsRoleSelectorOpen] = React.useState(false);
