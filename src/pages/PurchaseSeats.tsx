@@ -84,8 +84,9 @@ export default function PurchaseSeats() {
         'create-dispensary-payment-paypal',
         {
           body: {
+            organization_id: organization.id, // P1: required for top-up branch
             quantity,
-            idempotencyKey
+            idempotencyKey,
           }
         }
       );
