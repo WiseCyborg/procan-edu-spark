@@ -127,14 +127,15 @@ Deno.serve(async (req) => {
 
   // --- Reparent children ---
   const reparent = async (table: string) => {
-    const { error, count } = await service
+    const { data, error } = await service
       .from(table)
-      .update({ organization_id: keep_org_id }, { count: "exact" })
+      .update({ organization_id: keep_org_id })
       .eq("organization_id", retire_org_id)
-      .select("id", { count: "exact", head: true });
+      .select("id");
     if (error) throw new Error(`${table}: ${error.message}`);
-    return count ?? 0;
+    return data?.length ?? 0;
   };
+
 
   const moved: Record<string, number> = {};
   try {
