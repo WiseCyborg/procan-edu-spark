@@ -106,34 +106,48 @@ const PaymentSuccess: React.FC = () => {
               }, 2000);
             }
           } else if (purchaseId) {
-            // Verify seat purchase payment
-            const { data, error } = await supabase.functions.invoke('verify-dispensary-payment-paypal', {
-              body: { orderId: token }
-            });
+            // P4 (2026-06-16): verify endpoint is read-only. It returns
+            //   status: 'provisioned'      → webhook is done, show seats
+            //   status: 'pending_webhook'  → poll again, webhook not landed yet
+            // We poll up to ~30s before falling back to a "check your email" message.
+            let attempts = 0;
+            let provisioned = false;
+            while (attempts < 15) {
+              attempts++;
+              const { data, error } = await supabase.functions.invoke('verify-dispensary-payment-paypal', {
+                body: { orderId: token }
+              });
+              if (error) throw error;
 
-            if (error) throw error;
+              if (data?.status === 'provisioned' || (data?.paid && data?.seats_provisioned)) {
+                provisioned = true;
+                break;
+              }
+              if (data?.status === 'pending_webhook') {
+                await new Promise((r) => setTimeout(r, 2000));
+                continue;
+              }
+              // Not paid yet from PayPal's POV — stop polling.
+              break;
+            }
 
-            if (data?.paid) {
-              // Show confetti for seat purchases
+            if (provisioned) {
               setShowConfetti(true);
               setTimeout(() => setShowConfetti(false), 5000);
 
-              // Fetch seat purchase details
-              const { data: purchase, error: purchaseError } = await supabase
+              const { data: purchase } = await supabase
                 .from('rvt_purchases')
                 .select('quantity, organization_id')
                 .eq('id', purchaseId)
                 .maybeSingle();
 
-              if (!purchaseError && purchase) {
-                // Get organization name
+              if (purchase) {
                 const { data: orgData } = await supabase
                   .from('organizations')
                   .select('name')
                   .eq('id', purchase.organization_id)
                   .maybeSingle();
 
-                // Get join code
                 const { data: joinCodeData } = await supabase
                   .from('rvt_join_codes' as any)
                   .select('code')
@@ -149,11 +163,18 @@ const PaymentSuccess: React.FC = () => {
               }
 
               toast({
-                title: "Payment Verified!",
-                description: `${data.credits || purchase?.quantity} training seats activated!`,
+                title: 'Payment Verified!',
+                description: `${purchase?.quantity ?? ''} training seats activated!`,
+              });
+            } else {
+              toast({
+                title: 'Payment received',
+                description:
+                  "We'll email your receipt as soon as PayPal confirms. Your seats will appear on your dashboard shortly.",
               });
             }
           }
+
         } catch (error) {
           console.error('Payment verification error:', error);
           toast({
