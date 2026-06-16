@@ -88,7 +88,8 @@ const Index = () => {
           {/* Main Logo and Tagline - Level 1 Typography */}
           <div className={`text-center ${isMobile ? 'mb-3' : 'mb-8'}`}>
             <h1 className={`font-bold text-white leading-tight ${isMobile ? 'text-4xl mb-2' : 'text-5xl md:text-7xl mb-4'}`}>
-              ProCann Edu
+              ProCann Edu <span className="block text-2xl md:text-3xl font-medium text-white/90 mt-2">Maryland RVT Certification Training</span>
+
             </h1>
             <h2 className={`gradient-text font-medium mx-auto leading-relaxed ${isMobile ? 'text-base max-w-sm px-2' : 'text-2xl md:text-3xl max-w-3xl'}`}>
               {isMobile ? "Maryland's AI-Powered RVT Certification" : heroMessage}

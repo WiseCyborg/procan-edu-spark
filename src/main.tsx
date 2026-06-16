@@ -1,6 +1,8 @@
 import { createRoot } from 'react-dom/client'
+import { HelmetProvider } from 'react-helmet-async'
 import App from './App.tsx'
 import './index.css'
+
 import { monitoring } from '@/lib/monitoring'
 import { registerServiceWorker, promptPWAInstall } from '@/lib/pwa-registration'
 
@@ -38,7 +40,7 @@ try {
   }
   
   console.log('[App] Starting React render...');
-  createRoot(rootElement).render(<App />);
+  createRoot(rootElement).render(<HelmetProvider><App /></HelmetProvider>);
   console.log('[App] React render initiated successfully');
 } catch (error) {
   console.error('[App] Fatal error during initialization:', error);
