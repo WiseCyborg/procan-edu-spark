@@ -1,76 +1,38 @@
-## Goal
+## End-to-End Test Run Plan
 
-Keep every video playable for Danielle and Louis (and all users) while the Vimeo → Supabase Storage migration is in flight. No videos move yet; this is a compatibility shim only.
+Execute the existing E2E pipeline regression harness against the live preview to confirm the platform is ready for Danielle and Louis's UAT session (including the just-shipped Vimeo fallback).
 
-## Current state (verified)
+### What gets run
 
-- **Course module videos** (`course_modules.video_url`) — Vimeo URLs like `https://vimeo.com/1073070281?h=...`. Rendered by `VideoPlayer` → `VimeoPlayer`. **Already works.** No change needed.
-- **`video_assets` table** — 19 of 20 rows have `storage_path = 'vimeo/<id>'` (legacy refs); 1 row has an MP4 path; 1 row has `storage_path = NULL`. These are the future migration targets.
-- **`SecureVideoPlayer`** — calls `get-video-url` edge function, which calls `storage.createSignedUrl()`. For any `vimeo/...` storage_path this fails with `signing_failed` because no file exists in the bucket. Used today on `WelcomeVideo` and `WelcomeVideoSection` (asset_key `welcome-intro`).
+1. **`post-migration-regression` edge function** — full pipeline sweep:
+   - Auth + session bootstrap
+   - Org membership / seat allocation → entitlement trigger
+   - Course gating + module completion persistence
+   - Exam atomic init + proxy photo check-in
+   - Certificate issuance + verification portal lookup
+   - Stripe webhook idempotency replay (test mode)
+   - Access snapshot RPC consistency
+2. **`get-video-url` smoke** against `welcome-intro` (Vimeo fallback) and one MP4 asset (signed URL) — confirms today's change didn't regress either branch.
+3. **PipelineTestHarness UI run** at `/admin` → Operations → Testing tab, captured via browser preview, so we have a visible green/red board for the call.
+4. **UAT harness scenarios** (`useUATRun`) — run the standard matrix (apply → approve → seat → train → exam → cert) for one consumer and one org-seated user.
 
-So the only break is the `SecureVideoPlayer` path when the asset hasn't been uploaded to Storage yet.
+### Output
 
-## Change
+- Pass/fail table written to `docs/audit/2026-07/evidence/e2e_run_2026-06-16.md`
+- Edge function log excerpts for any failure
+- Screenshot of the Testing tab final state
+- One-line go/no-go verdict appended to `docs/audit/2026-07/PRE_CALL_SIGNOFF_2026-06-14.md`
 
-Make `get-video-url` + `SecureVideoPlayer` Vimeo-aware so they transparently fall back to a Vimeo embed when `storage_path` starts with `vimeo/`. No DB migration, no file moves.
+### Out of scope
 
-### 1. Edge function `supabase/functions/get-video-url/index.ts`
+- No schema changes, no data repairs, no new features
+- No Vimeo → Storage migration work
+- No destructive prod actions; webhook replay uses Stripe test mode only
 
-Before the `createSignedUrl` block, add:
+### Technical notes
 
-```ts
-// Vimeo fallback — used while migration to Supabase Storage is in progress.
-// storage_path format: "vimeo/<id>" or "vimeo/<id>?h=<hash>"
-if (asset.storage_path.startsWith("vimeo/")) {
-  const ref = asset.storage_path.slice("vimeo/".length);
-  const [id, query] = ref.split("?");
-  const hash = new URLSearchParams(query ?? "").get("h");
-  return json({
-    success: true,
-    provider: "vimeo",
-    vimeo_id: id,
-    vimeo_hash: hash,
-    expires_at: null,
-    title: asset.title,
-    thumbnail_url: asset.thumbnail_url,
-    duration_seconds: asset.duration_seconds,
-  });
-}
-```
+- Harness already exists: `supabase/functions/post-migration-regression`, `src/components/admin/PipelineTestHarness.tsx`, `src/hooks/useUATRun.ts`
+- Runs against the current Supabase project; uses seeded UAT accounts (`docs/testing/uat-password-standard`)
+- Total wall time ≈ 3–5 min
 
-All existing auth/entitlement checks above this block continue to gate access. `provider` defaults to `supabase` (omitted) for the existing signed-URL path so old responses stay shape-compatible.
-
-### 2. Hook `src/hooks/useSignedVideoUrl.ts`
-
-Extend `SignedVideoResponse` with optional `provider`, `vimeo_id`, `vimeo_hash` fields. No logic change.
-
-### 3. `src/components/video/SecureVideoPlayer.tsx`
-
-When `data.success && data.provider === "vimeo"`, render the same Vimeo iframe used by `VimeoPlayer` (badge=0, autopause=0). Keep the lazy-play overlay, loading state, and all denial states (`not_authorized`, `not_authenticated`, `not_found`) untouched. Drop the `not_uploaded` "coming soon" copy for assets that still have a `vimeo/...` path — they'll now play.
-
-`onComplete` for the Vimeo branch fires when the iframe's `ended` event arrives via `@vimeo/player` (already a dependency, used by `VimeoPlayer`).
-
-### 4. Admin label
-
-In `src/pages/admin/VideoLibrary.tsx`, change the `vimeo/` row label from `"Legacy Vimeo ref"` / warn tone to `"Playing via Vimeo (migration pending)"` / ok tone, so the admin view reflects that these are functional, not broken.
-
-## Out of scope
-
-- Actual file uploads to `training-videos` bucket
-- Touching `course_modules.video_url` rows (already working)
-- Migration plan, encoding, or cutover sequencing — that's the post-call track
-
-## Verification
-
-1. `bun run build` exits 0.
-2. Curl `get-video-url` with `assetKey: "welcome-intro"` as a signed-in user → response has `success: true, provider: "vimeo", vimeo_id: "..."`.
-3. Load `/welcome-video` in the preview → Vimeo player renders and plays.
-4. Pick one `video_assets` row with `storage_path = NULL` → still returns `not_uploaded` (unchanged).
-5. Pick the orientation row with the real MP4 path → still returns a signed URL (unchanged).
-
-## Files touched
-
-- `supabase/functions/get-video-url/index.ts` (edit)
-- `src/hooks/useSignedVideoUrl.ts` (edit — type only)
-- `src/components/video/SecureVideoPlayer.tsx` (edit — Vimeo branch)
-- `src/pages/admin/VideoLibrary.tsx` (edit — status label only)
+Approve and I'll execute.
