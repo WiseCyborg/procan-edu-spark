@@ -1,71 +1,65 @@
-# End-to-End Regression + Welcome Video Backfill (v3 — embedded ephemeral token)
+## Two follow-up plans (pick one or both to greenlight)
 
-## Goal
-Defensible GO/NO-GO for Danielle & Louis with every video playable. No new persisted secret; the one-shot privileged endpoint dies with its function bundle.
+Both are pre-existing issues uncovered by the 2026-06-16 regression. They are independent and can run in either order, but Plan A should land first because the 75 findings can't be trusted until the agent stops crashing mid-run.
 
-## 1. Welcome-intro backfill (already executed in v2 run)
-- `UPDATE public.video_assets SET storage_path = 'vimeo/1096146284?h=e90b8e5dfc', updated_at = now() WHERE asset_key = 'welcome-intro';` — done.
-- Re-verify post-run via `get-video-url` smoke check (section 2, check #4).
+---
 
-## 2. Pass/fail threshold (verdict contract)
-`verdict = "GO"` only if **every** check below passes. Any failure ⇒ `NO-GO` with the failing items enumerated in chat and the evidence file.
+### Plan A — Fix `pipeline-health-agent` crash (`supabase.sql` template tags)
 
-| # | Check | Pass criterion |
-|---|---|---|
-| 1 | `post-migration-regression` HTTP | status 200 AND body `success === true` |
-| 2 | Regression verdict | `verdict === "SHIPPABLE"` AND `deterministic === true` (run1 + run2 both zero failures, signatures match) |
-| 3 | `pipeline_health_snapshot` refresh | new row id (≠ pre-run id) AND `last_run_at` within 120 s AND `pipelines_healthy === pipelines_total` |
-| 4 | Video smoke — `welcome-intro` | 200, `provider === "vimeo"`, `vimeo_id === "1096146284"`, `vimeo_hash === "e90b8e5dfc"` |
-| 5 | Video smoke — one `section_*` Vimeo asset | 200, `provider === "vimeo"` |
-| 6 | Video smoke — first MP4 asset in `video_assets` (if any) | 200, `provider === "supabase"`, signed URL returned. Skipped (and noted) only if zero MP4 rows exist. |
-| 7 | `regression_runs` row | inserted by `post-migration-regression` with status `complete` |
+**Scope:** One file, one function, no schema change, no behavior change beyond "agent no longer throws."
 
-"Function ran without throwing" is explicitly **NO-GO**.
+**Root cause:** `supabase/functions/pipeline-health-agent/index.ts` lines ~261–262 use `supabase.sql\`run_count + 1\`` and `supabase.sql\`success_count + 1\``. `supabase-js` v2 has no `.sql` tagged template — that's Drizzle/pg syntax. The call throws, the agent never writes `agent_configs`, and the snapshot row that downstream UI reads is left stale.
 
-## 3. One-shot function `ops-run-e2e-regression` (revised auth)
-- Replace JWT/service-role auth check with a constant-time compare against a 32-byte hex token **defined as a `const` at the top of `index.ts`**.
-- Token is generated fresh for this run, never written to the secrets store, never echoed in chat after the call, and disappears with the function file in step 4.
-- Endpoint requires `x-ops-token: <embedded_token>`; missing/wrong header ⇒ 401.
-- Otherwise identical to v2: snapshot refresh → regression → 3 video smokes → JSON verdict payload.
-- Deploy via `supabase--deploy_edge_functions`.
-- Call exactly once via `supabase--curl_edge_functions` with the header.
+**Fix:** Replace the two tagged-template increments with a read-modify-write that uses values already in scope, OR with a Postgres RPC. Lowest-risk option is the in-function increment because it avoids a new DB object:
 
-## 4. Verified cleanup (token dies with the function)
-Run in this order, capture each response in the evidence file:
-1. `supabase--delete_edge_functions(["ops-run-e2e-regression"])` → record response.
-2. Delete the local files `supabase/functions/ops-run-e2e-regression/{index.ts,deno.json}` via `rm`.
-3. **Probe:** `curl` `https://<ref>.supabase.co/functions/v1/ops-run-e2e-regression` with the (now-orphaned) token header → expect 404 / `FUNCTION_NOT_FOUND`. Record status + body.
-4. **Probe:** `secrets--fetch_secrets` → confirm no `OPS_*` secret was ever added. Record listing.
-5. If either probe shows the function still resolves, mark evidence `CLEANUP_FAILED` and downgrade chat verdict to `NO-GO — privileged endpoint still live`.
+1. Before the `agent_configs` update, fetch current counters:
+   `const { data: cfg } = await supabase.from('agent_configs').select('run_count, success_count').eq('agent_type','pipeline_health').maybeSingle();`
+2. Replace the two `supabase.sql\`...\`` expressions with `(cfg?.run_count ?? 0) + 1` and `(cfg?.success_count ?? 0) + 1`.
+3. Leave the rest of the update payload untouched.
 
-No secrets-store interaction at any point. Token only ever existed in (a) the deployed function bundle and (b) the single `x-ops-token` header value used to call it; both are gone after step 1.
+**Race-condition note:** The agent runs on a cron with no overlap, so a read-modify-write is safe. If we ever fan it out, swap to a `SECURITY DEFINER` RPC `increment_agent_run_counters(agent_type text, success boolean)` — noted as a follow-up, not in this plan.
 
-## 5. Migration-track coordination
-Add a `MIGRATION_COORDINATION` block to the evidence file and append a matching checklist line to `docs/VIDEO_ENCODING_RUNBOOK.md`:
+**Verification:**
+- Redeploy, invoke the function once from Admin → Pipeline Health "Run Agent".
+- Confirm `agent_configs.run_count` advances by 1 and `pipeline_health_snapshot.last_run_at` is fresh (< 60s).
+- Tail edge logs for the correlation ID — expect no `supabase.sql is not a function` error.
 
-> `welcome-intro.storage_path` is currently `vimeo/1096146284?h=e90b8e5dfc`. The Vimeo → Supabase Storage migration must (a) upload the source to `training-videos/welcome-intro.mp4`, (b) overwrite `storage_path` **only after** the upload succeeds, (c) keep the Vimeo reference in a recovery column until a signed URL plays end-to-end. Do not run the migration's bulk UPDATE without this guard or it will silently break `/welcome-video`.
+**Out of scope:** Triaging the findings the agent produces (that's Plan B), refactoring the agent, RPC introduction.
 
-No code-level guard added — procedural only.
+**Wall time:** ~5 min including verification.
 
-## 6. Evidence & verdict
-Write `docs/audit/2026-07/evidence/e2e_run_2026-06-16.md` containing:
-- Pass-criteria table (section 2) with actual values.
-- `pipeline_health_snapshot` before/after rows.
-- `regression_runs` row id + run1/run2 summaries + signature hashes.
-- Video smoke table.
-- **Cleanup section**: delete responses, 404 probe, secrets listing.
-- Migration-coordination note (section 5).
+---
 
-Append one line to `docs/audit/2026-07/PRE_CALL_SIGNOFF_2026-06-14.md` and post the same line in chat:
-`2026-06-16 HH:MM UTC — <GO|NO-GO> — pipelines x/7, regression SHIPPABLE/det=<y|n>, video x/3, cleanup verified <yes|no>`
+### Plan B — Triage the 75 health-agent findings (23 apps / 23 orgs / 29 seats)
 
-## Out of scope
-- Vimeo → Storage migration itself.
-- Schema changes beyond the one `video_assets` row (already done).
-- Player code, RLS, auth changes.
-- New persisted secrets.
+**Scope:** Read-only investigation first, then a categorized remediation plan. No data writes in this plan — writes get their own one-shot plan(s) once categories are known, same pattern as the Vimeo backfill.
 
-## Technical notes
-- Token generated with `crypto.getRandomValues(new Uint8Array(32))` → hex; lives only in the deploy bundle.
-- Constant-time compare to avoid timing leaks (defense in depth; bundle is deleted within minutes regardless).
-- Wall time ≈ 3–5 min including cleanup probes.
+**Step 1 — Pull the findings (read-only):**
+- `pipeline_health_events` for the latest run's `correlation_id`, grouped by `pipeline_type` (application / organization / seat) and `severity`.
+- `pipeline_health_snapshot` for the per-dimension counters that produced the 23/23/29 totals.
+- For each dimension, the underlying detector query (already in `child agents` under `supabase/functions/pipeline-health-agent/agents/`) so we know exactly which rows are flagged and why.
+
+**Step 2 — Bucket the 75 into categories.** Expected buckets based on prior audits:
+- **Orphans** (e.g. application without profile, seat without entitlement, org without owner).
+- **State drift** (e.g. `status='approved'` but no downstream artifact created).
+- **Stale/abandoned** (e.g. application > N days in `submitted`).
+- **Test/UAT residue** that shouldn't be counted at all → filter rule, not a data fix.
+
+Output of Step 2 is a single markdown table in `docs/audit/2026-07/evidence/health_findings_triage_2026-06-16.md` with: bucket, count, sample IDs, proposed action (auto-fix / manual review / ignore-with-rule), and blast radius.
+
+**Step 3 — Per-bucket remediation plans.** Each bucket that needs writes gets its own short plan you approve separately, executed via the same one-shot service-role pattern we just used (deploy → invoke → delete → 404 probe → evidence). UAT residue gets a detector-filter PR instead of a data write.
+
+**Verification at the end:** Re-run `ops-run-e2e-regression` (or its successor). GO requires `issues_detected` to drop to whatever the agreed steady-state floor is (likely 0 for orphans, non-zero allowed for "stale" if we keep that as informational).
+
+**Out of scope:** Any data writes in this plan. Changing detector thresholds without evidence. Touching the agent code (that's Plan A).
+
+**Wall time:** ~15–20 min for Steps 1–2; per-bucket plans sized when we see the table.
+
+---
+
+### What I need from you
+
+Reply with one of:
+- `Plan A` — fix the crash only
+- `Plan B` — triage the 75 only
+- `Both` — A first, then B (recommended; B's output is meaningless while the agent is throwing)
