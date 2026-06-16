@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { filterOutTestOrgs } from "../_shared/test-org-filter.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -188,8 +189,11 @@ serve(async (req) => {
       .eq('admin_approved', true)
       .eq('is_active', true);
 
-    if (orgsNeedingCodes) {
-      for (const org of orgsNeedingCodes) {
+    // B1: drop UAT/E2E synthetic orgs so phantom issues don't inflate dashboards.
+    const realOrgsNeedingCodes = filterOutTestOrgs(orgsNeedingCodes);
+
+    if (realOrgsNeedingCodes.length) {
+      for (const org of realOrgsNeedingCodes) {
         const { data: joinCodes } = await supabase
           .from('rvt_join_codes')
           .select('id, code, is_active, expires_at')
@@ -197,27 +201,35 @@ serve(async (req) => {
           .eq('is_active', true);
 
         if (!joinCodes || joinCodes.length === 0) {
-          // Auto-fix: Generate join code
+          // Auto-fix: Generate join code (A2 — rvt_join_codes has no course_id column;
+          // any reference would silently fail. Insert is now error-checked so we never
+          // emit auto_fixed:true for a phantom write.)
           const code = `JOIN-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
-          
-          const { data: course } = await supabase
-            .from('courses')
-            .select('id')
-            .eq('is_active', true)
-            .limit(1)
-            .single();
 
-          if (course) {
-            await supabase.from('rvt_join_codes').insert({
+          const { data: inserted, error: insertErr } = await supabase
+            .from('rvt_join_codes')
+            .insert({
               organization_id: org.id,
               code: code,
-              course_id: course.id,
               max_uses: 1000,
               current_uses: 0,
               expires_at: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
               is_active: true
-            });
+            })
+            .select('id')
+            .single();
 
+          if (insertErr || !inserted) {
+            console.error(`[SRA-${correlationId}] Failed to insert join code for org ${org.id}:`, insertErr);
+            issues.push({
+              issue_type: 'missing_join_code',
+              severity: 'critical',
+              description: `Failed to auto-generate join code for "${org.name}": ${insertErr?.message ?? 'unknown error'}`,
+              organization_id: org.id,
+              auto_fixed: false,
+              metadata: { error: insertErr?.message, code }
+            });
+          } else {
             issues.push({
               issue_type: 'missing_join_code',
               severity: 'warning',
@@ -225,7 +237,7 @@ serve(async (req) => {
               organization_id: org.id,
               auto_fixed: true,
               fix_action: `Created join code: ${code}`,
-              metadata: { code }
+              metadata: { code, join_code_id: inserted.id }
             });
             autoFixedCount++;
           }
