@@ -20,7 +20,9 @@ import { InvestmentValueCard } from '@/components/InvestmentValueCard';
 import { ComplianceDisclaimer } from '@/components/ComplianceDisclaimer';
 import { SwipeUpIndicator } from '@/components/SwipeUpIndicator';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Seo } from '@/components/Seo';
 const Index = () => {
+
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [isRoleSelectorOpen, setIsRoleSelectorOpen] = React.useState(false);
@@ -49,6 +51,28 @@ const Index = () => {
     }]
   });
   return <div className="min-h-screen">
+      <Seo
+        title="ProCann Edu — Maryland RVT Certification Training"
+        description="Maryland's AI-powered Responsible Vendor Training. State-aligned cannabis dispensary certification, team management, and compliance reporting in one platform."
+        path="/"
+        jsonLd={[
+          {
+            '@context': 'https://schema.org',
+            '@type': 'Organization',
+            name: 'ProCann Edu',
+            url: 'https://www.procannedu.com/',
+            logo: 'https://www.procannedu.com/favicon-procann.jpg',
+            sameAs: ['https://procannedu.com'],
+          },
+          {
+            '@context': 'https://schema.org',
+            '@type': 'WebSite',
+            name: 'ProCann Edu',
+            url: 'https://www.procannedu.com/',
+          },
+        ]}
+      />
+
       <AccessibilityToolbar />
       
       {/* Mobile-First Optimized Hero Section - Above Fold */}
@@ -88,7 +112,8 @@ const Index = () => {
           {/* Main Logo and Tagline - Level 1 Typography */}
           <div className={`text-center ${isMobile ? 'mb-3' : 'mb-8'}`}>
             <h1 className={`font-bold text-white leading-tight ${isMobile ? 'text-4xl mb-2' : 'text-5xl md:text-7xl mb-4'}`}>
-              ProCann Edu
+              ProCann Edu <span className="block text-2xl md:text-3xl font-medium text-white/90 mt-2">Maryland RVT Certification Training</span>
+
             </h1>
             <h2 className={`gradient-text font-medium mx-auto leading-relaxed ${isMobile ? 'text-base max-w-sm px-2' : 'text-2xl md:text-3xl max-w-3xl'}`}>
               {isMobile ? "Maryland's AI-Powered RVT Certification" : heroMessage}

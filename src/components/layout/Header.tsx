@@ -280,9 +280,11 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                       size="icon"
                       onClick={() => setShortcutsDialogOpen(true)}
                       className="hidden md:flex"
+                      aria-label="Open keyboard shortcuts"
                     >
-                      <Keyboard className="h-4 w-4" />
+                      <Keyboard className="h-4 w-4" aria-hidden="true" />
                     </Button>
+
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>Press <kbd className="px-1.5 py-0.5 text-xs font-semibold bg-muted rounded border">{isMac ? '⌘' : 'Ctrl'}/</kbd> for shortcuts</p>
