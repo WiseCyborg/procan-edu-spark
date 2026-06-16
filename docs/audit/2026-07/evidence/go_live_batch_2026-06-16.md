@@ -37,3 +37,24 @@ After the next pipeline-health-agent run completes:
 2. `agent_configs` row for `application_state`: `run_count` and `success_count` increment by exactly 1 each invocation.
 3. `pipeline_health_events`: no new `stuck_after_approval` or `no_registration_token` events sourced from orgs named `UAT Test*`, `E2E Test*`, or `ABC`.
 4. `payment_events` (post next real or sandbox course capture): the previously-unrecognized `course_{...}_user_{...}` custom_id should now produce `status='processed'`.
+
+---
+
+## Update 2026-06-16 (PM): P4, P5, B2/B3 landed
+
+### P4 — Dual-provisioning race eliminated
+`verify-dispensary-payment-paypal` rewritten as read-only. It now (a) captures the PayPal order so it doesn't get stuck in APPROVED, and (b) reports DB state: `status: 'provisioned'` if the webhook has landed, `status: 'pending_webhook'` if not. `PaymentSuccess.tsx` polls `pending_webhook` up to ~30s before showing a "we'll email your receipt" fallback. The webhook (`paypal-webhook`) is now the single writer for `rvt_purchases` / `rvt_seats` / `rvt_join_codes` / application status / confirmation emails.
+
+### P5 — `usePaymentStatus` reads real entitlements
+Hook rewritten to query `course_entitlements` first (covers Stripe, admin grants, promo codes, and seat-trigger assignments) and fall back to `rvt_seats` filtered by `assigned_user_id` + `course_id` + status in (`assigned`,`used`). The vestigial `orders` table is no longer consulted. Signature unchanged, so `CourseLayout`, `TrainingHandbook`, and `ChatAssistant` need no edits.
+
+### B2/B3 — Duplicate license resolution scaffolded (not executed)
+- New one-shot edge function `resolve-duplicate-license` (admin-only, JWT-verified, service-role-internal). Reparents children, soft-deletes the retired org, writes `admin_operations_audit`. Refuses if both orgs have members.
+- Sign-off worksheet at `docs/audit/2026-07/evidence/duplicate_license_signoff_2026-06-16.md` with per-license impact counts and a recommended keep/retire pick for each pair.
+- Discovery: all six rows are `ABC`-named test orgs under `daniellebrooks502@gmail.com`. Alternate path documented (scrub all six instead of merging) — owner picks.
+- **No DB writes yet.** Execution waits on a signed worksheet.
+
+### Remaining before GO
+1. Configure `PAYPAL_WEBHOOK_ID` in production secrets (P2 still gates production).
+2. Danielle/Louis sign the duplicate-license worksheet, then admin runs `resolve-duplicate-license` for each pair.
+3. UAT pass — one full role-path with evidence captured.

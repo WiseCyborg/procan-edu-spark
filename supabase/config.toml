@@ -530,3 +530,6 @@ verify_jwt = false
 
 [functions.ai-curriculum-optimizer]
 verify_jwt = false
+
+[functions.resolve-duplicate-license]
+verify_jwt = true
