@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -21,6 +22,8 @@ import { useGuardedNavigation } from '@/hooks/useGuardedNavigation';
 import { supabase } from '@/integrations/supabase/client';
 import { LogoutConfirmModal } from '@/components/auth/LogoutConfirmModal';
 import { SaveIndicator } from '@/components/auth/SaveIndicator';
+import { LanguageSwitcher } from '@/components/i18n/LanguageSwitcher';
+import { usePreferredLanguage } from '@/hooks/usePreferredLanguage';
 
 interface HeaderProps {
   role?: string;
@@ -49,6 +52,9 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
   const { organization } = useOrganization();
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
+  // Hydrate profile.preferred_language → i18n runtime on auth (and persist manual changes).
+  usePreferredLanguage();
   const [showCommunicationHub, setShowCommunicationHub] = useState(false);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -159,7 +165,7 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
           >
             <h1 className="text-2xl font-bold text-green-700 hover:text-green-600 transition-colors">ProCann Edu</h1>
           </Button>
-          <span className="text-sm text-gray-600">Maryland Cannabis Training</span>
+          <span className="text-sm text-gray-600">{t('nav.tagline')}</span>
         </div>
         
         <div className="flex items-center space-x-4">
@@ -172,7 +178,7 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                 size="sm"
                 className="hidden md:inline-flex"
               >
-                Training Handbook
+                {t('nav.handbook')}
               </Button>
               <Button 
                 onClick={() => navigate('/faq')}
@@ -180,7 +186,7 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                 size="sm"
                 className="hidden md:inline-flex"
               >
-                FAQ
+                {t('nav.faq')}
               </Button>
               <Button 
                 onClick={() => navigate('/verify-certificate')}
@@ -188,7 +194,7 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                 size="sm"
                 className="hidden md:inline-flex"
               >
-                Verify Certificate
+                {t('nav.verifyCertificate')}
               </Button>
               {!user ? (
                 <>
@@ -197,14 +203,14 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                     variant="outline"
                     size="sm"
                   >
-                    Sign In
+                    {t('nav.signIn')}
                   </Button>
                   <Button 
                     onClick={() => navigate('/get-started')}
                     size="sm"
                     className="bg-green-600 hover:bg-green-700 text-white"
                   >
-                    Get Started
+                    {t('nav.getStarted')}
                   </Button>
                 </>
               ) : (
@@ -220,9 +226,11 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                   ) : (
                     <LayoutDashboard className="w-4 h-4" />
                   )}
-                  Go to Dashboard
+                  {t('nav.goToDashboard')}
                 </Button>
               )}
+              {/* Language selector — visible to anon + authed users on public routes */}
+              <LanguageSwitcher />
             </div>
           )}
           
@@ -239,7 +247,7 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                   className="flex items-center space-x-2"
                 >
                   <Home className="w-4 h-4" />
-                  <span>Dashboard</span>
+                  <span>{t('nav.dashboard')}</span>
                 </Button>
                 <Button 
                   onClick={() => navigate('/course')}
@@ -248,7 +256,7 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                   className="flex items-center space-x-2"
                 >
                   <BookOpen className="w-4 h-4" />
-                  <span>Training</span>
+                  <span>{t('nav.training')}</span>
                 </Button>
                 <Button 
                   onClick={() => navigate('/communication')}
@@ -257,7 +265,7 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                   className="flex items-center space-x-2 relative"
                 >
                   <MessageSquare className="w-4 h-4" />
-                  <span>Communication</span>
+                  <span>{t('nav.communication')}</span>
                   {unreadCount > 0 && (
                     <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 min-w-5 flex items-center justify-center text-xs px-1">
                       {unreadCount > 99 ? '99+' : unreadCount}
@@ -271,6 +279,8 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
           {/* User Controls - Profile Dropdown for all logged-in users */}
           {user && (
             <div className="flex items-center space-x-2">
+              {/* Language selector — also visible inside authed app shell */}
+              {!isPublicMarketingRoute && <LanguageSwitcher />}
               {/* Keyboard Shortcuts Indicator - only on app routes */}
               {!isPublicMarketingRoute && (
                 <Tooltip>
@@ -297,7 +307,7 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="sm" className="h-9 px-3">
                     <User className="h-4 w-4" />
-                    <span className="hidden md:inline ml-2">Profile</span>
+                    <span className="hidden md:inline ml-2">{t('nav.profile')}</span>
                     <ChevronDown className="h-3 w-3 ml-1" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -323,23 +333,23 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                   
                   {/* Quick Links Section */}
                   <DropdownMenuLabel className="text-xs text-muted-foreground font-semibold px-2 py-1.5">
-                    QUICK LINKS
+                    {t('nav.quickLinks')}
                   </DropdownMenuLabel>
                   <DropdownMenuItem onClick={handleGoToDashboard}>
                     <Home className="mr-2 h-4 w-4" />
-                    <span>Dashboard</span>
+                    <span>{t('nav.dashboard')}</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/course')}>
                     <BookOpen className="mr-2 h-4 w-4" />
-                    <span>My Training</span>
+                    <span>{t('nav.myTraining')}</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/certificates')}>
                     <Award className="mr-2 h-4 w-4" />
-                    <span>Certificates</span>
+                    <span>{t('nav.certificates')}</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/training-handbook')}>
                     <FileText className="mr-2 h-4 w-4" />
-                    <span>Training Handbook</span>
+                    <span>{t('nav.handbook')}</span>
                   </DropdownMenuItem>
                   
                   {/* Team Section - Managers only */}
@@ -347,23 +357,23 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuLabel className="text-xs text-muted-foreground font-semibold px-2 py-1.5">
-                        TEAM
+                        {t('nav.team')}
                       </DropdownMenuLabel>
                       <DropdownMenuItem onClick={() => navigate('/team-management')}>
                         <Users className="mr-2 h-4 w-4" />
-                        <span>Team Dashboard</span>
+                        <span>{t('nav.teamDashboard')}</span>
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => navigate('/dispensary-manager-dashboard?tab=invite')}>
                         <Mail className="mr-2 h-4 w-4" />
-                        <span>Invite Employee</span>
+                        <span>{t('nav.inviteEmployee')}</span>
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => navigate('/dispensary-manager-dashboard?tab=seats')}>
                         <CreditCard className="mr-2 h-4 w-4" />
-                        <span>Manage Seats</span>
+                        <span>{t('nav.manageSeats')}</span>
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => setShowPurchaseModal(true)}>
                         <ShoppingCart className="mr-2 h-4 w-4" />
-                        <span>Purchase Seats</span>
+                        <span>{t('nav.purchaseSeats')}</span>
                       </DropdownMenuItem>
                     </>
                   )}
@@ -373,11 +383,11 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuLabel className="text-xs text-muted-foreground font-semibold px-2 py-1.5">
-                        ADMIN
+                        {t('nav.admin')}
                       </DropdownMenuLabel>
                       <DropdownMenuItem onClick={() => navigate('/admin')}>
                         <Shield className="mr-2 h-4 w-4" />
-                        <span>Admin Dashboard</span>
+                        <span>{t('nav.adminDashboard')}</span>
                       </DropdownMenuItem>
                     </>
                   )}
@@ -385,15 +395,15 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                   {/* Resources Section */}
                   <DropdownMenuSeparator />
                   <DropdownMenuLabel className="text-xs text-muted-foreground font-semibold px-2 py-1.5">
-                    RESOURCES
+                    {t('nav.resources')}
                   </DropdownMenuLabel>
                   <DropdownMenuItem onClick={() => navigate('/consumer-education')}>
                     <GraduationCap className="mr-2 h-4 w-4" />
-                    <span>Consumer Education</span>
+                    <span>{t('nav.consumerEducation')}</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/faq')}>
                     <HelpCircle className="mr-2 h-4 w-4" />
-                    <span>FAQ</span>
+                    <span>{t('nav.faq')}</span>
                   </DropdownMenuItem>
                   
                   {/* Role Switcher - Multi-role users only */}
@@ -416,7 +426,7 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOutClick} className="text-destructive focus:text-destructive">
                     <LogOut className="mr-2 h-4 w-4" />
-                    <span>Sign Out</span>
+                    <span>{t('nav.signOut')}</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

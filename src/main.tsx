@@ -2,6 +2,8 @@ import { createRoot } from 'react-dom/client'
 import { HelmetProvider } from 'react-helmet-async'
 import App from './App.tsx'
 import './index.css'
+import './i18n' // initialize i18next before any component renders
+
 
 import { monitoring } from '@/lib/monitoring'
 import { registerServiceWorker, promptPWAInstall } from '@/lib/pwa-registration'

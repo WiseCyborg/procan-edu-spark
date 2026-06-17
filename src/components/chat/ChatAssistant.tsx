@@ -254,6 +254,7 @@ export const ChatAssistant: React.FC = () => {
       const { data, error } = await supabase.functions.invoke('chat-assistant', {
         body: {
           message: inputMessage.trim(),
+          user_language: (typeof window !== 'undefined' && window.localStorage?.getItem('procann_language')) || 'en',
           context: contextInfo,
           user_id: user?.id,
           user_roles: roles,

@@ -178,6 +178,7 @@ export const useCharmAI = () => {
       const { data, error } = await supabase.functions.invoke('chat-assistant', {
         body: {
           message,
+          user_language: (typeof window !== 'undefined' && window.localStorage?.getItem('procann_language')) || 'en',
           context: {
             ...analyzedState,
             conversationHistory: conversationHistory.slice(-3), // Last 3 messages for context

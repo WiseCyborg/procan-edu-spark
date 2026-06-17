@@ -519,6 +519,7 @@ export const DraggableVoiceAssistant: React.FC = () => {
       const { data, error } = await supabase.functions.invoke('chat-assistant', {
         body: {
           message: text,
+          user_language: (typeof window !== 'undefined' && window.localStorage?.getItem('procann_language')) || 'en',
           context: contextInfo,
           user_id: user?.id || null,
           user_roles: roles || []
