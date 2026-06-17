@@ -9103,6 +9103,8 @@ export type Database = {
           created_at: string | null
           description: string | null
           duration_seconds: number | null
+          fallback_bucket_id: string | null
+          fallback_storage_path: string | null
           file_size_mb: number | null
           id: string
           is_active: boolean | null
@@ -9122,6 +9124,8 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           duration_seconds?: number | null
+          fallback_bucket_id?: string | null
+          fallback_storage_path?: string | null
           file_size_mb?: number | null
           id?: string
           is_active?: boolean | null
@@ -9141,6 +9145,8 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           duration_seconds?: number | null
+          fallback_bucket_id?: string | null
+          fallback_storage_path?: string | null
           file_size_mb?: number | null
           id?: string
           is_active?: boolean | null

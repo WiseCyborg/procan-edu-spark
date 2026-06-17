@@ -130,12 +130,14 @@ export const SecureVideoPlayer: React.FC<SecureVideoPlayerProps> = ({
     );
   }
 
-  // 5a. Vimeo fallback (used until asset is migrated to Supabase Storage)
+  // 5a. Vimeo path (used until asset is migrated to Supabase Storage)
   if (data.provider === 'vimeo' && data.vimeo_id) {
     return (
       <VimeoIframe
         vimeoId={data.vimeo_id}
         vimeoHash={data.vimeo_hash ?? null}
+        fallbackUrl={data.fallback_url ?? null}
+        poster={poster || data.thumbnail_url || undefined}
         className={cn(aspect, className)}
         completionThreshold={completionThreshold}
         onComplete={onComplete}
@@ -163,6 +165,8 @@ export const SecureVideoPlayer: React.FC<SecureVideoPlayerProps> = ({
 interface VimeoIframeProps {
   vimeoId: string;
   vimeoHash: string | null;
+  fallbackUrl: string | null;
+  poster?: string;
   className?: string;
   completionThreshold: number;
   onComplete?: () => void;
@@ -171,39 +175,101 @@ interface VimeoIframeProps {
 const VimeoIframe: React.FC<VimeoIframeProps> = ({
   vimeoId,
   vimeoHash,
+  fallbackUrl,
+  poster,
   className,
   completionThreshold,
   onComplete,
 }) => {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
   const completedRef = useRef(false);
+  const [useFallback, setUseFallback] = useState(false);
 
+  // Wire up Vimeo Player events: completion tracking + error/load-timeout → fallback.
   useEffect(() => {
-    if (!iframeRef.current || !onComplete) return;
+    if (useFallback || !iframeRef.current) return;
     const player = new Player(iframeRef.current);
-    const handler = (data: { seconds: number; duration: number }) => {
-      if (completedRef.current) return;
-      if (data.duration > 0 && data.seconds / data.duration >= completionThreshold) {
+    let loaded = false;
+
+    const failover = (reason: string) => {
+      if (loaded) return;
+      if (!fallbackUrl) return;
+      console.warn(`[SecureVideoPlayer] Vimeo unavailable (${reason}), switching to Storage fallback`);
+      setUseFallback(true);
+    };
+
+    const onLoaded = () => {
+      loaded = true;
+    };
+    const onError = (err: unknown) => {
+      console.warn('[SecureVideoPlayer] Vimeo player error', err);
+      failover('player_error');
+    };
+    const onTime = (d: { seconds: number; duration: number }) => {
+      if (completedRef.current || !onComplete) return;
+      if (d.duration > 0 && d.seconds / d.duration >= completionThreshold) {
         completedRef.current = true;
         onComplete();
       }
     };
-    player.on('timeupdate', handler);
-    player.on('ended', () => {
-      if (!completedRef.current) {
+    const onEnded = () => {
+      if (!completedRef.current && onComplete) {
         completedRef.current = true;
         onComplete();
       }
-    });
+    };
+
+    player.on('loaded', onLoaded);
+    player.on('error', onError);
+    player.on('timeupdate', onTime);
+    player.on('ended', onEnded);
+
+    // If Vimeo never reports `loaded` within 8s, assume the embed was blocked
+    // (e.g. "This video isn't available") and fall back to the MP4 if we have one.
+    const timeoutId = window.setTimeout(() => failover('load_timeout'), 8000);
+
     return () => {
+      window.clearTimeout(timeoutId);
       try {
-        player.off('timeupdate', handler);
+        player.off('loaded', onLoaded);
+        player.off('error', onError);
+        player.off('timeupdate', onTime);
+        player.off('ended', onEnded);
         player.destroy();
       } catch {
         // ignore
       }
     };
-  }, [vimeoId, completionThreshold, onComplete]);
+  }, [vimeoId, fallbackUrl, completionThreshold, onComplete, useFallback]);
+
+  // Storage MP4 fallback playback + completion tracking.
+  const handleTimeUpdate = () => {
+    if (completedRef.current || !onComplete) return;
+    const v = videoRef.current;
+    if (!v || !v.duration) return;
+    if (v.currentTime / v.duration >= completionThreshold) {
+      completedRef.current = true;
+      onComplete();
+    }
+  };
+
+  if (useFallback && fallbackUrl) {
+    return (
+      <div className={className}>
+        <video
+          ref={videoRef}
+          src={fallbackUrl}
+          poster={poster}
+          className="absolute inset-0 w-full h-full"
+          controls
+          playsInline
+          preload="metadata"
+          onTimeUpdate={handleTimeUpdate}
+        />
+      </div>
+    );
+  }
 
   const src = `https://player.vimeo.com/video/${vimeoId}?${vimeoHash ? `h=${vimeoHash}&` : ''}badge=0&autopause=0&player_id=0&app_id=58479`;
 
