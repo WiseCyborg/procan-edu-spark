@@ -91,6 +91,17 @@ serve(async (req) => {
           else if (user_roles.includes('dispensary_manager')) security_level = 'manager';
           else if (user_roles.includes('training_coordinator')) security_level = 'manager';
         }
+        // If client didn't send a language, fall back to profile.preferred_language.
+        if (!clientLanguage) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('preferred_language')
+            .eq('id', user.id)
+            .maybeSingle();
+          if (profile?.preferred_language) {
+            userLanguage = normalizeChatLanguage(profile.preferred_language);
+          }
+        }
       }
     }
 
