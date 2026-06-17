@@ -1,0 +1,1 @@
+ALTER VIEW public.launch_audit_batch_summary SET (security_invoker = true);
