@@ -24,20 +24,6 @@ Deno.serve(async (req) => {
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    const authHeader = req.headers.get("Authorization") ?? "";
-    if (!authHeader.startsWith("Bearer ")) {
-      return json({ success: false, error_code: "not_authenticated" }, 401);
-    }
-
-    const userClient = createClient(supabaseUrl, anonKey, {
-      global: { headers: { Authorization: authHeader } },
-    });
-    const { data: userData, error: userError } = await userClient.auth.getUser();
-    if (userError || !userData?.user) {
-      return json({ success: false, error_code: "not_authenticated" }, 401);
-    }
-    const userId = userData.user.id;
-
     const { assetKey } = await req.json().catch(() => ({}));
     if (!assetKey || typeof assetKey !== "string") {
       return json({ success: false, error_code: "missing_asset_key" }, 400);
@@ -60,6 +46,23 @@ Deno.serve(async (req) => {
       return json({ success: false, error_code: "not_found" }, 200);
     }
 
+    // Resolve user identity only when needed (non-public assets).
+    let userId: string | null = null;
+    if (asset.access_level !== "public") {
+      const authHeader = req.headers.get("Authorization") ?? "";
+      if (!authHeader.startsWith("Bearer ")) {
+        return json({ success: false, error_code: "not_authenticated" }, 200);
+      }
+      const userClient = createClient(supabaseUrl, anonKey, {
+        global: { headers: { Authorization: authHeader } },
+      });
+      const { data: userData, error: userError } = await userClient.auth.getUser();
+      if (userError || !userData?.user) {
+        return json({ success: false, error_code: "not_authenticated" }, 200);
+      }
+      userId = userData.user.id;
+    }
+
     // Authorization
     if (asset.access_level === "enrolled") {
       if (!asset.course_id) {
@@ -68,7 +71,7 @@ Deno.serve(async (req) => {
       const { data: ent } = await admin
         .from("course_entitlements")
         .select("id")
-        .eq("user_id", userId)
+        .eq("user_id", userId!)
         .eq("course_id", asset.course_id)
         .in("status", ["active", "granted", "issued"])
         .limit(1)
@@ -77,7 +80,8 @@ Deno.serve(async (req) => {
         return json({ success: false, error_code: "not_authorized" }, 200);
       }
     }
-    // "authenticated" and "public" both allow any signed-in user past this point.
+    // "authenticated" requires a signed-in user (verified above).
+    // "public" allows anonymous access.
 
     // If the file isn't uploaded yet
     if (!asset.storage_path) {
