@@ -43,6 +43,7 @@ export const AIFAQChat = () => {
       const { data, error } = await supabase.functions.invoke('chat-assistant', {
         body: {
           message: userMessage,
+          user_language: (typeof window !== 'undefined' && window.localStorage?.getItem('procann_language')) || 'en',
           context: {
             page: 'homepage',
             type: 'faq',
