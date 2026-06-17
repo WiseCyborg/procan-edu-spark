@@ -3817,10 +3817,12 @@ export type Database = {
       launch_audit_runs: {
         Row: {
           created_at: string
+          failed_checks: Json
           findings: Json
           http_status: number | null
           id: string
           markdown_excerpt: string | null
+          rollup_status: string | null
           route: string
           run_batch: string
           screenshot_path: string | null
@@ -3830,10 +3832,12 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          failed_checks?: Json
           findings?: Json
           http_status?: number | null
           id?: string
           markdown_excerpt?: string | null
+          rollup_status?: string | null
           route: string
           run_batch: string
           screenshot_path?: string | null
@@ -3843,10 +3847,12 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          failed_checks?: Json
           findings?: Json
           http_status?: number | null
           id?: string
           markdown_excerpt?: string | null
+          rollup_status?: string | null
           route?: string
           run_batch?: string
           screenshot_path?: string | null
@@ -9495,6 +9501,20 @@ export type Database = {
           section_title: string | null
           topic_area: string | null
           total_attempts: number | null
+        }
+        Relationships: []
+      }
+      launch_audit_batch_summary: {
+        Row: {
+          ended_at: string | null
+          fail_count: number | null
+          pass_count: number | null
+          rollup_status: string | null
+          run_batch: string | null
+          started_at: string | null
+          total_routes: number | null
+          warn_count: number | null
+          welcome_intro_probe: Json | null
         }
         Relationships: []
       }

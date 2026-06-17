@@ -3,31 +3,72 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Loader2, RefreshCw, CheckCircle2, XCircle, AlertTriangle, ExternalLink } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  ArrowLeft,
+  Loader2,
+  RefreshCw,
+  CheckCircle2,
+  XCircle,
+  AlertTriangle,
+  ExternalLink,
+  Info,
+} from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useToast } from "@/hooks/use-toast";
 import {
   useReadinessSnapshot,
   useAuditRuns,
   useRunAudit,
+  CHECK_DESCRIPTIONS,
+  NOT_CHECKED,
   type AuditRunRow,
 } from "@/hooks/useLaunchReadiness";
 
 const lightFor = (ok: boolean) =>
   ok ? <CheckCircle2 className="h-4 w-4 text-green-600" /> : <XCircle className="h-4 w-4 text-red-600" />;
 
+const RollupPill: React.FC<{ rollup: AuditRunRow["rollup_status"] }> = ({ rollup }) => {
+  if (rollup === "pass") return <Badge className="bg-green-600 hover:bg-green-600 text-white text-[10px]">PASS</Badge>;
+  if (rollup === "warn") return <Badge className="bg-amber-500 hover:bg-amber-500 text-white text-[10px]">WARN</Badge>;
+  if (rollup === "fail") return <Badge className="bg-red-600 hover:bg-red-600 text-white text-[10px]">FAIL</Badge>;
+  return <Badge variant="outline" className="text-[10px]">—</Badge>;
+};
+
 const FindingsCell: React.FC<{ row: AuditRunRow }> = ({ row }) => {
   const f = row.findings ?? {};
   const items: Array<[string, unknown]> = Object.entries(f);
+  const failedNames = new Set((row.failed_checks ?? []).map((fc) => fc.check));
   if (!items.length) return <span className="text-xs text-muted-foreground">no findings</span>;
   return (
-    <div className="flex flex-wrap gap-1">
-      {items.map(([k, v]) => (
-        <Badge key={k} variant="outline" className="text-[10px]">
-          {k}: {String(v)}
-        </Badge>
-      ))}
-    </div>
+    <TooltipProvider delayDuration={150}>
+      <div className="flex flex-wrap gap-1">
+        {items.map(([k, v]) => {
+          const desc = CHECK_DESCRIPTIONS[k];
+          const isFailed = failedNames.has(k);
+          const badge = (
+            <Badge
+              variant="outline"
+              className={`text-[10px] cursor-help ${isFailed ? "border-red-500 text-red-700 dark:text-red-300" : ""}`}
+            >
+              {k}: {String(v)}
+            </Badge>
+          );
+          if (!desc) return <span key={k}>{badge}</span>;
+          return (
+            <Tooltip key={k}>
+              <TooltipTrigger asChild>{badge}</TooltipTrigger>
+              <TooltipContent className="max-w-xs text-xs">{desc}</TooltipContent>
+            </Tooltip>
+          );
+        })}
+      </div>
+    </TooltipProvider>
   );
 };
 
@@ -48,6 +89,8 @@ const LaunchReadiness: React.FC = () => {
   }
 
   const s = snapshot.data;
+  const probe = s?.welcome_intro_probe;
+  const lastBatch = s?.last_batch;
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -64,7 +107,7 @@ const LaunchReadiness: React.FC = () => {
         <Button
           onClick={() =>
             runAudit.mutate(undefined, {
-              onSuccess: (d: any) => toast({ title: "Audit complete", description: `${d.results?.length ?? 0} routes scanned.` }),
+              onSuccess: (d: any) => toast({ title: "Audit complete", description: `${d.results?.length ?? 0} entries written.` }),
               onError: (e: any) => toast({ title: "Audit failed", description: e?.message ?? String(e), variant: "destructive" }),
             })
           }
@@ -74,6 +117,24 @@ const LaunchReadiness: React.FC = () => {
           Run Firecrawl Audit
         </Button>
       </div>
+
+      {/* Blind-spot disclosures */}
+      <Card className="border-amber-300 bg-amber-50/40 dark:bg-amber-950/10">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Info className="h-4 w-4 text-amber-600" /> What this dashboard does NOT check
+          </CardTitle>
+          <CardDescription className="text-xs">
+            Green here means "the checks below passed", not "the app is ready to ship". Read this list before treating
+            any pass as a go/no-go signal.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ul className="text-xs space-y-1 list-disc list-inside text-muted-foreground">
+            {NOT_CHECKED.map((line) => <li key={line}>{line}</li>)}
+          </ul>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
@@ -91,15 +152,28 @@ const LaunchReadiness: React.FC = () => {
               <AlertTriangle className="inline h-4 w-4 mr-1" /> {(snapshot.error as Error).message}
             </div>
           ) : s ? (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <Stat label="Active Courses" value={s.total_active_courses} />
-              <Stat label="Active Modules" value={s.total_active_modules} />
-              <Stat label="Active Videos" value={s.total_active_videos} />
-              <Stat label="Welcome Intro" icon={lightFor(s.welcome_intro_resolved)} value={s.welcome_intro_resolved ? "Resolved" : "Missing"} />
-              <Stat label="Unmapped Modules" value={s.unmapped_modules} warn={s.unmapped_modules > 0} />
-              <Stat label="Duplicate Video URLs" value={s.duplicate_videos} warn={s.duplicate_videos > 0} />
-              <Stat label="Orphan Video Assets" value={s.orphan_video_assets} warn={s.orphan_video_assets > 0} />
-            </div>
+            <>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <Stat label="Active Courses" value={s.total_active_courses} />
+                <Stat label="Active Modules" value={s.total_active_modules} />
+                <Stat label="Active Videos" value={s.total_active_videos} />
+                <WelcomeIntroStat
+                  dbPresent={s.welcome_intro_db_row_present}
+                  probe={probe ?? null}
+                />
+                <Stat
+                  label="Unmapped Modules (NULL/empty only)"
+                  value={s.unmapped_modules}
+                  warn={s.unmapped_modules > 0}
+                  hint={s.unmapped_modules_hardened
+                    ? "Includes placeholder/format detection."
+                    : "Counts NULL/empty video_url only. Placeholder + format checks pending storage convention from Louis."}
+                />
+                <Stat label="Duplicate Video URLs" value={s.duplicate_videos} warn={s.duplicate_videos > 0} />
+                <Stat label="Orphan Video Assets" value={s.orphan_video_assets} warn={s.orphan_video_assets > 0} />
+                <BatchRollupStat batch={lastBatch ?? null} />
+              </div>
+            </>
           ) : null}
         </CardContent>
       </Card>
@@ -107,7 +181,9 @@ const LaunchReadiness: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle>Recent Audit Runs</CardTitle>
-          <CardDescription>Most recent 50 routes scanned by Firecrawl.</CardDescription>
+          <CardDescription>
+            Most recent 50 entries. Rollup is computed from per-route required checks; HTTP 2xx alone is not a pass.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {runs.isLoading ? (
@@ -120,7 +196,7 @@ const LaunchReadiness: React.FC = () => {
                 <div key={row.id} className="border rounded-md p-3 text-sm">
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0">
-                      {lightFor(row.status === "ok")}
+                      <RollupPill rollup={row.rollup_status} />
                       <code className="font-mono truncate">{row.route}</code>
                       <Badge variant="secondary" className="text-[10px]">HTTP {row.http_status ?? "—"}</Badge>
                     </div>
@@ -134,6 +210,16 @@ const LaunchReadiness: React.FC = () => {
                       )}
                     </div>
                   </div>
+                  {row.failed_checks && row.failed_checks.length > 0 && (
+                    <div className="mt-2 text-xs text-red-700 dark:text-red-300">
+                      <strong>Failures:</strong>{" "}
+                      {row.failed_checks.map((fc, i) => (
+                        <span key={i} className="mr-2">
+                          <code>{fc.check}</code> — {fc.reason}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                   <div className="mt-2"><FindingsCell row={row} /></div>
                 </div>
               ))}
@@ -145,13 +231,76 @@ const LaunchReadiness: React.FC = () => {
   );
 };
 
-const Stat: React.FC<{ label: string; value: React.ReactNode; warn?: boolean; icon?: React.ReactNode }> = ({
-  label, value, warn, icon,
-}) => (
+const Stat: React.FC<{
+  label: string;
+  value: React.ReactNode;
+  warn?: boolean;
+  icon?: React.ReactNode;
+  hint?: string;
+}> = ({ label, value, warn, icon, hint }) => (
   <div className={`rounded-md border p-3 ${warn ? "border-amber-400 bg-amber-50 dark:bg-amber-950/20" : ""}`}>
-    <div className="text-xs text-muted-foreground flex items-center gap-1">{icon}{label}</div>
+    <div className="text-xs text-muted-foreground flex items-center gap-1">
+      {icon}{label}
+      {hint && (
+        <TooltipProvider delayDuration={150}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Info className="h-3 w-3 cursor-help" />
+            </TooltipTrigger>
+            <TooltipContent className="max-w-xs text-xs">{hint}</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
+    </div>
     <div className="text-lg font-semibold mt-1">{value}</div>
   </div>
 );
+
+const WelcomeIntroStat: React.FC<{
+  dbPresent: boolean;
+  probe: import("@/hooks/useLaunchReadiness").WelcomeIntroProbe | null;
+}> = ({ dbPresent, probe }) => {
+  let state: "green" | "amber" | "red" = "red";
+  let label = "Missing";
+  if (!dbPresent) {
+    state = "red"; label = "DB row missing";
+  } else if (!probe) {
+    state = "amber"; label = "Row OK, never probed";
+  } else if (probe.ok) {
+    state = "green"; label = `Probe ${probe.http_status} (${probe.latency_ms}ms)`;
+  } else {
+    state = "red"; label = `Probe ${probe.http_status ?? probe.error_code ?? "failed"}`;
+  }
+  const icon =
+    state === "green" ? <CheckCircle2 className="h-4 w-4 text-green-600" /> :
+    state === "amber" ? <AlertTriangle className="h-4 w-4 text-amber-600" /> :
+    <XCircle className="h-4 w-4 text-red-600" />;
+  const hint = probe?.resolved_url
+    ? `${probe.method ?? "HEAD"} ${probe.resolved_url} → ${probe.http_status ?? "?"} (${probe.content_type ?? "no type"})`
+    : "No probe has been run yet. Click 'Run Firecrawl Audit' to probe the welcome-intro asset.";
+  return (
+    <Stat label="Welcome Intro" icon={icon} value={label} hint={hint} warn={state !== "green"} />
+  );
+};
+
+const BatchRollupStat: React.FC<{ batch: import("@/hooks/useLaunchReadiness").LastBatchRollup | null }> = ({ batch }) => {
+  if (!batch) return <Stat label="Last Audit Rollup" value="No runs yet" warn />;
+  const warn = batch.rollup_status !== "pass";
+  return (
+    <Stat
+      label="Last Audit Rollup"
+      value={
+        <span>
+          <span className="uppercase">{batch.rollup_status}</span>{" "}
+          <span className="text-xs text-muted-foreground">
+            {batch.pass_count}/{batch.total_routes} pass · {batch.warn_count} warn · {batch.fail_count} fail
+          </span>
+        </span>
+      }
+      warn={warn}
+      hint={`Batch ${batch.run_batch.slice(0, 8)} — started ${new Date(batch.started_at).toLocaleString()}`}
+    />
+  );
+};
 
 export default LaunchReadiness;
