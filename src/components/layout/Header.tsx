@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -21,6 +22,8 @@ import { useGuardedNavigation } from '@/hooks/useGuardedNavigation';
 import { supabase } from '@/integrations/supabase/client';
 import { LogoutConfirmModal } from '@/components/auth/LogoutConfirmModal';
 import { SaveIndicator } from '@/components/auth/SaveIndicator';
+import { LanguageSwitcher } from '@/components/i18n/LanguageSwitcher';
+import { usePreferredLanguage } from '@/hooks/usePreferredLanguage';
 
 interface HeaderProps {
   role?: string;
