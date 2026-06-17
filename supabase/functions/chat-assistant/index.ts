@@ -7,6 +7,11 @@ import {
   verifiedFactsBlock,
   todayISO,
 } from "../_shared/prompt-guardrail.ts";
+import {
+  localizedPromptHead,
+  normalizeChatLanguage,
+  type ChatLanguage,
+} from "../_shared/localized-prompts.ts";
 
 const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
 
@@ -17,6 +22,8 @@ const corsHeaders = {
 
 interface ChatRequest {
   message: string;
+  /** ISO 639-1 code from the client (en, es, zh). Resolved server-side; falls back to profile or 'en'. */
+  user_language?: string;
   context?: {
     intent?: string;
     urgency?: string;
@@ -48,11 +55,14 @@ serve(async (req) => {
       throw new Error('Lovable API key not configured');
     }
 
-    const { message, context = {} } = await req.json() as ChatRequest;
+    const { message, context = {}, user_language: clientLanguage } = await req.json() as ChatRequest;
 
     if (!message || !context) {
       throw new Error('Message and context are required');
     }
+
+    // Resolve user language: explicit client value > (later) profile > 'en'.
+    let userLanguage: ChatLanguage = normalizeChatLanguage(clientLanguage);
 
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
