@@ -186,11 +186,17 @@ IMPORTANT: When citing these regulations:
       - Focus on course completion, certification, and career development`;
     }
 
-    // Enhanced system prompt with Baltimore personality and local cannabis industry knowledge
-    // GUARDRAIL_BLOCK and verifiedFactsBlock are prepended to close CHATBOT-SEC-01 and CHATBOT-ACC-01/02.
+    // Enhanced system prompt with Baltimore personality and local cannabis industry knowledge.
+    // Order matters:
+    //   1) GUARDRAIL_BLOCK (English, non-negotiable) — closes CHATBOT-SEC-01.
+    //   2) verifiedFactsBlock — closes CHATBOT-ACC-01/02.
+    //   3) localizedPromptHead — sets response language + COMAR-stays-English note.
+    //   4) Existing system prompt + role/regulatory context.
     const enhancedSystemPrompt = `${GUARDRAIL_BLOCK}
 
 ${verifiedFactsBlock(todayISO())}
+
+${localizedPromptHead(userLanguage, todayISO())}
 
 ${context.systemPrompt ?? ''}
 ${regulatoryContext}
