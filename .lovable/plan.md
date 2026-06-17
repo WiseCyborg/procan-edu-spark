@@ -1,58 +1,51 @@
-# Option B — Best-title-match duplicate correction
+# Two threads — answering both
 
-You picked B. I'll keep the one module per duplicate group whose title best matches the `video_assets` canonical title, and unmap the rest. Below are the exact picks I'll make. **Review the "Keep" / "Unmap" column before approving** — these are heuristic picks, not Louis-validated.
+## A. UAT/Production readiness (video pipeline)
 
-## Picks
+Short answer: **not yet — close to it, but with named items still open.**
 
-| Vimeo id | Canonical title (video_assets) | Module (course_modules) | Action | Reason |
-|---|---|---|---|---|
-| 1073072073 | Section 3: Cannabis Pharmacology and Therapeutics | mod 4 "Inventory Management and Tracking" | **Unmap** | Only consumer, but title doesn't match — leaving it would keep a known-wrong mapping live |
-| 1073072091 | Section 4: Substance Use and Customer Safety | mod 8 "Dosage Guidelines and Patient Consultation" | **Keep** | Closest to "Customer Safety" / patient-facing |
-| 1073072091 | (same) | mod 9 "Point of Sale Systems and Transactions" | **Unmap** | Unrelated to substance/safety |
-| 1073072091 | (same) | mod 14 "Age Verification and ID Checking" | **Unmap** | Unrelated |
-| 1096134152 | Section 7: Mastering Record Keeping | mod 13 "Handling Cash and Banking" | **Keep** | Banking → record keeping is the closest semantic fit |
-| 1096134152 | (same) | mod 2 "Patient Rights and Privacy" | **Unmap** | Unrelated to record keeping |
+**Landed this session:**
+- 6 cross-subject duplicate Vimeo mappings unmapped
+- Partial unique index `course_modules_video_url_unique_per_course` blocks recurrence
+- Signed-URL edge function + `SecureVideoPlayer` + `useSignedVideoUrl` shipped
+- Evidence written to `docs/audit/2026-07/evidence/video_mapping_correction_2026-06-17.md`
 
-Net effect: 4 modules get `video_url = NULL` (player renders the existing "Video coming soon" state); 2 modules keep their current video; 0 modules end up mapped to a video known to be from a different subject.
+**Still open (must close or formally accept as deferred):**
+1. 6 unmapped modules need correct Vimeo ids from Louis (currently render "Video coming soon")
+2. 2 heuristic "keep" picks — mod 8 (`1073072091`) and mod 13 (`1096134152`) — need Louis confirmation
+3. `welcome-intro` Storage fallback — confirm backfill landed end-to-end
+4. Hardcoded Vimeo iframes in `TrainingHandbook.tsx` and `Index.tsx` bypass signed-URL path — migrate or waive
+5. Orphan asset `1096138533` ("Section 15: Customer Education") — map, archive, or document
+6. Re-run `docs/audit/2026-07/evidence/signed_video_url_tests.md` after the unmaps
 
-If any "Keep" pick is wrong, reply with the correction (e.g. "keep mod 14 on 1073072091, unmap mod 8 instead") and I'll adjust before running.
+**Recommendation:** UAT can start now if items 1, 2, 5 are explicitly logged as "known deferred" with sign-off. Production should wait on items 3 and 4 (real user-blocking issues).
 
-## Execution
+---
 
-1. Single migration:
-   ```sql
-   UPDATE public.course_modules SET video_url = NULL, updated_at = now()
-   WHERE id IN (
-     '14d0aa9f-4436-460c-a76b-52f07ba33bf3', -- mod 4 Inventory Management   (1073072073)
-     'b49e8150-f795-4d6f-a501-35d5e1f5aacf', -- mod 9 Point of Sale          (1073072091)
-     'b8d16c7f-10e6-40d5-b766-721839038f5e', -- mod 14 Age Verification      (1073072091)
-     '3b7d23c0-c7d9-48ea-ac75-17e515e6304a'  -- mod 2 Patient Rights         (1096134152)
-   );
-   ```
-2. Add a partial unique index to prevent the same `video_url` from being assigned to two modules in the same course again:
-   ```sql
-   CREATE UNIQUE INDEX IF NOT EXISTS course_modules_video_url_unique_per_course
-     ON public.course_modules (course_id, video_url)
-     WHERE video_url IS NOT NULL;
-   ```
-3. Verification query (run after) — expect zero rows:
-   ```sql
-   SELECT course_id, video_url, count(*) FROM public.course_modules
-   WHERE video_url IS NOT NULL
-   GROUP BY 1,2 HAVING count(*) > 1;
-   ```
-4. Write `docs/audit/2026-07/evidence/video_mapping_correction_2026-06-17.md` with before-state, decisions/heuristic, after-state, and remaining open items:
-   - 4 modules now need a real Vimeo id from Louis (mods 4, 9, 14, 2).
-   - Orphan `section_15_customer_ed` (Vimeo 1096138533) still needs a module assignment from Louis.
-   - Hardcoded iframes in `TrainingHandbook.tsx` / `Index.tsx` still need a separate migration ticket.
-   - Welcome-intro Storage MP4 fallback is a separate open ticket (already wired in code, no asset uploaded).
+## B. i18n Launch Package — pre-build confirmations (Section 2 of your upload)
 
-## Out of scope
+You uploaded a 3–4 day i18n scope to ship with July 1. Before I plan the build, three confirmations the doc itself asks for:
 
-- Touching `video_assets` rows.
-- Reassigning any module to a *new* Vimeo id (that's Option C, not B).
-- Backfilling the orphan or removing hardcoded iframes.
+1. **Profile table is `public.profiles`** in this project (confirmed against the schema). The `preferred_language` column lands there — no new `users` table.
+2. **Chatbot guardrail (SEC-01)** — the three localized system prompts will carry the same anti-prompt-leak block. I'll re-run one leak probe per language post-deploy and attach to the evidence pack.
+3. **Library: `react-i18next`** as the default unless you say otherwise.
 
-## Decision needed
+## Proposed sequencing across both threads
 
-Approve the picks above (or send corrections), and I'll run the migration + write the evidence doc in one turn.
+```text
+Now      Decide path on video items 1/2/5 (accept-deferred vs. wait on Louis)
+Now      Confirm i18n items above (or correct them)
+Day 1-2  i18n schema + provider + header selector + en.json full coverage
+Day 2-3  es.json + zh.json (machine draft for low-risk; manual for the 40-60 high-visibility)
+Day 3    Chatbot prompt routing + 3 localized prompts with SEC-01 guardrail intact
+Day 4    Run 9-test evidence pack; Louis QA pass on ES/ZH; leak probes
+Parallel Close video items 3 (welcome-intro), 4 (hardcoded iframes) before prod cutover
+Prod     Promote when video items 3+4 closed and i18n acceptance criteria met
+```
+
+## What I need from you to proceed
+
+- **Video:** "accept items 1/2/5 as deferred, proceed to UAT" — or — "wait until Louis confirms"?
+- **i18n:** confirm the 3 items above (profiles table / SEC-01 carry-over / react-i18next) so I can issue the build plan.
+
+Once you answer, I'll issue the concrete build plan for i18n and the punch-list migration for the remaining video items.
