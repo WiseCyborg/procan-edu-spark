@@ -165,7 +165,7 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
           >
             <h1 className="text-2xl font-bold text-green-700 hover:text-green-600 transition-colors">ProCann Edu</h1>
           </Button>
-          <span className="text-sm text-gray-600">Maryland Cannabis Training</span>
+          <span className="text-sm text-gray-600">{t('nav.tagline')}</span>
         </div>
         
         <div className="flex items-center space-x-4">
@@ -178,7 +178,7 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                 size="sm"
                 className="hidden md:inline-flex"
               >
-                Training Handbook
+                {t('nav.handbook')}
               </Button>
               <Button 
                 onClick={() => navigate('/faq')}
@@ -186,7 +186,7 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                 size="sm"
                 className="hidden md:inline-flex"
               >
-                FAQ
+                {t('nav.faq')}
               </Button>
               <Button 
                 onClick={() => navigate('/verify-certificate')}
@@ -194,7 +194,7 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                 size="sm"
                 className="hidden md:inline-flex"
               >
-                Verify Certificate
+                {t('nav.verifyCertificate')}
               </Button>
               {!user ? (
                 <>
@@ -203,14 +203,14 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                     variant="outline"
                     size="sm"
                   >
-                    Sign In
+                    {t('nav.signIn')}
                   </Button>
                   <Button 
                     onClick={() => navigate('/get-started')}
                     size="sm"
                     className="bg-green-600 hover:bg-green-700 text-white"
                   >
-                    Get Started
+                    {t('nav.getStarted')}
                   </Button>
                 </>
               ) : (
@@ -226,9 +226,11 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                   ) : (
                     <LayoutDashboard className="w-4 h-4" />
                   )}
-                  Go to Dashboard
+                  {t('nav.goToDashboard')}
                 </Button>
               )}
+              {/* Language selector — visible to anon + authed users on public routes */}
+              <LanguageSwitcher />
             </div>
           )}
           
