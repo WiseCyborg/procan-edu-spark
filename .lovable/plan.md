@@ -1,76 +1,58 @@
-# Fix Vimeo "This video isn't available" on Welcome screen
+# Option B — Best-title-match duplicate correction
 
-## Root cause
+You picked B. I'll keep the one module per duplicate group whose title best matches the `video_assets` canonical title, and unmap the rest. Below are the exact picks I'll make. **Review the "Keep" / "Unmap" column before approving** — these are heuristic picks, not Louis-validated.
 
-The Welcome video player is already wired correctly:
-- `video_assets.welcome-intro` → `storage_path = "vimeo/1096146284?h=e90b8e5dfc"`, `access_level = 'public'`
-- `get-video-url` returns `{ provider: 'vimeo', vimeo_id: '1096146284', vimeo_hash: 'e90b8e5dfc' }`
-- `SecureVideoPlayer` embeds `https://player.vimeo.com/video/1096146284?h=e90b8e5dfc&...`
+## Picks
 
-The error message "This video isn't available. The owner has been notified." is rendered **inside the Vimeo iframe**, not by our app. Vimeo loaded, identified the video, and then refused playback. That only happens for one of three reasons, all controlled in the Vimeo dashboard — not in code:
+| Vimeo id | Canonical title (video_assets) | Module (course_modules) | Action | Reason |
+|---|---|---|---|---|
+| 1073072073 | Section 3: Cannabis Pharmacology and Therapeutics | mod 4 "Inventory Management and Tracking" | **Unmap** | Only consumer, but title doesn't match — leaving it would keep a known-wrong mapping live |
+| 1073072091 | Section 4: Substance Use and Customer Safety | mod 8 "Dosage Guidelines and Patient Consultation" | **Keep** | Closest to "Customer Safety" / patient-facing |
+| 1073072091 | (same) | mod 9 "Point of Sale Systems and Transactions" | **Unmap** | Unrelated to substance/safety |
+| 1073072091 | (same) | mod 14 "Age Verification and ID Checking" | **Unmap** | Unrelated |
+| 1096134152 | Section 7: Mastering Record Keeping | mod 13 "Handling Cash and Banking" | **Keep** | Banking → record keeping is the closest semantic fit |
+| 1096134152 | (same) | mod 2 "Patient Rights and Privacy" | **Unmap** | Unrelated to record keeping |
 
-1. **Privacy → Embed** is set to "Specific domains" and `procannedu.com` / `lovableproject.com` / `lovable.app` are not on the allowlist.
-2. **Privacy → Who can watch** is set to "Only people with a private link" but the unlisted/private hash (`h=...`) is wrong or has been rotated.
-3. **Distribution** is restricted (region block, password) or the video is still transcoding / was removed.
+Net effect: 4 modules get `video_url = NULL` (player renders the existing "Video coming soon" state); 2 modules keep their current video; 0 modules end up mapped to a video known to be from a different subject.
 
-The URL you shared (`https://vimeo.com/1096146284?fl=ip&fe=ec`) has no `h=` parameter, which suggests the canonical share link does not require a hash — so the stored hash `e90b8e5dfc` may now be stale, OR the embed domain allowlist is the blocker.
+If any "Keep" pick is wrong, reply with the correction (e.g. "keep mod 14 on 1073072091, unmap mod 8 instead") and I'll adjust before running.
 
-## Plan
+## Execution
 
-### Step 1 — Vimeo dashboard fixes (you do this, no code)
-
-In Vimeo → Manage Videos → "Welcome Intro" (id `1096146284`) → **Privacy**:
-
-- **Where can this be embedded?** → either "Anywhere" OR "Specific domains" with these added:
-  - `procannedu.com`
-  - `www.procannedu.com`
-  - `procannedu.lovable.app`
-  - `lovableproject.com`
-  - `lovable.app`
-- **Who can watch?** → "Anyone" (or "Only people with the private link" + confirm the current unlisted hash).
-- Confirm the video status is "Ready" (not still transcoding) and not region-blocked.
-
-Then copy the current embed code from Vimeo's "Embed" panel and paste the `h=...` value into the next step.
-
-### Step 2 — Sync the stored hash (one DB update)
-
-Update `video_assets.welcome-intro.storage_path` to match whatever Vimeo currently shows in the embed snippet:
-
-```
-storage_path = 'vimeo/1096146284?h=<current-hash-from-vimeo>'
-```
-
-If Vimeo's privacy is set to "Anyone" with no hash required, store just `'vimeo/1096146284'`.
-
-### Step 3 — Add a true fallback so this never blocks users again
-
-Today the only "fallback" is Vimeo itself, so if Vimeo blocks playback there is nothing to fall back to. Add a real backup:
-
-- Upload the same MP4 to the existing `secure-videos` Supabase Storage bucket as `welcome-intro/welcome-intro.mp4`.
-- Add a new column `fallback_storage_path text` to `video_assets` and set it for `welcome-intro`.
-- `get-video-url` returns both `vimeo_*` fields and a signed `fallback_url` (60-min signed URL from the bucket) for public assets.
-- `SecureVideoPlayer` listens for the Vimeo Player `error` event (or a 6s "no `loaded` event" timeout) and swaps the iframe for a native `<video src={fallback_url} controls>` element.
-
-### Step 4 — Verify
-
-- Logged out, hard reload `/`, confirm the Vimeo iframe plays.
-- Temporarily break the hash in the DB to simulate a Vimeo failure and confirm the native `<video>` fallback appears.
-- Restore the correct hash.
-
-## Files / surfaces touched in Step 3
-
-- DB: `ALTER TABLE public.video_assets ADD COLUMN fallback_storage_path text;` + one row update.
-- `supabase/functions/get-video-url/index.ts` — sign `fallback_storage_path` from `secure-videos` bucket and include in response.
-- `src/hooks/useSignedVideoUrl.ts` — surface `fallback_url`.
-- `src/components/video/SecureVideoPlayer.tsx` — Vimeo `error` / load-timeout handler that switches to `<video>` with the signed URL.
+1. Single migration:
+   ```sql
+   UPDATE public.course_modules SET video_url = NULL, updated_at = now()
+   WHERE id IN (
+     '14d0aa9f-4436-460c-a76b-52f07ba33bf3', -- mod 4 Inventory Management   (1073072073)
+     'b49e8150-f795-4d6f-a501-35d5e1f5aacf', -- mod 9 Point of Sale          (1073072091)
+     'b8d16c7f-10e6-40d5-b766-721839038f5e', -- mod 14 Age Verification      (1073072091)
+     '3b7d23c0-c7d9-48ea-ac75-17e515e6304a'  -- mod 2 Patient Rights         (1096134152)
+   );
+   ```
+2. Add a partial unique index to prevent the same `video_url` from being assigned to two modules in the same course again:
+   ```sql
+   CREATE UNIQUE INDEX IF NOT EXISTS course_modules_video_url_unique_per_course
+     ON public.course_modules (course_id, video_url)
+     WHERE video_url IS NOT NULL;
+   ```
+3. Verification query (run after) — expect zero rows:
+   ```sql
+   SELECT course_id, video_url, count(*) FROM public.course_modules
+   WHERE video_url IS NOT NULL
+   GROUP BY 1,2 HAVING count(*) > 1;
+   ```
+4. Write `docs/audit/2026-07/evidence/video_mapping_correction_2026-06-17.md` with before-state, decisions/heuristic, after-state, and remaining open items:
+   - 4 modules now need a real Vimeo id from Louis (mods 4, 9, 14, 2).
+   - Orphan `section_15_customer_ed` (Vimeo 1096138533) still needs a module assignment from Louis.
+   - Hardcoded iframes in `TrainingHandbook.tsx` / `Index.tsx` still need a separate migration ticket.
+   - Welcome-intro Storage MP4 fallback is a separate open ticket (already wired in code, no asset uploaded).
 
 ## Out of scope
 
-- Changing the Vimeo video id, captions, poster image, or Welcome page copy.
-- Touching other `video_assets` rows or non-welcome players.
+- Touching `video_assets` rows.
+- Reassigning any module to a *new* Vimeo id (that's Option C, not B).
+- Backfilling the orphan or removing hardcoded iframes.
 
-## What I need from you to proceed
+## Decision needed
 
-Either:
-- **(A)** Confirm "go ahead with all 3 steps" and tell me the current embed hash from the Vimeo dashboard (or "no hash, set to Anyone"), and I'll do Steps 2 + 3, OR
-- **(B)** "Just do Step 3 (storage fallback) now" — I'll add the backup path so even a misconfigured Vimeo asset still plays, and you can fix Vimeo privacy on your own time.
+Approve the picks above (or send corrections), and I'll run the migration + write the evidence doc in one turn.
