@@ -5344,6 +5344,7 @@ export type Database = {
           organization_id: string | null
           phone: string | null
           phone_verified: boolean | null
+          preferred_language: string
           profile_photo_url: string | null
           state: string | null
           tier_status: string | null
@@ -5379,6 +5380,7 @@ export type Database = {
           organization_id?: string | null
           phone?: string | null
           phone_verified?: boolean | null
+          preferred_language?: string
           profile_photo_url?: string | null
           state?: string | null
           tier_status?: string | null
@@ -5414,6 +5416,7 @@ export type Database = {
           organization_id?: string | null
           phone?: string | null
           phone_verified?: boolean | null
+          preferred_language?: string
           profile_photo_url?: string | null
           state?: string | null
           tier_status?: string | null
