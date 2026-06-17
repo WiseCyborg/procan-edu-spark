@@ -1,78 +1,110 @@
-# Launch Leverage Plan — Connector-Driven UAT & Readiness (Phase 1)
+# Launch Readiness — Honesty Pass
 
-## Inputs received
-- **Preview URL + token** — captured; will be stored as runtime secret `LOVABLE_PREVIEW_URL` (full tokenized URL) so Firecrawl can crawl gated preview routes without leaking the token into client code or git. Token expires ~2026-08-17, so we'll add a "refresh preview token" admin action.
-- **Supabase** — project `zhmpwczrvitomsxjwpzc`, already wired.
-- **Teams target — needs clarification.** The link you pasted is a **Teams *meeting chat*** (`19:meeting_...@thread.v2`), not a standard channel in a team. Graph API `POST /teams/{teamId}/channels/{channelId}/messages` only works against a **Team → Channel** (Microsoft 365 / work account), not a personal Teams chat or meeting thread. See "Open Questions" below.
+Goal: make the `/admin/launch-readiness` dashboard mean what it shows. Green = checks actually passed; not-checked is labeled, not implied passed.
 
----
+## Scope
 
-## Phase 1 Build
+Four approved fixes plus the welcome-intro upgrade. Item (b) ships behind a flag until Louis's storage convention is confirmed; everything else lands in this pass.
 
-### 1.1 Storage + secrets
-- Secret: `LOVABLE_PREVIEW_URL` (full tokenized preview URL) — added via `secrets--add_secret`.
-- Secret: `TEAMS_TEAM_ID`, `TEAMS_CHANNEL_ID` — only after you confirm the Teams target.
-- Storage bucket: `launch-audit` (private), admin-only signed URL access.
+## (a) Add `PREVIEW_AUDIT_URL` secret
 
-### 1.2 Database (one migration)
-- Table `public.launch_audit_runs`: `run_id uuid PK`, `route text`, `status text`, `screenshot_path text`, `markdown_excerpt text`, `findings jsonb`, `triggered_by uuid`, `created_at`.
-  - GRANT to `authenticated` + `service_role`; RLS: admin-only via `has_role(auth.uid(), 'admin')`.
-- View `public.v_launch_readiness` (admin-gated RPC wrapper `get_launch_readiness()`):
-  - `unmapped_modules`, `duplicate_video_urls`, `orphan_video_assets`, `welcome_intro_resolved`, `hardcoded_iframe_count`, `i18n_lang_count`.
+Trigger `secrets--add_secret` for `PREVIEW_AUDIT_URL`. Value should be a fully-qualified preview URL (e.g. `https://id-preview--39cb473a-…lovable.app`), optionally with a `__lovable_token=...` query param so authenticated routes render. Without this the crawler returns `missing_config` — nothing else works.
 
-### 1.3 Edge functions (3)
-- **`launch-audit-crawler`** (JWT-guarded, admin-only via `has_role`):
-  - Reads `LOVABLE_PREVIEW_URL`, appends route paths (`/`, `/auth`, `/dashboard`, `/courses`, `/admin`, sample `/course/<slug>/module/1`).
-  - Calls Firecrawl v2 `/scrape` per route with `formats: ['markdown','screenshot','links']`.
-  - Runs heuristic checks (header overflow class, password eye-icon toggle, Vimeo iframe presence, module count vs DB, i18n switcher).
-  - Writes screenshots to `launch-audit` bucket, row per route into `launch_audit_runs`.
-- **`launch-readiness-snapshot`** (JWT-guarded admin): returns `get_launch_readiness()` JSON.
-- **`post-readiness-update`** (JWT-guarded admin): posts Adaptive Card to Teams via `microsoft_teams` gateway. **Blocked until Teams target resolved.**
+## (b) Harden `unmapped_modules` — held pending storage convention
 
-### 1.4 Admin UI — `/admin/launch-readiness`
-- Traffic-light board sourced from `launch-readiness-snapshot`.
-- "Run Firecrawl audit" button → invokes `launch-audit-crawler`.
-- Table of last 10 runs with screenshot thumbnails (signed URLs) + findings JSON.
-- "Post status to Teams" button (disabled until Teams configured).
-- "Refresh preview token" field to update `LOVABLE_PREVIEW_URL` when it expires.
+Once you confirm whether `course_modules.video_url` stores:
+- a full URL (`https://player.vimeo.com/video/<id>`), or
+- a bare numeric Vimeo id, or
+- a mixed legacy format,
 
-### 1.5 Out of scope for Phase 1
-- Scheduled cron crawls (defer to Phase 3).
-- Modifying video pipeline, i18n, or chatbot (observational only).
+migration will rewrite the count in `get_launch_readiness()` to flag:
+1. NULL / empty (current behavior)
+2. Placeholder strings: `TBD`, `TODO`, `pending`, `n/a`, `-` (case-insensitive)
+3. Format violations vs the confirmed convention (e.g. non-numeric where bare ids are required; non-Vimeo host where full URLs are required)
+4. Optional: dangling references — `video_url` whose id is not present as an active `video_assets.vimeo_id`
 
----
+Return shape will split the tile into `unmapped_modules` (total bad) and a `unmapped_breakdown` jsonb so the UI can show *why* each one failed. **No migration ships under this item until the convention is in hand.**
 
-## Technical Section
+## (c) Real per-run rollup status
 
-**Connectors required (verify before build):**
-- `firecrawl` — should be linked; will confirm with `standard_connectors--list_connections`.
-- `microsoft_teams` — pending target confirmation.
+Today every run with HTTP 2xx is stored as `status='ok'` regardless of heuristic results. Change:
 
-**Files to create:**
-- `supabase/migrations/<ts>_launch_audit.sql`
-- `supabase/functions/launch-audit-crawler/{index.ts,deno.json}` (+ `config.toml` entry, `verify_jwt = true`)
-- `supabase/functions/launch-readiness-snapshot/index.ts`
-- `supabase/functions/post-readiness-update/index.ts`
-- `src/pages/admin/LaunchReadiness.tsx`
-- `src/hooks/useLaunchReadiness.ts`
-- Route addition in admin router
+- Add `rollup_status text` (`pass` | `warn` | `fail`) and `failed_checks jsonb` to `launch_audit_runs`.
+- In `launch-audit-crawler/index.ts`, after `analyze()`, compute rollup per route using a typed check registry:
+  - `fail` if any required check is false (e.g. `has_header` on every route, `has_language_switcher` on every public route, `has_password_eye_icon` on `/auth`, `has_vimeo_iframe` on routes expected to embed video).
+  - `warn` for informational findings (hardcoded iframe present on routes where it's unexpected).
+  - `pass` only if all required checks pass and the route returned 2xx.
+- Per-route expectations live in a `ROUTE_EXPECTATIONS` map at the top of the function, not scattered through `analyze()`, so blind spots are visible in one place.
+- Batch-level rollup: a `launch_audit_batch_summary` view aggregates `pass/warn/fail` counts per `run_batch`. Dashboard "Last audit" stat tile turns red if any route is `fail`, amber if any `warn`.
 
-**Security:**
-- All three functions validate `supabase.auth.getUser()` then `has_role(uid, 'admin')` — pattern from `mem://security/edge-function-authorization-hardening`.
-- Preview token kept server-side only; never sent to browser.
-- Screenshot bucket private; signed URLs minted by edge function for admin UI.
+## (d) Welcome-intro upgrade — actually resolve the asset
 
----
+`get_launch_readiness()` stays for the DB-row check, but the authoritative answer moves to the crawler:
 
-## Open Questions (blocking)
+- New edge function step (in the same `launch-audit-crawler` run): read the active `video_assets` row for `asset_key='welcome-intro'`, resolve to a fetchable URL (prefer `public_url`; if `storage_path`, generate a signed URL via service role), then issue `HEAD` (fallback `GET` with `Range: bytes=0-1024` for hosts that reject HEAD).
+- Store result in a new `welcome_intro_probe` jsonb on the batch summary: `{ resolved_url, method, http_status, content_type, latency_ms, ok }`.
+- `welcome_intro_resolved` in the RPC return becomes a derived field: `db_row_present AND last_probe_ok` (falls back to `unknown` if no probe exists yet).
+- UI tile shows three states: Green (probe 2xx + correct content-type), Amber (row exists, never probed), Red (row missing OR probe non-2xx) — with the probed URL and status visible on hover.
 
-1. **Teams target — the URL you pasted is a meeting chat, not a Team channel.** Graph API channel-messages only works for a Microsoft 365 Team → Channel (work/school account). Three options:
-   - **(a)** You give me a real Team + Channel (Teams → channel → ⋯ → "Get link to channel" → I'll extract `teamId` + `channelId`).
-   - **(b)** Skip Teams; surface readiness only in the in-app admin dashboard.
-   - **(c)** Use a different channel (Slack, email digest via Resend) — say the word and I'll swap the connector.
+## (d-disclosures) Blind-spot labels in the UI
 
-2. **Preview token expiry (~2026-08-17):** OK to surface a "rotate token" input in the admin dashboard, or do you want it injected only via Workspace Settings?
+Add a "What this does **not** check" panel to `LaunchReadiness.tsx`, listed explicitly:
+1. Visual layout / clipped CTAs — Firecrawl reads DOM only; a present-but-clipped "Get Started" passes every check. Recommended manual review using the captured screenshot.
+2. Video playback — we verify the asset URL responds 2xx, not that the player renders or playback starts. Manual smoke test required.
+3. Interactive behavior — language switcher, password-eye, modals, etc., are detected as text/markup presence only; we do not click.
+4. Lazy-loaded content past the 1500ms `waitFor` window.
 
-3. **Routes to crawl:** the default list above (`/`, `/auth`, `/dashboard`, `/courses`, `/admin`, one course module) — add/remove any?
+Each finding badge in the audit-runs list gets a tooltip with its plain-language pass/fail rule (the table from my previous answer), so reviewers don't have to read the edge-function source to know what green means.
 
-Once you answer #1 (and ideally #2, #3) I'll switch to build mode and ship the migration + 3 edge functions + admin page in one pass.
+## Technical details
+
+```text
+DB migration (single file):
+  ALTER TABLE launch_audit_runs
+    ADD COLUMN rollup_status text,
+    ADD COLUMN failed_checks jsonb DEFAULT '[]'::jsonb;
+  CREATE VIEW launch_audit_batch_summary AS
+    SELECT run_batch, min(created_at) AS started_at,
+           count(*) FILTER (WHERE rollup_status='pass')  AS pass_count,
+           count(*) FILTER (WHERE rollup_status='warn')  AS warn_count,
+           count(*) FILTER (WHERE rollup_status='fail')  AS fail_count,
+           count(*) AS total
+    FROM launch_audit_runs GROUP BY run_batch;
+  GRANT SELECT ON launch_audit_batch_summary TO authenticated;
+  -- get_launch_readiness(): add welcome_intro_probe + last_batch_rollup fields
+  -- (unmapped_modules logic deferred to fix b)
+
+Edge functions:
+  launch-audit-crawler:
+    + ROUTE_EXPECTATIONS map (required checks per route)
+    + computeRollup(findings, expectations) -> {status, failed_checks}
+    + welcomeIntroProbe() step (HEAD/GET with Range)
+    + persist rollup_status, failed_checks, batch-level welcome_intro_probe
+  launch-readiness-snapshot:
+    + return last batch rollup + welcome_intro_probe alongside DB snapshot
+
+Frontend (src/pages/admin/LaunchReadiness.tsx, src/hooks/useLaunchReadiness.ts):
+  + Rollup pill on each audit-run card (pass/warn/fail) with failed_checks list
+  + Welcome Intro tile shows probe URL + http_status + latency
+  + "What this does NOT check" disclosures panel
+  + Per-finding tooltip with plain-language rule
+  + Empty-state CTA pointing at "Add PREVIEW_AUDIT_URL" when missing_config returns
+```
+
+No changes to UI styling beyond adding the rollup pill, probe details, and disclosure panel — keep it utilitarian, not polished.
+
+## Order of operations
+
+1. Trigger `secrets--add_secret(['PREVIEW_AUDIT_URL'])` (fix a).
+2. Migration: rollup columns + batch summary view + RPC additions (fixes c, welcome-intro DB side).
+3. Edge function updates: `launch-audit-crawler` rollup + welcome-intro probe; `launch-readiness-snapshot` returns the new fields.
+4. Frontend updates: rollup pill, probe display, disclosures panel, finding tooltips.
+5. Hand off: user runs an audit from `/admin/launch-readiness`; I read `launch_audit_runs` + `launch_audit_batch_summary` directly via SQL and report numbers back.
+6. **Held**: fix (b) ships in a follow-up migration the moment Louis's `video_url` storage convention is confirmed.
+
+## Out of scope (called out explicitly)
+
+- No pixel/layout analysis of screenshots (clipped-CTA detection).
+- No headless playback verification (we probe the URL, we don't play the video).
+- No click-through of interactive elements.
+- No changes to the homepage, `/auth`, or any user-facing surface.
