@@ -17,8 +17,14 @@ export interface SignedVideoResponse {
 
 
 async function fetchSignedUrl(assetKey: string): Promise<SignedVideoResponse> {
+  // Forward the user's JWT when signed in (needed for authenticated/enrolled assets),
+  // but allow the call to succeed without a session for public assets.
+  const { data: sessionData } = await supabase.auth.getSession();
+  const accessToken = sessionData?.session?.access_token;
+
   const { data, error } = await supabase.functions.invoke('get-video-url', {
     body: { assetKey },
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
   });
   if (error) {
     return { success: false, error_code: 'request_failed' };
