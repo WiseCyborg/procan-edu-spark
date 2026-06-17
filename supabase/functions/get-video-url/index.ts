@@ -33,7 +33,7 @@ Deno.serve(async (req) => {
 
     const { data: asset, error: assetError } = await admin
       .from("video_assets")
-      .select("id, asset_key, title, description, duration_seconds, thumbnail_url, storage_path, public_url, bucket_id, access_level, course_id, is_active")
+      .select("id, asset_key, title, description, duration_seconds, thumbnail_url, storage_path, public_url, bucket_id, access_level, course_id, is_active, fallback_storage_path, fallback_bucket_id")
       .eq("asset_key", assetKey)
       .eq("is_active", true)
       .maybeSingle();
@@ -106,7 +106,22 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Vimeo fallback — used while migration to Supabase Storage is in progress.
+    // Optional Storage-hosted backup MP4 (used if the primary embed refuses to play).
+    let fallback_url: string | null = null;
+    if (asset.fallback_storage_path) {
+      const fbBucket = asset.fallback_bucket_id || "secure-videos";
+      const { data: fbSigned, error: fbErr } = await admin
+        .storage
+        .from(fbBucket)
+        .createSignedUrl(asset.fallback_storage_path, SIGNED_URL_TTL_SECONDS);
+      if (fbErr) {
+        console.warn("fallback createSignedUrl failed", fbErr);
+      } else {
+        fallback_url = fbSigned?.signedUrl ?? null;
+      }
+    }
+
+    // Vimeo path — used while migration to Supabase Storage is in progress.
     // storage_path format: "vimeo/<id>" or "vimeo/<id>?h=<hash>"
     if (asset.storage_path.startsWith("vimeo/")) {
       const ref = asset.storage_path.slice("vimeo/".length);
@@ -117,7 +132,8 @@ Deno.serve(async (req) => {
         provider: "vimeo",
         vimeo_id: id,
         vimeo_hash: hash,
-        expires_at: null,
+        fallback_url,
+        expires_at: fallback_url ? new Date(Date.now() + SIGNED_URL_TTL_SECONDS * 1000).toISOString() : null,
         title: asset.title,
         thumbnail_url: asset.thumbnail_url,
         duration_seconds: asset.duration_seconds,

@@ -9,6 +9,8 @@ export interface SignedVideoResponse {
   provider?: 'supabase' | 'vimeo';
   vimeo_id?: string;
   vimeo_hash?: string | null;
+  /** Signed URL to a Storage-hosted MP4 backup, used if the primary source fails. */
+  fallback_url?: string | null;
   expires_at?: string | null;
   title?: string;
   thumbnail_url?: string | null;
