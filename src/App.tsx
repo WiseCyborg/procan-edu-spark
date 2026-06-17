@@ -95,6 +95,8 @@ import AdminUtilities from "./pages/AdminUtilities";
 import UATTestMatrix from "./pages/admin/UATTestMatrix";
 import VideoLibrary from "./pages/admin/VideoLibrary";
 import UATControls from "./pages/admin/UATControls";
+import LaunchReadiness from "./pages/admin/LaunchReadiness";
+
 import UATValidationPage from "./pages/UATValidationPage";
 import UATEvidenceSubmission from "./pages/UATEvidenceSubmission";
 import UATFeedback from "./pages/uat/UATFeedback";
@@ -402,6 +404,12 @@ const AppRoutesLayout = () => {
                 <UATControls />
               </ProtectedRoute>
             } />
+            <Route path="/admin/launch-readiness" element={
+              <ProtectedRoute>
+                <LaunchReadiness />
+              </ProtectedRoute>
+            } />
+
             <Route path="/enhanced-admin-dashboard" element={<Navigate to="/admin" replace />} />
             <Route path="/admin-dashboard" element={<Navigate to="/admin" replace />} />
             <Route path="/admin/realtime-operations" element={
