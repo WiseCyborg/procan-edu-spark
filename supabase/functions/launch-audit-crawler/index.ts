@@ -140,15 +140,23 @@ async function probeWelcomeIntro(
 
   let resolvedUrl = asset.public_url as string | null;
   let resolveMethod = "public_url";
-  if (!resolvedUrl && asset.storage_path) {
-    const { data: signed, error: signErr } = await admin.storage
-      .from("videos")
-      .createSignedUrl(asset.storage_path as string, 60);
-    if (signErr || !signed?.signedUrl) {
-      return { ok: false, error_code: "sign_failed", error: signErr?.message };
+  const storagePath = asset.storage_path as string | null;
+  if (!resolvedUrl && storagePath) {
+    if (storagePath.startsWith("vimeo/")) {
+      // Convention: vimeo/<id>?h=<hash>
+      const rest = storagePath.slice("vimeo/".length);
+      resolvedUrl = `https://player.vimeo.com/video/${rest}`;
+      resolveMethod = "vimeo_player";
+    } else {
+      const { data: signed, error: signErr } = await admin.storage
+        .from("ProCannVideos")
+        .createSignedUrl(storagePath, 60);
+      if (signErr || !signed?.signedUrl) {
+        return { ok: false, error_code: "sign_failed", error: signErr?.message };
+      }
+      resolvedUrl = signed.signedUrl;
+      resolveMethod = "signed_url";
     }
-    resolvedUrl = signed.signedUrl;
-    resolveMethod = "signed_url";
   }
   if (!resolvedUrl) return { ok: false, error_code: "no_url" };
 
