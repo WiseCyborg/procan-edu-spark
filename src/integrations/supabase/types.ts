@@ -3814,6 +3814,48 @@ export type Database = {
         }
         Relationships: []
       }
+      launch_audit_runs: {
+        Row: {
+          created_at: string
+          findings: Json
+          http_status: number | null
+          id: string
+          markdown_excerpt: string | null
+          route: string
+          run_batch: string
+          screenshot_path: string | null
+          status: string
+          triggered_by: string | null
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          findings?: Json
+          http_status?: number | null
+          id?: string
+          markdown_excerpt?: string | null
+          route: string
+          run_batch: string
+          screenshot_path?: string | null
+          status?: string
+          triggered_by?: string | null
+          url: string
+        }
+        Update: {
+          created_at?: string
+          findings?: Json
+          http_status?: number | null
+          id?: string
+          markdown_excerpt?: string | null
+          route?: string
+          run_batch?: string
+          screenshot_path?: string | null
+          status?: string
+          triggered_by?: string | null
+          url?: string
+        }
+        Relationships: []
+      }
       lighthouse_scores: {
         Row: {
           accessibility_score: number | null
@@ -9950,6 +9992,7 @@ export type Database = {
         }
       }
       get_last_comar_review: { Args: never; Returns: string }
+      get_launch_readiness: { Args: never; Returns: Json }
       get_managed_org_ids: { Args: { _user_id: string }; Returns: string[] }
       get_modules_needing_review: {
         Args: never
