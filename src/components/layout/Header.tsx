@@ -52,6 +52,9 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
   const { organization } = useOrganization();
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
+  // Hydrate profile.preferred_language → i18n runtime on auth (and persist manual changes).
+  usePreferredLanguage();
   const [showCommunicationHub, setShowCommunicationHub] = useState(false);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
