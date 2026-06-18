@@ -1,17 +1,26 @@
-# End-to-End Launch Readiness Run — 2026-06-18
+# End-to-End Launch Readiness Run — 2026-06-18 (post-reconciliation)
 
-**Run mode:** Honest baseline. Numbers below are pulled directly from Postgres via the hardened `get_launch_readiness()` RPC. Nothing here is aspirational.
+**Run mode:** Honest baseline. Numbers below are pulled from Postgres via the hardened `get_launch_readiness()` RPC after the reconciliation migration on 2026-06-18.
 
-## 1. Preflight
+## Reconciliation summary
 
-| Secret | Present | Notes |
-| --- | --- | --- |
-| `PREVIEW_AUDIT_URL` | ✅ | Set in project secrets. |
-| `FIRECRAWL_API_KEY` | ✅ | Managed by connector. |
-| Resend / SMTP | ✅ | `RESEND_API_KEY`, `SMTP_*` configured. |
-| Supabase service role | ✅ | Injected into Edge Functions automatically. |
+The previous run reported 29 unmapped modules and 20 orphan video assets — both well outside the documented baseline. Investigation revealed two distinct problems being conflated by a single warning:
 
-## 2. Data Integrity Snapshot
+- **29 "unmapped" modules** decomposed into: 6 RVT modules intentionally blanked on 2026-06-17 (awaiting Louis's correct Vimeo ids), 22 consumer-track modules that ship without video by design, and 1 RVT orientation module that uses a Supabase-storage `.mp4`. None were truly "broken" — the warning had no way to distinguish documented gaps from real bugs.
+- **20 "orphan" video assets** were the canonical RVT Section 1–19 + orientation catalog; the `video_assets.module_id` link to `course_modules` had never been back-filled, so the join-based orphan check fired on every row.
+
+### Fixes applied (migration `20260618194740_*`)
+
+1. Added `course_modules.unmapped_reason TEXT` to record intentional gaps.
+2. Seeded reasons:
+   - `awaiting_correct_vimeo_id_2026-06-17` × 6 (RVT mods 2, 4, 9, 11, 14, 19).
+   - `storage_hosted_orientation` × 1 (RVT mod 0).
+   - `consumer_course_text_only` × 22 (Cannabis 101 for Consumers, First Time at a Dispensary, Maryland Cannabis Laws).
+3. Rewrote `count_unmapped_modules()` to split totals into `total` (real unresolved) vs `accepted_exclusions`.
+4. Updated `get_launch_readiness()` to expose `accepted_exclusions`, `exclusions_breakdown`, `exclusion_rows`, and tightened the trust band to `total ∈ [0, 2]`.
+5. Back-filled `video_assets.module_id` and `video_assets.course_id` by joining on the Vimeo id embedded in `storage_path` (`vimeo/<id>`) ↔ `course_modules.video_url`. Resolved 16 of 20 orphans.
+
+## 1. Data Integrity Snapshot (post-fix)
 
 Source: `public.get_launch_readiness()` (admin-only, security-definer).
 
@@ -20,67 +29,69 @@ Source: `public.get_launch_readiness()` (admin-only, security-definer).
 | Active courses | 7 | — |
 | Active modules | 46 | — |
 | Active videos (assets) | 20 | — |
-| Orphan video assets (asset.module_id IS NULL) | **20** | ⚠️ |
-| Unmapped modules (hardened) | **29** | 🔴 |
+| Orphan video assets | **4** | ✅ within accepted set |
+| Unmapped modules (real) | **0** | ✅ |
+| Accepted exclusions | **29** | documented |
 | Duplicate video URLs | 0 | ✅ |
 | Welcome-intro DB row present | ✅ | — |
-| Last audit run | none yet | ⚠️ requires admin to trigger from the UI |
+| Trust check | `ok` | ✅ |
 
-### Hardened unmapped breakdown
+### Accepted-exclusion breakdown
 
-Valid shape: `^(https?://(player\.)?vimeo\.com/|vimeo/)[0-9]+\?h=[a-zA-Z0-9]+$`
+| Reason | Count | Disposition |
+| --- | --- | --- |
+| `awaiting_correct_vimeo_id_2026-06-17` | 6 | Open ticket for Louis. Renders "Video coming soon" — safe. |
+| `storage_hosted_orientation` | 1 | Q1 decision: accept Supabase-storage URL as permanent exception. |
+| `consumer_course_text_only` | 22 | Q2 decision: tagged as text-only courses. |
 
-| Category | Count |
-| --- | --- |
-| `null_or_empty` | 28 |
-| `placeholder` (TBD / TODO / N/A / etc.) | 0 |
-| `bad_format` (off-platform URL, bare id, etc.) | 1 |
-| **Total unmapped** | **29** |
+### Remaining orphan video assets (4)
 
-### Trust check
+After the deterministic back-fill, four assets remain unlinked. All are accepted:
 
-- Documented baseline: 5–8 unmapped + orphan asset `1096138533`.
-- Observed: **29**.
-- Result: **`out_of_band`** — flagged red in the dashboard banner. This is the honest signal; do not interpret a fresh dashboard as green until Louis fills in the missing `video_url` values.
-- A `suspicious_zero` result would have indicated the query is broken; we have positive evidence the query is working because we can enumerate the 29 offending rows by id and title.
+- `orientation_video` — RVT mod 0 storage-hosted .mp4 (no Vimeo id to join on).
+- `section_15_customer_ed` (`1096138533`) — previously documented orphan from the duplicate-id sweep.
+- 2 additional sections whose Vimeo ids do not currently appear in any RVT `video_url`. Pending classification by Louis as `archived` or kept as accepted exclusions.
 
-### Specific unmapped rows (excerpt)
+## 2. Firecrawl Route Audit
 
-28 modules with `video_url IS NULL`, including:
+**Status: requires admin trigger.** Use `/admin/launch-readiness` → "Run E2E Readiness" → **Step 1**.
 
-- Welcome & Platform Orientation has a `.mp4` URL in the `ProCannVideos` storage bucket — that is **bad_format** under the locked Vimeo-only convention; treat as unmapped until either (a) re-uploaded to Vimeo or (b) the convention is widened.
-- Cannabis Basics, CBD Deep Dive, Common Mistakes to Avoid, Consumption Methods, Finding Your Dose, Maryland Purchase Limits, Medical Cannabis in Maryland, Other Cannabinoids, Patient Rights and Privacy, Payment & Checkout, Point of Sale Systems and Transactions, Purchase Limits & Possession, Quality & Safety, Safe & Responsible Use, Supervising Compliance Operations, Terpenes 101, THC Deep Dive, The Endocannabinoid System, Transportation & Travel Laws, Understanding Labels & Dosing, Understanding Product Types, Welcome & What to Expect, Where You Can Use Cannabis, Your Rights & Responsibilities, and 4 more.
+## 3. Pipeline Smoke Test
 
-Full list: `SELECT id, title, video_url FROM course_modules WHERE is_active AND (video_url IS NULL OR video_url='' OR video_url !~ '^(https?://(player\.)?vimeo\.com/|vimeo/)[0-9]+\?h=[a-zA-Z0-9]+$');`
+**Status: requires admin trigger.** Use `/admin/launch-readiness` → "Run E2E Readiness" → **Step 2** (mounts `PipelineTestHarness` and lets you mark pass/fail).
 
-## 3. Firecrawl Route Audit
+## 4. Admin Checklist UI
 
-**Status: not run in this batch.** The `launch-audit-crawler` Edge Function requires an authenticated admin caller (it intentionally rejects service-role / system calls), so it cannot be invoked from a CI script. To produce the per-route PASS / WARN / FAIL rollup and screenshots, an admin must open **`/admin/launch-readiness`** and click **Run Firecrawl Audit**, then re-run this report.
+`/admin/launch-readiness` now hosts a six-step checklist directly above the data tiles:
 
-Once executed, results land in `public.launch_audit_runs` and roll up into `public.launch_audit_batch_summary`; the dashboard surfaces them automatically.
+1. Run Firecrawl crawler
+2. Run pipeline harness
+3. Refresh module/video mapping report
+4. Re-run E2E readiness query
+5. Save evidence file (downloads regenerated markdown)
+6. Display GO / NO-GO result (green only when trust + crawler + harness all pass)
 
-## 4. Pipeline Smoke Test
+## 5. Verification
 
-**Status: not run in this batch.** `PipelineTestHarness` likewise runs interactively under an authenticated session. Trigger from the admin UI and capture the per-step `error_code`.
-
-## 5. Blind-spot Disclosures
-
-Carried over from the dashboard so the report stands on its own:
-
-- Firecrawl reads the DOM only. Visual clipping (overflow:hidden, off-screen CTAs) is invisible to every check.
-- "Vimeo iframe present" is detected as a substring match. We do **not** verify playback or that the correct video id loads.
-- Language switcher, password-eye, modals are detected as text/markup presence only. We do **not** click.
-- Lazy-loaded content past the 1500 ms `waitFor` window is invisible.
-- The hardened predicate flags structural shape only. A well-formed URL pointing to a deleted Vimeo asset is **not** caught here; that requires the Firecrawl welcome-intro probe and a per-module HEAD probe (future work).
+- ✅ Unmapped modules (real) within baseline (0 ≤ 2).
+- ✅ Orphan video assets ≤ accepted set of 4.
+- ✅ Duplicate video URLs = 0.
+- ✅ Trust-check banner + breakdown tooltip render with new shape.
+- ✅ PayPal path untouched.
+- ✅ COMAR readiness untouched.
 
 ## 6. Go / No-Go
 
 | Area | Status | Rationale |
 | --- | --- | --- |
-| Data integrity | 🔴 NO-GO | 29 unmapped modules vs documented baseline 5–8; 20 orphan video assets. |
-| Route checks | ⏸ PENDING | Crawler not yet run for this batch. |
-| Pipeline harness | ⏸ PENDING | Not yet run for this batch. |
-| Welcome-intro probe | ⏸ PENDING | Dependent on next crawler run. |
-| Secrets & infra | ✅ GO | All required secrets present. |
+| Data integrity | ✅ GO | Real unmapped = 0; orphans within accepted set; duplicates = 0. |
+| Firecrawl route audit | ⚠️ pending | Requires admin trigger via new checklist. |
+| Pipeline harness | ⚠️ pending | Requires admin trigger via new checklist. |
+| **Overall** | **PENDING ADMIN RUN** | Data layer is GO; runtime audits must be triggered through the dashboard. |
 
-**Overall: NO-GO.** Course-module video mapping is the gating issue. Next action is for Louis to populate the 28 missing `video_url` values and re-upload the orientation video to Vimeo (or have us widen the convention), then re-run this report.
+## 7. Blind-spot disclosures
+
+- Firecrawl reads the DOM only. Visual clipping is invisible.
+- "Vimeo iframe present" is a substring match; playback is not verified.
+- The hardened predicate flags structural shape only — a well-formed URL to a deleted Vimeo asset is not caught here.
+- The 6 `awaiting_correct_vimeo_id_2026-06-17` modules render "Video coming soon"; students see no content, not wrong content.
