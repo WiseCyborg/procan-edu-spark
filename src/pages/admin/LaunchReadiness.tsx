@@ -162,17 +162,31 @@ const LaunchReadiness: React.FC = () => {
                   probe={probe ?? null}
                 />
                 <Stat
-                  label="Unmapped Modules (NULL/empty only)"
+                  label={`Unmapped Modules${s.unmapped_modules_hardened ? " (hardened)" : ""}`}
                   value={s.unmapped_modules}
                   warn={s.unmapped_modules > 0}
-                  hint={s.unmapped_modules_hardened
-                    ? "Includes placeholder/format detection."
-                    : "Counts NULL/empty video_url only. Placeholder + format checks pending storage convention from Louis."}
+                  hint={s.unmapped_breakdown
+                    ? `null/empty: ${s.unmapped_breakdown.null_or_empty}, placeholder: ${s.unmapped_breakdown.placeholder}, bad format: ${s.unmapped_breakdown.bad_format}. Valid shape: vimeo id + ?h=<hash>.`
+                    : "Counts NULL/empty video_url only."}
                 />
                 <Stat label="Duplicate Video URLs" value={s.duplicate_videos} warn={s.duplicate_videos > 0} />
                 <Stat label="Orphan Video Assets" value={s.orphan_video_assets} warn={s.orphan_video_assets > 0} />
                 <BatchRollupStat batch={lastBatch ?? null} />
               </div>
+
+              {s.trust_check && s.trust_check !== "ok" && (
+                <div className={`mt-4 rounded-md border p-3 text-xs ${
+                  s.trust_check === "suspicious_zero"
+                    ? "border-red-500 bg-red-50 dark:bg-red-950/20 text-red-800 dark:text-red-200"
+                    : "border-amber-400 bg-amber-50 dark:bg-amber-950/20 text-amber-900 dark:text-amber-200"
+                }`}>
+                  <strong>Trust check: {s.trust_check.replace("_", " ")}.</strong>{" "}
+                  {s.trust_check === "suspicious_zero"
+                    ? "RPC returned 0 unmapped modules, but the documented baseline is 5–8. The query is probably wrong — do NOT treat green as ready."
+                    : `Unmapped count (${s.unmapped_modules}) is outside the documented baseline of ${s.trust_baseline?.min}–${s.trust_baseline?.max}. ${s.trust_baseline?.note ?? ""}`}
+                </div>
+              )}
+
             </>
           ) : null}
         </CardContent>
