@@ -26,9 +26,21 @@ export interface LastBatchRollup {
   welcome_intro_probe: WelcomeIntroProbe | null;
 }
 
+export interface UnmappedBreakdown {
+  null_or_empty: number;
+  placeholder: number;
+  bad_format: number;
+  dangling: number;
+}
+
+export type TrustCheck = "ok" | "suspicious_zero" | "out_of_band";
+
 export interface ReadinessSnapshot {
   unmapped_modules: number;
   unmapped_modules_hardened: boolean;
+  unmapped_breakdown?: UnmappedBreakdown;
+  trust_check?: TrustCheck;
+  trust_baseline?: { min: number; max: number; note: string };
   duplicate_videos: number;
   orphan_video_assets: number;
   welcome_intro_db_row_present: boolean;
@@ -41,6 +53,7 @@ export interface ReadinessSnapshot {
   last_audit_run_at: string | null;
   generated_at: string;
 }
+
 
 export interface FailedCheck {
   check: string;
