@@ -101,8 +101,16 @@ const LaunchReadiness: React.FC = () => {
           </Link>
           <h1 className="text-2xl font-semibold">Launch Readiness</h1>
           <p className="text-sm text-muted-foreground">
-            Firecrawl-driven preview audits + Supabase data integrity checks.
+            Firecrawl-driven preview audits + Supabase data integrity checks.{" "}
+            <a
+              href="https://github.com/"
+              onClick={(e) => { e.preventDefault(); window.open("/docs/audit/2026-07/evidence/e2e_readiness_run_2026-06-18.md", "_blank"); }}
+              className="text-primary hover:underline inline-flex items-center"
+            >
+              Latest evidence report <ExternalLink className="h-3 w-3 ml-0.5" />
+            </a>
           </p>
+
         </div>
         <Button
           onClick={() =>
