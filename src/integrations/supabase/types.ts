@@ -9812,6 +9812,7 @@ export type Database = {
         Args: { _action_type?: string; _user_id?: string }
         Returns: number
       }
+      count_unmapped_modules: { Args: never; Returns: Json }
       create_initial_admin: { Args: never; Returns: string }
       create_initial_seats_for_organization: {
         Args: { org_id: string; purchased_by_id?: string; quantity?: number }
