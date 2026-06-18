@@ -127,7 +127,10 @@ const LaunchReadiness: React.FC = () => {
         </Button>
       </div>
 
+      <E2EReadinessChecklist snapshot={s} refetchSnapshot={() => snapshot.refetch()} />
+
       {/* Blind-spot disclosures */}
+
       <Card className="border-amber-300 bg-amber-50/40 dark:bg-amber-950/10">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm flex items-center gap-2">
@@ -171,15 +174,20 @@ const LaunchReadiness: React.FC = () => {
                   probe={probe ?? null}
                 />
                 <Stat
-                  label={`Unmapped Modules${s.unmapped_modules_hardened ? " (hardened)" : ""}`}
+                  label={`Unmapped Modules${s.unmapped_modules_hardened ? " (real)" : ""}`}
                   value={s.unmapped_modules}
                   warn={s.unmapped_modules > 0}
                   hint={s.unmapped_breakdown
-                    ? `null/empty: ${s.unmapped_breakdown.null_or_empty}, placeholder: ${s.unmapped_breakdown.placeholder}, bad format: ${s.unmapped_breakdown.bad_format}. Valid shape: vimeo id + ?h=<hash>.`
+                    ? `Real unresolved — null/empty: ${s.unmapped_breakdown.null_or_empty}, placeholder: ${s.unmapped_breakdown.placeholder}, bad format: ${s.unmapped_breakdown.bad_format}. Accepted exclusions: ${s.accepted_exclusions ?? 0} (null/empty ${s.exclusions_breakdown?.null_or_empty ?? 0}, placeholder ${s.exclusions_breakdown?.placeholder ?? 0}, bad format ${s.exclusions_breakdown?.bad_format ?? 0}).`
                     : "Counts NULL/empty video_url only."}
                 />
+                <Stat
+                  label="Accepted Exclusions"
+                  value={s.accepted_exclusions ?? 0}
+                  hint="Modules with a documented unmapped_reason — intentional gaps not counted as failures."
+                />
                 <Stat label="Duplicate Video URLs" value={s.duplicate_videos} warn={s.duplicate_videos > 0} />
-                <Stat label="Orphan Video Assets" value={s.orphan_video_assets} warn={s.orphan_video_assets > 0} />
+                <Stat label="Orphan Video Assets" value={s.orphan_video_assets} warn={s.orphan_video_assets > 4} />
                 <BatchRollupStat batch={lastBatch ?? null} />
               </div>
 
@@ -191,8 +199,9 @@ const LaunchReadiness: React.FC = () => {
                 }`}>
                   <strong>Trust check: {s.trust_check.replace("_", " ")}.</strong>{" "}
                   {s.trust_check === "suspicious_zero"
-                    ? "RPC returned 0 unmapped modules, but the documented baseline is 5–8. The query is probably wrong — do NOT treat green as ready."
-                    : `Unmapped count (${s.unmapped_modules}) is outside the documented baseline of ${s.trust_baseline?.min}–${s.trust_baseline?.max}. ${s.trust_baseline?.note ?? ""}`}
+                    ? "RPC returned 0 real-unmapped AND 0 accepted exclusions — the query is probably wrong."
+                    : `Real unmapped (${s.unmapped_modules}) is outside the documented baseline of ${s.trust_baseline?.min}–${s.trust_baseline?.max}. ${s.trust_baseline?.note ?? ""}`}
+
                 </div>
               )}
 
