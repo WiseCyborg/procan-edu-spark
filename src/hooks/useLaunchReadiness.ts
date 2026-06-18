@@ -33,12 +33,30 @@ export interface UnmappedBreakdown {
   dangling: number;
 }
 
+export interface ExclusionsBreakdown {
+  null_or_empty: number;
+  placeholder: number;
+  bad_format: number;
+}
+
+export interface ExclusionRow {
+  id: string;
+  title: string;
+  course: string | null;
+  module_number: number | null;
+  reason: string;
+  video_url: string | null;
+}
+
 export type TrustCheck = "ok" | "suspicious_zero" | "out_of_band";
 
 export interface ReadinessSnapshot {
   unmapped_modules: number;
   unmapped_modules_hardened: boolean;
   unmapped_breakdown?: UnmappedBreakdown;
+  accepted_exclusions?: number;
+  exclusions_breakdown?: ExclusionsBreakdown;
+  exclusion_rows?: ExclusionRow[];
   trust_check?: TrustCheck;
   trust_baseline?: { min: number; max: number; note: string };
   duplicate_videos: number;
