@@ -1806,6 +1806,7 @@ export type Database = {
           quiz_questions: Json | null
           stoplight_tier: string | null
           title: string
+          unmapped_reason: string | null
           updated_at: string
           version: number | null
           video_url: string | null
@@ -1829,6 +1830,7 @@ export type Database = {
           quiz_questions?: Json | null
           stoplight_tier?: string | null
           title: string
+          unmapped_reason?: string | null
           updated_at?: string
           version?: number | null
           video_url?: string | null
@@ -1852,6 +1854,7 @@ export type Database = {
           quiz_questions?: Json | null
           stoplight_tier?: string | null
           title?: string
+          unmapped_reason?: string | null
           updated_at?: string
           version?: number | null
           video_url?: string | null
