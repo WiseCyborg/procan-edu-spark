@@ -342,6 +342,46 @@ serve(async (req) => {
               .eq("course_id", courseId)
               .eq("status", "pending");
 
+            // ============================================================
+            // Gate 4 fix (2026-06-20) — webhook is the authoritative path
+            // for granting course access. Idempotent: UNIQUE(user_id,
+            // course_id). If verify-payment-paypal already granted on the
+            // buyer's return, this upsert is a no-op (and refreshes
+            // metadata with the webhook event id for audit).
+            // ============================================================
+            const { data: orderRow } = await supabase
+              .from("orders")
+              .select("id, amount, currency")
+              .eq("user_id", userId)
+              .eq("course_id", courseId)
+              .order("created_at", { ascending: false })
+              .limit(1)
+              .maybeSingle();
+
+            const { error: entErr } = await supabase
+              .from("course_entitlements")
+              .upsert({
+                user_id: userId,
+                course_id: courseId,
+                source: "paypal",
+                status: "active",
+                purchased_at: new Date().toISOString(),
+                metadata: {
+                  paypal_order_id: orderId,
+                  paypal_capture_id: captureId ?? null,
+                  paypal_event_id: event.id,
+                  order_id: orderRow?.id ?? null,
+                  amount_cents: orderRow?.amount ?? null,
+                  currency: (orderRow?.currency || currency || "usd").toLowerCase(),
+                  granted_via: "paypal-webhook",
+                },
+              }, { onConflict: "user_id,course_id" });
+
+            if (entErr) {
+              console.error("[paypal-webhook] course entitlement upsert failed", entErr);
+              throw new Error(`course entitlement upsert failed: ${entErr.message}`);
+            }
+
             await supabase
               .from("payment_events")
               .update({ status: "processed", paypal_order_id: orderId })
