@@ -1,9 +1,18 @@
 # Mission Control — Unified Operations Summary
 
-- **Generated:** 2026-06-18 (live DB snapshot)
+- **Generated:** 2026-06-18 (live DB snapshot); **closeout update:** 2026-06-20
 - **Environment:** production (Supabase ref `zhmpwczrvitomsxjwpzc`)
 - **Source:** single `supabase--read_query` aggregate against public tables
-- **Overall verdict:** 🟡 **CONDITIONAL GO** — training/cert pipeline healthy and data integrity reconciled; payments idle (no live transactions in 30d), system_jobs deadletter backlog and security event volume need triage before public launch.
+- **Overall verdict (2026-06-20, post-closeout):** 🔴 **PRODUCTION NO-GO.**
+  - Gates 1, 2, 3, 5 from `launch_closeout_2026-06-18/` are 🟢 RESOLVED.
+  - Gate 4 (PayPal sandbox round-trip) is 🔴 FAIL: direct PayPal course purchases
+    never create a `course_entitlements` row, so paid buyers remain paywalled.
+    Neither `verify-payment-paypal` nor `paypal-webhook` (course branch)
+    provisions access; there is no compensating DB trigger. See
+    [`launch_closeout_2026-06-18/gate4_paypal_roundtrip.md`](./launch_closeout_2026-06-18/gate4_paypal_roundtrip.md)
+    for the exact remediation (entitlement upsert in both functions). Re-run
+    Gate 4 after the fix lands; Gates 1, 2, 3, 5 do not need to be re-run.
+- **Original verdict (2026-06-18):** 🟡 **CONDITIONAL GO** — training/cert pipeline healthy and data integrity reconciled; payments idle (no live transactions in 30d), system_jobs deadletter backlog and security event volume need triage before public launch.
 
 ---
 
