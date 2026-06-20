@@ -338,28 +338,29 @@ serve(async (req) => {
           }
 
           if (userId && courseId) {
-            console.log("[paypal-webhook] course branch entered", { userId, courseId, orderId, captureId });
-
-            const { error: ordErr, count: ordCount } = await supabase
+            const { error: ordErr } = await supabase
               .from("orders")
               .update({
                 status: "completed",
                 paypal_order_id: orderId,
                 paid_at: new Date().toISOString(),
-              }, { count: "exact" })
+              })
               .eq("user_id", userId)
               .eq("course_id", courseId)
-              .in("status", ["pending", "completed"]);
-            console.log("[paypal-webhook] orders update", { ordErr, ordCount });
+              .eq("status", "pending");
+            if (ordErr) {
+              console.error("[paypal-webhook] orders update failed", ordErr);
+              throw new Error(`orders update failed: ${ordErr.message}`);
+            }
 
             // ============================================================
             // Gate 4 fix (2026-06-20) — webhook is the authoritative path
-            // for granting course access. Idempotent: UNIQUE(user_id,
+            // for granting course access. Idempotent via UNIQUE(user_id,
             // course_id). If verify-payment-paypal already granted on the
             // buyer's return, this upsert is a no-op (and refreshes
             // metadata with the webhook event id for audit).
             // ============================================================
-            const { data: orderRow, error: ordSelErr } = await supabase
+            const { data: orderRow } = await supabase
               .from("orders")
               .select("id, amount, currency")
               .eq("user_id", userId)
@@ -367,32 +368,25 @@ serve(async (req) => {
               .order("created_at", { ascending: false })
               .limit(1)
               .maybeSingle();
-            console.log("[paypal-webhook] order fetched", { orderRow, ordSelErr });
 
-            const entPayload = {
-              user_id: userId,
-              course_id: courseId,
-              source: "paypal",
-              status: "active",
-              purchased_at: new Date().toISOString(),
-              metadata: {
-                paypal_order_id: orderId,
-                paypal_capture_id: captureId ?? null,
-                paypal_event_id: event.id,
-                order_id: orderRow?.id ?? null,
-                amount_cents: orderRow?.amount ?? null,
-                currency: (orderRow?.currency || currency || "usd").toLowerCase(),
-                granted_via: "paypal-webhook",
-              },
-            };
-            console.log("[paypal-webhook] entitlement payload", entPayload);
-
-            const { data: entRow, error: entErr } = await supabase
+            const { error: entErr } = await supabase
               .from("course_entitlements")
-              .upsert(entPayload, { onConflict: "user_id,course_id" })
-              .select()
-              .single();
-            console.log("[paypal-webhook] entitlement upsert result", { entRow, entErr });
+              .upsert({
+                user_id: userId,
+                course_id: courseId,
+                source: "paypal",
+                status: "active",
+                purchased_at: new Date().toISOString(),
+                metadata: {
+                  paypal_order_id: orderId,
+                  paypal_capture_id: captureId ?? null,
+                  paypal_event_id: event.id,
+                  order_id: orderRow?.id ?? null,
+                  amount_cents: orderRow?.amount ?? null,
+                  currency: (orderRow?.currency || currency || "usd").toLowerCase(),
+                  granted_via: "paypal-webhook",
+                },
+              }, { onConflict: "user_id,course_id" });
 
             if (entErr) {
               console.error("[paypal-webhook] course entitlement upsert failed", entErr);
@@ -403,7 +397,10 @@ serve(async (req) => {
               .from("payment_events")
               .update({ status: "processed", paypal_order_id: orderId })
               .eq("paypal_event_id", event.id);
-            console.log("[paypal-webhook] payment_events update", { peErr });
+            if (peErr) {
+              console.error("[paypal-webhook] payment_events status update failed", peErr);
+              // Don't throw — entitlement is granted, this is audit residue only.
+            }
           } else {
             console.warn("[paypal-webhook] could not parse course custom_id", customId);
             await supabase
