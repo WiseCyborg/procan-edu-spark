@@ -203,6 +203,13 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    if (insertErr) {
+      // Gate 4 fix (2026-06-20) — previously this branch was silent, which hid
+      // a NOT-NULL constraint on stripe_event_id that was blocking every
+      // PayPal event insert. Log loudly and fail the request so PayPal retries.
+      console.error("[paypal-webhook] payment_events insert failed", insertErr);
+      throw new Error(`payment_events insert failed: ${insertErr.message}`);
+    }
 
     // P2 — Signature verification. In production the webhook ID MUST be present;
     // otherwise we reject the request so forged events cannot trigger provisioning.
@@ -331,7 +338,7 @@ serve(async (req) => {
           }
 
           if (userId && courseId) {
-            await supabase
+            const { error: ordErr } = await supabase
               .from("orders")
               .update({
                 status: "completed",
@@ -341,11 +348,59 @@ serve(async (req) => {
               .eq("user_id", userId)
               .eq("course_id", courseId)
               .eq("status", "pending");
+            if (ordErr) {
+              console.error("[paypal-webhook] orders update failed", ordErr);
+              throw new Error(`orders update failed: ${ordErr.message}`);
+            }
 
-            await supabase
+            // ============================================================
+            // Gate 4 fix (2026-06-20) — webhook is the authoritative path
+            // for granting course access. Idempotent via UNIQUE(user_id,
+            // course_id). If verify-payment-paypal already granted on the
+            // buyer's return, this upsert is a no-op (and refreshes
+            // metadata with the webhook event id for audit).
+            // ============================================================
+            const { data: orderRow } = await supabase
+              .from("orders")
+              .select("id, amount, currency")
+              .eq("user_id", userId)
+              .eq("course_id", courseId)
+              .order("created_at", { ascending: false })
+              .limit(1)
+              .maybeSingle();
+
+            const { error: entErr } = await supabase
+              .from("course_entitlements")
+              .upsert({
+                user_id: userId,
+                course_id: courseId,
+                source: "paypal",
+                status: "active",
+                purchased_at: new Date().toISOString(),
+                metadata: {
+                  paypal_order_id: orderId,
+                  paypal_capture_id: captureId ?? null,
+                  paypal_event_id: event.id,
+                  order_id: orderRow?.id ?? null,
+                  amount_cents: orderRow?.amount ?? null,
+                  currency: (orderRow?.currency || currency || "usd").toLowerCase(),
+                  granted_via: "paypal-webhook",
+                },
+              }, { onConflict: "user_id,course_id" });
+
+            if (entErr) {
+              console.error("[paypal-webhook] course entitlement upsert failed", entErr);
+              throw new Error(`course entitlement upsert failed: ${entErr.message}`);
+            }
+
+            const { error: peErr } = await supabase
               .from("payment_events")
               .update({ status: "processed", paypal_order_id: orderId })
               .eq("paypal_event_id", event.id);
+            if (peErr) {
+              console.error("[paypal-webhook] payment_events status update failed", peErr);
+              // Don't throw — entitlement is granted, this is audit residue only.
+            }
           } else {
             console.warn("[paypal-webhook] could not parse course custom_id", customId);
             await supabase

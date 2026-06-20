@@ -4466,6 +4466,7 @@ export type Database = {
           currency: string | null
           id: string
           metadata: Json | null
+          paid_at: string | null
           paypal_order_id: string | null
           paypal_payer_id: string | null
           paypal_payment_id: string | null
@@ -4482,6 +4483,7 @@ export type Database = {
           currency?: string | null
           id?: string
           metadata?: Json | null
+          paid_at?: string | null
           paypal_order_id?: string | null
           paypal_payer_id?: string | null
           paypal_payment_id?: string | null
@@ -4498,6 +4500,7 @@ export type Database = {
           currency?: string | null
           id?: string
           metadata?: Json | null
+          paid_at?: string | null
           paypal_order_id?: string | null
           paypal_payer_id?: string | null
           paypal_payment_id?: string | null
@@ -4877,7 +4880,7 @@ export type Database = {
           purchase_id: string | null
           session_id: string | null
           status: string
-          stripe_event_id: string
+          stripe_event_id: string | null
           user_id: string | null
         }
         Insert: {
@@ -4896,7 +4899,7 @@ export type Database = {
           purchase_id?: string | null
           session_id?: string | null
           status?: string
-          stripe_event_id: string
+          stripe_event_id?: string | null
           user_id?: string | null
         }
         Update: {
@@ -4915,7 +4918,7 @@ export type Database = {
           purchase_id?: string | null
           session_id?: string | null
           status?: string
-          stripe_event_id?: string
+          stripe_event_id?: string | null
           user_id?: string | null
         }
         Relationships: [

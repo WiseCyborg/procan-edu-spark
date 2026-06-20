@@ -1,18 +1,25 @@
 # Mission Control — Unified Operations Summary
 
-- **Generated:** 2026-06-18 (live DB snapshot); **closeout update:** 2026-06-20
+- **Generated:** 2026-06-18 (live DB snapshot); **closeout final:** 2026-06-20
 - **Environment:** production (Supabase ref `zhmpwczrvitomsxjwpzc`)
 - **Source:** single `supabase--read_query` aggregate against public tables
-- **Overall verdict (2026-06-20, post-closeout):** 🔴 **PRODUCTION NO-GO.**
-  - Gates 1, 2, 3, 5 from `launch_closeout_2026-06-18/` are 🟢 RESOLVED.
-  - Gate 4 (PayPal sandbox round-trip) is 🔴 FAIL: direct PayPal course purchases
-    never create a `course_entitlements` row, so paid buyers remain paywalled.
-    Neither `verify-payment-paypal` nor `paypal-webhook` (course branch)
-    provisions access; there is no compensating DB trigger. See
-    [`launch_closeout_2026-06-18/gate4_paypal_roundtrip.md`](./launch_closeout_2026-06-18/gate4_paypal_roundtrip.md)
-    for the exact remediation (entitlement upsert in both functions). Re-run
-    Gate 4 after the fix lands; Gates 1, 2, 3, 5 do not need to be re-run.
-- **Original verdict (2026-06-18):** 🟡 **CONDITIONAL GO** — training/cert pipeline healthy and data integrity reconciled; payments idle (no live transactions in 30d), system_jobs deadletter backlog and security event volume need triage before public launch.
+- **Overall verdict (2026-06-20, final):** 🟢 **PRODUCTION GO.**
+  - Gates 1, 2, 3, 5: 🟢 RESOLVED.
+  - Gate 4: 🟢 PASS — direct PayPal course purchases now grant
+    `course_entitlements` server-side from both `verify-payment-paypal` and
+    `paypal-webhook` (idempotent on `UNIQUE(user_id, course_id)`). Fix
+    verified end-to-end via a synthetic `PAYMENT.CAPTURE.COMPLETED` event;
+    three pre-existing schema mismatches that were silently breaking the
+    webhook were also fixed, and the webhook now hard-fails on DB errors
+    instead of returning 200 with no writes. Deno regression test at
+    `supabase/functions/paypal-webhook/entitlement_regression_test.ts`. See
+    [`launch_closeout_2026-06-18/gate4_paypal_roundtrip.md`](./launch_closeout_2026-06-18/gate4_paypal_roundtrip.md).
+  - Non-blocking follow-up: the `Start Course` button on `/courses` routes
+    unpaid users through the dispensary `/payment` page instead of the
+    course-specific `CoursePaymentGate`. Server-side entitlement provisioning
+    is correct either way — this is a UX entry-point issue only.
+- **Prior verdicts:** 🟡 CONDITIONAL GO (2026-06-18) → 🔴 NO-GO (2026-06-20 a.m.,
+  Gate 4 FAIL) → 🟢 GO (2026-06-20 p.m.).
 
 ---
 

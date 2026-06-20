@@ -66,6 +66,8 @@ serve(async (req) => {
 
     // Check if order is completed/approved
     if (orderData.status === "COMPLETED" || orderData.status === "APPROVED") {
+      const captureId = orderData.purchase_units?.[0]?.payments?.captures?.[0]?.id;
+
       // Update order status in database
       const { error: updateError } = await supabaseService
         .from("orders")
@@ -73,7 +75,7 @@ serve(async (req) => {
           status: "paid",
           updated_at: new Date().toISOString(),
           paypal_payer_id: orderData.payer?.payer_id,
-          paypal_payment_id: orderData.purchase_units?.[0]?.payments?.captures?.[0]?.id
+          paypal_payment_id: captureId
         })
         .eq("paypal_order_id", orderId);
 
@@ -107,6 +109,41 @@ serve(async (req) => {
           .single();
 
         if (order) {
+          // ============================================================
+          // Gate 4 fix (2026-06-20) — grant course access server-side.
+          // Idempotent: UNIQUE(user_id, course_id) on course_entitlements
+          // means a duplicate call (or the paypal-webhook firing too) is a
+          // no-op upsert. PaymentSuccess.tsx redirects to /courses/{id}
+          // immediately after this returns; without this insert
+          // usePaymentStatus would still see no entitlement and
+          // CoursePaymentGate would re-render the paywall.
+          // ============================================================
+          const { error: entErr } = await supabaseService
+            .from("course_entitlements")
+            .upsert({
+              user_id: order.user_id,
+              course_id: order.course_id,
+              source: "paypal",
+              status: "active",
+              purchased_at: new Date().toISOString(),
+              metadata: {
+                paypal_order_id: orderId,
+                paypal_capture_id: captureId ?? null,
+                order_id: order.id,
+                amount_cents: order.amount,
+                currency: (order.currency || "usd").toLowerCase(),
+                granted_via: "verify-payment-paypal",
+              },
+            }, { onConflict: "user_id,course_id" });
+
+          if (entErr) {
+            console.error("[verify-payment-paypal] entitlement upsert failed", entErr);
+            // Hard-fail so the frontend knows access was NOT granted, even
+            // though PayPal captured. Manual remediation is preferable to a
+            // silent paywall.
+            throw new Error(`Entitlement upsert failed: ${entErr.message}`);
+          }
+
           const { data: { user } } = await supabaseService.auth.admin.getUserById(order.user_id);
           const { data: profile } = await supabaseService
             .from("profiles")
