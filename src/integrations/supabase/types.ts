@@ -9168,6 +9168,7 @@ export type Database = {
           storage_path: string | null
           thumbnail_url: string | null
           title: string
+          unmapped_reason: string | null
           updated_at: string | null
         }
         Insert: {
@@ -9189,6 +9190,7 @@ export type Database = {
           storage_path?: string | null
           thumbnail_url?: string | null
           title: string
+          unmapped_reason?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -9210,6 +9212,7 @@ export type Database = {
           storage_path?: string | null
           thumbnail_url?: string | null
           title?: string
+          unmapped_reason?: string | null
           updated_at?: string | null
         }
         Relationships: [
