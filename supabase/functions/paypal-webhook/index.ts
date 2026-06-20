@@ -203,6 +203,13 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    if (insertErr) {
+      // Gate 4 fix (2026-06-20) — previously this branch was silent, which hid
+      // a NOT-NULL constraint on stripe_event_id that was blocking every
+      // PayPal event insert. Log loudly and fail the request so PayPal retries.
+      console.error("[paypal-webhook] payment_events insert failed", insertErr);
+      throw new Error(`payment_events insert failed: ${insertErr.message}`);
+    }
 
     // P2 — Signature verification. In production the webhook ID MUST be present;
     // otherwise we reject the request so forged events cannot trigger provisioning.
