@@ -109,55 +109,64 @@ const Index = () => {
             <LiveCOMARBadge />
           </div>
 
-          {/* Main Logo and Tagline - Level 1 Typography */}
-          <div className={`text-center ${isMobile ? 'mb-3' : 'mb-8'}`}>
-            <h1 className={`font-bold text-white leading-tight ${isMobile ? 'text-4xl mb-2' : 'text-5xl md:text-7xl mb-4'}`}>
-              ProCann Edu <span className="block text-2xl md:text-3xl font-medium text-white/90 mt-2">Maryland RVT Certification Training</span>
-
+          {/* Main Logo and Value Proposition */}
+          <div className={`text-center ${isMobile ? 'mb-4' : 'mb-6'}`}>
+            <h1 className={`font-bold text-white leading-tight ${isMobile ? 'text-3xl mb-2' : 'text-5xl md:text-6xl mb-3'}`}>
+              ProCann Edu
             </h1>
-            <h2 className={`gradient-text font-medium mx-auto leading-relaxed ${isMobile ? 'text-base max-w-sm px-2' : 'text-2xl md:text-3xl max-w-3xl'}`}>
-              {isMobile ? "Maryland's AI-Powered RVT Certification" : heroMessage}
-            </h2>
-            {!isMobile && <p className="text-lg text-white/90 mt-4 max-w-2xl mx-auto">
-                Complete Maryland RVT certification in 4-6 hours • 24 modules • $49.99
-              </p>}
-          </div>
-
-          {/* Welcome Video Section */}
-          <WelcomeVideoSection videoUrl="https://vimeo.com/1096146284/e90b8e5dfc" className={isMobile ? 'mb-3' : 'mb-8'} />
-
-          {/* Single Primary CTA */}
-          <div className={`text-center ${isMobile ? 'mb-2' : 'mb-6'}`}>
-            <Button onClick={() => setIsRoleSelectorOpen(true)} size={isMobile ? 'default' : 'lg'} className={`bg-white text-primary hover:bg-white/90 font-semibold rounded-xl shadow-xl hover:shadow-2xl transition-all hover:scale-105 ${isMobile ? 'w-full px-6 py-6 text-base h-auto' : 'px-8 py-6 text-lg'}`}>
-              {isMobile ? 'Get Certified - $49.99' : 'Start Your Maryland RVT Certification - $49.99'}
-            </Button>
-            <p className={`text-white/70 mt-3 ${isMobile ? 'text-xs' : 'text-sm'}`}>
-              {isMobile ? '✓ 4-6 hrs ✓ AI tracking ✓ Lifetime access' : 'Choose your path: Student • Team Manager • Dispensary Owner'}
+            <p className={`text-white font-medium mx-auto leading-snug ${isMobile ? 'text-lg max-w-sm px-2' : 'text-2xl md:text-3xl max-w-3xl'}`}>
+              Maryland cannabis training & certification
+            </p>
+            <p className={`text-white/90 mx-auto ${isMobile ? 'text-sm mt-2' : 'text-lg mt-3 max-w-2xl'}`}>
+              Official Maryland Responsible Vendor Training (RVT) — <span className="font-semibold">$49.99</span>, self-paced, COMAR-aligned.
             </p>
           </div>
 
-          {/* Quick Links - Desktop Only */}
-          {!isMobile && <>
-              <div className="text-center mb-4">
-                <Button variant="link" onClick={() => navigate('/get-started')} className="text-white/90 hover:text-white underline text-sm">
-                  Not sure? See all registration options →
-                </Button>
-              </div>
+          {/* Welcome Video Section - Desktop Only (keeps mobile CTA above fold) */}
+          {!isMobile && (
+            <WelcomeVideoSection videoUrl="https://vimeo.com/1096146284/e90b8e5dfc" className="mb-6" />
+          )}
 
-              <div className="flex flex-wrap justify-center gap-4 text-white/80 text-sm">
-                <button onClick={() => navigate('/faq')} className="hover:text-white transition-colors underline">
-                  Questions? Check our FAQ
-                </button>
-                <span>•</span>
-                <button onClick={() => navigate('/verify-certificate')} className="hover:text-white transition-colors underline">
-                  Verify a Certificate
-                </button>
-                <span>•</span>
-                <a href="mailto:info@procannedu.com" className="hover:text-white transition-colors underline">
-                  Chat with us
-                </a>
-              </div>
-            </>}
+          {/* Primary CTA + Secondary Link */}
+          <div className={`text-center ${isMobile ? 'mb-3' : 'mb-5'}`}>
+            <Button
+              onClick={() => navigate('/get-started')}
+              size={isMobile ? 'default' : 'lg'}
+              className={`bg-white text-primary hover:bg-white/90 font-semibold rounded-xl shadow-xl hover:shadow-2xl transition-all hover:scale-105 ${isMobile ? 'w-full px-6 py-5 text-base h-auto' : 'px-10 py-6 text-lg'}`}
+            >
+              Get Certified — $49.99
+            </Button>
+            <div className="mt-3">
+              <button
+                onClick={() => navigate('/verify-certificate')}
+                className={`text-white/80 hover:text-white underline underline-offset-4 transition-colors ${isMobile ? 'text-xs' : 'text-sm'}`}
+              >
+                Verify a certificate
+              </button>
+            </div>
+          </div>
+
+          {/* Trust Strip */}
+          <div className={`flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-white/85 ${isMobile ? 'text-xs mb-2' : 'text-sm mb-4'}`}>
+            <span className="inline-flex items-center gap-1.5"><CheckCircle className="h-3.5 w-3.5" /> COMAR-aligned</span>
+            <span className="opacity-50">•</span>
+            <span className="inline-flex items-center gap-1.5"><CheckCircle className="h-3.5 w-3.5" /> Maryland-focused</span>
+            <span className="opacity-50">•</span>
+            <span className="inline-flex items-center gap-1.5"><CheckCircle className="h-3.5 w-3.5" /> Certificate verification</span>
+          </div>
+
+          {/* Desktop secondary links */}
+          {!isMobile && (
+            <div className="flex flex-wrap justify-center gap-4 text-white/70 text-sm">
+              <button onClick={() => navigate('/faq')} className="hover:text-white transition-colors underline">
+                FAQ
+              </button>
+              <span>•</span>
+              <a href="mailto:info@procannedu.com" className="hover:text-white transition-colors underline">
+                Contact us
+              </a>
+            </div>
+          )}
 
           {/* Swipe Up Indicator - Mobile Only */}
           <SwipeUpIndicator />
