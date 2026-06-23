@@ -138,11 +138,15 @@ async function provisionDispensaryPayment(
     .eq("purchase_id", ctx.purchaseId);
 
   if (!existingSeatCount || existingSeatCount === 0) {
+    // Seats are intentionally pinned to the Maryland RVT course.
+    // This id mirrors the frontend course-access guard in App.tsx.
+    // TODO: centralize into shared config.
+    const RVT_COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
     const { data: defaultCourse } = await supabase
       .from("courses")
       .select("id")
+      .eq("id", RVT_COURSE_ID)
       .eq("is_active", true)
-      .limit(1)
       .maybeSingle();
 
     if (defaultCourse?.id) {
@@ -155,7 +159,7 @@ async function provisionDispensaryPayment(
       const { error: seatErr } = await supabase.from("rvt_seats").insert(seats);
       if (seatErr) console.error("[paypal-webhook] seat insert error", seatErr);
     } else {
-      console.warn("[paypal-webhook] no active course found — skipping seat issuance");
+      console.error("[paypal-webhook] RVT course not found/inactive — seats not issued");
     }
   }
 
