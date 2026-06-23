@@ -125,13 +125,16 @@ serve(async (req) => {
         );
       }
 
-      // **Check seat availability before accepting**
+      // Seats are pinned to the Maryland RVT course (mirrors paypal-webhook seat
+      // issuance and the frontend course-access guard in App.tsx — centralize later).
+      const RVT_COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
+
       const { data: defaultCourse } = await supabase
         .from('courses')
         .select('id')
+        .eq('id', RVT_COURSE_ID)
         .eq('is_active', true)
-        .limit(1)
-        .single();
+        .maybeSingle();
 
       if (!defaultCourse) {
         return new Response(
@@ -146,7 +149,7 @@ serve(async (req) => {
           .rpc('allocate_seat_to_user', {
             org_id: invitation.organization_id,
             user_id: userId,
-            course_id: defaultCourse.id
+            course_id: RVT_COURSE_ID
           });
 
         if (seatError) {
