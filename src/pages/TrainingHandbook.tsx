@@ -208,12 +208,7 @@ const TrainingHandbook = () => {
                 </p>
                 <div className="rounded-lg overflow-hidden bg-muted">
                   <div className="aspect-video">
-                    <iframe 
-                      src="https://player.vimeo.com/video/1073072061?h=ae7329d469&title=0&byline=0&portrait=0&badge=0&autopause=0&player_id=0&app_id=58479" 
-                      className="w-full h-full"
-                      allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
-                      title="Section 2: Operational and Safety Procedures"
-                    />
+                    <SecureVideoPlayer assetKey="section_2_sops" lazy={false} />
                   </div>
                   <p className="text-sm text-muted-foreground text-center py-3">
                     <em>Video: Demonstration of security procedures and emergency responses.</em>
