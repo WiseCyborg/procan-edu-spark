@@ -1,11 +1,11 @@
 // One-shot admin helper: mints a signed upload URL into a private Storage bucket.
-// Caller must be an authenticated admin. Used to upload large training-video MP4s
-// directly from the agent sandbox without exposing the service-role key.
+// Gated by a shared bootstrap token (UPLOAD_BOOTSTRAP_TOKEN_V2) so the agent
+// sandbox can upload large training-video MP4s without a user JWT.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-bootstrap-token",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
@@ -19,30 +19,19 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    const expected = Deno.env.get("UPLOAD_BOOTSTRAP_TOKEN_V2");
+    const provided = req.headers.get("x-bootstrap-token");
+    if (!expected || provided !== expected) {
+      return json({ success: false, error_code: "not_authorized" }, 401);
+    }
+
     const url = Deno.env.get("SUPABASE_URL")!;
-    const anon = Deno.env.get("SUPABASE_ANON_KEY")!;
     const service = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-
-    const auth = req.headers.get("Authorization") ?? "";
-    if (!auth.startsWith("Bearer ")) return json({ success: false, error_code: "not_authenticated" });
-
-    const userClient = createClient(url, anon, { global: { headers: { Authorization: auth } } });
-    const { data: userData, error: userErr } = await userClient.auth.getUser();
-    if (userErr || !userData?.user) return json({ success: false, error_code: "not_authenticated" });
-
     const admin = createClient(url, service);
-    const { data: roleRow } = await admin
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userData.user.id)
-      .eq("role", "admin")
-      .maybeSingle();
-    if (!roleRow) return json({ success: false, error_code: "not_authorized" });
 
     const { bucket, path } = await req.json().catch(() => ({}));
     if (!bucket || !path) return json({ success: false, error_code: "missing_params" });
 
-    // Ensure bucket exists (private)
     const { data: existing } = await admin.storage.getBucket(bucket);
     if (!existing) {
       const { error: createErr } = await admin.storage.createBucket(bucket, {

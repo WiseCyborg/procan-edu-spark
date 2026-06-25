@@ -4,7 +4,7 @@ project_id = "zhmpwczrvitomsxjwpzc"
 verify_jwt = false
 
 [functions.admin-storage-signed-upload]
-verify_jwt = true
+verify_jwt = false
 
 [functions.get-video-url]
 verify_jwt = false
