@@ -17,24 +17,16 @@ export const LiveActivityTicker = () => {
     queryKey: ['live-activities'],
     queryFn: async () => {
       try {
-        const { data: exams, error: examsError } = await supabase
-          .from('exam_attempts')
-          .select('user_id, created_at, is_passed')
-          .eq('is_passed', true)
-          .order('created_at', { ascending: false })
-          .limit(5);
+        const { data, error } = await supabase.rpc('get_public_activity_stats', { p_limit: 5 });
+        if (error) throw error;
+        if (!data || data.length === 0) return [];
 
-        if (examsError) throw examsError;
-        if (!exams || exams.length === 0) return [];
-
-        const recentActivities: Activity[] = exams.map((exam: any) => ({
+        return (data as Array<{ passed_at: string }>).map((row) => ({
           type: 'certificate' as const,
           message: `Someone from Maryland just earned their certificate! 🎉`,
-          timestamp: exam.created_at,
+          timestamp: row.passed_at,
           icon: Trophy,
         }));
-
-        return recentActivities;
       } catch (error) {
         console.warn('LiveActivityTicker: failed to load activities', error);
         return [];
