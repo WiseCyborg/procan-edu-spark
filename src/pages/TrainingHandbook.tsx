@@ -11,6 +11,7 @@ import { usePaymentStatus } from '@/hooks/usePaymentStatus';
 import { useOrganizationAccess } from '@/hooks/useOrganizationAccess';
 import { CoursePaymentGate } from '@/components/CoursePaymentGate';
 import { EmployeeAccessMessage } from '@/components/EmployeeAccessMessage';
+import { SecureVideoPlayer } from '@/components/video/SecureVideoPlayer';
 
 const COURSE_ID = '76524ea8-a00f-47b3-8e29-a0aa12c23a60';
 
@@ -179,12 +180,7 @@ const TrainingHandbook = () => {
                 </p>
                 <div className="rounded-lg overflow-hidden bg-muted">
                   <div className="aspect-video">
-                    <iframe 
-                      src="https://player.vimeo.com/video/1073070281?h=5f6915d732&badge=0&autopause=0&player_id=0&app_id=58479" 
-                      className="w-full h-full"
-                      allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
-                      title="Section 1: Legal and Regulatory Foundations"
-                    />
+                    <SecureVideoPlayer assetKey="section_1_laws" lazy={false} />
                   </div>
                   <p className="text-sm text-muted-foreground text-center py-3">
                     <em>Video: Overview of Federal and Maryland cannabis laws for dispensary agents.</em>
@@ -212,12 +208,7 @@ const TrainingHandbook = () => {
                 </p>
                 <div className="rounded-lg overflow-hidden bg-muted">
                   <div className="aspect-video">
-                    <iframe 
-                      src="https://player.vimeo.com/video/1073072061?h=ae7329d469&title=0&byline=0&portrait=0&badge=0&autopause=0&player_id=0&app_id=58479" 
-                      className="w-full h-full"
-                      allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
-                      title="Section 2: Operational and Safety Procedures"
-                    />
+                    <SecureVideoPlayer assetKey="section_2_sops" lazy={false} />
                   </div>
                   <p className="text-sm text-muted-foreground text-center py-3">
                     <em>Video: Demonstration of security procedures and emergency responses.</em>
@@ -245,12 +236,7 @@ const TrainingHandbook = () => {
                 </p>
                 <div className="rounded-lg overflow-hidden bg-muted">
                   <div className="aspect-video">
-                    <iframe 
-                      src="https://player.vimeo.com/video/1073072073?h=39cef65ffc&title=0&byline=0&portrait=0&badge=0&autopause=0&player_id=0&app_id=58479" 
-                      className="w-full h-full"
-                      allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
-                      title="Section 3: Cannabis Pharmacology and Therapeutics"
-                    />
+                    <SecureVideoPlayer assetKey="section_3_inventory" lazy={false} />
                   </div>
                   <p className="text-sm text-muted-foreground text-center py-3">
                     <em>Video: Understanding cannabis active components and dosage forms.</em>
@@ -278,12 +264,7 @@ const TrainingHandbook = () => {
                 </p>
                 <div className="rounded-lg overflow-hidden bg-muted">
                   <div className="aspect-video">
-                    <iframe 
-                      src="https://player.vimeo.com/video/1073072091?h=f75482ba3d&title=0&byline=0&portrait=0&badge=0&autopause=0&player_id=0&app_id=58479" 
-                      className="w-full h-full"
-                      allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
-                      title="Section 4: Substance Use and Customer Safety"
-                    />
+                    <SecureVideoPlayer assetKey="section_4_sales" lazy={false} />
                   </div>
                   <p className="text-sm text-muted-foreground text-center py-3">
                     <em>Video: Identifying signs of intoxication and substance use disorders.</em>
@@ -311,12 +292,7 @@ const TrainingHandbook = () => {
                 </p>
                 <div className="rounded-lg overflow-hidden bg-muted">
                   <div className="aspect-video">
-                    <iframe 
-                      src="https://player.vimeo.com/video/1073072103?h=44ce932241&title=0&byline=0&portrait=0&badge=0&autopause=0&player_id=0&app_id=58479" 
-                      className="w-full h-full"
-                      allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
-                      title="Section 5: Responsible Vendor Training Program"
-                    />
+                    <SecureVideoPlayer assetKey="section_5_safety" lazy={false} />
                   </div>
                   <p className="text-sm text-muted-foreground text-center py-3">
                     <em>Video: Key elements of the Responsible Vendor Training Program.</em>
