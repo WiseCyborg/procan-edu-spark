@@ -3,6 +3,9 @@ project_id = "zhmpwczrvitomsxjwpzc"
 [functions.configure-encryption-key]
 verify_jwt = false
 
+[functions.admin-storage-signed-upload]
+verify_jwt = true
+
 [functions.get-video-url]
 verify_jwt = false
 
