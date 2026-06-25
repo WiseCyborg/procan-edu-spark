@@ -11,6 +11,7 @@ import { usePaymentStatus } from '@/hooks/usePaymentStatus';
 import { useOrganizationAccess } from '@/hooks/useOrganizationAccess';
 import { CoursePaymentGate } from '@/components/CoursePaymentGate';
 import { EmployeeAccessMessage } from '@/components/EmployeeAccessMessage';
+import { SecureVideoPlayer } from '@/components/video/SecureVideoPlayer';
 
 const COURSE_ID = '76524ea8-a00f-47b3-8e29-a0aa12c23a60';
 
