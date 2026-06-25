@@ -24,7 +24,10 @@ const getGateRedirect = (denyReason: DenyReason): string => {
     case 'enrollment_required':
       return '/auth?tab=signup';
     case 'payment_required':
-      return '/payment';
+      // UX-001 fix: route unpaid users to the course catalog paywall
+      // (UniversalCourseCard → create-course-payment-paypal), not the
+      // dispensary-application page at /payment.
+      return '/courses';
     case 'org_seat_required':
       return '/auth?tab=accesskey';
     case 'suspended':
