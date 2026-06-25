@@ -398,6 +398,29 @@ serve(async (req: Request) => {
       .single();
     results.push(probeRow);
 
+    // Video reachability sweep — probes every URL in course_modules.video_url
+    // and video_assets.public_url. Persisted as a sentinel row so the UI can
+    // surface a single fail/pass plus the failing URL list.
+    const videos = await probeAllVideos(admin);
+    const { data: videoRow } = await admin
+      .from("launch_audit_runs")
+      .insert({
+        run_batch: runBatch,
+        route: "__video_reachability__",
+        url: "",
+        http_status: null,
+        status: videos.ok ? "ok" : "error",
+        rollup_status: videos.ok ? "pass" : "fail",
+        failed_checks: videos.ok
+          ? []
+          : [{ check: "video_reachability", reason: `${videos.failing_count}/${videos.total} URLs unreachable` }],
+        findings: videos,
+        triggered_by: caller.id,
+      })
+      .select("id, route, rollup_status, findings")
+      .single();
+    results.push(videoRow);
+
     return new Response(JSON.stringify({ success: true, run_batch: runBatch, results }), {
       status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
