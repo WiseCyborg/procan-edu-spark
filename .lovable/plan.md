@@ -1,89 +1,33 @@
-# Go-Live Blocker Audit — 2026-06-25
+## Vimeo Orphan Reconciliation — Confirmed Mappings
 
-Live signals checked just now against the prod DB and the running preview:
+Apply Louis's confirmed mappings to clear the 2 orphan video assets and unblock 2 of the 6 RVT modules currently missing a `video_url`.
 
-| Signal | Value | Status |
+### Confirmed mappings
+| Orphan video | Vimeo URL | Target module |
 |---|---|---|
-| `course_entitlements` rows | 9 | ok (seeded) |
-| `payment_events` rows | **0** | ❌ Gate 4 still unproven on real traffic |
-| `system_jobs_deadletter` rows | **7** (new since cleanup) | ❌ regression |
-| `course_modules` real unmapped | 0 (29 accepted exclusions) | ok |
-| `video_assets` real orphans | 0 | ok |
-| `comar_versions` rows | 1 | ok |
-| `security_events` high/critical (7d) | 0 | ok |
-| Console on `/` | `permission denied for table exam_attempts` every 30s | ❌ public-facing error |
+| `section_3_inventory` | `https://vimeo.com/1073072073` | Module 4 — Inventory Management and Tracking (`14d0aa9f-4436-460c-a76b-52f07ba33bf3`) |
+| `section_15_customer_ed` | `https://vimeo.com/1096138533?h=<hash>` | Module 2 — Patient Rights and Privacy (`3b7d23c0-c7d9-48ea-ac75-17e515e6304a`) |
 
-Net: **four real blockers** between today and a clean 🟢 Production GO. Everything else from the prior Mission Control snapshot is still green.
+Module 5 (Customer Service Excellence) is **not** touched — it already has a valid video.
 
----
+### Changes (data-only, via insert tool)
 
-## Blocker 1 — Gate 4: live PayPal capture never executed
-**What it is.** `payment_events` is empty. We have synthetic regression coverage for `verify-payment-paypal` and `paypal-webhook`, plus the schema/grant fixes from the closeout, but no real capture has ever round-tripped: checkout → capture → `payment_events` row → `orders.paid_at` → `course_entitlements` row.
+1. **`video_assets`** — set `module_id` and clear `unmapped_reason`
+   - row `069082d4-3325-4960-99f2-e3ea4a0d287c` (section_3_inventory) → `module_id = 14d0aa9f…` , `unmapped_reason = NULL`
+   - row `0fd47100-2171-4d29-a9d1-11f49958c428` (section_15_customer_ed) → `module_id = 3b7d23c0…`, `unmapped_reason = NULL`
 
-**Why it blocks.** Until one real capture lands, the only evidence the entitlement-grant path works end-to-end is synthetic. Mission Control's GO verdict was explicitly conditional on this single live transaction.
+2. **`course_modules`** — populate `video_url` and clear `unmapped_reason`
+   - Module 4 → `video_url = 'https://vimeo.com/1073072073'`, `unmapped_reason = NULL`
+   - Module 2 → `video_url = 'https://vimeo.com/1096138533'` (use full Vimeo hash from the `video_assets` row if present), `unmapped_reason = NULL`
 
-**Resolution path.**
-1. Use the live PayPal account against a real (or production-mode sandbox) checkout from `/get-started`.
-2. Verify in DB: one row each in `payment_events`, `orders` (with `paid_at` set), `course_entitlements` (source=`paypal`).
-3. Verify in UI: the buyer's `/courses` shows the RVT course unlocked.
-4. Capture screenshots + the four row IDs into `docs/audit/2026-07/evidence/gate4_live_capture_2026-06-25.md`.
-5. If any step fails, the edge-function logs for `verify-payment-paypal` and `paypal-webhook` are the first stop — entitlement-write errors are no longer swallowed.
+3. **Verification queries (read-only)** after the writes:
+   - Confirm both `video_assets` rows now have `module_id` set and `unmapped_reason IS NULL`.
+   - Confirm both `course_modules` rows now have `video_url` populated.
+   - Re-run `count_unmapped_modules()` and `get_launch_readiness()` and report the new `real_unmapped` count (expected to drop by 2; remaining 4 stay classified as `accepted_exclusions` awaiting correct Vimeo IDs).
 
----
+### Out of scope (explicitly NOT changed)
+- Modules 9 (POS), 11 (Cannabis Cultivation), 14 (Age Verification), 19 (Supervising Compliance) — **leave as is**, still flagged `awaiting_correct_vimeo_id_2026-06-17`. These need either net-new Vimeo uploads or a separate confirmed mapping.
+- No schema changes, no edge function changes, no UI changes.
 
-## Blocker 2 — Public landing page logs `permission denied for table exam_attempts`
-**What it is.** `src/components/LiveActivityTicker.tsx` queries `exam_attempts` from the anon role on `/`. Console shows the 42501 error firing every 30s for every visitor.
-
-**Why it blocks.** It's not a data leak (RLS denied the read), but it's a permanent red error in DevTools on the landing page during a conversion push. Anyone evaluating the platform sees a broken widget and a Postgres error string.
-
-**Resolution path.** Pick one — both are surgical, frontend/edge-only:
-- **A (preferred).** Replace the direct table read with a `SECURITY DEFINER` RPC (or edge function) that returns a count + recent-completion summary — no PII, no row access. Grant execute to `anon`.
-- **B.** Hide the ticker on public routes; only render it once the user is authenticated.
-
-Either way: re-load `/`, confirm console is clean.
-
----
-
-## Blocker 3 — Deadletter regression: `seat_utilization_alert` jobs with no handler
-**What it is.** 7 jobs of type `seat_utilization_alert` have piled up in `system_jobs_deadletter` since 2026-06-22, all with `last_error = "No handler for job type: seat_utilization_alert"`. A scheduler is still emitting them; the `jobs-processor` has no case for them.
-
-**Why it blocks.** OPS-001 closeout claim was "deadletter = 0." It will drift back to hundreds within weeks and re-fire admin alerts on launch day.
-
-**Resolution path.**
-1. Find the emitter (cron entry or trigger that inserts `seat_utilization_alert` into `system_jobs`).
-2. Decide: **implement** the handler (probably an org-level email when seat usage crosses a threshold) **or remove** the emitter if the alert isn't a real product requirement yet.
-3. Purge the 7 existing DLQ rows.
-4. Watch `jobs-processor` logs for 24h to confirm no recurrence.
-
----
-
-## Blocker 4 — Evidence freeze + build tag never finalized
-**What it is.** The Mission Control summary was updated to 🟢 GO on the prior commit, but the post-GO closeout (A1–A4: freeze evidence dir, tag the build with SHA, commit the UAT runbook, file UX-001 as closed) was paused when we shifted to the landing-page conversion pass.
-
-**Why it blocks.** No frozen artifact = no defensible "we launched on this build" record. If anything regresses post-launch, there's no SHA-pinned baseline to diff against.
-
-**Resolution path.**
-1. Re-run Mission Control snapshot at current HEAD; write `docs/audit/2026-07/evidence/mission_control_summary_<today>.md`.
-2. Mark prior `evidence/` directory read-only (rename to `frozen-<sha>/`).
-3. Record current commit SHA + a one-line release note in `docs/audit/2026-07/RELEASE.md`.
-4. Close UX-001 in the doc (RequireAccess fix already shipped — just needs verification line).
-
----
-
-## Items checked and confirmed NOT blockers
-- **Unmapped modules trust check** — DB says real=0, accepted_exclusions=29 (6 awaiting Louis, 1 orientation, 22 consumer text-only). My earlier ad-hoc query used a looser regex and reported 17; the canonical `count_unmapped_modules()` RPC is correct.
-- **Orphan video assets** — 0 real, 4 accepted (storage-hosted orientation assets).
-- **High/critical security events** — 0 in the last 7 days.
-- **COMAR seed, Stripe decommission, SEC-001 role sweep, RequireAccess UX-001 fix** — all confirmed shipped at HEAD.
-
----
-
-## Suggested execution order
-1. Blocker 2 (10 min, pure frontend, removes a visible error during any demo).
-2. Blocker 3 (30–60 min depending on whether we implement or remove the handler).
-3. Blocker 1 (requires you to run the live checkout; I verify the DB rows after).
-4. Blocker 4 (snapshot + freeze + tag, ~15 min, must be last so the frozen evidence reflects all three fixes).
-
-After all four: 🟢 Production GO with frozen evidence pinned to a known SHA.
-
-Tell me which one to start with — or "all four, in that order" and I'll work through them.
+### Risk
+Zero — purely two-row updates on each of two tables, fully reversible, no auth/payment/edge surface touched. Production GO blockers (Phase 3 PayPal capture, Phase 4 evidence freeze) are unaffected by this change.
