@@ -1,56 +1,44 @@
-# Gate 4 — PayPal Sandbox Round-Trip (Automated Execution)
+# Go-Live Blocker Checklist
 
-Run a full end-to-end PayPal sandbox purchase as a fresh UAT student, verify every downstream effect, then regenerate the launch closeout and final Mission Control snapshot.
+Four hard items remain between today's 🟡 Conditional GO and a clean 🟢 Production GO. Everything else (30-day stabilization, OPS dashboards, PAY-001 reconciliation) is post-launch.
 
-## Inputs
-- **Buyer (PayPal sandbox personal):** `sb-eq4dp47066600@personal.example.com` / `[<0&o1Gk`
-- **UAT student:** created fresh during the run (deterministic UAT password)
-- **Course:** first published paid course (`price_cents > 0`) — selected via SQL at runtime
+## 1. Live PayPal capture — Gate 4 closeout
+**Why blocker:** Gate 4 currently passes on synthetic webhook events only. We need one real money round-trip in production (or production-mode sandbox) to prove the full path: checkout → capture → `payment_events` row → `orders.paid_at` set → `course_entitlements` row written → student lands on the course gate unlocked.
 
-## Steps
+**Action:**
+- Run one $49.99 PayPal purchase as a fresh UAT student against the live `paypal-webhook`.
+- Verify the four DB rows exist and `RequireAccess` lets the user into the RVT course without manual intervention.
+- Save the capture ID + DB row screenshots to `docs/audit/2026-07/evidence/launch_closeout_2026-06-18/gate4_live_capture.md`.
 
-1. **Pre-flight (SQL + edge):**
-   - Confirm `paypal_configuration.environment = 'sandbox'`.
-   - Pick a paid published course; capture `course_id`, title, price.
-   - Confirm `create-course-payment-paypal` is deployed.
+## 2. UX-001 — "Start Course" redirect
+**Why blocker:** Unpaid users clicking "Start Course" on `/courses` get routed through `RequireAccess` → `/payment` (the dispensary application page) instead of the `CoursePaymentGate` paywall. Server-side entitlement is correct, but the entry point is broken for the most common conversion path.
 
-2. **Create UAT student:**
-   - Insert via admin test-account path (deterministic password from UAT password standard).
-   - Capture `user_id`, email.
-   - Confirm `profiles` row, email-verified state, no pre-existing entitlements.
+**Action:** One-line route change on the unpaid branch — send to the course paywall, not `/payment`. Frontend only, no edge function or DB change.
 
-3. **Initiate order (as UAT student):**
-   - Sign in as UAT student in a clean browser session.
-   - Trigger PayPal checkout on the chosen course.
-   - Capture the PayPal approval URL and `paypal_order_id`.
-   - Verify `orders` row exists with `status = 'pending'`.
+## 3. SEC-001 — Role matrix sweep
+**Why blocker:** Last security event triage (Gate 1) classified 8 admin role changes as expected UAT activity. Before go-live we need a clean snapshot proving no unexpected `admin` / `manager` grants exist in production.
 
-4. **Buyer approval (PayPal sandbox):**
-   - `browser--navigate_to_url` to the approval URL.
-   - Log in with the sandbox buyer credentials.
-   - Approve the payment; capture screenshot on the return page (`/payment-success?course_id=…`).
+**Action:**
+- Query `user_roles` joined to `auth.users` and confirm every `admin` / `manager` row maps to a known operator.
+- Revoke anything unrecognized.
+- Save the snapshot to `docs/audit/2026-07/evidence/sec001_role_sweep.md`.
 
-5. **Post-capture verification (SQL):**
-   - `orders.status = 'completed'` with `paypal_order_id` populated.
-   - `payments` row with `provider = 'paypal'`, correct `amount_cents`, `status = 'succeeded'`.
-   - `course_entitlements` row for (user, course) with `status = 'active'`.
-   - `email_send_log` (or `email_logs`) shows `payment-confirmation` template `sent` to UAT email.
+## 4. Evidence freeze + build tag
+**Why blocker:** The 🟢 verdict has to be tied to a specific commit so we can roll back cleanly and so the audit trail is reproducible.
 
-6. **Course unlock check:**
-   - As UAT student in browser, navigate to the course; confirm paywall is gone and module 1 is launchable.
-   - Screenshot the unlocked course state.
+**Action:**
+- Re-run Mission Control snapshot on the post-fix HEAD; expect all five gates green.
+- Update `docs/audit/2026-07/evidence/mission_control_summary_2026-06-18.md` with the final commit SHA and timestamp.
+- Tag the build `launch-go-1.0.0`.
 
-7. **Evidence + closeout:**
-   - Overwrite `docs/audit/2026-07/evidence/launch_closeout_2026-06-18/gate4_paypal_roundtrip.md` with a PASS/FAIL table, IDs, timestamps, and screenshots embedded inline (paths under the same folder).
-   - Update `docs/audit/2026-07/evidence/launch_closeout_2026-06-18/README.md` Gate 4 row to 🟢 PASS (or 🔴 FAIL with reason).
-   - Regenerate `docs/audit/2026-07/evidence/mission_control_summary_2026-06-18.md` with final aggregate (🟢 PRODUCTION GO or 🔴 NO-GO) and a one-line rationale per gate.
+## Out of scope (intentionally deferred)
+- PAY-001 reconciliation job (post-launch, week 1)
+- OPS-001 / OPS-002 production health dashboards
+- CERT-001 certificate audit sweep
+- Full 30-day stabilization plan
 
-## Risk + side effects (acknowledge before approval)
-- Creates a **real** UAT user, a **real** `orders` row, a **real** PayPal sandbox transaction, and a **real** `course_entitlements` row. None of this touches live PayPal — sandbox only.
-- If any step fails, the AI stops, records the failure in `gate4_paypal_roundtrip.md` as FAIL with full context, and flips Mission Control to 🔴 NO-GO. No silent retries, no DB hand-patching.
-- The unrelated `permission denied for table exam_attempts` console warning from `LiveActivityTicker` is out of scope and will not be touched.
+## Sequencing
+Do them in order: **2 → 1 → 3 → 4**. UX-001 first because the live capture in #1 should exercise the fixed flow; SEC-001 right before the freeze so the snapshot is current.
 
-## Deliverables
-- Updated `gate4_paypal_roundtrip.md` with full evidence
-- Updated `launch_closeout_2026-06-18/README.md`
-- Regenerated `mission_control_summary_2026-06-18.md` with final GO / NO-GO
+## Want me to execute?
+Say the word and I'll start with UX-001 (smallest, frontend-only) and then drive the rest one at a time.
