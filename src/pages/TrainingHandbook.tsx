@@ -180,12 +180,7 @@ const TrainingHandbook = () => {
                 </p>
                 <div className="rounded-lg overflow-hidden bg-muted">
                   <div className="aspect-video">
-                    <iframe 
-                      src="https://player.vimeo.com/video/1073070281?h=5f6915d732&badge=0&autopause=0&player_id=0&app_id=58479" 
-                      className="w-full h-full"
-                      allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
-                      title="Section 1: Legal and Regulatory Foundations"
-                    />
+                    <SecureVideoPlayer assetKey="section_1_laws" lazy={false} />
                   </div>
                   <p className="text-sm text-muted-foreground text-center py-3">
                     <em>Video: Overview of Federal and Maryland cannabis laws for dispensary agents.</em>
