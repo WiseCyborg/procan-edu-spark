@@ -133,6 +133,25 @@ const JOB_HANDLERS: Record<string, (job: Job, supabase: any) => Promise<void>> =
     if (error) {
       console.error('[ADMIN ALERT] Failed to insert alert:', error);
     }
+  },
+
+  'seat_utilization_alert': async (job, supabase) => {
+    // Log an org-level seat-utilization alert into compliance_alerts.
+    // The ai-seat-utilization-agent emits these when an org's used/total ratio
+    // is < 50% with > 5 seats idle. We surface as an info-level compliance alert
+    // rather than an email blast — owners see it in the admin dashboard.
+    const p = job.payload || {};
+    const { error } = await supabase.from('compliance_alerts').insert({
+      alert_type: 'seat_utilization',
+      title: `Low seat utilization: ${p.organization_name ?? 'org'}`,
+      description: `Org is using ${p.used_seats ?? 0}/${p.total_seats ?? 0} seats (${p.utilization_rate ?? 0}%). ${p.available_seats ?? 0} seats idle.`,
+      severity: 'info',
+      metadata: p,
+    });
+    if (error) {
+      console.error('[SEAT-UTILIZATION-ALERT] Failed to insert compliance alert:', error);
+      throw error;
+    }
   }
 };
 
