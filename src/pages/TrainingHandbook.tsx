@@ -292,12 +292,7 @@ const TrainingHandbook = () => {
                 </p>
                 <div className="rounded-lg overflow-hidden bg-muted">
                   <div className="aspect-video">
-                    <iframe 
-                      src="https://player.vimeo.com/video/1073072103?h=44ce932241&title=0&byline=0&portrait=0&badge=0&autopause=0&player_id=0&app_id=58479" 
-                      className="w-full h-full"
-                      allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
-                      title="Section 5: Responsible Vendor Training Program"
-                    />
+                    <SecureVideoPlayer assetKey="section_5_safety" lazy={false} />
                   </div>
                   <p className="text-sm text-muted-foreground text-center py-3">
                     <em>Video: Key elements of the Responsible Vendor Training Program.</em>
