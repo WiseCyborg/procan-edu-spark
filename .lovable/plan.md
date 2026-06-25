@@ -170,3 +170,92 @@ HIGH-1, HIGH-2, HIGH-3, HIGH-4, MEDIUM-2, MEDIUM-3, MEDIUM-4, MEDIUM-5, MEDIUM-6
 ---
 
 *Generated read-only on 2026-06-25. No application code, DB rows, RLS policies, or storage objects were modified.*
+
+---
+
+# ADDENDUM — Codebase-sweep findings (subagent `sub_myhhf8jp`)
+
+The parallel source-only sweep finished after the main report was filed. It surfaced **five additional CRITICAL items** and several HIGH items that change the go/no-go calculus. Net effect: the NO-GO verdict is **reinforced**, and the Fix-first list grows from 5 to 10.
+
+## New CRITICAL items
+
+### CRITICAL-5 — Phantom RVT ID `76524ea8-…` still live in two FE files
+- `src/pages/TrainingHandbook.tsx:16` — `COURSE_ID = '76524ea8-a00f-47b3-8e29-a0aa12c23a60'` is passed to `usePaymentStatus`. There is no DB row for this ID → the payment gate never opens via the handbook entry-point.
+- `src/components/chat/ChatAssistant.tsx:17` — same phantom ID seeds AI assistant context, so the assistant's "course context" is wrong for every student.
+- **Earlier turns claimed this was fixed in edge functions only.** The FE was not patched.
+- **Fix:** replace both with `TRACKS.RVT_CORE` from `src/constants/tracks.ts` (`e6841a2f-4e92-47c3-9ed4-243ccc22338b`).
+- **Blocker:** **Yes.**
+
+### CRITICAL-6 — Stripe columns still in DB schema with no handler
+- `src/integrations/supabase/types.ts:1747-1748, 1949-1950, 4474-4476` lists `stripe_checkout_session_id`, `stripe_payment_intent_id`, `stripe_price_id`, `stripe_product_id`, `stripe_customer_id`, `stripe_session_id` on live tables. Stripe edge functions were stubbed to 410, but the **columns and any leftover webhook registrations have not been removed**.
+- **Impact:** any historical or external system still posting to a Stripe webhook URL silently writes nothing and gets no error path. New devs reading the schema see two payment systems.
+- **Fix:** confirm no Stripe webhook registrations remain in the PayPal/Stripe dashboards, then ship a migration to either drop or rename these columns.
+- **Blocker:** **Yes** (audit-trail + future-confusion risk; ship the migration before launch).
+
+### CRITICAL-7 — Two parallel invitation systems running simultaneously
+- **System A:** `staff_invitations` → `send-invitation-email` → `/accept-invitation` (`AcceptInvitation.tsx`) → `accept-invitation` EF → `allocate_seat_to_user` RPC (atomic).
+- **System B:** `org_invites` → `/accept-invite` (`AcceptInvite.tsx`) → `accept-org-invite` EF → **raw `rvt_seats` update, no RPC, no atomicity**.
+- Both routes are wired in `src/App.tsx:351, 431`. Senders only generate System A URLs, so System B is orphaned but reachable.
+- **Impact:** a stale/manual link could land a user on the wrong page; the two paths give different seat-grant semantics and audit trails.
+- **Fix:** pick one (recommend A — it uses the atomic RPC), migrate any data, redirect `/accept-invite` → `/accept-invitation`, delete `AcceptInvite.tsx` and `accept-org-invite`.
+- **Blocker:** **Yes.**
+
+### CRITICAL-8 — `accept-org-invite` treats NULL `expires_at` as valid forever
+- `supabase/functions/accept-org-invite/index.ts` — expiry check is `new Date(invite.expires_at) < new Date()`. If `expires_at IS NULL` the comparison is `false` → invite is treated as valid indefinitely.
+- **Impact:** any invitation row with NULL expiry is a perpetual back-door into the org's seat pool.
+- **Fix:** treat NULL `expires_at` as expired; add a NOT NULL + default constraint on the column.
+- **Blocker:** **Yes** (security).
+
+### CRITICAL-9 — Two certificate issuance paths fire from different layers
+- Path 1: `src/pages/Course/FinalExam.tsx:745` calls `supabase.functions.invoke('generate-certificate', …)` directly when an exam passes.
+- Path 2: `src/hooks/useCertificateIssuance.ts:34` calls `supabase.rpc('evaluate_and_issue_certificate', …)`.
+- If both fire (e.g., user retries the exam page after navigation) the only thing preventing a double-issue is a DB unique constraint, not idempotency in the calling code.
+- **Fix:** make `FinalExam.tsx` go through `useCertificateIssuance` exclusively; remove the direct `functions.invoke`.
+- **Blocker:** **Yes** (compliance — double-issued certs with different serials would be a regulator-facing problem).
+
+## New HIGH items
+
+- **HIGH-6 — `generate-certificate-retry` does not write to `certificate_audit_log`.** Only the primary `generate-certificate` does (line 295). Any retry-issued cert has no audit row → regulator-visible gap.
+- **HIGH-7 — Cert renewal has no learner-facing trigger.** `CertificateRenewal.tsx` exists at `/renew`; `Certificates.tsx` never links to it. Renewal monitor runs server-side but no in-app prompt fires when `expiry_date - now() < 60d`.
+- **HIGH-8 — `v_pipeline_metrics` is a materialised snapshot, not a live view** (its `calculated_at` field gives it away). Mission Control polls it every 60s but shows no staleness badge — if the materialisation cron stalls, every tile reads green on hours-old data. This is the same class of "dishonest green" bug as HIGH-5 in the main report.
+- **HIGH-9 — Email send-* functions have no transactional retry.** If the function crashes between the provider call and the `email_logs` insert, the failure is invisible. `auto-retry-failed-emails` exists but reads from `email_logs`, which is exactly the row that didn't get written.
+- **HIGH-10 — Dead-letter queue is not surfaced in admin UI.** `clear-deadletter-queue` EF exists; `EmailMonitoringDashboard` only reads `email_logs` and has no DLQ tile / requeue button. Ops cannot see silent failures.
+- **HIGH-11 — `accept-invitation` token has no rate limit and no signature.** Plain string read from `staff_invitations`. Token entropy is whatever the generator chose. Brute-forceable in principle.
+- **HIGH-12 — RVT canonical UUID inlined in 13+ files.** `TRACKS.RVT_CORE` exists in `src/constants/tracks.ts` but isn't used by `StudentDashboard`, `Course/*`, `Dashboard`, `ResumePrompt`, `useContinueTraining`, `useStudentChecklistStatus`, `useExamAttempts`, `App.tsx`, `accept-invitation`, `accept-org-invite`, `paypal-webhook`. Re-introducing a phantom on the next ID change is a matter of when, not if.
+- **HIGH-13 — `EmailMonitoringDashboard` retry button does not refresh state.** Result is `console.log`'d; the row keeps showing "failed" until manual reload → ops will double-retry.
+- **HIGH-14 — `AdminSystemHealth` renders `RealSystemHealthPanel` twice** (Overview tab + Email tab) — duplicate health-check query per page load.
+- **HIGH-15 — Orphan/duplicate routes**: `/accept-invite` (no inbound links); `/system-health` declared **twice** in `App.tsx:432` and `:500`; `/verify-certificate` orphan (use `/verify`); `EnhancedDispensaryPortal` imported but not routed.
+
+## New MEDIUM / LOW items
+
+- **MED-7** — `useExamAttempts` defaults `courseId` to the RVT UUID — bakes a course ID into the API contract. Remove the default.
+- **MED-8** — Three "Continue Training" render paths each call `useContinueTraining()` on mount → up to 3× DB round-trips per dashboard render. Lift to shared context.
+- **MED-9** — Four video-player components (`VideoPlayer`, `VimeoPlayer`, `SCORMStylePlayer`, `SecureVideoPlayer`) without a documented canonical. Risk of inconsistent `useVideoProgress` write-back.
+- **MED-10** — `ImpactDashboardPage` and `StateOfficialsPage` run three identical raw `supabase.from()` queries with no shared cache — promote to a single RPC + shared hook.
+- **MED-11** — `unified-email-service.ts` uses obfuscated/minified field name `n` for template name and does not guard against undefined → silent send failures.
+- **MED-12** — `OrgSeatsManagementTab.tsx:112` writes `course_entitlements.course_id` from `rvt_seats.course_id` with no NULL guard and no canonical-ID assertion.
+- **MED-13** — `AdminMissionControl.tsx:37-38` fetches profile via raw `supabase.from('profiles')` in `useEffect` instead of using the cached `useAuth()` profile.
+- **MED-14** — Three certificate verification routes (`/verify`, `/verify-certificate`, `/verify/certificate/:id`); only the last logs via `track-certificate-verification`. Consolidate.
+- **LOW-6** — `UAT*` routes (`/uat/validation-checklist`, `/uat/evidence`, `/uat/feedback`, `/admin/demo-setup`) are not gated for production; should be guarded by `NODE_ENV` or admin flag.
+
+## Updated Fix-first list (Day 0)
+
+| # | Item | Source |
+|---|---|---|
+| 1 | **CRITICAL-1** — phantom courses with 0 modules (`tracks.ts` + `courses`) | main |
+| 2 | **CRITICAL-2** — NULL `video_url` on three published courses + 5 RVT gaps | main |
+| 3 | **CRITICAL-3** — `user_journey_state` write loop | main |
+| 4 | **CRITICAL-4** — three RVT modules still on Vimeo | main |
+| 5 | **CRITICAL-5** — phantom RVT ID `76524ea8` in `TrainingHandbook.tsx` + `ChatAssistant.tsx` | addendum |
+| 6 | **CRITICAL-7** — consolidate the two invitation systems | addendum |
+| 7 | **CRITICAL-8** — NULL `expires_at` = expired (security fix) | addendum |
+| 8 | **CRITICAL-9** — single cert-issuance path from `FinalExam.tsx` | addendum |
+| 9 | **CRITICAL-6** — Stripe column/webhook cleanup migration | addendum |
+| 10 | **HIGH-5 + HIGH-8** — content-completeness + snapshot-staleness honesty checks on Mission Control | both |
+
+## Updated Go / no-go
+
+**🔴 NO-GO reinforced.** The codebase sweep added a second-payment-system landmine (Stripe columns), a perpetual-back-door invitation bug (NULL expiry), a duplicate cert-issuance path, and a still-active phantom course ID on the most-trafficked learner entry-point. These are not "polish" items — any one of them can fail a real buyer, learner, or compliance audit in the first week.
+
+**🟢 GO when:** all 10 Fix-first items are closed **and** Mission Control re-runs green with both the content-completeness check (HIGH-5) and the snapshot-staleness badge (HIGH-8) active.
+
