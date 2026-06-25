@@ -264,12 +264,7 @@ const TrainingHandbook = () => {
                 </p>
                 <div className="rounded-lg overflow-hidden bg-muted">
                   <div className="aspect-video">
-                    <iframe 
-                      src="https://player.vimeo.com/video/1073072091?h=f75482ba3d&title=0&byline=0&portrait=0&badge=0&autopause=0&player_id=0&app_id=58479" 
-                      className="w-full h-full"
-                      allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
-                      title="Section 4: Substance Use and Customer Safety"
-                    />
+                    <SecureVideoPlayer assetKey="section_4_sales" lazy={false} />
                   </div>
                   <p className="text-sm text-muted-foreground text-center py-3">
                     <em>Video: Identifying signs of intoxication and substance use disorders.</em>
