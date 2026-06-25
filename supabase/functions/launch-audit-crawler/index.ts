@@ -193,6 +193,79 @@ async function probeWelcomeIntro(
   };
 }
 
+// Probe every distinct video URL stored in course_modules.video_url and
+// video_assets.public_url via Vimeo oEmbed (or HEAD for non-Vimeo URLs).
+// Returns an aggregate result with per-URL detail so we catch the exact
+// regression class that bit us on 2026-06-25 (1096xxx batch — Vimeo embed
+// privacy didn't include procannedu.com, so the iframe rendered "Sorry").
+async function probeAllVideos(
+  admin: ReturnType<typeof createClient>,
+): Promise<Record<string, unknown>> {
+  const started = Date.now();
+
+  const [modulesRes, assetsRes] = await Promise.all([
+    admin.from("course_modules").select("id, course_id, module_number, title, video_url").not("video_url", "is", null),
+    admin.from("video_assets").select("id, asset_key, public_url").not("public_url", "is", null),
+  ]);
+
+  type Probe = { source: string; ref: string; url: string; ok: boolean; status: number | null; error?: string };
+  const probes: Probe[] = [];
+  const seen = new Map<string, Probe>();
+
+  const enqueue = async (source: string, ref: string, url: string) => {
+    const key = `${source}::${url}`;
+    if (seen.has(key)) return;
+    let ok = false;
+    let status: number | null = null;
+    let error: string | undefined;
+    try {
+      if (/vimeo\.com/.test(url)) {
+        const api = `https://vimeo.com/api/oembed.json?url=${encodeURIComponent(url)}`;
+        const res = await fetch(api, { method: "GET" });
+        status = res.status;
+        ok = res.ok;
+      } else {
+        const res = await fetch(url, { method: "HEAD" });
+        status = res.status;
+        ok = res.ok;
+        if (status === 405 || status === 403) {
+          const r2 = await fetch(url, { method: "GET", headers: { Range: "bytes=0-1024" } });
+          status = r2.status;
+          ok = r2.ok;
+        }
+      }
+    } catch (err) {
+      error = err instanceof Error ? err.message : String(err);
+    }
+    const probe: Probe = { source, ref, url, ok, status, ...(error ? { error } : {}) };
+    seen.set(key, probe);
+    probes.push(probe);
+  };
+
+  const queue: Promise<void>[] = [];
+  for (const m of (modulesRes.data ?? [])) {
+    queue.push(enqueue("course_modules", `${m.course_id}#${m.module_number}`, m.video_url as string));
+  }
+  for (const a of (assetsRes.data ?? [])) {
+    queue.push(enqueue("video_assets", a.asset_key as string, a.public_url as string));
+  }
+  // Run in small parallel batches to stay polite to Vimeo's oEmbed.
+  const concurrency = 6;
+  for (let i = 0; i < queue.length; i += concurrency) {
+    await Promise.all(queue.slice(i, i + concurrency));
+  }
+
+  const total = probes.length;
+  const failing = probes.filter((p) => !p.ok);
+  return {
+    ok: failing.length === 0,
+    total,
+    failing_count: failing.length,
+    failing,
+    latency_ms: Date.now() - started,
+  };
+}
+
 serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -324,6 +397,29 @@ serve(async (req: Request) => {
       .select("id, route, rollup_status, findings")
       .single();
     results.push(probeRow);
+
+    // Video reachability sweep — probes every URL in course_modules.video_url
+    // and video_assets.public_url. Persisted as a sentinel row so the UI can
+    // surface a single fail/pass plus the failing URL list.
+    const videos = await probeAllVideos(admin);
+    const { data: videoRow } = await admin
+      .from("launch_audit_runs")
+      .insert({
+        run_batch: runBatch,
+        route: "__video_reachability__",
+        url: "",
+        http_status: null,
+        status: videos.ok ? "ok" : "error",
+        rollup_status: videos.ok ? "pass" : "fail",
+        failed_checks: videos.ok
+          ? []
+          : [{ check: "video_reachability", reason: `${videos.failing_count}/${videos.total} URLs unreachable` }],
+        findings: videos,
+        triggered_by: caller.id,
+      })
+      .select("id, route, rollup_status, findings")
+      .single();
+    results.push(videoRow);
 
     return new Response(JSON.stringify({ success: true, run_batch: runBatch, results }), {
       status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
