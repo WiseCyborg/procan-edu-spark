@@ -10106,6 +10106,12 @@ export type Database = {
           old_value: string
         }[]
       }
+      get_public_activity_stats: {
+        Args: { p_limit?: number }
+        Returns: {
+          passed_at: string
+        }[]
+      }
       get_recent_certificate_activity: {
         Args: { _limit?: number }
         Returns: {
