@@ -35,6 +35,7 @@ interface UserData {
   ip: string;
   photo?: string;
   certificateNumber?: string;
+  certificatePdfPath?: string;
 }
 
 interface ExamResult {
