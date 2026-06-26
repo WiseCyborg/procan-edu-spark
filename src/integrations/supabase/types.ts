@@ -10497,6 +10497,7 @@ export type Database = {
           issue_date: string
         }[]
       }
+      verify_cron_secret: { Args: { p_secret: string }; Returns: boolean }
       verify_token_hash: {
         Args: { stored_hash: string; token: string }
         Returns: boolean

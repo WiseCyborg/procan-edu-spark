@@ -12,8 +12,9 @@ import { useOrganizationAccess } from '@/hooks/useOrganizationAccess';
 import { CoursePaymentGate } from '@/components/CoursePaymentGate';
 import { EmployeeAccessMessage } from '@/components/EmployeeAccessMessage';
 import { SecureVideoPlayer } from '@/components/video/SecureVideoPlayer';
+import { TRACK_IDS } from '@/constants/tracks';
 
-const COURSE_ID = '76524ea8-a00f-47b3-8e29-a0aa12c23a60';
+const COURSE_ID = TRACK_IDS.RVT_CORE;
 
 const TrainingHandbook = () => {
   const navigate = useNavigate();
