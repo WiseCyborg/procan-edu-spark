@@ -993,64 +993,70 @@ const FinalExam: React.FC = () => {
     );
   };
 
-  // Render results screen with topic-level scoring
+  // Render results screen with topic-level scoring — sourced from the persisted attempt.
   const renderResults = () => {
-    const totalQuestions = Object.values(quizzes).reduce((sum, section) => sum + section.length, 0);
-    const percentage = (totalScore / totalQuestions) * 100;
-    const passed = percentage >= 80;
-    const elapsedTime = 5400 - totalTimeLeft;
-    
+    // Prefer persisted values so UI and database agree. Fall back to client computation
+    // only while persistence is still in flight (very brief window).
+    const overallPercent = persistedAttempt?.total_score ?? 0;
+    const passed = persistedAttempt?.is_passed === true;
+    const sourceTopicScores: TopicScore[] = persistedAttempt?.topic_scores ?? topicScores;
+    const elapsedTime = persistedAttempt?.time_taken ?? (5400 - totalTimeLeft);
+
     return (
       <div className="space-y-6">
         {/* Topic-Level Scoring and Remedial Recommendations */}
         <RemedialRecommendations
-          topicScores={topicScores}
+          topicScores={sourceTopicScores}
           overallPassed={passed}
-          overallScore={Math.round(percentage)}
+          overallScore={overallPercent}
         />
-        
+
         {/* Detailed Section Results */}
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h3 className="text-xl font-bold mb-4">Detailed Results by Section</h3>
           <p className="text-sm text-muted-foreground mb-4">
-            Total Time: {formatTime(elapsedTime)}
+            Total Time: {formatTime(elapsedTime)} · Overall: {overallPercent}% ·{' '}
+            {passed ? (
+              <span className="text-green-600 font-semibold">Passed</span>
+            ) : (
+              <span className="text-destructive font-semibold">Did not pass</span>
+            )}
           </p>
-          
+
           <div className="space-y-2">
-            {Object.keys(results).map(sectionKey => {
-              const section = parseInt(sectionKey);
-              const sectionResults = results[section];
-              const sectionScore = sectionResults.filter(r => r.isCorrect).length;
-              const sectionTotal = sectionResults.length;
-              const sectionPercentage = Math.round((sectionScore / sectionTotal) * 100);
-              
-              return (
-                <div 
-                  key={section} 
-                  className={`p-3 rounded-lg border ${
-                    sectionPercentage >= 80 
-                      ? 'border-green-500/30 bg-green-500/5' 
-                      : 'border-destructive/30 bg-destructive/5'
-                  }`}
-                >
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium text-sm">
-                      Section {section}: {sectionTitles[section]}
-                    </span>
-                    <span className={`font-bold ${
-                      sectionPercentage >= 80 ? 'text-green-600' : 'text-destructive'
-                    }`}>
-                      {sectionScore}/{sectionTotal} ({sectionPercentage}%)
-                    </span>
-                  </div>
+            {sourceTopicScores.map(ts => (
+              <div
+                key={ts.section_number}
+                className={`p-3 rounded-lg border ${
+                  ts.score_percentage >= 80
+                    ? 'border-green-500/30 bg-green-500/5'
+                    : 'border-destructive/30 bg-destructive/5'
+                }`}
+              >
+                <div className="flex justify-between items-center">
+                  <span className="font-medium text-sm">
+                    Section {ts.section_number}: {ts.section_title}
+                  </span>
+                  <span className={`font-bold ${
+                    ts.score_percentage >= 80 ? 'text-green-600' : 'text-destructive'
+                  }`}>
+                    {ts.questions_correct}/{ts.questions_total} ({ts.score_percentage}%)
+                  </span>
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
-          
+
+          {!passed && (
+            <p className="mt-4 text-sm text-muted-foreground">
+              To earn the certificate, every section must reach at least 80% and the overall score must be at least{' '}
+              {persistedAttempt?.passing_score ?? 80}%.
+            </p>
+          )}
+
           <div className="mt-6 flex justify-center">
             {passed ? (
-              <Button size="lg" onClick={generateCertificate}>
+              <Button size="lg" onClick={generateCertificate} disabled={isFinalizing}>
                 Generate Certificate
               </Button>
             ) : (
@@ -1063,6 +1069,7 @@ const FinalExam: React.FC = () => {
       </div>
     );
   };
+
 
   // Render certificate using CertificateAchievement component
   const renderCertificate = () => {
