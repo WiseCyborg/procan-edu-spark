@@ -15,7 +15,10 @@ import { ProtectedCourseAccess } from '@/components/ProtectedCourseAccess';
 import { EmployeeAccessMessage } from '@/components/EmployeeAccessMessage';
 import { Breadcrumbs } from '@/components/navigation/Breadcrumbs';
 import { CourseProgressionCTA } from '@/components/course/CourseProgressionCTA';
+import { useCourseState } from '@/hooks/useCourseState';
+import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
+
 
 const TOTAL_MODULES = 24;
 const COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
