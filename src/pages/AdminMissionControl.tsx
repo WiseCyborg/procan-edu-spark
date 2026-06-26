@@ -111,6 +111,10 @@ const AdminMissionControl = () => {
         {/* Admin next action guidance */}
         <NextActionBanner variant="compact" className="mb-2" />
 
+        {/* Environment Controls */}
+        <EnvironmentControls />
+
+
         {/* Action Center - Critical Alerts */}
         {(criticalAlerts.length > 0 || warningAlerts.length > 0) && (
           <Alert variant={criticalAlerts.length > 0 ? "destructive" : "default"} className="border-2">
