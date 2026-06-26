@@ -599,10 +599,24 @@ const FinalExam: React.FC = () => {
     setShowInstructions(false);
   };
 
-  const startExam = () => {
+  const startExam = async () => {
+    const startedAt = new Date();
+    setExamStartedAt(startedAt);
     setExamStage('exam');
     setSectionTimeLeft(300);
     setTotalTimeLeft(5400);
+
+    // Record started_at on the existing attempt row (created at check-in)
+    if (examAttemptId) {
+      try {
+        await supabase
+          .from('exam_attempts')
+          .update({ started_at: startedAt.toISOString() })
+          .eq('id', examAttemptId);
+      } catch (err) {
+        console.error('Failed to record exam started_at:', err);
+      }
+    }
   };
 
   const pauseTimer = () => {
@@ -629,48 +643,62 @@ const FinalExam: React.FC = () => {
         isCorrect: selectedAnswer === question.a
       };
     });
-    
+
     const sectionScore = sectionResults.filter(result => result.isCorrect).length;
-    setTotalScore(prev => prev + sectionScore);
-    
-    setResults(prev => ({
-      ...prev,
-      [section]: sectionResults
-    }));
-    
-    setSubmittedSections(prev => {
-      const newSet = new Set(prev);
-      newSet.add(section);
-      return newSet;
-    });
-    
-    // Check if all sections are completed
-    if (submittedSections.size >= 17 && section === 18) {
-      showFinalResults();
+
+    // Build a fresh snapshot so we don't depend on stale React state when finalizing
+    const nextResults: ExamResult = { ...results, [section]: sectionResults };
+    const nextSubmitted = new Set(submittedSections);
+    nextSubmitted.add(section);
+    const nextTotalCorrect = Object.values(nextResults).reduce(
+      (sum, secResults) => sum + secResults.filter(r => r.isCorrect).length,
+      0
+    );
+
+    setResults(nextResults);
+    setSubmittedSections(nextSubmitted);
+    setTotalScore(nextTotalCorrect);
+
+    // Check if all 18 sections are now complete
+    if (nextSubmitted.size >= 18) {
+      finalizeExam(nextResults);
     } else {
       toast.success(`Section ${section} submitted. Score: ${sectionScore}/${questions.length}`);
-      
-      // Move to next section
-      if (section < 18) {
-        setCurrentSection(section + 1);
+
+      // Move to next un-submitted section (default: section + 1)
+      let nextSection = section + 1;
+      while (nextSection <= 18 && nextSubmitted.has(nextSection)) nextSection++;
+      if (nextSection <= 18) {
+        setCurrentSection(nextSection);
         setSectionTimeLeft(300);
       }
     }
   };
 
-  const showFinalResults = async () => {
+  // Compute final results from a snapshot, persist to exam_attempts, and transition to results screen.
+  const finalizeExam = async (allResults: ExamResult) => {
+    if (isFinalizing) return;
+    setIsFinalizing(true);
+
     if (totalTimerRef.current) clearInterval(totalTimerRef.current);
     if (sectionTimerRef.current) clearInterval(sectionTimerRef.current);
-    
-    // Calculate topic-level scores
+
+    // Per-section (topic) scores from the snapshot — no stale state
     const calculatedTopicScores: TopicScore[] = [];
-    
+    let overallCorrect = 0;
+    let overallTotal = 0;
+
     for (let section = 1; section <= 18; section++) {
-      const sectionResults = results[section] || [];
+      const sectionResults = allResults[section] || [];
       const questionsCorrect = sectionResults.filter(r => r.isCorrect).length;
-      const questionsTotal = sectionResults.length;
-      const scorePercentage = questionsTotal > 0 ? Math.round((questionsCorrect / questionsTotal) * 100) : 0;
-      
+      const questionsTotal = (quizzes[section] || []).length;
+      const scorePercentage = questionsTotal > 0
+        ? Math.round((questionsCorrect / questionsTotal) * 100)
+        : 0;
+
+      overallCorrect += questionsCorrect;
+      overallTotal += questionsTotal;
+
       calculatedTopicScores.push({
         section_number: section,
         section_title: sectionTitles[section],
@@ -682,62 +710,116 @@ const FinalExam: React.FC = () => {
         needs_remediation: scorePercentage < 80
       });
     }
-    
+
+    const PASSING_SCORE = 80;
+    const overallPercent = overallTotal > 0
+      ? Math.round((overallCorrect / overallTotal) * 100)
+      : 0;
+    const allTopicsMastered = calculatedTopicScores.every(t => t.score_percentage >= 80);
+    const isPassed = allTopicsMastered && overallPercent >= PASSING_SCORE;
+
+    const completedAtIso = new Date().toISOString();
+    const timeTakenSec = examStartedAt
+      ? Math.max(0, Math.round((Date.now() - examStartedAt.getTime()) / 1000))
+      : (5400 - totalTimeLeft);
+
     setTopicScores(calculatedTopicScores);
-    
-    // Update the existing exam attempt (created at check-in time) with final scores
-    try {
-      const { data: authData } = await supabase.auth.getUser();
-      const userId = authData.user?.id;
-      
-      if (!userId) {
-        console.error('User not authenticated');
-        setExamStage('results');
-        return;
-      }
+    setTotalScore(overallPercent); // total_score now represents the overall percentage 0–100
 
-      if (examAttemptId) {
-        // Update the stub attempt with actual results
-        const { error: updateError } = await supabase
-          .from('exam_attempts')
-          .update({
-            total_score: totalScore,
-            time_taken: 5400 - totalTimeLeft,
-            completed_at: new Date().toISOString(),
-            topic_scores: calculatedTopicScores as any,
-          })
-          .eq('id', examAttemptId);
-
-        if (updateError) {
-          console.error('Error updating exam attempt:', updateError);
-        }
-
-        // Store individual topic scores in exam_topic_scores table
-        const topicScoreInserts = calculatedTopicScores.map(ts => ({
-          exam_attempt_id: examAttemptId,
-          section_number: ts.section_number,
-          comar_section: ts.comar_section,
-          topic_area: ts.topic_area,
-          questions_correct: ts.questions_correct,
-          questions_total: ts.questions_total,
-          score_percentage: ts.score_percentage,
-          needs_remediation: ts.needs_remediation
-        }));
-        
-        await supabase
-          .from('exam_topic_scores')
-          .insert(topicScoreInserts);
-          
-        // Refetch attempt history and stats
-        refetchAttempts();
-        refetchStats();
-      }
-    } catch (error) {
-      console.error('Error storing topic scores:', error);
+    if (!examAttemptId) {
+      console.error('Cannot persist exam results: examAttemptId is null');
+      toast.error('Could not save your exam results. Please contact support.');
+      setPersistedAttempt({
+        total_score: overallPercent,
+        is_passed: false,
+        passing_score: PASSING_SCORE,
+        topic_scores: calculatedTopicScores,
+        time_taken: timeTakenSec,
+        completed_at: completedAtIso,
+      });
+      setExamStage('results');
+      setIsFinalizing(false);
+      return;
     }
-    
+
+    try {
+      const { error: updateError } = await supabase
+        .from('exam_attempts')
+        .update({
+          total_score: overallPercent,
+          passing_score: PASSING_SCORE,
+          is_passed: isPassed,
+          time_taken: timeTakenSec,
+          completed_at: completedAtIso,
+          topic_scores: calculatedTopicScores as any,
+        })
+        .eq('id', examAttemptId);
+
+      if (updateError) {
+        console.error('Error persisting exam attempt:', updateError);
+        toast.error('Failed to save exam results. Please contact support.');
+      }
+
+      // Also store individual topic scores (best-effort)
+      const topicScoreInserts = calculatedTopicScores.map(ts => ({
+        exam_attempt_id: examAttemptId,
+        section_number: ts.section_number,
+        comar_section: ts.comar_section,
+        topic_area: ts.topic_area,
+        questions_correct: ts.questions_correct,
+        questions_total: ts.questions_total,
+        score_percentage: ts.score_percentage,
+        needs_remediation: ts.needs_remediation
+      }));
+      await supabase.from('exam_topic_scores').insert(topicScoreInserts);
+
+      // Re-read the persisted attempt so the UI mirrors what's actually in the DB
+      const { data: persisted, error: readErr } = await supabase
+        .from('exam_attempts')
+        .select('total_score, is_passed, passing_score, topic_scores, time_taken, completed_at')
+        .eq('id', examAttemptId)
+        .maybeSingle();
+
+      if (readErr || !persisted) {
+        // Fall back to the values we just wrote
+        setPersistedAttempt({
+          total_score: overallPercent,
+          is_passed: isPassed,
+          passing_score: PASSING_SCORE,
+          topic_scores: calculatedTopicScores,
+          time_taken: timeTakenSec,
+          completed_at: completedAtIso,
+        });
+      } else {
+        setPersistedAttempt({
+          total_score: persisted.total_score ?? overallPercent,
+          is_passed: persisted.is_passed === true,
+          passing_score: persisted.passing_score ?? PASSING_SCORE,
+          topic_scores: (persisted.topic_scores as unknown as TopicScore[]) || calculatedTopicScores,
+          time_taken: persisted.time_taken ?? timeTakenSec,
+          completed_at: persisted.completed_at ?? completedAtIso,
+        });
+      }
+
+      refetchAttempts();
+      refetchStats();
+    } catch (error) {
+      console.error('Error finalizing exam:', error);
+      toast.error('An error occurred saving your exam.');
+      setPersistedAttempt({
+        total_score: overallPercent,
+        is_passed: isPassed,
+        passing_score: PASSING_SCORE,
+        topic_scores: calculatedTopicScores,
+        time_taken: timeTakenSec,
+        completed_at: completedAtIso,
+      });
+    }
+
     setExamStage('results');
+    setIsFinalizing(false);
   };
+
 
   const generateCertificate = async () => {
     try {
