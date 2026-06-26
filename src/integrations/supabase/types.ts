@@ -1472,14 +1472,24 @@ export type Database = {
         Row: {
           ai_suggested_change: string | null
           assigned_to: string | null
+          change_severity: string | null
+          change_summary: string | null
           completed_at: string | null
           content_id: string | null
+          content_title: string | null
           content_type: string
           created_at: string | null
+          descript_project_id: string | null
+          draft_faq_text: string | null
+          draft_video_url: string | null
           due_date: string | null
+          goes_live_at: string | null
           id: string
           location: string
           regulatory_update_id: string | null
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           status: string | null
           updated_at: string | null
           urgency: string | null
@@ -1487,14 +1497,24 @@ export type Database = {
         Insert: {
           ai_suggested_change?: string | null
           assigned_to?: string | null
+          change_severity?: string | null
+          change_summary?: string | null
           completed_at?: string | null
           content_id?: string | null
+          content_title?: string | null
           content_type: string
           created_at?: string | null
+          descript_project_id?: string | null
+          draft_faq_text?: string | null
+          draft_video_url?: string | null
           due_date?: string | null
+          goes_live_at?: string | null
           id?: string
           location: string
           regulatory_update_id?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           status?: string | null
           updated_at?: string | null
           urgency?: string | null
@@ -1502,14 +1522,24 @@ export type Database = {
         Update: {
           ai_suggested_change?: string | null
           assigned_to?: string | null
+          change_severity?: string | null
+          change_summary?: string | null
           completed_at?: string | null
           content_id?: string | null
+          content_title?: string | null
           content_type?: string
           created_at?: string | null
+          descript_project_id?: string | null
+          draft_faq_text?: string | null
+          draft_video_url?: string | null
           due_date?: string | null
+          goes_live_at?: string | null
           id?: string
           location?: string
           regulatory_update_id?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           status?: string | null
           updated_at?: string | null
           urgency?: string | null
@@ -9161,7 +9191,9 @@ export type Database = {
           bucket_id: string
           course_id: string | null
           created_at: string | null
+          descript_project_id: string | null
           description: string | null
+          draft_video_url: string | null
           duration_seconds: number | null
           fallback_bucket_id: string | null
           fallback_storage_path: string | null
@@ -9183,7 +9215,9 @@ export type Database = {
           bucket_id?: string
           course_id?: string | null
           created_at?: string | null
+          descript_project_id?: string | null
           description?: string | null
+          draft_video_url?: string | null
           duration_seconds?: number | null
           fallback_bucket_id?: string | null
           fallback_storage_path?: string | null
@@ -9205,7 +9239,9 @@ export type Database = {
           bucket_id?: string
           course_id?: string | null
           created_at?: string | null
+          descript_project_id?: string | null
           description?: string | null
+          draft_video_url?: string | null
           duration_seconds?: number | null
           fallback_bucket_id?: string | null
           fallback_storage_path?: string | null

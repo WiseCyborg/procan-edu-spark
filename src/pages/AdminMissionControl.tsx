@@ -18,6 +18,7 @@ import { ConsumerCoursesSection } from '@/components/admin/ConsumerCoursesSectio
 import { SupportRequestsPanel } from '@/components/admin/SupportRequestsPanel';
 import { E2EValidationReport } from '@/components/admin/E2EValidationReport';
 import { EnvironmentControls } from '@/components/admin/EnvironmentControls';
+import { RegulatoryReviewPanel } from '@/components/admin/RegulatoryReviewPanel';
 import { Loader2 } from 'lucide-react';
 import { InternalChatbot } from '@/components/chat/InternalChatbot';
 import { NextActionBanner } from '@/components/guidance/NextActionBanner';
@@ -113,6 +114,11 @@ const AdminMissionControl = () => {
 
         {/* Environment Controls */}
         <EnvironmentControls />
+
+        {/* Regulatory Review (human approval gate) */}
+        <RegulatoryReviewPanel />
+
+
 
 
         {/* Action Center - Critical Alerts */}
