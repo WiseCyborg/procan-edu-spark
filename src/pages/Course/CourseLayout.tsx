@@ -15,7 +15,10 @@ import { ProtectedCourseAccess } from '@/components/ProtectedCourseAccess';
 import { EmployeeAccessMessage } from '@/components/EmployeeAccessMessage';
 import { Breadcrumbs } from '@/components/navigation/Breadcrumbs';
 import { CourseProgressionCTA } from '@/components/course/CourseProgressionCTA';
+import { useCourseState } from '@/hooks/useCourseState';
+import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
+
 
 const TOTAL_MODULES = 24;
 const COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
@@ -57,6 +60,16 @@ const CourseLayout: React.FC = () => {
     isLoading
   } = useUserProgress(COURSE_ID);
 
+  // BUG-011: Server-computed exam gate (required-only progress)
+  const { courseState } = useCourseState(COURSE_ID);
+  const requiredTotal = courseState.required_total || REQUIRED_FOR_EXAM;
+  const requiredCompleted = Math.min(courseState.required_completed ?? 0, requiredTotal);
+  const examEligible = courseState.exam_eligible || areAllModulesCompleted();
+  const requiredRemaining = Math.max(requiredTotal - requiredCompleted, 0);
+  const requiredPercent = requiredTotal > 0
+    ? Math.round((requiredCompleted / requiredTotal) * 100)
+    : 0;
+
   useEffect(() => {
     const fetchModules = async () => {
       const { data, error } = await supabase
@@ -90,15 +103,20 @@ const CourseLayout: React.FC = () => {
   }, []);
 
   const updateProgressDisplay = () => {
-    const completedCount = getCompletedModulesCount();
     const averageScore = getTotalScore();
-    return `${completedCount}/${REQUIRED_FOR_EXAM} modules completed${averageScore > 0 ? ` • Average score: ${averageScore}%` : ''}`;
+    return `${requiredCompleted}/${requiredTotal} required modules completed${averageScore > 0 ? ` • Average score: ${averageScore}%` : ''}`;
   };
 
-  const isExamEnabled = areAllModulesCompleted();
   const isManagerRole = isDispensaryManager || isAdmin;
   const managerModules = modules.filter(m => m.is_manager_only);
   const agentModules = modules.filter(m => !m.is_manager_only);
+  const managerCompletedCount = managerModules.filter(m =>
+    isModuleCompleted(`part${m.module_number}`)
+  ).length;
+  const managerPercent = managerModules.length > 0
+    ? Math.round((managerCompletedCount / managerModules.length) * 100)
+    : 0;
+
 
   // Show loading state
   if (isLoading || paymentLoading || rolesLoading || orgLoading) {
@@ -147,7 +165,7 @@ const CourseLayout: React.FC = () => {
             )}
           </CardTitle>
           <p className="text-muted-foreground">
-            Complete all modules to unlock the final exam and earn your certificate
+            Complete the {requiredTotal} required agent modules to unlock the final exam and earn your Maryland RVT (Agent) certificate.
           </p>
           {organizationName && (
             <p className="text-sm text-muted-foreground mt-2">
@@ -161,22 +179,42 @@ const CourseLayout: React.FC = () => {
               {updateProgressDisplay()}
             </Badge>
           </div>
+          {/* Required (Agent) progress */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span className="font-medium text-foreground">Agent Certification Progress (required)</span>
+              <span className="text-muted-foreground">
+                {requiredCompleted} of {requiredTotal} • {requiredPercent}%
+              </span>
+            </div>
+            <Progress value={requiredPercent} className="h-2" />
+            <p className="text-xs text-muted-foreground">
+              {examEligible
+                ? 'All required modules complete — your final exam is unlocked.'
+                : `${requiredRemaining} required module${requiredRemaining === 1 ? '' : 's'} remaining before the final exam unlocks.`}
+            </p>
+          </div>
           <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
             <p className="text-sm text-blue-800 dark:text-blue-300 text-center">
-              <span className="font-semibold">Note:</span> Green, Yellow, and Red tier levels are for progress tracking and motivation. 
-              All 24 modules are required for Maryland RVT certification compliance.
+              <span className="font-semibold">Note:</span> Green, Yellow, and Red tier levels are for progress tracking and motivation.
+              The {requiredTotal} agent modules are required for Maryland RVT (Agent) certification. The {managerModules.length || 5} manager-level modules are optional and count only toward Manager-Level RVT certification.
             </p>
           </div>
           {isManagerRole && managerModules.length > 0 && (
-            <div className="bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800 rounded-lg p-4">
+            <div className="bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800 rounded-lg p-4 space-y-2">
               <p className="text-sm text-purple-800 dark:text-purple-300 text-center">
-                <span className="font-semibold">Manager Track:</span> You have access to {managerModules.length} additional manager-level modules. 
-                Complete these for <strong>Manager-Level RVT Certification</strong>.
+                <span className="font-semibold">Manager Track (Optional):</span> {managerModules.length} additional manager-level modules. These do not block your Agent exam — complete them for <strong>Manager-Level RVT Certification</strong>.
               </p>
+              <div className="flex items-center justify-between text-xs text-purple-800 dark:text-purple-300">
+                <span>Manager Track Progress</span>
+                <span>{managerCompletedCount} of {managerModules.length} • {managerPercent}%</span>
+              </div>
+              <Progress value={managerPercent} className="h-2" />
             </div>
           )}
         </CardContent>
       </Card>
+
 
       {/* Agent-Level Modules (1-18) */}
       <div className="space-y-4">
@@ -285,14 +323,16 @@ const CourseLayout: React.FC = () => {
         </div>
       )}
 
-      {/* Dynamic Progression CTA - Always shows the ONE next step */}
+      {/* Dynamic Progression CTA - Always shows the ONE next step
+          BUG-011: Gate exam on required-only completion (exam_eligible), not on all 24 modules. */}
       <CourseProgressionCTA
-        completedModulesCount={getCompletedModulesCount()}
-        requiredModulesCount={REQUIRED_FOR_EXAM}
+        completedModulesCount={requiredCompleted}
+        requiredModulesCount={requiredTotal}
         firstIncompleteModule={getFirstIncompleteModule()}
-        allModulesCompleted={areAllModulesCompleted()}
+        allModulesCompleted={examEligible}
         isManagerRole={isManagerRole}
       />
+
       </div>
     </ProtectedCourseAccess>
   );
