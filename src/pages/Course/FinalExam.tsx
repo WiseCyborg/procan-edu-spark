@@ -1042,7 +1042,7 @@ const FinalExam: React.FC = () => {
         completionDate={date}
         tierStatus={tierStatus}
         userPhoto={userData.photo}
-        onDownload={printCertificate}
+        onDownload={downloadCertificate}
         onShare={emailCertificate}
       />
     );
