@@ -43,7 +43,7 @@ const getContextInfo = (pathname: string, userRoles: string[]): ContextInfo => {
   if (pathname === '/auth') {
     return {
       route: 'auth',
-      title: 'ProCann Assistant',
+      title: 'AiLean',
       description: 'Get help with signing in or creating your account',
       helpTips: [
         'Having trouble signing in?',
@@ -66,7 +66,7 @@ const getContextInfo = (pathname: string, userRoles: string[]): ContextInfo => {
     
     return {
       route: 'dashboard',
-      title: 'ProCann Assistant',
+      title: 'AiLean',
       description: `Navigate your ${securityLevel === 'student' ? 'training progress' : 'management dashboard'}`,
       helpTips: tips,
       securityLevel
@@ -86,7 +86,7 @@ const getContextInfo = (pathname: string, userRoles: string[]): ContextInfo => {
     
     return {
       route: 'course',
-      title: 'ProCann Assistant',
+      title: 'AiLean',
       description: 'Get help with course content and navigation',
       helpTips: [
         'Explain cannabis regulations in Maryland',
@@ -101,7 +101,7 @@ const getContextInfo = (pathname: string, userRoles: string[]): ContextInfo => {
   if (pathname === '/dispensary-portal' && securityLevel !== 'student') {
     return {
       route: 'dispensary-portal',
-      title: 'ProCann Assistant',
+      title: 'AiLean',
       description: 'Manage your team and organizational compliance',
       helpTips: [
         'How do I add new employees?',
@@ -116,7 +116,7 @@ const getContextInfo = (pathname: string, userRoles: string[]): ContextInfo => {
   if (pathname === '/admin-dashboard' && securityLevel === 'admin') {
     return {
       route: 'admin-dashboard',
-      title: 'ProCann Assistant',
+      title: 'AiLean',
       description: 'Manage the entire ProCann Edu platform',
       helpTips: [
         'How do I manage organizations?',
@@ -131,7 +131,7 @@ const getContextInfo = (pathname: string, userRoles: string[]): ContextInfo => {
   // Default/fallback context
   return {
     route: 'general',
-    title: 'ProCann Assistant',
+    title: 'AiLean',
     description: 'Your cannabis education and compliance expert',
     helpTips: [
       'Tell me about ProCann Edu',
@@ -503,7 +503,7 @@ export const EnhancedChatAssistant: React.FC = () => {
                       <div className={`flex flex-col ${message.isUser ? 'items-end' : 'items-start'} max-w-[75%]`}>
                         <div className="flex items-center gap-1.5 mb-1">
                           <span className="text-xs font-medium text-muted-foreground">
-                            {message.isUser ? (userFirstName || 'You') : 'ProCann Assistant'}
+                            {message.isUser ? (userFirstName || 'You') : 'AiLean'}
                           </span>
                           <span className="text-xs text-muted-foreground/60">
                             {format(message.timestamp, 'h:mm a')}
@@ -561,7 +561,7 @@ export const EnhancedChatAssistant: React.FC = () => {
                       <Bot className="w-4 h-4 text-primary animate-pulse" />
                     </div>
                     <div className="flex flex-col items-start">
-                      <span className="text-xs font-medium text-muted-foreground mb-1">ProCann Assistant</span>
+                      <span className="text-xs font-medium text-muted-foreground mb-1">AiLean</span>
                       <div className="bg-muted rounded-lg px-3 py-2 text-sm text-muted-foreground animate-pulse">
                         Typing...
                       </div>

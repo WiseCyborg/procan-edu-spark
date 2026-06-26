@@ -58,7 +58,7 @@ export const QuestionMarkTooltip = ({
               className="w-full flex items-center gap-2"
             >
               <MessageCircle className="h-4 w-4" />
-              Ask Charm AI
+              Ask AiLean
             </Button>
           )}
         </TooltipContent>

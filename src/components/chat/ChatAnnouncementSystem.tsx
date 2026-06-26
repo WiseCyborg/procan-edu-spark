@@ -22,7 +22,7 @@ export const ChatAnnouncementSystem: React.FC<AnnouncementProps> = ({
   const announcements = [
     {
       title: "👋 Hey Maryland!",
-      message: "I'm ProCann Assist, your cannabis training assistant. Need help navigating Maryland's regulations?",
+      message: "I'm AiLean, your cannabis training assistant. Need help navigating Maryland's regulations?",
       cta: "Start Chatting",
       icon: MessageCircle,
       color: "bg-primary"

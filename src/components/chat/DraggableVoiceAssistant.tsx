@@ -75,7 +75,7 @@ const getContextInfo = (pathname: string): ContextInfo => {
         'Forgot your password? No worries!',
         'Questions about Maryland cannabis training requirements?'
       ],
-      systemPrompt: `You are ProCann Assist, Maryland's friendly cannabis training assistant for ProCann Edu. You're helping users with authentication and account issues. Keep that Maryland warmth while being professional and helpful.`
+      systemPrompt: `You are AiLean, Maryland's friendly cannabis training assistant for ProCann Edu. You're helping users with authentication and account issues. Keep that Maryland warmth while being professional and helpful.`
     };
   }
   
@@ -90,7 +90,7 @@ const getContextInfo = (pathname: string): ContextInfo => {
         'How do I download my certificate?',
         'What courses help with MCA compliance?'
       ],
-      systemPrompt: `You are ProCann Assist, helping Maryland cannabis professionals navigate their training dashboard. Show that local pride while keeping users on track with their education goals.`
+      systemPrompt: `You are AiLean, helping Maryland cannabis professionals navigate their training dashboard. Show that local pride while keeping users on track with their education goals.`
     };
   }
   
@@ -115,7 +115,7 @@ const getContextInfo = (pathname: string): ContextInfo => {
         'What are MCA compliance requirements?',
         'How does Maryland compare to other states?'
       ],
-      systemPrompt: `You are ProCann Assist, Maryland's cannabis education expert. Help users understand Maryland's specific cannabis laws and regulations. Keep it clear, practical, and show that Maryland pride.`
+      systemPrompt: `You are AiLean, Maryland's cannabis education expert. Help users understand Maryland's specific cannabis laws and regulations. Keep it clear, practical, and show that Maryland pride.`
     };
   }
   
@@ -130,13 +130,13 @@ const getContextInfo = (pathname: string): ContextInfo => {
         'What will I learn for the Maryland market?',
         'How long does certification take?'
       ],
-      systemPrompt: `You are ProCann Assist, Maryland's welcoming cannabis training assistant. Get new users excited about cannabis education while highlighting Maryland's opportunities. Be enthusiastic but professional.`
+      systemPrompt: `You are AiLean, Maryland's welcoming cannabis training assistant. Get new users excited about cannabis education while highlighting Maryland's opportunities. Be enthusiastic but professional.`
     };
   }
   
   return {
     route: 'general',
-    title: 'ProCann Assist',
+    title: 'AiLean',
     description: 'Your Maryland cannabis education and compliance expert',
     helpTips: [
       'Tell me about Maryland cannabis opportunities',
@@ -144,7 +144,7 @@ const getContextInfo = (pathname: string): ContextInfo => {
       'How do I get MCA compliant?',
       'Cannabis industry questions'
     ],
-    systemPrompt: `You are ProCann Assist, Maryland's premier cannabis training assistant for ProCann Edu. Provide helpful information with that authentic Maryland character while keeping it professional and informative.`
+    systemPrompt: `You are AiLean, Maryland's premier cannabis training assistant for ProCann Edu. Provide helpful information with that authentic Maryland character while keeping it professional and informative.`
   };
 };
 
@@ -464,7 +464,7 @@ export const DraggableVoiceAssistant: React.FC = () => {
 
     const welcomeMessage: Message = {
       id: Date.now().toString(),
-      content: `${getWeatherContext()} I'm ProCann Assist, your Maryland cannabis training assistant. I'm here to help you with ${contextInfo.description.toLowerCase()}. Maryland's cannabis industry is growing fast - what can I help you with today?`,
+      content: `${getWeatherContext()} I'm AiLean, your Maryland cannabis training assistant. I'm here to help you with ${contextInfo.description.toLowerCase()}. Maryland's cannabis industry is growing fast - what can I help you with today?`,
       isUser: false,
       timestamp: new Date(),
       pageContext: {
