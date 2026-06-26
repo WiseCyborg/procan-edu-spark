@@ -296,29 +296,6 @@ const AdminMissionControl = () => {
         </Card>
 
 
-        {/* Payment Transactions */}
-        <Card>
-          <CardHeader
-            className="cursor-pointer hover:bg-muted/50 transition-colors"
-            onClick={() => toggleSection('payments')}
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <CreditCard className="h-5 w-5 text-primary" />
-                <div>
-                  <CardTitle>Payment Transactions</CardTitle>
-                  <CardDescription>PayPal webhook events, revenue, and seat purchases</CardDescription>
-                </div>
-              </div>
-              {expandedSection === 'payments' ? <ChevronUp /> : <ChevronDown />}
-            </div>
-          </CardHeader>
-          {expandedSection === 'payments' && (
-            <CardContent className="pt-6">
-              <PaymentTransactionsPanel />
-            </CardContent>
-          )}
-        </Card>
 
         {/* Four Expandable Sections */}
         <div className="space-y-4">
