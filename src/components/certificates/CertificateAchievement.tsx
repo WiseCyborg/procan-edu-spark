@@ -107,7 +107,7 @@ export const CertificateAchievement: React.FC<CertificateAchievementProps> = ({
               )}
             </div>
             
-            <h2 className="text-3xl font-bold text-stoplight-charcoal font-playfair italic">
+            <h2 className="text-2xl sm:text-3xl font-bold text-stoplight-charcoal font-playfair italic break-words">
               {userName}
             </h2>
             
