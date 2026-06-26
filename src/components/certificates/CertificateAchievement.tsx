@@ -138,12 +138,12 @@ export const CertificateAchievement: React.FC<CertificateAchievementProps> = ({
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.7 }}
-          className="flex justify-center gap-4 mt-8"
+          className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mt-8"
         >
           <Button 
             size="lg" 
             onClick={onDownload}
-            className="bg-stoplight-green hover:bg-stoplight-green/90"
+            className="bg-stoplight-green hover:bg-stoplight-green/90 w-full sm:w-auto"
           >
             <Download className="w-4 h-4 mr-2" />
             Download Certificate
@@ -152,6 +152,7 @@ export const CertificateAchievement: React.FC<CertificateAchievementProps> = ({
             size="lg" 
             variant="outline"
             onClick={onShare}
+            className="w-full sm:w-auto"
           >
             <Share2 className="w-4 h-4 mr-2" />
             Share Achievement
