@@ -14,6 +14,7 @@ import { sanitizeHtml } from "@/utils/sanitize-html";
 import { markdownToHtml } from "@/utils/markdown-to-html";
 import { useUserProgress } from '@/hooks/useUserProgress';
 import { useResumeState } from '@/hooks/useResumeState';
+import { useSignedVideoUrl } from '@/hooks/useSignedVideoUrl';
 import { supabase } from '@/integrations/supabase/client';
 import { RegulatorySidebar } from '@/components/regulatory/RegulatorySidebar';
 import { SectionProgressNav } from '@/components/course/SectionProgressNav';
@@ -65,6 +66,8 @@ interface ModuleData {
   comar_reference?: string;
   video_url?: string;
   lessons?: Lesson[];
+  asset_key?: string | null;
+  video_pending?: boolean;
 }
 
 const COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
@@ -88,6 +91,11 @@ const EnhancedCourseModule: React.FC = () => {
   const [quizPassed, setQuizPassed] = useState(false);
   const [weakTopics, setWeakTopics] = useState<WeakTopic[]>([]);
   const [isTransitioning, setIsTransitioning] = useState(false);
+
+  const { data: signedVideoData } = useSignedVideoUrl(
+    moduleData?.asset_key ?? '',
+    !!moduleData?.asset_key && activeTab === 'course'
+  );
 
   const { updateProgress, isModuleCompletedByNumber, canAccessModule, getModuleUUID, getFirstIncompleteModule } = useUserProgress(COURSE_ID);
   const { saveResumeState } = useResumeState(COURSE_ID);
@@ -262,6 +270,13 @@ const EnhancedCourseModule: React.FC = () => {
         }
 
         if (data) {
+          const { data: assetData } = await supabase
+            .from('video_assets')
+            .select('asset_key, unmapped_reason')
+            .eq('module_id', data.id)
+            .eq('is_active', true)
+            .maybeSingle();
+
           setModuleData({
             id: data.id,
             title: data.title,
@@ -270,7 +285,9 @@ const EnhancedCourseModule: React.FC = () => {
             quiz_questions: (data.quiz_questions as unknown as QuizQuestion[]) || [],
             module_number: data.module_number,
             comar_reference: data.comar_reference,
-            video_url: data.video_url
+            video_url: data.video_url,
+            asset_key: assetData?.asset_key ?? null,
+            video_pending: assetData?.unmapped_reason === 'pending_ai_generation',
           });
         }
       } catch (error) {
@@ -632,12 +649,21 @@ const EnhancedCourseModule: React.FC = () => {
                               id: `${moduleData.id}-lesson-1`,
                               title: moduleData.title,
                               duration: '15 min',
-                              videoType: moduleData.video_url 
-                                ? (moduleData.video_url.includes('vimeo.com') ? 'embed' : 'file') 
-                                : 'none' as const,
-                              videoUrl: moduleData.video_url || '',
+                              videoType: (() => {
+                                if (moduleData.video_pending) return 'none' as const;
+                                if (signedVideoData?.success && signedVideoData.provider === 'vimeo') return 'embed' as const;
+                                if (signedVideoData?.success && signedVideoData.url) return 'file' as const;
+                                return 'none' as const;
+                              })(),
+                              videoUrl: signedVideoData?.success ? (signedVideoData.url ?? '') : '',
                               markdownContent: moduleData.content || '', // Raw markdown for pagination
-                              htmlSummary: `<div>${sanitizeHtml(markdownToHtml(moduleData.content || ''))}</div>`,
+                              htmlSummary: moduleData.video_pending
+                                ? `<div style="padding:16px;background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;margin-bottom:16px;">
+                                    <p style="font-weight:600;color:#92400e;margin:0 0 4px;">📹 Video Coming Soon</p>
+                                    <p style="color:#78350f;font-size:14px;margin:0;">This module's video is being prepared. The written content below covers all learning objectives.</p>
+                                  </div>
+                                  <div>${sanitizeHtml(markdownToHtml(moduleData.content || ''))}</div>`
+                                : `<div>${sanitizeHtml(markdownToHtml(moduleData.content || ''))}</div>`,
                               resourceLinks: moduleDocuments.map(doc => ({
                                 label: doc.title,
                                 href: `/docs/${doc.id}`
