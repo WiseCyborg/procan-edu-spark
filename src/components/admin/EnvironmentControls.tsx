@@ -49,12 +49,12 @@ export const EnvironmentControls = () => {
         if (data.updated_by) {
           const { data: profile } = await supabase
             .from('profiles')
-            .select('first_name, last_name, email')
+            .select('first_name, last_name')
             .eq('user_id', data.updated_by)
             .maybeSingle();
           if (profile) {
             const name = [profile.first_name, profile.last_name].filter(Boolean).join(' ').trim();
-            setUpdatedByLabel(name || profile.email || data.updated_by);
+            setUpdatedByLabel(name || data.updated_by);
           } else {
             setUpdatedByLabel(data.updated_by);
           }
