@@ -509,23 +509,25 @@ const DispensaryManagerDashboard = () => {
 
       {/* Main Content Tabs */}
       <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="employees">
-            <Users className="w-4 h-4 mr-2" />
-            Employees
-          </TabsTrigger>
-          <TabsTrigger value="seats">Seat Management</TabsTrigger>
-          <TabsTrigger value="seat-requests">Seat Requests</TabsTrigger>
-          <TabsTrigger value="invite">Invite Employees</TabsTrigger>
-          <TabsTrigger value="coordinators">Team Management</TabsTrigger>
-          <TabsTrigger value="checkins">
-            <ShieldCheck className="w-4 h-4 mr-2" />
-            Exam Check-Ins
-          </TabsTrigger>
-          <TabsTrigger value="compliance">Compliance Reports</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
-        </TabsList>
+        <div className="-mx-4 px-4 md:mx-0 md:px-0 overflow-x-auto">
+          <TabsList className="inline-flex w-max md:w-auto flex-nowrap">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="employees">
+              <Users className="w-4 h-4 mr-2" />
+              Employees
+            </TabsTrigger>
+            <TabsTrigger value="seats">Seat Management</TabsTrigger>
+            <TabsTrigger value="seat-requests">Seat Requests</TabsTrigger>
+            <TabsTrigger value="invite">Invite Employees</TabsTrigger>
+            <TabsTrigger value="coordinators">Team Management</TabsTrigger>
+            <TabsTrigger value="checkins">
+              <ShieldCheck className="w-4 h-4 mr-2" />
+              Exam Check-Ins
+            </TabsTrigger>
+            <TabsTrigger value="compliance">Compliance Reports</TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="overview" className="space-y-4">
           {/* Onboarding Progress Indicator */}
