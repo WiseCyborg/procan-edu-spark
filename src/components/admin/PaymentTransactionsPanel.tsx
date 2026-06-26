@@ -148,7 +148,7 @@ export function PaymentTransactionsPanel() {
     setLoading(true);
     setError(null);
     try {
-      const [eventsRes, purchasesRes] = await Promise.all([
+      const [eventsRes, purchasesRes, pendingRes] = await Promise.all([
         supabase
           .from('payment_events')
           .select(
@@ -159,6 +159,11 @@ export function PaymentTransactionsPanel() {
         supabase
           .from('rvt_purchases')
           .select('status, amount_paid, quantity'),
+        supabase
+          .from('rvt_purchases')
+          .select('id, status, quantity, amount_paid, paypal_order_id, metadata, organization_id, organizations(name)')
+          .in('status', ['pending', 'failed'])
+          .order('id', { ascending: false }),
       ]);
 
       if (eventsRes.error) throw eventsRes.error;
@@ -186,6 +191,9 @@ export function PaymentTransactionsPanel() {
         return acc;
       }, { ...EMPTY_SUMMARY });
       setSummary(agg);
+      if (!pendingRes.error) {
+        setPendingPurchases((pendingRes.data as unknown as PendingPurchase[]) ?? []);
+      }
       setLastRefreshed(new Date());
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Failed to load payment data';
@@ -194,6 +202,30 @@ export function PaymentTransactionsPanel() {
       setLoading(false);
     }
   }, []);
+
+  const handleManualApprove = async (purchaseId: string) => {
+    setApprovingId(purchaseId);
+    try {
+      const res = await supabase.functions.invoke('admin-manual-payment-approval', {
+        body: { purchase_id: purchaseId, notes: 'Manual approval via admin dashboard' },
+      });
+      if (res.error) throw res.error;
+      if (!res.data?.success) throw new Error(res.data?.error ?? 'Approval failed');
+      toast({
+        title: 'Payment Approved',
+        description: `${res.data.seats_issued} seats issued. Registration email sent.`,
+      });
+      await load();
+    } catch (e) {
+      toast({
+        title: 'Approval Failed',
+        description: e instanceof Error ? e.message : 'Unknown error',
+        variant: 'destructive',
+      });
+    } finally {
+      setApprovingId(null);
+    }
+  };
 
   useEffect(() => {
     load();
