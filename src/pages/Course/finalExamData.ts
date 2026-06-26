@@ -123,6 +123,10 @@ export const quizzes: Record<number, QuizQuestion[]> = Object.fromEntries(
   ]),
 ) as Record<number, QuizQuestion[]>;
 
+export const expectedQuestionIds = new Set(
+  Object.values(quizzes).flatMap(sectionQuestions => sectionQuestions.map(q => q.id)),
+);
+
 export const sectionTitles: Record<number, string> = {
   1: "Federal and State Cannabis Laws",
   2: "Standard Operating Procedures",
@@ -225,6 +229,25 @@ export function buildPerfectAnswers(): Record<string, string> {
 }
 
 /**
+ * Build the same questionId -> selected option text map the rendered radio path
+ * produces. This intentionally keys by the rendered question object's stable id.
+ */
+export function buildRenderedPathPerfectAnswers(
+  renderedQuizzes: Record<number, QuizQuestion[]> = quizzes,
+): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (let s = 1; s <= TOTAL_SECTIONS; s++) {
+    for (const renderedQuestion of renderedQuizzes[s] || []) {
+      if (!expectedQuestionIds.has(renderedQuestion.id)) {
+        throw new Error(`[FinalExam selfTest] Rendered question id ${renderedQuestion.id} is not in the grader expected id set`);
+      }
+      out[renderedQuestion.id] = renderedQuestion.options.find(o => o === renderedQuestion.a) ?? renderedQuestion.a;
+    }
+  }
+  return out;
+}
+
+/**
  * Runtime self-check. Throws (in dev) if the grader regresses or the data is
  * inconsistent. Called once when the FinalExam component mounts in dev.
  */
@@ -269,7 +292,21 @@ export function selfTestGrader(): void {
     throw new Error('[FinalExam selfTest] Shuffle-independent grading regressed');
   }
 
-  // 5. Partial credit: miss exactly one question -> 35/36 -> 97%, but NOT passed
+  // 5. Full render -> radio answers path: simulate the shuffled question objects
+  //    used by FinalExam.tsx, key answers exactly as the radio inputs do
+  //    (renderedQuestion.id), and verify the canonical grader still scores 100%.
+  const renderedShuffledQuizzes = Object.fromEntries(
+    Object.entries(quizzes).map(([section, qs]) => [
+      Number(section),
+      qs.map(q => ({ ...q, options: [...q.options].reverse() })),
+    ]),
+  ) as Record<number, QuizQuestion[]>;
+  const renderPath = gradeExam(buildRenderedPathPerfectAnswers(renderedShuffledQuizzes));
+  if (renderPath.overallPercent !== 100 || !renderPath.isPassed || renderPath.topicScores.length !== TOTAL_SECTIONS) {
+    throw new Error(`[FinalExam selfTest] Render-to-answer path regressed (got ${renderPath.overallPercent}%, topics=${renderPath.topicScores.length}, passed=${renderPath.isPassed})`);
+  }
+
+  // 6. Partial credit: miss exactly one question -> 35/36 -> 97%, but NOT passed
   //    because the section with the miss drops below 80% (1/2 = 50%).
   const partial = { ...buildPerfectAnswers() };
   partial[getQuestionId(1, 0)] = 'WRONG_VALUE';

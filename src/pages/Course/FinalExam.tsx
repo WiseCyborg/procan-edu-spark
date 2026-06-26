@@ -21,7 +21,7 @@ import {
   comarSections,
   gradeExam,
   selfTestGrader,
-  getQuestionId,
+  expectedQuestionIds,
   PASSING_SCORE,
   TOTAL_SECTIONS,
   type QuizQuestion,
@@ -118,6 +118,10 @@ const FinalExam: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const sectionTimerRef = useRef<NodeJS.Timeout | null>(null);
   const totalTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const answersRef = useRef<Record<string, string>>({});
+  const finalizingRef = useRef(false);
+  const examAttemptIdRef = useRef<string | null>(null);
+  const examStartedAtRef = useRef<Date | null>(null);
 
   // Quiz data, section titles, COMAR mapping, and the grader live in
   // ./finalExamData so they're testable and shuffle-independent.
@@ -180,9 +184,13 @@ const FinalExam: React.FC = () => {
   useEffect(() => {
     if (examStage === 'exam') {
       // Reset answers when exam starts
+      answersRef.current = {};
       setAnswers({});
+      finalizingRef.current = false;
+      setIsFinalizing(false);
       
       const shuffled: {[key: number]: QuizQuestion[]} = {};
+      const renderedIds: string[] = [];
       
       Object.keys(quizzes).forEach(sectionKey => {
         const section = parseInt(sectionKey);
@@ -190,7 +198,15 @@ const FinalExam: React.FC = () => {
           ...question,
           options: shuffleArray([...question.options])
         }));
+        renderedIds.push(...shuffled[section].map(question => question.id));
       });
+
+      if (import.meta.env.DEV) {
+        const invalidIds = renderedIds.filter(id => !expectedQuestionIds.has(id));
+        if (invalidIds.length > 0) {
+          console.error('[FinalExam] Rendered question ids are not in grader expected id set', invalidIds);
+        }
+      }
       
       setShuffledQuizzes(shuffled);
     }
@@ -218,7 +234,7 @@ const FinalExam: React.FC = () => {
         setTotalTimeLeft(prev => {
           if (prev <= 1) {
             clearInterval(totalTimerRef.current!);
-            finalizeExam(results);
+            void finalizeExam({ ...answersRef.current });
             return 0;
           }
           return prev - 1;
@@ -321,6 +337,7 @@ const FinalExam: React.FC = () => {
       }
 
       const result = data as unknown as { attempt_id: string; checkin_id: string; status: string; attempt_number: number };
+      examAttemptIdRef.current = result.attempt_id;
       setExamAttemptId(result.attempt_id);
       setCheckinId(result.checkin_id);
 
@@ -490,7 +507,18 @@ const FinalExam: React.FC = () => {
 
   const startExam = async () => {
     const startedAt = new Date();
+    examStartedAtRef.current = startedAt;
+    answersRef.current = {};
+    finalizingRef.current = false;
     setExamStartedAt(startedAt);
+    setAnswers({});
+    setResults({});
+    setSubmittedSections(new Set());
+    setTopicScores([]);
+    setPersistedAttempt(null);
+    setTotalScore(0);
+    setCurrentSection(1);
+    setIsFinalizing(false);
     setExamStage('exam');
     setSectionTimeLeft(300);
     setTotalTimeLeft(5400);
@@ -520,13 +548,37 @@ const FinalExam: React.FC = () => {
     }));
   };
 
+  const handleAnswerChange = useCallback((questionId: string, option: string) => {
+    if (import.meta.env.DEV && !expectedQuestionIds.has(questionId)) {
+      console.error('[FinalExam] Answer key is not in grader expected id set', questionId);
+    }
+
+    const nextAnswers = {
+      ...answersRef.current,
+      [questionId]: option,
+    };
+    answersRef.current = nextAnswers;
+    setAnswers(nextAnswers);
+  }, []);
+
   const submitSection = () => {
+    if (finalizingRef.current) return;
+
     const section = currentSection;
-    const questions = quizzes[section] || [];
+    const questions = shuffledQuizzes[section] || quizzes[section] || [];
+    const latestAnswers = { ...answersRef.current };
+
+    if (import.meta.env.DEV) {
+      const invalidIds = questions.map(q => q.id).filter(id => !expectedQuestionIds.has(id));
+      if (invalidIds.length > 0) {
+        console.error('[FinalExam] Section contains rendered question ids not in grader expected id set', { section, invalidIds });
+      }
+    }
+
     // Grade by the question's STABLE id + correct option VALUE — never by
     // rendered/shuffled index. This is the BUG-017 fix.
     const sectionResults = questions.map((question) => {
-      const selectedAnswer = answers[question.id];
+      const selectedAnswer = latestAnswers[question.id];
       return {
         question: question.q,
         selected: selectedAnswer || "Not answered",
@@ -551,8 +603,8 @@ const FinalExam: React.FC = () => {
     setTotalScore(nextTotalCorrect);
 
     // Check if all 18 sections are now complete
-    if (nextSubmitted.size >= 18) {
-      finalizeExam(nextResults);
+    if (nextSubmitted.size >= TOTAL_SECTIONS) {
+      void finalizeExam(latestAnswers);
     } else {
       toast.success(`Section ${section} submitted. Score: ${sectionScore}/${questions.length}`);
 
@@ -570,27 +622,36 @@ const FinalExam: React.FC = () => {
   // Compute final results, persist to exam_attempts, and transition to the
   // results screen. Grading runs through the canonical `gradeExam` helper —
   // the same one that's covered by selfTestGrader().
-  const finalizeExam = async (_allResults: ExamResult) => {
-    if (isFinalizing) return;
+  const finalizeExam = async (answerSnapshot: Record<string, string> = { ...answersRef.current }) => {
+    if (finalizingRef.current) return;
+    finalizingRef.current = true;
     setIsFinalizing(true);
+
+    const completedAtIso = new Date().toISOString();
+    const startedAt = examStartedAtRef.current ?? examStartedAt;
+    const timeTakenSec = startedAt
+      ? Math.max(0, Math.round((Date.now() - startedAt.getTime()) / 1000))
+      : (5400 - totalTimeLeft);
+    const attemptId = examAttemptIdRef.current ?? examAttemptId;
+    const validUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
     if (totalTimerRef.current) clearInterval(totalTimerRef.current);
     if (sectionTimerRef.current) clearInterval(sectionTimerRef.current);
 
-    // Grade from the raw answers map (stable question id -> selected option text).
-    const graded = gradeExam(answers);
-    const { overallPercent, isPassed, topicScores: calculatedTopicScores } = graded;
+    // Grade from the latest raw answers map (stable question id -> selected option text).
+    const latestAnswers = { ...answerSnapshot };
+    console.log('FINALIZE answers keys', Object.keys(latestAnswers));
+    const graded = gradeExam(latestAnswers);
+    console.log('FINALIZE graded', graded.overallPercent, graded.topicScores.length);
+    console.log('FINALIZE examAttemptId', attemptId);
 
-    const completedAtIso = new Date().toISOString();
-    const timeTakenSec = examStartedAt
-      ? Math.max(0, Math.round((Date.now() - examStartedAt.getTime()) / 1000))
-      : (5400 - totalTimeLeft);
+    const { overallPercent, isPassed, topicScores: calculatedTopicScores } = graded;
 
     setTopicScores(calculatedTopicScores);
     setTotalScore(overallPercent); // total_score now represents the overall percentage 0–100
 
-    if (!examAttemptId) {
-      console.error('Cannot persist exam results: examAttemptId is null');
+    if (!attemptId || !validUuid.test(attemptId)) {
+      console.error('FINALIZE update error', new Error(`Invalid examAttemptId: ${attemptId ?? 'null'}`));
       toast.error('Could not save your exam results. Please contact support.');
       setPersistedAttempt({
         total_score: overallPercent,
@@ -606,7 +667,11 @@ const FinalExam: React.FC = () => {
     }
 
     try {
-      const { error: updateError } = await supabase
+      if (calculatedTopicScores.length !== TOTAL_SECTIONS) {
+        console.error('FINALIZE update error', new Error(`Expected ${TOTAL_SECTIONS} topic scores, got ${calculatedTopicScores.length}`));
+      }
+
+      const { data: updatedAttempt, error: updateError } = await supabase
         .from('exam_attempts')
         .update({
           total_score: overallPercent,
@@ -616,16 +681,24 @@ const FinalExam: React.FC = () => {
           completed_at: completedAtIso,
           topic_scores: calculatedTopicScores as any,
         })
-        .eq('id', examAttemptId);
+        .eq('id', attemptId)
+        .select('total_score, is_passed, passing_score, topic_scores, time_taken, completed_at')
+        .maybeSingle();
 
       if (updateError) {
-        console.error('Error persisting exam attempt:', updateError);
-        toast.error('Failed to save exam results. Please contact support.');
+        console.error('FINALIZE update error', updateError);
+        throw updateError;
+      }
+
+      if (!updatedAttempt) {
+        const noRowError = new Error('Exam attempt update returned no row. RLS or an invalid attempt id likely blocked persistence.');
+        console.error('FINALIZE update error', noRowError);
+        throw noRowError;
       }
 
       // Also store individual topic scores (best-effort)
       const topicScoreInserts = calculatedTopicScores.map(ts => ({
-        exam_attempt_id: examAttemptId,
+        exam_attempt_id: attemptId,
         section_number: ts.section_number,
         comar_section: ts.comar_section,
         topic_area: ts.topic_area,
@@ -634,51 +707,38 @@ const FinalExam: React.FC = () => {
         score_percentage: ts.score_percentage,
         needs_remediation: ts.needs_remediation
       }));
-      await supabase.from('exam_topic_scores').insert(topicScoreInserts);
 
-      // Re-read the persisted attempt so the UI mirrors what's actually in the DB
-      const { data: persisted, error: readErr } = await supabase
-        .from('exam_attempts')
-        .select('total_score, is_passed, passing_score, topic_scores, time_taken, completed_at')
-        .eq('id', examAttemptId)
-        .maybeSingle();
-
-      if (readErr || !persisted) {
-        setPersistedAttempt({
-          total_score: overallPercent,
-          is_passed: isPassed,
-          passing_score: PASSING_SCORE,
-          topic_scores: calculatedTopicScores,
-          time_taken: timeTakenSec,
-          completed_at: completedAtIso,
-        });
-      } else {
-        setPersistedAttempt({
-          total_score: persisted.total_score ?? overallPercent,
-          is_passed: persisted.is_passed === true,
-          passing_score: persisted.passing_score ?? PASSING_SCORE,
-          topic_scores: (persisted.topic_scores as unknown as TopicScore[]) || calculatedTopicScores,
-          time_taken: persisted.time_taken ?? timeTakenSec,
-          completed_at: persisted.completed_at ?? completedAtIso,
-        });
+      const { error: topicScoreError } = await supabase.from('exam_topic_scores').insert(topicScoreInserts);
+      if (topicScoreError) {
+        console.error('[FinalExam] topic score insert error', topicScoreError);
       }
+
+      setPersistedAttempt({
+        total_score: updatedAttempt.total_score ?? overallPercent,
+        is_passed: updatedAttempt.is_passed === true,
+        passing_score: updatedAttempt.passing_score ?? PASSING_SCORE,
+        topic_scores: (updatedAttempt.topic_scores as unknown as TopicScore[]) || calculatedTopicScores,
+        time_taken: updatedAttempt.time_taken ?? timeTakenSec,
+        completed_at: updatedAttempt.completed_at ?? completedAtIso,
+      });
 
       refetchAttempts();
       refetchStats();
+      setExamStage('results');
     } catch (error) {
-      console.error('Error finalizing exam:', error);
-      toast.error('An error occurred saving your exam.');
+      console.error('FINALIZE update error', error);
+      toast.error('Failed to save exam results. Please contact support.');
       setPersistedAttempt({
         total_score: overallPercent,
-        is_passed: isPassed,
+        is_passed: false,
         passing_score: PASSING_SCORE,
         topic_scores: calculatedTopicScores,
         time_taken: timeTakenSec,
         completed_at: completedAtIso,
       });
+      setExamStage('results');
     }
 
-    setExamStage('results');
     setIsFinalizing(false);
   };
 
@@ -801,7 +861,10 @@ const FinalExam: React.FC = () => {
           {(shuffledQuizzes[section] || quizzes[section] || []).map((question, index) => {
             // Use the canonical, shuffle-independent question id from finalExamData,
             // not a positional key derived from this render.
-            const qid = question.id ?? getQuestionId(section, index);
+            const qid = question.id;
+            if (import.meta.env.DEV && !expectedQuestionIds.has(qid)) {
+              console.error('[FinalExam] Rendered question id is not in grader expected id set', { section, qid });
+            }
             return (
               <div key={qid} className="mb-4 md:mb-6 p-3 md:p-4 bg-gray-50 rounded-lg">
                 <p className="font-medium mb-3 text-base md:text-lg">{index + 1}. {question.q}</p>
@@ -812,10 +875,7 @@ const FinalExam: React.FC = () => {
                       name={qid}
                       value={option}
                       checked={answers[qid] === option}
-                      onChange={() => setAnswers(prev => ({
-                        ...prev,
-                        [qid]: option,
-                      }))}
+                      onChange={() => handleAnswerChange(qid, option)}
                       className="mr-3 h-4 w-4 md:h-5 md:w-5 flex-shrink-0"
                     />
                     <span className="text-sm md:text-base">{option}</span>
@@ -852,6 +912,7 @@ const FinalExam: React.FC = () => {
             </Button>
             <Button 
               onClick={submitSection} 
+              disabled={isFinalizing}
               className="w-full sm:w-auto bg-primary hover:bg-primary/90 h-11 md:h-10 text-base md:text-sm"
             >
               Submit Section
