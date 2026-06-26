@@ -323,14 +323,16 @@ const CourseLayout: React.FC = () => {
         </div>
       )}
 
-      {/* Dynamic Progression CTA - Always shows the ONE next step */}
+      {/* Dynamic Progression CTA - Always shows the ONE next step
+          BUG-011: Gate exam on required-only completion (exam_eligible), not on all 24 modules. */}
       <CourseProgressionCTA
-        completedModulesCount={getCompletedModulesCount()}
-        requiredModulesCount={REQUIRED_FOR_EXAM}
+        completedModulesCount={requiredCompleted}
+        requiredModulesCount={requiredTotal}
         firstIncompleteModule={getFirstIncompleteModule()}
-        allModulesCompleted={areAllModulesCompleted()}
+        allModulesCompleted={examEligible}
         isManagerRole={isManagerRole}
       />
+
       </div>
     </ProtectedCourseAccess>
   );
