@@ -14,6 +14,7 @@ import { sanitizeHtml } from "@/utils/sanitize-html";
 import { markdownToHtml } from "@/utils/markdown-to-html";
 import { useUserProgress } from '@/hooks/useUserProgress';
 import { useResumeState } from '@/hooks/useResumeState';
+import { useSignedVideoUrl } from '@/hooks/useSignedVideoUrl';
 import { supabase } from '@/integrations/supabase/client';
 import { RegulatorySidebar } from '@/components/regulatory/RegulatorySidebar';
 import { SectionProgressNav } from '@/components/course/SectionProgressNav';
@@ -65,6 +66,8 @@ interface ModuleData {
   comar_reference?: string;
   video_url?: string;
   lessons?: Lesson[];
+  asset_key?: string | null;
+  video_pending?: boolean;
 }
 
 const COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
@@ -88,6 +91,11 @@ const EnhancedCourseModule: React.FC = () => {
   const [quizPassed, setQuizPassed] = useState(false);
   const [weakTopics, setWeakTopics] = useState<WeakTopic[]>([]);
   const [isTransitioning, setIsTransitioning] = useState(false);
+
+  const { data: signedVideoData } = useSignedVideoUrl(
+    moduleData?.asset_key ?? '',
+    !!moduleData?.asset_key && activeTab === 'course'
+  );
 
   const { updateProgress, isModuleCompletedByNumber, canAccessModule, getModuleUUID, getFirstIncompleteModule } = useUserProgress(COURSE_ID);
   const { saveResumeState } = useResumeState(COURSE_ID);
