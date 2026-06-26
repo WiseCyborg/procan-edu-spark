@@ -121,7 +121,7 @@ export const CertificateAchievement: React.FC<CertificateAchievementProps> = ({
               <p className="text-sm text-gray-500 mb-1">
                 {isManagerCertification ? 'Manager-Level ' : ''}Certificate Number
               </p>
-              <p className="text-xl font-bold text-stoplight-charcoal font-mono">
+              <p className="text-base sm:text-xl font-bold text-stoplight-charcoal font-mono break-all">
                 {certificateNumber}
               </p>
               <p className="text-sm text-gray-500 mt-2">{completionDate}</p>
