@@ -62,7 +62,9 @@ export const ExamAttemptHistory: React.FC<ExamAttemptHistoryProps> = ({
   };
 
   const trend = calculateTrend();
-  const totalQuestions = 36; // 18 sections * 2 questions
+  // total_score and stats.*_score are stored as overall percentage (0–100).
+  const clampPct = (n: number) => Math.max(0, Math.min(100, Math.round(n || 0)));
+
 
   return (
     <div className="space-y-6">
