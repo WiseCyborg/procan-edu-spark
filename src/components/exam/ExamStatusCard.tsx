@@ -112,8 +112,9 @@ export const ExamStatusCard: React.FC = () => {
             </div>
             <div className="p-2 rounded-lg bg-blue-500/10 border border-blue-500/20">
               <div className="text-lg font-bold text-blue-600">
-                {Math.round((stats.best_score / totalQuestions) * 100)}%
+                {clampPct(stats.best_score)}%
               </div>
+
               <div className="text-xs text-muted-foreground">Best</div>
             </div>
           </div>
