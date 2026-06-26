@@ -798,27 +798,33 @@ const FinalExam: React.FC = () => {
           </h2>
           <p className="text-sm md:text-base text-gray-600 mb-4 md:mb-6">Test your knowledge of {sectionTitles[section].toLowerCase()}.</p>
           
-          {(shuffledQuizzes[section] || quizzes[section] || []).map((question, index) => (
-            <div key={index} className="mb-4 md:mb-6 p-3 md:p-4 bg-gray-50 rounded-lg">
-              <p className="font-medium mb-3 text-base md:text-lg">{index + 1}. {question.q}</p>
-              {question.options.map((option, i) => (
-                <label key={i} className="block mb-2 p-3 md:p-4 border-2 rounded-lg hover:bg-white hover:border-primary transition-all cursor-pointer min-h-[48px] flex items-center">
-                  <input 
-                    type="radio" 
-                    name={`q${section}${index}`} 
-                    value={option}
-                    checked={answers[`q${section}${index}`] === option}
-                    onChange={() => setAnswers(prev => ({
-                      ...prev,
-                      [`q${section}${index}`]: option
-                    }))}
-                    className="mr-3 h-4 w-4 md:h-5 md:w-5 flex-shrink-0" 
-                  />
-                  <span className="text-sm md:text-base">{option}</span>
-                </label>
-              ))}
-            </div>
-          ))}
+          {(shuffledQuizzes[section] || quizzes[section] || []).map((question, index) => {
+            // Use the canonical, shuffle-independent question id from finalExamData,
+            // not a positional key derived from this render.
+            const qid = question.id ?? getQuestionId(section, index);
+            return (
+              <div key={qid} className="mb-4 md:mb-6 p-3 md:p-4 bg-gray-50 rounded-lg">
+                <p className="font-medium mb-3 text-base md:text-lg">{index + 1}. {question.q}</p>
+                {question.options.map((option, i) => (
+                  <label key={`${qid}-${option}`} className="block mb-2 p-3 md:p-4 border-2 rounded-lg hover:bg-white hover:border-primary transition-all cursor-pointer min-h-[48px] flex items-center">
+                    <input
+                      type="radio"
+                      name={qid}
+                      value={option}
+                      checked={answers[qid] === option}
+                      onChange={() => setAnswers(prev => ({
+                        ...prev,
+                        [qid]: option,
+                      }))}
+                      className="mr-3 h-4 w-4 md:h-5 md:w-5 flex-shrink-0"
+                    />
+                    <span className="text-sm md:text-base">{option}</span>
+                  </label>
+                ))}
+              </div>
+            );
+          })}
+
           
           <div className="flex flex-col sm:flex-row flex-wrap gap-2 md:gap-3 mt-4 md:mt-6 pt-4 md:pt-6 border-t">
             {section > 1 && (
