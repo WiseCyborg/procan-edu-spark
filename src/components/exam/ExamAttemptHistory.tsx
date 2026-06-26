@@ -206,7 +206,7 @@ export const ExamAttemptHistory: React.FC<ExamAttemptHistoryProps> = ({
                         <span className={`font-bold text-lg ${
                           passed ? 'text-green-600 dark:text-green-500' : 'text-red-600 dark:text-red-500'
                         }`}>
-                          {attempt.total_score}/{totalQuestions} ({percentage}%)
+                          {percentage}%
                         </span>
                         <span className="flex items-center gap-1">
                           <Clock className="h-4 w-4" />
