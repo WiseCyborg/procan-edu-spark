@@ -89,12 +89,22 @@ const FinalExam: React.FC = () => {
   >('verification');
   const [checkinId, setCheckinId] = useState<string | null>(null);
   const [currentSection, setCurrentSection] = useState(1);
-  const [totalScore, setTotalScore] = useState(0);
+  const [totalScore, setTotalScore] = useState(0); // raw correct count during exam; equals overall percentage after finalize
   const [submittedSections, setSubmittedSections] = useState<Set<number>>(new Set());
   const [results, setResults] = useState<ExamResult>({});
   const [topicScores, setTopicScores] = useState<TopicScore[]>([]);
   const [shuffledQuizzes, setShuffledQuizzes] = useState<{[key: number]: QuizQuestion[]}>({});
   const [examAttemptId, setExamAttemptId] = useState<string | null>(null);
+  const [examStartedAt, setExamStartedAt] = useState<Date | null>(null);
+  const [persistedAttempt, setPersistedAttempt] = useState<{
+    total_score: number;
+    is_passed: boolean;
+    passing_score: number;
+    topic_scores: TopicScore[];
+    time_taken: number;
+    completed_at: string;
+  } | null>(null);
+  const [isFinalizing, setIsFinalizing] = useState(false);
   const [sectionTimeLeft, setSectionTimeLeft] = useState(300); // 5 minutes
   const [totalTimeLeft, setTotalTimeLeft] = useState(5400); // 90 minutes
   const [isPaused, setIsPaused] = useState(false);
