@@ -52,6 +52,11 @@ export interface CourseState {
   total_modules: number;
   completed_modules: number;
   completion_percentage: number;
+  // BUG-011: Required-only progress fields (modules where is_manager_only = false)
+  required_total: number;
+  required_completed: number;
+  required_completion_percentage: number;
+  exam_eligible: boolean;
   resume_target: ResumeTarget | null;
   error?: string;
 }
@@ -69,8 +74,13 @@ const DEFAULT_COURSE_STATE: CourseState = {
   total_modules: 0,
   completed_modules: 0,
   completion_percentage: 0,
+  required_total: 0,
+  required_completed: 0,
+  required_completion_percentage: 0,
+  exam_eligible: false,
   resume_target: null,
 };
+
 
 // Slightly longer stale time - module state changes less frequently
 const COURSE_STATE_STALE_TIME = 2 * 60 * 1000; // 2 minutes
