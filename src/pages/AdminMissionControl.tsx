@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Shield, AlertTriangle, TrendingUp, Building2, Users, Award, ChevronDown, ChevronUp, TestTube2, BookOpen, ClipboardCheck } from 'lucide-react';
+import { Shield, AlertTriangle, TrendingUp, Building2, Users, Award, ChevronDown, ChevronUp, TestTube2, BookOpen, ClipboardCheck, CreditCard } from 'lucide-react';
+import { PaymentTransactionsPanel } from '@/components/admin/PaymentTransactionsPanel';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -268,6 +269,31 @@ const AdminMissionControl = () => {
               </div>
             </div>
           </CardContent>
+        </Card>
+
+
+        {/* Payment Transactions */}
+        <Card>
+          <CardHeader
+            className="cursor-pointer hover:bg-muted/50 transition-colors"
+            onClick={() => toggleSection('payments')}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <CreditCard className="h-5 w-5 text-primary" />
+                <div>
+                  <CardTitle>Payment Transactions</CardTitle>
+                  <CardDescription>PayPal webhook events, revenue, and seat purchases</CardDescription>
+                </div>
+              </div>
+              {expandedSection === 'payments' ? <ChevronUp /> : <ChevronDown />}
+            </div>
+          </CardHeader>
+          {expandedSection === 'payments' && (
+            <CardContent className="pt-6">
+              <PaymentTransactionsPanel />
+            </CardContent>
+          )}
         </Card>
 
         {/* Four Expandable Sections */}
