@@ -111,7 +111,7 @@ export const ExamAttemptHistory: React.FC<ExamAttemptHistoryProps> = ({
               
               <div className="text-center p-4 rounded-lg bg-purple-500/10 border border-purple-500/20">
                 <div className="text-2xl font-bold text-purple-600 dark:text-purple-500">
-                  {Math.round(stats.average_score / totalQuestions * 100)}%
+                  {clampPct(stats.average_score)}%
                 </div>
                 <div className="text-xs text-muted-foreground mt-1">Avg Score</div>
               </div>
