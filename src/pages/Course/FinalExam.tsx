@@ -822,28 +822,24 @@ const FinalExam: React.FC = () => {
 
 
   const generateCertificate = async () => {
-    try {
-      // Update existing exam attempt to mark as passed
-      if (examAttemptId) {
-        await supabase
-          .from('exam_attempts')
-          .update({
-            is_passed: true
-          })
-          .eq('id', examAttemptId);
-      }
+    // Gate strictly on the persisted attempt — UI cannot bypass the DB result.
+    if (!examAttemptId || !persistedAttempt || persistedAttempt.is_passed !== true) {
+      toast.error('Certificate is only available for a passing attempt.');
+      return;
+    }
 
-      // Generate certificate using secure edge function
+    try {
+      // Generate certificate using secure edge function (uses persisted, not client-computed, values)
       const { data: certData, error: certError } = await supabase.functions.invoke('generate-certificate', {
         body: {
           exam_attempt_id: examAttemptId,
           user_data: userData,
           exam_results: {
-            total_score: totalScore,
+            total_score: persistedAttempt.total_score,
             total_questions: Object.values(quizzes).reduce((sum, section) => sum + section.length, 0),
-            time_taken: 5400 - totalTimeLeft,
-            passing_score: 80,
-            topic_scores: topicScores
+            time_taken: persistedAttempt.time_taken,
+            passing_score: persistedAttempt.passing_score,
+            topic_scores: persistedAttempt.topic_scores,
           }
         }
       });
@@ -851,28 +847,26 @@ const FinalExam: React.FC = () => {
       if (certError) {
         console.error('Error generating certificate:', certError);
         toast.error('Failed to generate certificate. You can retry from your dashboard.');
-        
-        if (examAttemptId) {
-          // Update exam_attempts with certificate failure
-          const { data: existingAttempt } = await supabase
-            .from('exam_attempts')
-            .select('metadata')
-            .eq('id', examAttemptId)
-            .single();
-            
-          const currentMetadata = (existingAttempt?.metadata as Record<string, any>) || {};
-          await supabase
-            .from('exam_attempts')
-            .update({
-              metadata: {
-                ...currentMetadata,
-                certificate_generation_failed: true,
-                failure_reason: certError.message,
-                failure_timestamp: new Date().toISOString()
-              } as any
-            })
-            .eq('id', examAttemptId);
-        }
+
+        // Record the failure on the attempt's metadata (do NOT toggle is_passed)
+        const { data: existingAttempt } = await supabase
+          .from('exam_attempts')
+          .select('metadata')
+          .eq('id', examAttemptId)
+          .single();
+
+        const currentMetadata = (existingAttempt?.metadata as Record<string, any>) || {};
+        await supabase
+          .from('exam_attempts')
+          .update({
+            metadata: {
+              ...currentMetadata,
+              certificate_generation_failed: true,
+              failure_reason: certError.message,
+              failure_timestamp: new Date().toISOString()
+            } as any
+          })
+          .eq('id', examAttemptId);
         return;
       }
 
@@ -885,6 +879,7 @@ const FinalExam: React.FC = () => {
       toast.error('An unexpected error occurred');
     }
   };
+
 
   const printCertificate = () => {
     window.print();
