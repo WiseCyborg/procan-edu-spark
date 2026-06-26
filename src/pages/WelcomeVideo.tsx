@@ -86,7 +86,7 @@ const WelcomeVideo = () => {
             <CardContent>
               {/* Self-hosted video via private Supabase Storage + signed URLs */}
               <div className="mb-6">
-                <SecureVideoPlayer assetKey="welcome-intro" />
+                <SecureVideoPlayer assetKey="orientation_video" lazy={false} />
               </div>
 
               {/* Video Description */}
