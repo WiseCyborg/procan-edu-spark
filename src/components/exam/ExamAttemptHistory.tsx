@@ -62,7 +62,9 @@ export const ExamAttemptHistory: React.FC<ExamAttemptHistoryProps> = ({
   };
 
   const trend = calculateTrend();
-  const totalQuestions = 36; // 18 sections * 2 questions
+  // total_score and stats.*_score are stored as overall percentage (0–100).
+  const clampPct = (n: number) => Math.max(0, Math.min(100, Math.round(n || 0)));
+
 
   return (
     <div className="space-y-6">
@@ -102,14 +104,14 @@ export const ExamAttemptHistory: React.FC<ExamAttemptHistoryProps> = ({
               
               <div className="text-center p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
                 <div className="text-2xl font-bold text-blue-600 dark:text-blue-500">
-                  {Math.round(stats.best_score / totalQuestions * 100)}%
+                  {clampPct(stats.best_score)}%
                 </div>
                 <div className="text-xs text-muted-foreground mt-1">Best Score</div>
               </div>
               
               <div className="text-center p-4 rounded-lg bg-purple-500/10 border border-purple-500/20">
                 <div className="text-2xl font-bold text-purple-600 dark:text-purple-500">
-                  {Math.round(stats.average_score / totalQuestions * 100)}%
+                  {clampPct(stats.average_score)}%
                 </div>
                 <div className="text-xs text-muted-foreground mt-1">Avg Score</div>
               </div>
@@ -160,7 +162,8 @@ export const ExamAttemptHistory: React.FC<ExamAttemptHistoryProps> = ({
         <CardContent>
           <div className="space-y-3">
             {attempts.map((attempt, index) => {
-              const percentage = Math.round((attempt.total_score / totalQuestions) * 100);
+              const percentage = clampPct(attempt.total_score);
+
               const passed = attempt.is_passed;
               const isLatest = index === 0;
               
@@ -203,7 +206,7 @@ export const ExamAttemptHistory: React.FC<ExamAttemptHistoryProps> = ({
                         <span className={`font-bold text-lg ${
                           passed ? 'text-green-600 dark:text-green-500' : 'text-red-600 dark:text-red-500'
                         }`}>
-                          {attempt.total_score}/{totalQuestions} ({percentage}%)
+                          {percentage}%
                         </span>
                         <span className="flex items-center gap-1">
                           <Clock className="h-4 w-4" />
@@ -275,7 +278,7 @@ export const ExamAttemptHistory: React.FC<ExamAttemptHistoryProps> = ({
                     .slice(0, 5)
                     .reverse()
                     .map((attempt, idx) => {
-                      const percentage = Math.round((attempt.total_score / totalQuestions) * 100);
+                      const percentage = clampPct(attempt.total_score);
                       return (
                         <div key={idx} className="text-center">
                           <div 

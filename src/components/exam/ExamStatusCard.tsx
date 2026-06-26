@@ -68,8 +68,10 @@ export const ExamStatusCard: React.FC = () => {
 
   const latestAttempt = attempts[0];
   const hasPassed = attempts.some(a => a.is_passed);
-  const totalQuestions = 36;
-  const latestScore = Math.round((latestAttempt.total_score / totalQuestions) * 100);
+  // total_score and stats.*_score are stored as overall percentage (0–100).
+  const clampPct = (n: number) => Math.max(0, Math.min(100, Math.round(n || 0)));
+  const latestScore = clampPct(latestAttempt.total_score);
+
 
   return (
     <Card className={hasPassed ? "border-green-500/30" : ""}>
@@ -110,8 +112,9 @@ export const ExamStatusCard: React.FC = () => {
             </div>
             <div className="p-2 rounded-lg bg-blue-500/10 border border-blue-500/20">
               <div className="text-lg font-bold text-blue-600">
-                {Math.round((stats.best_score / totalQuestions) * 100)}%
+                {clampPct(stats.best_score)}%
               </div>
+
               <div className="text-xs text-muted-foreground">Best</div>
             </div>
           </div>
@@ -148,7 +151,7 @@ export const ExamStatusCard: React.FC = () => {
             <div className="flex items-center gap-1">
               <TrendingUp className="h-4 w-4 text-green-500" />
               <span className="font-medium">
-                {Math.round((stats.average_score / totalQuestions) * 100)}% avg
+                {clampPct(stats.average_score)}% avg
               </span>
             </div>
           </div>

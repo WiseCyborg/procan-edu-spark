@@ -89,12 +89,22 @@ const FinalExam: React.FC = () => {
   >('verification');
   const [checkinId, setCheckinId] = useState<string | null>(null);
   const [currentSection, setCurrentSection] = useState(1);
-  const [totalScore, setTotalScore] = useState(0);
+  const [totalScore, setTotalScore] = useState(0); // raw correct count during exam; equals overall percentage after finalize
   const [submittedSections, setSubmittedSections] = useState<Set<number>>(new Set());
   const [results, setResults] = useState<ExamResult>({});
   const [topicScores, setTopicScores] = useState<TopicScore[]>([]);
   const [shuffledQuizzes, setShuffledQuizzes] = useState<{[key: number]: QuizQuestion[]}>({});
   const [examAttemptId, setExamAttemptId] = useState<string | null>(null);
+  const [examStartedAt, setExamStartedAt] = useState<Date | null>(null);
+  const [persistedAttempt, setPersistedAttempt] = useState<{
+    total_score: number;
+    is_passed: boolean;
+    passing_score: number;
+    topic_scores: TopicScore[];
+    time_taken: number;
+    completed_at: string;
+  } | null>(null);
+  const [isFinalizing, setIsFinalizing] = useState(false);
   const [sectionTimeLeft, setSectionTimeLeft] = useState(300); // 5 minutes
   const [totalTimeLeft, setTotalTimeLeft] = useState(5400); // 90 minutes
   const [isPaused, setIsPaused] = useState(false);
@@ -319,7 +329,7 @@ const FinalExam: React.FC = () => {
         setTotalTimeLeft(prev => {
           if (prev <= 1) {
             clearInterval(totalTimerRef.current!);
-            showFinalResults();
+            finalizeExam(results);
             return 0;
           }
           return prev - 1;
@@ -589,10 +599,24 @@ const FinalExam: React.FC = () => {
     setShowInstructions(false);
   };
 
-  const startExam = () => {
+  const startExam = async () => {
+    const startedAt = new Date();
+    setExamStartedAt(startedAt);
     setExamStage('exam');
     setSectionTimeLeft(300);
     setTotalTimeLeft(5400);
+
+    // Record started_at on the existing attempt row (created at check-in)
+    if (examAttemptId) {
+      try {
+        await supabase
+          .from('exam_attempts')
+          .update({ started_at: startedAt.toISOString() })
+          .eq('id', examAttemptId);
+      } catch (err) {
+        console.error('Failed to record exam started_at:', err);
+      }
+    }
   };
 
   const pauseTimer = () => {
@@ -619,48 +643,62 @@ const FinalExam: React.FC = () => {
         isCorrect: selectedAnswer === question.a
       };
     });
-    
+
     const sectionScore = sectionResults.filter(result => result.isCorrect).length;
-    setTotalScore(prev => prev + sectionScore);
-    
-    setResults(prev => ({
-      ...prev,
-      [section]: sectionResults
-    }));
-    
-    setSubmittedSections(prev => {
-      const newSet = new Set(prev);
-      newSet.add(section);
-      return newSet;
-    });
-    
-    // Check if all sections are completed
-    if (submittedSections.size >= 17 && section === 18) {
-      showFinalResults();
+
+    // Build a fresh snapshot so we don't depend on stale React state when finalizing
+    const nextResults: ExamResult = { ...results, [section]: sectionResults };
+    const nextSubmitted = new Set(submittedSections);
+    nextSubmitted.add(section);
+    const nextTotalCorrect = Object.values(nextResults).reduce(
+      (sum, secResults) => sum + secResults.filter(r => r.isCorrect).length,
+      0
+    );
+
+    setResults(nextResults);
+    setSubmittedSections(nextSubmitted);
+    setTotalScore(nextTotalCorrect);
+
+    // Check if all 18 sections are now complete
+    if (nextSubmitted.size >= 18) {
+      finalizeExam(nextResults);
     } else {
       toast.success(`Section ${section} submitted. Score: ${sectionScore}/${questions.length}`);
-      
-      // Move to next section
-      if (section < 18) {
-        setCurrentSection(section + 1);
+
+      // Move to next un-submitted section (default: section + 1)
+      let nextSection = section + 1;
+      while (nextSection <= 18 && nextSubmitted.has(nextSection)) nextSection++;
+      if (nextSection <= 18) {
+        setCurrentSection(nextSection);
         setSectionTimeLeft(300);
       }
     }
   };
 
-  const showFinalResults = async () => {
+  // Compute final results from a snapshot, persist to exam_attempts, and transition to results screen.
+  const finalizeExam = async (allResults: ExamResult) => {
+    if (isFinalizing) return;
+    setIsFinalizing(true);
+
     if (totalTimerRef.current) clearInterval(totalTimerRef.current);
     if (sectionTimerRef.current) clearInterval(sectionTimerRef.current);
-    
-    // Calculate topic-level scores
+
+    // Per-section (topic) scores from the snapshot — no stale state
     const calculatedTopicScores: TopicScore[] = [];
-    
+    let overallCorrect = 0;
+    let overallTotal = 0;
+
     for (let section = 1; section <= 18; section++) {
-      const sectionResults = results[section] || [];
+      const sectionResults = allResults[section] || [];
       const questionsCorrect = sectionResults.filter(r => r.isCorrect).length;
-      const questionsTotal = sectionResults.length;
-      const scorePercentage = questionsTotal > 0 ? Math.round((questionsCorrect / questionsTotal) * 100) : 0;
-      
+      const questionsTotal = (quizzes[section] || []).length;
+      const scorePercentage = questionsTotal > 0
+        ? Math.round((questionsCorrect / questionsTotal) * 100)
+        : 0;
+
+      overallCorrect += questionsCorrect;
+      overallTotal += questionsTotal;
+
       calculatedTopicScores.push({
         section_number: section,
         section_title: sectionTitles[section],
@@ -672,86 +710,136 @@ const FinalExam: React.FC = () => {
         needs_remediation: scorePercentage < 80
       });
     }
-    
+
+    const PASSING_SCORE = 80;
+    const overallPercent = overallTotal > 0
+      ? Math.round((overallCorrect / overallTotal) * 100)
+      : 0;
+    const allTopicsMastered = calculatedTopicScores.every(t => t.score_percentage >= 80);
+    const isPassed = allTopicsMastered && overallPercent >= PASSING_SCORE;
+
+    const completedAtIso = new Date().toISOString();
+    const timeTakenSec = examStartedAt
+      ? Math.max(0, Math.round((Date.now() - examStartedAt.getTime()) / 1000))
+      : (5400 - totalTimeLeft);
+
     setTopicScores(calculatedTopicScores);
-    
-    // Update the existing exam attempt (created at check-in time) with final scores
-    try {
-      const { data: authData } = await supabase.auth.getUser();
-      const userId = authData.user?.id;
-      
-      if (!userId) {
-        console.error('User not authenticated');
-        setExamStage('results');
-        return;
-      }
+    setTotalScore(overallPercent); // total_score now represents the overall percentage 0–100
 
-      if (examAttemptId) {
-        // Update the stub attempt with actual results
-        const { error: updateError } = await supabase
-          .from('exam_attempts')
-          .update({
-            total_score: totalScore,
-            time_taken: 5400 - totalTimeLeft,
-            completed_at: new Date().toISOString(),
-            topic_scores: calculatedTopicScores as any,
-          })
-          .eq('id', examAttemptId);
-
-        if (updateError) {
-          console.error('Error updating exam attempt:', updateError);
-        }
-
-        // Store individual topic scores in exam_topic_scores table
-        const topicScoreInserts = calculatedTopicScores.map(ts => ({
-          exam_attempt_id: examAttemptId,
-          section_number: ts.section_number,
-          comar_section: ts.comar_section,
-          topic_area: ts.topic_area,
-          questions_correct: ts.questions_correct,
-          questions_total: ts.questions_total,
-          score_percentage: ts.score_percentage,
-          needs_remediation: ts.needs_remediation
-        }));
-        
-        await supabase
-          .from('exam_topic_scores')
-          .insert(topicScoreInserts);
-          
-        // Refetch attempt history and stats
-        refetchAttempts();
-        refetchStats();
-      }
-    } catch (error) {
-      console.error('Error storing topic scores:', error);
+    if (!examAttemptId) {
+      console.error('Cannot persist exam results: examAttemptId is null');
+      toast.error('Could not save your exam results. Please contact support.');
+      setPersistedAttempt({
+        total_score: overallPercent,
+        is_passed: false,
+        passing_score: PASSING_SCORE,
+        topic_scores: calculatedTopicScores,
+        time_taken: timeTakenSec,
+        completed_at: completedAtIso,
+      });
+      setExamStage('results');
+      setIsFinalizing(false);
+      return;
     }
-    
+
+    try {
+      const { error: updateError } = await supabase
+        .from('exam_attempts')
+        .update({
+          total_score: overallPercent,
+          passing_score: PASSING_SCORE,
+          is_passed: isPassed,
+          time_taken: timeTakenSec,
+          completed_at: completedAtIso,
+          topic_scores: calculatedTopicScores as any,
+        })
+        .eq('id', examAttemptId);
+
+      if (updateError) {
+        console.error('Error persisting exam attempt:', updateError);
+        toast.error('Failed to save exam results. Please contact support.');
+      }
+
+      // Also store individual topic scores (best-effort)
+      const topicScoreInserts = calculatedTopicScores.map(ts => ({
+        exam_attempt_id: examAttemptId,
+        section_number: ts.section_number,
+        comar_section: ts.comar_section,
+        topic_area: ts.topic_area,
+        questions_correct: ts.questions_correct,
+        questions_total: ts.questions_total,
+        score_percentage: ts.score_percentage,
+        needs_remediation: ts.needs_remediation
+      }));
+      await supabase.from('exam_topic_scores').insert(topicScoreInserts);
+
+      // Re-read the persisted attempt so the UI mirrors what's actually in the DB
+      const { data: persisted, error: readErr } = await supabase
+        .from('exam_attempts')
+        .select('total_score, is_passed, passing_score, topic_scores, time_taken, completed_at')
+        .eq('id', examAttemptId)
+        .maybeSingle();
+
+      if (readErr || !persisted) {
+        // Fall back to the values we just wrote
+        setPersistedAttempt({
+          total_score: overallPercent,
+          is_passed: isPassed,
+          passing_score: PASSING_SCORE,
+          topic_scores: calculatedTopicScores,
+          time_taken: timeTakenSec,
+          completed_at: completedAtIso,
+        });
+      } else {
+        setPersistedAttempt({
+          total_score: persisted.total_score ?? overallPercent,
+          is_passed: persisted.is_passed === true,
+          passing_score: persisted.passing_score ?? PASSING_SCORE,
+          topic_scores: (persisted.topic_scores as unknown as TopicScore[]) || calculatedTopicScores,
+          time_taken: persisted.time_taken ?? timeTakenSec,
+          completed_at: persisted.completed_at ?? completedAtIso,
+        });
+      }
+
+      refetchAttempts();
+      refetchStats();
+    } catch (error) {
+      console.error('Error finalizing exam:', error);
+      toast.error('An error occurred saving your exam.');
+      setPersistedAttempt({
+        total_score: overallPercent,
+        is_passed: isPassed,
+        passing_score: PASSING_SCORE,
+        topic_scores: calculatedTopicScores,
+        time_taken: timeTakenSec,
+        completed_at: completedAtIso,
+      });
+    }
+
     setExamStage('results');
+    setIsFinalizing(false);
   };
 
-  const generateCertificate = async () => {
-    try {
-      // Update existing exam attempt to mark as passed
-      if (examAttemptId) {
-        await supabase
-          .from('exam_attempts')
-          .update({
-            is_passed: true
-          })
-          .eq('id', examAttemptId);
-      }
 
-      // Generate certificate using secure edge function
+  const generateCertificate = async () => {
+    // Gate strictly on the persisted attempt — UI cannot bypass the DB result.
+    if (!examAttemptId || !persistedAttempt || persistedAttempt.is_passed !== true) {
+      toast.error('Certificate is only available for a passing attempt.');
+      return;
+    }
+
+    try {
+      // Generate certificate using secure edge function (uses persisted, not client-computed, values)
       const { data: certData, error: certError } = await supabase.functions.invoke('generate-certificate', {
         body: {
           exam_attempt_id: examAttemptId,
           user_data: userData,
           exam_results: {
-            total_score: totalScore,
+            total_score: persistedAttempt.total_score,
             total_questions: Object.values(quizzes).reduce((sum, section) => sum + section.length, 0),
-            time_taken: 5400 - totalTimeLeft,
-            passing_score: 80,
-            topic_scores: topicScores
+            time_taken: persistedAttempt.time_taken,
+            passing_score: persistedAttempt.passing_score,
+            topic_scores: persistedAttempt.topic_scores,
           }
         }
       });
@@ -759,28 +847,26 @@ const FinalExam: React.FC = () => {
       if (certError) {
         console.error('Error generating certificate:', certError);
         toast.error('Failed to generate certificate. You can retry from your dashboard.');
-        
-        if (examAttemptId) {
-          // Update exam_attempts with certificate failure
-          const { data: existingAttempt } = await supabase
-            .from('exam_attempts')
-            .select('metadata')
-            .eq('id', examAttemptId)
-            .single();
-            
-          const currentMetadata = (existingAttempt?.metadata as Record<string, any>) || {};
-          await supabase
-            .from('exam_attempts')
-            .update({
-              metadata: {
-                ...currentMetadata,
-                certificate_generation_failed: true,
-                failure_reason: certError.message,
-                failure_timestamp: new Date().toISOString()
-              } as any
-            })
-            .eq('id', examAttemptId);
-        }
+
+        // Record the failure on the attempt's metadata (do NOT toggle is_passed)
+        const { data: existingAttempt } = await supabase
+          .from('exam_attempts')
+          .select('metadata')
+          .eq('id', examAttemptId)
+          .single();
+
+        const currentMetadata = (existingAttempt?.metadata as Record<string, any>) || {};
+        await supabase
+          .from('exam_attempts')
+          .update({
+            metadata: {
+              ...currentMetadata,
+              certificate_generation_failed: true,
+              failure_reason: certError.message,
+              failure_timestamp: new Date().toISOString()
+            } as any
+          })
+          .eq('id', examAttemptId);
         return;
       }
 
@@ -793,6 +879,7 @@ const FinalExam: React.FC = () => {
       toast.error('An unexpected error occurred');
     }
   };
+
 
   const printCertificate = () => {
     window.print();
@@ -906,64 +993,70 @@ const FinalExam: React.FC = () => {
     );
   };
 
-  // Render results screen with topic-level scoring
+  // Render results screen with topic-level scoring — sourced from the persisted attempt.
   const renderResults = () => {
-    const totalQuestions = Object.values(quizzes).reduce((sum, section) => sum + section.length, 0);
-    const percentage = (totalScore / totalQuestions) * 100;
-    const passed = percentage >= 80;
-    const elapsedTime = 5400 - totalTimeLeft;
-    
+    // Prefer persisted values so UI and database agree. Fall back to client computation
+    // only while persistence is still in flight (very brief window).
+    const overallPercent = persistedAttempt?.total_score ?? 0;
+    const passed = persistedAttempt?.is_passed === true;
+    const sourceTopicScores: TopicScore[] = persistedAttempt?.topic_scores ?? topicScores;
+    const elapsedTime = persistedAttempt?.time_taken ?? (5400 - totalTimeLeft);
+
     return (
       <div className="space-y-6">
         {/* Topic-Level Scoring and Remedial Recommendations */}
         <RemedialRecommendations
-          topicScores={topicScores}
+          topicScores={sourceTopicScores}
           overallPassed={passed}
-          overallScore={Math.round(percentage)}
+          overallScore={overallPercent}
         />
-        
+
         {/* Detailed Section Results */}
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h3 className="text-xl font-bold mb-4">Detailed Results by Section</h3>
           <p className="text-sm text-muted-foreground mb-4">
-            Total Time: {formatTime(elapsedTime)}
+            Total Time: {formatTime(elapsedTime)} · Overall: {overallPercent}% ·{' '}
+            {passed ? (
+              <span className="text-green-600 font-semibold">Passed</span>
+            ) : (
+              <span className="text-destructive font-semibold">Did not pass</span>
+            )}
           </p>
-          
+
           <div className="space-y-2">
-            {Object.keys(results).map(sectionKey => {
-              const section = parseInt(sectionKey);
-              const sectionResults = results[section];
-              const sectionScore = sectionResults.filter(r => r.isCorrect).length;
-              const sectionTotal = sectionResults.length;
-              const sectionPercentage = Math.round((sectionScore / sectionTotal) * 100);
-              
-              return (
-                <div 
-                  key={section} 
-                  className={`p-3 rounded-lg border ${
-                    sectionPercentage >= 80 
-                      ? 'border-green-500/30 bg-green-500/5' 
-                      : 'border-destructive/30 bg-destructive/5'
-                  }`}
-                >
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium text-sm">
-                      Section {section}: {sectionTitles[section]}
-                    </span>
-                    <span className={`font-bold ${
-                      sectionPercentage >= 80 ? 'text-green-600' : 'text-destructive'
-                    }`}>
-                      {sectionScore}/{sectionTotal} ({sectionPercentage}%)
-                    </span>
-                  </div>
+            {sourceTopicScores.map(ts => (
+              <div
+                key={ts.section_number}
+                className={`p-3 rounded-lg border ${
+                  ts.score_percentage >= 80
+                    ? 'border-green-500/30 bg-green-500/5'
+                    : 'border-destructive/30 bg-destructive/5'
+                }`}
+              >
+                <div className="flex justify-between items-center">
+                  <span className="font-medium text-sm">
+                    Section {ts.section_number}: {ts.section_title}
+                  </span>
+                  <span className={`font-bold ${
+                    ts.score_percentage >= 80 ? 'text-green-600' : 'text-destructive'
+                  }`}>
+                    {ts.questions_correct}/{ts.questions_total} ({ts.score_percentage}%)
+                  </span>
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
-          
+
+          {!passed && (
+            <p className="mt-4 text-sm text-muted-foreground">
+              To earn the certificate, every section must reach at least 80% and the overall score must be at least{' '}
+              {persistedAttempt?.passing_score ?? 80}%.
+            </p>
+          )}
+
           <div className="mt-6 flex justify-center">
             {passed ? (
-              <Button size="lg" onClick={generateCertificate}>
+              <Button size="lg" onClick={generateCertificate} disabled={isFinalizing}>
                 Generate Certificate
               </Button>
             ) : (
@@ -977,6 +1070,7 @@ const FinalExam: React.FC = () => {
     );
   };
 
+
   // Render certificate using CertificateAchievement component
   const renderCertificate = () => {
     const date = new Date().toLocaleDateString('en-US', { 
@@ -985,9 +1079,11 @@ const FinalExam: React.FC = () => {
       day: 'numeric' 
     });
     
-    // Determine tier status (can be calculated based on score)
-    const tierStatus: 'green' | 'yellow' | 'red' = 
-      totalScore >= 32 ? 'green' : totalScore >= 28 ? 'yellow' : 'red';
+    // Determine tier status from the persisted overall percentage (0–100).
+    const overallPct = persistedAttempt?.total_score ?? 0;
+    const tierStatus: 'green' | 'yellow' | 'red' =
+      overallPct >= 90 ? 'green' : overallPct >= 80 ? 'yellow' : 'red';
+
     
     return (
       <CertificateAchievement
