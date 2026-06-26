@@ -17,6 +17,7 @@ import { UATAccountManager } from '@/components/admin/UATAccountManager';
 import { ConsumerCoursesSection } from '@/components/admin/ConsumerCoursesSection';
 import { SupportRequestsPanel } from '@/components/admin/SupportRequestsPanel';
 import { E2EValidationReport } from '@/components/admin/E2EValidationReport';
+import { EnvironmentControls } from '@/components/admin/EnvironmentControls';
 import { Loader2 } from 'lucide-react';
 import { InternalChatbot } from '@/components/chat/InternalChatbot';
 import { NextActionBanner } from '@/components/guidance/NextActionBanner';
@@ -109,6 +110,10 @@ const AdminMissionControl = () => {
 
         {/* Admin next action guidance */}
         <NextActionBanner variant="compact" className="mb-2" />
+
+        {/* Environment Controls */}
+        <EnvironmentControls />
+
 
         {/* Action Center - Critical Alerts */}
         {(criticalAlerts.length > 0 || warningAlerts.length > 0) && (

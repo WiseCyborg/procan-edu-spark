@@ -10253,6 +10253,7 @@ export type Database = {
           success: boolean
         }[]
       }
+      reap_stuck_emails: { Args: { p_grace_minutes?: number }; Returns: number }
       reconcile_payment_status: {
         Args: { p_session_id: string }
         Returns: Json
