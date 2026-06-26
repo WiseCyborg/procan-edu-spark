@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { DollarSign, RefreshCw, AlertCircle, Clock, Loader2 } from 'lucide-react';
+import { DollarSign, RefreshCw, AlertCircle, Clock, Loader2, CheckCircle2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 interface PaymentEventRow {
@@ -37,6 +37,17 @@ interface PurchaseSummary {
   failed: number;
   total_revenue: number;
   total_seats_sold: number;
+}
+
+interface PendingPurchase {
+  id: string;
+  status: string;
+  quantity: number;
+  amount_paid: string | number | null;
+  paypal_order_id: string | null;
+  metadata: Record<string, unknown> | null;
+  organization_id: string | null;
+  organizations: { name: string | null } | null;
 }
 
 const EMPTY_SUMMARY: PurchaseSummary = {
@@ -127,15 +138,17 @@ function OrderIdCell({ id }: { id: string | null }) {
 export function PaymentTransactionsPanel() {
   const [events, setEvents] = useState<PaymentEventRow[]>([]);
   const [summary, setSummary] = useState<PurchaseSummary>(EMPTY_SUMMARY);
+  const [pendingPurchases, setPendingPurchases] = useState<PendingPurchase[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null);
+  const [approvingId, setApprovingId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const [eventsRes, purchasesRes] = await Promise.all([
+      const [eventsRes, purchasesRes, pendingRes] = await Promise.all([
         supabase
           .from('payment_events')
           .select(
@@ -146,6 +159,11 @@ export function PaymentTransactionsPanel() {
         supabase
           .from('rvt_purchases')
           .select('status, amount_paid, quantity'),
+        supabase
+          .from('rvt_purchases')
+          .select('id, status, quantity, amount_paid, paypal_order_id, metadata, organization_id, organizations(name)')
+          .in('status', ['pending', 'failed'])
+          .order('id', { ascending: false }),
       ]);
 
       if (eventsRes.error) throw eventsRes.error;
@@ -173,6 +191,9 @@ export function PaymentTransactionsPanel() {
         return acc;
       }, { ...EMPTY_SUMMARY });
       setSummary(agg);
+      if (!pendingRes.error) {
+        setPendingPurchases((pendingRes.data as unknown as PendingPurchase[]) ?? []);
+      }
       setLastRefreshed(new Date());
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Failed to load payment data';
@@ -181,6 +202,30 @@ export function PaymentTransactionsPanel() {
       setLoading(false);
     }
   }, []);
+
+  const handleManualApprove = async (purchaseId: string) => {
+    setApprovingId(purchaseId);
+    try {
+      const res = await supabase.functions.invoke('admin-manual-payment-approval', {
+        body: { purchase_id: purchaseId, notes: 'Manual approval via admin dashboard' },
+      });
+      if (res.error) throw res.error;
+      if (!res.data?.success) throw new Error(res.data?.error ?? 'Approval failed');
+      toast({
+        title: 'Payment Approved',
+        description: `${res.data.seats_issued} seats issued. Registration email sent.`,
+      });
+      await load();
+    } catch (e) {
+      toast({
+        title: 'Approval Failed',
+        description: e instanceof Error ? e.message : 'Unknown error',
+        variant: 'destructive',
+      });
+    } finally {
+      setApprovingId(null);
+    }
+  };
 
   useEffect(() => {
     load();
@@ -225,6 +270,63 @@ export function PaymentTransactionsPanel() {
           </CardContent>
         </Card>
       </div>
+
+      {pendingPurchases.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <h3 className="font-semibold text-amber-700">Pending Purchases Requiring Action</h3>
+            <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+              {pendingPurchases.length}
+            </Badge>
+          </div>
+          <div className="border border-amber-200 rounded-md bg-amber-50/30">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Organization</TableHead>
+                  <TableHead>PayPal Order ID</TableHead>
+                  <TableHead>Seats</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {pendingPurchases.map((p) => (
+                  <TableRow key={p.id}>
+                    <TableCell className="text-sm font-medium">
+                      {p.organizations?.name ?? (p.metadata?.organization_name as string) ?? '—'}
+                    </TableCell>
+                    <TableCell><OrderIdCell id={p.paypal_order_id} /></TableCell>
+                    <TableCell className="text-sm">{p.quantity}</TableCell>
+                    <TableCell className="text-sm">{formatAmount(p.amount_paid, 'USD')}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className={p.status === 'failed' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-amber-50 text-amber-700 border-amber-200'}>
+                        {p.status === 'failed' ? 'Failed' : 'Pending'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-green-700 border-green-300 hover:bg-green-50"
+                        disabled={approvingId === p.id}
+                        onClick={() => handleManualApprove(p.id)}
+                      >
+                        {approvingId === p.id ? (
+                          <><Loader2 className="h-3 w-3 animate-spin mr-1" />Processing…</>
+                        ) : (
+                          <><CheckCircle2 className="h-3 w-3 mr-1" />Mark as Paid</>
+                        )}
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+      )}
 
       {/* Events table header */}
       <div className="flex items-center justify-between">
