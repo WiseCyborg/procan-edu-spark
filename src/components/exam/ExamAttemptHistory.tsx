@@ -162,7 +162,8 @@ export const ExamAttemptHistory: React.FC<ExamAttemptHistoryProps> = ({
         <CardContent>
           <div className="space-y-3">
             {attempts.map((attempt, index) => {
-              const percentage = Math.round((attempt.total_score / totalQuestions) * 100);
+              const percentage = clampPct(attempt.total_score);
+
               const passed = attempt.is_passed;
               const isLatest = index === 0;
               
