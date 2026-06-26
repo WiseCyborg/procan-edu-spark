@@ -151,7 +151,7 @@ export const ExamStatusCard: React.FC = () => {
             <div className="flex items-center gap-1">
               <TrendingUp className="h-4 w-4 text-green-500" />
               <span className="font-medium">
-                {Math.round((stats.average_score / totalQuestions) * 100)}% avg
+                {clampPct(stats.average_score)}% avg
               </span>
             </div>
           </div>
