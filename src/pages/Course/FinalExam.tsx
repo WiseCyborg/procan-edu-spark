@@ -15,12 +15,18 @@ import { useExamAttempts } from '@/hooks/useExamAttempts';
 import { useUserProgress } from '@/hooks/useUserProgress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Clock, History, AlertTriangle, BookOpen } from 'lucide-react';
-
-interface QuizQuestion {
-  q: string;
-  a: string;
-  options: string[];
-}
+import {
+  quizzes,
+  sectionTitles,
+  comarSections,
+  gradeExam,
+  selfTestGrader,
+  getQuestionId,
+  PASSING_SCORE,
+  TOTAL_SECTIONS,
+  type QuizQuestion,
+  type TopicScore,
+} from './finalExamData';
 
 interface UserData {
   name: string;
@@ -40,16 +46,6 @@ interface ExamResult {
   }>;
 }
 
-interface TopicScore {
-  section_number: number;
-  section_title: string;
-  comar_section: string;
-  topic_area: string;
-  questions_correct: number;
-  questions_total: number;
-  score_percentage: number;
-  needs_remediation: boolean;
-}
 
 const COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
 
@@ -123,124 +119,17 @@ const FinalExam: React.FC = () => {
   const sectionTimerRef = useRef<NodeJS.Timeout | null>(null);
   const totalTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Quiz data - All 18 sections with 2 questions each
-  const quizzes: {[key: number]: QuizQuestion[]} = {
-    1: [
-      { q: "Which federal law classifies cannabis as a Schedule I drug?", a: "Controlled Substances Act", options: ["Controlled Substances Act", "Food and Drug Act", "Tax Code"] },
-      { q: "What is Maryland's legal possession limit for personal cannabis use?", a: "1.5 oz", options: ["1 oz", "1.5 oz", "2 oz"] }
-    ],
-    2: [
-      { q: "What is a key SOP for dispensary operations?", a: "Daily inventory checks", options: ["Daily inventory checks", "Monthly sales reports", "Random pricing"] },
-      { q: "Who must approve SOPs in Maryland?", a: "Maryland Cannabis Administration", options: ["FDA", "DEA", "Maryland Cannabis Administration"] }
-    ],
-    3: [
-      { q: "What must be tracked in inventory?", a: "Batch numbers", options: ["Employee hours", "Batch numbers", "Store hours"] },
-      { q: "How often should inventory be reconciled?", a: "Daily", options: ["Weekly", "Daily", "Monthly"] }
-    ],
-    4: [
-      { q: "What is required before a sale?", a: "ID verification", options: ["ID verification", "Credit check", "Membership"] },
-      { q: "What is the minimum age for cannabis purchase?", a: "21", options: ["19", "21", "25"] }
-    ],
-    5: [
-      { q: "What safety measure prevents diversion?", a: "Locked storage", options: ["Open shelves", "Locked storage", "Public display"] },
-      { q: "What should be worn when handling cannabis?", a: "Gloves", options: ["Gloves", "Aprons", "Masks"] }
-    ],
-    6: [
-      { q: "What is the primary psychoactive component of cannabis?", a: "THC", options: ["CBD", "THC", "CBN"] },
-      { q: "Which is a potential adverse effect of cannabis?", a: "Anxiety", options: ["Pain relief", "Anxiety", "Improved sleep"] }
-    ],
-    7: [
-      { q: "How long must sales records be kept?", a: "5 years", options: ["1 year", "3 years", "5 years"] },
-      { q: "What must be recorded for each sale?", a: "Customer ID", options: ["Customer ID", "Employee mood", "Weather"] }
-    ],
-    8: [
-      { q: "What is required for dispensary security?", a: "Surveillance cameras", options: ["Open windows", "Surveillance cameras", "Signage"] },
-      { q: "Who must be notified of a security breach?", a: "Maryland Cannabis Administration", options: ["Local police only", "Maryland Cannabis Administration", "No one"] }
-    ],
-    9: [
-      { q: "What ensures compliance with COMAR?", a: "Regular audits", options: ["Customer feedback", "Regular audits", "Sales targets"] },
-      { q: "What is a penalty for non-compliance?", a: "Fines", options: ["Fines", "Awards", "Promotions"] }
-    ],
-    10: [
-      { q: "What must cannabis packaging be?", a: "Child-resistant", options: ["Transparent", "Child-resistant", "Colorful"] },
-      { q: "What is prohibited on packaging?", a: "Cartoon characters", options: ["Dosage info", "Cartoon characters", "Batch numbers"] }
-    ],
-    11: [
-      { q: "What must be on a cannabis label?", a: "THC content", options: ["THC content", "Store logo", "Employee name"] },
-      { q: "What warning is required on labels?", a: "Keep out of reach of children", options: ["Enjoy responsibly", "Keep out of reach of children", "Use daily"] }
-    ],
-    12: [
-      { q: "What is required for cannabis transport?", a: "Secure vehicle", options: ["Open truck", "Secure vehicle", "Public transit"] },
-      { q: "Who can transport cannabis?", a: "Licensed agents", options: ["Customers", "Licensed agents", "Anyone"] }
-    ],
-    13: [
-      { q: "How must cannabis waste be disposed?", a: "Rendered unusable", options: ["Thrown in trash", "Rendered unusable", "Recycled"] },
-      { q: "What records are kept for waste?", a: "Weight and date", options: ["Employee name", "Weight and date", "Customer feedback"] }
-    ],
-    14: [
-      { q: "What must be tested in cannabis?", a: "Pesticides", options: ["Color", "Pesticides", "Texture"] },
-      { q: "Who conducts cannabis testing?", a: "Licensed labs", options: ["Dispensary staff", "Licensed labs", "Customers"] }
-    ],
-    15: [
-      { q: "What should customers be educated on?", a: "Dosage forms", options: ["Store hours", "Dosage forms", "Employee names"] },
-      { q: "What symptom should customers report?", a: "Acute intoxication", options: ["Happiness", "Acute intoxication", "Energy"] }
-    ],
-    16: [
-      { q: "What is an emergency procedure?", a: "Evacuation plan", options: ["Price adjustment", "Evacuation plan", "Staff meeting"] },
-      { q: "Who is notified in an emergency?", a: "Authorities", options: ["Customers", "Authorities", "Media"] }
-    ],
-    17: [
-      { q: "How often must agents be trained?", a: "Every 12 months", options: ["Every 6 months", "Every 12 months", "Every 2 years"] },
-      { q: "What training covers drug interactions?", a: "RVT", options: ["Sales training", "RVT", "Marketing"] }
-    ],
-    18: [
-      { q: "What is an ethical duty of agents?", a: "Confidentiality", options: ["Upselling", "Confidentiality", "Advertising"] },
-      { q: "What should agents avoid?", a: "Misrepresenting products", options: ["Educating customers", "Misrepresenting products", "Following SOPs"] }
-    ]
-  };
+  // Quiz data, section titles, COMAR mapping, and the grader live in
+  // ./finalExamData so they're testable and shuffle-independent.
 
-  const sectionTitles: {[key: number]: string} = {
-    1: "Federal and State Cannabis Laws",
-    2: "Standard Operating Procedures",
-    3: "Inventory Management",
-    4: "Sales Procedures",
-    5: "Safety Protocols",
-    6: "Health and Pharmacology",
-    7: "Record Keeping",
-    8: "Security Measures",
-    9: "Compliance Standards",
-    10: "Packaging Regulations",
-    11: "Labeling Requirements",
-    12: "Transportation Guidelines",
-    13: "Waste Management",
-    14: "Testing Standards",
-    15: "Customer Education",
-    16: "Emergency Procedures",
-    17: "Training Requirements",
-    18: "Ethical Standards"
-  };
+  // Run grader self-test once in dev — guards BUG-017 from regressing silently.
+  useEffect(() => {
+    if (import.meta.env.DEV) {
+      try { selfTestGrader(); }
+      catch (e) { console.error(e); }
+    }
+  }, []);
 
-  // COMAR section mapping for exam blueprint
-  const comarSections: {[key: number]: { comar: string; topic: string }} = {
-    1: { comar: "COMAR 10.62.01", topic: "Legal Framework" },
-    2: { comar: "COMAR 10.62.03", topic: "Operational Compliance" },
-    3: { comar: "COMAR 10.62.04", topic: "Inventory Control" },
-    4: { comar: "COMAR 10.62.05", topic: "Sales & Transactions" },
-    5: { comar: "COMAR 10.62.06", topic: "Workplace Safety" },
-    6: { comar: "COMAR 10.62.07", topic: "Medical Knowledge" },
-    7: { comar: "COMAR 10.62.08", topic: "Documentation" },
-    8: { comar: "COMAR 10.62.09", topic: "Security & Loss Prevention" },
-    9: { comar: "COMAR 10.62.10", topic: "Regulatory Compliance" },
-    10: { comar: "COMAR 10.62.11", topic: "Product Packaging" },
-    11: { comar: "COMAR 10.62.12", topic: "Product Labeling" },
-    12: { comar: "COMAR 10.62.13", topic: "Transport & Distribution" },
-    13: { comar: "COMAR 10.62.14", topic: "Disposal & Waste" },
-    14: { comar: "COMAR 10.62.15", topic: "Quality Assurance" },
-    15: { comar: "COMAR 10.62.16", topic: "Patient Education" },
-    16: { comar: "COMAR 10.62.17", topic: "Emergency Response" },
-    17: { comar: "COMAR 10.62.18", topic: "Agent Training" },
-    18: { comar: "COMAR 10.62.19", topic: "Professional Ethics" }
-  };
 
   // Check if all modules are completed before allowing exam access
   useEffect(() => {
@@ -634,13 +523,15 @@ const FinalExam: React.FC = () => {
   const submitSection = () => {
     const section = currentSection;
     const questions = quizzes[section] || [];
-    const sectionResults = questions.map((question, index) => {
-      const selectedAnswer = answers[`q${section}${index}`];
+    // Grade by the question's STABLE id + correct option VALUE — never by
+    // rendered/shuffled index. This is the BUG-017 fix.
+    const sectionResults = questions.map((question) => {
+      const selectedAnswer = answers[question.id];
       return {
         question: question.q,
         selected: selectedAnswer || "Not answered",
         correct: question.a,
-        isCorrect: selectedAnswer === question.a
+        isCorrect: selectedAnswer !== undefined && selectedAnswer === question.a,
       };
     });
 
@@ -675,48 +566,20 @@ const FinalExam: React.FC = () => {
     }
   };
 
-  // Compute final results from a snapshot, persist to exam_attempts, and transition to results screen.
-  const finalizeExam = async (allResults: ExamResult) => {
+
+  // Compute final results, persist to exam_attempts, and transition to the
+  // results screen. Grading runs through the canonical `gradeExam` helper —
+  // the same one that's covered by selfTestGrader().
+  const finalizeExam = async (_allResults: ExamResult) => {
     if (isFinalizing) return;
     setIsFinalizing(true);
 
     if (totalTimerRef.current) clearInterval(totalTimerRef.current);
     if (sectionTimerRef.current) clearInterval(sectionTimerRef.current);
 
-    // Per-section (topic) scores from the snapshot — no stale state
-    const calculatedTopicScores: TopicScore[] = [];
-    let overallCorrect = 0;
-    let overallTotal = 0;
-
-    for (let section = 1; section <= 18; section++) {
-      const sectionResults = allResults[section] || [];
-      const questionsCorrect = sectionResults.filter(r => r.isCorrect).length;
-      const questionsTotal = (quizzes[section] || []).length;
-      const scorePercentage = questionsTotal > 0
-        ? Math.round((questionsCorrect / questionsTotal) * 100)
-        : 0;
-
-      overallCorrect += questionsCorrect;
-      overallTotal += questionsTotal;
-
-      calculatedTopicScores.push({
-        section_number: section,
-        section_title: sectionTitles[section],
-        comar_section: comarSections[section].comar,
-        topic_area: comarSections[section].topic,
-        questions_correct: questionsCorrect,
-        questions_total: questionsTotal,
-        score_percentage: scorePercentage,
-        needs_remediation: scorePercentage < 80
-      });
-    }
-
-    const PASSING_SCORE = 80;
-    const overallPercent = overallTotal > 0
-      ? Math.round((overallCorrect / overallTotal) * 100)
-      : 0;
-    const allTopicsMastered = calculatedTopicScores.every(t => t.score_percentage >= 80);
-    const isPassed = allTopicsMastered && overallPercent >= PASSING_SCORE;
+    // Grade from the raw answers map (stable question id -> selected option text).
+    const graded = gradeExam(answers);
+    const { overallPercent, isPassed, topicScores: calculatedTopicScores } = graded;
 
     const completedAtIso = new Date().toISOString();
     const timeTakenSec = examStartedAt
@@ -781,7 +644,6 @@ const FinalExam: React.FC = () => {
         .maybeSingle();
 
       if (readErr || !persisted) {
-        // Fall back to the values we just wrote
         setPersistedAttempt({
           total_score: overallPercent,
           is_passed: isPassed,
@@ -819,6 +681,7 @@ const FinalExam: React.FC = () => {
     setExamStage('results');
     setIsFinalizing(false);
   };
+
 
 
   const generateCertificate = async () => {
@@ -935,27 +798,33 @@ const FinalExam: React.FC = () => {
           </h2>
           <p className="text-sm md:text-base text-gray-600 mb-4 md:mb-6">Test your knowledge of {sectionTitles[section].toLowerCase()}.</p>
           
-          {(shuffledQuizzes[section] || quizzes[section] || []).map((question, index) => (
-            <div key={index} className="mb-4 md:mb-6 p-3 md:p-4 bg-gray-50 rounded-lg">
-              <p className="font-medium mb-3 text-base md:text-lg">{index + 1}. {question.q}</p>
-              {question.options.map((option, i) => (
-                <label key={i} className="block mb-2 p-3 md:p-4 border-2 rounded-lg hover:bg-white hover:border-primary transition-all cursor-pointer min-h-[48px] flex items-center">
-                  <input 
-                    type="radio" 
-                    name={`q${section}${index}`} 
-                    value={option}
-                    checked={answers[`q${section}${index}`] === option}
-                    onChange={() => setAnswers(prev => ({
-                      ...prev,
-                      [`q${section}${index}`]: option
-                    }))}
-                    className="mr-3 h-4 w-4 md:h-5 md:w-5 flex-shrink-0" 
-                  />
-                  <span className="text-sm md:text-base">{option}</span>
-                </label>
-              ))}
-            </div>
-          ))}
+          {(shuffledQuizzes[section] || quizzes[section] || []).map((question, index) => {
+            // Use the canonical, shuffle-independent question id from finalExamData,
+            // not a positional key derived from this render.
+            const qid = question.id ?? getQuestionId(section, index);
+            return (
+              <div key={qid} className="mb-4 md:mb-6 p-3 md:p-4 bg-gray-50 rounded-lg">
+                <p className="font-medium mb-3 text-base md:text-lg">{index + 1}. {question.q}</p>
+                {question.options.map((option, i) => (
+                  <label key={`${qid}-${option}`} className="block mb-2 p-3 md:p-4 border-2 rounded-lg hover:bg-white hover:border-primary transition-all cursor-pointer min-h-[48px] flex items-center">
+                    <input
+                      type="radio"
+                      name={qid}
+                      value={option}
+                      checked={answers[qid] === option}
+                      onChange={() => setAnswers(prev => ({
+                        ...prev,
+                        [qid]: option,
+                      }))}
+                      className="mr-3 h-4 w-4 md:h-5 md:w-5 flex-shrink-0"
+                    />
+                    <span className="text-sm md:text-base">{option}</span>
+                  </label>
+                ))}
+              </div>
+            );
+          })}
+
           
           <div className="flex flex-col sm:flex-row flex-wrap gap-2 md:gap-3 mt-4 md:mt-6 pt-4 md:pt-6 border-t">
             {section > 1 && (
