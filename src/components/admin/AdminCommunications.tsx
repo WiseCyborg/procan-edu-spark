@@ -4,12 +4,17 @@ import { EmailOpsConsole } from '@/components/admin/communications/EmailOpsConso
 import { EmailTemplateManager } from '@/components/admin/EmailTemplateManager';
 import { TestEmailSender } from '@/components/admin/TestEmailSender';
 import { EmailLogsTable } from '@/components/admin/communications/EmailLogsTable';
-import { Activity, FileText, Send, Table } from 'lucide-react';
+import { EmailHealthPanel } from '@/components/admin/communications/EmailHealthPanel';
+import { Activity, FileText, Send, Table, HeartPulse } from 'lucide-react';
 
 export const AdminCommunications = () => {
   return (
-    <Tabs defaultValue="ops" className="w-full">
-      <TabsList className="grid w-full grid-cols-4">
+    <Tabs defaultValue="health" className="w-full">
+      <TabsList className="grid w-full grid-cols-5">
+        <TabsTrigger value="health" className="flex items-center gap-2">
+          <HeartPulse className="h-4 w-4" />
+          Health
+        </TabsTrigger>
         <TabsTrigger value="ops" className="flex items-center gap-2">
           <Activity className="h-4 w-4" />
           Ops Console
@@ -27,6 +32,10 @@ export const AdminCommunications = () => {
           Test Emails
         </TabsTrigger>
       </TabsList>
+
+      <TabsContent value="health" className="mt-4">
+        <EmailHealthPanel />
+      </TabsContent>
 
       <TabsContent value="ops" className="mt-4">
         <EmailOpsConsole />
