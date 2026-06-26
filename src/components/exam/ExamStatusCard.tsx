@@ -68,8 +68,10 @@ export const ExamStatusCard: React.FC = () => {
 
   const latestAttempt = attempts[0];
   const hasPassed = attempts.some(a => a.is_passed);
-  const totalQuestions = 36;
-  const latestScore = Math.round((latestAttempt.total_score / totalQuestions) * 100);
+  // total_score and stats.*_score are stored as overall percentage (0–100).
+  const clampPct = (n: number) => Math.max(0, Math.min(100, Math.round(n || 0)));
+  const latestScore = clampPct(latestAttempt.total_score);
+
 
   return (
     <Card className={hasPassed ? "border-green-500/30" : ""}>
