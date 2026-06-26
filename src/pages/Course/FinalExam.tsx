@@ -567,48 +567,19 @@ const FinalExam: React.FC = () => {
   };
 
 
-  // Compute final results from a snapshot, persist to exam_attempts, and transition to results screen.
-  const finalizeExam = async (allResults: ExamResult) => {
+  // Compute final results, persist to exam_attempts, and transition to the
+  // results screen. Grading runs through the canonical `gradeExam` helper —
+  // the same one that's covered by selfTestGrader().
+  const finalizeExam = async (_allResults: ExamResult) => {
     if (isFinalizing) return;
     setIsFinalizing(true);
 
     if (totalTimerRef.current) clearInterval(totalTimerRef.current);
     if (sectionTimerRef.current) clearInterval(sectionTimerRef.current);
 
-    // Per-section (topic) scores from the snapshot — no stale state
-    const calculatedTopicScores: TopicScore[] = [];
-    let overallCorrect = 0;
-    let overallTotal = 0;
-
-    for (let section = 1; section <= 18; section++) {
-      const sectionResults = allResults[section] || [];
-      const questionsCorrect = sectionResults.filter(r => r.isCorrect).length;
-      const questionsTotal = (quizzes[section] || []).length;
-      const scorePercentage = questionsTotal > 0
-        ? Math.round((questionsCorrect / questionsTotal) * 100)
-        : 0;
-
-      overallCorrect += questionsCorrect;
-      overallTotal += questionsTotal;
-
-      calculatedTopicScores.push({
-        section_number: section,
-        section_title: sectionTitles[section],
-        comar_section: comarSections[section].comar,
-        topic_area: comarSections[section].topic,
-        questions_correct: questionsCorrect,
-        questions_total: questionsTotal,
-        score_percentage: scorePercentage,
-        needs_remediation: scorePercentage < 80
-      });
-    }
-
-    const PASSING_SCORE = 80;
-    const overallPercent = overallTotal > 0
-      ? Math.round((overallCorrect / overallTotal) * 100)
-      : 0;
-    const allTopicsMastered = calculatedTopicScores.every(t => t.score_percentage >= 80);
-    const isPassed = allTopicsMastered && overallPercent >= PASSING_SCORE;
+    // Grade from the raw answers map (stable question id -> selected option text).
+    const graded = gradeExam(answers);
+    const { overallPercent, isPassed, topicScores: calculatedTopicScores } = graded;
 
     const completedAtIso = new Date().toISOString();
     const timeTakenSec = examStartedAt
@@ -673,7 +644,6 @@ const FinalExam: React.FC = () => {
         .maybeSingle();
 
       if (readErr || !persisted) {
-        // Fall back to the values we just wrote
         setPersistedAttempt({
           total_score: overallPercent,
           is_passed: isPassed,
@@ -711,6 +681,7 @@ const FinalExam: React.FC = () => {
     setExamStage('results');
     setIsFinalizing(false);
   };
+
 
 
   const generateCertificate = async () => {
