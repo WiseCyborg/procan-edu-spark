@@ -21,7 +21,7 @@ export const ChatWelcomeOverlay: React.FC<WelcomeOverlayProps> = ({
   const features = [
     {
       icon: MessageCircle,
-      title: "Maryland's ProCann Assist",
+      title: "Maryland's AiLean",
       description: "Your friendly cannabis training assistant with that authentic Maryland character",
       color: "bg-primary"
     },

@@ -288,7 +288,7 @@ export const PersonalChatbot = () => {
             <div className="flex items-center gap-2">
               <Sparkles className="h-5 w-5" />
               <div>
-                <h3 className="font-semibold">ProCann Assist</h3>
+                <h3 className="font-semibold">AiLean</h3>
                 <p className="text-xs opacity-90">
                   {context.first_name ? `Helping ${context.first_name}` : 'Your Personal Assistant'}
                 </p>

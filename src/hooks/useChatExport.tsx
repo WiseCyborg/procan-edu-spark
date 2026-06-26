@@ -38,7 +38,7 @@ export const useChatExport = () => {
       }
       
       const timestamp = message.timestamp.toLocaleTimeString();
-      const sender = message.isUser ? 'You' : 'ProCann Assist';
+      const sender = message.isUser ? 'You' : 'AiLean';
       
       // Sender and timestamp
       doc.setFont(undefined, 'bold');
@@ -62,7 +62,7 @@ export const useChatExport = () => {
     
     messages.forEach((message) => {
       const timestamp = message.timestamp.toLocaleString();
-      const sender = message.isUser ? 'You' : 'ProCann Assist';
+      const sender = message.isUser ? 'You' : 'AiLean';
       content += `${sender} (${timestamp}):\n${message.content}\n\n`;
     });
     
