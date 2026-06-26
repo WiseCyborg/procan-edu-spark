@@ -278,7 +278,7 @@ export const ExamAttemptHistory: React.FC<ExamAttemptHistoryProps> = ({
                     .slice(0, 5)
                     .reverse()
                     .map((attempt, idx) => {
-                      const percentage = Math.round((attempt.total_score / totalQuestions) * 100);
+                      const percentage = clampPct(attempt.total_score);
                       return (
                         <div key={idx} className="text-center">
                           <div 
