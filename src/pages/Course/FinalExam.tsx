@@ -35,6 +35,7 @@ interface UserData {
   ip: string;
   photo?: string;
   certificateNumber?: string;
+  certificatePdfPath?: string;
 }
 
 interface ExamResult {
@@ -793,8 +794,12 @@ const FinalExam: React.FC = () => {
         return;
       }
 
-      // Store certificate number for display
-      setUserData(prev => ({ ...prev, certificateNumber: certData.certificate_number }));
+      // Store certificate number + stored pdf path for display/download
+      setUserData(prev => ({
+        ...prev,
+        certificateNumber: certData.certificate_number,
+        certificatePdfPath: certData.pdf_path || undefined,
+      }));
       setExamStage('certificate');
       toast.success('Certificate generated successfully!');
     } catch (error) {
@@ -804,8 +809,23 @@ const FinalExam: React.FC = () => {
   };
 
 
-  const printCertificate = () => {
-    window.print();
+  const downloadCertificate = async () => {
+    const path = userData.certificatePdfPath;
+    if (!path) {
+      // Fallback: print view
+      window.print();
+      return;
+    }
+    try {
+      const { data, error } = await supabase.storage
+        .from('certificates')
+        .createSignedUrl(path, 3600);
+      if (error || !data?.signedUrl) throw error || new Error('No signed URL');
+      window.open(data.signedUrl, '_blank', 'noopener,noreferrer');
+    } catch (err: any) {
+      console.error('Download certificate failed:', err);
+      toast.error('Could not open certificate PDF. Please try again.');
+    }
   };
 
   const emailCertificate = () => {
@@ -1022,7 +1042,7 @@ const FinalExam: React.FC = () => {
         completionDate={date}
         tierStatus={tierStatus}
         userPhoto={userData.photo}
-        onDownload={printCertificate}
+        onDownload={downloadCertificate}
         onShare={emailCertificate}
       />
     );
