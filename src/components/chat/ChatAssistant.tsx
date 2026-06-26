@@ -13,8 +13,9 @@ import { usePaymentStatus } from '@/hooks/usePaymentStatus';
 import { useOrganizationAccess } from '@/hooks/useOrganizationAccess';
 import { useUATMode } from '@/hooks/useUATMode';
 import { toast } from '@/components/ui/use-toast';
+import { TRACK_IDS } from '@/constants/tracks';
 
-const COURSE_ID = '76524ea8-a00f-47b3-8e29-a0aa12c23a60';
+const COURSE_ID = TRACK_IDS.RVT_CORE;
 
 interface Message {
   id: string;
