@@ -17,6 +17,7 @@ import { UATAccountManager } from '@/components/admin/UATAccountManager';
 import { ConsumerCoursesSection } from '@/components/admin/ConsumerCoursesSection';
 import { SupportRequestsPanel } from '@/components/admin/SupportRequestsPanel';
 import { E2EValidationReport } from '@/components/admin/E2EValidationReport';
+import { EnvironmentControls } from '@/components/admin/EnvironmentControls';
 import { Loader2 } from 'lucide-react';
 import { InternalChatbot } from '@/components/chat/InternalChatbot';
 import { NextActionBanner } from '@/components/guidance/NextActionBanner';
