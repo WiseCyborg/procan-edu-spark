@@ -60,6 +60,16 @@ const CourseLayout: React.FC = () => {
     isLoading
   } = useUserProgress(COURSE_ID);
 
+  // BUG-011: Server-computed exam gate (required-only progress)
+  const { courseState } = useCourseState(COURSE_ID);
+  const requiredTotal = courseState.required_total || REQUIRED_FOR_EXAM;
+  const requiredCompleted = Math.min(courseState.required_completed ?? 0, requiredTotal);
+  const examEligible = courseState.exam_eligible || areAllModulesCompleted();
+  const requiredRemaining = Math.max(requiredTotal - requiredCompleted, 0);
+  const requiredPercent = requiredTotal > 0
+    ? Math.round((requiredCompleted / requiredTotal) * 100)
+    : 0;
+
   useEffect(() => {
     const fetchModules = async () => {
       const { data, error } = await supabase
@@ -93,15 +103,20 @@ const CourseLayout: React.FC = () => {
   }, []);
 
   const updateProgressDisplay = () => {
-    const completedCount = getCompletedModulesCount();
     const averageScore = getTotalScore();
-    return `${completedCount}/${REQUIRED_FOR_EXAM} modules completed${averageScore > 0 ? ` • Average score: ${averageScore}%` : ''}`;
+    return `${requiredCompleted}/${requiredTotal} required modules completed${averageScore > 0 ? ` • Average score: ${averageScore}%` : ''}`;
   };
 
-  const isExamEnabled = areAllModulesCompleted();
   const isManagerRole = isDispensaryManager || isAdmin;
   const managerModules = modules.filter(m => m.is_manager_only);
   const agentModules = modules.filter(m => !m.is_manager_only);
+  const managerCompletedCount = managerModules.filter(m =>
+    isModuleCompleted(`part${m.module_number}`)
+  ).length;
+  const managerPercent = managerModules.length > 0
+    ? Math.round((managerCompletedCount / managerModules.length) * 100)
+    : 0;
+
 
   // Show loading state
   if (isLoading || paymentLoading || rolesLoading || orgLoading) {
