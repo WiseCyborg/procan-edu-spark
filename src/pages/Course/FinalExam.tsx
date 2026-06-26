@@ -523,13 +523,15 @@ const FinalExam: React.FC = () => {
   const submitSection = () => {
     const section = currentSection;
     const questions = quizzes[section] || [];
-    const sectionResults = questions.map((question, index) => {
-      const selectedAnswer = answers[`q${section}${index}`];
+    // Grade by the question's STABLE id + correct option VALUE — never by
+    // rendered/shuffled index. This is the BUG-017 fix.
+    const sectionResults = questions.map((question) => {
+      const selectedAnswer = answers[question.id];
       return {
         question: question.q,
         selected: selectedAnswer || "Not answered",
         correct: question.a,
-        isCorrect: selectedAnswer === question.a
+        isCorrect: selectedAnswer !== undefined && selectedAnswer === question.a,
       };
     });
 
@@ -563,6 +565,7 @@ const FinalExam: React.FC = () => {
       }
     }
   };
+
 
   // Compute final results from a snapshot, persist to exam_attempts, and transition to results screen.
   const finalizeExam = async (allResults: ExamResult) => {
