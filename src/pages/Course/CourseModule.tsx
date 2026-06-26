@@ -132,7 +132,7 @@ const CourseModule: React.FC = () => {
                   {question.options.map(option => (
                     <label 
                       key={option} 
-                      className={`block p-3 border rounded-md cursor-pointer hover:bg-gray-100 ${
+                      className={`flex items-center min-h-[44px] p-3 border rounded-md cursor-pointer hover:bg-gray-100 ${
                         submitted 
                           ? (option === question.a 
                             ? 'bg-green-100 border-green-300' 
@@ -149,9 +149,9 @@ const CourseModule: React.FC = () => {
                         checked={selectedAnswers[index] === option}
                         onChange={() => handleAnswerSelect(index, option)}
                         disabled={submitted}
-                        className="mr-2"
+                        className="mr-3 h-4 w-4 flex-shrink-0"
                       />
-                      <span>{option}</span>
+                      <span className="text-base">{option}</span>
                     </label>
                   ))}
                 </div>

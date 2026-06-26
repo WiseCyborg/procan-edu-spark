@@ -74,13 +74,13 @@ export const CertificateAchievement: React.FC<CertificateAchievementProps> = ({
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.5 }}
-          className="bg-white border-4 border-stoplight-green rounded-lg shadow-2xl p-8 relative"
+          className="bg-white border-4 border-stoplight-green rounded-lg shadow-2xl p-4 sm:p-8 relative"
         >
-          {/* Professional ID Photo - Top Right Corner */}
+          {/* Professional ID Photo - Top Right on desktop, centered on mobile */}
           {userPhoto && (
-            <div className="absolute top-8 right-8">
+            <div className="flex justify-center sm:block sm:absolute sm:top-8 sm:right-8 mb-4 sm:mb-0">
               <div className="relative">
-                <div className="w-32 h-40 rounded-lg overflow-hidden border-4 border-gray-300 shadow-lg bg-white">
+                <div className="w-24 h-32 sm:w-32 sm:h-40 rounded-lg overflow-hidden border-4 border-gray-300 shadow-lg bg-white">
                   <img 
                     src={userPhoto} 
                     alt="Certificate holder"
@@ -95,7 +95,7 @@ export const CertificateAchievement: React.FC<CertificateAchievementProps> = ({
             </div>
           )}
 
-          <div className="text-center space-y-4 pr-40">
+          <div className="text-center space-y-4 sm:pr-40">
             <div className="flex items-center justify-center gap-2 flex-wrap">
               <Badge className={`${tier.bg} text-white text-lg px-4 py-2`}>
                 {tier.emoji} {tierStatus.toUpperCase()} TIER CERTIFIED
@@ -107,7 +107,7 @@ export const CertificateAchievement: React.FC<CertificateAchievementProps> = ({
               )}
             </div>
             
-            <h2 className="text-3xl font-bold text-stoplight-charcoal font-playfair italic">
+            <h2 className="text-2xl sm:text-3xl font-bold text-stoplight-charcoal font-playfair italic break-words">
               {userName}
             </h2>
             
@@ -121,7 +121,7 @@ export const CertificateAchievement: React.FC<CertificateAchievementProps> = ({
               <p className="text-sm text-gray-500 mb-1">
                 {isManagerCertification ? 'Manager-Level ' : ''}Certificate Number
               </p>
-              <p className="text-xl font-bold text-stoplight-charcoal font-mono">
+              <p className="text-base sm:text-xl font-bold text-stoplight-charcoal font-mono break-all">
                 {certificateNumber}
               </p>
               <p className="text-sm text-gray-500 mt-2">{completionDate}</p>
@@ -138,12 +138,12 @@ export const CertificateAchievement: React.FC<CertificateAchievementProps> = ({
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.7 }}
-          className="flex justify-center gap-4 mt-8"
+          className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mt-8"
         >
           <Button 
             size="lg" 
             onClick={onDownload}
-            className="bg-stoplight-green hover:bg-stoplight-green/90"
+            className="bg-stoplight-green hover:bg-stoplight-green/90 w-full sm:w-auto"
           >
             <Download className="w-4 h-4 mr-2" />
             Download Certificate
@@ -152,6 +152,7 @@ export const CertificateAchievement: React.FC<CertificateAchievementProps> = ({
             size="lg" 
             variant="outline"
             onClick={onShare}
+            className="w-full sm:w-auto"
           >
             <Share2 className="w-4 h-4 mr-2" />
             Share Achievement
