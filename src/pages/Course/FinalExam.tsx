@@ -329,7 +329,7 @@ const FinalExam: React.FC = () => {
         setTotalTimeLeft(prev => {
           if (prev <= 1) {
             clearInterval(totalTimerRef.current!);
-            showFinalResults();
+            finalizeExam(results);
             return 0;
           }
           return prev - 1;
