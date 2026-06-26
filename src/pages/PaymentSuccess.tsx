@@ -498,11 +498,11 @@ const PaymentSuccess: React.FC = () => {
             </ul>
           </div>
 
-          <div className="flex justify-center space-x-4">
+          <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
             <Button 
               onClick={() => navigate('/course')}
               size="lg"
-              className="bg-green-600 hover:bg-green-700 text-white"
+              className="bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto"
             >
               Start Learning
               <ArrowRight className="h-5 w-5 ml-2" />
@@ -511,6 +511,7 @@ const PaymentSuccess: React.FC = () => {
               onClick={() => navigate('/dashboard')}
               size="lg"
               variant="outline"
+              className="w-full sm:w-auto"
             >
               Go to Dashboard
             </Button>
