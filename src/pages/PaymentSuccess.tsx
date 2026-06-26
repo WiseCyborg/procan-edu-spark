@@ -359,16 +359,16 @@ const PaymentSuccess: React.FC = () => {
               <h3 className="font-bold text-xl mb-3 text-center text-blue-900">
                 Your Organization Join Code
               </h3>
-              <div className="bg-white p-6 rounded-lg border-2 border-blue-400 mb-3">
-                <div className="flex items-center justify-between">
-                  <code className="text-3xl font-mono font-bold text-blue-600 tracking-wider">
+              <div className="bg-white p-4 sm:p-6 rounded-lg border-2 border-blue-400 mb-3">
+                <div className="flex flex-col sm:flex-row items-center sm:items-center justify-between gap-3">
+                  <code className="text-lg sm:text-3xl font-mono font-bold text-blue-600 tracking-wider break-all text-center sm:text-left">
                     {seatPurchaseData.joinCode}
                   </code>
                   <Button
                     size="icon"
                     variant="outline"
                     onClick={handleCopyCode}
-                    className="ml-4"
+                    className="sm:ml-4 flex-shrink-0 h-11 w-11"
                   >
                     {copied ? <Check className="h-5 w-5 text-green-600" /> : <Copy className="h-5 w-5" />}
                   </Button>
