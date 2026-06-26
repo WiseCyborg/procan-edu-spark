@@ -71,7 +71,7 @@ export const EmailHealthPanel = () => {
     setRetryingId(id);
     try {
       const { error } = await supabase.functions.invoke("retry-failed-email", {
-        body: { email_log_id: id },
+        body: { email_id: id },
       });
       if (error) throw error;
       toast.success("Retry triggered");
