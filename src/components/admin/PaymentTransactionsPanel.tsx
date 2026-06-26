@@ -271,6 +271,63 @@ export function PaymentTransactionsPanel() {
         </Card>
       </div>
 
+      {pendingPurchases.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <h3 className="font-semibold text-amber-700">Pending Purchases Requiring Action</h3>
+            <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+              {pendingPurchases.length}
+            </Badge>
+          </div>
+          <div className="border border-amber-200 rounded-md bg-amber-50/30">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Organization</TableHead>
+                  <TableHead>PayPal Order ID</TableHead>
+                  <TableHead>Seats</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {pendingPurchases.map((p) => (
+                  <TableRow key={p.id}>
+                    <TableCell className="text-sm font-medium">
+                      {p.organizations?.name ?? (p.metadata?.organization_name as string) ?? '—'}
+                    </TableCell>
+                    <TableCell><OrderIdCell id={p.paypal_order_id} /></TableCell>
+                    <TableCell className="text-sm">{p.quantity}</TableCell>
+                    <TableCell className="text-sm">{formatAmount(p.amount_paid, 'USD')}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className={p.status === 'failed' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-amber-50 text-amber-700 border-amber-200'}>
+                        {p.status === 'failed' ? 'Failed' : 'Pending'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-green-700 border-green-300 hover:bg-green-50"
+                        disabled={approvingId === p.id}
+                        onClick={() => handleManualApprove(p.id)}
+                      >
+                        {approvingId === p.id ? (
+                          <><Loader2 className="h-3 w-3 animate-spin mr-1" />Processing…</>
+                        ) : (
+                          <><CheckCircle2 className="h-3 w-3 mr-1" />Mark as Paid</>
+                        )}
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+      )}
+
       {/* Events table header */}
       <div className="flex items-center justify-between">
         <div>
