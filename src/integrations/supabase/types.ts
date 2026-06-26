@@ -1638,6 +1638,7 @@ export type Database = {
       }
       course_completions: {
         Row: {
+          certificate_url: string | null
           completed_at: string
           completion_percent: number
           course_id: string
@@ -1648,6 +1649,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          certificate_url?: string | null
           completed_at?: string
           completion_percent?: number
           course_id: string
@@ -1658,6 +1660,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          certificate_url?: string | null
           completed_at?: string
           completion_percent?: number
           course_id?: string
