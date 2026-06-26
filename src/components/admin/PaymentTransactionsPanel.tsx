@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { DollarSign, RefreshCw, AlertCircle, Clock, Loader2 } from 'lucide-react';
+import { DollarSign, RefreshCw, AlertCircle, Clock, Loader2, CheckCircle2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 interface PaymentEventRow {
@@ -37,6 +37,17 @@ interface PurchaseSummary {
   failed: number;
   total_revenue: number;
   total_seats_sold: number;
+}
+
+interface PendingPurchase {
+  id: string;
+  status: string;
+  quantity: number;
+  amount_paid: string | number | null;
+  paypal_order_id: string | null;
+  metadata: Record<string, unknown> | null;
+  organization_id: string | null;
+  organizations: { name: string | null } | null;
 }
 
 const EMPTY_SUMMARY: PurchaseSummary = {
@@ -127,9 +138,11 @@ function OrderIdCell({ id }: { id: string | null }) {
 export function PaymentTransactionsPanel() {
   const [events, setEvents] = useState<PaymentEventRow[]>([]);
   const [summary, setSummary] = useState<PurchaseSummary>(EMPTY_SUMMARY);
+  const [pendingPurchases, setPendingPurchases] = useState<PendingPurchase[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null);
+  const [approvingId, setApprovingId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
