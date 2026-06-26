@@ -104,7 +104,7 @@ export const ExamAttemptHistory: React.FC<ExamAttemptHistoryProps> = ({
               
               <div className="text-center p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
                 <div className="text-2xl font-bold text-blue-600 dark:text-blue-500">
-                  {Math.round(stats.best_score / totalQuestions * 100)}%
+                  {clampPct(stats.best_score)}%
                 </div>
                 <div className="text-xs text-muted-foreground mt-1">Best Score</div>
               </div>
