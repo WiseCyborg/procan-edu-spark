@@ -1079,9 +1079,11 @@ const FinalExam: React.FC = () => {
       day: 'numeric' 
     });
     
-    // Determine tier status (can be calculated based on score)
-    const tierStatus: 'green' | 'yellow' | 'red' = 
-      totalScore >= 32 ? 'green' : totalScore >= 28 ? 'yellow' : 'red';
+    // Determine tier status from the persisted overall percentage (0–100).
+    const overallPct = persistedAttempt?.total_score ?? 0;
+    const tierStatus: 'green' | 'yellow' | 'red' =
+      overallPct >= 90 ? 'green' : overallPct >= 80 ? 'yellow' : 'red';
+
     
     return (
       <CertificateAchievement
