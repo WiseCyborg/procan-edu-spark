@@ -15,12 +15,18 @@ import { useExamAttempts } from '@/hooks/useExamAttempts';
 import { useUserProgress } from '@/hooks/useUserProgress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Clock, History, AlertTriangle, BookOpen } from 'lucide-react';
-
-interface QuizQuestion {
-  q: string;
-  a: string;
-  options: string[];
-}
+import {
+  quizzes,
+  sectionTitles,
+  comarSections,
+  gradeExam,
+  selfTestGrader,
+  getQuestionId,
+  PASSING_SCORE,
+  TOTAL_SECTIONS,
+  type QuizQuestion,
+  type TopicScore,
+} from './finalExamData';
 
 interface UserData {
   name: string;
@@ -40,16 +46,6 @@ interface ExamResult {
   }>;
 }
 
-interface TopicScore {
-  section_number: number;
-  section_title: string;
-  comar_section: string;
-  topic_area: string;
-  questions_correct: number;
-  questions_total: number;
-  score_percentage: number;
-  needs_remediation: boolean;
-}
 
 const COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
 
