@@ -165,7 +165,7 @@ const CourseLayout: React.FC = () => {
             )}
           </CardTitle>
           <p className="text-muted-foreground">
-            Complete all modules to unlock the final exam and earn your certificate
+            Complete the {requiredTotal} required agent modules to unlock the final exam and earn your Maryland RVT (Agent) certificate.
           </p>
           {organizationName && (
             <p className="text-sm text-muted-foreground mt-2">
@@ -179,22 +179,42 @@ const CourseLayout: React.FC = () => {
               {updateProgressDisplay()}
             </Badge>
           </div>
+          {/* Required (Agent) progress */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span className="font-medium text-foreground">Agent Certification Progress (required)</span>
+              <span className="text-muted-foreground">
+                {requiredCompleted} of {requiredTotal} • {requiredPercent}%
+              </span>
+            </div>
+            <Progress value={requiredPercent} className="h-2" />
+            <p className="text-xs text-muted-foreground">
+              {examEligible
+                ? 'All required modules complete — your final exam is unlocked.'
+                : `${requiredRemaining} required module${requiredRemaining === 1 ? '' : 's'} remaining before the final exam unlocks.`}
+            </p>
+          </div>
           <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
             <p className="text-sm text-blue-800 dark:text-blue-300 text-center">
-              <span className="font-semibold">Note:</span> Green, Yellow, and Red tier levels are for progress tracking and motivation. 
-              All 24 modules are required for Maryland RVT certification compliance.
+              <span className="font-semibold">Note:</span> Green, Yellow, and Red tier levels are for progress tracking and motivation.
+              The {requiredTotal} agent modules are required for Maryland RVT (Agent) certification. The {managerModules.length || 5} manager-level modules are optional and count only toward Manager-Level RVT certification.
             </p>
           </div>
           {isManagerRole && managerModules.length > 0 && (
-            <div className="bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800 rounded-lg p-4">
+            <div className="bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800 rounded-lg p-4 space-y-2">
               <p className="text-sm text-purple-800 dark:text-purple-300 text-center">
-                <span className="font-semibold">Manager Track:</span> You have access to {managerModules.length} additional manager-level modules. 
-                Complete these for <strong>Manager-Level RVT Certification</strong>.
+                <span className="font-semibold">Manager Track (Optional):</span> {managerModules.length} additional manager-level modules. These do not block your Agent exam — complete them for <strong>Manager-Level RVT Certification</strong>.
               </p>
+              <div className="flex items-center justify-between text-xs text-purple-800 dark:text-purple-300">
+                <span>Manager Track Progress</span>
+                <span>{managerCompletedCount} of {managerModules.length} • {managerPercent}%</span>
+              </div>
+              <Progress value={managerPercent} className="h-2" />
             </div>
           )}
         </CardContent>
       </Card>
+
 
       {/* Agent-Level Modules (1-18) */}
       <div className="space-y-4">
