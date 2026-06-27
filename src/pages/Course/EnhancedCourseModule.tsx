@@ -122,6 +122,7 @@ const EnhancedCourseModule: React.FC = () => {
     moduleData?.id ?? null,
     COURSE_ID,
   );
+  const trackSupplement = !supplementVideoData?.is_admin_preview;
 
   // Emit a single 'play' for the primary video when its signed URL becomes available
   // on the course tab. SCORMStylePlayer wraps a Vimeo iframe or HTML5 video we can't
@@ -134,11 +135,13 @@ const EnhancedCourseModule: React.FC = () => {
     const key = `${moduleData.id}:${moduleData.asset_key}`;
     if (primaryPlayEmittedRef.current === key) return;
     primaryPlayEmittedRef.current = key;
-    primaryTracking.emitManual('play', {
-      position: 0,
-      duration: signedVideoData.duration_seconds ?? 1,
-      rate: 1,
-    });
+    if (!signedVideoData.is_admin_preview) {
+      primaryTracking.emitManual('play', {
+        position: 0,
+        duration: signedVideoData.duration_seconds ?? 1,
+        rate: 1,
+      });
+    }
   }, [activeTab, signedVideoData, moduleData?.asset_key, moduleData?.id, primaryTracking]);
 
   // Log and emit analytics when the primary video fails to load
@@ -149,17 +152,19 @@ const EnhancedCourseModule: React.FC = () => {
     const key = `${moduleData.id}:${moduleData.asset_key}`;
     if (videoLoadErrorEmittedRef.current === key) return;
     videoLoadErrorEmittedRef.current = key;
-    primaryTracking.emitManual('error', {
-      position: 0,
-      duration: 0,
-      rate: 1,
-    });
+    if (!signedVideoData.is_admin_preview) {
+      primaryTracking.emitManual('error', {
+        position: 0,
+        duration: 0,
+        rate: 1,
+      });
+    }
     console.error('[course-video] load failed', {
       module: moduleData.module_number,
       assetKey: moduleData.asset_key,
       error: signedVideoData.error_code,
     });
-  }, [moduleData?.asset_key, moduleData?.video_pending, moduleData?.id, moduleData?.module_number, signedVideoData?.success, signedVideoData?.error_code, primaryTracking]);
+  }, [moduleData?.asset_key, moduleData?.video_pending, moduleData?.id, moduleData?.module_number, signedVideoData?.success, signedVideoData?.error_code, signedVideoData?.is_admin_preview, primaryTracking]);
 
   const { updateProgress, isModuleCompletedByNumber, canAccessModule, getModuleUUID, getFirstIncompleteModule } = useUserProgress(COURSE_ID);
   const { saveResumeState } = useResumeState(COURSE_ID);
@@ -817,11 +822,13 @@ const EnhancedCourseModule: React.FC = () => {
                       }}
                       onLessonComplete={(lessonId) => {
                         console.log('Lesson completed:', lessonId);
-                        primaryTracking.emitManual('ended', {
-                          position: signedVideoData?.duration_seconds ?? 1,
-                          duration: signedVideoData?.duration_seconds ?? 1,
-                          rate: 1,
-                        });
+                        if (!signedVideoData?.is_admin_preview) {
+                          primaryTracking.emitManual('ended', {
+                            position: signedVideoData?.duration_seconds ?? 1,
+                            duration: signedVideoData?.duration_seconds ?? 1,
+                            rate: 1,
+                          });
+                        }
                       }}
                       onDocumentOpen={(docId) => {
                         setActiveTab('documents');
@@ -863,13 +870,13 @@ const EnhancedCourseModule: React.FC = () => {
                             controls
                             preload="metadata"
                             className="w-full rounded-md"
-                            onPlay={supplementTracking.onPlay}
-                            onPause={supplementTracking.onPause}
-                            onSeeking={supplementTracking.onSeeking}
-                            onSeeked={supplementTracking.onSeeked}
-                            onTimeUpdate={supplementTracking.onTimeUpdate}
-                            onEnded={supplementTracking.onEnded}
-                            onError={supplementTracking.onError}
+                            onPlay={trackSupplement ? supplementTracking.onPlay : undefined}
+                            onPause={trackSupplement ? supplementTracking.onPause : undefined}
+                            onSeeking={trackSupplement ? supplementTracking.onSeeking : undefined}
+                            onSeeked={trackSupplement ? supplementTracking.onSeeked : undefined}
+                            onTimeUpdate={trackSupplement ? supplementTracking.onTimeUpdate : undefined}
+                            onEnded={trackSupplement ? supplementTracking.onEnded : undefined}
+                            onError={trackSupplement ? supplementTracking.onError : undefined}
                           />
                         )}
                       </CardContent>
