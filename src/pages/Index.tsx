@@ -13,7 +13,7 @@ import { MarylandCountyHeatmap } from '@/components/MarylandCountyHeatmap';
 import { StickyMobileCTA } from '@/components/StickyMobileCTA';
 import { PredictiveAnalyticsPreview } from '@/components/PredictiveAnalyticsPreview';
 import { ExitIntentModal } from '@/components/ExitIntentModal';
-import { AIFAQChat } from '@/components/AIFAQChat';
+
 import { useABTest } from '@/hooks/useABTest';
 import { RoleSelectorModal } from '@/components/RoleSelectorModal';
 import { InvestmentValueCard } from '@/components/InvestmentValueCard';
@@ -457,7 +457,7 @@ const Index = () => {
       {/* Sticky Mobile CTA */}
       <StickyMobileCTA />
       <ExitIntentModal />
-      <AIFAQChat />
+      
     </div>;
 };
 export default Index;
