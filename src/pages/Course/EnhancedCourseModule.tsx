@@ -821,11 +821,13 @@ const EnhancedCourseModule: React.FC = () => {
                       }}
                       onLessonComplete={(lessonId) => {
                         console.log('Lesson completed:', lessonId);
-                        primaryTracking.emitManual('ended', {
-                          position: signedVideoData?.duration_seconds ?? 1,
-                          duration: signedVideoData?.duration_seconds ?? 1,
-                          rate: 1,
-                        });
+                        if (!signedVideoData?.is_admin_preview) {
+                          primaryTracking.emitManual('ended', {
+                            position: signedVideoData?.duration_seconds ?? 1,
+                            duration: signedVideoData?.duration_seconds ?? 1,
+                            rate: 1,
+                          });
+                        }
                       }}
                       onDocumentOpen={(docId) => {
                         setActiveTab('documents');
