@@ -282,12 +282,15 @@ const EnhancedCourseModule: React.FC = () => {
         }
 
         if (data) {
-          const { data: assetData } = await supabase
+          const { data: assetsData } = await supabase
             .from('video_assets')
-            .select('asset_key, unmapped_reason')
+            .select('asset_key, title, description, unmapped_reason')
             .eq('module_id', data.id)
-            .eq('is_active', true)
-            .maybeSingle();
+            .eq('is_active', true);
+
+          const allAssets = assetsData ?? [];
+          const primary = allAssets.find(a => !a.asset_key?.includes('_supplement')) ?? null;
+          const supplement = allAssets.find(a => a.asset_key?.includes('_supplement')) ?? null;
 
           setModuleData({
             id: data.id,
@@ -298,9 +301,18 @@ const EnhancedCourseModule: React.FC = () => {
             module_number: data.module_number,
             comar_reference: data.comar_reference,
             video_url: data.video_url,
-            asset_key: assetData?.asset_key ?? null,
-            video_pending: assetData?.unmapped_reason === 'pending_ai_generation',
+            asset_key: primary?.asset_key ?? null,
+            video_pending: primary?.unmapped_reason === 'pending_ai_generation',
           });
+          setSupplementAsset(
+            supplement
+              ? {
+                  asset_key: supplement.asset_key,
+                  title: supplement.title ?? null,
+                  description: supplement.description ?? null,
+                }
+              : null
+          );
         }
       } catch (error) {
         console.error('Error in fetchModuleData:', error);
