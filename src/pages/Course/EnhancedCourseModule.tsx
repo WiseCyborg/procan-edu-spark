@@ -722,17 +722,44 @@ const EnhancedCourseModule: React.FC = () => {
                         <div className="flex items-start gap-3">
                           <Info className="h-5 w-5 text-accent-foreground mt-0.5 shrink-0" />
                           <div>
-                            <p className="font-semibold text-foreground">We couldn't load this video right now.</p>
-                            <p className="text-sm text-muted-foreground mt-1">
-                              This may be a temporary access issue. Please refresh the page, and if it keeps happening, contact support.
-                            </p>
-                            <Button
-                              onClick={() => window.location.reload()}
-                              variant="outline"
-                              className="mt-4"
-                            >
-                              Refresh
-                            </Button>
+                            {signedVideoData.error_code === 'not_authorized' && (
+                              <>
+                                <p className="font-semibold text-foreground">Access required</p>
+                                <p className="text-sm text-muted-foreground mt-1">
+                                  You don't currently have access to this training video. Please contact your dispensary administrator to gain access.
+                                </p>
+                              </>
+                            )}
+                            {signedVideoData.error_code === 'not_authenticated' && (
+                              <>
+                                <p className="font-semibold text-foreground">Please sign in</p>
+                                <p className="text-sm text-muted-foreground mt-1">
+                                  Your session may have expired. Please sign in again to continue.
+                                </p>
+                                <Button
+                                  onClick={() => navigate('/auth')}
+                                  variant="outline"
+                                  className="mt-4"
+                                >
+                                  Sign In
+                                </Button>
+                              </>
+                            )}
+                            {signedVideoData.error_code !== 'not_authorized' && signedVideoData.error_code !== 'not_authenticated' && (
+                              <>
+                                <p className="font-semibold text-foreground">We couldn't load this video right now.</p>
+                                <p className="text-sm text-muted-foreground mt-1">
+                                  This may be a temporary access issue. Please refresh the page, and if it keeps happening, contact support.
+                                </p>
+                                <Button
+                                  onClick={() => window.location.reload()}
+                                  variant="outline"
+                                  className="mt-4"
+                                >
+                                  Refresh
+                                </Button>
+                              </>
+                            )}
                           </div>
                         </div>
                       </CardContent>
