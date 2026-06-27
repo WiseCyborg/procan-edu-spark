@@ -707,68 +707,100 @@ const EnhancedCourseModule: React.FC = () => {
                 </TabsContent>
 
                 <TabsContent value="course" className="space-y-4">
-                  <SCORMStylePlayer 
-                    config={{
-                      id: moduleData.id,
-                      title: moduleData.title,
-                      tagLabel: `Module ${moduleData.module_number} • ${currentModule?.tier.toUpperCase()} Tier`,
-                      estimatedMinutes: moduleData.lessons && moduleData.lessons.length > 0 
-                        ? moduleData.lessons.reduce((sum, l) => sum + (parseInt(l.duration) || 0), 0)
-                        : 15,
-                      lessons: moduleData.lessons && moduleData.lessons.length > 0 
-                        ? moduleData.lessons.map(l => ({
-                            ...l,
-                            markdownContent: l.markdownContent || moduleData.content || ''
-                          }))
-                        : [
-                          {
-                              id: `${moduleData.id}-lesson-1`,
-                              title: moduleData.title,
-                              duration: '15 min',
-                              videoType: (() => {
-                                if (moduleData.video_pending) return 'none' as const;
-                                if (signedVideoData?.success && signedVideoData.provider === 'vimeo') return 'embed' as const;
-                                if (signedVideoData?.success && signedVideoData.url) return 'file' as const;
-                                return 'none' as const;
-                              })(),
-                              videoUrl: signedVideoData?.success ? (signedVideoData.url ?? '') : '',
-                              markdownContent: moduleData.content || '', // Raw markdown for pagination
-                              htmlSummary: moduleData.video_pending
-                                ? `<div style="padding:16px;background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;margin-bottom:16px;">
-                                    <p style="font-weight:600;color:#92400e;margin:0 0 4px;">📹 Video Coming Soon</p>
-                                    <p style="color:#78350f;font-size:14px;margin:0;">This module's video is being prepared. The written content below covers all learning objectives.</p>
-                                  </div>
-                                  <div>${sanitizeHtml(markdownToHtml(moduleData.content || ''))}</div>`
-                                : `<div>${sanitizeHtml(markdownToHtml(moduleData.content || ''))}</div>`,
-                              resourceLinks: moduleDocuments.map(doc => ({
-                                label: doc.title,
-                                href: `/docs/${doc.id}`
-                              }))
-                            }
-                          ],
-                    }}
-                    onCourseComplete={() => {
-                      setCourseComplete(true);
-                      setActiveTab('documents');
-                      toast({
-                        title: "Course Section Complete!",
-                        description: "Continue with the documents and then take the quiz.",
-                      });
-                    }}
-                    onLessonComplete={(lessonId) => {
-                      console.log('Lesson completed:', lessonId);
-                      // Primary video is wrapped by SCORMStylePlayer (often Vimeo iframe),
-                      // so we surface 'ended' here as the most reliable completion signal.
-                      primaryTracking.emitManual('ended', {
-                        position: signedVideoData?.duration_seconds ?? 1,
-                        duration: signedVideoData?.duration_seconds ?? 1,
-                        rate: 1,
-                      });
-                    }}
-                    onDocumentOpen={(docId) => {
-                      setActiveTab('documents');
-                    }}
-                  />
+                  {moduleData.asset_key && !moduleData.video_pending && signedVideoData === undefined && (
+                    <Card>
+                      <CardContent className="py-12 text-center">
+                        <Video className="h-8 w-8 mx-auto mb-3 text-muted-foreground animate-pulse" />
+                        <p className="text-muted-foreground">Loading video…</p>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {moduleData.asset_key && !moduleData.video_pending && signedVideoData?.success === false && (
+                    <Card className="border-accent bg-accent/10">
+                      <CardContent className="py-8">
+                        <div className="flex items-start gap-3">
+                          <Info className="h-5 w-5 text-accent-foreground mt-0.5 shrink-0" />
+                          <div>
+                            <p className="font-semibold text-foreground">We couldn't load this video right now.</p>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              This may be a temporary access issue. Please refresh the page, and if it keeps happening, contact support.
+                            </p>
+                            <Button
+                              onClick={() => window.location.reload()}
+                              variant="outline"
+                              className="mt-4"
+                            >
+                              Refresh
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {(!moduleData.asset_key || moduleData.video_pending || signedVideoData?.success === true) && (
+                    <SCORMStylePlayer 
+                      config={{
+                        id: moduleData.id,
+                        title: moduleData.title,
+                        tagLabel: `Module ${moduleData.module_number} • ${currentModule?.tier.toUpperCase()} Tier`,
+                        estimatedMinutes: moduleData.lessons && moduleData.lessons.length > 0 
+                          ? moduleData.lessons.reduce((sum, l) => sum + (parseInt(l.duration) || 0), 0)
+                          : 15,
+                        lessons: moduleData.lessons && moduleData.lessons.length > 0 
+                          ? moduleData.lessons.map(l => ({
+                              ...l,
+                              markdownContent: l.markdownContent || moduleData.content || ''
+                            }))
+                          : [
+                            {
+                                id: `${moduleData.id}-lesson-1`,
+                                title: moduleData.title,
+                                duration: '15 min',
+                                videoType: (() => {
+                                  if (moduleData.video_pending) return 'none' as const;
+                                  if (signedVideoData?.success && signedVideoData.provider === 'vimeo') return 'embed' as const;
+                                  if (signedVideoData?.success && signedVideoData.url) return 'file' as const;
+                                  return 'none' as const;
+                                })(),
+                                videoUrl: signedVideoData?.success ? (signedVideoData.url ?? '') : '',
+                                markdownContent: moduleData.content || '',
+                                htmlSummary: moduleData.video_pending
+                                  ? `<div style="padding:16px;background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;margin-bottom:16px;">
+                                      <p style="font-weight:600;color:#92400e;margin:0 0 4px;">📹 Video Coming Soon</p>
+                                      <p style="color:#78350f;font-size:14px;margin:0;">This module's video is being prepared. The written content below covers all learning objectives.</p>
+                                    </div>
+                                    <div>${sanitizeHtml(markdownToHtml(moduleData.content || ''))}</div>`
+                                  : `<div>${sanitizeHtml(markdownToHtml(moduleData.content || ''))}</div>`,
+                                resourceLinks: moduleDocuments.map(doc => ({
+                                  label: doc.title,
+                                  href: `/docs/${doc.id}`
+                                }))
+                              }
+                            ],
+                      }}
+                      onCourseComplete={() => {
+                        setCourseComplete(true);
+                        setActiveTab('documents');
+                        toast({
+                          title: "Course Section Complete!",
+                          description: "Continue with the documents and then take the quiz.",
+                        });
+                      }}
+                      onLessonComplete={(lessonId) => {
+                        console.log('Lesson completed:', lessonId);
+                        primaryTracking.emitManual('ended', {
+                          position: signedVideoData?.duration_seconds ?? 1,
+                          duration: signedVideoData?.duration_seconds ?? 1,
+                          rate: 1,
+                        });
+                      }}
+                      onDocumentOpen={(docId) => {
+                        setActiveTab('documents');
+                      }}
+                    />
+                  )}
 
                   {supplementAsset && supplementVideoData?.success && supplementVideoData.url && (
                     <Card className="border-primary/30">
