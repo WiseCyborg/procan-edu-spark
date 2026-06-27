@@ -15,6 +15,8 @@ export interface SignedVideoResponse {
   title?: string;
   thumbnail_url?: string | null;
   duration_seconds?: number | null;
+  /** True when the viewer is an admin bypassing the entitlement gate (content QA). */
+  is_admin_preview?: boolean;
 }
 
 
