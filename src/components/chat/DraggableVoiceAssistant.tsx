@@ -196,6 +196,14 @@ export const DraggableVoiceAssistant: React.FC = () => {
   const [dragOffset, setDragOffset] = useState<Position>({ x: 0, y: 0 });
   const [isListening, setIsListening] = useState(false);
   const [isChatDismissed, setIsChatDismissed] = useState(false);
+  const [chatLanguage, setChatLanguage] = useState(getStoredLanguage());
+
+  const handleLanguageChange = useCallback((lang: { code: string; ttsLang: string }) => {
+    setChatLanguage(lang.code);
+    setStoredLanguage(lang.code);
+    stop();
+  }, [stop]);
+
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout>();
