@@ -15,6 +15,7 @@ import { markdownToHtml } from "@/utils/markdown-to-html";
 import { useUserProgress } from '@/hooks/useUserProgress';
 import { useResumeState } from '@/hooks/useResumeState';
 import { useSignedVideoUrl } from '@/hooks/useSignedVideoUrl';
+import { useVideoEngagementTracking } from '@/hooks/useVideoEngagementTracking';
 import { supabase } from '@/integrations/supabase/client';
 import { RegulatorySidebar } from '@/components/regulatory/RegulatorySidebar';
 import { SectionProgressNav } from '@/components/course/SectionProgressNav';
