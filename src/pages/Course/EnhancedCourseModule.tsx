@@ -737,6 +737,13 @@ const EnhancedCourseModule: React.FC = () => {
                     }}
                     onLessonComplete={(lessonId) => {
                       console.log('Lesson completed:', lessonId);
+                      // Primary video is wrapped by SCORMStylePlayer (often Vimeo iframe),
+                      // so we surface 'ended' here as the most reliable completion signal.
+                      primaryTracking.emitManual('ended', {
+                        position: signedVideoData?.duration_seconds ?? 1,
+                        duration: signedVideoData?.duration_seconds ?? 1,
+                        rate: 1,
+                      });
                     }}
                     onDocumentOpen={(docId) => {
                       setActiveTab('documents');
