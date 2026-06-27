@@ -288,6 +288,48 @@ export type Database = {
         }
         Relationships: []
       }
+      agentic_remediation_log: {
+        Row: {
+          action_type: string
+          created_at: string
+          description: string | null
+          entity_id: string | null
+          entity_type: string
+          id: string
+          metadata: Json | null
+          org_id: string | null
+          run_id: string
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          description?: string | null
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          metadata?: Json | null
+          org_id?: string | null
+          run_id: string
+          status: string
+          user_id?: string | null
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          description?: string | null
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          metadata?: Json | null
+          org_id?: string | null
+          run_id?: string
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       ai_agent_runs: {
         Row: {
           actions_taken: Json | null
