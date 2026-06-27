@@ -133,9 +133,18 @@ export const UnifiedVoiceProvider: React.FC<{ children: React.ReactNode }> = ({ 
       }
 
       const utterance = new SpeechSynthesisUtterance(text);
-      
-      // Configure voice settings
-      if (settings.voice) {
+
+      // Language-aware voice selection (prefer voice matching stored language)
+      const storedLang = getStoredLanguage();
+      const langMap: Record<string, string> = {
+        en: 'en-US', es: 'es-US', zh: 'zh-CN', fr: 'fr-FR', vi: 'vi-VN', am: 'am-ET',
+      };
+      utterance.lang = langMap[storedLang] || 'en-US';
+
+      const langPreferredVoice = selectVoice(availableVoices, settings.gender, storedLang);
+      if (langPreferredVoice) {
+        utterance.voice = langPreferredVoice;
+      } else if (settings.voice) {
         const selectedVoice = availableVoices.find(voice => voice.name === settings.voice);
         if (selectedVoice) {
           utterance.voice = selectedVoice;
