@@ -37,6 +37,7 @@ import { ChatExportDialog } from './ChatExportDialog';
 import { InteractiveMessage } from './InteractiveMessage';
 import { ChatAnnouncementSystem } from './ChatAnnouncementSystem';
 import { useChatPersistence } from '@/hooks/useChatPersistence';
+import { LanguageSwitcher, getStoredLanguage, setStoredLanguage } from './LanguageSwitcher';
 
 interface Message {
   id: string;
@@ -195,6 +196,14 @@ export const DraggableVoiceAssistant: React.FC = () => {
   const [dragOffset, setDragOffset] = useState<Position>({ x: 0, y: 0 });
   const [isListening, setIsListening] = useState(false);
   const [isChatDismissed, setIsChatDismissed] = useState(false);
+  const [chatLanguage, setChatLanguage] = useState(getStoredLanguage());
+
+  const handleLanguageChange = useCallback((lang: { code: string; ttsLang: string }) => {
+    setChatLanguage(lang.code);
+    setStoredLanguage(lang.code);
+    stop();
+  }, [stop]);
+
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout>();
@@ -712,6 +721,7 @@ export const DraggableVoiceAssistant: React.FC = () => {
                       <Volume2 className="w-4 h-4 text-primary animate-pulse" />
                     </div>
                   )}
+                  <LanguageSwitcher compact={true} onLanguageChange={handleLanguageChange} />
                   <Button
                     size="sm"
                     variant="ghost"
@@ -721,6 +731,7 @@ export const DraggableVoiceAssistant: React.FC = () => {
                     <Settings className="w-4 h-4" />
                   </Button>
                 </div>
+
               </div>
               
               {/* Settings Panel */}
