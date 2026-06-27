@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useCallback, useState, useRef } from 'react';
+import { getStoredLanguage } from '@/components/chat/LanguageSwitcher';
 
 interface VoiceSettings {
   enabled: boolean;
