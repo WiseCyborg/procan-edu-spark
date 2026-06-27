@@ -870,13 +870,13 @@ const EnhancedCourseModule: React.FC = () => {
                             controls
                             preload="metadata"
                             className="w-full rounded-md"
-                            onPlay={supplementTracking.onPlay}
-                            onPause={supplementTracking.onPause}
-                            onSeeking={supplementTracking.onSeeking}
-                            onSeeked={supplementTracking.onSeeked}
-                            onTimeUpdate={supplementTracking.onTimeUpdate}
-                            onEnded={supplementTracking.onEnded}
-                            onError={supplementTracking.onError}
+                            onPlay={trackSupplement ? supplementTracking.onPlay : undefined}
+                            onPause={trackSupplement ? supplementTracking.onPause : undefined}
+                            onSeeking={trackSupplement ? supplementTracking.onSeeking : undefined}
+                            onSeeked={trackSupplement ? supplementTracking.onSeeked : undefined}
+                            onTimeUpdate={trackSupplement ? supplementTracking.onTimeUpdate : undefined}
+                            onEnded={trackSupplement ? supplementTracking.onEnded : undefined}
+                            onError={trackSupplement ? supplementTracking.onError : undefined}
                           />
                         )}
                       </CardContent>
