@@ -72,11 +72,18 @@ interface ModuleData {
 
 const COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
 
+interface SupplementAsset {
+  asset_key: string;
+  title: string | null;
+  description: string | null;
+}
+
 const EnhancedCourseModule: React.FC = () => {
   const { moduleId } = useParams<{ moduleId: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const [moduleData, setModuleData] = useState<ModuleData | null>(null);
+  const [supplementAsset, setSupplementAsset] = useState<SupplementAsset | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<string>(searchParams.get('tab') || 'overview');
   const [currentPageIndex, setCurrentPageIndex] = useState<number>(parseInt(searchParams.get('page') || '0'));
@@ -95,6 +102,11 @@ const EnhancedCourseModule: React.FC = () => {
   const { data: signedVideoData } = useSignedVideoUrl(
     moduleData?.asset_key ?? '',
     !!moduleData?.asset_key && activeTab === 'course'
+  );
+
+  const { data: supplementVideoData } = useSignedVideoUrl(
+    supplementAsset?.asset_key ?? '',
+    !!supplementAsset?.asset_key && activeTab === 'course'
   );
 
   const { updateProgress, isModuleCompletedByNumber, canAccessModule, getModuleUUID, getFirstIncompleteModule } = useUserProgress(COURSE_ID);
@@ -270,12 +282,15 @@ const EnhancedCourseModule: React.FC = () => {
         }
 
         if (data) {
-          const { data: assetData } = await supabase
+          const { data: assetsData } = await supabase
             .from('video_assets')
-            .select('asset_key, unmapped_reason')
+            .select('asset_key, title, description, unmapped_reason')
             .eq('module_id', data.id)
-            .eq('is_active', true)
-            .maybeSingle();
+            .eq('is_active', true);
+
+          const allAssets = assetsData ?? [];
+          const primary = allAssets.find(a => !a.asset_key?.includes('_supplement')) ?? null;
+          const supplement = allAssets.find(a => a.asset_key?.includes('_supplement')) ?? null;
 
           setModuleData({
             id: data.id,
@@ -286,9 +301,18 @@ const EnhancedCourseModule: React.FC = () => {
             module_number: data.module_number,
             comar_reference: data.comar_reference,
             video_url: data.video_url,
-            asset_key: assetData?.asset_key ?? null,
-            video_pending: assetData?.unmapped_reason === 'pending_ai_generation',
+            asset_key: primary?.asset_key ?? null,
+            video_pending: primary?.unmapped_reason === 'pending_ai_generation',
           });
+          setSupplementAsset(
+            supplement
+              ? {
+                  asset_key: supplement.asset_key,
+                  title: supplement.title ?? null,
+                  description: supplement.description ?? null,
+                }
+              : null
+          );
         }
       } catch (error) {
         console.error('Error in fetchModuleData:', error);
@@ -686,7 +710,48 @@ const EnhancedCourseModule: React.FC = () => {
                       setActiveTab('documents');
                     }}
                   />
+
+                  {supplementAsset && supplementVideoData?.success && supplementVideoData.url && (
+                    <Card className="border-primary/30">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-base">
+                          <Video className="h-4 w-4 text-primary" />
+                          Supplementary Material
+                        </CardTitle>
+                        {supplementAsset.title && (
+                          <p className="text-sm font-medium text-foreground">{supplementAsset.title}</p>
+                        )}
+                        {supplementAsset.description && (
+                          <p className="text-xs text-muted-foreground">{supplementAsset.description}</p>
+                        )}
+                        <p className="text-xs text-muted-foreground italic">
+                          Optional viewing — not required for module completion.
+                        </p>
+                      </CardHeader>
+                      <CardContent>
+                        {supplementVideoData.provider === 'vimeo' ? (
+                          <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                            <iframe
+                              src={supplementVideoData.url}
+                              className="absolute inset-0 h-full w-full rounded-md"
+                              allow="autoplay; fullscreen; picture-in-picture"
+                              allowFullScreen
+                              title={supplementAsset.title ?? 'Supplementary video'}
+                            />
+                          </div>
+                        ) : (
+                          <video
+                            src={supplementVideoData.url}
+                            controls
+                            preload="metadata"
+                            className="w-full rounded-md"
+                          />
+                        )}
+                      </CardContent>
+                    </Card>
+                  )}
                 </TabsContent>
+
 
                 <TabsContent value="documents" className="space-y-4">
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
