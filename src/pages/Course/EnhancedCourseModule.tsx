@@ -72,11 +72,18 @@ interface ModuleData {
 
 const COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
 
+interface SupplementAsset {
+  asset_key: string;
+  title: string | null;
+  description: string | null;
+}
+
 const EnhancedCourseModule: React.FC = () => {
   const { moduleId } = useParams<{ moduleId: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const [moduleData, setModuleData] = useState<ModuleData | null>(null);
+  const [supplementAsset, setSupplementAsset] = useState<SupplementAsset | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<string>(searchParams.get('tab') || 'overview');
   const [currentPageIndex, setCurrentPageIndex] = useState<number>(parseInt(searchParams.get('page') || '0'));
@@ -95,6 +102,11 @@ const EnhancedCourseModule: React.FC = () => {
   const { data: signedVideoData } = useSignedVideoUrl(
     moduleData?.asset_key ?? '',
     !!moduleData?.asset_key && activeTab === 'course'
+  );
+
+  const { data: supplementVideoData } = useSignedVideoUrl(
+    supplementAsset?.asset_key ?? '',
+    !!supplementAsset?.asset_key && activeTab === 'course'
   );
 
   const { updateProgress, isModuleCompletedByNumber, canAccessModule, getModuleUUID, getFirstIncompleteModule } = useUserProgress(COURSE_ID);
