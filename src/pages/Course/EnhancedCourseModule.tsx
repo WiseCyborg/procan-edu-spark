@@ -710,7 +710,48 @@ const EnhancedCourseModule: React.FC = () => {
                       setActiveTab('documents');
                     }}
                   />
+
+                  {supplementAsset && supplementVideoData?.success && supplementVideoData.url && (
+                    <Card className="border-primary/30">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-base">
+                          <Video className="h-4 w-4 text-primary" />
+                          Supplementary Material
+                        </CardTitle>
+                        {supplementAsset.title && (
+                          <p className="text-sm font-medium text-foreground">{supplementAsset.title}</p>
+                        )}
+                        {supplementAsset.description && (
+                          <p className="text-xs text-muted-foreground">{supplementAsset.description}</p>
+                        )}
+                        <p className="text-xs text-muted-foreground italic">
+                          Optional viewing — not required for module completion.
+                        </p>
+                      </CardHeader>
+                      <CardContent>
+                        {supplementVideoData.provider === 'vimeo' ? (
+                          <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                            <iframe
+                              src={supplementVideoData.url}
+                              className="absolute inset-0 h-full w-full rounded-md"
+                              allow="autoplay; fullscreen; picture-in-picture"
+                              allowFullScreen
+                              title={supplementAsset.title ?? 'Supplementary video'}
+                            />
+                          </div>
+                        ) : (
+                          <video
+                            src={supplementVideoData.url}
+                            controls
+                            preload="metadata"
+                            className="w-full rounded-md"
+                          />
+                        )}
+                      </CardContent>
+                    </Card>
+                  )}
                 </TabsContent>
+
 
                 <TabsContent value="documents" className="space-y-4">
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
