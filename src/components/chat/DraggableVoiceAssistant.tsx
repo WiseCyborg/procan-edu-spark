@@ -198,11 +198,20 @@ export const DraggableVoiceAssistant: React.FC = () => {
   const [isChatDismissed, setIsChatDismissed] = useState(false);
   const [chatLanguage, setChatLanguage] = useState(getStoredLanguage());
 
-  const handleLanguageChange = useCallback((lang: { code: string; ttsLang: string }) => {
+  const handleLanguageChange = useCallback(async (lang: { code: string; ttsLang: string }) => {
     setChatLanguage(lang.code);
     setStoredLanguage(lang.code);
     stop();
-  }, [stop]);
+    if (user?.id) {
+      supabase
+        .from('profiles')
+        .update({ preferred_language: lang.code })
+        .eq('id', user.id)
+        .then(({ error }) => {
+          if (error) console.error('[chat] language preference save failed:', error.message);
+        });
+    }
+  }, [stop, user]);
 
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -488,6 +497,28 @@ export const DraggableVoiceAssistant: React.FC = () => {
       saveMessage(sessionId, welcomeMessage);
     }
   }, [isOpen, messages.length, isChatDisabled, isAuthPage, currentSessionId, startNewSession, saveMessage, contextInfo]);
+
+  useEffect(() => {
+    if (!user || !isOpen) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('preferred_language')
+          .eq('id', user.id)
+          .maybeSingle();
+        if (cancelled || !profile?.preferred_language) return;
+        if (profile.preferred_language !== getStoredLanguage()) {
+          setStoredLanguage(profile.preferred_language);
+          setChatLanguage(profile.preferred_language);
+        }
+      } catch (err) {
+        console.error('[chat] language sync failed:', err);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [user, isOpen]);
 
   // ============================================
   // CONDITIONAL RETURNS MUST COME AFTER ALL HOOKS
