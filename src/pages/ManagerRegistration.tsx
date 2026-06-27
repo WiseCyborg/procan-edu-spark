@@ -207,9 +207,11 @@ export default function ManagerRegistration() {
         }
       }
 
-      // Only update dispensary_applications for application-based registrations
-      if (registrationType === 'application' && token) {
-        await supabase.from('dispensary_applications').update({ registration_completed: true }).eq('registration_token', token);
+      // Only update dispensary_applications for application-based registrations.
+      // Match by application id (returned from validate_registration_token) since the
+      // plaintext registration_token is no longer persisted at rest.
+      if (registrationType === 'application' && applicationData?.id) {
+        await supabase.from('dispensary_applications').update({ registration_completed: true }).eq('id', applicationData.id);
       }
       
       toast({ title: "Account Created!", description: "Redirecting to setup..." });
