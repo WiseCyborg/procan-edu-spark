@@ -784,6 +784,13 @@ const EnhancedCourseModule: React.FC = () => {
                             controls
                             preload="metadata"
                             className="w-full rounded-md"
+                            onPlay={supplementTracking.onPlay}
+                            onPause={supplementTracking.onPause}
+                            onSeeking={supplementTracking.onSeeking}
+                            onSeeked={supplementTracking.onSeeked}
+                            onTimeUpdate={supplementTracking.onTimeUpdate}
+                            onEnded={supplementTracking.onEnded}
+                            onError={supplementTracking.onError}
                           />
                         )}
                       </CardContent>
