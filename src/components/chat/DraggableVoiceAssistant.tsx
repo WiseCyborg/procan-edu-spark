@@ -721,6 +721,7 @@ export const DraggableVoiceAssistant: React.FC = () => {
                       <Volume2 className="w-4 h-4 text-primary animate-pulse" />
                     </div>
                   )}
+                  <LanguageSwitcher compact={true} onLanguageChange={handleLanguageChange} />
                   <Button
                     size="sm"
                     variant="ghost"
@@ -730,6 +731,7 @@ export const DraggableVoiceAssistant: React.FC = () => {
                     <Settings className="w-4 h-4" />
                   </Button>
                 </div>
+
               </div>
               
               {/* Settings Panel */}
