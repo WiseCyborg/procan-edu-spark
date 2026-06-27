@@ -151,17 +151,19 @@ const EnhancedCourseModule: React.FC = () => {
     const key = `${moduleData.id}:${moduleData.asset_key}`;
     if (videoLoadErrorEmittedRef.current === key) return;
     videoLoadErrorEmittedRef.current = key;
-    primaryTracking.emitManual('error', {
-      position: 0,
-      duration: 0,
-      rate: 1,
-    });
+    if (!signedVideoData.is_admin_preview) {
+      primaryTracking.emitManual('error', {
+        position: 0,
+        duration: 0,
+        rate: 1,
+      });
+    }
     console.error('[course-video] load failed', {
       module: moduleData.module_number,
       assetKey: moduleData.asset_key,
       error: signedVideoData.error_code,
     });
-  }, [moduleData?.asset_key, moduleData?.video_pending, moduleData?.id, moduleData?.module_number, signedVideoData?.success, signedVideoData?.error_code, primaryTracking]);
+  }, [moduleData?.asset_key, moduleData?.video_pending, moduleData?.id, moduleData?.module_number, signedVideoData?.success, signedVideoData?.error_code, signedVideoData?.is_admin_preview, primaryTracking]);
 
   const { updateProgress, isModuleCompletedByNumber, canAccessModule, getModuleUUID, getFirstIncompleteModule } = useUserProgress(COURSE_ID);
   const { saveResumeState } = useResumeState(COURSE_ID);
