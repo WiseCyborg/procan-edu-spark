@@ -109,6 +109,37 @@ const EnhancedCourseModule: React.FC = () => {
     !!supplementAsset?.asset_key && activeTab === 'course'
   );
 
+  const primaryTracking = useVideoEngagementTracking(
+    moduleData?.asset_key ?? null,
+    false,
+    moduleData?.id ?? null,
+    COURSE_ID,
+  );
+  const supplementTracking = useVideoEngagementTracking(
+    supplementAsset?.asset_key ?? null,
+    true,
+    moduleData?.id ?? null,
+    COURSE_ID,
+  );
+
+  // Emit a single 'play' for the primary video when its signed URL becomes available
+  // on the course tab. SCORMStylePlayer wraps a Vimeo iframe or HTML5 video we can't
+  // attach to from here, so we only capture what we can safely observe.
+  const primaryPlayEmittedRef = React.useRef<string | null>(null);
+  useEffect(() => {
+    if (activeTab !== 'course') return;
+    if (!signedVideoData?.success || !signedVideoData.url) return;
+    if (!moduleData?.asset_key) return;
+    const key = `${moduleData.id}:${moduleData.asset_key}`;
+    if (primaryPlayEmittedRef.current === key) return;
+    primaryPlayEmittedRef.current = key;
+    primaryTracking.emitManual('play', {
+      position: 0,
+      duration: signedVideoData.duration_seconds ?? 1,
+      rate: 1,
+    });
+  }, [activeTab, signedVideoData, moduleData?.asset_key, moduleData?.id, primaryTracking]);
+
   const { updateProgress, isModuleCompletedByNumber, canAccessModule, getModuleUUID, getFirstIncompleteModule } = useUserProgress(COURSE_ID);
   const { saveResumeState } = useResumeState(COURSE_ID);
   
