@@ -4379,11 +4379,14 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          last_attempt_at: string | null
+          last_error: string | null
           message: string
           metadata: Json | null
           organization_id: string | null
           priority: string | null
           recipient_email: string
+          retry_count: number
           rule_id: string | null
           scheduled_for: string
           sent_at: string | null
@@ -4394,11 +4397,14 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          last_attempt_at?: string | null
+          last_error?: string | null
           message: string
           metadata?: Json | null
           organization_id?: string | null
           priority?: string | null
           recipient_email: string
+          retry_count?: number
           rule_id?: string | null
           scheduled_for: string
           sent_at?: string | null
@@ -4409,11 +4415,14 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          last_attempt_at?: string | null
+          last_error?: string | null
           message?: string
           metadata?: Json | null
           organization_id?: string | null
           priority?: string | null
           recipient_email?: string
+          retry_count?: number
           rule_id?: string | null
           scheduled_for?: string
           sent_at?: string | null
