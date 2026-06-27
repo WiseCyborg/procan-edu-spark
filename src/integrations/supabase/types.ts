@@ -9407,6 +9407,66 @@ export type Database = {
           },
         ]
       }
+      video_engagement_events: {
+        Row: {
+          asset_key: string
+          client_event_at: string | null
+          course_id: string | null
+          created_at: string
+          duration_seconds: number | null
+          event_type: string
+          id: string
+          is_supplement: boolean
+          metadata: Json
+          module_id: string | null
+          percent_watched: number | null
+          playback_rate: number | null
+          position_seconds: number | null
+          seek_from_seconds: number | null
+          seek_to_seconds: number | null
+          session_id: string | null
+          user_id: string
+        }
+        Insert: {
+          asset_key: string
+          client_event_at?: string | null
+          course_id?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          event_type: string
+          id?: string
+          is_supplement?: boolean
+          metadata?: Json
+          module_id?: string | null
+          percent_watched?: number | null
+          playback_rate?: number | null
+          position_seconds?: number | null
+          seek_from_seconds?: number | null
+          seek_to_seconds?: number | null
+          session_id?: string | null
+          user_id: string
+        }
+        Update: {
+          asset_key?: string
+          client_event_at?: string | null
+          course_id?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          event_type?: string
+          id?: string
+          is_supplement?: boolean
+          metadata?: Json
+          module_id?: string | null
+          percent_watched?: number | null
+          playback_rate?: number | null
+          position_seconds?: number | null
+          seek_from_seconds?: number | null
+          seek_to_seconds?: number | null
+          session_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       workflow_automations: {
         Row: {
           actions: Json
