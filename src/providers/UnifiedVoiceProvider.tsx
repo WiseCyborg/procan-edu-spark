@@ -50,7 +50,7 @@ export const UnifiedVoiceProvider: React.FC<{ children: React.ReactNode }> = ({ 
       
       // Auto-select appropriate voice based on gender preference
       if (!settings.voice && voices.length > 0) {
-        const preferredVoice = selectVoiceByGender(voices, settings.gender);
+        const preferredVoice = selectVoice(voices, settings.gender);
         if (preferredVoice) {
           setSettings(prev => ({ ...prev, voice: preferredVoice.name }));
         }
