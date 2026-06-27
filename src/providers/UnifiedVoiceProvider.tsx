@@ -61,29 +61,39 @@ export const UnifiedVoiceProvider: React.FC<{ children: React.ReactNode }> = ({ 
     speechSynthesis.onvoiceschanged = loadVoices;
   }, [settings.gender, settings.voice, isSupported]);
 
-  const selectVoiceByGender = (voices: SpeechSynthesisVoice[], gender: string): SpeechSynthesisVoice | null => {
-    const englishVoices = voices.filter(voice => voice.lang.startsWith('en'));
-    
-    switch (gender) {
-      case 'female':
-        return englishVoices.find(voice => 
-          voice.name.toLowerCase().includes('female') || 
-          voice.name.toLowerCase().includes('woman') ||
-          voice.name.toLowerCase().includes('samantha') ||
-          voice.name.toLowerCase().includes('serena')
-        ) || englishVoices.find(voice => voice.name.toLowerCase().includes('microsoft zira')) || englishVoices[0];
-      
-      case 'male':
-        return englishVoices.find(voice => 
-          voice.name.toLowerCase().includes('male') || 
-          voice.name.toLowerCase().includes('man') ||
-          voice.name.toLowerCase().includes('david') ||
-          voice.name.toLowerCase().includes('mark')
-        ) || englishVoices.find(voice => voice.name.toLowerCase().includes('microsoft david')) || englishVoices[1];
-      
-      default:
-        return englishVoices[0];
+  const selectVoice = (voices: SpeechSynthesisVoice[], gender: string, langCode?: string): SpeechSynthesisVoice | null => {
+    const targetLang = langCode || getStoredLanguage();
+    const langPrefixMap: Record<string, string> = {
+      en: 'en', es: 'es', zh: 'zh', fr: 'fr', vi: 'vi', am: 'am',
+    };
+    const prefix = langPrefixMap[targetLang] || 'en';
+
+    const langVoices = voices.filter(v => v.lang.toLowerCase().startsWith(prefix));
+
+    if (langVoices.length > 0) {
+      const genderedMatch = langVoices.find(v => {
+        const n = v.name.toLowerCase();
+        if (gender === 'female') return n.includes('female') || n.includes('woman') || n.includes('samantha') || n.includes('serena') || n.includes('zira');
+        if (gender === 'male') return n.includes('male') || n.includes('man') || n.includes('david') || n.includes('mark');
+        return false;
+      });
+      return genderedMatch || langVoices[0];
     }
+
+    const englishVoices = voices.filter(v => v.lang.startsWith('en'));
+    if (gender === 'female') {
+      return englishVoices.find(v => {
+        const n = v.name.toLowerCase();
+        return n.includes('female') || n.includes('samantha') || n.includes('serena') || n.includes('zira');
+      }) || englishVoices[0] || null;
+    }
+    if (gender === 'male') {
+      return englishVoices.find(v => {
+        const n = v.name.toLowerCase();
+        return n.includes('male') || n.includes('david') || n.includes('mark');
+      }) || englishVoices[1] || englishVoices[0] || null;
+    }
+    return englishVoices[0] || voices[0] || null;
   };
 
   const updateSettings = useCallback((newSettings: Partial<VoiceSettings>) => {
