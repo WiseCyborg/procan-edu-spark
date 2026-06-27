@@ -150,8 +150,9 @@ const EnhancedCourseModule: React.FC = () => {
     if (videoLoadErrorEmittedRef.current === key) return;
     videoLoadErrorEmittedRef.current = key;
     primaryTracking.emitManual('error', {
-      assetKey: moduleData.asset_key,
-      error_code: signedVideoData.error_code,
+      position: 0,
+      duration: 0,
+      rate: 1,
     });
     console.error('[course-video] load failed', {
       module: moduleData.module_number,
