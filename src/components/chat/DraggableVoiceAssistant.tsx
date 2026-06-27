@@ -37,6 +37,7 @@ import { ChatExportDialog } from './ChatExportDialog';
 import { InteractiveMessage } from './InteractiveMessage';
 import { ChatAnnouncementSystem } from './ChatAnnouncementSystem';
 import { useChatPersistence } from '@/hooks/useChatPersistence';
+import { LanguageSwitcher, getStoredLanguage, setStoredLanguage } from './LanguageSwitcher';
 
 interface Message {
   id: string;
