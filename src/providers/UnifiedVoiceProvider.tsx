@@ -102,7 +102,7 @@ export const UnifiedVoiceProvider: React.FC<{ children: React.ReactNode }> = ({ 
       
       // If gender changed, auto-select new voice
       if (newSettings.gender && newSettings.gender !== prev.gender) {
-        const newVoice = selectVoiceByGender(availableVoices, newSettings.gender);
+        const newVoice = selectVoice(availableVoices, newSettings.gender);
         if (newVoice) {
           updated.voice = newVoice.name;
         }
