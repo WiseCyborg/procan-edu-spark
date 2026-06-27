@@ -134,11 +134,13 @@ const EnhancedCourseModule: React.FC = () => {
     const key = `${moduleData.id}:${moduleData.asset_key}`;
     if (primaryPlayEmittedRef.current === key) return;
     primaryPlayEmittedRef.current = key;
-    primaryTracking.emitManual('play', {
-      position: 0,
-      duration: signedVideoData.duration_seconds ?? 1,
-      rate: 1,
-    });
+    if (!signedVideoData.is_admin_preview) {
+      primaryTracking.emitManual('play', {
+        position: 0,
+        duration: signedVideoData.duration_seconds ?? 1,
+        rate: 1,
+      });
+    }
   }, [activeTab, signedVideoData, moduleData?.asset_key, moduleData?.id, primaryTracking]);
 
   // Log and emit analytics when the primary video fails to load
