@@ -122,6 +122,7 @@ const EnhancedCourseModule: React.FC = () => {
     moduleData?.id ?? null,
     COURSE_ID,
   );
+  const trackSupplement = !supplementVideoData?.is_admin_preview;
 
   // Emit a single 'play' for the primary video when its signed URL becomes available
   // on the course tab. SCORMStylePlayer wraps a Vimeo iframe or HTML5 video we can't
