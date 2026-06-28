@@ -43,7 +43,8 @@ const PUBLIC_MARKETING_ROUTES = [
   '/privacy-policy',
   '/terms-of-service',
   '/roi-calculator',
-  '/success-stories'
+  '/success-stories',
+  '/demo'
 ];
 
 const Header = ({ role: headerRole }: HeaderProps = {}) => {
