@@ -43,7 +43,8 @@ const PUBLIC_MARKETING_ROUTES = [
   '/privacy-policy',
   '/terms-of-service',
   '/roi-calculator',
-  '/success-stories'
+  '/success-stories',
+  '/demo'
 ];
 
 const Header = ({ role: headerRole }: HeaderProps = {}) => {
@@ -179,6 +180,14 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                 className="hidden md:inline-flex"
               >
                 {t('nav.handbook')}
+              </Button>
+              <Button
+                onClick={() => navigate('/demo')}
+                variant="ghost"
+                size="sm"
+                className="hidden md:inline-flex"
+              >
+                Preview Course
               </Button>
               <Button 
                 onClick={() => navigate('/faq')}
