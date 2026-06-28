@@ -102,6 +102,7 @@ import UATEvidenceSubmission from "./pages/UATEvidenceSubmission";
 import UATFeedback from "./pages/uat/UATFeedback";
 import UATDispensaryOnboarding from "./pages/UATDispensaryOnboarding";
 import AllCourses from "./pages/AllCourses";
+import DemoPreview from "./pages/DemoPreview";
 import VerifyCertificate from "./pages/VerifyCertificate";
 
 import { ProtectedCourseAccess } from "./components/ProtectedCourseAccess";
