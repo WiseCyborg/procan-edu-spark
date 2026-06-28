@@ -75,7 +75,7 @@ export const ConsumerModuleContent = ({
         </div>
 
         {/* Video Section */}
-        {module.video_url && (
+        {module.video_url ? (
           <div className="aspect-video bg-muted rounded-lg overflow-hidden">
             <iframe
               src={module.video_url}
@@ -84,6 +84,18 @@ export const ConsumerModuleContent = ({
               allow="autoplay; fullscreen; picture-in-picture"
               allowFullScreen
             />
+          </div>
+        ) : (
+          <div className="aspect-video bg-muted/40 rounded-lg border border-border flex flex-col items-center justify-center gap-3 text-center p-6">
+            <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-primary/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10l4.553-2.069A1 1 0 0121 8.82v6.36a1 1 0 01-1.447.89L15 14M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
+              </svg>
+            </div>
+            <div>
+              <p className="font-semibold text-foreground">Video Coming Soon</p>
+              <p className="text-sm text-muted-foreground mt-1">This module's video is being produced. The written content below covers all learning objectives.</p>
+            </div>
           </div>
         )}
 
