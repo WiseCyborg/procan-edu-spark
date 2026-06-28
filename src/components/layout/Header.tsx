@@ -180,6 +180,14 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
               >
                 {t('nav.handbook')}
               </Button>
+              <Button
+                onClick={() => navigate('/demo')}
+                variant="ghost"
+                size="sm"
+                className="hidden md:inline-flex"
+              >
+                Preview Course
+              </Button>
               <Button 
                 onClick={() => navigate('/faq')}
                 variant="ghost"
