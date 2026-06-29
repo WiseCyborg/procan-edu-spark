@@ -3,8 +3,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Sparkles, AlertTriangle, ArrowUpDown, Download } from 'lucide-react';
+import { Loader2, Sparkles, AlertTriangle, ArrowUpDown, Download, Shield } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { useUserRole } from '@/hooks/useUserRole';
 
 interface ReportResult {
   columns: string[];
@@ -42,6 +44,35 @@ export default function AdminReports() {
   const [result, setResult] = useState<ReportResult | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [sort, setSort] = useState<{ col: number; dir: 'asc' | 'desc' } | null>(null);
+
+  const { user } = useAuth();
+  const { isAdmin, isLoading: roleLoading } = useUserRole();
+
+  if (roleLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-orange-50 p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <Shield className="h-12 w-12 text-red-600 mx-auto mb-4" />
+            <CardTitle className="text-2xl font-bold text-red-700">Access Denied</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-center text-muted-foreground">
+              You don't have permission to access admin reports.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const run = async (q: string) => {
     if (!q.trim()) return;

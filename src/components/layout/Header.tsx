@@ -398,6 +398,10 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                         <Shield className="mr-2 h-4 w-4" />
                         <span>{t('nav.adminDashboard')}</span>
                       </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate('/admin/reports')}>
+                        <BarChart3 className="mr-2 h-4 w-4" />
+                        <span>Reports</span>
+                      </DropdownMenuItem>
                     </>
                   )}
                   
