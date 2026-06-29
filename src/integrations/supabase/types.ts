@@ -9254,9 +9254,12 @@ export type Database = {
           file_size_mb: number | null
           id: string
           is_active: boolean | null
+          last_regenerated_at: string | null
           mime_type: string
           module_id: string | null
+          needs_regeneration: boolean | null
           public_url: string | null
+          regeneration_reason: string | null
           storage_path: string | null
           thumbnail_url: string | null
           title: string
@@ -9278,9 +9281,12 @@ export type Database = {
           file_size_mb?: number | null
           id?: string
           is_active?: boolean | null
+          last_regenerated_at?: string | null
           mime_type?: string
           module_id?: string | null
+          needs_regeneration?: boolean | null
           public_url?: string | null
+          regeneration_reason?: string | null
           storage_path?: string | null
           thumbnail_url?: string | null
           title: string
@@ -9302,9 +9308,12 @@ export type Database = {
           file_size_mb?: number | null
           id?: string
           is_active?: boolean | null
+          last_regenerated_at?: string | null
           mime_type?: string
           module_id?: string | null
+          needs_regeneration?: boolean | null
           public_url?: string | null
+          regeneration_reason?: string | null
           storage_path?: string | null
           thumbnail_url?: string | null
           title?: string
