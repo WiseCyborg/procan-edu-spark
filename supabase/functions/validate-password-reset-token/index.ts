@@ -25,12 +25,17 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    // Hash incoming token (stored hashed at rest)
+    const hashBuf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(token));
+    const tokenHash = Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
+
     // Check if token exists and is valid
     const { data: tokenData, error } = await supabase
       .from('password_reset_tokens')
       .select('*')
-      .eq('token', token)
-      .single();
+      .eq('token_hash', tokenHash)
+      .maybeSingle();
+
 
     if (error || !tokenData) {
       console.error('Token not found:', error);

@@ -4904,7 +4904,8 @@ export type Database = {
           created_at: string | null
           expires_at: string
           id: string
-          token: string
+          token: string | null
+          token_hash: string | null
           used_at: string | null
           user_id: string
         }
@@ -4912,7 +4913,8 @@ export type Database = {
           created_at?: string | null
           expires_at: string
           id?: string
-          token: string
+          token?: string | null
+          token_hash?: string | null
           used_at?: string | null
           user_id: string
         }
@@ -4920,7 +4922,8 @@ export type Database = {
           created_at?: string | null
           expires_at?: string
           id?: string
-          token?: string
+          token?: string | null
+          token_hash?: string | null
           used_at?: string | null
           user_id?: string
         }
