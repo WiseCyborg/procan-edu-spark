@@ -148,6 +148,10 @@ const AdminMissionControl = () => {
         {/* Learner Progress Dashboard */}
         <LearnerProgressPanel />
 
+        {/* Video Review Queue - human approval for regenerated compliance videos */}
+        <VideoReviewPanel />
+
+
 
 
 
