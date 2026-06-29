@@ -33,12 +33,17 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    // Hash incoming token (stored hashed at rest)
+    const hashBuf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(token));
+    const tokenHash = Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
+
     // Validate token
     const { data: tokenData, error: tokenError } = await supabase
       .from('password_reset_tokens')
       .select('*')
-      .eq('token', token)
-      .single();
+      .eq('token_hash', tokenHash)
+      .maybeSingle();
+
 
     if (tokenError || !tokenData) {
       console.error('Token not found:', tokenError);
@@ -99,7 +104,8 @@ serve(async (req) => {
     const { error: markUsedError } = await supabase
       .from('password_reset_tokens')
       .update({ used_at: new Date().toISOString() })
-      .eq('token', token);
+      .eq('token_hash', tokenHash);
+
 
     if (markUsedError) {
       console.error('Failed to mark token as used:', markUsedError);
