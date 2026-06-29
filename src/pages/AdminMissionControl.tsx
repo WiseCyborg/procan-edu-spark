@@ -20,6 +20,7 @@ import { SupportRequestsPanel } from '@/components/admin/SupportRequestsPanel';
 import { E2EValidationReport } from '@/components/admin/E2EValidationReport';
 import { EnvironmentControls } from '@/components/admin/EnvironmentControls';
 import { RegulatoryReviewPanel } from '@/components/admin/RegulatoryReviewPanel';
+import { LearnerProgressPanel } from '@/components/admin/LearnerProgressPanel';
 import { Loader2 } from 'lucide-react';
 import { InternalChatbot } from '@/components/chat/InternalChatbot';
 import { NextActionBanner } from '@/components/guidance/NextActionBanner';
