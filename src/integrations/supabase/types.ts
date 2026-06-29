@@ -9247,6 +9247,8 @@ export type Database = {
           created_at: string | null
           descript_project_id: string | null
           description: string | null
+          draft_generated_at: string | null
+          draft_script: string | null
           draft_video_url: string | null
           duration_seconds: number | null
           fallback_bucket_id: string | null
@@ -9260,6 +9262,9 @@ export type Database = {
           needs_regeneration: boolean | null
           public_url: string | null
           regeneration_reason: string | null
+          review_status: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           storage_path: string | null
           thumbnail_url: string | null
           title: string
@@ -9274,6 +9279,8 @@ export type Database = {
           created_at?: string | null
           descript_project_id?: string | null
           description?: string | null
+          draft_generated_at?: string | null
+          draft_script?: string | null
           draft_video_url?: string | null
           duration_seconds?: number | null
           fallback_bucket_id?: string | null
@@ -9287,6 +9294,9 @@ export type Database = {
           needs_regeneration?: boolean | null
           public_url?: string | null
           regeneration_reason?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           storage_path?: string | null
           thumbnail_url?: string | null
           title: string
@@ -9301,6 +9311,8 @@ export type Database = {
           created_at?: string | null
           descript_project_id?: string | null
           description?: string | null
+          draft_generated_at?: string | null
+          draft_script?: string | null
           draft_video_url?: string | null
           duration_seconds?: number | null
           fallback_bucket_id?: string | null
@@ -9314,6 +9326,9 @@ export type Database = {
           needs_regeneration?: boolean | null
           public_url?: string | null
           regeneration_reason?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           storage_path?: string | null
           thumbnail_url?: string | null
           title?: string
