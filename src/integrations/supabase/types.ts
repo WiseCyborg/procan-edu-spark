@@ -1218,6 +1218,51 @@ export type Database = {
         }
         Relationships: []
       }
+      compliance_citation_audit: {
+        Row: {
+          action: string
+          change_set: string
+          created_at: string
+          id: string
+          location_detail: string | null
+          location_ref: string
+          location_type: string
+          new_citation: string | null
+          old_citation: string
+          performed_by: string
+          rationale: string | null
+          verification_source: string | null
+        }
+        Insert: {
+          action: string
+          change_set: string
+          created_at?: string
+          id?: string
+          location_detail?: string | null
+          location_ref: string
+          location_type: string
+          new_citation?: string | null
+          old_citation: string
+          performed_by?: string
+          rationale?: string | null
+          verification_source?: string | null
+        }
+        Update: {
+          action?: string
+          change_set?: string
+          created_at?: string
+          id?: string
+          location_detail?: string | null
+          location_ref?: string
+          location_type?: string
+          new_citation?: string | null
+          old_citation?: string
+          performed_by?: string
+          rationale?: string | null
+          verification_source?: string | null
+        }
+        Relationships: []
+      }
       compliance_incidents: {
         Row: {
           created_at: string
