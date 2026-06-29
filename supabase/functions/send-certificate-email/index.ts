@@ -69,7 +69,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Build verification URL - ensure proper formatting
     const baseUrl = 'https://www.procannedu.com';
-    const verificationUrl = certificateUrl || `${baseUrl}/verify/${certificateNumber}`;
+    const verificationUrl = certificateUrl || `${baseUrl}/verify?code=${certificateNumber}`;
     const certificatesPageUrl = `${baseUrl}/certificates`;
 
     // Load and render the certificate template
