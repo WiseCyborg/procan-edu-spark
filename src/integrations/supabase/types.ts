@@ -4615,7 +4615,8 @@ export type Database = {
           invited_by: string | null
           organization_id: string
           role: string
-          token: string
+          token: string | null
+          token_hash: string | null
         }
         Insert: {
           accepted_at?: string | null
@@ -4627,7 +4628,8 @@ export type Database = {
           invited_by?: string | null
           organization_id: string
           role: string
-          token: string
+          token?: string | null
+          token_hash?: string | null
         }
         Update: {
           accepted_at?: string | null
@@ -4639,7 +4641,8 @@ export type Database = {
           invited_by?: string | null
           organization_id?: string
           role?: string
-          token?: string
+          token?: string | null
+          token_hash?: string | null
         }
         Relationships: [
           {
@@ -7227,7 +7230,7 @@ export type Database = {
           error_message: string | null
           expires_at: string
           id: string
-          invitation_token: string
+          invitation_token: string | null
           invitation_token_hash: string | null
           inviter_id: string | null
           metadata: Json | null
@@ -7244,7 +7247,7 @@ export type Database = {
           error_message?: string | null
           expires_at?: string
           id?: string
-          invitation_token: string
+          invitation_token?: string | null
           invitation_token_hash?: string | null
           inviter_id?: string | null
           metadata?: Json | null
@@ -7261,7 +7264,7 @@ export type Database = {
           error_message?: string | null
           expires_at?: string
           id?: string
-          invitation_token?: string
+          invitation_token?: string | null
           invitation_token_hash?: string | null
           inviter_id?: string | null
           metadata?: Json | null
