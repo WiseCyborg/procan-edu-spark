@@ -10102,6 +10102,7 @@ export type Database = {
             Returns: Json
           }
         | { Args: { p_course_id: string; p_user_id: string }; Returns: Json }
+      exec_readonly_sql: { Args: { p_sql: string }; Returns: Json }
       expire_test_organizations: { Args: never; Returns: undefined }
       fix_manager_registration: {
         Args: { p_application_id: string; p_user_email: string }
