@@ -1,25 +1,32 @@
-## Persisted security scan — raw findings (read-only report)
+## Plan: replace ElevenLabs TTS with Google Cloud TTS (Neural2-D)
 
-Scanners reporting clean: `supabase`, `connector_security_scan`, `supply_chain`.
-Scanner with findings: `supabase_lov` (3 findings, all severity `warn`).
+### Findings (no code changed yet)
+- Only `src/components/chat/PersonalChatbot.tsx` calls the `text-to-voice` edge function (the ElevenLabs path).
+- `DraggableVoiceAssistant.tsx` does NOT use ElevenLabs — it uses `useUnifiedVoice()` (browser `speechSynthesis`). Out of scope unless explicitly requested.
+- `supabase/functions/text-to-voice/index.ts` is the only ElevenLabs caller; it returns `{ audioContent: "<base64 MP3>" }`.
+- No existing Google TTS edge function in the repo. Must be added (or `text-to-voice` rewritten in place).
 
-### 1. `dispensary_applications_public_insert_no_select_guard` — warn
-Dispensary applications table allows public INSERT of contact PII (email, phone, name, license_number, registration_token). Need to verify the BEFORE-INSERT trigger reliably nulls `registration_token` before any read-back path can expose plaintext.
+### Proposed implementation (pending approval)
 
-### 2. `org_invites_plaintext_token_column` — warn
-`org_invites` retains a plaintext `token` column alongside `token_hash`. Need to confirm a BEFORE-INSERT trigger unconditionally nulls `token` so plaintext is never persisted (defense-in-depth if a SELECT policy is ever added).
+**1. Rewrite `supabase/functions/text-to-voice/index.ts` to call Google Cloud TTS**
+- Auth: read `GOOGLE_TTS_API_KEY` from env (simpler than service-account JWT in Deno). User must add this secret via Project Settings → Secrets. Remove `ELEVENLABS_API_KEY` usage.
+- Endpoint: `POST https://texttospeech.googleapis.com/v1/text:synthesize?key=$GOOGLE_TTS_API_KEY`.
+- Body: `{ input:{text}, voice:{languageCode:"en-US", name:"en-US-Neural2-D"}, audioConfig:{audioEncoding:"MP3"} }`.
+- Keep accepting the existing `{ text, voice }` request shape; map an optional `voice` param to Google Neural2 voice names (default `en-US-Neural2-D`).
+- Response: pass Google's `audioContent` through unchanged so the response contract `{ audioContent: <base64 MP3> }` stays identical.
+- Remove `xhr` polyfill import and the manual ArrayBuffer→base64 conversion (Google already returns base64).
+- Keep CORS headers and error envelope intact.
 
-### 3. `password_reset_tokens_plaintext_token` — warn
-`password_reset_tokens` has plaintext `token` column alongside `token_hash`. Same pattern: needs BEFORE-INSERT trigger that hashes into `token_hash` and nulls `token`, matching `staff_invitations` / `org_invites`.
+**2. Frontend: zero changes required**
+- `PersonalChatbot.tsx` already plays `data:audio/mpeg;base64,${data.audioContent}`, which works for Google MP3 output. No edit unless we expose voice selection UI.
 
-### Note on the 202 "findings" from run_security_scan
-The unpersisted scan returned 202 entries, but those are linter rule definitions (no `internal_id`), almost entirely repeats of `SUPA_anon_security_definer_function_executable` and `SUPA_authenticated_security_definer_function_executable`. They are not actionable via `manage_security_finding` and are not tracked as persisted findings.
+**3. Out of scope (call out, don't change)**
+- `UnifiedVoiceProvider` / `DraggableVoiceAssistant` (browser TTS) — leave untouched.
+- Decommissioning `ELEVENLABS_API_KEY` from Supabase secrets — leave for the user to remove once they confirm no other consumers.
 
-## Next step — awaiting your decision
-Tell me which finding(s) to fix (or "all three"). On approval I'll:
-1. Inspect the existing BEFORE-INSERT triggers on each table via `supabase--read_query`.
-2. For any table where the trigger is missing/incomplete: add or repair a BEFORE-INSERT trigger that hashes the secret into the `*_hash` column and sets the plaintext column to NULL, plus a `CHECK (<plaintext_col> IS NULL)` constraint to enforce at-rest invariant.
-3. Run a verification query confirming no row has a non-null plaintext value.
-4. Mark the resolved findings via `manage_security_finding` with an explanation of the fix.
+### Prerequisite from the user
+Add `GOOGLE_TTS_API_KEY` (a Google Cloud API key with the Text-to-Speech API enabled, and ideally HTTP-referrer-unrestricted since edge functions don't send a referrer — restrict by API instead) in Project Settings → Secrets before the function will work. I'll wire the `add_secret` request when we switch to build mode.
 
-No code changes will happen until you approve.
+### Validation after build
+- `supabase--curl_edge_functions` POST to `/text-to-voice` with a short sample text; confirm 200 + non-empty base64 audio.
+- Spot-check in the PersonalChatbot in the preview.
