@@ -22,6 +22,7 @@ import { EnvironmentControls } from '@/components/admin/EnvironmentControls';
 import { RegulatoryReviewPanel } from '@/components/admin/RegulatoryReviewPanel';
 import { LearnerProgressPanel } from '@/components/admin/LearnerProgressPanel';
 import { VideoReviewPanel } from '@/components/admin/VideoReviewPanel';
+import { AIReportingSummaryPanel } from '@/components/admin/AIReportingSummaryPanel';
 import { Loader2 } from 'lucide-react';
 import { InternalChatbot } from '@/components/chat/InternalChatbot';
 import { NextActionBanner } from '@/components/guidance/NextActionBanner';
@@ -150,6 +151,10 @@ const AdminMissionControl = () => {
 
         {/* Video Review Queue - human approval for regenerated compliance videos */}
         <VideoReviewPanel />
+
+        {/* AI Reporting - natural language → SQL */}
+        <AIReportingSummaryPanel />
+
 
 
 

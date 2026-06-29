@@ -29,6 +29,7 @@ import DispensaryManagerDashboard from "./pages/DispensaryManagerDashboard";
 import TrainingCoordinatorDashboard from "./pages/TrainingCoordinatorDashboard";
 import StudentDashboard from "./pages/StudentDashboard";
 import AdminMissionControl from "./pages/AdminMissionControl";
+import AdminReports from "./pages/AdminReports";
 import RealTimeOperationsDashboard from "./pages/RealTimeOperationsDashboard";
 import Profile from "./pages/Profile";
 import CourseLayout from "./pages/Course/CourseLayout";
@@ -364,6 +365,11 @@ const AppRoutesLayout = () => {
             <Route path="/admin" element={
               <ProtectedRoute>
                 <AdminMissionControl />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/reports" element={
+              <ProtectedRoute>
+                <AdminReports />
               </ProtectedRoute>
             } />
             <Route path="/admin/management" element={
