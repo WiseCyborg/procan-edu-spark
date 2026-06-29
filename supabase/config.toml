@@ -497,6 +497,9 @@ verify_jwt = true
 [functions.send-outdated-content-alerts]
 verify_jwt = true
 
+[functions.admin-ai-report]
+verify_jwt = true
+
 [functions.trigger-certificate-email]
 verify_jwt = true
 
