@@ -124,7 +124,11 @@ const StudentAuthForm = () => {
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
-      window.location.href = '/student-dashboard';
+      const redirectParam = searchParams.get('redirect');
+      const safeRedirect = redirectParam && redirectParam.startsWith('/') && !redirectParam.startsWith('//')
+        ? redirectParam
+        : '/student-dashboard';
+      window.location.href = safeRedirect;
     } catch (error: any) {
       toast({ title: "Login Failed", description: error.message, variant: "destructive" });
     } finally {
