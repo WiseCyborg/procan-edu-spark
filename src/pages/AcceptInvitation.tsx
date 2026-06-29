@@ -71,6 +71,17 @@ const AcceptInvitation = () => {
 
     setSubmitting(true);
     try {
+      // Proactive guard: if email already has an account, route to existing-user flow
+      const { data: existsData } = await invokePublicFunction<{ exists: boolean }>(
+        'check-email-exists',
+        { email: invitationData.email }
+      );
+      if (existsData?.exists) {
+        toast.info('You already have an account with this email. Please sign in to accept this invitation.');
+        navigate(`/accept-invite?token=${searchParams.get('token')}`);
+        return;
+      }
+
       // Create account
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: invitationData.email,
