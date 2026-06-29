@@ -21,6 +21,7 @@ import { E2EValidationReport } from '@/components/admin/E2EValidationReport';
 import { EnvironmentControls } from '@/components/admin/EnvironmentControls';
 import { RegulatoryReviewPanel } from '@/components/admin/RegulatoryReviewPanel';
 import { LearnerProgressPanel } from '@/components/admin/LearnerProgressPanel';
+import { VideoReviewPanel } from '@/components/admin/VideoReviewPanel';
 import { Loader2 } from 'lucide-react';
 import { InternalChatbot } from '@/components/chat/InternalChatbot';
 import { NextActionBanner } from '@/components/guidance/NextActionBanner';
@@ -146,6 +147,10 @@ const AdminMissionControl = () => {
 
         {/* Learner Progress Dashboard */}
         <LearnerProgressPanel />
+
+        {/* Video Review Queue - human approval for regenerated compliance videos */}
+        <VideoReviewPanel />
+
 
 
 
