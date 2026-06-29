@@ -13,30 +13,19 @@ const corsHeaders = {
 const SCHEMA_HINT = `
 You are a PostgreSQL analyst for the ProCannEdu LMS (Supabase). Generate ONE
 read-only SELECT query answering the user's question. Use ONLY these tables
-and ONLY the columns listed here. Do NOT invent columns or tables.
+and columns:
 
-- courses(id, title, description, module_count, passing_score, is_active, created_at, updated_at, price_cents, currency, payment_required, course_type, is_public, target_audience, completion_badge_name, prerequisite_course_id, prerequisite_required)
-- course_modules(id, course_id, module_number, title, description, video_url, is_active, created_at, updated_at, stoplight_tier, comar_reference, estimated_minutes, is_manager_only, comar_compliance_status, version)
-- video_assets(id, asset_key, storage_path, public_url, title, description, duration_seconds, module_id, is_active, created_at, updated_at, course_id, access_level, review_status, needs_regeneration, unmapped_reason)
-- course_entitlements(id, user_id, course_id, source, status, stripe_payment_intent_id, purchased_at, expires_at, granted_by, created_at)
-- user_progress(id, user_id, course_id, module_id, is_completed, score, time_spent, completed_at, created_at, updated_at, current_tier, trainer_id, training_method)
-- course_completions(id, user_id, course_id, completed_at, completion_percent, passed, created_at, certificate_url)
-- exam_attempts(id, user_id, course_id, total_score, passing_score, created_at)  -- check for is_passed/submitted_at via metadata if needed
-- certificates(id, user_id, course_id, exam_attempt_id, certificate_number, issue_date, expiry_date, pdf_url, is_revoked, created_at, certification_level, status)
-- payment_events(id, stripe_event_id, event_type, session_id, user_id, order_id, status, processed_at, created_at, paypal_event_id, paypal_order_id, purchase_id, amount, currency)
-- email_logs(id, user_id, email_type, recipient_email, subject, status, sent_at, delivered_at, created_at, error_message, provider, template_name, opened_at, clicked_at)
-- organizations(id, name, contact_person, contact_email, license_number, is_active, created_at, payment_status, admin_approved, subscription_tier, max_active_seats, subscription_start_date, subscription_end_date, environment, ready_for_production)
-- organization_members(id, organization_id, user_id, email, role, status, invited_by, created_at, member_type)
-- rvt_seats(id, purchase_id, organization_id, course_id, assigned_user_id, status, assigned_at, used_at, created_at)
-- rvt_purchases(id, organization_id, quantity, amount_paid, currency, payment_method, paypal_order_id, status, created_at, completed_at)
-- profiles(id, user_id, first_name, last_name, phone, organization, job_title, is_verified, created_at, updated_at, organization_id, tier_status, email_cache, first_shift_date, welcome_video_watched, deleted_at, deactivated_at, preferred_language)
-
-Notes:
-- Profile email is in profiles.email_cache (NOT profiles.email).
-- Module ordering uses course_modules.module_number (NOT module_index).
-- Certificate issue date is certificates.issue_date (NOT issued_at).
-- Progress completion uses user_progress.is_completed (NOT a "completed" column) and course_completions for course-level completions.
-- Seats: an "unused" rvt_seat has assigned_user_id IS NULL or status = 'available'.
+- courses(id, title, description, is_active, course_type, created_at)
+- course_modules(id, course_id, module_number, title, is_active, created_at)
+- course_entitlements(id, user_id, course_id, source, status, purchased_at, expires_at, created_at)
+- certificates(id, user_id, course_id, certificate_number, issue_date, status, is_revoked, created_at)
+- payment_events(id, user_id, event_type, status, amount, currency, paypal_order_id, created_at)
+- email_logs(id, user_id, email_type, recipient_email, status, error_message, sent_at, created_at)
+- organizations(id, name, contact_email, is_active, payment_status, course_credits, admin_approved, created_at)
+- organization_members(id, organization_id, user_id, email, role, status, created_at)
+- rvt_seats(id, organization_id, purchase_id, course_id, assigned_user_id, status, assigned_at, created_at)
+- rvt_purchases(id, organization_id, quantity, amount_paid, currency, status, paypal_order_id, created_at)
+- profiles(id, user_id, first_name, last_name, email_cache, organization_id, tier_status, created_at)
 
 Rules:
 - Output a SINGLE SELECT statement. No CTE writes, no DDL, no DML.
