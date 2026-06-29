@@ -33,6 +33,13 @@ serve(async (req) => {
       );
     }
 
+    // Hash incoming plaintext token; plaintext is not stored at rest
+    const _tokenBytes = new TextEncoder().encode(token);
+    const _hashBuf = await crypto.subtle.digest('SHA-256', _tokenBytes);
+    const tokenHash = Array.from(new Uint8Array(_hashBuf))
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
+
     // Fetch invitation details
     const { data: invitation, error: invitationError } = await supabase
       .from('staff_invitations')
@@ -46,7 +53,7 @@ serve(async (req) => {
         inviter_id,
         metadata
       `)
-      .eq('invitation_token', token)
+      .eq('invitation_token_hash', tokenHash)
       .single();
 
     if (invitationError || !invitation) {

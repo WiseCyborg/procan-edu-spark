@@ -431,6 +431,16 @@ async function resendInvitation(invitationId: string): Promise<Response> {
       .eq('id', invitationId);
   }
 
+  // Rotate the invitation token on resend (the previous plaintext is hashed at
+  // rest and cannot be recovered). The BEFORE-trigger on staff_invitations will
+  // hash the new value and null the plaintext column after this update.
+  const { data: newTokenData } = await supabase.rpc('generate_invitation_token');
+  const rotatedToken = newTokenData as string;
+  await supabase
+    .from('staff_invitations')
+    .update({ invitation_token: rotatedToken })
+    .eq('id', invitationId);
+
   // Get inviter details
   const { data: inviter } = await supabase
     .from('profiles')
@@ -449,14 +459,14 @@ async function resendInvitation(invitationId: string): Promise<Response> {
       organizationName: invitation.organizations?.name || 'Cannabis Training Organization',
       inviterName: inviterName,
       role: invitation.role,
-      invitationToken: invitation.invitation_token,
+      invitationToken: rotatedToken,
       expiryDate: invitation.expires_at,
       customMessage: invitation.metadata?.custom_message,
       isReminder: true
     }
   });
 
-  // Log communication
+  // Log communication (do NOT log the plaintext token)
   await supabase
     .from('communication_logs')
     .insert({
@@ -467,7 +477,6 @@ async function resendInvitation(invitationId: string): Promise<Response> {
       recipient_email: invitation.email,
       metadata: {
         invitation_id: invitation.id,
-        invitation_token: invitation.invitation_token,
         is_reminder: true
       }
     });

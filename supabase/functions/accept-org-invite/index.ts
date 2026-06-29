@@ -61,11 +61,18 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Find the invite
+    // Hash the incoming plaintext token; plaintext is not stored at rest
+    const _tokBytes = new TextEncoder().encode(token);
+    const _tokHashBuf = await crypto.subtle.digest('SHA-256', _tokBytes);
+    const tokenHash = Array.from(new Uint8Array(_tokHashBuf))
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
+
+    // Find the invite by hashed token
     const { data: invite, error: inviteError } = await serviceClient
       .from('org_invites')
       .select('*, organizations(id, name)')
-      .eq('token', token)
+      .eq('token_hash', tokenHash)
       .is('accepted_at', null)
       .single();
 

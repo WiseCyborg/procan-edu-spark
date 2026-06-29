@@ -18,11 +18,17 @@ serve(async (req) => {
 
     const { token } = await req.json();
 
-    // Validate invitation token
+    // Hash incoming plaintext token and look up by hash (plaintext is not stored at rest)
+    const tokenBytes = new TextEncoder().encode(token);
+    const hashBuf = await crypto.subtle.digest('SHA-256', tokenBytes);
+    const tokenHash = Array.from(new Uint8Array(hashBuf))
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
+
     const { data: invitation, error } = await supabase
       .from('staff_invitations')
       .select('*, organizations(name, id)')
-      .eq('invitation_token', token)
+      .eq('invitation_token_hash', tokenHash)
       .is('accepted_at', null)
       .gt('expires_at', new Date().toISOString())
       .single();
