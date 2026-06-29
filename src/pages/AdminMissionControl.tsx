@@ -144,6 +144,9 @@ const AdminMissionControl = () => {
         {/* Regulatory Review (human approval gate) */}
         <RegulatoryReviewPanel />
 
+        {/* Learner Progress Dashboard */}
+        <LearnerProgressPanel />
+
 
 
 
