@@ -161,7 +161,7 @@ export const comarSections: Record<number, { comar: string; topic: string }> = {
   10: { comar: "COMAR 14.17.18.02", topic: "Product Packaging" },
   11: { comar: "COMAR 14.17.18", topic: "Product Labeling" },
   12: { comar: "COMAR 14.17.09", topic: "Transport & Distribution" },
-  13: { comar: "COMAR 14.17", topic: "Disposal & Waste" },
+  13: { comar: "COMAR 14.17.10.05", topic: "Disposal & Waste" },
   14: { comar: "COMAR 14.17.08", topic: "Quality Assurance" },
   15: { comar: "COMAR 14.17.05.06", topic: "Patient Education" },
   16: { comar: "COMAR 14.17", topic: "Emergency Response" },
