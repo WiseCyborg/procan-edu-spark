@@ -147,7 +147,7 @@ const handler = async (req: Request): Promise<Response> => {
       <p>Best regards,<br>The ProCann Edu Team</p>
     </div>
     <div class="footer">
-      <p>© 2025 ProCann Edu. All rights reserved.</p>
+      <p>© 2026 ProCann Edu. All rights reserved.</p>
       <p>This email was sent to ${email}</p>
     </div>
   </div>
