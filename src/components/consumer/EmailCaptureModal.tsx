@@ -58,130 +58,116 @@ export const EmailCaptureModal = ({
       const nowIso = new Date().toISOString();
       let targetEnrollmentId: string | null = enrollmentId ?? null;
 
-      // 1) If we know the existing enrollment, UPDATE it (do NOT create a duplicate).
-      if (targetEnrollmentId) {
-        const { data: current } = await supabase
-          .from('consumer_enrollments')
-          .select('metadata, completed_at')
-          .eq('id', targetEnrollmentId)
-          .maybeSingle();
+      // AUTHENTICATED path: update/create the enrollment row via RLS-safe client writes.
+      if (user?.id) {
+        if (targetEnrollmentId) {
+          const { data: current } = await supabase
+            .from('consumer_enrollments')
+            .select('metadata, completed_at')
+            .eq('id', targetEnrollmentId)
+            .maybeSingle();
 
-        const currentMeta = (current?.metadata as Record<string, any>) || {};
-        const mergedMeta = {
-          ...currentMeta,
-          name: name || currentMeta.name,
-          completedModules: Array.isArray(currentMeta.completedModules) && currentMeta.completedModules.length > 0
-            ? currentMeta.completedModules
-            : completedModuleIds,
-          completedAt: current?.completed_at ?? currentMeta.completedAt ?? nowIso,
-        };
+          const currentMeta = (current?.metadata as Record<string, any>) || {};
+          const mergedMeta = {
+            ...currentMeta,
+            name: name || currentMeta.name,
+            completedModules:
+              Array.isArray(currentMeta.completedModules) && currentMeta.completedModules.length > 0
+                ? currentMeta.completedModules
+                : completedModuleIds,
+            completedAt: current?.completed_at ?? currentMeta.completedAt ?? nowIso,
+          };
 
-        const { error: updErr } = await supabase
-          .from('consumer_enrollments')
-          .update({
-            email,
-            completed_at: current?.completed_at ?? nowIso,
-            metadata: mergedMeta as any,
-          })
-          .eq('id', targetEnrollmentId);
-        if (updErr) throw updErr;
-      } else if (user?.id) {
-        // 2) Authenticated but no enrollment id passed — find or create the row for this user+course.
-        const { data: existing } = await supabase
-          .from('consumer_enrollments')
-          .select('id, metadata, completed_at')
-          .eq('user_id', user.id)
-          .eq('course_id', courseId)
-          .maybeSingle();
-
-        if (existing) {
-          targetEnrollmentId = existing.id;
-          const currentMeta = (existing.metadata as Record<string, any>) || {};
-          await supabase
+          const { error: updErr } = await supabase
             .from('consumer_enrollments')
             .update({
               email,
-              completed_at: existing.completed_at ?? nowIso,
-              metadata: {
-                ...currentMeta,
-                name: name || currentMeta.name,
-                completedModules: Array.isArray(currentMeta.completedModules) && currentMeta.completedModules.length > 0
-                  ? currentMeta.completedModules
-                  : completedModuleIds,
-                completedAt: existing.completed_at ?? currentMeta.completedAt ?? nowIso,
-              } as any,
+              completed_at: current?.completed_at ?? nowIso,
+              metadata: mergedMeta as any,
             })
-            .eq('id', existing.id);
+            .eq('id', targetEnrollmentId);
+          if (updErr) throw updErr;
         } else {
-          const { data: created, error: insErr } = await supabase
+          const { data: existing } = await supabase
             .from('consumer_enrollments')
-            .insert({
-              user_id: user.id,
-              session_id: sessionId || undefined,
-              course_id: courseId,
-              email,
-              completed_at: nowIso,
-              metadata: {
-                courseId,
-                name: name || undefined,
-                completedModules: completedModuleIds,
-                completedAt: nowIso,
-              } as any,
-            })
-            .select('id')
-            .single();
-          if (insErr) throw insErr;
-          targetEnrollmentId = created.id;
-        }
-      } else {
-        // 3) Guest with no known enrollment — create one with the ACTUAL completion state,
-        //    not a blank shell.
-        const { data: created, error: insErr } = await supabase
-          .from('consumer_enrollments')
-          .insert({
-            session_id: sessionId || undefined,
-            course_id: courseId,
-            email,
-            completed_at: nowIso,
-            metadata: {
-              courseId,
-              name: name || undefined,
-              completedModules: completedModuleIds,
-              completedAt: nowIso,
-            } as any,
-          })
-          .select('id')
-          .single();
-        if (insErr) throw insErr;
-        targetEnrollmentId = created.id;
-      }
+            .select('id, metadata, completed_at')
+            .eq('user_id', user.id)
+            .eq('course_id', courseId)
+            .maybeSingle();
 
-      // Update guest session with email
+          if (existing) {
+            targetEnrollmentId = existing.id;
+            const currentMeta = (existing.metadata as Record<string, any>) || {};
+            await supabase
+              .from('consumer_enrollments')
+              .update({
+                email,
+                completed_at: existing.completed_at ?? nowIso,
+                metadata: {
+                  ...currentMeta,
+                  name: name || currentMeta.name,
+                  completedModules:
+                    Array.isArray(currentMeta.completedModules) && currentMeta.completedModules.length > 0
+                      ? currentMeta.completedModules
+                      : completedModuleIds,
+                  completedAt: existing.completed_at ?? currentMeta.completedAt ?? nowIso,
+                } as any,
+              })
+              .eq('id', existing.id);
+          } else {
+            const { data: created, error: insErr } = await supabase
+              .from('consumer_enrollments')
+              .insert({
+                user_id: user.id,
+                session_id: sessionId || undefined,
+                course_id: courseId,
+                email,
+                completed_at: nowIso,
+                metadata: {
+                  courseId,
+                  name: name || undefined,
+                  completedModules: completedModuleIds,
+                  completedAt: nowIso,
+                } as any,
+              })
+              .select('id')
+              .single();
+            if (insErr) throw insErr;
+            targetEnrollmentId = created.id;
+          }
+        }
+      }
+      // GUEST path: no client write — the edge function (service role) creates
+      // the enrollment. `consumer_enrollments` has no anon RLS policy, so a
+      // client-side insert would 401/403 for guests.
+
       updateEmail(email);
 
-      // Generate consumer certificate against the REAL enrollment id
-      if (targetEnrollmentId) {
-        try {
-          const { data: certData, error: certError } = await supabase.functions.invoke(
-            'generate-consumer-certificate',
-            {
-              body: {
-                enrollment_id: targetEnrollmentId,
-                email: email,
-                name: name || undefined,
-                course_id: courseId,
-              }
-            }
-          );
-
-          if (certError) {
-            console.error('Certificate generation error:', certError);
-          } else {
-            console.log('Certificate generated:', certData?.certificate?.certificate_number);
+      // Generate the certificate. For guests, the edge function creates the
+      // enrollment from session_id + completed_modules + email.
+      try {
+        const { data: certData, error: certError } = await supabase.functions.invoke(
+          'generate-consumer-certificate',
+          {
+            body: {
+              enrollment_id: targetEnrollmentId ?? undefined,
+              session_id: sessionId || undefined,
+              user_id: user?.id ?? undefined,
+              email,
+              name: name || undefined,
+              course_id: courseId,
+              completed_modules: completedModuleIds,
+            },
           }
-        } catch (certError) {
-          console.error('Failed to generate certificate:', certError);
+        );
+
+        if (certError) {
+          console.error('Certificate generation error:', certError);
+        } else {
+          console.log('Certificate generated:', certData?.certificate?.certificate_number);
         }
+      } catch (certError) {
+        console.error('Failed to generate certificate:', certError);
       }
 
       toast({
@@ -196,7 +182,7 @@ export const EmailCaptureModal = ({
       toast({
         title: 'Error',
         description: 'Failed to save your information. Please try again.',
-        variant: 'destructive'
+        variant: 'destructive',
       });
     } finally {
       setIsSubmitting(false);

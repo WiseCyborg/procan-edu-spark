@@ -18,7 +18,8 @@ import Welcome from "./pages/Welcome";
 import WelcomeVideo from "./pages/WelcomeVideo";
 import NotFound from "./pages/NotFound";
 import FAQ from "./pages/FAQ";
-import CertificateVerification from "./pages/CertificateVerification";
+import VerifyRedirect from "./components/VerifyRedirect";
+import AcceptInviteRedirect from "./components/AcceptInviteRedirect";
 import StoplightStandard from "./pages/StoplightStandard";
 import ProCannLive from "./pages/ProCannLive";
 import DispensaryPortal from "./pages/DispensaryPortal";
@@ -44,7 +45,7 @@ import SmartDashboardRouter from "./components/routing/SmartDashboardRouter";
 import Header from "./components/layout/Header";
 import DraggableVoiceAssistant from "./components/chat/DraggableVoiceAssistant";
 import PurchaseSeats from "./pages/PurchaseSeats";
-import SecureCertificateVerification from "./pages/SecureCertificateVerification";
+// SecureCertificateVerification consolidated into /verify (see VerifyRedirect)
 import AdvancedAnalytics from "./pages/AdvancedAnalytics";
 import UnifiedOperationsDashboard from "./pages/UnifiedOperationsDashboard";
 import ContentReviewDashboard from "./pages/ContentReviewDashboard";
@@ -71,7 +72,7 @@ import DemoAccountsSetup from "./pages/DemoAccountsSetup";
 import SystemHealthDashboard from "./pages/SystemHealthDashboard";
 import UnifiedHealthReport from "./pages/UnifiedHealthReport";
 import AcceptInvitation from "./pages/AcceptInvitation";
-import AcceptInvite from "./pages/AcceptInvite";
+// AcceptInvite consolidated into /accept-invitation (see AcceptInviteRedirect)
 import RoleSelectionDashboard from "./pages/RoleSelectionDashboard";
 import OnboardingSetup from "./pages/OnboardingSetup";
 import OperationsCommandCenter from "./pages/OperationsCommandCenter";
@@ -245,7 +246,7 @@ const AppRoutesLayout = () => {
                 <CommunicationHubPage />
               </ProtectedRoute>
             } />
-            <Route path="/verify-certificate" element={<CertificateVerification />} />
+            <Route path="/verify-certificate" element={<VerifyRedirect />} />
             <Route path="/stoplight-standard" element={
               <ProtectedRoute>
                 <StoplightStandard />
@@ -351,7 +352,7 @@ const AppRoutesLayout = () => {
             <Route path="/success-stories" element={<SuccessStories />} />
             <Route path="/mca-compliance-review" element={<MCAComplianceReview />} />
             <Route path="/regulatory-explorer" element={<RegulatoryExplorerPage />} />
-            <Route path="/accept-invite" element={<AcceptInvite />} />
+            <Route path="/accept-invite" element={<AcceptInviteRedirect />} />
             <Route path="/team-management" element={
               <ProtectedRoute>
                 <TeamManagement />
@@ -430,7 +431,7 @@ const AppRoutesLayout = () => {
                 <ProfileOnboardingWizard />
               </ProtectedRoute>
             } />
-            <Route path="/verify/certificate/:certificateId" element={<SecureCertificateVerification />} />
+            <Route path="/verify/certificate/:certificateId" element={<VerifyRedirect />} />
             <Route path="/onboarding/setup-team" element={
               <ProtectedRoute>
                 <OnboardingSetup />
