@@ -1,32 +1,38 @@
-## Plan: replace ElevenLabs TTS with Google Cloud TTS (Neural2-D)
+## File
+`src/pages/Course/finalExamData.ts` (317 lines total)
 
-### Findings (no code changed yet)
-- Only `src/components/chat/PersonalChatbot.tsx` calls the `text-to-voice` edge function (the ElevenLabs path).
-- `DraggableVoiceAssistant.tsx` does NOT use ElevenLabs — it uses `useUnifiedVoice()` (browser `speechSynthesis`). Out of scope unless explicitly requested.
-- `supabase/functions/text-to-voice/index.ts` is the only ElevenLabs caller; it returns `{ audioContent: "<base64 MP3>" }`.
-- No existing Google TTS edge function in the repo. Must be added (or `text-to-voice` rewritten in place).
+## Data Structure
+```ts
+interface QuizQuestion {
+  id: string;      // stable id via getQuestionId(section, index) → `s{n}_q{i}`
+  q: string;       // question text
+  a: string;       // correct answer as literal option text (stable identifier)
+  options: string[];
+}
 
-### Proposed implementation (pending approval)
+// Raw source: Record<sectionNumber, Array<Omit<QuizQuestion,'id'>>>
+// 18 sections × 2 questions each = 36 questions
+// Passing score: 80 (PASSING_SCORE), TOTAL_SECTIONS = 18
+// Grading is by string match against `a` — shuffle-safe (BUG-017 fix)
+```
 
-**1. Rewrite `supabase/functions/text-to-voice/index.ts` to call Google Cloud TTS**
-- Auth: read `GOOGLE_TTS_API_KEY` from env (simpler than service-account JWT in Deno). User must add this secret via Project Settings → Secrets. Remove `ELEVENLABS_API_KEY` usage.
-- Endpoint: `POST https://texttospeech.googleapis.com/v1/text:synthesize?key=$GOOGLE_TTS_API_KEY`.
-- Body: `{ input:{text}, voice:{languageCode:"en-US", name:"en-US-Neural2-D"}, audioConfig:{audioEncoding:"MP3"} }`.
-- Keep accepting the existing `{ text, voice }` request shape; map an optional `voice` param to Google Neural2 voice names (default `en-US-Neural2-D`).
-- Response: pass Google's `audioContent` through unchanged so the response contract `{ audioContent: <base64 MP3> }` stays identical.
-- Remove `xhr` polyfill import and the manual ArrayBuffer→base64 conversion (Google already returns base64).
-- Keep CORS headers and error envelope intact.
+## First 3 Questions (Section 1 + Section 2 q1)
 
-**2. Frontend: zero changes required**
-- `PersonalChatbot.tsx` already plays `data:audio/mpeg;base64,${data.audioContent}`, which works for Google MP3 output. No edit unless we expose voice selection UI.
+**Section 1 — Q1** (`id: s1_q0`)
+- q: "Which federal law classifies cannabis as a Schedule I drug?"
+- options: `["Controlled Substances Act", "Food and Drug Act", "Tax Code"]`
+- a: `"Controlled Substances Act"`
 
-**3. Out of scope (call out, don't change)**
-- `UnifiedVoiceProvider` / `DraggableVoiceAssistant` (browser TTS) — leave untouched.
-- Decommissioning `ELEVENLABS_API_KEY` from Supabase secrets — leave for the user to remove once they confirm no other consumers.
+**Section 1 — Q2** (`id: s1_q1`)
+- q: "What is Maryland's legal possession limit for personal cannabis use?"
+- options: `["1 oz", "1.5 oz", "2 oz"]`
+- a: `"1.5 oz"`
 
-### Prerequisite from the user
-Add `GOOGLE_TTS_API_KEY` (a Google Cloud API key with the Text-to-Speech API enabled, and ideally HTTP-referrer-unrestricted since edge functions don't send a referrer — restrict by API instead) in Project Settings → Secrets before the function will work. I'll wire the `add_secret` request when we switch to build mode.
+**Section 2 — Q1** (`id: s2_q0`)
+- q: "What is a key SOP for dispensary operations?"
+- options: `["Daily inventory checks", "Monthly sales reports", "Random pricing"]`
+- a: `"Daily inventory checks"`
 
-### Validation after build
-- `supabase--curl_edge_functions` POST to `/text-to-voice` with a short sample text; confirm 200 + non-empty base64 audio.
-- Spot-check in the PersonalChatbot in the preview.
+## Notes
+- File also exports `PASSING_SCORE`, `TOTAL_SECTIONS`, `getQuestionId()`, and (further down, not shown) topic metadata + grader logic that returns `GradeResult` with per-topic `TopicScore[]`.
+- Ready to view more sections or the grader on request — no edits proposed yet since this was a read-only lookup.
