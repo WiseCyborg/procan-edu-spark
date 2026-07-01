@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useGuestSession } from './useGuestSession';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,7 +11,7 @@ interface CourseProgress {
   completedAt: string | null;
 }
 
-const getStorageKey = (courseId: string, identifier: string) => 
+const getStorageKey = (courseId: string, identifier: string) =>
   `procann_progress_${courseId}_${identifier}`;
 
 export const useConsumerProgress = (courseId: string) => {
@@ -24,37 +24,68 @@ export const useConsumerProgress = (courseId: string) => {
     startedAt: new Date().toISOString(),
     completedAt: null
   });
+  const [enrollmentId, setEnrollmentId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const enrollmentIdRef = useRef<string | null>(null);
 
   const identifier = user?.id || sessionId || 'anonymous';
 
-  // Load progress from localStorage or database
+  useEffect(() => {
+    enrollmentIdRef.current = enrollmentId;
+  }, [enrollmentId]);
+
+  // Load or create enrollment (auth users) + load progress
   useEffect(() => {
     const loadProgress = async () => {
       try {
         if (user?.id) {
-          // Try to load from database for authenticated users
-          const { data, error } = await supabase
+          // Load existing enrollment for this user + course
+          const { data: existing } = await supabase
             .from('consumer_enrollments')
-            .select('metadata')
+            .select('id, metadata, started_at, completed_at')
             .eq('course_id', courseId)
             .eq('user_id', user.id)
             .maybeSingle();
 
-          if (!error && data?.metadata && typeof data.metadata === 'object') {
-            const metadata = data.metadata as Record<string, any>;
+          if (existing) {
+            setEnrollmentId(existing.id);
+            const metadata = (existing.metadata as Record<string, any>) || {};
             if (metadata.courseId && Array.isArray(metadata.completedModules)) {
-              setProgress(metadata as CourseProgress);
+              setProgress({
+                ...(metadata as CourseProgress),
+                completedAt: existing.completed_at ?? metadata.completedAt ?? null,
+                startedAt: existing.started_at ?? metadata.startedAt ?? new Date().toISOString(),
+              });
               setIsLoading(false);
               return;
+            }
+          } else {
+            // Create the enrollment row up-front so subsequent updates target it.
+            const startedAt = new Date().toISOString();
+            const { data: created, error: createErr } = await supabase
+              .from('consumer_enrollments')
+              .insert({
+                user_id: user.id,
+                course_id: courseId,
+                started_at: startedAt,
+                metadata: {
+                  courseId,
+                  completedModules: [],
+                  lastAccessedModule: null,
+                  startedAt,
+                  completedAt: null,
+                } as any,
+              })
+              .select('id')
+              .single();
+            if (!createErr && created) {
+              setEnrollmentId(created.id);
             }
           }
         }
 
-        // Fall back to localStorage
-        const storageKey = getStorageKey(courseId, identifier);
-        const stored = localStorage.getItem(storageKey);
-        
+        // Fall back to localStorage (also used for auth users w/o metadata yet)
+        const stored = localStorage.getItem(getStorageKey(courseId, identifier));
         if (stored) {
           setProgress(JSON.parse(stored));
         }
@@ -70,40 +101,39 @@ export const useConsumerProgress = (courseId: string) => {
     }
   }, [courseId, identifier, user?.id]);
 
-  // Save progress to localStorage and optionally database
+  // Save progress to localStorage and (if enrollment exists) the SAME DB row
   const saveProgress = useCallback(async (updatedProgress: CourseProgress) => {
-    const storageKey = getStorageKey(courseId, identifier);
-    localStorage.setItem(storageKey, JSON.stringify(updatedProgress));
+    localStorage.setItem(getStorageKey(courseId, identifier), JSON.stringify(updatedProgress));
 
-    // If authenticated, also save to database
     if (user?.id) {
       try {
-        const { data: existing } = await supabase
-          .from('consumer_enrollments')
-          .select('id')
-          .eq('course_id', courseId)
-          .eq('user_id', user.id)
-          .maybeSingle();
-
-        if (existing) {
+        const currentId = enrollmentIdRef.current;
+        if (currentId) {
           await supabase
             .from('consumer_enrollments')
             .update({
               metadata: updatedProgress as any,
               started_at: updatedProgress.startedAt,
-              completed_at: updatedProgress.completedAt
+              completed_at: updatedProgress.completedAt,
             })
-            .eq('id', existing.id);
+            .eq('id', currentId);
         } else {
-          await supabase
+          // Enrollment didn't exist yet — create and remember it.
+          const { data: created } = await supabase
             .from('consumer_enrollments')
             .insert({
               user_id: user.id,
               course_id: courseId,
               metadata: updatedProgress as any,
               started_at: updatedProgress.startedAt,
-              completed_at: updatedProgress.completedAt
-            });
+              completed_at: updatedProgress.completedAt,
+            })
+            .select('id')
+            .single();
+          if (created) {
+            enrollmentIdRef.current = created.id;
+            setEnrollmentId(created.id);
+          }
         }
       } catch (error) {
         console.error('Error saving progress to database:', error);
@@ -111,34 +141,77 @@ export const useConsumerProgress = (courseId: string) => {
     }
   }, [courseId, identifier, user?.id]);
 
-  const markModuleComplete = useCallback((moduleId: string) => {
+  // Also write to user_progress so admin/RVT reporting sees consumer progress.
+  const writeUserProgress = useCallback(async (moduleId: string) => {
+    if (!user?.id) return; // user_progress.user_id is NOT NULL — guests can't participate
+    try {
+      const nowIso = new Date().toISOString();
+      // Upsert-ish: check for existing row
+      const { data: existing } = await supabase
+        .from('user_progress')
+        .select('id, is_completed')
+        .eq('user_id', user.id)
+        .eq('course_id', courseId)
+        .eq('module_id', moduleId)
+        .maybeSingle();
+
+      if (existing) {
+        if (!existing.is_completed) {
+          await supabase
+            .from('user_progress')
+            .update({ is_completed: true, completed_at: nowIso })
+            .eq('id', existing.id);
+        }
+      } else {
+        await supabase.from('user_progress').insert({
+          user_id: user.id,
+          course_id: courseId,
+          module_id: moduleId,
+          is_completed: true,
+          completed_at: nowIso,
+        });
+      }
+    } catch (error) {
+      console.error('Error writing user_progress:', error);
+    }
+  }, [courseId, user?.id]);
+
+  const markModuleComplete = useCallback((moduleId: string, totalModules?: number) => {
     setProgress((prev) => {
       if (prev.completedModules.includes(moduleId)) {
+        // Still ensure user_progress reflects it.
+        writeUserProgress(moduleId);
         return prev;
       }
 
+      const completedModules = [...prev.completedModules, moduleId];
+      const isAllDone =
+        typeof totalModules === 'number' && totalModules > 0 && completedModules.length >= totalModules;
+
       const updatedProgress: CourseProgress = {
         ...prev,
-        completedModules: [...prev.completedModules, moduleId],
-        lastAccessedModule: moduleId
+        completedModules,
+        lastAccessedModule: moduleId,
+        completedAt: isAllDone ? (prev.completedAt ?? new Date().toISOString()) : prev.completedAt,
       };
 
       saveProgress(updatedProgress);
+      writeUserProgress(moduleId);
       return updatedProgress;
     });
-  }, [saveProgress]);
+  }, [saveProgress, writeUserProgress]);
 
   const isModuleComplete = useCallback((moduleId: string) => {
     return progress.completedModules.includes(moduleId);
   }, [progress.completedModules]);
 
-  const completeCourse = useCallback((totalModules: number) => {
+  const completeCourse = useCallback((_totalModules?: number) => {
     setProgress((prev) => {
+      if (prev.completedAt) return prev;
       const updatedProgress: CourseProgress = {
         ...prev,
-        completedAt: new Date().toISOString()
+        completedAt: new Date().toISOString(),
       };
-
       saveProgress(updatedProgress);
       return updatedProgress;
     });
@@ -151,6 +224,7 @@ export const useConsumerProgress = (courseId: string) => {
 
   return {
     progress,
+    enrollmentId,
     completedModules: progress.completedModules,
     markModuleComplete,
     isModuleComplete,
