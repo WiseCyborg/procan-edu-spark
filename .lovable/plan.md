@@ -1,69 +1,75 @@
+# Language Switcher Audit — Read-Only Report
 
-# Manager Registration Token — Post-Payment Flow (read-only findings)
+This is an assessment, not an implementation plan. No files will be changed.
 
-## 1. What fires after PayPal payment
+## 1. Where the header switcher is rendered
+- **Component:** `src/components/i18n/LanguageSwitcher.tsx` (shadcn `DropdownMenu` with a globe icon + 2-letter code trigger).
+- **Mounted in:** `src/components/layout/Header.tsx` in two slots:
+  - line 242 — public/marketing shell (anon + authed)
+  - line 292 — authed app shell (hidden on public marketing routes)
 
-`supabase/functions/paypal-webhook/index.ts` (lines 100–177) is the single writer for post-payment state. On `PAYMENT.CAPTURE.COMPLETED` it:
+## 2. Translation mechanism
+- **Library:** `i18next` + `react-i18next` + `i18next-browser-languagedetector`.
+- **Bootstrap:** `src/i18n/index.ts` (imported once at app entry). Uses `initReactI18next`, `fallbackLng: "en"`, `load: "languageOnly"`, `nonExplicitSupportedLngs: true` (so `es-MX` → `es`, `zh-CN` → `zh`).
+- **Runtime API:** components call `useTranslation()` → `t("key")`.
+- No Google Translate widget, no react-intl, no custom context.
 
-1. Marks `rvt_purchases.status = 'paid'`.
-2. Updates `dispensary_applications` with `payment_status`, `payment_provider`, `payment_transaction_id`, `payment_amount`, `payment_date` — **does NOT write `registration_token` or `registration_token_expires_at`**.
-3. Issues `rvt_seats`.
-4. Invokes `send-manager-registration-token` (line 169) with `application_id`.
+## 3. Supported languages
+Defined in `src/i18n/index.ts`:
+- `SUPPORTED_LANGUAGES = ["en", "es", "zh"]`
+- `LANGUAGE_LABELS`: `EN / English`, `ES / Español`, `ZH / 中文` (Simplified Chinese).
+- The switcher dropdown iterates `SUPPORTED_LANGUAGES` directly, so adding a language is a one-file change plus a new locale JSON.
 
-`supabase/functions/verify-dispensary-payment-paypal/index.ts` is now read-only (per the P4 2026-06-16 note in its header); it only captures the PayPal order and polls DB state. It never touches `registration_token`.
+## 4. How strings are stored
+- **Static JSON bundles** shipped with the client:
+  - `src/i18n/locales/en.json`
+  - `src/i18n/locales/es.json`
+  - `src/i18n/locales/zh.json`
+- All three files are exactly **48 lines / ~40 keys**, covering only: top-nav labels, a few auth field labels, 5 chatbot strings, 5 common words, 2 error strings, 2 welcome strings.
+- **Per-user persistence:** `profiles.preferred_language` in Supabase, synced by `src/hooks/usePreferredLanguage.tsx`. On login, the DB value overrides `localStorage`; on manual switch, `localStorage` (`procann_language`) updates immediately and the profile is patched in the background.
+- No DB-backed translation catalog, no translation API, no per-request server translation.
 
-`supabase/functions/send-manager-registration-token/index.ts` (line 39) **reads** `application.registration_token` to build the URL. It does not generate one.
+## 5. Chatbot (AiLean) language handling
+- The chatbot UI components — `src/components/ailean/AiLeanCoach.tsx`, `src/components/chat/EnhancedChatAssistant.tsx`, `src/components/AIFAQChat.tsx` — do **not** import `useTranslation` or reference `i18n` at all (verified via ripgrep).
+- The `chatbot.*` keys in the locale JSONs (`title`, `placeholder`, `send`, `clear`, `error.generic`) exist but are **unused** — dead translations.
+- The LLM prompts sent to the AI gateway are not language-aware; nothing forwards `i18n.language` to the edge functions or system prompts. Responses come back in whatever language the model infers from the user's input, not from the switcher.
 
-## 2. Where the token IS generated
+## 6. What actually changes when a user switches language
+- **Only strings wrapped in `t(...)`.** Ripgrep shows `useTranslation` is imported in exactly **3 files** across the entire `src/` tree:
+  1. `src/components/layout/Header.tsx`
+  2. `src/components/i18n/LanguageSwitcher.tsx`
+  3. `src/hooks/usePreferredLanguage.tsx`
+- In practice this means **only the top navigation / header menu items translate**. The rest of the page — landing hero, marketing sections, dashboards, forms, course content, certificates, chatbot, footer, toasts, error boundaries — stays in English regardless of selection.
+- No route-level locale prefix, no HTML `lang` attribute swap, no RTL handling (not needed for the current set).
 
-Two SQL RPCs generate the token:
+## 7. Coverage gaps (honest list)
+- **~80 pages under `src/pages/` are not translated.** None call `useTranslation`.
+- Marketing / conversion surfaces (landing page, `/employers`, `/get-started`, `/org/apply`, `/contact-procann`) are English-only despite the switcher being visible on them — the primary business risk, because Spanish is a real audience for MD cannabis workforce.
+- Course content, module bodies, quiz questions, exam prompts, and certificates are stored in English in the DB with no translation column.
+- Auth pages, dashboards, admin/Mission Control, seat management, verify-certificate portal — all English-only.
+- Chatbot UI chrome and AI responses — see §5.
+- Toasts, form validation messages, Zod error strings, error boundaries — hardcoded English.
+- Email templates (Resend/Supabase Auth) — not wired to `preferred_language`.
+- The locale JSONs themselves have low coverage — even the ~40 keys present are mostly nav-only; there is no `landing.*`, `dashboard.*`, `course.*`, `certificate.*`, `form.*` namespace.
 
-- `supabase/migrations/20251104141352_2436af68-2f8b-4b63-90c0-0c1552e554ef.sql` — `approve_dispensary_application()` sets `registration_token = encode(gen_random_bytes(32),'hex')` and `registration_token_expires_at = NOW() + 7 days` (lines 111, 122–123).
-- `supabase/migrations/20251104170525_3ce406c1-673a-45a2-a2bb-de6090b93d28.sql` — a sibling approval RPC doing the same (lines 99–100).
+## 8. Is it production-safe?
+**Functionally safe, but misleading to users.** Assessment:
 
-Both are called from the **admin approval** path (`supabase/functions/approve-application/`, `supabase/functions/approve-with-roles/`, and the admin UI in `src/components/admin/DispensaryApplicationManager.tsx`) — **not from the payment path**.
+Working correctly:
+- Switcher renders, persists to `localStorage` and `profiles.preferred_language`, hydrates on login, falls back to English cleanly, and never renders a raw key (`returnNull: false`, `fallbackLng: "en"`).
+- No crashes, no console errors expected, no security concern.
 
-After generation, `supabase/migrations/20260630125328_7a814a8e-a904-4900-8192-8b0a881d5c32.sql` installs trigger `trg_hash_dispensary_registration_token` (BEFORE INSERT/UPDATE OF `registration_token`) which SHA-256 hashes the value into `registration_token_hash` and **nulls the plaintext `registration_token` column** (lines 13–24). Existing rows were back-filled and their plaintext nulled (lines 28–33).
+Real problems:
+- **Advertises multilingual support that doesn't exist.** A user selecting Español or 中文 sees the header change and effectively nothing else. This is a trust/UX bug more than a technical one, and is arguably worse than not showing the switcher at all — especially on marketing pages where the switcher is visible pre-signup.
+- **Chatbot i18n keys are dead code** (defined in all three JSONs, referenced nowhere).
+- **`preferred_language` is written to the DB but never read by any edge function**, so server-side flows (emails, cert generation, AI prompts) cannot honor it.
+- No missing-key telemetry — gaps are silent.
 
-## 3. The race / missing step
+## Recommended next actions (for a future build-mode session, not now)
+Pick one, in priority order:
+1. Decide policy: either (a) hide the switcher on routes that aren't translated, or (b) commit to translating the landing page + auth + primary CTAs first.
+2. Wire `i18n.language` (or `profiles.preferred_language`) into the AiLean edge functions' system prompt so chatbot responses match the UI selection.
+3. Expand locale JSONs with `landing.*`, `auth.*`, `common.*` namespaces and convert the highest-traffic pages (landing, `/auth`, `/get-started`) to `useTranslation`.
+4. Add a dev-mode `saveMissing` handler to i18next to log untranslated keys during QA.
 
-There are two independent defects that compound:
-
-**Defect A — payment path never generates the token.**
-`paypal-webhook` (line 167–175) fires `send-manager-registration-token` immediately after marking the application paid, but nothing in that path calls `approve_dispensary_application()` or otherwise writes `registration_token`. If the admin approval RPC has not already run for that application, the row's `registration_token` is NULL and `registration_token_expires_at` is NULL, so the email either sends a broken URL (`.../register/manager?token=`) or crashes in `send-manager-registration-token/index.ts:33` when it does `new Date(application.registration_token_expires_at)`.
-
-**Defect B — even when admin approval ran, the plaintext is gone.**
-The hashing trigger from `20260630125328` nulls `registration_token` on every INSERT/UPDATE that sets it. So `send-manager-registration-token/index.ts:39` reads `application.registration_token` and gets `NULL` — the emailed URL is always tokenless. The only working generator is `batch-regenerate-tokens` (or the resend path) if it returns the plaintext to the caller before persisting; the post-payment webhook path never does this.
-
-**Net effect:** post-payment token emails are unreliable by construction — the webhook depends on a value it never writes, and even when written the hashing trigger destroys it before the email sender reads it. Order of operations between webhook and admin approval RPC is also racy: whichever runs last determines what (if anything) the email contains.
-
-## Exact file paths referenced
-
-- `supabase/functions/paypal-webhook/index.ts` — post-payment orchestrator (lines 100–177)
-- `supabase/functions/verify-dispensary-payment-paypal/index.ts` — read-only status probe
-- `supabase/functions/send-manager-registration-token/index.ts` — email sender, reads `registration_token`
-- `supabase/functions/approve-application/index.ts` — admin approval entry
-- `supabase/functions/approve-with-roles/index.ts` — admin approval entry
-- `supabase/functions/resend-manager-registration/index.ts` — manual resend
-- `supabase/functions/batch-regenerate-tokens/index.ts` — bulk regen
-- `supabase/functions/send-application-approved/index.ts` — approval email, also reads `registration_token`
-- `supabase/migrations/20251104141352_2436af68-2f8b-4b63-90c0-0c1552e554ef.sql` — `approve_dispensary_application()` RPC (generator #1)
-- `supabase/migrations/20251104170525_3ce406c1-673a-45a2-a2bb-de6090b93d28.sql` — sibling approval RPC (generator #2)
-- `supabase/migrations/20260630125328_7a814a8e-a904-4900-8192-8b0a881d5c32.sql` — hashing trigger that nulls plaintext
-- `src/pages/ManagerRegistration.tsx` — consumer of the emailed token
-- `supabase/functions/validate-manager-registration/index.ts` — token validation on registration submit
-
-## Recommended fix (not implemented — plan only)
-
-Pick one of:
-
-**Option 1 — Generate at webhook time, return plaintext once.**
-In `paypal-webhook/index.ts` between steps 2 and 4:
-- Generate `plainToken = crypto.randomUUID()` (or 32-byte hex) in the edge function.
-- UPDATE `dispensary_applications` SET `registration_token = plainToken, registration_token_expires_at = now() + interval '7 days'` — the trigger will hash it and null the column, which is fine.
-- Pass `plainToken` (not the column) directly to `send-manager-registration-token` via the invoke body; refactor `send-manager-registration-token` to accept `token` in the payload instead of re-reading the column.
-
-**Option 2 — Have admin approval be a prerequisite of payment.**
-Enforce that `paypal-webhook` refuses to send the token email unless `application.registration_token_hash IS NOT NULL`, and route pre-approval token generation into a single RPC that returns the plaintext to whoever calls it.
-
-Option 1 is the smaller, lower-risk change and matches the pattern already used for staff invitations elsewhere in the codebase.
+No code will be changed until you approve a specific direction.
