@@ -418,6 +418,10 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                     <HelpCircle className="mr-2 h-4 w-4" />
                     <span>{t('nav.faq')}</span>
                   </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/resources')}>
+                    <BookOpen className="mr-2 h-4 w-4" />
+                    <span>Resources</span>
+                  </DropdownMenuItem>
                   
                   {/* Role Switcher - Multi-role users only */}
                   {flags.multi_role_selector && hasMultipleManagementRoles && (
