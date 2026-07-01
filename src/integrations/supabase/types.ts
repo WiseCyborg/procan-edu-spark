@@ -10497,6 +10497,15 @@ export type Database = {
         }[]
       }
       record_email_result: { Args: { p_success: boolean }; Returns: undefined }
+      redeem_join_code_for_user: {
+        Args: {
+          p_code: string
+          p_email: string
+          p_member_type?: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
       regenerate_manager_token: {
         Args: { application_id: string }
         Returns: {
