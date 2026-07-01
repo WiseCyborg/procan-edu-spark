@@ -35,11 +35,13 @@ const ConsumerCourse = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const { 
-    completedModules, 
-    markModuleComplete, 
+  const {
+    completedModules,
+    markModuleComplete,
     isModuleComplete,
-    completionPercentage 
+    completionPercentage,
+    enrollmentId,
+    completeCourse,
   } = useConsumerProgress(courseId || '');
 
   useEffect(() => {
