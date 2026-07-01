@@ -152,7 +152,67 @@ const JOB_HANDLERS: Record<string, (job: Job, supabase: any) => Promise<void>> =
       console.error('[SEAT-UTILIZATION-ALERT] Failed to insert compliance alert:', error);
       throw error;
     }
-  }
+  },
+
+  'trigger_certificate_email': async (job, supabase) => {
+    // Unblocks dead-lettered certificate emails and prevents future cert
+    // completions from silently dropping their email notification.
+    const certificateId = job.payload?.certificateId || job.payload?.certificate_id;
+    if (!certificateId) {
+      throw new Error('trigger_certificate_email: missing payload.certificateId');
+    }
+
+    // 1) Load the certificate row
+    const { data: cert, error: certErr } = await supabase
+      .from('certificates')
+      .select('id, user_id, certificate_number, pdf_url, course_id')
+      .eq('id', certificateId)
+      .maybeSingle();
+
+    if (certErr) throw certErr;
+    if (!cert) throw new Error(`trigger_certificate_email: certificate ${certificateId} not found`);
+
+    // 2) Load the recipient profile (first/last name) and email from auth.users
+    const [{ data: profile }, { data: authUser, error: authErr }] = await Promise.all([
+      supabase
+        .from('profiles')
+        .select('first_name, last_name, email')
+        .eq('id', cert.user_id)
+        .maybeSingle(),
+      supabase.auth.admin.getUserById(cert.user_id),
+    ]);
+
+    if (authErr) console.warn('[trigger_certificate_email] auth.admin.getUserById error:', authErr);
+
+    const email = authUser?.user?.email || profile?.email;
+    if (!email) {
+      throw new Error(`trigger_certificate_email: no email found for user ${cert.user_id}`);
+    }
+
+    const firstName = profile?.first_name || (authUser?.user?.user_metadata as any)?.first_name || '';
+    const lastName = profile?.last_name || (authUser?.user?.user_metadata as any)?.last_name || '';
+
+    // 3) Invoke the existing certificate email function
+    const { error: invokeErr } = await supabase.functions.invoke('send-certificate-email', {
+      body: {
+        certificateId: cert.id,
+        certificateNumber: cert.certificate_number,
+        pdfUrl: cert.pdf_url,
+        courseId: cert.course_id,
+        userId: cert.user_id,
+        email,
+        firstName,
+        lastName,
+      },
+    });
+
+    if (invokeErr) {
+      console.error(`[trigger_certificate_email] send-certificate-email failed for ${cert.id}:`, invokeErr);
+      throw invokeErr;
+    }
+
+    console.log(`[trigger_certificate_email] ✅ sent cert ${cert.certificate_number} to ${email}`);
+  },
 };
 
 serve(async (req) => {

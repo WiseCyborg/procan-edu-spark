@@ -14,6 +14,7 @@ import { ProfileCompletionBanner } from '@/components/ProfileCompletionBanner';
 import { NextActionBanner } from '@/components/guidance/NextActionBanner';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { AccessPipelineHealth } from '@/components/debug/AccessPipelineHealth';
+import { GHOST_COURSE_IDS_PG_LIST } from '@/lib/ghostCourses';
 
 // RVT Course ID - requires org access
 const RVT_COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
@@ -65,7 +66,8 @@ const Dashboard = () => {
       const { data: coursesData, error: coursesError } = await supabase
         .from('courses')
         .select('*')
-        .eq('is_active', true);
+        .eq('is_active', true)
+        .not('id', 'in', GHOST_COURSE_IDS_PG_LIST);
 
       if (coursesError) throw coursesError;
       

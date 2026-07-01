@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { ConsumerCourseCard } from '@/components/consumer/ConsumerCourseCard';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
+import { GHOST_COURSE_IDS_PG_LIST } from '@/lib/ghostCourses';
 
 interface ConsumerCourse {
   id: string;
@@ -29,6 +30,7 @@ const ConsumerEducation = () => {
           .eq('is_public', true)
           .eq('course_type', 'consumer')
           .eq('is_active', true)
+          .not('id', 'in', GHOST_COURSE_IDS_PG_LIST)
           .order('created_at', { ascending: true });
 
         if (error) throw error;

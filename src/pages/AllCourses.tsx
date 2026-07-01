@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { UniversalCourseCard, CourseInfo } from '@/components/courses/UniversalCourseCard';
 import { Button } from '@/components/ui/button';
 import { Seo } from '@/components/Seo';
+import { GHOST_COURSE_IDS_PG_LIST } from '@/lib/ghostCourses';
 
 
 const AllCourses = () => {
@@ -29,6 +30,7 @@ const AllCourses = () => {
             is_public
           `)
           .eq('is_active', true)
+          .not('id', 'in', GHOST_COURSE_IDS_PG_LIST)
           .order('created_at', { ascending: true });
 
         if (error) throw error;

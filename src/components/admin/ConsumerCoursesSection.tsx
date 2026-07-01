@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Loader2, BookOpen, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import { GHOST_COURSE_IDS_PG_LIST } from '@/lib/ghostCourses';
 
 export function ConsumerCoursesSection() {
   const [isPopulating, setIsPopulating] = useState(false);
@@ -24,6 +25,7 @@ export function ConsumerCoursesSection() {
           course_modules(count)
         `)
         .eq('course_type', 'consumer')
+        .not('id', 'in', GHOST_COURSE_IDS_PG_LIST)
         .order('created_at', { ascending: true });
 
       if (error) throw error;

@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, History, CheckCircle2, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { GHOST_COURSE_IDS_PG_LIST } from '@/lib/ghostCourses';
 
 interface CurriculumVersion {
   id: string;
@@ -41,7 +42,8 @@ export const CurriculumVersionManager = () => {
       const { data, error } = await supabase
         .from('courses')
         .select('id, title')
-        .eq('is_active', true);
+        .eq('is_active', true)
+        .not('id', 'in', GHOST_COURSE_IDS_PG_LIST);
       if (error) throw error;
       return data;
     }
