@@ -27,6 +27,8 @@ interface ConsumerModuleContentProps {
   courseId: string;
   completedCount: number;
   totalCount: number;
+  enrollmentId?: string | null;
+  completedModuleIds?: string[];
 }
 
 export const ConsumerModuleContent = ({
