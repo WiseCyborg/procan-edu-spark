@@ -181,7 +181,7 @@ export const EmailCaptureModal = ({
       });
 
       onOpenChange(false);
-      navigate(`/consumer-certificates?course=${courseId}`);
+      navigate(`/consumer-certificates?course=${courseId}&cert=${certData.certificate.certificate_number}`);
     } catch (error) {
       console.error('Error saving enrollment:', error);
       toast({
