@@ -264,7 +264,10 @@ const EnhancedCourseModule: React.FC = () => {
     }, 300);
   };
 
-  // Reset state when module changes - but respect deep-link (tab/page) for DB-backed resume
+  // Reset state when module changes - but respect deep-link (tab/page) for DB-backed resume.
+  // IMPORTANT: only depend on `moduleId` here. Depending on `searchParams` caused this effect
+  // to re-run whenever we wrote the tab/page back to the URL, which reset per-module UI state
+  // on every tab click and interacted badly with the fetch effect below.
   useEffect(() => {
     setIsTransitioning(false);
 
@@ -287,16 +290,27 @@ const EnhancedCourseModule: React.FC = () => {
     setQuizScore(0);
     setQuizPassed(false);
     setWeakTopics([]);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [moduleId, searchParams]);
 
-  // Prerequisite check - prevent URL bypass of locked modules
+    // Clear stale module data so the previous module's content doesn't linger
+    // while the new module's data is being fetched.
+    setModuleData(null);
+    setSupplementAsset(null);
+    setIsLoading(true);
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [moduleId]);
+
+  // Prerequisite check - prevent URL bypass of locked modules.
+  // WAIT for progressData to load before running this check, otherwise we redirect
+  // to /course/part0 on every fresh navigation because canAccessModule() returns false
+  // while progressData is still undefined.
   useEffect(() => {
     if (!moduleId) return;
-    
+    if (isProgressLoading) return;
+
     const moduleNumber = parseInt(moduleId.replace('part', ''));
-    
-    // Check if user can access this module
+
     if (!canAccessModule(moduleNumber)) {
       const firstIncomplete = getFirstIncompleteModule();
       toast({
@@ -306,20 +320,29 @@ const EnhancedCourseModule: React.FC = () => {
       });
       navigate(`/course/part${firstIncomplete}`);
     }
-  }, [moduleId, canAccessModule, getFirstIncompleteModule, navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [moduleId, isProgressLoading, navigate]);
 
   useEffect(() => {
     if (!moduleId) return;
-    
+    // Wait for progress to load so we don't short-circuit the fetch on the
+    // first render when canAccessModule() is momentarily false.
+    if (isProgressLoading) return;
+
+    const moduleNumber = parseInt(moduleId.replace('part', ''));
+
+    // Don't fetch if module is locked (prerequisite effect will redirect).
+    if (!canAccessModule(moduleNumber)) {
+      setIsLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+
     const fetchModuleData = async () => {
       try {
-        const moduleNumber = parseInt(moduleId.replace('part', ''));
-        
-        // Don't fetch if module is locked
-        if (!canAccessModule(moduleNumber)) {
-          return;
-        }
-        
+        setIsLoading(true);
+
         const { data, error } = await supabase
           .from('course_modules')
           .select('*')
@@ -327,7 +350,9 @@ const EnhancedCourseModule: React.FC = () => {
           .eq('module_number', moduleNumber)
           .single();
 
-        if (error) {
+        if (cancelled) return;
+
+        if (error || !data) {
           console.error('Error fetching module:', error);
           toast({
             title: "Module not found",
@@ -338,40 +363,45 @@ const EnhancedCourseModule: React.FC = () => {
           return;
         }
 
-        if (data) {
-          const { data: assetsData } = await supabase
-            .from('video_assets')
-            .select('asset_key, title, description, unmapped_reason')
-            .eq('module_id', data.id)
-            .eq('is_active', true);
+        // Resolve the video asset by module_id (join on video_assets.module_id).
+        // This is the authoritative link — do NOT derive from asset_key patterns,
+        // because a handful of assets use section-based keys (e.g. section_3_inventory
+        // for module 4) even though their storage_path is still module_04_*.
+        const { data: assetsData } = await supabase
+          .from('video_assets')
+          .select('asset_key, title, description, unmapped_reason')
+          .eq('module_id', data.id)
+          .eq('is_active', true);
 
-          const allAssets = assetsData ?? [];
-          const primary = allAssets.find(a => !a.asset_key?.includes('_supplement')) ?? null;
-          const supplement = allAssets.find(a => a.asset_key?.includes('_supplement')) ?? null;
+        if (cancelled) return;
 
-          setModuleData({
-            id: data.id,
-            title: data.title,
-            description: data.description,
-            content: data.content,
-            quiz_questions: (data.quiz_questions as unknown as QuizQuestion[]) || [],
-            module_number: data.module_number,
-            comar_reference: data.comar_reference,
-            video_url: data.video_url,
-            asset_key: primary?.asset_key ?? null,
-            video_pending: primary?.unmapped_reason === 'pending_ai_generation',
-          });
-          setSupplementAsset(
-            supplement
-              ? {
-                  asset_key: supplement.asset_key,
-                  title: supplement.title ?? null,
-                  description: supplement.description ?? null,
-                }
-              : null
-          );
-        }
+        const allAssets = assetsData ?? [];
+        const primary = allAssets.find(a => !a.asset_key?.includes('_supplement')) ?? null;
+        const supplement = allAssets.find(a => a.asset_key?.includes('_supplement')) ?? null;
+
+        setModuleData({
+          id: data.id,
+          title: data.title,
+          description: data.description,
+          content: data.content,
+          quiz_questions: (data.quiz_questions as unknown as QuizQuestion[]) || [],
+          module_number: data.module_number,
+          comar_reference: data.comar_reference,
+          video_url: data.video_url,
+          asset_key: primary?.asset_key ?? null,
+          video_pending: primary?.unmapped_reason === 'pending_ai_generation',
+        });
+        setSupplementAsset(
+          supplement
+            ? {
+                asset_key: supplement.asset_key,
+                title: supplement.title ?? null,
+                description: supplement.description ?? null,
+              }
+            : null
+        );
       } catch (error) {
+        if (cancelled) return;
         console.error('Error in fetchModuleData:', error);
         toast({
           title: "Error",
@@ -379,12 +409,21 @@ const EnhancedCourseModule: React.FC = () => {
           variant: "destructive",
         });
       } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
     };
 
     fetchModuleData();
-  }, [moduleId, navigate, canAccessModule]);
+
+    return () => {
+      cancelled = true;
+    };
+    // Intentionally do NOT include canAccessModule/navigate — canAccessModule is a
+    // new function reference on every render of useUserProgress and would cause the
+    // fetch to spam on every re-render (which produced spurious "Module not found"
+    // toasts when tab changes triggered re-renders).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [moduleId, isProgressLoading]);
 
   const handleQuizComplete = async (score: number, passed: boolean, timeSpent: number, weakTopicsData?: WeakTopic[]) => {
     setQuizScore(score);
