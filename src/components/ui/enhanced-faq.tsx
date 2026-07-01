@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +9,7 @@ import { Search, User, Building2, HelpCircle, Phone, Mail, Clock, Shield, Lock, 
 import { useUserRole } from '@/hooks/useUserRole';
 import { useContentLastUpdated } from '@/hooks/useContentLastUpdated';
 import { formatDistanceToNow } from 'date-fns';
+import { ListenButton } from '@/components/i18n/ListenButton';
 
 interface FAQItem {
   id: string;
