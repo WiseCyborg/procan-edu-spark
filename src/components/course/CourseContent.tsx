@@ -1,9 +1,11 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Clock, Target } from 'lucide-react';
 import { sanitizeHtml } from '@/utils/sanitize-html';
 import { RegulatorySidebar } from '@/components/regulatory/RegulatorySidebar';
+import { ListenButton } from '@/components/i18n/ListenButton';
+import { MachineTranslationBadge } from '@/components/i18n/MachineTranslationBadge';
 
 interface CourseContentProps {
   content: string;
@@ -28,6 +30,7 @@ const CourseContent: React.FC<CourseContentProps> = ({
 }) => {
   // Sanitize content once on mount/update
   const sanitizedContent = useMemo(() => sanitizeHtml(content), [content]);
+  const readingPaneRef = useRef<HTMLDivElement>(null);
 
   const getTierColor = (tier?: string) => {
     switch (tier) {
@@ -51,6 +54,10 @@ const CourseContent: React.FC<CourseContentProps> = ({
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Clock className="h-4 w-4" />
             <span>{estimatedTime} minutes</span>
+          </div>
+          <MachineTranslationBadge />
+          <div className="ml-auto">
+            <ListenButton targetRef={readingPaneRef} />
           </div>
         </div>
 
@@ -77,13 +84,15 @@ const CourseContent: React.FC<CourseContentProps> = ({
         {/* Main Content - NOW SANITIZED */}
         <Card>
           <CardContent className="pt-6">
-            <div 
+            <div
+              ref={readingPaneRef}
               className="prose prose-sm max-w-none dark:prose-invert"
               dangerouslySetInnerHTML={{ __html: sanitizedContent }}
             />
           </CardContent>
         </Card>
       </div>
+
 
       {/* Regulatory Sidebar */}
       {showRegulatorySidebar && moduleNumber && (

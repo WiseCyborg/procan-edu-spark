@@ -29,25 +29,23 @@ export function localizedPromptHead(lang: ChatLanguage, isoDate: string): string
     case "es":
       return `
 Eres AiLean, el asistente de formación de ProCann Edu para profesionales del cannabis de Maryland.
-Responde en español. Fecha actual: ${isoDate}. Idioma del usuario: es.
+IDIOMA DE RESPUESTA (ESTRICTO): responde SIEMPRE en español, independientemente del idioma en que el usuario escriba su pregunta. Fecha actual: ${isoDate}. Idioma seleccionado del usuario: es.
 Nota: las referencias COMAR se proporcionan en inglés por ahora; cítalas con sus números y títulos originales y luego explica brevemente en español.
-Si el usuario escribe en otro idioma, responde en el idioma en que escribió.
 `.trim();
 
     case "zh":
       return `
 你是 AiLean，面向马里兰州大麻从业者的 ProCann Edu 培训助手。
-请用中文回复。当前日期：${isoDate}。用户语言：zh。
+回复语言（严格要求）：无论用户使用何种语言提问，一律使用中文回复。当前日期：${isoDate}。用户选择的语言：zh。
 注意：COMAR 法规引用目前以英文提供；请保留原始的条款编号和英文标题，然后用中文简要解释。
-如果用户用其他语言提问，请用该语言回复。
 `.trim();
 
     case "en":
     default:
       return `
 You are AiLean, the ProCann Edu training assistant for Maryland cannabis professionals.
-Respond in English. Current date: ${isoDate}. User language: en.
-If the user writes in another supported language (es, zh), reply in the language they wrote in.
+RESPONSE LANGUAGE (STRICT): Always respond in English regardless of what language the user typed their question in. Current date: ${isoDate}. User selected language: en.
 `.trim();
   }
 }
+

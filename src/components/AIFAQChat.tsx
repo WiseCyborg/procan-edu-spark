@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { MessageCircle, X, Send, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { getCurrentLanguage } from '@/i18n';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -11,17 +13,26 @@ interface Message {
 }
 
 export const AIFAQChat = () => {
+  const { t, i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: 'assistant',
-      content: "Hi! I'm your ProCann AI assistant. Ask me anything about Maryland RVT certification, COMAR compliance, or our training programs!",
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+
+  // Reset greeting whenever language changes (or on first mount).
+  useEffect(() => {
+    setMessages([
+      {
+        role: 'assistant',
+        content: t('chatbot.greeting', {
+          defaultValue:
+            "Hi! I'm AiLean, your ProCann training assistant. Ask me anything about Maryland RVT certification, COMAR compliance, or our training programs!",
+        }),
+      },
+    ]);
+  }, [i18n.language, t]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -36,18 +47,24 @@ export const AIFAQChat = () => {
 
     const userMessage = input.trim();
     setInput('');
-    setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+    setMessages((prev) => [...prev, { role: 'user', content: userMessage }]);
     setIsLoading(true);
+
+    const language = getCurrentLanguage();
+    const languageName =
+      language === 'es' ? 'Spanish (Español)' : language === 'zh' ? 'Simplified Chinese (中文)' : 'English';
 
     try {
       const { data, error } = await supabase.functions.invoke('chat-assistant', {
         body: {
           message: userMessage,
-          user_language: (typeof window !== 'undefined' && window.localStorage?.getItem('procann_language')) || 'en',
+          user_language: language,
           context: {
             page: 'homepage',
             type: 'faq',
-            systemPrompt: `You are ProCann's AI assistant specializing in Maryland RVT (Responsible Vendor Training) certification and compliance.
+            systemPrompt: `You are AiLean, ProCann's AI training assistant specializing in Maryland RVT (Responsible Vendor Training) certification and compliance.
+
+RESPONSE LANGUAGE (STRICT): Always respond in ${languageName}. This is the user's selected UI language. Reply in ${languageName} regardless of what language the user typed their question in. Keep proper nouns (ProCann, COMAR, Maryland, RVT) and regulatory citation numbers in their original form.
 
 Key Facts:
 - ProCann offers $49.99 certification (Maryland max is $50.00 per COMAR 14.17.07.06)
@@ -72,16 +89,22 @@ Be helpful, concise, and professional. Do not make up statistics or claims. If y
 
       if (error) throw error;
 
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: data.response || 'I apologize, but I encountered an error. Please try again.',
-      }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          content:
+            data?.response ||
+            data?.reply ||
+            t('chatbot.error.generic', { defaultValue: 'Something went wrong. Please try again.' }),
+        },
+      ]);
     } catch (error) {
       console.error('Chat error:', error);
       toast({
-        title: "Error",
-        description: "Failed to send message. Please try again.",
-        variant: "destructive",
+        title: t('common.error', { defaultValue: 'Error' }),
+        description: t('chatbot.error.generic', { defaultValue: 'Something went wrong. Please try again.' }),
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
@@ -102,6 +125,7 @@ Be helpful, concise, and professional. Do not make up statistics or claims. If y
         onClick={() => setIsOpen(true)}
         className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-50 hover:scale-110 transition-transform"
         size="icon"
+        aria-label={t('chatbot.title', { defaultValue: 'Ask AiLean' })}
       >
         <MessageCircle className="h-6 w-6" />
       </Button>
@@ -114,8 +138,10 @@ Be helpful, concise, and professional. Do not make up statistics or claims. If y
             <div className="flex items-center gap-2">
               <MessageCircle className="h-5 w-5" />
               <div>
-                <h3 className="font-semibold">ProCann AI Assistant</h3>
-                <p className="text-xs opacity-90">Ask about RVT certification</p>
+                <h3 className="font-semibold">{t('chatbot.title', { defaultValue: 'Ask AiLean' })}</h3>
+                <p className="text-xs opacity-90">
+                  {t('chatbot.subtitle', { defaultValue: 'Ask about RVT certification' })}
+                </p>
               </div>
             </div>
             <Button
@@ -123,6 +149,7 @@ Be helpful, concise, and professional. Do not make up statistics or claims. If y
               size="icon"
               onClick={() => setIsOpen(false)}
               className="h-8 w-8 text-primary-foreground hover:bg-primary-foreground/20"
+              aria-label={t('common.cancel', { defaultValue: 'Cancel' })}
             >
               <X className="h-4 w-4" />
             </Button>
@@ -137,9 +164,7 @@ Be helpful, concise, and professional. Do not make up statistics or claims. If y
               >
                 <div
                   className={`max-w-[80%] rounded-lg px-4 py-2 ${
-                    msg.role === 'user'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted'
+                    msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'
                   }`}
                 >
                   <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
@@ -163,13 +188,15 @@ Be helpful, concise, and professional. Do not make up statistics or claims. If y
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Ask a question..."
+                placeholder={t('chatbot.placeholder', { defaultValue: 'Ask a question...' })}
                 disabled={isLoading}
+                lang={i18n.language}
               />
               <Button
                 onClick={handleSend}
                 disabled={isLoading || !input.trim()}
                 size="icon"
+                aria-label={t('chatbot.send', { defaultValue: 'Send' })}
               >
                 <Send className="h-4 w-4" />
               </Button>
