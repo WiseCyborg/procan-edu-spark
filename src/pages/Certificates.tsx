@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import jsPDF from 'jspdf';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Download, Eye, FileCheck, Calendar, Shield } from 'lucide-react';
+import { Download, Eye, FileCheck, Calendar, Shield, Printer } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { SensitiveOperationWrapper } from '@/components/auth/SensitiveOperationWrapper';
+
 
 interface Certificate {
   id: string;
@@ -86,23 +87,164 @@ export default function Certificates() {
     return { label: 'Valid', color: 'bg-green-100 text-green-800', status: 'valid' };
   };
 
-  const downloadCertificate = async (certificateId: string, certificateNumber: string) => {
+  const downloadCertificate = async (cert: Certificate) => {
     try {
-      // In a real implementation, this would generate and download a PDF certificate
-      toast({
-        title: "Download Started",
-        description: `Certificate ${certificateNumber} download initiated`,
-      });
-      
-      // For now, we'll simulate the download
-      console.log(`Downloading certificate: ${certificateId}`);
-    } catch (error: any) {
-      console.error('Error downloading certificate:', error);
-      toast({
-        title: "Download Failed",
-        description: "Unable to download certificate",
-        variant: "destructive",
-      });
+      const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+      const W = pdf.internal.pageSize.getWidth();
+      const H = pdf.internal.pageSize.getHeight();
+
+      // BACKGROUND
+      pdf.setFillColor(252, 250, 245);
+      pdf.rect(0, 0, W, H, 'F');
+
+      // OUTER BORDER double line
+      pdf.setDrawColor(15, 82, 51);
+      pdf.setLineWidth(3);
+      pdf.rect(8, 8, W - 16, H - 16);
+      pdf.setLineWidth(0.5);
+      pdf.rect(12, 12, W - 24, H - 24);
+
+      // CORNER ORNAMENTS
+      const drawCorner = (x: number, y: number) => {
+        pdf.setDrawColor(15, 82, 51);
+        pdf.setLineWidth(1);
+        pdf.line(x - 6, y, x + 6, y);
+        pdf.line(x, y - 6, x, y + 6);
+      };
+      drawCorner(20, 20); drawCorner(W - 20, 20);
+      drawCorner(20, H - 20); drawCorner(W - 20, H - 20);
+
+      // HEADER BAND
+      pdf.setFillColor(15, 82, 51);
+      pdf.rect(12, 12, W - 24, 28, 'F');
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text('MARYLAND CANNABIS ADMINISTRATION — RESPONSIBLE VENDOR TRAINING', W / 2, 22, { align: 'center' });
+      pdf.setFontSize(18);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('ProCann Edu', W / 2, 34, { align: 'center' });
+
+      // SEAL CIRCLE
+      pdf.setFillColor(255, 255, 255);
+      pdf.setDrawColor(15, 82, 51);
+      pdf.setLineWidth(1.5);
+      pdf.circle(50, 110, 22, 'FD');
+      pdf.setFillColor(15, 82, 51);
+      pdf.circle(50, 110, 18, 'F');
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(5.5);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('PROCANN', 50, 105, { align: 'center' });
+      pdf.text('EDU', 50, 111, { align: 'center' });
+      pdf.text('RVT', 50, 117, { align: 'center' });
+
+      // CERTIFICATE TYPE
+      pdf.setTextColor(100, 100, 100);
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text('CERTIFICATE OF COMPLETION — RESPONSIBLE VENDOR TRAINING', W / 2, 56, { align: 'center' });
+
+      // GOLD DIVIDER
+      pdf.setDrawColor(180, 140, 60);
+      pdf.setLineWidth(0.5);
+      pdf.line(W / 2 - 80, 59, W / 2 + 80, 59);
+
+      // THIS CERTIFIES THAT
+      pdf.setTextColor(80, 80, 80);
+      pdf.setFontSize(9);
+      pdf.setFont('helvetica', 'italic');
+      pdf.text('This certifies that', W / 2, 70, { align: 'center' });
+
+      // RECIPIENT NAME — fetch from profile
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('first_name, last_name')
+        .eq('user_id', user?.id)
+        .maybeSingle();
+      const recipientName = profile
+        ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || user?.email || 'Registered Agent'
+        : user?.email || 'Registered Agent';
+
+      pdf.setTextColor(15, 82, 51);
+      pdf.setFontSize(28);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(recipientName, W / 2, 88, { align: 'center' });
+      pdf.setDrawColor(15, 82, 51);
+      pdf.setLineWidth(0.5);
+      const nameWidth = pdf.getTextWidth(recipientName);
+      pdf.line(W / 2 - nameWidth / 2, 91, W / 2 + nameWidth / 2, 91);
+
+      // HAS SUCCESSFULLY COMPLETED
+      pdf.setTextColor(80, 80, 80);
+      pdf.setFontSize(9);
+      pdf.setFont('helvetica', 'italic');
+      pdf.text('has successfully completed the Maryland Responsible Vendor Training program', W / 2, 101, { align: 'center' });
+
+      // COURSE TITLE
+      pdf.setTextColor(20, 20, 20);
+      pdf.setFontSize(15);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(cert.courses.title, W / 2, 113, { align: 'center' });
+
+      // COMAR BADGE
+      const badgeW = 120;
+      pdf.setFillColor(240, 253, 244);
+      pdf.setDrawColor(15, 82, 51);
+      pdf.setLineWidth(0.5);
+      pdf.roundedRect(W / 2 - badgeW / 2, 118, badgeW, 10, 3, 3, 'FD');
+      pdf.setTextColor(15, 82, 51);
+      pdf.setFontSize(8);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('COMAR 14.17.15.05 — Maryland Cannabis Administration', W / 2, 125, { align: 'center' });
+
+      // BOTTOM 3 COLUMNS
+      const issueDate = formatDate(cert.issue_date);
+      const expiryDate = cert.expiry_date ? formatDate(cert.expiry_date) : 'No Expiry';
+
+      // Left — Issue Date
+      pdf.setDrawColor(200, 200, 200); pdf.setLineWidth(0.3);
+      pdf.line(W / 2 - 95, 148, W / 2 - 35, 148);
+      pdf.setTextColor(20, 20, 20); pdf.setFontSize(9); pdf.setFont('helvetica', 'bold');
+      pdf.text(issueDate, W / 2 - 65, 145, { align: 'center' });
+      pdf.setTextColor(120, 120, 120); pdf.setFontSize(7); pdf.setFont('helvetica', 'normal');
+      pdf.text('DATE OF ISSUE', W / 2 - 65, 153, { align: 'center' });
+
+      // Center — Cert Number
+      pdf.setDrawColor(200, 200, 200);
+      pdf.line(W / 2 - 25, 148, W / 2 + 25, 148);
+      pdf.setTextColor(20, 20, 20); pdf.setFontSize(8); pdf.setFont('helvetica', 'bold');
+      pdf.text(cert.certificate_number, W / 2, 145, { align: 'center' });
+      pdf.setTextColor(120, 120, 120); pdf.setFontSize(7); pdf.setFont('helvetica', 'normal');
+      pdf.text('CERTIFICATE NUMBER', W / 2, 153, { align: 'center' });
+
+      // Right — Expiry Date
+      pdf.setDrawColor(200, 200, 200);
+      pdf.line(W / 2 + 35, 148, W / 2 + 95, 148);
+      pdf.setTextColor(20, 20, 20); pdf.setFontSize(9); pdf.setFont('helvetica', 'bold');
+      pdf.text(expiryDate, W / 2 + 65, 145, { align: 'center' });
+      pdf.setTextColor(120, 120, 120); pdf.setFontSize(7); pdf.setFont('helvetica', 'normal');
+      pdf.text('EXPIRATION DATE', W / 2 + 65, 153, { align: 'center' });
+
+      // VERIFY URL
+      pdf.setTextColor(37, 99, 235); pdf.setFontSize(7);
+      pdf.text(`Verify: https://www.procannedu.com/verify?code=${cert.certificate_number}`, W / 2, 163, { align: 'center' });
+
+      // FOOTER
+      pdf.setFillColor(15, 82, 51);
+      pdf.rect(12, H - 24, W - 24, 12, 'F');
+      pdf.setTextColor(255, 255, 255); pdf.setFontSize(6.5); pdf.setFont('helvetica', 'normal');
+      pdf.text(
+        'This certificate satisfies Maryland Cannabis Administration Responsible Vendor Training requirements per COMAR 14.17.15.05. Valid for 2 years from date of issue.',
+        W / 2, H - 16, { align: 'center' }
+      );
+
+      pdf.save(`${cert.certificate_number}-RVT-certificate.pdf`);
+
+      toast({ title: 'Certificate Downloaded', description: `${cert.certificate_number} is ready.` });
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast({ title: 'Download Failed', description: 'Failed to generate PDF. Please try again.', variant: 'destructive' });
     }
   };
 
