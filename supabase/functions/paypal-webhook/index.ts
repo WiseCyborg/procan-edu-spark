@@ -163,16 +163,43 @@ async function provisionDispensaryPayment(
     }
   }
 
-  // 4. Trigger manager-registration-token email so applicant can activate the account
+  // 4. Generate plaintext registration token, persist it (the BEFORE trigger
+  //    hashes it into registration_token_hash and nulls the plaintext column),
+  //    then hand the plaintext straight to the email sender so it doesn't need
+  //    to re-read a column that will always be NULL.
   if (applicationId && !alreadyPaid) {
     try {
-      await supabase.functions.invoke("send-manager-registration-token", {
-        body: { application_id: applicationId },
-      });
+      const tokenBytes = new Uint8Array(32);
+      crypto.getRandomValues(tokenBytes);
+      const plainToken = Array.from(tokenBytes)
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
+      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+
+      const { error: tokenErr } = await supabase
+        .from("dispensary_applications")
+        .update({
+          registration_token: plainToken,
+          registration_token_expires_at: expiresAt,
+        })
+        .eq("id", applicationId);
+
+      if (tokenErr) {
+        console.error("[paypal-webhook] failed to persist registration token", tokenErr);
+      } else {
+        await supabase.functions.invoke("send-manager-registration-token", {
+          body: {
+            application_id: applicationId,
+            token: plainToken,
+            expires_at: expiresAt,
+          },
+        });
+      }
     } catch (e) {
       console.error("[paypal-webhook] failed to enqueue registration-token email", e);
     }
   }
+
 
   return { applicationId };
 }
