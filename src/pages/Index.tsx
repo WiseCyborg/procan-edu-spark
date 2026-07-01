@@ -434,7 +434,7 @@ const Index = () => {
             </div>
           </div>
           <div className="text-center text-sm text-white/60 pt-8 border-t border-white/10">
-            <p>&copy; 2025copy; 2026 ProCann Edu. All rights reserved.</p>
+            <p>&copy; 2026 ProCann Edu. All rights reserved.</p>
             <p className="mt-2">Made with 💚 in Maryland</p>
             <div className="mt-6">
               <a href="/mca-compliance-review" className="text-white/80 hover:text-white underline text-xs">
