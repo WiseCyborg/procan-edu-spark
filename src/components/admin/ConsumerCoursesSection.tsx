@@ -25,6 +25,7 @@ export function ConsumerCoursesSection() {
           course_modules(count)
         `)
         .eq('course_type', 'consumer')
+        .not('id', 'in', GHOST_COURSE_IDS_PG_LIST)
         .order('created_at', { ascending: true });
 
       if (error) throw error;
