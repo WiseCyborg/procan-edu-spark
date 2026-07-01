@@ -165,21 +165,22 @@ const JOB_HANDLERS: Record<string, (job: Job, supabase: any) => Promise<void>> =
     // 1) Load the certificate row
     const { data: cert, error: certErr } = await supabase
       .from('certificates')
-      .select('id, user_id, certificate_number, pdf_url, course_id')
+      .select('id, user_id, certificate_number, pdf_url, course_id, issue_date, expiry_date, certification_level, metadata')
       .eq('id', certificateId)
       .maybeSingle();
 
     if (certErr) throw certErr;
     if (!cert) throw new Error(`trigger_certificate_email: certificate ${certificateId} not found`);
 
-    // 2) Load the recipient profile (first/last name) and email from auth.users
-    const [{ data: profile }, { data: authUser, error: authErr }] = await Promise.all([
+    // 2) Load recipient profile (profiles is keyed by user_id) and auth user
+    const [{ data: profile }, { data: authUser, error: authErr }, { data: course }] = await Promise.all([
       supabase
         .from('profiles')
         .select('first_name, last_name, email')
-        .eq('id', cert.user_id)
+        .eq('user_id', cert.user_id)
         .maybeSingle(),
       supabase.auth.admin.getUserById(cert.user_id),
+      supabase.from('courses').select('title').eq('id', cert.course_id).maybeSingle(),
     ]);
 
     if (authErr) console.warn('[trigger_certificate_email] auth.admin.getUserById error:', authErr);
@@ -189,20 +190,32 @@ const JOB_HANDLERS: Record<string, (job: Job, supabase: any) => Promise<void>> =
       throw new Error(`trigger_certificate_email: no email found for user ${cert.user_id}`);
     }
 
-    const firstName = profile?.first_name || (authUser?.user?.user_metadata as any)?.first_name || '';
+    const firstName = profile?.first_name || (authUser?.user?.user_metadata as any)?.first_name || 'Student';
     const lastName = profile?.last_name || (authUser?.user?.user_metadata as any)?.last_name || '';
+    const certificationType: 'rvt' | 'manager' =
+      cert.certification_level === 'manager' ? 'manager' : 'rvt';
+    const courseTitle =
+      course?.title ||
+      (certificationType === 'manager'
+        ? 'Maryland RVT + Manager Leadership Training'
+        : 'Maryland Responsible Vendor Training');
+    const fmt = (iso: string | null | undefined) =>
+      iso ? new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
 
-    // 3) Invoke the existing certificate email function
+    // 3) Invoke send-certificate-email with the payload shape it expects
     const { error: invokeErr } = await supabase.functions.invoke('send-certificate-email', {
       body: {
-        certificateId: cert.id,
-        certificateNumber: cert.certificate_number,
-        pdfUrl: cert.pdf_url,
-        courseId: cert.course_id,
-        userId: cert.user_id,
         email,
         firstName,
         lastName,
+        certificateNumber: cert.certificate_number,
+        courseTitle,
+        issueDate: fmt(cert.issue_date) || new Date().toLocaleDateString('en-US'),
+        expiryDate: fmt(cert.expiry_date),
+        certificateUrl:
+          (cert.metadata as any)?.verify_url ||
+          `https://www.procannedu.com/verify?code=${cert.certificate_number}`,
+        certificationType,
       },
     });
 
