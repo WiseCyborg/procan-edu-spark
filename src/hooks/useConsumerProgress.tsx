@@ -179,7 +179,6 @@ export const useConsumerProgress = (courseId: string) => {
   const markModuleComplete = useCallback((moduleId: string, totalModules?: number) => {
     setProgress((prev) => {
       if (prev.completedModules.includes(moduleId)) {
-        // Still ensure user_progress reflects it.
         writeUserProgress(moduleId);
         return prev;
       }
@@ -187,19 +186,42 @@ export const useConsumerProgress = (courseId: string) => {
       const completedModules = [...prev.completedModules, moduleId];
       const isAllDone =
         typeof totalModules === 'number' && totalModules > 0 && completedModules.length >= totalModules;
+      const completedAt = isAllDone ? (prev.completedAt ?? new Date().toISOString()) : prev.completedAt;
 
       const updatedProgress: CourseProgress = {
         ...prev,
         completedModules,
         lastAccessedModule: moduleId,
-        completedAt: isAllDone ? (prev.completedAt ?? new Date().toISOString()) : prev.completedAt,
+        completedAt,
       };
 
       saveProgress(updatedProgress);
       writeUserProgress(moduleId);
+
+      // Safety-net finalize: if the course is now complete, explicitly UPDATE
+      // the enrollment row by (user_id, course_id) so completed_at is never
+      // left null due to a race with enrollmentIdRef being unset.
+      if (isAllDone && user?.id) {
+        (async () => {
+          try {
+            await supabase
+              .from('consumer_enrollments')
+              .update({
+                completed_at: completedAt,
+                metadata: updatedProgress as any,
+              })
+              .eq('user_id', user.id)
+              .eq('course_id', courseId)
+              .is('completed_at', null);
+          } catch (err) {
+            console.error('Error finalizing enrollment completion:', err);
+          }
+        })();
+      }
+
       return updatedProgress;
     });
-  }, [saveProgress, writeUserProgress]);
+  }, [saveProgress, writeUserProgress, user?.id, courseId]);
 
   const isModuleComplete = useCallback((moduleId: string) => {
     return progress.completedModules.includes(moduleId);
