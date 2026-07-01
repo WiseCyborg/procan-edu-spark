@@ -8,7 +8,6 @@ import { Badge } from '@/components/ui/badge';
 import { Download, Eye, FileCheck, Calendar, Shield, Printer } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
-
 interface Certificate {
   id: string;
   certificate_number: string;
