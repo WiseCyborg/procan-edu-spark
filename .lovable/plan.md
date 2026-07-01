@@ -1,75 +1,54 @@
-# Language Switcher Audit — Read-Only Report
+# Translation Coverage Audit — Honest Assessment
 
-This is an assessment, not an implementation plan. No files will be changed.
+## Locale files (src/i18n/locales/)
 
-## 1. Where the header switcher is rendered
-- **Component:** `src/components/i18n/LanguageSwitcher.tsx` (shadcn `DropdownMenu` with a globe icon + 2-letter code trigger).
-- **Mounted in:** `src/components/layout/Header.tsx` in two slots:
-  - line 242 — public/marketing shell (anon + authed)
-  - line 292 — authed app shell (hidden on public marketing routes)
+| File | Size | Top-level key groups |
+|---|---|---|
+| en.json | 12,233 bytes (~12 KB) | 134 |
+| es.json | 13,952 bytes (~14 KB) | 134 |
+| zh.json | 11,059 bytes (~11 KB) | 134 |
 
-## 2. Translation mechanism
-- **Library:** `i18next` + `react-i18next` + `i18next-browser-languagedetector`.
-- **Bootstrap:** `src/i18n/index.ts` (imported once at app entry). Uses `initReactI18next`, `fallbackLng: "en"`, `load: "languageOnly"`, `nonExplicitSupportedLngs: true` (so `es-MX` → `es`, `zh-CN` → `zh`).
-- **Runtime API:** components call `useTranslation()` → `t("key")`.
-- No Google Translate widget, no react-intl, no custom context.
+All three files are in structural sync (134 top-level groups each). Counting leaf strings (nested keys under `faq.items.*`, `nav.*`, `chatbot.*`, `listen.*`, `i18n.*`, etc.), each locale holds roughly **~180–200 translatable leaf strings**, dominated by the 35 FAQ Q/A pairs added in the last i18n pass.
 
-## 3. Supported languages
-Defined in `src/i18n/index.ts`:
-- `SUPPORTED_LANGUAGES = ["en", "es", "zh"]`
-- `LANGUAGE_LABELS`: `EN / English`, `ES / Español`, `ZH / 中文` (Simplified Chinese).
-- The switcher dropdown iterates `SUPPORTED_LANGUAGES` directly, so adding a language is a one-file change plus a new locale JSON.
+## Hardcoded English strings in src/ (684 .ts/.tsx files)
 
-## 4. How strings are stored
-- **Static JSON bundles** shipped with the client:
-  - `src/i18n/locales/en.json`
-  - `src/i18n/locales/es.json`
-  - `src/i18n/locales/zh.json`
-- All three files are exactly **48 lines / ~40 keys**, covering only: top-nav labels, a few auth field labels, 5 chatbot strings, 5 common words, 2 error strings, 2 welcome strings.
-- **Per-user persistence:** `profiles.preferred_language` in Supabase, synced by `src/hooks/usePreferredLanguage.tsx`. On login, the DB value overrides `localStorage`; on manual switch, `localStorage` (`procann_language`) updates immediately and the profile is patched in the background.
-- No DB-backed translation catalog, no translation API, no per-request server translation.
+Measured with ripgrep heuristics — undercount likely, since these patterns miss multi-line JSX, template literals, and dynamic strings:
 
-## 5. Chatbot (AiLean) language handling
-- The chatbot UI components — `src/components/ailean/AiLeanCoach.tsx`, `src/components/chat/EnhancedChatAssistant.tsx`, `src/components/AIFAQChat.tsx` — do **not** import `useTranslation` or reference `i18n` at all (verified via ripgrep).
-- The `chatbot.*` keys in the locale JSONs (`title`, `placeholder`, `send`, `clear`, `error.generic`) exist but are **unused** — dead translations.
-- The LLM prompts sent to the AI gateway are not language-aware; nothing forwards `i18n.language` to the edge functions or system prompts. Responses come back in whatever language the model infers from the user's input, not from the switcher.
+| Category | Count |
+|---|---|
+| JSX text nodes (`>Some Text<`) | 3,230 |
+| `placeholder="..."` literals | 278 |
+| `aria-label="..."` literals | 17 |
+| `title="..."` JSX props | 46 |
+| `label="..."` literals | 67 |
+| Toast `title:`/`description:` literals | 1,450 |
+| **Rough total translatable strings** | **~5,088** |
 
-## 6. What actually changes when a user switches language
-- **Only strings wrapped in `t(...)`.** Ripgrep shows `useTranslation` is imported in exactly **3 files** across the entire `src/` tree:
-  1. `src/components/layout/Header.tsx`
-  2. `src/components/i18n/LanguageSwitcher.tsx`
-  3. `src/hooks/usePreferredLanguage.tsx`
-- In practice this means **only the top navigation / header menu items translate**. The rest of the page — landing hero, marketing sections, dashboards, forms, course content, certificates, chatbot, footer, toasts, error boundaries — stays in English regardless of selection.
-- No route-level locale prefix, no HTML `lang` attribute swap, no RTL handling (not needed for the current set).
+Files that actually import `useTranslation` / `react-i18next`: **8 out of 684** (~1.2%).
+Total `t('...')` call sites across the codebase: **56**.
 
-## 7. Coverage gaps (honest list)
-- **~80 pages under `src/pages/` are not translated.** None call `useTranslation`.
-- Marketing / conversion surfaces (landing page, `/employers`, `/get-started`, `/org/apply`, `/contact-procann`) are English-only despite the switcher being visible on them — the primary business risk, because Spanish is a real audience for MD cannabis workforce.
-- Course content, module bodies, quiz questions, exam prompts, and certificates are stored in English in the DB with no translation column.
-- Auth pages, dashboards, admin/Mission Control, seat management, verify-certificate portal — all English-only.
-- Chatbot UI chrome and AI responses — see §5.
-- Toasts, form validation messages, Zod error strings, error boundaries — hardcoded English.
-- Email templates (Resend/Supabase Auth) — not wired to `preferred_language`.
-- The locale JSONs themselves have low coverage — even the ~40 keys present are mostly nav-only; there is no `landing.*`, `dashboard.*`, `course.*`, `certificate.*`, `form.*` namespace.
+## Honest coverage ratio
 
-## 8. Is it production-safe?
-**Functionally safe, but misleading to users.** Assessment:
+- Translated strings in use: **~56 `t()` call sites** (plus 35 FAQ items rendered via a loop, so effectively ~90 user-visible translated strings).
+- Estimated translatable strings in codebase: **~5,000+**.
+- **Real UI translation coverage: ~1.5–2%.**
 
-Working correctly:
-- Switcher renders, persists to `localStorage` and `profiles.preferred_language`, hydrates on login, falls back to English cleanly, and never renders a raw key (`returnNull: false`, `fallbackLng: "en"`).
-- No crashes, no console errors expected, no security concern.
+Even being generous and assuming every leaf key in en.json (~200) is wired somewhere: coverage is still **~4%**.
 
-Real problems:
-- **Advertises multilingual support that doesn't exist.** A user selecting Español or 中文 sees the header change and effectively nothing else. This is a trust/UX bug more than a technical one, and is arguably worse than not showing the switcher at all — especially on marketing pages where the switcher is visible pre-signup.
-- **Chatbot i18n keys are dead code** (defined in all three JSONs, referenced nowhere).
-- **`preferred_language` is written to the DB but never read by any edge function**, so server-side flows (emails, cert generation, AI prompts) cannot honor it.
-- No missing-key telemetry — gaps are silent.
+## What this means in practice
 
-## Recommended next actions (for a future build-mode session, not now)
-Pick one, in priority order:
-1. Decide policy: either (a) hide the switcher on routes that aren't translated, or (b) commit to translating the landing page + auth + primary CTAs first.
-2. Wire `i18n.language` (or `profiles.preferred_language`) into the AiLean edge functions' system prompt so chatbot responses match the UI selection.
-3. Expand locale JSONs with `landing.*`, `auth.*`, `common.*` namespaces and convert the highest-traffic pages (landing, `/auth`, `/get-started`) to `useTranslation`.
-4. Add a dev-mode `saveMissing` handler to i18next to log untranslated keys during QA.
+- Nav header, FAQ page, AiLean chatbot UI shell, Listen button, MT badge — translated.
+- Everything else — landing page, auth, dashboards, course player content chrome, admin Mission Control, checkout, certificates, toasts, form validation messages, error states, email capture, manager/employer flows — **English only**, regardless of the switcher setting.
+- The 1,450 toast literals are the single biggest untranslated surface and the most user-visible during flows.
 
-No code will be changed until you approve a specific direction.
+## Recommendation (not executed in plan mode)
+
+If you want to advertise multilingual support honestly, the next pass needs to target, in order of user impact:
+1. Toasts (1,450) — centralize via a `t()`-wrapped toast helper.
+2. Landing page + auth (highest-traffic English strings).
+3. Course player chrome + certificate UI.
+4. Dashboards (student, manager, employer).
+
+Otherwise, consider gating the ES/ZH options behind a "Beta — limited coverage" label so users aren't misled.
+
+No files will be changed in plan mode. Approve to proceed with a scoped translation-expansion plan, or tell me which surface to prioritize first.
