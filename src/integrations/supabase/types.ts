@@ -6113,6 +6113,63 @@ export type Database = {
         }
         Relationships: []
       }
+      resource_guides: {
+        Row: {
+          audience: string
+          audience_tag: string
+          color: string
+          created_at: string | null
+          description: string
+          file_size_kb: number | null
+          icon: string
+          id: string
+          is_active: boolean
+          public_url: string
+          slug: string
+          sort_order: number
+          storage_path: string
+          subtitle: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          audience: string
+          audience_tag: string
+          color?: string
+          created_at?: string | null
+          description: string
+          file_size_kb?: number | null
+          icon?: string
+          id?: string
+          is_active?: boolean
+          public_url: string
+          slug: string
+          sort_order?: number
+          storage_path: string
+          subtitle: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          audience?: string
+          audience_tag?: string
+          color?: string
+          created_at?: string | null
+          description?: string
+          file_size_kb?: number | null
+          icon?: string
+          id?: string
+          is_active?: boolean
+          public_url?: string
+          slug?: string
+          sort_order?: number
+          storage_path?: string
+          subtitle?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       retraining_events: {
         Row: {
           created_at: string
