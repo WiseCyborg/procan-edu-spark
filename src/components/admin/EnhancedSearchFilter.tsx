@@ -8,6 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { GHOST_COURSE_IDS_PG_LIST } from '@/lib/ghostCourses';
 import { 
   Search, 
   Filter, 
