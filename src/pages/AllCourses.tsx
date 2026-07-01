@@ -30,6 +30,7 @@ const AllCourses = () => {
             is_public
           `)
           .eq('is_active', true)
+          .not('id', 'in', GHOST_COURSE_IDS_PG_LIST)
           .order('created_at', { ascending: true });
 
         if (error) throw error;
