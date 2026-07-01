@@ -27,6 +27,8 @@ interface ConsumerModuleContentProps {
   courseId: string;
   completedCount: number;
   totalCount: number;
+  enrollmentId?: string | null;
+  completedModuleIds?: string[];
 }
 
 export const ConsumerModuleContent = ({
@@ -40,7 +42,10 @@ export const ConsumerModuleContent = ({
   isLastModule,
   courseId,
   completedCount,
-  totalCount
+  totalCount,
+  enrollmentId,
+  completedModuleIds
+
 }: ConsumerModuleContentProps) => {
   const [showEmailCapture, setShowEmailCapture] = useState(false);
 
@@ -170,6 +175,8 @@ export const ConsumerModuleContent = ({
         open={showEmailCapture}
         onOpenChange={setShowEmailCapture}
         courseId={courseId}
+        enrollmentId={enrollmentId ?? null}
+        completedModuleIds={completedModuleIds ?? []}
       />
     </>
   );

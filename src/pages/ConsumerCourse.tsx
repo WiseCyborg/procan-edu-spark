@@ -35,11 +35,13 @@ const ConsumerCourse = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const { 
-    completedModules, 
-    markModuleComplete, 
+  const {
+    completedModules,
+    markModuleComplete,
     isModuleComplete,
-    completionPercentage 
+    completionPercentage,
+    enrollmentId,
+    completeCourse,
   } = useConsumerProgress(courseId || '');
 
   useEffect(() => {
@@ -105,7 +107,14 @@ const ConsumerCourse = () => {
 
   const handleMarkComplete = () => {
     if (currentModule) {
-      markModuleComplete(currentModule.id);
+      markModuleComplete(currentModule.id, modules.length);
+      // If this was the final required module, ensure the enrollment is marked complete.
+      const willBeComplete =
+        !completedModules.includes(currentModule.id) &&
+        completedModules.length + 1 >= modules.length;
+      if (willBeComplete) {
+        completeCourse(modules.length);
+      }
     }
   };
 
@@ -206,6 +215,8 @@ const ConsumerCourse = () => {
             courseId={courseId || ''}
             completedCount={completedModules.length}
             totalCount={modules.length}
+            enrollmentId={enrollmentId}
+            completedModuleIds={completedModules}
           />
         </main>
       </div>

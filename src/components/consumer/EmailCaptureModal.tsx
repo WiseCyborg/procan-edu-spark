@@ -14,29 +14,35 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useGuestSession } from '@/hooks/useGuestSession';
+import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 
 interface EmailCaptureModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   courseId: string;
+  enrollmentId?: string | null;
+  completedModuleIds?: string[];
 }
 
 export const EmailCaptureModal = ({
   open,
   onOpenChange,
-  courseId
+  courseId,
+  enrollmentId,
+  completedModuleIds = [],
 }: EmailCaptureModalProps) => {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const { sessionId, updateEmail } = useGuestSession();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!email || !email.includes('@')) {
       toast({
         title: 'Invalid email',
@@ -49,46 +55,133 @@ export const EmailCaptureModal = ({
     setIsSubmitting(true);
 
     try {
-      // Save enrollment with email
-      const { data: enrollment, error } = await supabase
-        .from('consumer_enrollments')
-        .insert({
-          session_id: sessionId || undefined,
-          course_id: courseId,
-          email,
-          completed_at: new Date().toISOString(),
-          metadata: { name: name || undefined }
-        })
-        .select()
-        .single();
+      const nowIso = new Date().toISOString();
+      let targetEnrollmentId: string | null = enrollmentId ?? null;
 
-      if (error) throw error;
+      // 1) If we know the existing enrollment, UPDATE it (do NOT create a duplicate).
+      if (targetEnrollmentId) {
+        const { data: current } = await supabase
+          .from('consumer_enrollments')
+          .select('metadata, completed_at')
+          .eq('id', targetEnrollmentId)
+          .maybeSingle();
+
+        const currentMeta = (current?.metadata as Record<string, any>) || {};
+        const mergedMeta = {
+          ...currentMeta,
+          name: name || currentMeta.name,
+          completedModules: Array.isArray(currentMeta.completedModules) && currentMeta.completedModules.length > 0
+            ? currentMeta.completedModules
+            : completedModuleIds,
+          completedAt: current?.completed_at ?? currentMeta.completedAt ?? nowIso,
+        };
+
+        const { error: updErr } = await supabase
+          .from('consumer_enrollments')
+          .update({
+            email,
+            completed_at: current?.completed_at ?? nowIso,
+            metadata: mergedMeta as any,
+          })
+          .eq('id', targetEnrollmentId);
+        if (updErr) throw updErr;
+      } else if (user?.id) {
+        // 2) Authenticated but no enrollment id passed — find or create the row for this user+course.
+        const { data: existing } = await supabase
+          .from('consumer_enrollments')
+          .select('id, metadata, completed_at')
+          .eq('user_id', user.id)
+          .eq('course_id', courseId)
+          .maybeSingle();
+
+        if (existing) {
+          targetEnrollmentId = existing.id;
+          const currentMeta = (existing.metadata as Record<string, any>) || {};
+          await supabase
+            .from('consumer_enrollments')
+            .update({
+              email,
+              completed_at: existing.completed_at ?? nowIso,
+              metadata: {
+                ...currentMeta,
+                name: name || currentMeta.name,
+                completedModules: Array.isArray(currentMeta.completedModules) && currentMeta.completedModules.length > 0
+                  ? currentMeta.completedModules
+                  : completedModuleIds,
+                completedAt: existing.completed_at ?? currentMeta.completedAt ?? nowIso,
+              } as any,
+            })
+            .eq('id', existing.id);
+        } else {
+          const { data: created, error: insErr } = await supabase
+            .from('consumer_enrollments')
+            .insert({
+              user_id: user.id,
+              session_id: sessionId || undefined,
+              course_id: courseId,
+              email,
+              completed_at: nowIso,
+              metadata: {
+                courseId,
+                name: name || undefined,
+                completedModules: completedModuleIds,
+                completedAt: nowIso,
+              } as any,
+            })
+            .select('id')
+            .single();
+          if (insErr) throw insErr;
+          targetEnrollmentId = created.id;
+        }
+      } else {
+        // 3) Guest with no known enrollment — create one with the ACTUAL completion state,
+        //    not a blank shell.
+        const { data: created, error: insErr } = await supabase
+          .from('consumer_enrollments')
+          .insert({
+            session_id: sessionId || undefined,
+            course_id: courseId,
+            email,
+            completed_at: nowIso,
+            metadata: {
+              courseId,
+              name: name || undefined,
+              completedModules: completedModuleIds,
+              completedAt: nowIso,
+            } as any,
+          })
+          .select('id')
+          .single();
+        if (insErr) throw insErr;
+        targetEnrollmentId = created.id;
+      }
 
       // Update guest session with email
       updateEmail(email);
 
-      // Generate consumer certificate
-      try {
-        const { data: certData, error: certError } = await supabase.functions.invoke(
-          'generate-consumer-certificate',
-          {
-            body: {
-              enrollment_id: enrollment.id,
-              email: email,
-              name: name || undefined,
-              course_id: courseId,
+      // Generate consumer certificate against the REAL enrollment id
+      if (targetEnrollmentId) {
+        try {
+          const { data: certData, error: certError } = await supabase.functions.invoke(
+            'generate-consumer-certificate',
+            {
+              body: {
+                enrollment_id: targetEnrollmentId,
+                email: email,
+                name: name || undefined,
+                course_id: courseId,
+              }
             }
-          }
-        );
+          );
 
-        if (certError) {
-          console.error('Certificate generation error:', certError);
-        } else {
-          console.log('Certificate generated:', certData?.certificate?.certificate_number);
+          if (certError) {
+            console.error('Certificate generation error:', certError);
+          } else {
+            console.log('Certificate generated:', certData?.certificate?.certificate_number);
+          }
+        } catch (certError) {
+          console.error('Failed to generate certificate:', certError);
         }
-      } catch (certError) {
-        console.error('Failed to generate certificate:', certError);
-        // Don't fail the whole flow if certificate generation fails
       }
 
       toast({
@@ -96,7 +189,6 @@ export const EmailCaptureModal = ({
         description: 'Your certificate will be sent to your email shortly.',
       });
 
-      // Close modal and navigate to certificates page
       onOpenChange(false);
       navigate(`/consumer-certificates?course=${courseId}`);
     } catch (error) {
@@ -173,7 +265,7 @@ export const EmailCaptureModal = ({
                 </>
               )}
             </Button>
-            
+
             <Button
               type="button"
               variant="ghost"
