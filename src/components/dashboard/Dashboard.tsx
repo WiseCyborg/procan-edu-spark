@@ -67,6 +67,7 @@ const Dashboard = () => {
         .from('courses')
         .select('*')
         .eq('is_active', true)
+        .eq('is_public', true)
         .not('id', 'in', GHOST_COURSE_IDS_PG_LIST);
 
       if (coursesError) throw coursesError;

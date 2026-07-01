@@ -87,25 +87,10 @@ const handler = async (req: Request): Promise<Response> => {
       BaseURL: baseUrl
     });
 
-    // Log email attempt
-    const { data: logData } = await supabase
-      .from('email_logs')
-      .insert({
-        recipient_email: email,
-        email_type: 'certificate',
-        status: 'sending',
-        template_name: 'certificate',
-        template_data: {
-          firstName,
-          lastName,
-          certificateNumber,
-          courseTitle,
-        }
-      })
-      .select('id')
-      .single();
-
-    const logId = logData?.id;
+    // NOTE: Do NOT pre-insert into email_logs here. EmailRouter.sendWithFailover
+    // creates and finalizes the single email_logs row for this send. A duplicate
+    // pre-insert would be left stuck in 'sending' and later reaped as 'failed'
+    // by the reap-stuck-emails cron, producing phantom failure metrics.
 
     const router = new EmailRouter();
     const emailResponse = await router.sendWithFailover({
@@ -113,7 +98,14 @@ const handler = async (req: Request): Promise<Response> => {
       subject: `🎓 Your ${courseTitle} Certificate is Ready!`,
       html,
       from: "ProCann Edu <certificates@procannedu.com>",
-      metadata: { email_type: 'certificate', log_id: logId }
+      metadata: {
+        email_type: 'certificate',
+        template_name: 'certificate',
+        firstName,
+        lastName,
+        certificateNumber,
+        courseTitle,
+      }
     }, supabase);
 
     console.log("Certificate email sent successfully:", emailResponse);
