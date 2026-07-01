@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Award, Download, Share2, Copy, Check } from 'lucide-react';
+import { Award, Download, Share2, Copy, Check, Printer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
@@ -26,6 +26,7 @@ const ConsumerCertificates = () => {
   const { sessionId, email: guestEmail } = useGuestSession();
   const [searchParams] = useSearchParams();
   const courseId = searchParams.get('course');
+  const certNumber = searchParams.get('cert');
   const { toast } = useToast();
   
   const [certificates, setCertificates] = useState<Certificate[]>([]);
@@ -40,11 +41,14 @@ const ConsumerCertificates = () => {
           .select('*')
           .order('issue_date', { ascending: false });
 
-        // Filter by user email or session
-        if (user?.email) {
-          query = query.eq('recipient_email', user.email);
-        } else if (guestEmail) {
-          query = query.eq('recipient_email', guestEmail);
+        const userEmail = user?.email || guestEmail;
+
+        if (userEmail && certNumber) {
+          query = query.or(`recipient_email.eq.${userEmail},certificate_number.eq.${certNumber}`);
+        } else if (userEmail) {
+          query = query.eq('recipient_email', userEmail);
+        } else if (certNumber) {
+          query = query.eq('certificate_number', certNumber);
         } else {
           // No way to identify user, can't fetch certificates
           setIsLoading(false);
@@ -215,14 +219,28 @@ const ConsumerCertificates = () => {
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-16">
-        <div className="flex items-center justify-center">
+        <div className="flex flex-col items-center justify-center gap-4">
           <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+          {certNumber && (
+            <p className="text-muted-foreground text-sm">Generating your certificate...</p>
+          )}
         </div>
       </div>
     );
   }
 
   if (certificates.length === 0) {
+    if (certNumber) {
+      return (
+        <div className="container mx-auto px-4 py-16">
+          <div className="flex flex-col items-center justify-center gap-4">
+            <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+            <p className="text-muted-foreground text-sm">Generating your certificate...</p>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-2xl mx-auto text-center space-y-6">
@@ -270,7 +288,7 @@ const ConsumerCertificates = () => {
             const userName = cert.recipient_name || 'Cannabis Consumer';
 
             return (
-              <Card key={cert.id} className="overflow-hidden">
+              <Card key={cert.id} className="overflow-hidden print:shadow-none print:border print:border-gray-900">
                 <CardHeader className="bg-gradient-to-r from-primary/10 to-secondary/10">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-4">
@@ -303,19 +321,27 @@ const ConsumerCertificates = () => {
                     </div>
                   </div>
 
-                  <div className="flex gap-2 pt-4">
+                  <div className="flex flex-wrap gap-2 pt-4">
                     <Button
                       onClick={() => handleDownload(cert)}
                       variant="default"
-                      className="flex-1"
+                      className="flex-1 min-w-[120px]"
                     >
                       <Download className="h-4 w-4 mr-2" />
                       Download PDF
                     </Button>
                     <Button
+                      onClick={() => window.print()}
+                      variant="outline"
+                      className="flex-1 min-w-[120px]"
+                    >
+                      <Printer className="h-4 w-4 mr-2" />
+                      Print
+                    </Button>
+                    <Button
                       onClick={() => handleCopyLink(cert)}
                       variant="outline"
-                      className="flex-1"
+                      className="flex-1 min-w-[120px]"
                     >
                       {copiedId === cert.id ? (
                         <>
