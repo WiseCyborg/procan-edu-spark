@@ -72,111 +72,178 @@ const ConsumerCertificates = () => {
 
   const handleDownload = async (cert: Certificate) => {
     try {
-      const pdf = new jsPDF({
-        orientation: 'landscape',
-        unit: 'mm',
-        format: 'a4'
-      });
+      const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+      const W = pdf.internal.pageSize.getWidth();  // 297
+      const H = pdf.internal.pageSize.getHeight(); // 210
 
-      const width = pdf.internal.pageSize.getWidth();
-      const height = pdf.internal.pageSize.getHeight();
+      // === BACKGROUND ===
+      pdf.setFillColor(252, 250, 245); // warm cream
+      pdf.rect(0, 0, W, H, 'F');
 
-      // Background
-      pdf.setFillColor(249, 250, 251);
-      pdf.rect(0, 0, width, height, 'F');
+      // === OUTER BORDER (double line) ===
+      pdf.setDrawColor(15, 82, 51); // dark green
+      pdf.setLineWidth(3);
+      pdf.rect(8, 8, W - 16, H - 16);
+      pdf.setLineWidth(0.5);
+      pdf.setDrawColor(15, 82, 51);
+      pdf.rect(12, 12, W - 24, H - 24);
 
-      // Border
-      pdf.setDrawColor(5, 150, 105);
-      pdf.setLineWidth(2);
-      pdf.rect(10, 10, width - 20, height - 20);
+      // === CORNER ORNAMENTS (simple cross marks) ===
+      const drawCorner = (x: number, y: number) => {
+        pdf.setDrawColor(15, 82, 51);
+        pdf.setLineWidth(1);
+        pdf.line(x - 6, y, x + 6, y);
+        pdf.line(x, y - 6, x, y + 6);
+      };
+      drawCorner(20, 20);
+      drawCorner(W - 20, 20);
+      drawCorner(20, H - 20);
+      drawCorner(W - 20, H - 20);
 
-      // Header
-      pdf.setFillColor(5, 150, 105);
-      pdf.rect(0, 0, width, 25, 'F');
-      
+      // === DARK GREEN HEADER BAND ===
+      pdf.setFillColor(15, 82, 51);
+      pdf.rect(12, 12, W - 24, 28, 'F');
+
+      // === HEADER TEXT ===
       pdf.setTextColor(255, 255, 255);
-      pdf.setFontSize(24);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text('ProCann Edu', width / 2, 15, { align: 'center' });
-
-      // Certificate Title
-      pdf.setTextColor(17, 24, 39);
+      pdf.setFontSize(11);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text('MARYLAND CANNABIS ADMINISTRATION', W / 2, 22, { align: 'center' });
       pdf.setFontSize(18);
-      pdf.text('Certificate of Completion', width / 2, 40, { align: 'center' });
-
-      // Badge
-      pdf.setFillColor(254, 243, 199);
-      pdf.roundedRect(width / 2 - 60, 50, 120, 20, 5, 5, 'F');
-      pdf.setTextColor(146, 64, 14);
-      pdf.setFontSize(20);
       pdf.setFont('helvetica', 'bold');
-      pdf.text(cert.badge_name, width / 2, 63, { align: 'center' });
+      pdf.text('ProCann Edu', W / 2, 34, { align: 'center' });
 
-      // Recipient
-      pdf.setTextColor(107, 114, 128);
-      pdf.setFontSize(12);
-      pdf.setFont('helvetica', 'normal');
-      pdf.text('This certificate is awarded to', width / 2, 80, { align: 'center' });
-
-      pdf.setTextColor(17, 24, 39);
-      pdf.setFontSize(22);
+      // === SEAL CIRCLE (left side) ===
+      pdf.setFillColor(255, 255, 255);
+      pdf.setDrawColor(15, 82, 51);
+      pdf.setLineWidth(1.5);
+      pdf.circle(50, 110, 22, 'FD');
+      pdf.setFillColor(15, 82, 51);
+      pdf.circle(50, 110, 18, 'F');
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(6);
       pdf.setFont('helvetica', 'bold');
-      pdf.text(cert.recipient_name || 'Cannabis Consumer', width / 2, 92, { align: 'center' });
+      pdf.text('PROCANN', 50, 106, { align: 'center' });
+      pdf.text('EDU', 50, 112, { align: 'center' });
+      pdf.text('CERTIFIED', 50, 118, { align: 'center' });
 
-      // Course Info
-      pdf.setTextColor(107, 114, 128);
-      pdf.setFontSize(12);
-      pdf.setFont('helvetica', 'normal');
-      pdf.text('For completing the course', width / 2, 105, { align: 'center' });
-
-      pdf.setTextColor(17, 24, 39);
-      pdf.setFontSize(16);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text(cert.course_title, width / 2, 115, { align: 'center' });
-
-      // Certificate Details
-      const issueDate = new Date(cert.issue_date).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
-
-      pdf.setTextColor(107, 114, 128);
+      // === CERTIFICATE OF COMPLETION ===
+      pdf.setTextColor(100, 100, 100);
       pdf.setFontSize(10);
       pdf.setFont('helvetica', 'normal');
-      pdf.text(`Certificate Number: ${cert.certificate_number}`, width / 2, 135, { align: 'center' });
-      pdf.text(`Issue Date: ${issueDate}`, width / 2, 142, { align: 'center' });
+      pdf.text('CERTIFICATE OF COMPLETION', W / 2, 56, { align: 'center' });
 
-      // Verification URL
-      pdf.setTextColor(37, 99, 235);
+      // thin gold divider line
+      pdf.setDrawColor(180, 140, 60);
+      pdf.setLineWidth(0.5);
+      pdf.line(W / 2 - 60, 59, W / 2 + 60, 59);
+
+      // === THIS CERTIFIES THAT ===
+      pdf.setTextColor(80, 80, 80);
       pdf.setFontSize(9);
-      pdf.text(`Verify at: ${cert.verification_url}`, width / 2, 150, { align: 'center' });
+      pdf.setFont('helvetica', 'italic');
+      pdf.text('This certifies that', W / 2, 70, { align: 'center' });
 
-      // Disclaimer
-      pdf.setTextColor(180, 83, 9);
+      // === RECIPIENT NAME ===
+      pdf.setTextColor(15, 82, 51);
+      pdf.setFontSize(28);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(cert.recipient_name || 'Cannabis Consumer', W / 2, 88, { align: 'center' });
+
+      // name underline
+      pdf.setDrawColor(15, 82, 51);
+      pdf.setLineWidth(0.5);
+      const nameWidth = pdf.getTextWidth(cert.recipient_name || 'Cannabis Consumer');
+      pdf.line(W / 2 - nameWidth / 2, 91, W / 2 + nameWidth / 2, 91);
+
+      // === HAS SUCCESSFULLY COMPLETED ===
+      pdf.setTextColor(80, 80, 80);
+      pdf.setFontSize(9);
+      pdf.setFont('helvetica', 'italic');
+      pdf.text('has successfully completed the course', W / 2, 101, { align: 'center' });
+
+      // === COURSE TITLE ===
+      pdf.setTextColor(20, 20, 20);
+      pdf.setFontSize(16);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(cert.course_title, W / 2, 113, { align: 'center' });
+
+      // === BADGE PILL ===
+      const badgeText = cert.badge_name;
+      const badgeW = 80;
+      pdf.setFillColor(240, 253, 244);
+      pdf.setDrawColor(15, 82, 51);
+      pdf.setLineWidth(0.5);
+      pdf.roundedRect(W / 2 - badgeW / 2, 118, badgeW, 10, 3, 3, 'FD');
+      pdf.setTextColor(15, 82, 51);
+      pdf.setFontSize(9);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(badgeText, W / 2, 125, { align: 'center' });
+
+      // === BOTTOM SECTION: 3 columns ===
+      const issueDate = new Date(cert.issue_date).toLocaleDateString('en-US', {
+        year: 'numeric', month: 'long', day: 'numeric'
+      });
+
+      // Left col — Issue Date
+      pdf.setDrawColor(200, 200, 200);
+      pdf.setLineWidth(0.3);
+      pdf.line(W / 2 - 80, 148, W / 2 - 20, 148);
+      pdf.setTextColor(20, 20, 20);
+      pdf.setFontSize(9);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(issueDate, W / 2 - 50, 145, { align: 'center' });
+      pdf.setTextColor(120, 120, 120);
       pdf.setFontSize(7);
-      pdf.text('This is a Certificate of Completion for educational purposes only.', width / 2, height - 25, { align: 'center' });
-      pdf.text('This is NOT a Maryland RVT certification and does not satisfy employee compliance requirements.', width / 2, height - 20, { align: 'center' });
+      pdf.setFont('helvetica', 'normal');
+      pdf.text('DATE OF COMPLETION', W / 2 - 50, 153, { align: 'center' });
 
-      // Footer
-      pdf.setTextColor(156, 163, 175);
+      // Center col — Cert Number
+      pdf.setDrawColor(200, 200, 200);
+      pdf.line(W / 2 - 20, 148, W / 2 + 20, 148);
+      pdf.setTextColor(20, 20, 20);
       pdf.setFontSize(8);
-      pdf.text('Maryland\'s Trusted Cannabis Education Provider', width / 2, height - 12, { align: 'center' });
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(cert.certificate_number, W / 2, 145, { align: 'center' });
+      pdf.setTextColor(120, 120, 120);
+      pdf.setFontSize(7);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text('CERTIFICATE NUMBER', W / 2, 153, { align: 'center' });
 
-      // Save PDF
+      // Right col — ProCann Edu Director
+      pdf.setDrawColor(200, 200, 200);
+      pdf.line(W / 2 + 20, 148, W / 2 + 80, 148);
+      pdf.setTextColor(20, 20, 20);
+      pdf.setFontSize(9);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('ProCann Edu', W / 2 + 50, 145, { align: 'center' });
+      pdf.setTextColor(120, 120, 120);
+      pdf.setFontSize(7);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text('ISSUING ORGANIZATION', W / 2 + 50, 153, { align: 'center' });
+
+      // === VERIFY URL ===
+      pdf.setTextColor(37, 99, 235);
+      pdf.setFontSize(7);
+      pdf.text(`Verify: ${cert.verification_url}`, W / 2, 163, { align: 'center' });
+
+      // === FOOTER DISCLAIMER ===
+      pdf.setFillColor(15, 82, 51);
+      pdf.rect(12, H - 24, W - 24, 12, 'F');
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(6.5);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(
+        'This is a Certificate of Completion for consumer education only. This is NOT a Maryland RVT certification and does not satisfy dispensary employee compliance requirements.',
+        W / 2, H - 16, { align: 'center' }
+      );
+
       pdf.save(`${cert.certificate_number}-certificate.pdf`);
 
-      toast({
-        title: "PDF Downloaded",
-        description: "Your certificate has been downloaded successfully",
-      });
+      toast({ title: 'Certificate Downloaded', description: 'Your certificate PDF is ready.' });
     } catch (error) {
       console.error('Error generating PDF:', error);
-      toast({
-        title: "Download Failed",
-        description: "Failed to generate PDF. Please try again.",
-        variant: "destructive"
-      });
+      toast({ title: 'Download Failed', description: 'Failed to generate PDF. Please try again.', variant: 'destructive' });
     }
   };
 
