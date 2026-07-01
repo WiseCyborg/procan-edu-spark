@@ -161,10 +161,25 @@ const StudentAuthForm = () => {
         ...sanitizedData,
         organizationId,
         organizationName,
+        joinCode: !invitationData ? sanitizedData.joinCode : undefined,
         invitationToken: invitationData ? invitationToken : undefined
       });
       if (error || result?.error) throw new Error(result?.error || error?.message || 'Registration failed');
       toast({ title: "Account Created!", description: "Redirecting..." });
+      // Fallback redemption call in case the edge function didn't handle it
+      if (!invitationData && sanitizedData.joinCode && joinCodeValidation?.organizationId) {
+        try {
+          await supabase.rpc('redeem_join_code_for_user', {
+            p_code: sanitizedData.joinCode,
+            p_user_id: result?.userId,
+            p_email: sanitizedData.email,
+            p_member_type: 'employee'
+          });
+        } catch (e) {
+          // non-fatal, edge function may have already handled it
+          console.warn('Join code redemption fallback:', e);
+        }
+      }
       setTimeout(() => window.location.href = '/onboarding/profile', 2000);
     } catch (error: any) {
       toast({ title: "Registration Error", description: error.message, variant: "destructive" });
