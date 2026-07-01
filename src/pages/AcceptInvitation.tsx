@@ -116,12 +116,35 @@ const AcceptInvitation = () => {
             last_page_visited: '/accept-invitation'
           });
 
-        // Mark invitation as accepted
+        // Mark invitation as accepted — match by hashed token since the DB
+        // trigger nulls the plaintext invitation_token column on insert.
+        const tokenPlaintext = searchParams.get('token') ?? '';
+        const encoder = new TextEncoder();
+        const data = encoder.encode(tokenPlaintext);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const tokenHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
         await supabase
           .from('staff_invitations')
           .update({ accepted_at: new Date().toISOString() })
           .eq('email', invitationData.email)
-          .eq('invitation_token', searchParams.get('token'));
+          .eq('invitation_token_hash', tokenHash);
+
+        // Create organization membership
+        await supabase.from('organization_members').insert({
+          user_id: authData.user.id,
+          organization_id: invitationData.organization_id,
+          role: 'employee'
+        });
+
+        // Create course entitlement for the canonical RVT course
+        await supabase.from('course_entitlements').insert({
+          user_id: authData.user.id,
+          course_id: 'e6841a2f-4e92-47c3-9ed4-243ccc22338b',
+          organization_id: invitationData.organization_id,
+          granted_at: new Date().toISOString()
+        });
       }
 
       toast.success('Account created successfully! Redirecting...');
