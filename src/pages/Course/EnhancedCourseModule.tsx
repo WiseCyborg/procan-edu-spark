@@ -166,7 +166,7 @@ const EnhancedCourseModule: React.FC = () => {
     });
   }, [moduleData?.asset_key, moduleData?.video_pending, moduleData?.id, moduleData?.module_number, signedVideoData?.success, signedVideoData?.error_code, signedVideoData?.is_admin_preview, primaryTracking]);
 
-  const { updateProgress, isModuleCompletedByNumber, canAccessModule, getModuleUUID, getFirstIncompleteModule } = useUserProgress(COURSE_ID);
+  const { updateProgress, isModuleCompletedByNumber, canAccessModule, getModuleUUID, getFirstIncompleteModule, isLoading: isProgressLoading } = useUserProgress(COURSE_ID);
   const { saveResumeState } = useResumeState(COURSE_ID);
   
   const currentModuleNumber = parseInt(moduleId?.replace('part', '') || '0');
