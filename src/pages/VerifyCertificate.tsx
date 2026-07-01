@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
+import { GHOST_COURSE_IDS_PG_LIST } from '@/lib/ghostCourses';
 
 interface VerificationResult {
   valid: boolean;
