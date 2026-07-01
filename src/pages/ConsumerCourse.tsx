@@ -107,7 +107,14 @@ const ConsumerCourse = () => {
 
   const handleMarkComplete = () => {
     if (currentModule) {
-      markModuleComplete(currentModule.id);
+      markModuleComplete(currentModule.id, modules.length);
+      // If this was the final required module, ensure the enrollment is marked complete.
+      const willBeComplete =
+        !completedModules.includes(currentModule.id) &&
+        completedModules.length + 1 >= modules.length;
+      if (willBeComplete) {
+        completeCourse(modules.length);
+      }
     }
   };
 
