@@ -380,7 +380,7 @@ export const EnhancedFAQ: React.FC<EnhancedFAQProps> = ({
           {icon}
           <span className="ml-2">{title}</span>
           <Badge variant="outline" className="ml-auto">
-            {faqs.length} questions
+            {t('faq.count', { count: faqs.length, defaultValue: `${faqs.length} questions` })}
           </Badge>
         </CardTitle>
       </CardHeader>
@@ -391,7 +391,7 @@ export const EnhancedFAQ: React.FC<EnhancedFAQProps> = ({
               <AccordionItem key={faq.id} value={faq.id}>
                 <AccordionTrigger className="text-left">
                   <div className="flex items-center justify-between w-full mr-4">
-                    <span className="flex-1">{faq.question}</span>
+                    <span className="flex-1">{tr(faq.id, 'q', faq.question)}</span>
                     <div className="flex items-center gap-2 ml-2">
                       {getSecurityIcon(faq.securityLevel)}
                       <Badge className={getCategoryColor(faq.category)} variant="secondary">
@@ -401,14 +401,14 @@ export const EnhancedFAQ: React.FC<EnhancedFAQProps> = ({
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="text-muted-foreground">
-                  {faq.answer}
+                  {tr(faq.id, 'a', faq.answer)}
                 </AccordionContent>
               </AccordionItem>
             ))}
           </Accordion>
         ) : (
           <p className="text-muted-foreground text-center py-4">
-            No questions found matching your search or access level.
+            {t('faq.empty', { defaultValue: 'No questions found matching your search or access level.' })}
           </p>
         )}
       </CardContent>
@@ -416,16 +416,19 @@ export const EnhancedFAQ: React.FC<EnhancedFAQProps> = ({
   );
 
   return (
-    <div className={`space-y-6 ${className}`}>
+    <div ref={contentRef} className={`space-y-6 ${className}`}>
       {/* Header */}
       <div className="text-center">
         <h1 className="text-3xl font-bold text-primary mb-2">
-          Frequently Asked Questions
+          {t('faq.header.title', { defaultValue: 'Frequently Asked Questions' })}
         </h1>
         <p className="text-muted-foreground max-w-2xl mx-auto">
-          Role-based help and support for ProCann Edu's cannabis training platform
+          {t('faq.header.subtitle', {
+            defaultValue: "Role-based help and support for ProCann Edu's cannabis training platform",
+          })}
         </p>
         <div className="flex items-center justify-center gap-3 mt-3 flex-wrap">
+          <ListenButton targetRef={contentRef} />
           {(isAdmin || isDispensaryManager) && (
             <Badge variant="outline">
               Advanced Access Level: {isAdmin ? 'Administrator' : 'Manager'}
@@ -447,7 +450,7 @@ export const EnhancedFAQ: React.FC<EnhancedFAQProps> = ({
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <Input
               type="text"
-              placeholder="Search frequently asked questions..."
+              placeholder={t('faq.search.placeholder', { defaultValue: 'Search frequently asked questions...' })}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -461,7 +464,7 @@ export const EnhancedFAQ: React.FC<EnhancedFAQProps> = ({
         <CardHeader className="bg-muted/50">
           <CardTitle className="flex items-center text-primary">
             <HelpCircle className="mr-2 h-5 w-5" />
-            Need Additional Help?
+            {t('faq.contact.title', { defaultValue: 'Need Additional Help?' })}
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-6">
@@ -472,7 +475,7 @@ export const EnhancedFAQ: React.FC<EnhancedFAQProps> = ({
             </div>
             <div className="flex items-center text-muted-foreground">
               <Clock className="mr-2 h-4 w-4 text-primary" />
-              <span>Mon-Fri 9AM-6PM EST</span>
+              <span>{t('faq.contact.hours', { defaultValue: 'Mon-Fri 9AM-6PM EST' })}</span>
             </div>
           </div>
         </CardContent>
@@ -483,44 +486,44 @@ export const EnhancedFAQ: React.FC<EnhancedFAQProps> = ({
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="student" className="flex items-center">
             <User className="mr-2 h-4 w-4" />
-            Students
+            {t('faq.tabs.students', { defaultValue: 'Students' })}
           </TabsTrigger>
           {(isDispensaryManager || isAdmin) && (
             <TabsTrigger value="dispensary" className="flex items-center">
               <Building2 className="mr-2 h-4 w-4" />
-              Managers
+              {t('faq.tabs.managers', { defaultValue: 'Managers' })}
             </TabsTrigger>
           )}
           {isAdmin && (
             <TabsTrigger value="admin" className="flex items-center">
               <Shield className="mr-2 h-4 w-4" />
-              Admins
+              {t('faq.tabs.admins', { defaultValue: 'Admins' })}
             </TabsTrigger>
           )}
           <TabsTrigger value="general" className="flex items-center">
             <HelpCircle className="mr-2 h-4 w-4" />
-            General
+            {t('faq.tabs.general', { defaultValue: 'General' })}
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="student">
-          {renderFAQSection(studentFAQs, 'Student Questions', <User className="h-5 w-5" />)}
+          {renderFAQSection(studentFAQs, t('faq.section.student', { defaultValue: 'Student Questions' }), <User className="h-5 w-5" />)}
         </TabsContent>
 
         {(isDispensaryManager || isAdmin) && (
           <TabsContent value="dispensary">
-            {renderFAQSection(managerFAQs, 'Manager & Dispensary Questions', <Building2 className="h-5 w-5" />)}
+            {renderFAQSection(managerFAQs, t('faq.section.manager', { defaultValue: 'Manager & Dispensary Questions' }), <Building2 className="h-5 w-5" />)}
           </TabsContent>
         )}
 
         {isAdmin && (
           <TabsContent value="admin">
-            {renderFAQSection(adminFAQs, 'Administrator Questions', <Shield className="h-5 w-5" />)}
+            {renderFAQSection(adminFAQs, t('faq.section.admin', { defaultValue: 'Administrator Questions' }), <Shield className="h-5 w-5" />)}
           </TabsContent>
         )}
 
         <TabsContent value="general">
-          {renderFAQSection(generalFAQs, 'General Platform Questions', <HelpCircle className="h-5 w-5" />)}
+          {renderFAQSection(generalFAQs, t('faq.section.general', { defaultValue: 'General Platform Questions' }), <HelpCircle className="h-5 w-5" />)}
         </TabsContent>
       </Tabs>
     </div>
