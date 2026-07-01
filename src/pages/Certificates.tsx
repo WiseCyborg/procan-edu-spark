@@ -376,18 +376,25 @@ export default function Certificates() {
                           View Details
                         </Button>
                         
-                        <SensitiveOperationWrapper
-                          operation="certificate_download"
-                          operationDescription={`Downloading certificate ${certificate.certificate_number}`}
-                          onExecute={() => downloadCertificate(certificate.id, certificate.certificate_number)}
-                          urgency="low"
+                        <Button
+                          variant="outline"
                           size="sm"
+                          onClick={() => downloadCertificate(certificate)}
                           disabled={certificate.is_revoked}
                           className="flex items-center gap-2"
                         >
                           <Download className="h-4 w-4" />
                           Download
-                        </SensitiveOperationWrapper>
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.print()}
+                          className="flex items-center gap-2"
+                        >
+                          <Printer className="h-4 w-4" />
+                          Print
+                        </Button>
                       </div>
                     </div>
                     
