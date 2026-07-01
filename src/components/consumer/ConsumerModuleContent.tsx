@@ -42,7 +42,10 @@ export const ConsumerModuleContent = ({
   isLastModule,
   courseId,
   completedCount,
-  totalCount
+  totalCount,
+  enrollmentId,
+  completedModuleIds
+
 }: ConsumerModuleContentProps) => {
   const [showEmailCapture, setShowEmailCapture] = useState(false);
 
