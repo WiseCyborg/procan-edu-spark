@@ -268,7 +268,7 @@ Deno.serve(async (req: Request) => {
     const expiryDate = new Date(issueDate);
     expiryDate.setFullYear(expiryDate.getFullYear() + 2);
 
-    const verifyUrl = `https://www.procannedu.com/verify/${certNumber}`;
+    const verifyUrl = `https://www.procannedu.com/verify?code=${certNumber}`;
 
     // Create certificate row first (so we have an ID and the row survives even if PDF fails)
     const { data: certificate, error: insertError } = await supabase
