@@ -96,56 +96,57 @@ const AcceptInvitation = () => {
       });
 
       if (authError) throw authError;
+      if (!authData.user) throw new Error('Account creation failed. Please try again.');
 
-      // Update profile with organization and phone
-      if (authData.user) {
+      // Ensure we have an active session (signUp returns one when email
+      // confirmation is disabled; otherwise sign in explicitly).
+      let accessToken = authData.session?.access_token;
+      if (!accessToken) {
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+          email: invitationData.email,
+          password,
+        });
+        if (signInError || !signInData.session) {
+          throw new Error(signInError?.message || 'Signed up, but could not establish a session.');
+        }
+        accessToken = signInData.session.access_token;
+      }
+
+      // Optional: persist phone number on the user's own profile row
+      // (profiles UPDATE own-row is allowed by RLS).
+      if (phoneNumber) {
         await supabase
           .from('profiles')
-          .update({ 
-            organization_id: invitationData.organization_id,
-            phone: phoneNumber || null
-          })
+          .update({ phone: phoneNumber })
           .eq('user_id', authData.user.id);
+      }
 
-        // Initialize journey state with profile_incomplete stage
-        await supabase
-          .from('user_journey_state')
-          .insert({
-            user_id: authData.user.id,
-            current_stage: 'profile_incomplete',
-            last_page_visited: '/accept-invitation'
-          });
-
-        // Mark invitation as accepted — match by hashed token since the DB
-        // trigger nulls the plaintext invitation_token column on insert.
-        const tokenPlaintext = searchParams.get('token') ?? '';
-        const encoder = new TextEncoder();
-        const data = encoder.encode(tokenPlaintext);
-        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        const tokenHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-
-        await supabase
-          .from('staff_invitations')
-          .update({ accepted_at: new Date().toISOString() })
-          .eq('email', invitationData.email)
-          .eq('invitation_token_hash', tokenHash);
-
-        // Create organization membership
-        await supabase.from('organization_members').insert({
+      // Initialize journey state (its RLS allows own-user insert)
+      await supabase
+        .from('user_journey_state')
+        .insert({
           user_id: authData.user.id,
-          organization_id: invitationData.organization_id,
-          email: invitationData.email,
-          role: 'employee'
+          current_stage: 'profile_incomplete',
+          last_page_visited: '/accept-invitation',
         });
 
-        // Create course entitlement for the canonical RVT course
-        await supabase.from('course_entitlements').insert({
-          user_id: authData.user.id,
-          course_id: 'e6841a2f-4e92-47c3-9ed4-243ccc22338b',
-          organization_id: invitationData.organization_id,
-          granted_at: new Date().toISOString()
-        });
+      // Delegate all privileged provisioning (seat allocation, org membership,
+      // course entitlement, roles, learning journey, invitation acceptance) to
+      // the edge function so RLS-restricted writes happen server-side.
+      const tokenPlaintext = searchParams.get('token') ?? '';
+      const { data: acceptData, error: acceptError } = await supabase.functions.invoke(
+        'accept-invitation',
+        {
+          body: { token: tokenPlaintext, action: 'accept', phone: phoneNumber || undefined },
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }
+      );
+
+      if (acceptError || !acceptData?.success) {
+        const msg = acceptData?.message || acceptError?.message || 'Failed to complete invitation acceptance.';
+        console.error('[AcceptInvitation] accept-invitation failed:', { acceptError, acceptData });
+        toast.error(msg);
+        return;
       }
 
       toast.success('Account created successfully! Redirecting...');
