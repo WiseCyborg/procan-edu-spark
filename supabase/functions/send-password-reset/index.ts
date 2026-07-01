@@ -125,7 +125,7 @@ serve(async (req) => {
     <div class="footer">
       <p><strong>ProCann Edu</strong> - Maryland Cannabis Compliance Training</p>
       <p>Questions? Contact us at <a href="mailto:support@procannedu.com">support@procannedu.com</a></p>
-      <p>© 2025 ProCann Edu. All rights reserved.</p>
+      <p>© 2026 ProCann Edu. All rights reserved.</p>
     </div>
   </div>
 </body>

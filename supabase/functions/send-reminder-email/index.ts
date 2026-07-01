@@ -81,7 +81,7 @@ serve(async (req) => {
     </div>
     <div class="footer">
       <p><strong>ProCann Edu</strong> - Maryland Cannabis Compliance Training</p>
-      <p>© 2025 ProCann Edu. All rights reserved.</p>
+      <p>© 2026 ProCann Edu. All rights reserved.</p>
     </div>
   </div>
 </body>
