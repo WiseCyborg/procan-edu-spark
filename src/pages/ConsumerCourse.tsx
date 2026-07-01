@@ -215,6 +215,8 @@ const ConsumerCourse = () => {
             courseId={courseId || ''}
             completedCount={completedModules.length}
             totalCount={modules.length}
+            enrollmentId={enrollmentId}
+            completedModuleIds={completedModules}
           />
         </main>
       </div>
