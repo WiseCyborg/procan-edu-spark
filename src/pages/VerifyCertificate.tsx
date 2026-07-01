@@ -50,6 +50,7 @@ const VerifyCertificate = () => {
         .from('courses')
         .select('id, title')
         .eq('is_active', true)
+        .not('id', 'in', GHOST_COURSE_IDS_PG_LIST)
         .order('title');
       return data || [];
     }
