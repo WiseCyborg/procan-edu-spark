@@ -63,14 +63,19 @@ const ConsumerCourse = () => {
         // Fetch modules (bypassing type issues)
         const modulesQuery = (supabase as any)
           .from('course_modules')
-          .select('id, title, content, video_url, module_number, estimated_minutes')
+          .select('id, title, content, video_url, module_number, estimated_minutes, video_assets(public_url)')
           .eq('course_id', courseId)
           .eq('is_active', true)
           .order('module_number', { ascending: true });
 
         const modulesResult = await modulesQuery;
         if (modulesResult.error) throw modulesResult.error;
-        setModules(modulesResult.data || []);
+
+        const mappedModules = (modulesResult.data || []).map((m: any) => ({
+          ...m,
+          video_url: m.video_url || m.video_assets?.[0]?.public_url || null,
+        }));
+        setModules(mappedModules);
       } catch (error) {
         console.error('Error fetching course data:', error);
       } finally {

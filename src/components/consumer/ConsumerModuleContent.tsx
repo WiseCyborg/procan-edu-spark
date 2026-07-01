@@ -81,13 +81,12 @@ export const ConsumerModuleContent = ({
 
         {/* Video Section */}
         {module.video_url ? (
-          <div className="aspect-video bg-muted rounded-lg overflow-hidden">
-            <iframe
+          <div className="rounded-lg overflow-hidden bg-muted">
+            <audio
               src={module.video_url}
-              title={module.title}
-              className="w-full h-full"
-              allow="autoplay; fullscreen; picture-in-picture"
-              allowFullScreen
+              controls
+              className="w-full"
+              preload="metadata"
             />
           </div>
         ) : (
