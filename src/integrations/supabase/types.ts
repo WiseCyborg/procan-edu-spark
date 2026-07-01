@@ -2063,6 +2063,9 @@ export type Database = {
           module_count: number | null
           passing_score: number | null
           payment_required: boolean | null
+          paypal_plan_id: string | null
+          paypal_price_id: string | null
+          paypal_product_id: string | null
           prerequisite_course_id: string | null
           prerequisite_required: boolean | null
           price_cents: number | null
@@ -2084,6 +2087,9 @@ export type Database = {
           module_count?: number | null
           passing_score?: number | null
           payment_required?: boolean | null
+          paypal_plan_id?: string | null
+          paypal_price_id?: string | null
+          paypal_product_id?: string | null
           prerequisite_course_id?: string | null
           prerequisite_required?: boolean | null
           price_cents?: number | null
@@ -2105,6 +2111,9 @@ export type Database = {
           module_count?: number | null
           passing_score?: number | null
           payment_required?: boolean | null
+          paypal_plan_id?: string | null
+          paypal_price_id?: string | null
+          paypal_product_id?: string | null
           prerequisite_course_id?: string | null
           prerequisite_required?: boolean | null
           price_cents?: number | null
