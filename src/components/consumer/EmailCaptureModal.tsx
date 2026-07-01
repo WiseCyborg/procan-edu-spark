@@ -145,30 +145,35 @@ export const EmailCaptureModal = ({
 
       // Generate the certificate. For guests, the edge function creates the
       // enrollment from session_id + completed_modules + email.
-      try {
-        const { data: certData, error: certError } = await supabase.functions.invoke(
-          'generate-consumer-certificate',
-          {
-            body: {
-              enrollment_id: targetEnrollmentId ?? undefined,
-              session_id: sessionId || undefined,
-              user_id: user?.id ?? undefined,
-              email,
-              name: name || undefined,
-              course_id: courseId,
-              completed_modules: completedModuleIds,
-            },
-          }
-        );
-
-        if (certError) {
-          console.error('Certificate generation error:', certError);
-        } else {
-          console.log('Certificate generated:', certData?.certificate?.certificate_number);
+      const { data: certData, error: certError } = await supabase.functions.invoke(
+        'generate-consumer-certificate',
+        {
+          body: {
+            enrollment_id: targetEnrollmentId ?? undefined,
+            session_id: sessionId || undefined,
+            user_id: user?.id ?? undefined,
+            email,
+            name: name || undefined,
+            course_id: courseId,
+            completed_modules: completedModuleIds,
+          },
         }
-      } catch (certError) {
-        console.error('Failed to generate certificate:', certError);
+      );
+
+      const certOk = !certError && certData?.success !== false && !!certData?.certificate?.certificate_number;
+
+      if (!certOk) {
+        console.error('Certificate generation failed:', certError || certData);
+        toast({
+          title: "We couldn't issue your certificate",
+          description: "Please try again in a moment. If the problem persists, contact support.",
+          variant: 'destructive',
+        });
+        setIsSubmitting(false);
+        return;
       }
+
+      console.log('Certificate generated:', certData.certificate.certificate_number);
 
       toast({
         title: 'Success! 🎉',

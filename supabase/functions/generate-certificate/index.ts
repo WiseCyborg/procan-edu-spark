@@ -225,7 +225,8 @@ Deno.serve(async (req: Request) => {
       .eq('is_completed', true);
 
     let certificationType: 'rvt' | 'manager' = 'rvt';
-    let certificationLevel = 'RVT Agent';
+    let certificationLevel = 'RVT Agent'; // human-readable label (PDF/email only)
+    let certificationLevelDb: 'agent' | 'manager' = 'agent'; // DB CHECK constraint value
     let tierBadge = 'rvt';
     let trainingTrack = 'Maryland RVT Required Training';
     let rvtComplete = false;
@@ -249,6 +250,7 @@ Deno.serve(async (req: Request) => {
           if (rvtComplete && managerComplete) {
             certificationType = 'manager';
             certificationLevel = 'Manager';
+            certificationLevelDb = 'manager';
             tierBadge = 'manager';
             trainingTrack = 'RVT Required + Manager Leadership Track';
           }
@@ -281,7 +283,7 @@ Deno.serve(async (req: Request) => {
         issue_date: issueDate.toISOString(),
         expiry_date: expiryDate.toISOString(),
         is_revoked: false,
-        certification_level: certificationLevel,
+        certification_level: certificationLevelDb,
         tier_badge: tierBadge,
         metadata: {
           exam_score: exam_results.total_score,
@@ -290,6 +292,7 @@ Deno.serve(async (req: Request) => {
           photo_verified: !!user_data.photo,
           generation_timestamp: new Date().toISOString(),
           certificate_type: certificationType,
+          certification_level_label: certificationLevel,
           training_track: trainingTrack,
           rvt_complete: rvtComplete,
           manager_complete: managerComplete,
