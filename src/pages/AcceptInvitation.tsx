@@ -78,7 +78,9 @@ const AcceptInvitation = () => {
       );
       if (existsData?.exists) {
         toast.info('You already have an account with this email. Please sign in to accept this invitation.');
-        navigate(`/accept-invite?token=${searchParams.get('token')}`);
+        const t = searchParams.get('token') ?? '';
+        const returnTo = encodeURIComponent(`/accept-invitation?token=${t}`);
+        navigate(`/auth?redirect=${returnTo}`);
         return;
       }
 
@@ -129,7 +131,9 @@ const AcceptInvitation = () => {
       const msg = (error?.message || '').toLowerCase();
       if (msg.includes('already registered') || msg.includes('already exists') || msg.includes('user already')) {
         toast.info('You already have an account with this email. Please sign in to accept this invitation.');
-        navigate(`/accept-invite?token=${searchParams.get('token')}`);
+        const t = searchParams.get('token') ?? '';
+        const returnTo = encodeURIComponent(`/accept-invitation?token=${t}`);
+        navigate(`/auth?redirect=${returnTo}`);
         return;
       }
       toast.error(error.message || 'Failed to create account');
