@@ -175,6 +175,8 @@ export const ConsumerModuleContent = ({
         open={showEmailCapture}
         onOpenChange={setShowEmailCapture}
         courseId={courseId}
+        enrollmentId={enrollmentId ?? null}
+        completedModuleIds={completedModuleIds ?? []}
       />
     </>
   );
