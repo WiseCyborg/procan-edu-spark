@@ -213,7 +213,7 @@ serve(async (req) => {
           status: 'active',
           updated_at: nowIso,
         },
-        { onConflict: 'organization_id,user_id' }
+        { onConflict: 'organization_id,email,role' }
       );
 
     if (memberError) {
