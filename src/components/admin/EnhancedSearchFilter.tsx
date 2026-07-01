@@ -153,7 +153,8 @@ export const EnhancedSearchFilter = () => {
         const { data: courses } = await supabase
           .from('courses')
           .select('*')
-          .ilike('title', `%${filters.query}%`);
+          .ilike('title', `%${filters.query}%`)
+          .not('id', 'in', GHOST_COURSE_IDS_PG_LIST);
 
         if (courses) {
           const courseResults: SearchResult[] = courses.map(course => ({
