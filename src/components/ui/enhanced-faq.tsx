@@ -32,10 +32,15 @@ export const EnhancedFAQ: React.FC<EnhancedFAQProps> = ({
   defaultTab = 'student'
 }) => {
   const { roles, isAdmin, isDispensaryManager } = useUserRole();
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
   const { lastUpdated, isLoading: isLoadingMetadata } = useContentLastUpdated('faq');
+  const contentRef = useRef<HTMLDivElement>(null);
 
-  // Comprehensive FAQ data with security levels
+  const tr = (id: string, field: 'q' | 'a', fallback: string) =>
+    t(`faq.items.${id}.${field}`, { defaultValue: fallback });
+
+
   const faqData: FAQItem[] = [
     // Student Level FAQs
     {
