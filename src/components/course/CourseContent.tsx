@@ -1,9 +1,11 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Clock, Target } from 'lucide-react';
 import { sanitizeHtml } from '@/utils/sanitize-html';
 import { RegulatorySidebar } from '@/components/regulatory/RegulatorySidebar';
+import { ListenButton } from '@/components/i18n/ListenButton';
+import { MachineTranslationBadge } from '@/components/i18n/MachineTranslationBadge';
 
 interface CourseContentProps {
   content: string;
