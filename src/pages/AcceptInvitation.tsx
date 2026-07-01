@@ -135,6 +135,7 @@ const AcceptInvitation = () => {
         await supabase.from('organization_members').insert({
           user_id: authData.user.id,
           organization_id: invitationData.organization_id,
+          email: invitationData.email,
           role: 'employee'
         });
 
