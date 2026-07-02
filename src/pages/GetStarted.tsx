@@ -56,7 +56,7 @@ const GetStarted = () => {
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Lock className="h-4 w-4" />
-                    <span>Requires join code from employer</span>
+                    <span>Requires employer invitation</span>
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Shield className="h-4 w-4" />
