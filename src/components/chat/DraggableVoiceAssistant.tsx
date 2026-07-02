@@ -883,7 +883,7 @@ export const DraggableVoiceAssistant: React.FC = () => {
               )}
 
               {/* Messages */}
-              <EnhancedScrollArea className="flex-1 pr-3 max-h-60">
+              <EnhancedScrollArea className="flex-1 pr-3">
                 <div className="space-y-2">
                   {messages.map((message) => (
                     <div

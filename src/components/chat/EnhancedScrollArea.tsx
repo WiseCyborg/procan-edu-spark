@@ -83,7 +83,7 @@ export const EnhancedScrollArea: React.FC<EnhancedScrollAreaProps> = ({
   };
 
   return (
-    <div className="relative flex-1">
+    <div className="relative flex-1 flex flex-col min-h-0">
       <ScrollArea className={className} ref={scrollRef} onScroll={handleScrollEvent}>
         <div ref={contentRef}>
           {children}
