@@ -68,20 +68,50 @@ const VerifyCertificate = () => {
   const handleVerifyByCode = async (verificationCode?: string) => {
     const codeToVerify = verificationCode || code;
     if (!codeToVerify.trim()) return;
-    
+
     setIsPending(true);
     setResult(null);
-    
+
     try {
-      const { data, error } = await supabase.rpc('verify_certificate', {
-        p_code: codeToVerify.trim()
-      });
-      
+      const { data, error } = await supabase.functions.invoke(
+        'track-certificate-verification',
+        {
+          body: {
+            certificate_number: codeToVerify.trim(),
+            verifier_info: { source: 'public_verify_page' },
+          },
+        }
+      );
+
       if (error) throw error;
-      setResult(data as unknown as VerificationResult);
+
+      if (!data || data.found === false) {
+        setResult({ valid: false, reason: 'not_found', method: 'code' });
+        return;
+      }
+
+      const status: string = data.status || 'valid';
+      const cert = data.certificate || {};
+      setResult({
+        valid: status === 'valid',
+        status,
+        method: 'code',
+        certificate_name: cert.tier_badge || 'Certificate',
+        recipient_name: cert.holder_name,
+        course_title: cert.organization,
+        issued_at: cert.issue_date,
+        expiry_date: cert.expiry_date,
+        verification_code: cert.certificate_number,
+        reason:
+          status === 'revoked'
+            ? 'revoked'
+            : status === 'expired'
+            ? 'expired'
+            : undefined,
+      });
     } catch (error) {
       console.error('Verification error:', error);
-      setResult({ valid: false, reason: 'verification_failed' });
+      setResult({ valid: false, reason: 'verification_failed', method: 'code' });
     } finally {
       setIsPending(false);
     }
