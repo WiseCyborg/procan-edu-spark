@@ -1,11 +1,7 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import SmartAuthForm from '@/components/auth/SmartAuthForm';
 import DispensaryAuthForm from '@/components/auth/DispensaryAuthForm';
 import StudentAuthForm from '@/components/auth/StudentAuthForm';
@@ -13,8 +9,7 @@ import AdminAuthForm from '@/components/auth/AdminAuthForm';
 import DispensaryManagerAuthForm from '@/components/auth/DispensaryManagerAuthForm';
 import AccessKeyEntry from '@/components/auth/AccessKeyEntry';
 import { PasswordReset } from '@/components/auth/PasswordReset';
-import { Mail, Key, ArrowRight, Info, Building2 } from 'lucide-react';
-import { toast } from 'sonner';
+import { Info, Building2 } from 'lucide-react';
 
 // (Join-code entry removed — join codes were never a real feature.
 // Students access the platform via email invitation or individual purchase.)
