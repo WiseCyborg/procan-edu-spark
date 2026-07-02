@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { GripVertical, Pin, X, Copy } from 'lucide-react';
+import { GripVertical, Pin, X, Copy, Volume2, Square } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 
 interface Message {
