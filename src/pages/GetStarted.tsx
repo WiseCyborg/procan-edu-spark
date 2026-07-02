@@ -292,7 +292,7 @@ const GetStarted = () => {
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold mb-2">Not sure which path to choose?</h3>
               <p className="text-sm text-muted-foreground mb-4">
-                <strong>Work at a dispensary?</strong> You need RVT Core Training — ask your manager for a join code.{' '}
+                <strong>Work at a dispensary?</strong> You need RVT Core Training — your manager will send you an email invite.{' '}
                 <strong>Dispensary owner?</strong> Apply to set up your organization.{' '}
                 <strong>Just curious?</strong> Start with our free Public Learning courses.
               </p>
