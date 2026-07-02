@@ -1,11 +1,7 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import SmartAuthForm from '@/components/auth/SmartAuthForm';
 import DispensaryAuthForm from '@/components/auth/DispensaryAuthForm';
 import StudentAuthForm from '@/components/auth/StudentAuthForm';
@@ -13,66 +9,10 @@ import AdminAuthForm from '@/components/auth/AdminAuthForm';
 import DispensaryManagerAuthForm from '@/components/auth/DispensaryManagerAuthForm';
 import AccessKeyEntry from '@/components/auth/AccessKeyEntry';
 import { PasswordReset } from '@/components/auth/PasswordReset';
-import { Mail, Key, ArrowRight, Info, Building2 } from 'lucide-react';
-import { toast } from 'sonner';
+import { Info, Building2 } from 'lucide-react';
 
-// Join Code Entry Component (Registration Only - No Login)
-const JoinCodeEntry = () => {
-  const navigate = useNavigate();
-  const [joinCode, setJoinCode] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const handleContinue = async () => {
-    if (!joinCode.trim() || joinCode.length < 6) {
-      toast.error('Please enter a valid join code');
-      return;
-    }
-    
-    setLoading(true);
-    // Navigate to registration with join code pre-filled
-    navigate(`/auth?role=student&register=true&code=${joinCode.toUpperCase()}`);
-  };
-
-  return (
-    <div className="space-y-4">
-      <div>
-        <Label htmlFor="joinCode">Organization Join Code</Label>
-        <Input
-          id="joinCode"
-          value={joinCode}
-          onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-          placeholder="Enter code (e.g., JOIN-20251201-ABC123)"
-          className="uppercase mt-1"
-          maxLength={24}
-        />
-        <p className="text-xs text-muted-foreground mt-1">
-          Your manager should have provided this code
-        </p>
-      </div>
-      
-      <Button 
-        onClick={handleContinue} 
-        className="w-full"
-        disabled={loading || joinCode.length < 6}
-      >
-        Continue to Registration
-        <ArrowRight className="ml-2 h-4 w-4" />
-      </Button>
-      
-      <div className="text-center">
-        <p className="text-sm text-muted-foreground">
-          Already have an account?{' '}
-          <button 
-            onClick={() => navigate('/auth?role=student')}
-            className="text-primary hover:underline"
-          >
-            Sign in here
-          </button>
-        </p>
-      </div>
-    </div>
-  );
-};
+// (Join-code entry removed — join codes were never a real feature.
+// Students access the platform via email invitation or individual purchase.)
 
 const Auth = () => {
   const [searchParams] = useSearchParams();
@@ -158,40 +98,12 @@ const Auth = () => {
           </CardHeader>
           <CardContent>
             <LogoutBanner />
-            <Tabs defaultValue={getDefaultTab()} className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="invite" className="flex items-center gap-1 text-xs sm:text-sm">
-                  <Mail className="h-4 w-4" />
-                  <span className="hidden sm:inline">Email</span> Invite
-                </TabsTrigger>
-                <TabsTrigger value="code" className="flex items-center gap-1 text-xs sm:text-sm">
-                  <Key className="h-4 w-4" />
-                  <span className="hidden sm:inline">Join</span> Code
-                </TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="invite" className="mt-4">
-                <div className="text-center mb-4 text-sm text-muted-foreground">
-                  If you received an email invitation, click the link in your email. 
-                  Otherwise, sign in below.
-                </div>
-                <StudentAuthForm />
-              </TabsContent>
-              
-              <TabsContent value="code" className="mt-4">
-                <div className="text-center mb-4 text-sm text-muted-foreground">
-                  {prefilledCode && !prefilledCode.startsWith(':')
-                    ? 'Complete your registration below'
-                    : 'Enter the join code provided by your manager to register'}
-                </div>
-                {/* If code is prefilled (and not a template placeholder), show registration form. Otherwise show code entry */}
-                {prefilledCode && forceRegister && !prefilledCode.startsWith(':') ? (
-                  <StudentAuthForm />
-                ) : (
-                  <JoinCodeEntry />
-                )}
-              </TabsContent>
-            </Tabs>
+            <div className="text-center mb-4 text-sm text-muted-foreground">
+              If you received an email invitation, click the link in your email.
+              Otherwise, sign in below.
+            </div>
+            <StudentAuthForm />
+
             
             {/* Role routing info */}
             <div className="mt-6 p-3 bg-muted/50 rounded-lg flex items-start gap-2">

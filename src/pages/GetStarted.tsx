@@ -56,7 +56,7 @@ const GetStarted = () => {
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Lock className="h-4 w-4" />
-                    <span>Requires join code from employer</span>
+                    <span>Requires employer invitation</span>
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Shield className="h-4 w-4" />
@@ -203,14 +203,14 @@ const GetStarted = () => {
               </CardContent>
             </Card>
 
-            {/* Employee with Join Code */}
+            {/* Employee sign-in */}
             <Card className="hover:shadow-xl transition-shadow cursor-pointer group" onClick={() => navigate('/auth?role=student')}>
               <CardHeader className="text-center">
                 <div className="mx-auto mb-4 p-4 bg-accent/10 rounded-full w-16 h-16 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
                   <GraduationCap className="h-8 w-8 text-accent" />
                 </div>
                 <CardTitle className="text-lg">Employee</CardTitle>
-                <CardDescription className="text-xs">Have a join code?</CardDescription>
+                <CardDescription className="text-xs">Sign in with your invite</CardDescription>
               </CardHeader>
               <CardContent>
                 <Button className="w-full" variant="outline" size="sm" onClick={() => navigate('/auth?role=student')}>
@@ -292,7 +292,7 @@ const GetStarted = () => {
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold mb-2">Not sure which path to choose?</h3>
               <p className="text-sm text-muted-foreground mb-4">
-                <strong>Work at a dispensary?</strong> You need RVT Core Training — ask your manager for a join code.{' '}
+                <strong>Work at a dispensary?</strong> You need RVT Core Training — your manager will send you an email invite.{' '}
                 <strong>Dispensary owner?</strong> Apply to set up your organization.{' '}
                 <strong>Just curious?</strong> Start with our free Public Learning courses.
               </p>

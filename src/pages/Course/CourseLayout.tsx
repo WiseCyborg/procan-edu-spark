@@ -1,22 +1,23 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useUserProgress } from '@/hooks/useUserProgress';
 import { usePaymentStatus } from '@/hooks/usePaymentStatus';
 import { useOrganizationAccess } from '@/hooks/useOrganizationAccess';
+import { useAccessSnapshot } from '@/hooks/useAccessSnapshot';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Lock, BookOpen, Award } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { CoursePaymentGate } from '@/components/CoursePaymentGate';
 import { ProtectedCourseAccess } from '@/components/ProtectedCourseAccess';
-import { EmployeeAccessMessage } from '@/components/EmployeeAccessMessage';
 import { Breadcrumbs } from '@/components/navigation/Breadcrumbs';
 import { CourseProgressionCTA } from '@/components/course/CourseProgressionCTA';
 import { useCourseState } from '@/hooks/useCourseState';
 import { Progress } from '@/components/ui/progress';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { supabase } from '@/integrations/supabase/client';
 
 
@@ -47,6 +48,7 @@ const CourseLayout: React.FC = () => {
 
   const { hasPaid, isLoading: paymentLoading } = usePaymentStatus(COURSE_ID);
   const { hasAccess: hasOrgAccess, isLoading: orgLoading, organizationName } = useOrganizationAccess(user?.id);
+  const { snapshot, isLoading: snapshotLoading } = useAccessSnapshot(COURSE_ID);
   
   const {
     getCompletedModulesCount,
@@ -118,22 +120,19 @@ const CourseLayout: React.FC = () => {
     : 0;
 
 
-  // Show loading state
-  if (isLoading || paymentLoading || rolesLoading || orgLoading) {
+  // Show loading state while auth/access snapshot resolves
+  if (isLoading || paymentLoading || rolesLoading || orgLoading || snapshotLoading) {
     return (
       <div className="flex justify-center items-center min-h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <LoadingSpinner size="large" label="Loading your course..." />
       </div>
     );
   }
 
-  // Show employee access message if student without organization access
-  if (accessType === 'NEEDS_ACCESS_KEY') {
-    return (
-      <ProtectedCourseAccess>
-        <EmployeeAccessMessage />
-      </ProtectedCourseAccess>
-    );
+  // If snapshot resolved and user has no course access (no org seat, no payment, not admin),
+  // send them to sign in. The DB is the source of truth via get_access_snapshot.
+  if (user && !snapshot.can_access_course && accessType === 'NEEDS_ACCESS_KEY') {
+    return <Navigate to="/auth" replace />;
   }
 
   // Show payment gate only for individual users (not employees)
