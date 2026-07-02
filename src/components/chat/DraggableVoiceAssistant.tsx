@@ -731,18 +731,16 @@ export const DraggableVoiceAssistant: React.FC = () => {
         </div>
       )}
 
-      {/* Chat Toggle Button - Now Draggable */}
+      {/* Chat Toggle Button — click-only, never draggable. */}
       <Button
-        onClick={(e) => {
-          if (!isDragging) {
-            setIsOpen(!isOpen);
-            setShowProactiveTip(false);
-          }
+        onClick={() => {
+          setIsOpen((v) => !v);
+          setShowProactiveTip(false);
         }}
-        onMouseDown={handleToggleMouseDown}
-        className={`fixed z-50 h-12 w-12 rounded-full shadow-lg transition-transform hover:scale-105 ${isDragging ? 'cursor-grabbing scale-105' : 'cursor-grab'}`}
+        className="fixed z-50 h-12 w-12 rounded-full shadow-lg transition-transform hover:scale-105"
         style={{ left: position.x + windowSize.width - 60, top: position.y - 60 }}
         size="icon"
+        aria-label={isOpen ? 'Close AiLean chat' : 'Open AiLean chat'}
       >
         {isOpen ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
       </Button>
