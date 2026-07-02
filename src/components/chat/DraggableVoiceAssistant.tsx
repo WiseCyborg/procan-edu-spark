@@ -197,6 +197,25 @@ export const DraggableVoiceAssistant: React.FC = () => {
   const [isListening, setIsListening] = useState(false);
   const [isChatDismissed, setIsChatDismissed] = useState(false);
   const [chatLanguage, setChatLanguage] = useState(getStoredLanguage());
+  const [speakingMessageId, setSpeakingMessageId] = useState<string | null>(null);
+
+  // Clear the "currently speaking" message id once playback ends.
+  React.useEffect(() => {
+    if (!isSpeaking && speakingMessageId) {
+      setSpeakingMessageId(null);
+    }
+  }, [isSpeaking, speakingMessageId]);
+
+  const playMessage = useCallback((messageId: string, content: string) => {
+    stop();
+    setSpeakingMessageId(messageId);
+    speak(content);
+  }, [speak, stop]);
+
+  const stopMessage = useCallback(() => {
+    stop();
+    setSpeakingMessageId(null);
+  }, [stop]);
 
   const handleLanguageChange = useCallback(async (lang: { code: string; ttsLang: string }) => {
     setChatLanguage(lang.code);
