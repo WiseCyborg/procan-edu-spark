@@ -802,9 +802,16 @@ export const DraggableVoiceAssistant: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-1">
                   {isSpeaking && (
-                    <div className="flex items-center gap-1">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-6 w-6 p-0"
+                      onClick={stopMessage}
+                      aria-label="Stop playback"
+                      title="Stop playback"
+                    >
                       <Volume2 className="w-4 h-4 text-primary animate-pulse" />
-                    </div>
+                    </Button>
                   )}
                   <LanguageSwitcher compact={true} onLanguageChange={handleLanguageChange} />
                   <Button
