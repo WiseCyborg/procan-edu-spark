@@ -203,14 +203,14 @@ const GetStarted = () => {
               </CardContent>
             </Card>
 
-            {/* Employee with Join Code */}
+            {/* Employee sign-in */}
             <Card className="hover:shadow-xl transition-shadow cursor-pointer group" onClick={() => navigate('/auth?role=student')}>
               <CardHeader className="text-center">
                 <div className="mx-auto mb-4 p-4 bg-accent/10 rounded-full w-16 h-16 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
                   <GraduationCap className="h-8 w-8 text-accent" />
                 </div>
                 <CardTitle className="text-lg">Employee</CardTitle>
-                <CardDescription className="text-xs">Have a join code?</CardDescription>
+                <CardDescription className="text-xs">Sign in with your invite</CardDescription>
               </CardHeader>
               <CardContent>
                 <Button className="w-full" variant="outline" size="sm" onClick={() => navigate('/auth?role=student')}>
