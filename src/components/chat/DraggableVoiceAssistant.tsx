@@ -762,7 +762,18 @@ export const DraggableVoiceAssistant: React.FC = () => {
             <CardHeader className="pb-2 relative">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Move className="w-4 h-4 text-muted-foreground" />
+                  {/* Drag handle — this is the ONLY element that repositions the panel. */}
+                  <button
+                    type="button"
+                    onMouseDown={handleDragHandleMouseDown}
+                    onTouchStart={handleDragHandleTouchStart}
+                    onClick={(e) => e.stopPropagation()}
+                    aria-label="Drag to reposition chat"
+                    title="Drag to reposition"
+                    className={`inline-flex items-center justify-center h-6 w-6 rounded hover:bg-muted touch-none select-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+                  >
+                    <Move className="w-4 h-4 text-muted-foreground" />
+                  </button>
                   <div>
                     <CardTitle className="text-sm">{contextInfo.title}</CardTitle>
                     <Badge variant="secondary" className="text-xs mt-1">
