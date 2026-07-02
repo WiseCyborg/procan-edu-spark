@@ -53,7 +53,10 @@ export const DraggableMessage: React.FC<DraggableMessageProps> = ({
   onUnpin,
   isPinned = false,
   pinnedPosition,
-  className
+  className,
+  isPlaying = false,
+  onPlay,
+  onStop,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState<Position>({ x: 0, y: 0 });
