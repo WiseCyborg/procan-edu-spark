@@ -641,9 +641,9 @@ export const DraggableVoiceAssistant: React.FC = () => {
 
       setMessages(prev => [...prev, assistantMessage]);
 
-      // Text-to-speech for assistant response
+      // Text-to-speech for assistant response (auto-play; user can stop or replay)
       if (voiceSettings.enabled && voiceSettings.volume > 0) {
-        speak(data.response);
+        playMessage(assistantMessage.id, data.response);
       }
     } catch (error) {
       console.error('Chat error:', error);
