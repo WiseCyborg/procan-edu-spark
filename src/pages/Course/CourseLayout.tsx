@@ -120,22 +120,19 @@ const CourseLayout: React.FC = () => {
     : 0;
 
 
-  // Show loading state
-  if (isLoading || paymentLoading || rolesLoading || orgLoading) {
+  // Show loading state while auth/access snapshot resolves
+  if (isLoading || paymentLoading || rolesLoading || orgLoading || snapshotLoading) {
     return (
       <div className="flex justify-center items-center min-h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <LoadingSpinner size="large" label="Loading your course..." />
       </div>
     );
   }
 
-  // Show employee access message if student without organization access
-  if (accessType === 'NEEDS_ACCESS_KEY') {
-    return (
-      <ProtectedCourseAccess>
-        <EmployeeAccessMessage />
-      </ProtectedCourseAccess>
-    );
+  // If snapshot resolved and user has no course access (no org seat, no payment, not admin),
+  // send them to sign in. The DB is the source of truth via get_access_snapshot.
+  if (user && !snapshot.can_access_course && accessType === 'NEEDS_ACCESS_KEY') {
+    return <Navigate to="/auth" replace />;
   }
 
   // Show payment gate only for individual users (not employees)
