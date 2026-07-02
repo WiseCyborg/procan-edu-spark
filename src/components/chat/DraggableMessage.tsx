@@ -204,6 +204,28 @@ export const DraggableMessage: React.FC<DraggableMessageProps> = ({
         
         {/* Message controls */}
         <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+          {!message.isUser && (onPlay || onStop) && (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-6 w-6 p-0"
+              onClick={() => {
+                if (isPlaying) {
+                  onStop?.();
+                } else {
+                  onPlay?.(message.id, message.content);
+                }
+              }}
+              aria-label={isPlaying ? 'Stop playback' : 'Play message'}
+              title={isPlaying ? 'Stop playback' : 'Play message'}
+            >
+              {isPlaying ? (
+                <Square className="w-3 h-3 text-primary animate-pulse" />
+              ) : (
+                <Volume2 className="w-3 h-3" />
+              )}
+            </Button>
+          )}
           <Button
             size="sm"
             variant="ghost"
@@ -212,6 +234,7 @@ export const DraggableMessage: React.FC<DraggableMessageProps> = ({
           >
             <Copy className="w-3 h-3" />
           </Button>
+          
           
           {!isPinned ? (
             <Button
