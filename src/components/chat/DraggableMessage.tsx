@@ -41,6 +41,9 @@ interface DraggableMessageProps {
   isPinned?: boolean;
   pinnedPosition?: Position;
   className?: string;
+  isPlaying?: boolean;
+  onPlay?: (messageId: string, content: string) => void;
+  onStop?: () => void;
 }
 
 export const DraggableMessage: React.FC<DraggableMessageProps> = ({
