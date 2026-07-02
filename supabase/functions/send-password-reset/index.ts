@@ -66,11 +66,19 @@ serve(async (req) => {
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
     // Store token in database
-    await supabase.from("password_reset_tokens").insert({
+    const { error: tokenInsertError } = await supabase.from("password_reset_tokens").insert({
       user_id: user.user_id,
       token,
       expires_at: expiresAt.toISOString(),
     });
+
+    if (tokenInsertError) {
+      console.error("Failed to create password reset token:", tokenInsertError);
+      return new Response(
+        JSON.stringify({ success: false, error: "Failed to create reset token" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
+      );
+    }
 
     const resetUrl = `${DOMAINS.PRODUCTION}/auth?mode=reset&token=${token}`;
 
