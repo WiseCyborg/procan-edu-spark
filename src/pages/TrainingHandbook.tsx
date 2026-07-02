@@ -10,7 +10,7 @@ import { useUserRole } from '@/hooks/useUserRole';
 import { usePaymentStatus } from '@/hooks/usePaymentStatus';
 import { useOrganizationAccess } from '@/hooks/useOrganizationAccess';
 import { CoursePaymentGate } from '@/components/CoursePaymentGate';
-import { EmployeeAccessMessage } from '@/components/EmployeeAccessMessage';
+import { Navigate } from 'react-router-dom';
 import { SecureVideoPlayer } from '@/components/video/SecureVideoPlayer';
 import { TRACK_IDS } from '@/constants/tracks';
 
