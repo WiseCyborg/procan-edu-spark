@@ -127,15 +127,7 @@ const getContextInfo = (pathname: string): ContextInfo => {
   }
   
   if (pathname.startsWith('/course')) {
-    if (pathname.includes('final-exam')) {
-      return {
-        route: 'final-exam',
-        title: 'Chat Unavailable',
-        description: 'Chat assistance is disabled during the final exam to maintain integrity',
-        helpTips: [],
-        systemPrompt: ''
-      };
-    }
+
     
     return {
       route: 'course',
