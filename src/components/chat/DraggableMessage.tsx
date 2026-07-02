@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { GripVertical, Pin, X, Copy } from 'lucide-react';
+import { GripVertical, Pin, X, Copy, Volume2, Square } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 
 interface Message {
@@ -41,6 +41,9 @@ interface DraggableMessageProps {
   isPinned?: boolean;
   pinnedPosition?: Position;
   className?: string;
+  isPlaying?: boolean;
+  onPlay?: (messageId: string, content: string) => void;
+  onStop?: () => void;
 }
 
 export const DraggableMessage: React.FC<DraggableMessageProps> = ({
@@ -50,7 +53,10 @@ export const DraggableMessage: React.FC<DraggableMessageProps> = ({
   onUnpin,
   isPinned = false,
   pinnedPosition,
-  className
+  className,
+  isPlaying = false,
+  onPlay,
+  onStop,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState<Position>({ x: 0, y: 0 });
@@ -198,6 +204,28 @@ export const DraggableMessage: React.FC<DraggableMessageProps> = ({
         
         {/* Message controls */}
         <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+          {!message.isUser && (onPlay || onStop) && (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-6 w-6 p-0"
+              onClick={() => {
+                if (isPlaying) {
+                  onStop?.();
+                } else {
+                  onPlay?.(message.id, message.content);
+                }
+              }}
+              aria-label={isPlaying ? 'Stop playback' : 'Play message'}
+              title={isPlaying ? 'Stop playback' : 'Play message'}
+            >
+              {isPlaying ? (
+                <Square className="w-3 h-3 text-primary animate-pulse" />
+              ) : (
+                <Volume2 className="w-3 h-3" />
+              )}
+            </Button>
+          )}
           <Button
             size="sm"
             variant="ghost"
@@ -206,6 +234,7 @@ export const DraggableMessage: React.FC<DraggableMessageProps> = ({
           >
             <Copy className="w-3 h-3" />
           </Button>
+          
           
           {!isPinned ? (
             <Button

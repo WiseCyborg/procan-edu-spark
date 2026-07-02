@@ -197,6 +197,25 @@ export const DraggableVoiceAssistant: React.FC = () => {
   const [isListening, setIsListening] = useState(false);
   const [isChatDismissed, setIsChatDismissed] = useState(false);
   const [chatLanguage, setChatLanguage] = useState(getStoredLanguage());
+  const [speakingMessageId, setSpeakingMessageId] = useState<string | null>(null);
+
+  // Clear the "currently speaking" message id once playback ends.
+  React.useEffect(() => {
+    if (!isSpeaking && speakingMessageId) {
+      setSpeakingMessageId(null);
+    }
+  }, [isSpeaking, speakingMessageId]);
+
+  const playMessage = useCallback((messageId: string, content: string) => {
+    stop();
+    setSpeakingMessageId(messageId);
+    speak(content);
+  }, [speak, stop]);
+
+  const stopMessage = useCallback(() => {
+    stop();
+    setSpeakingMessageId(null);
+  }, [stop]);
 
   const handleLanguageChange = useCallback(async (lang: { code: string; ttsLang: string }) => {
     setChatLanguage(lang.code);
@@ -622,9 +641,9 @@ export const DraggableVoiceAssistant: React.FC = () => {
 
       setMessages(prev => [...prev, assistantMessage]);
 
-      // Text-to-speech for assistant response
+      // Text-to-speech for assistant response (auto-play; user can stop or replay)
       if (voiceSettings.enabled && voiceSettings.volume > 0) {
-        speak(data.response);
+        playMessage(assistantMessage.id, data.response);
       }
     } catch (error) {
       console.error('Chat error:', error);
@@ -783,9 +802,16 @@ export const DraggableVoiceAssistant: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-1">
                   {isSpeaking && (
-                    <div className="flex items-center gap-1">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-6 w-6 p-0"
+                      onClick={stopMessage}
+                      aria-label="Stop playback"
+                      title="Stop playback"
+                    >
                       <Volume2 className="w-4 h-4 text-primary animate-pulse" />
-                    </div>
+                    </Button>
                   )}
                   <LanguageSwitcher compact={true} onLanguageChange={handleLanguageChange} />
                   <Button
@@ -874,6 +900,9 @@ export const DraggableVoiceAssistant: React.FC = () => {
                         onPin={pinMessage}
                         onUnpin={unpinMessage}
                         isPinned={isPinned(message.id)}
+                        isPlaying={speakingMessageId === message.id && isSpeaking}
+                        onPlay={playMessage}
+                        onStop={stopMessage}
                       />
                     </div>
                   ))}
