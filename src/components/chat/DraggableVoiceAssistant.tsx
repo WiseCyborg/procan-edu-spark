@@ -64,7 +64,38 @@ interface Position {
   y: number;
 }
 
+/**
+ * Routes representing a graded/scored assessment where the AiLean chat
+ * assistant must be disabled to preserve academic integrity.
+ * Add new matchers here as new assessment routes are introduced.
+ * Each entry may be an exact path, a prefix (ending with '/'), or a RegExp.
+ */
+const ASSESSMENT_ROUTE_MATCHERS: Array<string | RegExp> = [
+  '/course/final-exam', // RVT final exam (primary)
+  '/exam',              // Alias route that also mounts FinalExam
+];
+
+const isAssessmentRoute = (pathname: string): boolean => {
+  return ASSESSMENT_ROUTE_MATCHERS.some((m) => {
+    if (typeof m === 'string') {
+      if (m.endsWith('/')) return pathname.startsWith(m);
+      return pathname === m || pathname.startsWith(m + '/');
+    }
+    return m.test(pathname);
+  });
+};
+
 const getContextInfo = (pathname: string): ContextInfo => {
+  if (isAssessmentRoute(pathname)) {
+    return {
+      route: 'assessment',
+      title: 'Chat Unavailable',
+      description: 'Chat assistance is disabled during graded assessments to maintain integrity',
+      helpTips: [],
+      systemPrompt: ''
+    };
+  }
+
   if (pathname === '/auth') {
     return {
       route: 'auth',
@@ -96,15 +127,7 @@ const getContextInfo = (pathname: string): ContextInfo => {
   }
   
   if (pathname.startsWith('/course')) {
-    if (pathname.includes('final-exam')) {
-      return {
-        route: 'final-exam',
-        title: 'Chat Unavailable',
-        description: 'Chat assistance is disabled during the final exam to maintain integrity',
-        helpTips: [],
-        systemPrompt: ''
-      };
-    }
+
     
     return {
       route: 'course',
@@ -240,7 +263,7 @@ export const DraggableVoiceAssistant: React.FC = () => {
   const audioChunksRef = useRef<Blob[]>([]);
 
   const contextInfo = getContextInfo(location.pathname);
-  const isChatDisabled = contextInfo.route === 'final-exam';
+  const isChatDisabled = contextInfo.route === 'assessment';
 
   // Compute isAuthPage (not a hook, so this is fine before useEffect)
   const isAuthPage = location.pathname === '/auth' || 
