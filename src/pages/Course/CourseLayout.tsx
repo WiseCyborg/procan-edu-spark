@@ -1,22 +1,23 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useUserProgress } from '@/hooks/useUserProgress';
 import { usePaymentStatus } from '@/hooks/usePaymentStatus';
 import { useOrganizationAccess } from '@/hooks/useOrganizationAccess';
+import { useAccessSnapshot } from '@/hooks/useAccessSnapshot';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Lock, BookOpen, Award } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { CoursePaymentGate } from '@/components/CoursePaymentGate';
 import { ProtectedCourseAccess } from '@/components/ProtectedCourseAccess';
-import { EmployeeAccessMessage } from '@/components/EmployeeAccessMessage';
 import { Breadcrumbs } from '@/components/navigation/Breadcrumbs';
 import { CourseProgressionCTA } from '@/components/course/CourseProgressionCTA';
 import { useCourseState } from '@/hooks/useCourseState';
 import { Progress } from '@/components/ui/progress';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { supabase } from '@/integrations/supabase/client';
 
 
