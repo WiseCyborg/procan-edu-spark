@@ -86,9 +86,9 @@ const TrainingHandbook = () => {
     );
   }
 
-  // Access key gate for students without organization
+  // Redirect students without org/paid access to sign in (DB is source of truth)
   if (accessType === 'NEEDS_ACCESS_KEY') {
-    return <EmployeeAccessMessage />;
+    return <Navigate to="/auth" replace />;
   }
 
   // Payment gate for individual students
