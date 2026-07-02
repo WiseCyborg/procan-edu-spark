@@ -103,40 +103,12 @@ const Auth = () => {
           </CardHeader>
           <CardContent>
             <LogoutBanner />
-            <Tabs defaultValue={getDefaultTab()} className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="invite" className="flex items-center gap-1 text-xs sm:text-sm">
-                  <Mail className="h-4 w-4" />
-                  <span className="hidden sm:inline">Email</span> Invite
-                </TabsTrigger>
-                <TabsTrigger value="code" className="flex items-center gap-1 text-xs sm:text-sm">
-                  <Key className="h-4 w-4" />
-                  <span className="hidden sm:inline">Join</span> Code
-                </TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="invite" className="mt-4">
-                <div className="text-center mb-4 text-sm text-muted-foreground">
-                  If you received an email invitation, click the link in your email. 
-                  Otherwise, sign in below.
-                </div>
-                <StudentAuthForm />
-              </TabsContent>
-              
-              <TabsContent value="code" className="mt-4">
-                <div className="text-center mb-4 text-sm text-muted-foreground">
-                  {prefilledCode && !prefilledCode.startsWith(':')
-                    ? 'Complete your registration below'
-                    : 'Enter the join code provided by your manager to register'}
-                </div>
-                {/* If code is prefilled (and not a template placeholder), show registration form. Otherwise show code entry */}
-                {prefilledCode && forceRegister && !prefilledCode.startsWith(':') ? (
-                  <StudentAuthForm />
-                ) : (
-                  <JoinCodeEntry />
-                )}
-              </TabsContent>
-            </Tabs>
+            <div className="text-center mb-4 text-sm text-muted-foreground">
+              If you received an email invitation, click the link in your email.
+              Otherwise, sign in below.
+            </div>
+            <StudentAuthForm />
+
             
             {/* Role routing info */}
             <div className="mt-6 p-3 bg-muted/50 rounded-lg flex items-start gap-2">
