@@ -16,63 +16,8 @@ import { PasswordReset } from '@/components/auth/PasswordReset';
 import { Mail, Key, ArrowRight, Info, Building2 } from 'lucide-react';
 import { toast } from 'sonner';
 
-// Join Code Entry Component (Registration Only - No Login)
-const JoinCodeEntry = () => {
-  const navigate = useNavigate();
-  const [joinCode, setJoinCode] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const handleContinue = async () => {
-    if (!joinCode.trim() || joinCode.length < 6) {
-      toast.error('Please enter a valid join code');
-      return;
-    }
-    
-    setLoading(true);
-    // Navigate to registration with join code pre-filled
-    navigate(`/auth?role=student&register=true&code=${joinCode.toUpperCase()}`);
-  };
-
-  return (
-    <div className="space-y-4">
-      <div>
-        <Label htmlFor="joinCode">Organization Join Code</Label>
-        <Input
-          id="joinCode"
-          value={joinCode}
-          onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-          placeholder="Enter code (e.g., JOIN-20251201-ABC123)"
-          className="uppercase mt-1"
-          maxLength={24}
-        />
-        <p className="text-xs text-muted-foreground mt-1">
-          Your manager should have provided this code
-        </p>
-      </div>
-      
-      <Button 
-        onClick={handleContinue} 
-        className="w-full"
-        disabled={loading || joinCode.length < 6}
-      >
-        Continue to Registration
-        <ArrowRight className="ml-2 h-4 w-4" />
-      </Button>
-      
-      <div className="text-center">
-        <p className="text-sm text-muted-foreground">
-          Already have an account?{' '}
-          <button 
-            onClick={() => navigate('/auth?role=student')}
-            className="text-primary hover:underline"
-          >
-            Sign in here
-          </button>
-        </p>
-      </div>
-    </div>
-  );
-};
+// (Join-code entry removed — join codes were never a real feature.
+// Students access the platform via email invitation or individual purchase.)
 
 const Auth = () => {
   const [searchParams] = useSearchParams();
