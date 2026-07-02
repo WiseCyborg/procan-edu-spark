@@ -271,67 +271,93 @@ export const DraggableVoiceAssistant: React.FC = () => {
   // For future ElevenLabs Conversational AI integration
   // const conversation = useConversation({...});
 
-  // Dragging functionality for toggle button
-  const handleToggleMouseDown = useCallback((e: React.MouseEvent) => {
+  // Dragging functionality — scoped ONLY to the header drag handle (<Move /> icon).
+  // The launcher button is NOT draggable; it always just toggles open/close.
+  // Tracks the pointer's starting position and the panel's starting position,
+  // then applies the delta on move. Supports both mouse and touch.
+  const dragStartRef = useRef<{ pointerX: number; pointerY: number; panelX: number; panelY: number } | null>(null);
+
+  const beginDrag = useCallback((pointerX: number, pointerY: number) => {
+    dragStartRef.current = {
+      pointerX,
+      pointerY,
+      panelX: position.x,
+      panelY: position.y,
+    };
+    setIsDragging(true);
+  }, [position.x, position.y]);
+
+  const handleDragHandleMouseDown = useCallback((e: React.MouseEvent) => {
+    // Only respond to primary button; don't hijack right-click / middle-click.
+    if (e.button !== 0) return;
     e.preventDefault();
     e.stopPropagation();
-    
-    // Calculate offset from toggle button position
-    const toggleButtonX = position.x + windowSize.width - 60;
-    const toggleButtonY = position.y - 60;
-    
-    setDragOffset({
-      x: e.clientX - toggleButtonX,
-      y: e.clientY - toggleButtonY
-    });
-    setIsDragging(true);
-  }, [position, windowSize]);
+    beginDrag(e.clientX, e.clientY);
+  }, [beginDrag]);
 
-  const handleMouseMove = useCallback((e: MouseEvent) => {
+  const handleDragHandleTouchStart = useCallback((e: React.TouchEvent) => {
+    const t = e.touches[0];
+    if (!t) return;
+    e.stopPropagation();
+    beginDrag(t.clientX, t.clientY);
+  }, [beginDrag]);
+
+  const applyPointerMove = useCallback((pointerX: number, pointerY: number) => {
+    const start = dragStartRef.current;
+    if (!start) return;
+    const dx = pointerX - start.pointerX;
+    const dy = pointerY - start.pointerY;
+
+    const panelWidth = windowSize.width;
+    const panelHeight = Math.min(window.innerHeight * 0.7, 480);
+
+    // Clamp the panel within the viewport (leave a 20px margin).
+    const minX = 20 - panelWidth + 80; // allow partial off-screen but keep handle reachable
+    const maxX = window.innerWidth - 80;
+    const minY = 20;
+    const maxY = window.innerHeight - 80;
+
+    const nextX = Math.max(minX, Math.min(start.panelX + dx, maxX));
+    const nextY = Math.max(minY, Math.min(start.panelY + dy, maxY));
+
+    setPosition({ x: nextX, y: nextY });
+  }, [windowSize.width]);
+
+  const handleWindowMouseMove = useCallback((e: MouseEvent) => {
     if (!isDragging) return;
-    
-    // Calculate new toggle button position
-    const newToggleX = e.clientX - dragOffset.x;
-    const newToggleY = e.clientY - dragOffset.y;
-    
-    // Convert to chat window position
-    const newChatX = newToggleX - windowSize.width + 60;
-    const newChatY = newToggleY + 60;
-    
-    // Keep toggle button within screen bounds
-    const minToggleX = windowSize.width - 60; // Ensure chat window doesn't go off left edge
-    const maxToggleX = window.innerWidth - 60; // Ensure toggle button doesn't go off right edge
-    const minToggleY = 60; // Ensure toggle button doesn't go off top edge
-    const maxToggleY = window.innerHeight - 60; // Ensure toggle button doesn't go off bottom edge
-    
-    const clampedToggleX = Math.max(minToggleX, Math.min(newToggleX, maxToggleX));
-    const clampedToggleY = Math.max(minToggleY, Math.min(newToggleY, maxToggleY));
-    
-    // Convert back to chat window position
-    const finalChatX = clampedToggleX - windowSize.width + 60;
-    const finalChatY = clampedToggleY + 60;
-    
-    setPosition({
-      x: finalChatX,
-      y: finalChatY
-    });
-  }, [isDragging, dragOffset, windowSize]);
+    applyPointerMove(e.clientX, e.clientY);
+  }, [isDragging, applyPointerMove]);
 
-  const handleMouseUp = useCallback(() => {
+  const handleWindowTouchMove = useCallback((e: TouchEvent) => {
+    if (!isDragging) return;
+    const t = e.touches[0];
+    if (!t) return;
+    // Prevent page scroll while dragging the panel via touch.
+    if (e.cancelable) e.preventDefault();
+    applyPointerMove(t.clientX, t.clientY);
+  }, [isDragging, applyPointerMove]);
+
+  const endDrag = useCallback(() => {
+    dragStartRef.current = null;
     setIsDragging(false);
   }, []);
 
   useEffect(() => {
-    if (isAuthPage) return; // Don't run on auth pages
-    if (isDragging) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-      return () => {
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
-      };
-    }
-  }, [isDragging, handleMouseMove, handleMouseUp, isAuthPage]);
+    if (isAuthPage) return;
+    if (!isDragging) return;
+    document.addEventListener('mousemove', handleWindowMouseMove);
+    document.addEventListener('mouseup', endDrag);
+    document.addEventListener('touchmove', handleWindowTouchMove, { passive: false });
+    document.addEventListener('touchend', endDrag);
+    document.addEventListener('touchcancel', endDrag);
+    return () => {
+      document.removeEventListener('mousemove', handleWindowMouseMove);
+      document.removeEventListener('mouseup', endDrag);
+      document.removeEventListener('touchmove', handleWindowTouchMove);
+      document.removeEventListener('touchend', endDrag);
+      document.removeEventListener('touchcancel', endDrag);
+    };
+  }, [isDragging, handleWindowMouseMove, handleWindowTouchMove, endDrag, isAuthPage]);
 
   // Scroll to bottom of messages
   const scrollToBottom = () => {
@@ -705,18 +731,16 @@ export const DraggableVoiceAssistant: React.FC = () => {
         </div>
       )}
 
-      {/* Chat Toggle Button - Now Draggable */}
+      {/* Chat Toggle Button — click-only, never draggable. */}
       <Button
-        onClick={(e) => {
-          if (!isDragging) {
-            setIsOpen(!isOpen);
-            setShowProactiveTip(false);
-          }
+        onClick={() => {
+          setIsOpen((v) => !v);
+          setShowProactiveTip(false);
         }}
-        onMouseDown={handleToggleMouseDown}
-        className={`fixed z-50 h-12 w-12 rounded-full shadow-lg transition-transform hover:scale-105 ${isDragging ? 'cursor-grabbing scale-105' : 'cursor-grab'}`}
+        className="fixed z-50 h-12 w-12 rounded-full shadow-lg transition-transform hover:scale-105"
         style={{ left: position.x + windowSize.width - 60, top: position.y - 60 }}
         size="icon"
+        aria-label={isOpen ? 'Close AiLean chat' : 'Open AiLean chat'}
       >
         {isOpen ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
       </Button>
@@ -738,7 +762,18 @@ export const DraggableVoiceAssistant: React.FC = () => {
             <CardHeader className="pb-2 relative">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Move className="w-4 h-4 text-muted-foreground" />
+                  {/* Drag handle — this is the ONLY element that repositions the panel. */}
+                  <button
+                    type="button"
+                    onMouseDown={handleDragHandleMouseDown}
+                    onTouchStart={handleDragHandleTouchStart}
+                    onClick={(e) => e.stopPropagation()}
+                    aria-label="Drag to reposition chat"
+                    title="Drag to reposition"
+                    className={`inline-flex items-center justify-center h-6 w-6 rounded hover:bg-muted touch-none select-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+                  >
+                    <Move className="w-4 h-4 text-muted-foreground" />
+                  </button>
                   <div>
                     <CardTitle className="text-sm">{contextInfo.title}</CardTitle>
                     <Badge variant="secondary" className="text-xs mt-1">
