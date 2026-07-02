@@ -48,6 +48,7 @@ const CourseLayout: React.FC = () => {
 
   const { hasPaid, isLoading: paymentLoading } = usePaymentStatus(COURSE_ID);
   const { hasAccess: hasOrgAccess, isLoading: orgLoading, organizationName } = useOrganizationAccess(user?.id);
+  const { snapshot, isLoading: snapshotLoading } = useAccessSnapshot(COURSE_ID);
   
   const {
     getCompletedModulesCount,
