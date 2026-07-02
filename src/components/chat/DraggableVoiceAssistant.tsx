@@ -263,7 +263,7 @@ export const DraggableVoiceAssistant: React.FC = () => {
   const audioChunksRef = useRef<Blob[]>([]);
 
   const contextInfo = getContextInfo(location.pathname);
-  const isChatDisabled = contextInfo.route === 'final-exam';
+  const isChatDisabled = contextInfo.route === 'assessment';
 
   // Compute isAuthPage (not a hook, so this is fine before useEffect)
   const isAuthPage = location.pathname === '/auth' || 
