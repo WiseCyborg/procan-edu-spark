@@ -900,6 +900,9 @@ export const DraggableVoiceAssistant: React.FC = () => {
                         onPin={pinMessage}
                         onUnpin={unpinMessage}
                         isPinned={isPinned(message.id)}
+                        isPlaying={speakingMessageId === message.id && isSpeaking}
+                        onPlay={playMessage}
+                        onStop={stopMessage}
                       />
                     </div>
                   ))}
