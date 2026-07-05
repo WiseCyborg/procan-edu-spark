@@ -23,11 +23,14 @@ export const CommunicationHub = () => {
     activeConversation,
     setActiveConversation,
     createConversation,
+    createDirectConversation,
     refreshConversations,
-    messages
+    messages,
+    setActiveConversation,
   } = useRealTimeMessaging();
 
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showDMDialog, setShowDMDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [creatingDefaultChannels, setCreatingDefaultChannels] = useState(false);
   const [showTour, setShowTour] = useState(false);
