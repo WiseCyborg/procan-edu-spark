@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Plus, Search, PlayCircle } from 'lucide-react';
+import { Plus, Search, PlayCircle, MessageSquarePlus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useRealTimeMessaging } from '@/hooks/useRealTimeMessaging';
 import { ConversationView } from './ConversationView';
 import { CreateConversationDialog } from './CreateConversationDialog';
+import { NewDirectMessageDialog } from './NewDirectMessageDialog';
 import { ChannelSidebar } from './ChannelSidebar';
 import { useAuth } from '@/hooks/useAuth';
 import { useOrganization } from '@/contexts/OrganizationContext';
