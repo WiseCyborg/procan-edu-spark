@@ -70,8 +70,9 @@ export class EmailRouter {
       console.log(`📤 [EMAIL-ROUTER] Subject: ${options.subject}`);
       console.log(`📤 [EMAIL-ROUTER] From: ${options.from || "ProCann Edu <noreply@procannedu.com>"}`);
       
-      const result = await this.resend.emails.send({
-        from: options.from || "ProCann Edu <noreply@procannedu.com>",
+      const fromAddress = options.from || "ProCann Edu <noreply@procannedu.com>";
+      const payload = {
+        from: fromAddress,
         to: [options.to],
         subject: options.subject,
         html: options.html,
@@ -81,36 +82,63 @@ export class EmailRouter {
           "List-Unsubscribe": "<mailto:unsubscribe@procannedu.com>",
           "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
           "X-Entity-Ref-ID": crypto.randomUUID(),
+        },
+      };
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      let json: any;
+      try {
+        const res = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${this.apiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+          signal: controller.signal,
+        });
+        if (!res.ok) {
+          const errText = await res.text().catch(() => "");
+          throw new Error(`Resend API ${res.status}: ${errText}`);
         }
-      });
-      
-      const responseTime = Date.now() - startTime;
-      
-      // CRITICAL: Verify result structure
-      if (!result.data) {
-        console.error(`❌ [EMAIL-ROUTER] Resend returned no data:`, JSON.stringify(result));
-        throw new Error(`Resend API returned no data. Full response: ${JSON.stringify(result)}`);
+        json = await res.json();
+      } catch (err: any) {
+        if (err?.name === "AbortError") {
+          throw new Error("Resend API request timed out after 10000ms");
+        }
+        throw err;
+      } finally {
+        clearTimeout(timeoutId);
       }
-      
+
+      const responseTime = Date.now() - startTime;
+
+      // CRITICAL: Verify result structure
+      if (!json || !json.id) {
+        console.error(`❌ [EMAIL-ROUTER] Resend returned no id:`, JSON.stringify(json));
+        throw new Error(`Resend API returned no id. Full response: ${JSON.stringify(json)}`);
+      }
+
       console.log(`✅ [EMAIL-ROUTER v1.2] Resend SUCCESS in ${responseTime}ms`);
-      console.log(`✅ [EMAIL-ROUTER] Provider ID: ${result.data.id}`);
-      console.log(`✅ Email sent via Resend in ${responseTime}ms:`, result.data?.id);
-      
+      console.log(`✅ [EMAIL-ROUTER] Provider ID: ${json.id}`);
+      console.log(`✅ Email sent via Resend in ${responseTime}ms:`, json.id);
+
       // Update log with success
       if (supabaseClient) {
         await supabaseClient.from("email_logs").update({
           status: 'sent',
           provider: 'resend',
-          provider_id: result.data?.id,
+          provider_id: json.id,
           sent_at: new Date().toISOString(),
           metadata: { ...options.metadata, response_time_ms: responseTime },
         }).eq('id', emailLogId);
       }
-      
+
       return {
         success: true,
         provider: 'resend',
-        providerId: result.data?.id,
+        providerId: json.id,
         responseTime,
       };
     } catch (resendError: any) {
