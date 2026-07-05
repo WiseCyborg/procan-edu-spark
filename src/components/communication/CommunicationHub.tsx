@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Plus, Search, PlayCircle } from 'lucide-react';
+import { Plus, Search, PlayCircle, MessageSquarePlus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useRealTimeMessaging } from '@/hooks/useRealTimeMessaging';
 import { ConversationView } from './ConversationView';
 import { CreateConversationDialog } from './CreateConversationDialog';
+import { NewDirectMessageDialog } from './NewDirectMessageDialog';
 import { ChannelSidebar } from './ChannelSidebar';
 import { useAuth } from '@/hooks/useAuth';
 import { useOrganization } from '@/contexts/OrganizationContext';
@@ -22,11 +23,13 @@ export const CommunicationHub = () => {
     activeConversation,
     setActiveConversation,
     createConversation,
+    createDirectConversation,
     refreshConversations,
-    messages
+    messages,
   } = useRealTimeMessaging();
 
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showDMDialog, setShowDMDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [creatingDefaultChannels, setCreatingDefaultChannels] = useState(false);
   const [showTour, setShowTour] = useState(false);
@@ -141,6 +144,15 @@ export const CommunicationHub = () => {
               Take Tour
             </Button>
             <Button
+              onClick={() => setShowDMDialog(true)}
+              variant="outline"
+              size="sm"
+              className="gap-2"
+            >
+              <MessageSquarePlus className="w-4 h-4" />
+              New Message
+            </Button>
+            <Button
               onClick={() => setShowCreateDialog(true)}
               className="gap-2"
               data-tour="new-channel-button"
@@ -177,6 +189,17 @@ export const CommunicationHub = () => {
         open={showCreateDialog}
         onOpenChange={setShowCreateDialog}
         onCreateConversation={createConversation}
+      />
+
+      {/* New Direct Message Dialog */}
+      <NewDirectMessageDialog
+        open={showDMDialog}
+        onOpenChange={setShowDMDialog}
+        onStartDirectMessage={async (otherUserId) => {
+          const id = await createDirectConversation(otherUserId);
+          if (id) setActiveConversation(id);
+          return id;
+        }}
       />
     </div>
     </>

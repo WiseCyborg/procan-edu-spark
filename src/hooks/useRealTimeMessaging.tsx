@@ -47,7 +47,7 @@ export const useRealTimeMessaging = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [messages, setMessages] = useState<Record<string, Message[]>>({});
   const [loading, setLoading] = useState(true);
-  const [activeConversation, setActiveConversation] = useState<string | null>(null);
+  const [activeConversation, setActiveConversationState] = useState<string | null>(null);
 
   // Fetch conversations
   const fetchConversations = useCallback(async () => {
@@ -58,7 +58,7 @@ export const useRealTimeMessaging = () => {
         .from('conversations')
         .select(`
           *,
-          conversation_participants!inner(user_id),
+          conversation_participants!inner(user_id, last_read_at),
           messages(
             id,
             content,
@@ -73,28 +73,94 @@ export const useRealTimeMessaging = () => {
 
       if (error) throw error;
 
-      const formattedConversations: Conversation[] = data?.map(conv => ({
-        id: conv.id,
-        organization_id: conv.organization_id,
-        title: conv.title,
-        conversation_type: conv.conversation_type as 'direct' | 'group' | 'announcement',
-        created_by: conv.created_by,
-        is_active: conv.is_active,
-        metadata: conv.metadata || {},
-        created_at: conv.created_at,
-        updated_at: conv.updated_at,
-        last_message: conv.messages?.[conv.messages.length - 1] ? {
-          id: conv.messages[conv.messages.length - 1].id,
-          conversation_id: conv.id,
-          sender_id: conv.messages[conv.messages.length - 1].sender_id,
-          content: conv.messages[conv.messages.length - 1].content,
-          message_type: conv.messages[conv.messages.length - 1].message_type as 'text' | 'file' | 'system' | 'announcement',
-          metadata: {},
-          is_edited: false,
-          created_at: conv.messages[conv.messages.length - 1].created_at
-        } : undefined,
-        unread_count: 0 // TODO: Calculate based on last_read_at
-      })) || [];
+      // Compute unread counts in parallel per conversation
+      const unreadPromises = (data || []).map(async (conv: any) => {
+        const myParticipant = (conv.conversation_participants || []).find(
+          (p: any) => p.user_id === user.id
+        );
+        const lastReadAt: string | null = myParticipant?.last_read_at ?? null;
+
+        let query = supabase
+          .from('messages')
+          .select('id', { count: 'exact', head: true })
+          .eq('conversation_id', conv.id)
+          .neq('sender_id', user.id);
+        if (lastReadAt) {
+          query = query.gt('created_at', lastReadAt);
+        }
+        const { count } = await query;
+        return { convId: conv.id, count: count || 0 };
+      });
+      const unreadResults = await Promise.all(unreadPromises);
+      const unreadMap = new Map(unreadResults.map(r => [r.convId, r.count]));
+
+      // Resolve direct conversation titles to the other participant's name
+      const directConvIds = (data || [])
+        .filter((c: any) => c.conversation_type === 'direct')
+        .map((c: any) => c.id);
+
+      const directTitleMap = new Map<string, string>();
+      if (directConvIds.length > 0) {
+        const { data: participantsData } = await supabase
+          .from('conversation_participants')
+          .select('conversation_id, user_id')
+          .in('conversation_id', directConvIds);
+        const otherIds = Array.from(
+          new Set((participantsData || [])
+            .filter((p: any) => p.user_id !== user.id)
+            .map((p: any) => p.user_id))
+        );
+        if (otherIds.length > 0) {
+          const { data: profiles } = await supabase
+            .from('profiles')
+            .select('user_id, first_name, last_name')
+            .in('user_id', otherIds);
+          const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, p]));
+          const byConv = new Map<string, string[]>();
+          (participantsData || []).forEach((p: any) => {
+            if (p.user_id === user.id) return;
+            const list = byConv.get(p.conversation_id) || [];
+            const prof: any = profileMap.get(p.user_id);
+            if (prof) {
+              const name = `${prof.first_name || ''} ${prof.last_name || ''}`.trim() || 'Unknown';
+              list.push(name);
+            }
+            byConv.set(p.conversation_id, list);
+          });
+          byConv.forEach((names, convId) => {
+            directTitleMap.set(convId, names.join(', ') || 'Direct message');
+          });
+        }
+      }
+
+      const formattedConversations: Conversation[] = data?.map(conv => {
+        const isDirect = conv.conversation_type === 'direct';
+        const resolvedTitle = isDirect
+          ? (directTitleMap.get(conv.id) || conv.title || 'Direct message')
+          : conv.title;
+        return {
+          id: conv.id,
+          organization_id: conv.organization_id,
+          title: resolvedTitle,
+          conversation_type: conv.conversation_type as 'direct' | 'group' | 'announcement',
+          created_by: conv.created_by,
+          is_active: conv.is_active,
+          metadata: conv.metadata || {},
+          created_at: conv.created_at,
+          updated_at: conv.updated_at,
+          last_message: conv.messages?.[conv.messages.length - 1] ? {
+            id: conv.messages[conv.messages.length - 1].id,
+            conversation_id: conv.id,
+            sender_id: conv.messages[conv.messages.length - 1].sender_id,
+            content: conv.messages[conv.messages.length - 1].content,
+            message_type: conv.messages[conv.messages.length - 1].message_type as 'text' | 'file' | 'system' | 'announcement',
+            metadata: {},
+            is_edited: false,
+            created_at: conv.messages[conv.messages.length - 1].created_at
+          } : undefined,
+          unread_count: unreadMap.get(conv.id) || 0,
+        };
+      }) || [];
 
       setConversations(formattedConversations);
     } catch (error) {
@@ -102,6 +168,30 @@ export const useRealTimeMessaging = () => {
       toast.error('Failed to load conversations');
     }
   }, [user]);
+
+  // Mark a conversation as read (updates last_read_at to now)
+  const markConversationRead = useCallback(async (conversationId: string) => {
+    if (!user) return;
+    try {
+      await supabase
+        .from('conversation_participants')
+        .update({ last_read_at: new Date().toISOString() })
+        .eq('conversation_id', conversationId)
+        .eq('user_id', user.id);
+      setConversations(prev =>
+        prev.map(c => (c.id === conversationId ? { ...c, unread_count: 0 } : c))
+      );
+    } catch (err) {
+      console.error('Error marking conversation read:', err);
+    }
+  }, [user]);
+
+  const setActiveConversation = useCallback((conversationId: string | null) => {
+    setActiveConversationState(conversationId);
+    if (conversationId) {
+      markConversationRead(conversationId);
+    }
+  }, [markConversationRead]);
 
   // Fetch messages for a conversation
   const fetchMessages = useCallback(async (conversationId: string) => {
@@ -124,7 +214,6 @@ export const useRealTimeMessaging = () => {
 
       if (error) throw error;
 
-      // Get sender profiles separately
       const senderIds = [...new Set(data?.map(msg => msg.sender_id) || [])];
       const { data: profiles } = await supabase
         .from('profiles')
@@ -170,7 +259,6 @@ export const useRealTimeMessaging = () => {
     if (!user || !content.trim()) return;
 
     try {
-      // Insert message
       const { data: message, error } = await supabase
         .from('messages')
         .insert({
@@ -185,7 +273,6 @@ export const useRealTimeMessaging = () => {
 
       if (error) throw error;
 
-      // Get user profile for sender name
       const { data: senderProfile } = await supabase
         .from('profiles')
         .select('first_name, last_name')
@@ -196,7 +283,6 @@ export const useRealTimeMessaging = () => {
         ? `${senderProfile.first_name} ${senderProfile.last_name}`.trim() || user.email || 'Someone'
         : user.email || 'Someone';
 
-      // Get conversation details for notification
       const { data: conversation } = await supabase
         .from('conversations')
         .select('title, conversation_type')
@@ -205,7 +291,6 @@ export const useRealTimeMessaging = () => {
 
       const conversationTitle = conversation?.title || 'a conversation';
 
-      // Send push notification to other participants
       pushNotificationService.notifyNewMessage({
         conversationId,
         senderId: user.id,
@@ -216,18 +301,15 @@ export const useRealTimeMessaging = () => {
         console.error('[Push] Failed to send message notification:', err);
       });
 
-      // Parse @mentions from content
       const mentionPattern = /@([A-Za-z]+\s+[A-Za-z]+)/g;
       const mentions = [...content.matchAll(mentionPattern)];
 
       if (mentions.length > 0 && message) {
-        // Get conversation participants to match names
         const { data: participants } = await supabase
           .from('conversation_participants')
           .select('user_id, profiles:user_id(first_name, last_name)')
           .eq('conversation_id', conversationId);
 
-        // Insert mentions
         const mentionInserts = [];
         for (const match of mentions) {
           const [firstName, lastName] = match[1].split(/\s+/);
@@ -247,7 +329,6 @@ export const useRealTimeMessaging = () => {
         if (mentionInserts.length > 0) {
           await supabase.from('message_mentions').insert(mentionInserts);
           
-          // Send push notifications to mentioned users
           const mentionedUserIds = mentionInserts.map(m => m.mentioned_user_id);
           pushNotificationService.notifyMention({
             mentionedUserIds,
@@ -261,7 +342,6 @@ export const useRealTimeMessaging = () => {
         }
       }
 
-      // Update conversation updated_at
       await supabase
         .from('conversations')
         .update({ updated_at: new Date().toISOString() })
@@ -296,7 +376,6 @@ export const useRealTimeMessaging = () => {
 
       if (convError) throw convError;
 
-      // Add participants
       const participantInserts = [
         { conversation_id: conversation.id, user_id: user.id, role: 'admin' },
         ...participants.map(userId => ({
@@ -317,6 +396,82 @@ export const useRealTimeMessaging = () => {
     } catch (error) {
       console.error('Error creating conversation:', error);
       toast.error('Failed to create conversation');
+      return null;
+    }
+  }, [user, fetchConversations]);
+
+  // Create a 1:1 direct conversation with another same-org user.
+  // If one already exists, return its id.
+  const createDirectConversation = useCallback(async (otherUserId: string) => {
+    if (!user || otherUserId === user.id) return null;
+    try {
+      const { data: myProfile } = await supabase
+        .from('profiles')
+        .select('organization_id')
+        .eq('user_id', user.id)
+        .single();
+      const { data: otherProfile } = await supabase
+        .from('profiles')
+        .select('organization_id')
+        .eq('user_id', otherUserId)
+        .single();
+      if (!myProfile?.organization_id || myProfile.organization_id !== otherProfile?.organization_id) {
+        toast.error('Direct messages are limited to your organization');
+        return null;
+      }
+
+      // Look for existing 1:1 direct conversation between the two
+      const { data: existingConvs } = await supabase
+        .from('conversations')
+        .select('id, conversation_participants!inner(user_id)')
+        .eq('conversation_type', 'direct')
+        .eq('organization_id', myProfile.organization_id)
+        .eq('conversation_participants.user_id', user.id);
+
+      if (existingConvs && existingConvs.length > 0) {
+        const ids = existingConvs.map((c: any) => c.id);
+        const { data: allParts } = await supabase
+          .from('conversation_participants')
+          .select('conversation_id, user_id')
+          .in('conversation_id', ids);
+        const byConv = new Map<string, Set<string>>();
+        (allParts || []).forEach((p: any) => {
+          const s = byConv.get(p.conversation_id) || new Set<string>();
+          s.add(p.user_id);
+          byConv.set(p.conversation_id, s);
+        });
+        for (const [cid, members] of byConv.entries()) {
+          if (members.size === 2 && members.has(user.id) && members.has(otherUserId)) {
+            return cid;
+          }
+        }
+      }
+
+      const { data: conversation, error: convError } = await supabase
+        .from('conversations')
+        .insert({
+          title: null,
+          conversation_type: 'direct',
+          created_by: user.id,
+          organization_id: myProfile.organization_id,
+        })
+        .select()
+        .single();
+      if (convError) throw convError;
+
+      const { error: partErr } = await supabase
+        .from('conversation_participants')
+        .insert([
+          { conversation_id: conversation.id, user_id: user.id, role: 'member' },
+          { conversation_id: conversation.id, user_id: otherUserId, role: 'member' },
+        ]);
+      if (partErr) throw partErr;
+
+      await fetchConversations();
+      return conversation.id;
+    } catch (error) {
+      console.error('Error creating direct conversation:', error);
+      toast.error('Failed to start direct message');
       return null;
     }
   }, [user, fetchConversations]);
@@ -344,18 +499,28 @@ export const useRealTimeMessaging = () => {
             ]
           }));
 
-          // Update conversation list
           setConversations(prev => 
-            prev.map(conv => 
-              conv.id === newMessage.conversation_id 
-                ? { ...conv, updated_at: new Date().toISOString(), last_message: newMessage }
-                : conv
-            ).sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+            prev.map(conv => {
+              if (conv.id !== newMessage.conversation_id) return conv;
+              const isActive = activeConversation === newMessage.conversation_id;
+              const isMine = newMessage.sender_id === user.id;
+              const nextUnread = isActive || isMine
+                ? (conv.unread_count || 0)
+                : (conv.unread_count || 0) + 1;
+              return {
+                ...conv,
+                updated_at: new Date().toISOString(),
+                last_message: newMessage,
+                unread_count: nextUnread,
+              };
+            }).sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
           );
 
-          // Show notification if not active conversation
           if (newMessage.sender_id !== user.id && activeConversation !== newMessage.conversation_id) {
             toast.info('New message received');
+          } else if (activeConversation === newMessage.conversation_id) {
+            // Auto-mark as read while viewing
+            markConversationRead(newMessage.conversation_id);
           }
         }
       )
@@ -375,7 +540,7 @@ export const useRealTimeMessaging = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, activeConversation, fetchConversations]);
+  }, [user, activeConversation, fetchConversations, markConversationRead]);
 
   // Initial load
   useEffect(() => {
@@ -392,7 +557,9 @@ export const useRealTimeMessaging = () => {
     setActiveConversation,
     sendMessage,
     createConversation,
+    createDirectConversation,
     fetchMessages,
+    markConversationRead,
     refreshConversations: fetchConversations
   };
 };

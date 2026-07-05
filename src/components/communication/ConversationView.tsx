@@ -74,6 +74,37 @@ export const ConversationView = ({
     }
   }, [conversationId, fetchMessages]);
 
+  // Realtime: reactions & mentions for this conversation
+  useEffect(() => {
+    if (!conversationId) return;
+    const channel = supabase
+      .channel(`conv-reactions-mentions-${conversationId}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'message_reactions' },
+        (payload: any) => {
+          const msgId = payload.new?.message_id || payload.old?.message_id;
+          if (!msgId) return;
+          const belongs = conversationMessages.some(m => m.id === msgId);
+          if (belongs) fetchMessages(conversationId);
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'message_mentions' },
+        (payload: any) => {
+          const msgId = payload.new?.message_id || payload.old?.message_id;
+          if (!msgId) return;
+          const belongs = conversationMessages.some(m => m.id === msgId);
+          if (belongs) fetchMessages(conversationId);
+        }
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [conversationId, conversationMessages, fetchMessages]);
+
   // Scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

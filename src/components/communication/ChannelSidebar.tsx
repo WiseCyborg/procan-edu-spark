@@ -118,7 +118,17 @@ export const ChannelSidebar = ({
   return (
     <div className="w-64 border-r border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex flex-col h-full" data-tour="channel-sidebar">
       <div className="p-4 border-b border-border">
-        <h2 className="font-semibold text-lg">Communication Hub</h2>
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="font-semibold text-lg">Communication Hub</h2>
+          {(() => {
+            const total = conversations.reduce((sum, c) => sum + (c.unread_count || 0), 0);
+            return total > 0 ? (
+              <Badge variant="destructive" className="h-5 min-w-5 px-1.5 text-xs">
+                {total > 99 ? '99+' : total}
+              </Badge>
+            ) : null;
+          })()}
+        </div>
         <p className="text-xs text-muted-foreground mt-1">
           {conversations.length} channel{conversations.length !== 1 ? 's' : ''}
         </p>
