@@ -1,4 +1,6 @@
 // Phase 2: Auto-Create Organization Channels Edge Function
+// Requires authenticated caller with admin or dispensary_manager role.
+// Idempotent: skips channels that already exist for the org.
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.4';
 
 const corsHeaders = {
@@ -64,8 +66,46 @@ Deno.serve(async (req) => {
 
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+
+    // --- Auth: validate JWT and role ---
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized: missing bearer token' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const authedClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const token = authHeader.replace('Bearer ', '');
+    const { data: claimsData, error: claimsError } = await authedClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims?.sub) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized: invalid token' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    const callerId = claimsData.claims.sub as string;
+
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Role check
+    const { data: roleRows, error: roleError } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', callerId)
+      .in('role', ['admin', 'dispensary_manager']);
+    if (roleError) throw roleError;
+    if (!roleRows || roleRows.length === 0) {
+      return new Response(
+        JSON.stringify({ error: 'Forbidden: admin or dispensary_manager role required' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     const { organizationId, createdBy } = await req.json();
 
@@ -76,7 +116,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log(`Creating default channels for organization: ${organizationId}`);
+    console.log(`Creating default channels for organization: ${organizationId} (caller: ${callerId})`);
 
     // Get all employees in the organization
     const { data: employees, error: employeesError } = await supabase
@@ -91,11 +131,25 @@ Deno.serve(async (req) => {
     const employeeIds = employees?.map(e => e.user_id) || [];
     console.log(`Found ${employeeIds.length} employees in organization`);
 
-    const createdChannels = [];
+    // Pre-fetch existing channel titles for this org (idempotency guard)
+    const { data: existingChannels, error: existingError } = await supabase
+      .from('conversations')
+      .select('title')
+      .eq('organization_id', organizationId)
+      .in('title', DEFAULT_CHANNELS.map(c => c.title));
+    if (existingError) throw existingError;
+    const existingTitles = new Set((existingChannels || []).map(c => c.title));
 
-    // Create each default channel
+    const createdChannels: Array<{ id: string; title: string; type: string; category: string }> = [];
+    const skippedChannels: string[] = [];
+
     for (const channelConfig of DEFAULT_CHANNELS) {
-      // Create conversation
+      if (existingTitles.has(channelConfig.title)) {
+        console.log(`Skipping existing channel: ${channelConfig.title}`);
+        skippedChannels.push(channelConfig.title);
+        continue;
+      }
+
       const { data: conversation, error: convError } = await supabase
         .from('conversations')
         .insert({
@@ -117,7 +171,6 @@ Deno.serve(async (req) => {
 
       console.log(`Created channel: ${channelConfig.title} (${conversation.id})`);
 
-      // Add all employees as participants (except restricted channels)
       if (!channelConfig.metadata.restrictedRoles) {
         const participants = employeeIds.map(userId => ({
           conversation_id: conversation.id,
@@ -137,7 +190,6 @@ Deno.serve(async (req) => {
           }
         }
       } else {
-        // For restricted channels, only add managers/coordinators
         const { data: managers, error: managersError } = await supabase
           .from('user_roles')
           .select('user_id')
@@ -171,14 +223,15 @@ Deno.serve(async (req) => {
       JSON.stringify({
         success: true,
         channels: createdChannels,
-        message: `Created ${createdChannels.length} default channels`,
+        skipped: skippedChannels,
+        message: `Created ${createdChannels.length} channel(s); skipped ${skippedChannels.length} existing.`,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
     console.error('Error in create-org-channels:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: (error as Error).message }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
