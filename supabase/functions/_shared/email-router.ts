@@ -1,4 +1,4 @@
-import { Resend } from "npm:resend@2.0.0";
+
 import { SMTPEmailService } from "./smtp-email-service.ts";
 
 export interface EmailOptions {
@@ -28,14 +28,14 @@ function extractTextFromHtml(html: string): string {
 }
 
 export class EmailRouter {
-  private resend: Resend;
+  private apiKey: string;
   
   constructor() {
     const apiKey = Deno.env.get("RESEND_API_KEY");
     if (!apiKey) {
       console.warn("⚠️ RESEND_API_KEY not configured, SMTP will be used as primary");
     }
-    this.resend = new Resend(apiKey || "");
+    this.apiKey = apiKey || "";
   }
   
   /**
