@@ -26,7 +26,6 @@ export const CommunicationHub = () => {
     createDirectConversation,
     refreshConversations,
     messages,
-    setActiveConversation,
   } = useRealTimeMessaging();
 
   const [showCreateDialog, setShowCreateDialog] = useState(false);
