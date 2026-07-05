@@ -190,6 +190,17 @@ export const CommunicationHub = () => {
         onOpenChange={setShowCreateDialog}
         onCreateConversation={createConversation}
       />
+
+      {/* New Direct Message Dialog */}
+      <NewDirectMessageDialog
+        open={showDMDialog}
+        onOpenChange={setShowDMDialog}
+        onStartDirectMessage={async (otherUserId) => {
+          const id = await createDirectConversation(otherUserId);
+          if (id) setActiveConversation(id);
+          return id;
+        }}
+      />
     </div>
     </>
   );
