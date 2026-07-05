@@ -144,6 +144,15 @@ export const CommunicationHub = () => {
               Take Tour
             </Button>
             <Button
+              onClick={() => setShowDMDialog(true)}
+              variant="outline"
+              size="sm"
+              className="gap-2"
+            >
+              <MessageSquarePlus className="w-4 h-4" />
+              New Message
+            </Button>
+            <Button
               onClick={() => setShowCreateDialog(true)}
               className="gap-2"
               data-tour="new-channel-button"
