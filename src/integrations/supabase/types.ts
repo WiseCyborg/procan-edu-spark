@@ -3221,7 +3221,8 @@ export type Database = {
       }
       email_verification_codes: {
         Row: {
-          code: string
+          code: string | null
+          code_hash: string | null
           created_at: string
           delivery_attempts: number | null
           delivery_method: string | null
@@ -3236,7 +3237,8 @@ export type Database = {
           vonage_request_id: string | null
         }
         Insert: {
-          code: string
+          code?: string | null
+          code_hash?: string | null
           created_at?: string
           delivery_attempts?: number | null
           delivery_method?: string | null
@@ -3251,7 +3253,8 @@ export type Database = {
           vonage_request_id?: string | null
         }
         Update: {
-          code?: string
+          code?: string | null
+          code_hash?: string | null
           created_at?: string
           delivery_attempts?: number | null
           delivery_method?: string | null

@@ -59,8 +59,14 @@ const handler = async (req: Request): Promise<Response> => {
     let isValidCode = false;
 
     if (verificationData.delivery_method === 'email') {
-      // Direct code comparison for email
-      isValidCode = verificationData.code === code;
+      // Hash submitted code and compare against stored code_hash
+      const codeBytes = new TextEncoder().encode(code);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', codeBytes);
+      const codeHash = Array.from(new Uint8Array(hashBuffer))
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join('');
+      isValidCode = verificationData.code_hash === codeHash;
+
     } else {
       // Use Vonage Verify API to check SMS/WhatsApp codes
       if (!verificationData.vonage_request_id) {

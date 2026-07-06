@@ -25,14 +25,21 @@ const handler = async (req: Request): Promise<Response> => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     const { email, code, purpose }: VerifyCodeRequest = await req.json();
 
-    console.log(`Verifying code ${code} for ${email} (${purpose})`);
+    console.log(`Verifying code for ${email} (${purpose})`);
 
-    // Find valid verification code
+    // Hash the submitted code (SHA-256 hex) to compare against stored code_hash
+    const codeBytes = new TextEncoder().encode(code);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', codeBytes);
+    const codeHash = Array.from(new Uint8Array(hashBuffer))
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
+
+    // Find valid verification code by hash
     const { data: verificationData, error: fetchError } = await supabase
       .from('email_verification_codes')
       .select('*')
       .eq('email', email)
-      .eq('code', code)
+      .eq('code_hash', codeHash)
       .eq('purpose', purpose)
       .is('verified_at', null)
       .gt('expires_at', new Date().toISOString())
@@ -44,6 +51,7 @@ const handler = async (req: Request): Promise<Response> => {
       console.error('Error fetching verification code:', fetchError);
       throw new Error('Failed to verify code');
     }
+
 
     if (!verificationData) {
       console.log('Invalid or expired verification code');
