@@ -55,6 +55,7 @@ export const CreateConversationDialog = ({
   const [channelCategory, setChannelCategory] = useState<string>('general');
   const [selectedParticipants, setSelectedParticipants] = useState<string[]>([]);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [myOrganizationId, setMyOrganizationId] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState(false);
   const [fetchingMembers, setFetchingMembers] = useState(false);
 
@@ -70,21 +71,24 @@ export const CreateConversationDialog = ({
 
     setFetchingMembers(true);
     try {
+      // Always resolve the current user's own organization, regardless of role.
+      // FIX: previously this was only fetched for dispensary managers, so admins
+      // always got organizationId=undefined when creating a conversation — even
+      // though an admin's own profile can (and often does) have a real
+      // organization_id, which made the conversations INSERT fail RLS.
+      const { data: ownProfile } = await supabase
+        .from('profiles')
+        .select('organization_id')
+        .eq('user_id', user.id)
+        .single();
+      setMyOrganizationId(ownProfile?.organization_id ?? undefined);
+
       let query = supabase
         .from('profiles')
         .select('user_id, first_name, last_name, organization_id');
 
-      if (isDispensaryManager && !isAdmin) {
-        // Get dispensary manager's organization
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('organization_id')
-          .eq('user_id', user.id)
-          .single();
-
-        if (profile?.organization_id) {
-          query = query.eq('organization_id', profile.organization_id);
-        }
+      if (isDispensaryManager && !isAdmin && ownProfile?.organization_id) {
+        query = query.eq('organization_id', ownProfile.organization_id);
       }
 
       const { data, error } = await query;
@@ -115,9 +119,7 @@ export const CreateConversationDialog = ({
 
     setLoading(true);
     try {
-      const organizationId = isDispensaryManager && !isAdmin 
-        ? teamMembers[0]?.organization_id 
-        : undefined;
+      const organizationId = myOrganizationId;
 
       const conversationId = await onCreateConversation(
         title,
