@@ -75,7 +75,7 @@ export const RegulationExplorer = () => {
           ))
         ) : filteredContent && filteredContent.length > 0 ? (
           filteredContent.map((item) => (
-            <Card key={item.id}>
+            <Card key={item.section_number}>
               <CardHeader>
                 <div className="flex items-start justify-between gap-4">
                   <div className="space-y-2">
@@ -83,9 +83,9 @@ export const RegulationExplorer = () => {
                       <Badge variant="outline" className="font-mono">
                         {item.section_number}
                       </Badge>
-                      {item.change_impact_level && (
-                        <Badge variant={getImpactColor(item.change_impact_level)}>
-                          {item.change_impact_level}
+                      {(item as any).change_impact_level && (
+                        <Badge variant={getImpactColor((item as any).change_impact_level)}>
+                          {(item as any).change_impact_level}
                         </Badge>
                       )}
                     </div>
@@ -135,9 +135,9 @@ export const RegulationExplorer = () => {
                       Last updated: {new Date(item.last_modified_at).toLocaleDateString()}
                     </div>
                   )}
-                  {item.last_mca_review_date && (
+                  {(item as any).last_mca_review_date && (
                     <div className="flex items-center gap-1">
-                      Last MCA review: {new Date(item.last_mca_review_date).toLocaleDateString()}
+                      Last MCA review: {new Date((item as any).last_mca_review_date).toLocaleDateString()}
                     </div>
                   )}
                 </div>
