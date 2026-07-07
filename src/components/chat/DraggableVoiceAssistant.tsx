@@ -257,7 +257,10 @@ export const DraggableVoiceAssistant: React.FC = () => {
 
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const contextInfoRef = useRef(contextInfo);
+  useEffect(() => {
+    contextInfoRef.current = contextInfo;
+  }, [contextInfo]);
   const cardRef = useRef<HTMLDivElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
