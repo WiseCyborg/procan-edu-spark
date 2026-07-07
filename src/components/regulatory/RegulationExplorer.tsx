@@ -135,9 +135,9 @@ export const RegulationExplorer = () => {
                       Last updated: {new Date(item.last_modified_at).toLocaleDateString()}
                     </div>
                   )}
-                  {item.last_mca_review_date && (
+                  {(item as any).last_mca_review_date && (
                     <div className="flex items-center gap-1">
-                      Last MCA review: {new Date(item.last_mca_review_date).toLocaleDateString()}
+                      Last MCA review: {new Date((item as any).last_mca_review_date).toLocaleDateString()}
                     </div>
                   )}
                 </div>
