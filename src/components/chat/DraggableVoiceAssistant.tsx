@@ -257,12 +257,13 @@ export const DraggableVoiceAssistant: React.FC = () => {
 
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const contextInfoRef = useRef<ContextInfo | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
 
   const contextInfo = getContextInfo(location.pathname);
+  contextInfoRef.current = contextInfo;
   const isChatDisabled = contextInfo.route === 'assessment';
 
   // Compute isAuthPage (not a hook, so this is fine before useEffect)
@@ -508,24 +509,19 @@ export const DraggableVoiceAssistant: React.FC = () => {
 
   // Proactive help trigger
   useEffect(() => {
-    if (isAuthPage || isChatDisabled) return; // Don't run on auth pages or when disabled
-    
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-    
-    timeoutRef.current = setTimeout(() => {
-      if (!isOpen && contextInfo.helpTips.length > 0) {
+    if (isAuthPage || isChatDisabled || isOpen) return;
+
+    const timer = setTimeout(() => {
+      if (contextInfoRef.current && contextInfoRef.current.helpTips.length > 0) {
         setShowProactiveTip(true);
       }
     }, 120000); // 2 minutes
 
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, [location.pathname, isOpen, isChatDisabled, isAuthPage, contextInfo.helpTips.length]);
+    return () => clearTimeout(timer);
+    // Intentionally NOT depending on location.pathname/contextInfo — navigating
+    // between pages should not reset this engagement timer; only opening/closing
+    // the chat, disabling it (exam routes), or auth-page transitions should.
+  }, [isOpen, isChatDisabled, isAuthPage]);
 
   // Enhanced session management
   useEffect(() => {
