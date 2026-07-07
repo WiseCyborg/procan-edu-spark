@@ -226,6 +226,65 @@ const JOB_HANDLERS: Record<string, (job: Job, supabase: any) => Promise<void>> =
 
     console.log(`[trigger_certificate_email] ✅ sent cert ${cert.certificate_number} to ${email}`);
   },
+
+  'send_progress_milestone': async (job, supabase) => {
+    // Circuit breaker guard (mirrors send_welcome_email)
+    const { data: circuit } = await supabase.rpc('check_email_circuit');
+    if (circuit && circuit[0]?.is_open) {
+      console.log('[JOB] Email circuit is OPEN - queueing send_progress_milestone for later retry');
+      throw new Error('Email circuit breaker is open');
+    }
+
+    try {
+      const { user_id, total_modules, modules_completed, milestone_percentage } = job.payload || {};
+      if (!user_id || milestone_percentage == null) {
+        throw new Error('send_progress_milestone: missing user_id or milestone_percentage in payload');
+      }
+
+      // Resolve recipient (same pattern as trigger_certificate_email)
+      const [{ data: profile }, { data: authUser, error: authErr }] = await Promise.all([
+        supabase
+          .from('profiles')
+          .select('first_name, last_name, email')
+          .eq('user_id', user_id)
+          .maybeSingle(),
+        supabase.auth.admin.getUserById(user_id),
+      ]);
+
+      if (authErr) console.warn('[send_progress_milestone] auth.admin.getUserById error:', authErr);
+
+      const email = authUser?.user?.email || profile?.email;
+      if (!email) {
+        throw new Error(`send_progress_milestone: no email found for user ${user_id}`);
+      }
+
+      const firstName = profile?.first_name || (authUser?.user?.user_metadata as any)?.first_name || 'Student';
+      const lastName = profile?.last_name || (authUser?.user?.user_metadata as any)?.last_name || '';
+
+      // Invoke the existing dedicated milestone email function.
+      // send-employee-progress-milestone loads the profile itself and renders
+      // the employee-progress-milestone template; it accepts { user_id, percentage }.
+      const { error: invokeErr } = await supabase.functions.invoke('send-employee-progress-milestone', {
+        body: {
+          user_id,
+          percentage: milestone_percentage,
+          modules_completed,
+          total_modules,
+          email,
+          firstName,
+          lastName,
+        },
+      });
+
+      if (invokeErr) throw invokeErr;
+
+      await supabase.rpc('record_email_result', { p_success: true });
+      console.log(`[send_progress_milestone] ✅ sent ${milestone_percentage}% milestone to ${email}`);
+    } catch (error) {
+      await supabase.rpc('record_email_result', { p_success: false });
+      throw error;
+    }
+  },
 };
 
 serve(async (req) => {
