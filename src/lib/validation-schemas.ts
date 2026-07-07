@@ -143,8 +143,9 @@ export const employeeRegistrationSchema = z.object({
   
   joinCode: z.string()
     .trim()
-    .length(8, "Join code must be exactly 8 characters")
-    .regex(/^[A-Z0-9]+$/i, "Join code must contain only letters and numbers")
+    .min(6, "Join code must be at least 6 characters")
+    .max(30, "Join code is too long")
+    .regex(/^[A-Z0-9-]+$/i, "Join code must contain only letters, numbers, and hyphens")
     .optional()
 });
 
