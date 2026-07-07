@@ -496,6 +496,7 @@ const EnhancedCourseModule: React.FC = () => {
   };
 
   const calculateSectionProgress = () => {
+    if (isModuleAlreadyCompleted) return 100;
     let completed = 0;
     if (overviewComplete) completed += 25;
     if (courseComplete) completed += 25;
@@ -543,7 +544,7 @@ const EnhancedCourseModule: React.FC = () => {
       id: 'overview',
       label: 'Overview',
       icon: <BookOpen className="h-4 w-4" />,
-      isCompleted: overviewComplete,
+      isCompleted: isModuleAlreadyCompleted || overviewComplete,
       isCurrent: activeTab === 'overview',
       isLocked: false,
     },
@@ -551,7 +552,7 @@ const EnhancedCourseModule: React.FC = () => {
       id: 'course',
       label: 'Course',
       icon: <Video className="h-4 w-4" />,
-      isCompleted: courseComplete,
+      isCompleted: isModuleAlreadyCompleted || courseComplete,
       isCurrent: activeTab === 'course',
       isLocked: !canAccessCourse,
       lockReason: 'Complete Overview first',
@@ -560,7 +561,7 @@ const EnhancedCourseModule: React.FC = () => {
       id: 'documents',
       label: 'Documents',
       icon: <FileText className="h-4 w-4" />,
-      isCompleted: docsViewed,
+      isCompleted: isModuleAlreadyCompleted || docsViewed,
       isCurrent: activeTab === 'documents',
       isLocked: !canAccessDocuments,
       lockReason: 'Complete Course first',
@@ -569,7 +570,7 @@ const EnhancedCourseModule: React.FC = () => {
       id: 'quiz',
       label: 'Quiz',
       icon: <CheckCircle2 className="h-4 w-4" />,
-      isCompleted: quizComplete && quizPassed,
+      isCompleted: isModuleAlreadyCompleted || (quizComplete && quizPassed),
       isCurrent: activeTab === 'quiz',
       isLocked: !canAccessQuiz,
       lockReason: 'Review all documents first',
@@ -939,8 +940,8 @@ const EnhancedCourseModule: React.FC = () => {
                           {moduleDocuments.length > 0 && (
                             <DocumentsProgressHeader
                               totalDocuments={moduleDocuments.length}
-                              completedDocuments={documentsViewed.size}
-                              quizUnlocked={documentsViewed.size === moduleDocuments.length}
+                              completedDocuments={isModuleAlreadyCompleted ? moduleDocuments.length : documentsViewed.size}
+                              quizUnlocked={isModuleAlreadyCompleted || documentsViewed.size === moduleDocuments.length}
                             />
                           )}
                           
@@ -978,9 +979,9 @@ const EnhancedCourseModule: React.FC = () => {
                     <div className="lg:col-span-1 space-y-4">
                       {/* Quiz Lock Indicator in Sidebar */}
                       <QuizLockIndicator
-                        isLocked={moduleDocuments.length > 0 && documentsViewed.size < moduleDocuments.length}
+                        isLocked={!isModuleAlreadyCompleted && moduleDocuments.length > 0 && documentsViewed.size < moduleDocuments.length}
                         documentsRequired={moduleDocuments.length}
-                        documentsCompleted={documentsViewed.size}
+                        documentsCompleted={isModuleAlreadyCompleted ? moduleDocuments.length : documentsViewed.size}
                         lockReason="Complete all required documents"
                       />
                       
@@ -998,9 +999,9 @@ const EnhancedCourseModule: React.FC = () => {
                       setDocsViewed(true);
                       setActiveTab('quiz');
                     }}
-                    canContinue={moduleDocuments.length === 0 || documentsViewed.size === moduleDocuments.length}
+                    canContinue={isModuleAlreadyCompleted || moduleDocuments.length === 0 || documentsViewed.size === moduleDocuments.length}
                     completionMessage={
-                      moduleDocuments.length === 0
+                      isModuleAlreadyCompleted || moduleDocuments.length === 0
                         ? "Continue to Quiz"
                         : documentsViewed.size === moduleDocuments.length
                           ? "✓ All documents read — Continue to Quiz"
