@@ -35,9 +35,9 @@ export const RegulatorySidebar = ({ sectionNumber, comarReference }: RegulatoryS
     return null;
   }
 
-  const officialLink = comarReference 
-    ? `https://dsd.maryland.gov/regulations/Pages/10.62.aspx#${comarReference}`
-    : 'https://dsd.maryland.gov/regulations/Pages/10.62.aspx';
+  // Prefer the canonical scraped source_url; fall back to the official COMAR portal.
+  const officialLink = (content as { source_url?: string })?.source_url
+    || 'https://dsd.maryland.gov/regulations/Pages/default.aspx';
 
   return (
     <Card className="sticky top-4">
