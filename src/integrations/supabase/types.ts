@@ -9807,6 +9807,44 @@ export type Database = {
         }
         Relationships: []
       }
+      join_codes_seat_health: {
+        Row: {
+          available_seats: number | null
+          code: string | null
+          current_uses: number | null
+          expires_at: string | null
+          is_active: boolean | null
+          join_code_id: string | null
+          max_uses: number | null
+          organization_id: string | null
+          organization_name: string | null
+          seat_status: string | null
+          total_seats: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rvt_join_codes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "compliance_dashboard_metrics"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "rvt_join_codes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rvt_join_codes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
+          },
+        ]
+      }
       launch_audit_batch_summary: {
         Row: {
           ended_at: string | null
