@@ -87,7 +87,7 @@ const raw: Record<number, Array<Omit<QuizQuestion, 'id'>>> = {
   7: [
     { q: "How long must sales records be kept?", a: "2 years", options: ["1 year", "2 years", "5 years"] },
     { q: "What must be recorded for each sale?", a: "Customer ID", options: ["Customer ID", "Employee mood", "Weather"] },
-    { q: "How long must dispensaries retain sales records per MCA regulations?", a: "3 years", options: ["1 year", "2 years", "3 years"] },
+    { q: "How long must dispensaries retain sales records per MCA regulations?", a: "2 years", options: ["1 year", "2 years", "3 years"] },
     { q: "Which records must be kept for every cannabis transaction?", a: "Customer name and product purchased", options: ["Customer name and product purchased", "Customer's medical history", "Customer's employment information"] },
     { q: "What is the purpose of a chain of custody record?", a: "Document cannabis movement from origin to sale", options: ["Track employee performance", "Document cannabis movement from origin to sale", "Record customer complaints"] },
   ],
