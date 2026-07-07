@@ -25,6 +25,7 @@ const TOTAL_MODULES = 24;
 const COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
 
 interface ModuleData {
+  id: string;
   module_number: number;
   title: string;
   description: string | null;
@@ -76,7 +77,7 @@ const CourseLayout: React.FC = () => {
     const fetchModules = async () => {
       const { data, error } = await supabase
         .from('course_modules')
-        .select('module_number, title, description, comar_reference, estimated_minutes, is_manager_only')
+        .select('id, module_number, title, description, comar_reference, estimated_minutes, is_manager_only')
         .eq('course_id', COURSE_ID)
         .eq('is_active', true)
         .order('module_number');
@@ -113,7 +114,7 @@ const CourseLayout: React.FC = () => {
   const managerModules = modules.filter(m => m.is_manager_only);
   const agentModules = modules.filter(m => !m.is_manager_only);
   const managerCompletedCount = managerModules.filter(m =>
-    isModuleCompleted(`part${m.module_number}`)
+    isModuleCompleted(m.id)
   ).length;
   const managerPercent = managerModules.length > 0
     ? Math.round((managerCompletedCount / managerModules.length) * 100)
@@ -239,12 +240,12 @@ const CourseLayout: React.FC = () => {
                       <div className="flex items-center space-x-2">
                         <BookOpen className={`w-5 h-5 ${tierColor}`} />
                         <span className="font-medium">Module {module.module_number}</span>
-                        {isModuleCompleted(moduleId) && (
+                        {isModuleCompleted(module.id) && (
                           <CheckCircle className="w-5 h-5 text-green-600" />
                         )}
                       </div>
-                      <Badge variant={isModuleCompleted(moduleId) ? "default" : "secondary"}>
-                        {isModuleCompleted(moduleId) ? 'Completed' : 'Available'}
+                      <Badge variant={isModuleCompleted(module.id) ? "default" : "secondary"}>
+                        {isModuleCompleted(module.id) ? 'Completed' : 'Available'}
                       </Badge>
                     </div>
                     <h3 className="font-semibold text-sm">{module.title}</h3>
@@ -291,12 +292,12 @@ const CourseLayout: React.FC = () => {
                         <div className="flex items-center space-x-2">
                           <BookOpen className="w-5 h-5 text-purple-600" />
                           <span className="font-medium">Module {module.module_number}</span>
-                          {isModuleCompleted(moduleId) && (
+                          {isModuleCompleted(module.id) && (
                             <CheckCircle className="w-5 h-5 text-green-600" />
                           )}
                         </div>
-                        <Badge variant={isModuleCompleted(moduleId) ? "default" : "secondary"}>
-                          {isModuleCompleted(moduleId) ? 'Completed' : 'Available'}
+                        <Badge variant={isModuleCompleted(module.id) ? "default" : "secondary"}>
+                          {isModuleCompleted(module.id) ? 'Completed' : 'Available'}
                         </Badge>
                       </div>
                       <h3 className="font-semibold text-sm">{module.title}</h3>
