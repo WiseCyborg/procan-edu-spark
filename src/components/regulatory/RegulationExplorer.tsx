@@ -75,7 +75,7 @@ export const RegulationExplorer = () => {
           ))
         ) : filteredContent && filteredContent.length > 0 ? (
           filteredContent.map((item) => (
-            <Card key={item.id}>
+            <Card key={item.section_number}>
               <CardHeader>
                 <div className="flex items-start justify-between gap-4">
                   <div className="space-y-2">
@@ -83,9 +83,9 @@ export const RegulationExplorer = () => {
                       <Badge variant="outline" className="font-mono">
                         {item.section_number}
                       </Badge>
-                      {item.change_impact_level && (
-                        <Badge variant={getImpactColor(item.change_impact_level)}>
-                          {item.change_impact_level}
+                      {(item as any).change_impact_level && (
+                        <Badge variant={getImpactColor((item as any).change_impact_level)}>
+                          {(item as any).change_impact_level}
                         </Badge>
                       )}
                     </div>
