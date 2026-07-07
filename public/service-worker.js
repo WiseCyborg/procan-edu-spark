@@ -1,60 +1,58 @@
-const CACHE_NAME = 'procann-edu-v1';
-const urlsToCache = [
-  '/',
-  '/course',
-  '/dashboard',
-  '/offline.html'
-];
+// Bump this version string on every deploy where you want to force clients
+// to pick up fresh content. Changing it changes this file's bytes, which is
+// what makes the browser's own service worker update-detection (see
+// src/lib/pwa-registration.ts) notice there's a new worker and prompt the
+// user to reload.
+const CACHE_VERSION = 'v2';
+const CACHE_NAME = `procann-edu-${CACHE_VERSION}`;
+const OFFLINE_URL = '/offline.html';
 
-// Install event - cache core assets
+// Install event - cache only the offline fallback page
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('Opened cache');
-        return cache.addAll(urlsToCache);
-      })
+      .then((cache) => cache.add(OFFLINE_URL))
   );
   self.skipWaiting();
 });
 
-// Fetch event - serve from cache, fallback to network
+// Fetch event - network-first. This is the fix: previously this was
+// cache-first, which meant a browser that had cached the app shell would
+// keep serving that exact snapshot forever, even after new deploys. Network
+// requests are tried first; the cache (and the offline page) are only used
+// as a fallback when the network request actually fails (e.g. truly offline).
 self.addEventListener('fetch', (event) => {
+  const { request } = event;
+
   event.respondWith(
-    caches.match(event.request)
+    fetch(request)
       .then((response) => {
-        // Cache hit - return response
-        if (response) {
+        if (!response || response.status !== 200 || response.type !== 'basic') {
           return response;
         }
 
-        return fetch(event.request).then((response) => {
-          // Check if valid response
-          if (!response || response.status !== 200 || response.type !== 'basic') {
-            return response;
-          }
-
-          // Clone the response
-          const responseToCache = response.clone();
-
-          caches.open(CACHE_NAME)
-            .then((cache) => {
-              cache.put(event.request, responseToCache);
-            });
-
-          return response;
+        const responseToCache = response.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(request, responseToCache);
         });
+
+        return response;
       })
       .catch(() => {
-        // Return offline page for navigation requests
-        if (event.request.mode === 'navigate') {
-          return caches.match('/offline.html');
-        }
+        return caches.match(request).then((cached) => {
+          if (cached) return cached;
+          if (request.mode === 'navigate') {
+            return caches.match(OFFLINE_URL);
+          }
+        });
       })
   );
 });
 
-// Activate event - clean up old caches
+// Activate event - clean up any cache not matching the current CACHE_NAME.
+// FIX: previously CACHE_NAME never changed, so this never actually deleted
+// anything. Now that CACHE_VERSION is meant to be bumped per deploy, this
+// correctly purges stale caches from earlier versions.
 self.addEventListener('activate', (event) => {
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
@@ -66,9 +64,8 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
-    })
+    }).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 // Push notification event
