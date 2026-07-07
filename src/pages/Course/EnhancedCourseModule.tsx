@@ -208,7 +208,7 @@ const EnhancedCourseModule: React.FC = () => {
     { id: '949aee25-1254-4dfe-a22b-e17912670ba7', number: 4, title: 'Product Knowledge and Safety', tier: 'green' as const, isCompleted: isModuleCompletedByNumber(4), isLocked: !canAccessModule(4) },
     { id: '14d0aa9f-4436-460c-a76b-52f07ba33bf3', number: 5, title: 'Inventory Management and Tracking', tier: 'green' as const, isCompleted: isModuleCompletedByNumber(5), isLocked: !canAccessModule(5) },
     { id: '00daed9a-9d63-4b21-ae90-7444816cb783', number: 6, title: 'Customer Service Excellence', tier: 'green' as const, isCompleted: isModuleCompletedByNumber(6), isLocked: !canAccessModule(6) },
-    { id: '9b4ccbb6-e96a-4d7e-9862-d33082cf35dc', number: 7, title: 'Security, Safety, and Drug-Free Workplace', tier: 'green' as const, isCompleted: isModuleCompletedByNumber(7), isLocked: !canAccessModule(7) },
+    { id: '9b4ccbb6-e96a-4d7e-9862-d33082cf35dc', number: 7, title: 'Security, Safety, and Drug-Free Workplace', tier: 'yellow' as const, isCompleted: isModuleCompletedByNumber(7), isLocked: !canAccessModule(7) },
     { id: 'b610259f-7bd4-4f77-9350-7c2c29939432', number: 8, title: 'Laboratory Testing and Quality Control', tier: 'yellow' as const, isCompleted: isModuleCompletedByNumber(8), isLocked: !canAccessModule(8) },
     { id: 'dbacc5bc-e14c-470a-a0ba-852df2b41220', number: 9, title: 'Dosage Guidelines and Patient Consultation', tier: 'yellow' as const, isCompleted: isModuleCompletedByNumber(9), isLocked: !canAccessModule(9) },
     { id: 'b49e8150-f795-4d6f-a501-35d5e1f5aacf', number: 10, title: 'Point of Sale Systems and Transactions', tier: 'yellow' as const, isCompleted: isModuleCompletedByNumber(10), isLocked: !canAccessModule(10) },
