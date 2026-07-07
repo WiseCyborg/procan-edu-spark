@@ -4,20 +4,40 @@ import { useAuth } from '@/hooks/useAuth';
 
 export const useRegulatoryContent = (sectionNumber?: string) => {
   return useQuery({
-    queryKey: ['regulatory-content', sectionNumber],
+    queryKey: ['comar-citation', sectionNumber],
+    enabled: !!sectionNumber,
     queryFn: async () => {
-      let query = supabase
-        .from('regulatory_content')
-        .select('*')
-        .order('created_at', { ascending: false });
+      if (!sectionNumber) return [];
 
-      if (sectionNumber) {
-        query = query.eq('section_number', sectionNumber);
-      }
+      // Canonical single source of truth: comar_citations (scraped official text),
+      // with the editorial paraphrase joined from comar_editorial_summaries.
+      const { data: citation, error } = await supabase
+        .from('comar_citations')
+        .select('section_number, chapter, section_title, official_text, source_url, last_scraped_at')
+        .eq('section_number', sectionNumber)
+        .eq('is_active', true)
+        .maybeSingle();
 
-      const { data, error } = await query;
       if (error) throw error;
-      return data;
+      if (!citation) return [];
+
+      const { data: summary } = await supabase
+        .from('comar_editorial_summaries')
+        .select('plain_summary')
+        .eq('section_number', sectionNumber)
+        .eq('is_active', true)
+        .maybeSingle();
+
+      // Shape the row to match what RegulatorySidebar consumes.
+      return [{
+        section_number: citation.section_number,
+        section_title: citation.section_title,
+        content_text: citation.official_text,
+        plain_language_summary: summary?.plain_summary ?? null,
+        source_url: citation.source_url,
+        last_modified_at: citation.last_scraped_at,
+        compliance_tips: null,
+      }];
     },
   });
 };

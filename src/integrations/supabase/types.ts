@@ -923,6 +923,86 @@ export type Database = {
         }
         Relationships: []
       }
+      comar_citations: {
+        Row: {
+          chapter: string
+          created_at: string
+          id: string
+          is_active: boolean
+          last_scraped_at: string
+          official_text: string
+          section_number: string
+          section_title: string
+          source_url: string
+          updated_at: string
+          version_hash: string
+        }
+        Insert: {
+          chapter: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_scraped_at?: string
+          official_text: string
+          section_number: string
+          section_title: string
+          source_url: string
+          updated_at?: string
+          version_hash: string
+        }
+        Update: {
+          chapter?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_scraped_at?: string
+          official_text?: string
+          section_number?: string
+          section_title?: string
+          source_url?: string
+          updated_at?: string
+          version_hash?: string
+        }
+        Relationships: []
+      }
+      comar_editorial_summaries: {
+        Row: {
+          authored_by: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          plain_summary: string
+          section_number: string
+          updated_at: string
+        }
+        Insert: {
+          authored_by?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          plain_summary: string
+          section_number: string
+          updated_at?: string
+        }
+        Update: {
+          authored_by?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          plain_summary?: string
+          section_number?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comar_editorial_summaries_section_number_fkey"
+            columns: ["section_number"]
+            isOneToOne: true
+            referencedRelation: "comar_citations"
+            referencedColumns: ["section_number"]
+          },
+        ]
+      }
       comar_versions: {
         Row: {
           change_summary: string | null
@@ -1910,6 +1990,7 @@ export type Database = {
         Row: {
           comar_compliance_status: string | null
           comar_reference: string | null
+          comar_section_ref: string | null
           comar_version_id: string | null
           content: string | null
           course_id: string
@@ -1934,6 +2015,7 @@ export type Database = {
         Insert: {
           comar_compliance_status?: string | null
           comar_reference?: string | null
+          comar_section_ref?: string | null
           comar_version_id?: string | null
           content?: string | null
           course_id: string
@@ -1958,6 +2040,7 @@ export type Database = {
         Update: {
           comar_compliance_status?: string | null
           comar_reference?: string | null
+          comar_section_ref?: string | null
           comar_version_id?: string | null
           content?: string | null
           course_id?: string
@@ -1980,6 +2063,13 @@ export type Database = {
           video_url?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "course_modules_comar_section_ref_fkey"
+            columns: ["comar_section_ref"]
+            isOneToOne: false
+            referencedRelation: "comar_citations"
+            referencedColumns: ["section_number"]
+          },
           {
             foreignKeyName: "course_modules_comar_version_id_fkey"
             columns: ["comar_version_id"]
@@ -3480,6 +3570,7 @@ export type Database = {
       exam_blueprint: {
         Row: {
           comar_section: string
+          comar_section_ref: string | null
           created_at: string
           id: string
           passing_threshold: number
@@ -3492,6 +3583,7 @@ export type Database = {
         }
         Insert: {
           comar_section: string
+          comar_section_ref?: string | null
           created_at?: string
           id?: string
           passing_threshold?: number
@@ -3504,6 +3596,7 @@ export type Database = {
         }
         Update: {
           comar_section?: string
+          comar_section_ref?: string | null
           created_at?: string
           id?: string
           passing_threshold?: number
@@ -3514,7 +3607,15 @@ export type Database = {
           topic_area?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "exam_blueprint_comar_section_ref_fkey"
+            columns: ["comar_section_ref"]
+            isOneToOne: false
+            referencedRelation: "comar_citations"
+            referencedColumns: ["section_number"]
+          },
+        ]
       }
       exam_checkins: {
         Row: {
