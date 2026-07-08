@@ -1,5 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { loadEmailTemplate } from "../_shared/email-templates.ts";
+import { EmailService } from "../_shared/email-service.ts";
 
 
 
@@ -239,8 +241,8 @@ const JOB_HANDLERS: Record<string, (job: Job, supabase: any) => Promise<void>> =
 
     try {
       const { user_id, total_modules, modules_completed, milestone_percentage } = job.payload || {};
-      if (!user_id || milestone_percentage == null) {
-        throw new Error('send_progress_milestone: missing user_id or milestone_percentage in payload');
+      if (!user_id || milestone_percentage == null || modules_completed == null || total_modules == null) {
+        throw new Error('send_progress_milestone: missing required payload fields');
       }
 
       // Resolve recipient (same pattern as trigger_certificate_email)
@@ -263,22 +265,36 @@ const JOB_HANDLERS: Record<string, (job: Job, supabase: any) => Promise<void>> =
       const firstName = profile?.first_name || (authUser?.user?.user_metadata as any)?.first_name || 'Student';
       const lastName = profile?.last_name || (authUser?.user?.user_metadata as any)?.last_name || '';
 
-      // Invoke the existing dedicated milestone email function.
-      // send-employee-progress-milestone loads the profile itself and renders
-      // the employee-progress-milestone template; it accepts { user_id, percentage }.
-      const { error: invokeErr } = await supabase.functions.invoke('send-employee-progress-milestone', {
-        body: {
-          user_id,
-          percentage: milestone_percentage,
-          modules_completed,
-          total_modules,
-          email,
-          firstName,
-          lastName,
-        },
+      const html = await loadEmailTemplate('employee-progress-milestone', {
+        FirstName: firstName,
+        LastName: lastName,
+        ProgressPercent: milestone_percentage,
+        ModulesCompleted: modules_completed,
+        TotalModules: total_modules,
+        ContinueUrl: 'https://www.procannedu.com/course',
+        NextModule: 'Continue your Maryland RVT certification training',
+        NextModuleDuration: '10–15',
+        RecentModule: `${modules_completed} of ${total_modules} modules`,
+        QuizScore: '',
+        TimeSpent: 'Progress saved',
       });
 
-      if (invokeErr) throw invokeErr;
+      const emailService = new EmailService();
+      const result = await emailService.send({
+        to: email,
+        subject: `🎯 ${milestone_percentage}% Complete - Keep Going!`,
+        html,
+        email_type: 'progress_milestone',
+        metadata: { user_id, milestone_percentage, modules_completed, total_modules },
+      });
+
+      await supabase.from('email_logs').insert({
+        recipient_email: email,
+        subject: `🎯 ${milestone_percentage}% Complete - Keep Going!`,
+        email_type: 'progress_milestone',
+        status: result.success ? 'sent' : 'failed',
+        metadata: { user_id, milestone_percentage, modules_completed, total_modules },
+      });
 
       await supabase.rpc('record_email_result', { p_success: true });
       console.log(`[send_progress_milestone] ✅ sent ${milestone_percentage}% milestone to ${email}`);
