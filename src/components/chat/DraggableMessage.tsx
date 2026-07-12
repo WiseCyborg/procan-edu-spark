@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { GripVertical, Pin, X, Copy, Volume2, Square } from 'lucide-react';
+import { GripVertical, Pin, X, Copy, Volume2, Square, Download } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 
 interface Message {
@@ -135,6 +135,37 @@ export const DraggableMessage: React.FC<DraggableMessageProps> = ({
     });
   };
 
+  const downloadMessage = () => {
+    const pageContext = message.pageContext || currentPageContext;
+    const speaker = message.isUser ? 'You' : 'AiLean';
+    const stamp = message.timestamp.toLocaleString('en-US');
+    const lines = [
+      `ProCann Edu — AiLean Chat Message`,
+      `From: ${speaker}`,
+      `Time: ${stamp}`,
+      pageContext ? `Page: ${pageContext.title} (${pageContext.route})` : '',
+      ``,
+      message.content,
+      ``,
+    ].filter(Boolean);
+
+    const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const safeStamp = message.timestamp.toISOString().replace(/[:.]/g, '-');
+    a.href = url;
+    a.download = `ailean-${speaker.toLowerCase()}-${safeStamp}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: 'Downloaded',
+      description: 'Message saved as a text file',
+    });
+  };
+
   const formatTime = (date: Date) => {
     return new Intl.DateTimeFormat('en-US', {
       hour: '2-digit',
@@ -202,66 +233,107 @@ export const DraggableMessage: React.FC<DraggableMessageProps> = ({
           </div>
         )}
         
-        {/* Message controls */}
-        <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-          {!message.isUser && (onPlay || onStop) && (
-            <Button
-              size="sm"
-              variant="ghost"
-              className="h-6 w-6 p-0"
-              onClick={() => {
-                if (isPlaying) {
-                  onStop?.();
-                } else {
-                  onPlay?.(message.id, message.content);
-                }
-              }}
-              aria-label={isPlaying ? 'Stop playback' : 'Play message'}
-              title={isPlaying ? 'Stop playback' : 'Play message'}
-            >
-              {isPlaying ? (
-                <Square className="w-3 h-3 text-primary animate-pulse" />
-              ) : (
-                <Volume2 className="w-3 h-3" />
-              )}
-            </Button>
-          )}
-          <Button
-            size="sm"
-            variant="ghost"
-            className="h-6 w-6 p-0"
-            onClick={copyMessage}
-          >
-            <Copy className="w-3 h-3" />
-          </Button>
-          
-          
-          {!isPinned ? (
-            <Button
-              size="sm"
-              variant="ghost"
-              className="h-6 w-6 p-0"
-              onClick={handlePin}
-            >
-              <Pin className="w-3 h-3" />
-            </Button>
-          ) : (
-            <Button
-              size="sm"
-              variant="ghost"
-              className="h-6 w-6 p-0"
-              onClick={handleUnpin}
-            >
-              <X className="w-3 h-3" />
-            </Button>
-          )}
-        </div>
 
-        <div className="pr-12">
-          <p className="text-sm leading-relaxed">{message.content}</p>
-          
+        <div>
+          <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+
+          {/* Persistent per-message action bar — read aloud, download, copy, pin.
+              Shown on BOTH sent and received messages. */}
+          <div
+            className={`mt-2 pt-2 flex items-center gap-1 border-t ${
+              message.isUser ? 'border-primary-foreground/25' : 'border-border/40'
+            }`}
+          >
+            <span
+              className={`text-[10px] mr-auto ${
+                message.isUser ? 'text-primary-foreground/70' : 'text-muted-foreground'
+              }`}
+            >
+              {formatTime(message.timestamp)}
+            </span>
+
+            {(onPlay || onStop) && (
+              <Button
+                size="sm"
+                variant="ghost"
+                className={`h-6 w-6 p-0 ${
+                  message.isUser ? 'text-primary-foreground hover:bg-primary-foreground/20' : ''
+                }`}
+                onClick={() => {
+                  if (isPlaying) {
+                    onStop?.();
+                  } else {
+                    onPlay?.(message.id, message.content);
+                  }
+                }}
+                aria-label={isPlaying ? 'Stop reading this message aloud' : 'Read this message aloud'}
+                title={isPlaying ? 'Stop reading aloud' : 'Read aloud'}
+              >
+                {isPlaying ? (
+                  <Square className="w-3 h-3 animate-pulse" />
+                ) : (
+                  <Volume2 className="w-3 h-3" />
+                )}
+              </Button>
+            )}
+
+            <Button
+              size="sm"
+              variant="ghost"
+              className={`h-6 w-6 p-0 ${
+                message.isUser ? 'text-primary-foreground hover:bg-primary-foreground/20' : ''
+              }`}
+              onClick={downloadMessage}
+              aria-label="Download this message"
+              title="Download this message"
+            >
+              <Download className="w-3 h-3" />
+            </Button>
+
+            <Button
+              size="sm"
+              variant="ghost"
+              className={`h-6 w-6 p-0 ${
+                message.isUser ? 'text-primary-foreground hover:bg-primary-foreground/20' : ''
+              }`}
+              onClick={copyMessage}
+              aria-label="Copy this message"
+              title="Copy this message"
+            >
+              <Copy className="w-3 h-3" />
+            </Button>
+
+            {!isPinned ? (
+              <Button
+                size="sm"
+                variant="ghost"
+                className={`h-6 w-6 p-0 ${
+                  message.isUser ? 'text-primary-foreground hover:bg-primary-foreground/20' : ''
+                }`}
+                onClick={handlePin}
+                aria-label="Pin this message"
+                title="Pin this message"
+              >
+                <Pin className="w-3 h-3" />
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                variant="ghost"
+                className={`h-6 w-6 p-0 ${
+                  message.isUser ? 'text-primary-foreground hover:bg-primary-foreground/20' : ''
+                }`}
+                onClick={handleUnpin}
+                aria-label="Unpin this message"
+                title="Unpin this message"
+              >
+                <X className="w-3 h-3" />
+              </Button>
+            )}
+          </div>
+
           {isPinned && (
-            <div className="mt-2 pt-2 border-t border-border/20">
+            <div className="mt-2">
               <Badge variant="secondary" className="text-xs">
                 Pinned Message
               </Badge>
