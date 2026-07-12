@@ -197,13 +197,13 @@ const CourseLayout: React.FC = () => {
           <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
             <p className="text-sm text-blue-800 dark:text-blue-300 text-center">
               <span className="font-semibold">Note:</span> Green, Yellow, and Red tier levels are for progress tracking and motivation.
-              The {requiredTotal} agent modules are required for Maryland RVT (Agent) certification. The {managerModules.length || 5} manager-level modules are optional and count only toward Manager-Level RVT certification.
+              The {requiredTotal} agent modules are required for Maryland RVT (Agent) certification. The {managerModules.length || 5} supervisory modules are optional and lead to a supplemental ProCann Edu Certificate of Completion — they are not part of MCA-required RVT certification.
             </p>
           </div>
           {isManagerRole && managerModules.length > 0 && (
             <div className="bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800 rounded-lg p-4 space-y-2">
               <p className="text-sm text-purple-800 dark:text-purple-300 text-center">
-                <span className="font-semibold">Manager Track (Optional):</span> {managerModules.length} additional manager-level modules. These do not block your Agent exam — complete them for <strong>Manager-Level RVT Certification</strong>.
+                <span className="font-semibold">Supervisory Track (Optional):</span> {managerModules.length} additional supervisory modules. These do not block your Agent exam — complete all of them, once you hold an active Agent RVT certificate, to earn the <strong>Supervisory Compliance Training Certificate of Completion</strong>. This is a supplemental ProCann Edu credential, not a separate MCA certification.
               </p>
               <div className="flex items-center justify-between text-xs text-purple-800 dark:text-purple-300">
                 <span>Manager Track Progress</span>
@@ -274,8 +274,8 @@ const CourseLayout: React.FC = () => {
       {isManagerRole && managerModules.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center gap-3">
-            <h2 className="text-2xl font-bold text-foreground">Manager-Level Training (Optional)</h2>
-            <Badge className="bg-purple-600 text-white">Manager Track</Badge>
+            <h2 className="text-2xl font-bold text-foreground">Supervisory Compliance Training (Optional)</h2>
+            <Badge className="bg-purple-600 text-white">Supervisory Track</Badge>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {managerModules.map((module) => {

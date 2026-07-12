@@ -10635,6 +10635,7 @@ export type Database = {
         Args: { target_user_id: string; viewer_id: string }
         Returns: boolean
       }
+      issue_manager_certificate: { Args: { p_user_id: string }; Returns: Json }
       jwt_org_id: { Args: never; Returns: string }
       jwt_role: { Args: never; Returns: string }
       log_exam_identity_verification: {
