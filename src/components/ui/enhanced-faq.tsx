@@ -200,70 +200,30 @@ export const EnhancedFAQ: React.FC<EnhancedFAQProps> = ({
       securityLevel: 'public'
     },
 
-    // Supabase Email Service FAQs
+    // Email Service FAQs
     {
       id: 'email-1',
-      question: 'What email service does ProCann Edu use?',
-      answer: 'ProCann Edu uses Supabase\'s enterprise-grade email infrastructure, which provides 99.9% delivery reliability, enterprise security, and SOC 2 compliance. This ensures your account verification, password resets, and training notifications are delivered reliably.',
+      question: 'What emails will I receive from ProCann Edu?',
+      answer: 'You will receive account verification and password reset emails, course and certificate notifications, and important compliance updates. Emails come from noreply@procannedu.com and certificates@procannedu.com.',
       category: 'Email Service',
-      securityLevel: 'public',
-      tags: ['email', 'reliability', 'supabase']
-    },
-    {
-      id: 'email-2',
-      question: 'Why do emails say "Powered by Supabase"?',
-      answer: 'The "Powered by Supabase" footer indicates you\'re receiving emails from our trusted, enterprise-grade infrastructure. Supabase is a leading database and authentication platform used by thousands of companies worldwide for secure, reliable communications.',
-      category: 'Email Service',
-      securityLevel: 'public',
-      tags: ['branding', 'trust', 'supabase']
-    },
-    {
-      id: 'email-3',
-      question: 'Are Supabase emails secure and legitimate?',
-      answer: 'Yes! Supabase emails are highly secure with end-to-end encryption, anti-phishing protection, and enterprise security standards. All emails are legitimate and come from ProCann Edu\'s verified domain through Supabase\'s secure infrastructure.',
-      category: 'Email Security',
-      securityLevel: 'public',
-      tags: ['security', 'encryption', 'legitimate']
-    },
-    {
-      id: 'email-4',
-      question: 'What types of emails will I receive?',
-      answer: 'You\'ll receive account verification emails, password reset links, course completion confirmations, certificate notifications, and important compliance updates. All emails are sent through Supabase\'s reliable delivery system.',
-      category: 'Email Types',
       securityLevel: 'student',
       tags: ['notifications', 'verification', 'certificates']
     },
     {
-      id: 'email-5',
-      question: 'What should I do if I don\'t receive an email?',
-      answer: 'First, check your spam/junk folder for emails from ProCann Edu via Supabase. If not found, verify your email address is correct in your profile settings. You can also request a new verification email from your account dashboard.',
+      id: 'email-2',
+      question: "What should I do if I don't receive an email?",
+      answer: 'First check your spam or junk folder for messages from procannedu.com. If it is not there, confirm the email address on your profile is correct, then request a new email from your account dashboard. If it still does not arrive, contact info@procannedu.com.',
       category: 'Email Troubleshooting',
       securityLevel: 'student',
       tags: ['troubleshooting', 'spam', 'verification']
     },
     {
-      id: 'email-6',
-      question: 'How reliable is Supabase\'s email delivery?',
-      answer: 'Supabase maintains 99.9% email delivery reliability with enterprise-grade infrastructure used by major companies. They provide real-time delivery monitoring, automatic retry mechanisms, and comprehensive spam protection.',
-      category: 'Email Reliability',
-      securityLevel: 'public',
-      tags: ['reliability', 'delivery', 'enterprise']
-    },
-    {
-      id: 'email-7',
-      question: 'Can I trust clicking links in Supabase emails?',
-      answer: 'Yes! All email links are cryptographically signed and verified. Supabase uses industry-standard security protocols to prevent tampering. Always verify the sender shows "ProCann Edu" and the domain matches our official communications.',
+      id: 'email-3',
+      question: 'How do I know an email from ProCann Edu is legitimate?',
+      answer: 'Legitimate ProCann Edu emails always come from the procannedu.com domain. We will never ask for your password by email. If an email looks suspicious or asks for credentials, do not click any links — forward it to info@procannedu.com instead.',
       category: 'Email Security',
       securityLevel: 'public',
-      tags: ['security', 'links', 'verification']
-    },
-    {
-      id: 'email-8',
-      question: 'Who has access to manage our organization\'s email settings?',
-      answer: 'Only ProCann Edu administrators can manage email settings. Supabase provides enterprise-grade access controls and audit logging. Your organization managers can view email delivery status but cannot modify system settings.',
-      category: 'Email Management',
-      securityLevel: 'manager',
-      tags: ['access', 'permissions', 'audit']
+      tags: ['security', 'phishing', 'legitimate']
     },
     
     // Session Security FAQs
