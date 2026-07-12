@@ -65,6 +65,7 @@ interface ModuleData {
   quiz_questions: QuizQuestion[];
   module_number: number;
   comar_reference?: string;
+  comar_section_ref?: string | null;
   video_url?: string;
   lessons?: Lesson[];
   asset_key?: string | null;
@@ -387,6 +388,7 @@ const EnhancedCourseModule: React.FC = () => {
           quiz_questions: (data.quiz_questions as unknown as QuizQuestion[]) || [],
           module_number: data.module_number,
           comar_reference: data.comar_reference,
+          comar_section_ref: data.comar_section_ref ?? null,
           video_url: data.video_url,
           asset_key: primary?.asset_key ?? null,
           video_pending: primary?.unmapped_reason === 'pending_ai_generation',
@@ -986,7 +988,7 @@ const EnhancedCourseModule: React.FC = () => {
                       />
                       
                       <RegulatorySidebar 
-                        sectionNumber={moduleData.module_number?.toString()}
+                        sectionNumber={moduleData.comar_section_ref ?? undefined}
                         comarReference={moduleData.comar_reference}
                       />
                     </div>
