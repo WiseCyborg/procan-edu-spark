@@ -54,21 +54,21 @@ export const EnhancedFAQ: React.FC<EnhancedFAQProps> = ({
     {
       id: 'student-2',
       question: 'How long do I have to complete the course?',
-      answer: 'You have unlimited time to complete the course. However, we recommend finishing within 30 days to maintain momentum and retain information effectively.',
+      answer: 'You can work through the course at your own pace. Note that COMAR 14.17.15.05C requires registered cannabis agents to complete an MCA-approved Responsible Vendor Training within 12 months of hire, so check your hire date with your manager. The MCA recommends completing training within 90 days as a best practice.',
       category: 'Course Access',
       securityLevel: 'student'
     },
     {
       id: 'student-3',
       question: 'What happens if I fail the final exam?',
-      answer: 'You can retake the final exam up to 3 times with a 24-hour waiting period between attempts. Additional study materials are provided after each attempt.',
+      answer: 'You can retake the final exam after a 24-hour waiting period. There is no limit on the number of attempts. Review the modules covering the topics you missed before retrying — your results highlight the weak areas to focus on.',
       category: 'Certification',
       securityLevel: 'student'
     },
     {
       id: 'student-4',
       question: 'How do I download my certificate?',
-      answer: 'After passing the final exam with 80%+ score, your certificate is automatically generated. Download it from your dashboard or check your email.',
+      answer: 'After passing the final exam with a score of 80% or higher, your certificate is generated automatically. Download it from your dashboard.',
       category: 'Certification',
       securityLevel: 'student'
     },
@@ -181,7 +181,7 @@ export const EnhancedFAQ: React.FC<EnhancedFAQProps> = ({
     {
       id: 'general-2',
       question: 'Is ProCann Edu aligned with Maryland Cannabis Administration requirements?',
-      answer: 'ProCann Edu is designed to meet MCA Responsible Vendor Training standards under COMAR 14.17.05. Our curriculum is regularly updated to align with current Maryland cannabis regulations.',
+      answer: 'ProCann Edu is designed to meet MCA Responsible Vendor Training standards under COMAR 14.17.15.05. Our curriculum is kept aligned with current Maryland cannabis regulations, which are tracked directly against the official COMAR source.',
       category: 'Certification',
       securityLevel: 'public'
     },
