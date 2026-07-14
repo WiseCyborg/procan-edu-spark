@@ -133,8 +133,7 @@ export const useUserProgress = (courseId?: string) => {
       // Check for tier unlock after completing a module
       if (variables.isCompleted) {
         const completedCount = (progressData?.filter(p => p.is_completed).length || 0) + 1;
-        const totalModules = 23; // Total modules in course
-        const completionPercentage = Math.round((completedCount / totalModules) * 100);
+        const completionPercentage = Math.round((completedCount / RVT_MODULE_COUNT) * 100);
 
         // Write course_completions when RVT modules are all done (19 modules: 0-18)
         if (completedCount >= RVT_MODULE_COUNT) {
