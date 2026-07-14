@@ -213,8 +213,17 @@ export const CertificateManagementView = () => {
                       <Button variant="ghost" size="sm">
                         <Download className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="sm">
-                        <Mail className="h-4 w-4" />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled={resendingIds.has(cert.id)}
+                        onClick={() => handleResendCertificate(cert)}
+                      >
+                        {resendingIds.has(cert.id) ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Mail className="h-4 w-4" />
+                        )}
                       </Button>
                       {!cert.is_revoked && (
                         <Button 
