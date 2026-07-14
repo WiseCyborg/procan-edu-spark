@@ -2680,6 +2680,13 @@ export type Database = {
             foreignKeyName: "email_analytics_email_log_id_fkey"
             columns: ["email_log_id"]
             isOneToOne: false
+            referencedRelation: "certificate_email_failures"
+            referencedColumns: ["email_log_id"]
+          },
+          {
+            foreignKeyName: "email_analytics_email_log_id_fkey"
+            columns: ["email_log_id"]
+            isOneToOne: false
             referencedRelation: "email_logs"
             referencedColumns: ["id"]
           },
@@ -9801,6 +9808,42 @@ export type Database = {
       }
     }
     Views: {
+      certificate_email_failures: {
+        Row: {
+          age_hours: number | null
+          created_at: string | null
+          email_log_id: string | null
+          error_message: string | null
+          looks_internal: boolean | null
+          recipient_email: string | null
+          status: string | null
+          subject: string | null
+          user_id: string | null
+        }
+        Insert: {
+          age_hours?: never
+          created_at?: string | null
+          email_log_id?: string | null
+          error_message?: string | null
+          looks_internal?: never
+          recipient_email?: string | null
+          status?: string | null
+          subject?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          age_hours?: never
+          created_at?: string | null
+          email_log_id?: string | null
+          error_message?: string | null
+          looks_internal?: never
+          recipient_email?: string | null
+          status?: string | null
+          subject?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       compliance_dashboard_metrics: {
         Row: {
           certified_employees: number | null
@@ -10743,6 +10786,10 @@ export type Database = {
       }
       reprovision_user: {
         Args: { p_organization_id: string; p_role?: string; p_user_id: string }
+        Returns: Json
+      }
+      requeue_failed_certificate_email: {
+        Args: { p_email_log_id: string }
         Returns: Json
       }
       reset_exam_state: {
