@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useCertificateManagement } from '@/hooks/useCertificateManagement';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { toast } from '@/components/ui/sonner';
 import {
   Table,
   TableBody,
@@ -34,6 +36,39 @@ import { cn } from '@/lib/utils';
 export const CertificateManagementView = () => {
   const { certificates, loading, filter, setFilter, expiringCount, revokeCertificate } = useCertificateManagement();
   const [searchTerm, setSearchTerm] = useState('');
+  const [resendingIds, setResendingIds] = useState<Set<string>>(new Set());
+
+  const handleResendCertificate = async (cert: typeof certificates[0]) => {
+    setResendingIds(prev => new Set(prev).add(cert.id));
+    try {
+      const { data, error } = await supabase.functions.invoke('resend-certificate', {
+        body: { certificate_id: cert.id }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data?.success) {
+        toast.success('Certificate email resent', {
+          description: `Certificate ${cert.certificate_number} resent to ${cert.user_email}`
+        });
+      } else {
+        throw new Error(data?.error || 'Failed to resend certificate email');
+      }
+    } catch (error: any) {
+      console.error('Error resending certificate:', error);
+      toast.error('Failed to resend certificate email', {
+        description: error?.message || 'An unexpected error occurred'
+      });
+    } finally {
+      setResendingIds(prev => {
+        const next = new Set(prev);
+        next.delete(cert.id);
+        return next;
+      });
+    }
+  };
 
   const filteredCertificates = certificates.filter(cert =>
     cert.certificate_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -178,8 +213,17 @@ export const CertificateManagementView = () => {
                       <Button variant="ghost" size="sm">
                         <Download className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="sm">
-                        <Mail className="h-4 w-4" />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled={resendingIds.has(cert.id)}
+                        onClick={() => handleResendCertificate(cert)}
+                      >
+                        {resendingIds.has(cert.id) ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Mail className="h-4 w-4" />
+                        )}
                       </Button>
                       {!cert.is_revoked && (
                         <Button 
