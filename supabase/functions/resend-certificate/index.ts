@@ -80,11 +80,14 @@ serve(async (req) => {
     // --- Look up recipient profile ---
     const { data: profile, error: profileErr } = await supabase
       .from("profiles")
-      .select("email, first_name, last_name")
+      .select("first_name, last_name")
       .eq("id", cert.user_id)
       .maybeSingle();
 
-    if (profileErr || !profile?.email) {
+    const { data: authUser, error: authUserErr } = await supabase.auth.admin.getUserById(cert.user_id);
+    const recipientEmail = authUser?.user?.email;
+
+    if (profileErr || !profile || authUserErr || !recipientEmail) {
       return new Response(JSON.stringify({ error: "Recipient email not found" }), {
         status: 404,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -100,7 +103,7 @@ serve(async (req) => {
 
     const emailService = new EmailService();
     const result = await emailService.send({
-      to: profile.email,
+      to: recipientEmail,
       subject: "Your ProCann Edu Certificate",
       html,
       email_type: "certificate",
@@ -113,7 +116,7 @@ serve(async (req) => {
 
     // Log success (EmailService only logs failures)
     await supabase.from("email_logs").insert({
-      recipient_email: profile.email,
+      recipient_email: recipientEmail,
       subject: "Your ProCann Edu Certificate",
       email_type: "certificate",
       status: "sent",
