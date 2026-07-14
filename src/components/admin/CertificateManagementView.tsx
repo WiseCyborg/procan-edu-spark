@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useCertificateManagement } from '@/hooks/useCertificateManagement';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { toast } from '@/components/ui/sonner';
 import {
   Table,
   TableBody,
