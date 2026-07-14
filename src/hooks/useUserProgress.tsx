@@ -160,7 +160,7 @@ export const useUserProgress = (courseId?: string) => {
               completion_percentage: completionPercentage,
               current_stage: completionPercentage >= 100 ? 'course_completed' : 'course_in_progress',
               last_activity_at: new Date().toISOString(),
-              stage_entered_at: completionPercentage === Math.round((1 / totalModules) * 100) 
+              stage_entered_at: completionPercentage === Math.round((1 / RVT_MODULE_COUNT) * 100) 
                 ? new Date().toISOString() 
                 : undefined
             })
