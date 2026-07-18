@@ -249,7 +249,7 @@ const JOB_HANDLERS: Record<string, (job: Job, supabase: any) => Promise<void>> =
       const [{ data: profile }, { data: authUser, error: authErr }] = await Promise.all([
         supabase
           .from('profiles')
-          .select('first_name, last_name, email')
+          .select('first_name, last_name, email_cache')
           .eq('user_id', user_id)
           .maybeSingle(),
         supabase.auth.admin.getUserById(user_id),
@@ -257,7 +257,7 @@ const JOB_HANDLERS: Record<string, (job: Job, supabase: any) => Promise<void>> =
 
       if (authErr) console.warn('[send_progress_milestone] auth.admin.getUserById error:', authErr);
 
-      const email = authUser?.user?.email || profile?.email;
+      const email = authUser?.user?.email || profile?.email_cache;
       if (!email) {
         throw new Error(`send_progress_milestone: no email found for user ${user_id}`);
       }
