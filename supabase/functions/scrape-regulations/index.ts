@@ -168,6 +168,9 @@ serve(async (req) => {
 
   try {
     // ---- 1. Walk each chapter and collect section numbers ----
+    const CHAPTERS = await discoverChapters();
+    console.log(`[scrape-regulations] scraping ${CHAPTERS.length} chapters: ${CHAPTERS.join(', ')}`);
+
     for (const chapter of CHAPTERS) {
       const chapterUrl = `${BASE}.${chapter}`;
       const chRes = await fetchText(chapterUrl);
