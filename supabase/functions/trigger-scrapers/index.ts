@@ -12,7 +12,7 @@
 //   - Resend email to admin recipients on any failure
 
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
 // Deno Deploy / Supabase Edge Runtime provides EdgeRuntime.waitUntil for
 // background tasks. Declare minimally in case the ambient types are missing.
@@ -50,7 +50,27 @@ serve(async (req) => {
 
   // ---- Auth gate ----
   const headerSecret = req.headers.get("x-cron-secret") ?? "";
-  const isCron = cronSecret.length > 0 && headerSecret === cronSecret;
+  let isCron = false;
+  let vaultVerifierReachable = false;
+  if (headerSecret.length > 0) {
+    try {
+      const { data: vaultOk, error: vaultErr } = await supabase.rpc("verify_cron_secret", {
+        p_secret: headerSecret.trim(),
+      });
+      if (vaultErr) {
+        console.error("[trigger-scrapers] verify_cron_secret RPC error:", vaultErr.message);
+      }
+      vaultVerifierReachable = vaultErr === null;
+      isCron = vaultOk === true;
+    } catch (e) {
+      console.error("[trigger-scrapers] verify_cron_secret threw:", e instanceof Error ? e.message : e);
+    }
+    // Fallback: legacy env var comparison, retained so a Vault outage cannot
+    // disable the daily scrape entirely.
+    if (!isCron && cronSecret.length > 0) {
+      isCron = headerSecret.trim() === cronSecret.trim();
+    }
+  }
   let isAdmin = false;
   if (!isCron) {
     const authHeader = req.headers.get("Authorization") ?? "";
@@ -75,6 +95,7 @@ serve(async (req) => {
         reason: "unauthorized",
         cron_secret_header_present: headerSecret.length > 0,
         cron_shared_secret_env_configured: cronSecret.length > 0,
+        vault_verifier_reachable: vaultVerifierReachable,
         invoked_by: req.headers.get("x-invoked-by"),
       };
       await supabase.from("cron_job_executions").insert({
@@ -212,7 +233,7 @@ serve(async (req) => {
 });
 
 async function logScraperError(
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseClient<any, "public", any>,
   scraperName: string,
   message: string,
   runId: string,
@@ -231,7 +252,7 @@ async function logScraperError(
 }
 
 async function sendFailureEmail(
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseClient<any, "public", any>,
   runId: string,
   status: string,
   results: ScraperResult[],
