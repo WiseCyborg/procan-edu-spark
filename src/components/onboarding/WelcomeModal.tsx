@@ -89,7 +89,7 @@ export const WelcomeModal = () => {
             <div className="grid gap-4 sm:grid-cols-3">
               <div className="p-4 border rounded-lg space-y-2">
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-lg px-3 py-1">24</Badge>
+                  <Badge variant="outline" className="text-lg px-3 py-1">19</Badge>
                   <span className="text-sm font-medium">Modules</span>
                 </div>
                 <p className="text-xs text-muted-foreground">
