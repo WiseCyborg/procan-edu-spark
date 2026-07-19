@@ -74,7 +74,7 @@ export const TrustStats = () => {
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
       <Card className="p-4 text-center bg-primary border-primary/20">
         <div className="text-2xl font-bold text-primary-foreground">
-          <AnimatedCounter end={24} />
+          19
         </div>
         <div className="text-sm text-primary-foreground/80">Training Modules</div>
       </Card>
