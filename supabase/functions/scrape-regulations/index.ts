@@ -310,6 +310,7 @@ serve(async (req) => {
         sectionsChecked,
         sectionsUpdated,
         changesDetected,
+        chapters: CHAPTERS,
         errorCount: errors.length,
         errors: errors.slice(0, 25),
       }),
