@@ -12,7 +12,7 @@
 //   - Resend email to admin recipients on any failure
 
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
 // Deno Deploy / Supabase Edge Runtime provides EdgeRuntime.waitUntil for
 // background tasks. Declare minimally in case the ambient types are missing.
