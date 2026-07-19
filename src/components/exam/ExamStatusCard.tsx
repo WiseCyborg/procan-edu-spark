@@ -162,7 +162,7 @@ export const ExamStatusCard: React.FC = () => {
           {hasPassed ? (
             <Button 
               onClick={() => navigate('/certificates')} 
-              className="flex-1"
+              className="w-full"
             >
               View Certificate
             </Button>
