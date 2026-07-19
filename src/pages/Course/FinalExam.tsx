@@ -173,36 +173,63 @@ const FinalExam: React.FC = () => {
     };
   }, []);
 
-  // Pre-shuffle quiz options once when exam starts
+  // Load exam questions from the database (no answers on the client) once the
+  // learner enters the exam stage.
   useEffect(() => {
-    if (examStage === 'exam') {
-      // Reset answers when exam starts
-      answersRef.current = {};
-      setAnswers({});
-      finalizingRef.current = false;
-      setIsFinalizing(false);
-      
-      const shuffled: {[key: number]: QuizQuestion[]} = {};
-      const renderedIds: string[] = [];
-      
-      Object.keys(quizzes).forEach(sectionKey => {
-        const section = parseInt(sectionKey);
-        shuffled[section] = quizzes[section].map(question => ({
-          ...question,
-          options: shuffleArray([...question.options])
-        }));
-        renderedIds.push(...shuffled[section].map(question => question.id));
-      });
+    if (examStage !== 'exam') return;
 
-      if (import.meta.env.DEV) {
-        const invalidIds = renderedIds.filter(id => !expectedQuestionIds.has(id));
-        if (invalidIds.length > 0) {
-          console.error('[FinalExam] Rendered question ids are not in grader expected id set', invalidIds);
-        }
+    // Reset answers when exam starts
+    answersRef.current = {};
+    setAnswers({});
+    finalizingRef.current = false;
+    setIsFinalizing(false);
+
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase
+        .from('exam_questions')
+        .select('question_id, section_number, question_index, question_text, options')
+        .eq('is_active', true)
+        .order('section_number', { ascending: true })
+        .order('question_index', { ascending: true });
+
+      if (cancelled) return;
+
+      if (error || !data) {
+        console.error('[FinalExam] Failed to load exam questions', error);
+        toast.error('Could not load the exam. Please try again.');
+        navigate('/course');
+        return;
       }
-      
-      setShuffledQuizzes(shuffled);
-    }
+
+      const grouped: Record<number, QuizQuestion[]> = {};
+      for (const row of data as Array<{
+        question_id: string;
+        section_number: number;
+        question_index: number;
+        question_text: string;
+        options: unknown;
+      }>) {
+        const optionList = Array.isArray(row.options)
+          ? (row.options as string[])
+          : [];
+        const section = row.section_number;
+        if (!grouped[section]) grouped[section] = [];
+        grouped[section].push({
+          id: row.question_id,
+          q: row.question_text,
+          options: shuffleArray([...optionList]),
+          a: '',
+        });
+      }
+
+      setExamQuestions(grouped);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+
   }, [examStage]);
 
   // Handle timers
