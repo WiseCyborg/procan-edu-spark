@@ -233,7 +233,7 @@ serve(async (req) => {
 });
 
 async function logScraperError(
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseClient<any, "public", any>,
   scraperName: string,
   message: string,
   runId: string,
