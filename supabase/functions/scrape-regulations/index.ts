@@ -184,7 +184,7 @@ serve(async (req) => {
       const sections = extractSectionLinksFromChapter(chRes.body, chapter);
       if (sections.length === 0) {
         // Some chapters render sections as .01–.20 without explicit anchors — probe .01 through .30.
-        for (let i = 1; i <= 30; i++) sections.push(String(i).padStart(2, "0"));
+        for (let i = 1; i <= 22; i++) sections.push(String(i).padStart(2, "0"));
       }
 
       for (const section of sections) {
