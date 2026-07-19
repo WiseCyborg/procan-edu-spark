@@ -18,7 +18,12 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-cron-secret",
 };
 
-const CHAPTERS = ["05", "08", "09", "12", "13", "14", "15", "18"] as const;
+// Minimum chapters we must always attempt, drawn from MCA's RVT Application
+// Guidance required-curriculum list. Discovery may add more; it may never
+// return fewer than these.
+const FLOOR_CHAPTERS = [
+  "04", "05", "06", "07", "08", "09", "12", "13", "14", "15", "16", "18", "20", "21",
+] as const;
 const BASE = "https://regs.maryland.gov/us/md/exec/comar/14.17";
 const MCA_LAW_URL = "https://cannabis.maryland.gov/pages/law.aspx";
 const UA = "ProCannEdu-RegBot/2.0 (+https://www.procannedu.com; compliance monitoring)";
