@@ -95,6 +95,7 @@ serve(async (req) => {
         reason: "unauthorized",
         cron_secret_header_present: headerSecret.length > 0,
         cron_shared_secret_env_configured: cronSecret.length > 0,
+        vault_verifier_reachable: vaultVerifierReachable,
         invoked_by: req.headers.get("x-invoked-by"),
       };
       await supabase.from("cron_job_executions").insert({
