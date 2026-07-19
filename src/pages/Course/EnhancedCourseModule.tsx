@@ -431,42 +431,89 @@ const EnhancedCourseModule: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [moduleId, isProgressLoading]);
 
-  const handleQuizComplete = async (score: number, passed: boolean, timeSpent: number, weakTopicsData?: WeakTopic[]) => {
+  const handleQuizComplete = async (
+    score: number,
+    passed: boolean,
+    timeSpent: number,
+    weakTopicsData?: WeakTopic[],
+    answers?: { question_index: number; answer: string }[]
+  ) => {
     setQuizScore(score);
     setQuizPassed(passed);
     setQuizComplete(true);
     setWeakTopics(weakTopicsData || []);
-    
+
     if (weakTopicsData && weakTopicsData.length > 0) {
       setShowQuizResults(true);
-    } else if (passed) {
-      // Fix: Use moduleData.id (UUID) instead of moduleId (URL param)
-      await updateProgress(COURSE_ID, moduleData!.id, true, score);
+      return;
+    }
+
+    if (!passed) return;
+
+    try {
+      const { data, error } = await supabase.rpc('submit_module_quiz', {
+        p_module_id: moduleData!.id,
+        p_answers: (answers ?? []) as unknown as Record<string, never>,
+      });
+
+      const result = data as {
+        ok: boolean;
+        score?: number;
+        passed?: boolean;
+        error?: string;
+      } | null;
+
+      if (error || !result?.ok) {
+        console.error('submit_module_quiz failed:', error, result);
+        toast({
+          title: 'Error',
+          description: "We couldn't record your quiz result. Please try again.",
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // Server is source of truth. Refresh cached progress so UI reflects the write.
+      queryClient.invalidateQueries({ queryKey: ['user-progress', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-data', user?.id] });
+
+      if (result.passed) {
+        toast({
+          title: 'Congratulations!',
+          description: `You passed with ${result.score}%! Module completed.`,
+        });
+      }
+    } catch (err) {
+      console.error('submit_module_quiz threw:', err);
       toast({
-        title: "Congratulations!",
-        description: `You passed with ${score}%! Module completed.`,
+        title: 'Error',
+        description: "We couldn't record your quiz result. Please try again.",
+        variant: 'destructive',
       });
     }
   };
 
   const handlePracticeComplete = async (score: number, passed: boolean) => {
+    // WeakAreaPractice does not supply answers in the shape required by
+    // submit_module_quiz, so we cannot mark the module complete from this path.
+    // Completion must come through the main quiz flow.
     if (passed) {
-      // Fix: Use moduleData.id (UUID) instead of moduleId (URL param)
-      await updateProgress(COURSE_ID, moduleData!.id, true, score);
       toast({
-        title: "Great work!",
+        title: 'Great work!',
         description: `You've mastered the weak areas! Score: ${score}%`,
       });
       setShowWeakPractice(false);
       setShowQuizResults(false);
     } else {
       toast({
-        title: "Keep practicing",
+        title: 'Keep practicing',
         description: `Score: ${score}%. Review the material and try again.`,
-        variant: "destructive",
+        variant: 'destructive',
       });
     }
   };
+
+
 
   const handleRetakeQuiz = () => {
     setShowQuizResults(false);
