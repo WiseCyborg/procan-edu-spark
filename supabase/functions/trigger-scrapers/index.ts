@@ -14,6 +14,12 @@
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
+// Deno Deploy / Supabase Edge Runtime provides EdgeRuntime.waitUntil for
+// background tasks. Declare minimally in case the ambient types are missing.
+declare const EdgeRuntime: {
+  waitUntil(promise: Promise<unknown>): void;
+} | undefined;
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-cron-secret, x-invoked-by",
@@ -61,6 +67,26 @@ serve(async (req) => {
     }
   }
   if (!isCron && !isAdmin) {
+    // Log the rejection BEFORE returning so silent 401s are visible in
+    // cron_job_executions. Never log secret material — booleans + invoker label only.
+    try {
+      const rejectPayload = {
+        runId,
+        reason: "unauthorized",
+        cron_secret_header_present: headerSecret.length > 0,
+        cron_shared_secret_env_configured: cronSecret.length > 0,
+        invoked_by: req.headers.get("x-invoked-by"),
+      };
+      await supabase.from("cron_job_executions").insert({
+        job_name: "trigger-scrapers",
+        executed_at: startedAt.toISOString(),
+        status: "error",
+        execution_time_ms: Math.round(performance.now() - runStart),
+        error_message: JSON.stringify(rejectPayload),
+      });
+    } catch (e) {
+      console.error("[trigger-scrapers] failed to log unauthorized rejection:", e);
+    }
     return new Response(
       JSON.stringify({ success: false, error_code: "unauthorized", runId }),
       { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
@@ -99,53 +125,89 @@ serve(async (req) => {
 
 
 
-  // ---- Invoke each scraper ----
-  const results: ScraperResult[] = [];
-  for (const name of SCRAPERS) {
-    const t0 = performance.now();
-    try {
-      const { data, error } = await supabase.functions.invoke(name, { body: {} });
-      const durationMs = Math.round(performance.now() - t0);
-      if (error) {
-        results.push({ name, success: false, durationMs, error: error.message ?? String(error), data: null });
-        await logScraperError(supabase, name, error.message ?? String(error), runId);
-      } else {
-        results.push({ name, success: true, durationMs, error: null, data });
-      }
-    } catch (e) {
-      const durationMs = Math.round(performance.now() - t0);
-      const msg = e instanceof Error ? `${e.message}\n${e.stack ?? ""}` : String(e);
-      results.push({ name, success: false, durationMs, error: msg, data: null });
-      await logScraperError(supabase, name, msg, runId);
-    }
-  }
-
-  const totalMs = Math.round(performance.now() - runStart);
-  const successCount = results.filter((r) => r.success).length;
-  const status: "success" | "partial" | "error" =
-    successCount === results.length ? "success" : successCount === 0 ? "error" : "partial";
-
-  // ---- Log execution ----
-  const payload = { runId, results, invoker: isCron ? "cron" : "admin", startedAt: startedAt.toISOString() };
-  await supabase.from("cron_job_executions").insert({
-    job_name: "trigger-scrapers",
-    executed_at: startedAt.toISOString(),
-    status,
-    execution_time_ms: totalMs,
-    error_message: JSON.stringify(payload),
-  });
-
-  // ---- Alert on failure ----
-  if (status !== "success") {
-    await sendFailureEmail(supabase, runId, status, results).catch((e) =>
-      console.error("[trigger-scrapers] failure email error:", e?.message ?? e),
+  // ---- Invoke each scraper IN PARALLEL as a background task ----
+  const runScrapers = async () => {
+    const settled = await Promise.allSettled(
+      SCRAPERS.map(async (name): Promise<ScraperResult> => {
+        const t0 = performance.now();
+        try {
+          const { data, error } = await supabase.functions.invoke(name, { body: {} });
+          const durationMs = Math.round(performance.now() - t0);
+          if (error) {
+            const msg = error.message ?? String(error);
+            await logScraperError(supabase, name, msg, runId);
+            return { name, success: false, durationMs, error: msg, data: null };
+          }
+          return { name, success: true, durationMs, error: null, data };
+        } catch (e) {
+          const durationMs = Math.round(performance.now() - t0);
+          const msg = e instanceof Error ? `${e.message}\n${e.stack ?? ""}` : String(e);
+          await logScraperError(supabase, name, msg, runId);
+          return { name, success: false, durationMs, error: msg, data: null };
+        }
+      }),
     );
+
+    const results: ScraperResult[] = settled.map((s, i) =>
+      s.status === "fulfilled"
+        ? s.value
+        : { name: SCRAPERS[i], success: false, durationMs: 0, error: String(s.reason), data: null },
+    );
+
+    const totalMs = Math.round(performance.now() - runStart);
+    const successCount = results.filter((r) => r.success).length;
+    const status: "success" | "partial" | "error" =
+      successCount === results.length ? "success" : successCount === 0 ? "error" : "partial";
+
+    const payload = { runId, results, invoker: isCron ? "cron" : "admin", startedAt: startedAt.toISOString() };
+    try {
+      await supabase.from("cron_job_executions").insert({
+        job_name: "trigger-scrapers",
+        executed_at: startedAt.toISOString(),
+        status,
+        execution_time_ms: totalMs,
+        error_message: JSON.stringify(payload),
+      });
+    } catch (e) {
+      console.error("[trigger-scrapers] failed to log completion:", e);
+    }
+
+    if (status !== "success") {
+      await sendFailureEmail(supabase, runId, status, results).catch((e) =>
+        console.error("[trigger-scrapers] failure email error:", e?.message ?? e),
+      );
+    }
+  };
+
+  // Record a dispatch row so even a killed background task leaves evidence.
+  try {
+    await supabase.from("cron_job_executions").insert({
+      job_name: "trigger-scrapers",
+      executed_at: startedAt.toISOString(),
+      status: "success",
+      execution_time_ms: Math.round(performance.now() - runStart),
+      error_message: JSON.stringify({ runId, phase: "dispatched", scrapers: SCRAPERS }),
+    });
+  } catch (e) {
+    console.error("[trigger-scrapers] failed to log dispatch:", e);
   }
 
-  const httpStatus = status === "success" ? 200 : 207;
+  if (typeof EdgeRuntime !== "undefined" && EdgeRuntime?.waitUntil) {
+    EdgeRuntime.waitUntil(runScrapers());
+  } else {
+    // Fallback: fire-and-forget without blocking the response.
+    runScrapers().catch((e) => console.error("[trigger-scrapers] background run error:", e));
+  }
+
   return new Response(
-    JSON.stringify({ success: status === "success", runId, status, results, durationMs: totalMs }),
-    { status: httpStatus, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    JSON.stringify({
+      success: true,
+      runId,
+      status: "dispatched",
+      scrapers: SCRAPERS,
+      dispatchedAt: startedAt.toISOString(),
+    }),
+    { status: 202, headers: { ...corsHeaders, "Content-Type": "application/json" } },
   );
 });
 
