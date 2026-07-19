@@ -770,7 +770,7 @@ const FinalExam: React.FC = () => {
           user_data: userData,
           exam_results: {
             total_score: persistedAttempt.total_score,
-            total_questions: Object.values(quizzes).reduce((sum, section) => sum + section.length, 0),
+            total_questions: persistedAttempt.topic_scores.reduce((sum, ts) => sum + ts.questions_total, 0),
             time_taken: persistedAttempt.time_taken,
             passing_score: persistedAttempt.passing_score,
             topic_scores: persistedAttempt.topic_scores,
