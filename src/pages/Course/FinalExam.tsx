@@ -16,12 +16,8 @@ import { useUserProgress } from '@/hooks/useUserProgress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Clock, History, AlertTriangle, BookOpen } from 'lucide-react';
 import {
-  quizzes,
   sectionTitles,
   comarSections,
-  gradeExam,
-  selfTestGrader,
-  expectedQuestionIds,
   PASSING_SCORE,
   TOTAL_SECTIONS,
   type QuizQuestion,
