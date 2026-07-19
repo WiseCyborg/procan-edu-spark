@@ -32,7 +32,13 @@ interface InteractiveQuizProps {
   timeLimit?: number; // in minutes
   passingScore?: number; // percentage
   maxQuestions?: number; // default 10 - randomly select this many questions from pool
-  onQuizComplete: (score: number, passed: boolean, timeSpent: number, weakTopics?: WeakTopic[]) => void;
+  onQuizComplete: (
+    score: number,
+    passed: boolean,
+    timeSpent: number,
+    weakTopics?: WeakTopic[],
+    answers?: { question_index: number; answer: string }[]
+  ) => void;
   onQuestionAnswer?: (questionId: string, answer: string, isCorrect: boolean) => void;
   allowRetry?: boolean;
 }
