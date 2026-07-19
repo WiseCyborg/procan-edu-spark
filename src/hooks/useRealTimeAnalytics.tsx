@@ -138,11 +138,6 @@ export const useRealTimeAnalytics = () => {
         .select('id, created_at, issue_date')
         .gte('created_at', new Date().toISOString().split('T')[0]);
 
-      // Fetch payments
-      const { data: payments } = await supabase
-        .from('payments')
-        .select('amount, status, created_at')
-        .gte('created_at', new Date().toISOString().split('T')[0]);
 
       // Fetch organizations
       const { data: organizations } = await supabase
@@ -164,8 +159,6 @@ export const useRealTimeAnalytics = () => {
         p.is_completed && new Date(p.updated_at).getTime() >= new Date().setHours(0, 0, 0, 0)
       ).length || 0;
 
-      const completedPayments = payments?.filter(p => p.status === 'completed') || [];
-      const totalRevenue = completedPayments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
 
       setMetrics(prev => ({
         ...prev,
@@ -184,11 +177,12 @@ export const useRealTimeAnalytics = () => {
           failed: 0
         },
         payments: {
-          processing: payments?.filter(p => p.status === 'pending').length || 0,
-          completedToday: completedPayments.length,
-          failedToday: payments?.filter(p => p.status === 'failed').length || 0,
-          totalRevenue: totalRevenue / 100
+          processing: 0,
+          completedToday: 0,
+          failedToday: 0,
+          totalRevenue: 0
         },
+
         organizations: {
           active: organizations?.filter(o => o.admin_approved).length || 0,
           newSignups: organizations?.filter(o => 
@@ -269,24 +263,8 @@ export const useRealTimeAnalytics = () => {
       )
       .subscribe();
 
-    // Payment subscription
-    const paymentChannel = supabase
-      .channel('payments')
-      .on('postgres_changes',
-        { event: '*', schema: 'public', table: 'payments' },
-        (payload) => {
-          const status = (payload.new as any)?.status || (payload.old as any)?.status;
-          addAlert({
-            type: status === 'completed' ? 'success' : status === 'failed' ? 'error' : 'info',
-            message: `Payment ${status}: $${(((payload.new as any)?.amount || 0) / 100).toFixed(2)}`,
-            category: 'Payments'
-          });
-          fetchInitialMetrics();
-        }
-      )
-      .subscribe();
-
     // Security events subscription
+
     const securityChannel = supabase
       .channel('security-events')
       .on('postgres_changes',
@@ -302,7 +280,7 @@ export const useRealTimeAnalytics = () => {
       )
       .subscribe();
 
-    channels.push(userChannel, progressChannel, certificateChannel, paymentChannel, securityChannel);
+    channels.push(userChannel, progressChannel, certificateChannel, securityChannel);
 
     return () => {
       channels.forEach(channel => supabase.removeChannel(channel));
