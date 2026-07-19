@@ -569,10 +569,6 @@ const FinalExam: React.FC = () => {
   };
 
   const handleAnswerChange = useCallback((questionId: string, option: string) => {
-    if (import.meta.env.DEV && !expectedQuestionIds.has(questionId)) {
-      console.error('[FinalExam] Answer key is not in grader expected id set', questionId);
-    }
-
     const nextAnswers = {
       ...answersRef.current,
       [questionId]: option,
@@ -585,48 +581,34 @@ const FinalExam: React.FC = () => {
     if (finalizingRef.current) return;
 
     const section = currentSection;
-    const questions = shuffledQuizzes[section] || quizzes[section] || [];
+    const questions = examQuestions[section] || [];
     const latestAnswers = { ...answersRef.current };
 
-    if (import.meta.env.DEV) {
-      const invalidIds = questions.map(q => q.id).filter(id => !expectedQuestionIds.has(id));
-      if (invalidIds.length > 0) {
-        console.error('[FinalExam] Section contains rendered question ids not in grader expected id set', { section, invalidIds });
-      }
-    }
-
-    // Grade by the question's STABLE id + correct option VALUE — never by
-    // rendered/shuffled index. This is the BUG-017 fix.
+    // Client no longer knows correct answers. Record the section as submitted
+    // and build a display-only results object; the server topic_scores
+    // supersede this once finalizeExam runs.
     const sectionResults = questions.map((question) => {
       const selectedAnswer = latestAnswers[question.id];
       return {
         question: question.q,
-        selected: selectedAnswer || "Not answered",
-        correct: question.a,
-        isCorrect: selectedAnswer !== undefined && selectedAnswer === question.a,
+        selected: selectedAnswer || 'Not answered',
+        correct: '',
+        isCorrect: false,
       };
     });
 
-    const sectionScore = sectionResults.filter(result => result.isCorrect).length;
-
-    // Build a fresh snapshot so we don't depend on stale React state when finalizing
     const nextResults: ExamResult = { ...results, [section]: sectionResults };
     const nextSubmitted = new Set(submittedSections);
     nextSubmitted.add(section);
-    const nextTotalCorrect = Object.values(nextResults).reduce(
-      (sum, secResults) => sum + secResults.filter(r => r.isCorrect).length,
-      0
-    );
 
     setResults(nextResults);
     setSubmittedSections(nextSubmitted);
-    setTotalScore(nextTotalCorrect);
 
     // Check if all 18 sections are now complete
     if (nextSubmitted.size >= TOTAL_SECTIONS) {
       void finalizeExam(latestAnswers);
     } else {
-      toast.success(`Section ${section} submitted. Score: ${sectionScore}/${questions.length}`);
+      toast.success(`Section ${section} submitted.`);
 
       // Move to next un-submitted section (default: section + 1)
       let nextSection = section + 1;
@@ -637,6 +619,7 @@ const FinalExam: React.FC = () => {
       }
     }
   };
+
 
 
   // Compute final results, persist to exam_attempts, and transition to the
