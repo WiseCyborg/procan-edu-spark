@@ -60,15 +60,15 @@ const Index = () => {
             '@context': 'https://schema.org',
             '@type': 'Organization',
             name: 'ProCann Edu',
-            url: 'https://www.procannedu.com/',
-            logo: 'https://www.procannedu.com/favicon-procann.jpg',
+            url: 'https://procannedu.com/',
+            logo: 'https://procannedu.com/favicon-procann.jpg',
             sameAs: ['https://procannedu.com'],
           },
           {
             '@context': 'https://schema.org',
             '@type': 'WebSite',
             name: 'ProCann Edu',
-            url: 'https://www.procannedu.com/',
+            url: 'https://procannedu.com/',
           },
         ]}
       />
