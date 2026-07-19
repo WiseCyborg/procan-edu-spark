@@ -273,7 +273,7 @@ const StudentDashboard = () => {
         <CardContent className="p-4">
           <p className="text-sm text-blue-800 dark:text-blue-300 text-center">
             <span className="font-semibold">Progress Tiers:</span> Green, Yellow, and Red levels help you track your progress. 
-            All 24 modules are required for Maryland RVT certification.
+            The 19 agent modules are required for Maryland RVT (Agent) certification. The 5 supervisory modules are optional.
           </p>
         </CardContent>
       </Card>
@@ -371,7 +371,7 @@ const StudentDashboard = () => {
           <CardDescription className="text-sm md:text-base">Pick up where you left off</CardDescription>
         </CardHeader>
         <CardContent className="p-4 md:p-6">
-          {completedModules < TOTAL_MODULES ? (
+          {completedModules < (agentModules.length || TOTAL_MODULES) ? (
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 border rounded-lg bg-accent/50 gap-4">
               <div className="flex-1 w-full md:w-auto">
                 <h3 className="font-semibold text-base md:text-lg">
@@ -411,7 +411,7 @@ const StudentDashboard = () => {
                 <p className="text-sm md:text-base text-green-600 dark:text-green-400">Ready to take the final exam</p>
               </div>
               <Button 
-                onClick={() => navigate('/final-exam')} 
+                onClick={() => navigate('/exam')} 
                 className="w-full md:w-auto bg-green-600 hover:bg-green-700 h-11 md:h-10 flex-shrink-0"
               >
                 Start Final Exam

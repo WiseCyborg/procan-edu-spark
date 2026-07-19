@@ -56,7 +56,7 @@ export const ExamStatusCard: React.FC = () => {
         </CardHeader>
         <CardContent>
           <Button 
-            onClick={() => navigate('/final-exam')} 
+            onClick={() => navigate('/exam')} 
             className="w-full"
           >
             Start Final Exam
@@ -162,26 +162,19 @@ export const ExamStatusCard: React.FC = () => {
           {hasPassed ? (
             <Button 
               onClick={() => navigate('/certificates')} 
-              className="flex-1"
+              className="w-full"
             >
               View Certificate
             </Button>
           ) : (
             <Button 
-              onClick={() => navigate('/final-exam')} 
+              onClick={() => navigate('/exam')} 
               disabled={!canRetakeNow}
-              className="flex-1"
+              className="w-full"
             >
               {canRetakeNow ? 'Retake Exam' : 'Cooldown Active'}
             </Button>
           )}
-          <Button 
-            variant="outline" 
-            onClick={() => navigate('/final-exam')}
-            className="flex-1"
-          >
-            View History
-          </Button>
         </div>
       </CardContent>
     </Card>
