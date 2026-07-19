@@ -67,8 +67,7 @@ export const WelcomeVideoSection: React.FC<WelcomeVideoSectionProps> = ({
         </h2>
         {!isMobile && (
           <p className="text-xl text-white/90 leading-relaxed max-w-2xl mx-auto">
-            We've partnered with the Maryland Cannabis Administration to deliver top-tier education for dispensary employees,
-            ensuring Maryland leads as the <strong>Cannabis Education State</strong>.
+            Our curriculum is aligned to Maryland Cannabis Administration Responsible Vendor Training standards, helping Maryland lead as the <strong>Cannabis Education State</strong>.
           </p>
         )}
       </div>
