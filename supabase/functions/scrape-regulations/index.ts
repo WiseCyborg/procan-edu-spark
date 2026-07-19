@@ -38,6 +38,23 @@ interface SectionRecord {
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+async function discoverChapters(): Promise<string[]> {
+  const found = new Set<string>(FLOOR_CHAPTERS);
+  try {
+    const res = await fetchText(BASE); // https://regs.maryland.gov/us/md/exec/comar/14.17
+    if (res.ok) {
+      for (const m of res.body.matchAll(/\/us\/md\/exec\/comar\/14\.17\.(\d{2})(?![\d.])/g)) {
+        found.add(m[1]);
+      }
+    } else {
+      console.warn(`[scrape-regulations] chapter discovery HTTP ${res.status}; using floor list only`);
+    }
+  } catch (e) {
+    console.warn('[scrape-regulations] chapter discovery failed; using floor list only:', e instanceof Error ? e.message : e);
+  }
+  return [...found].sort();
+}
+
 async function fetchText(url: string): Promise<{ ok: boolean; status: number; body: string }> {
   try {
     const res = await fetch(url, { headers: { "User-Agent": UA, Accept: "text/html,*/*" } });
