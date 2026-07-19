@@ -124,13 +124,8 @@ const FinalExam: React.FC = () => {
   // Quiz data, section titles, COMAR mapping, and the grader live in
   // ./finalExamData so they're testable and shuffle-independent.
 
-  // Run grader self-test once in dev — guards BUG-017 from regressing silently.
-  useEffect(() => {
-    if (import.meta.env.DEV) {
-      try { selfTestGrader(); }
-      catch (e) { console.error(e); }
-    }
-  }, []);
+  // Grader lives server-side (submit_exam RPC). No client-side self-test.
+
 
 
   // Check if all modules are completed before allowing exam access
