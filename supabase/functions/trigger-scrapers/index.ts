@@ -50,7 +50,27 @@ serve(async (req) => {
 
   // ---- Auth gate ----
   const headerSecret = req.headers.get("x-cron-secret") ?? "";
-  const isCron = cronSecret.length > 0 && headerSecret === cronSecret;
+  let isCron = false;
+  let vaultVerifierReachable = false;
+  if (headerSecret.length > 0) {
+    try {
+      const { data: vaultOk, error: vaultErr } = await supabase.rpc("verify_cron_secret", {
+        p_secret: headerSecret.trim(),
+      });
+      if (vaultErr) {
+        console.error("[trigger-scrapers] verify_cron_secret RPC error:", vaultErr.message);
+      }
+      vaultVerifierReachable = vaultErr === null;
+      isCron = vaultOk === true;
+    } catch (e) {
+      console.error("[trigger-scrapers] verify_cron_secret threw:", e instanceof Error ? e.message : e);
+    }
+    // Fallback: legacy env var comparison, retained so a Vault outage cannot
+    // disable the daily scrape entirely.
+    if (!isCron && cronSecret.length > 0) {
+      isCron = headerSecret.trim() === cronSecret.trim();
+    }
+  }
   let isAdmin = false;
   if (!isCron) {
     const authHeader = req.headers.get("Authorization") ?? "";
