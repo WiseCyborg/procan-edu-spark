@@ -358,7 +358,7 @@ export const detectComplianceGaps = async (): Promise<Gap[]> => {
           auto_fixable: false,
           affected_entity: module.title,
           affected_entity_id: module.module_number.toString(),
-          suggested_action: 'Review and add appropriate COMAR 14.17.05 reference',
+          suggested_action: 'Review and add appropriate COMAR 14.17.15.05 reference',
         });
       });
     }

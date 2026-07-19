@@ -50,7 +50,7 @@ const GetStarted = () => {
                   </div>
                   <p className="text-sm text-muted-foreground">
                     Complete Maryland RVT certification for dispensary employees. 
-                    Meets all COMAR 14.17.05 requirements.
+                    Meets all COMAR 14.17.15.05 requirements.
                   </p>
                 </div>
                 <div className="space-y-2 text-sm">

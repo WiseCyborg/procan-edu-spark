@@ -85,7 +85,7 @@ export default function StateOfficialsPage() {
             </div>
             <div>
               <p className="text-sm text-muted-foreground">COMAR Compliance</p>
-              <p className="text-lg font-semibold">14.17.05</p>
+              <p className="text-lg font-semibold">14.17.15.05</p>
             </div>
           </div>
         </CardContent>
@@ -209,7 +209,7 @@ export default function StateOfficialsPage() {
               onClick={() => window.location.href = '/compliance/curriculum-matrix'}
             >
               <div className="text-left w-full">
-                <p className="font-semibold">COMAR 14.17.05 Compliance Matrix</p>
+                <p className="font-semibold">COMAR 14.17.15.05 Compliance Matrix</p>
                 <p className="text-sm text-muted-foreground">Full curriculum mapping to state requirements</p>
               </div>
             </Button>

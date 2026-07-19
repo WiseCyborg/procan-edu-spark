@@ -74,7 +74,7 @@ export default function ComplianceCurriculumMatrixPage() {
           Regulatory Compliance Documentation
         </Badge>
         <h1 className="text-4xl font-bold mb-4">
-          COMAR 14.17.05 Compliance Matrix
+          COMAR 14.17.15.05 Compliance Matrix
         </h1>
         <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
           Documenting Full Alignment with Maryland RVT Standards
@@ -139,7 +139,7 @@ export default function ComplianceCurriculumMatrixPage() {
         <CardHeader>
           <CardTitle>Curriculum Compliance Mapping</CardTitle>
           <p className="text-sm text-muted-foreground">
-            All 23 modules mapped to COMAR 14.17.05 requirements, including Drug-Free Workplace (COMAR 21.11.08.03), 
+            All 23 modules mapped to COMAR 14.17.15.05 requirements, including Drug-Free Workplace (COMAR 21.11.08.03), 
             Diversion Prevention, and Standard Operating Procedures
           </p>
         </CardHeader>
@@ -193,7 +193,7 @@ export default function ComplianceCurriculumMatrixPage() {
                           </TableCell>
                           <TableCell>
                             <Badge variant="outline" className="whitespace-nowrap font-mono text-xs">
-                              {module.comar_reference || 'COMAR 14.17.05'}
+                              {module.comar_reference || 'COMAR 14.17.15.05'}
                             </Badge>
                           </TableCell>
                           <TableCell className="text-center">
@@ -269,7 +269,7 @@ export default function ComplianceCurriculumMatrixPage() {
                                       <div className="bg-white rounded-lg p-3 border border-primary/20 shadow-sm">
                                         <p className="text-xs font-semibold text-muted-foreground mb-1">Primary Reference</p>
                                         <Badge variant="default" className="font-mono">
-                                          {module.comar_reference || 'COMAR 14.17.05'}
+                                          {module.comar_reference || 'COMAR 14.17.15.05'}
                                         </Badge>
                                       </div>
                                       <div className="bg-white rounded-lg p-3 border border-primary/20 shadow-sm">

@@ -38,9 +38,9 @@ async function fetchLatestCOMARVersion(): Promise<COMARVersionData> {
 
   if (contentData) {
     return {
-      version: '14.17.05',
+      version: '14.17.15.05',
       effectiveDate: contentData.last_modified_at || new Date().toISOString(),
-      sectionReference: contentData.section_number || 'COMAR 14.17.05',
+      sectionReference: contentData.section_number || 'COMAR 14.17.15.05',
       lastUpdated: contentData.last_modified_at || new Date().toISOString(),
       source: 'regulatory_content'
     };
@@ -48,9 +48,9 @@ async function fetchLatestCOMARVersion(): Promise<COMARVersionData> {
 
   // Ultimate fallback - return current date with note
   return {
-    version: '14.17.05',
+    version: '14.17.15.05',
     effectiveDate: new Date().toISOString(),
-    sectionReference: 'COMAR 14.17.05',
+    sectionReference: 'COMAR 14.17.15.05',
     lastUpdated: new Date().toISOString(),
     source: 'fallback'
   };
@@ -71,10 +71,10 @@ export const useCOMARCompliance = () => {
   
   return {
     isCompliant: true, // Platform is always compliant with latest fetched version
-    version: data?.version || '14.17.05',
+    version: data?.version || '14.17.15.05',
     effectiveDate: data?.effectiveDate,
     lastUpdated: data?.lastUpdated,
-    sectionReference: data?.sectionReference || 'COMAR 14.17.05',
+    sectionReference: data?.sectionReference || 'COMAR 14.17.15.05',
     isLoading,
     error,
     source: data?.source

@@ -52,7 +52,7 @@ export default function AboutTeamPage() {
                   </h4>
                   <div className="space-y-2">
                     <Badge variant="secondary">Cannabis Industry Certified</Badge>
-                    <Badge variant="secondary">COMAR 14.17.05 Specialist</Badge>
+                    <Badge variant="secondary">COMAR 14.17.15.05 Specialist</Badge>
                     <Badge variant="secondary">Maryland Regulatory Expert</Badge>
                     <Badge variant="secondary">Adult Education Certified</Badge>
                   </div>
@@ -92,7 +92,7 @@ export default function AboutTeamPage() {
               </p>
               <p className="text-sm leading-relaxed">
                 Specializes in Maryland cannabis regulations and compliance frameworks. Works directly 
-                with dispensaries to ensure adherence to COMAR 14.17.05 requirements. Provides up-to-date 
+                with dispensaries to ensure adherence to COMAR 14.17.15.05 requirements. Provides up-to-date 
                 guidance on evolving state regulations.
               </p>
               <div className="mt-4 space-y-2">
@@ -189,7 +189,7 @@ export default function AboutTeamPage() {
               <p className="text-sm text-muted-foreground leading-relaxed">
                 Our curriculum is developed through a collaborative process involving regulatory experts, 
                 industry practitioners, and educational specialists. Every module undergoes rigorous review 
-                to ensure accuracy, compliance with COMAR 14.17.05, and practical applicability.
+                to ensure accuracy, compliance with COMAR 14.17.15.05, and practical applicability.
               </p>
             </div>
             

@@ -38,7 +38,7 @@ export default function AboutUs() {
           <h2>What Makes Us Different</h2>
           <h3>1. MCA-Aligned Content</h3>
           <p>
-            Our training modules are directly aligned with COMAR 14.17.05 requirements and updated in real-time 
+            Our training modules are directly aligned with COMAR 14.17.15.05 requirements and updated in real-time 
             as regulations change. We don't just teach compliance—we embed it into every lesson.
           </p>
 
