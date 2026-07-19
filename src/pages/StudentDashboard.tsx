@@ -411,7 +411,7 @@ const StudentDashboard = () => {
                 <p className="text-sm md:text-base text-green-600 dark:text-green-400">Ready to take the final exam</p>
               </div>
               <Button 
-                onClick={() => navigate('/final-exam')} 
+                onClick={() => navigate('/exam')} 
                 className="w-full md:w-auto bg-green-600 hover:bg-green-700 h-11 md:h-10 flex-shrink-0"
               >
                 Start Final Exam
