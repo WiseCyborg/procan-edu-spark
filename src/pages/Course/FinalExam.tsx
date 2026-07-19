@@ -87,7 +87,7 @@ const FinalExam: React.FC = () => {
   const [submittedSections, setSubmittedSections] = useState<Set<number>>(new Set());
   const [results, setResults] = useState<ExamResult>({});
   const [topicScores, setTopicScores] = useState<TopicScore[]>([]);
-  const [shuffledQuizzes, setShuffledQuizzes] = useState<{[key: number]: QuizQuestion[]}>({});
+  
   const [examAttemptId, setExamAttemptId] = useState<string | null>(null);
   const [examStartedAt, setExamStartedAt] = useState<Date | null>(null);
   const [persistedAttempt, setPersistedAttempt] = useState<{
