@@ -67,6 +67,26 @@ serve(async (req) => {
     }
   }
   if (!isCron && !isAdmin) {
+    // Log the rejection BEFORE returning so silent 401s are visible in
+    // cron_job_executions. Never log secret material — booleans + invoker label only.
+    try {
+      const rejectPayload = {
+        runId,
+        reason: "unauthorized",
+        cron_secret_header_present: headerSecret.length > 0,
+        cron_shared_secret_env_configured: cronSecret.length > 0,
+        invoked_by: req.headers.get("x-invoked-by"),
+      };
+      await supabase.from("cron_job_executions").insert({
+        job_name: "trigger-scrapers",
+        executed_at: startedAt.toISOString(),
+        status: "error",
+        execution_time_ms: Math.round(performance.now() - runStart),
+        error_message: JSON.stringify(rejectPayload),
+      });
+    } catch (e) {
+      console.error("[trigger-scrapers] failed to log unauthorized rejection:", e);
+    }
     return new Response(
       JSON.stringify({ success: false, error_code: "unauthorized", runId }),
       { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
