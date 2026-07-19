@@ -108,7 +108,7 @@ export const ComplianceReviewWorkflow = () => {
         <CardHeader>
           <CardTitle>COMAR Compliance Review Workflow</CardTitle>
           <CardDescription>
-            Formal review process for ensuring all course content meets COMAR 14.17.05 requirements
+            Formal review process for ensuring all course content meets COMAR 14.17.15.05 requirements
           </CardDescription>
         </CardHeader>
         <CardContent>

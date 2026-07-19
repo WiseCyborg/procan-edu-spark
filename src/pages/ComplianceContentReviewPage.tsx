@@ -107,7 +107,7 @@ export default function ComplianceContentReviewPage() {
             <p className="leading-relaxed mb-4">
               "I, on behalf of the ProCann Edu Compliance Team, certify that all training materials 
               have been reviewed as of <strong>{new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</strong> and 
-              are in full compliance with COMAR 14.17.05 requirements."
+              are in full compliance with COMAR 14.17.15.05 requirements."
             </p>
             <div className="flex items-center justify-between border-t pt-4">
               <div>

@@ -21,7 +21,7 @@ export const documentContent: Record<string, DocumentContent> = {
     category: 'Legal & Regulatory',
     version: '2.1',
     lastUpdated: '2025-01-15',
-    comarReferences: ['14.17.01', '14.17.05', '14.17.08'],
+    comarReferences: ['14.17.01', '14.17.15.05', '14.17.08'],
     content: `
       <h2>Maryland Cannabis Legal Framework</h2>
       <p>This comprehensive guide covers all Maryland cannabis laws and regulations that dispensary agents must understand to ensure full compliance with state requirements.</p>

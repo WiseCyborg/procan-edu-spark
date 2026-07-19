@@ -21,7 +21,7 @@ export const InvestmentValueCard = () => {
     },
     {
       title: 'Maryland-Specific Content',
-      description: '23 modules tailored to MD regulations',
+      description: '19 required modules tailored to MD regulations',
       outcome: 'County-specific compliance scenarios',
     },
     {

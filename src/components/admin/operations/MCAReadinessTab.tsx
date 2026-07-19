@@ -101,11 +101,11 @@ export const MCAReadinessTab = () => {
               <CardContent className="pt-6">
                 <h3 className="font-semibold mb-2">Step 1: Populate COMAR Regulatory Content</h3>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Load official COMAR 14.17.05 sections into the regulatory_content table to enable live compliance tracking
+                  Load official COMAR 14.17.15.05 sections into the regulatory_content table to enable live compliance tracking
                 </p>
                 <Button onClick={populateCOMAR} disabled={isPopulating}>
                   <Database className="h-4 w-4 mr-2" />
-                  {isPopulating ? 'Populating...' : 'Populate COMAR 14.17.05 Sections'}
+                  {isPopulating ? 'Populating...' : 'Populate COMAR 14.17.15.05 Sections'}
                 </Button>
               </CardContent>
             </Card>

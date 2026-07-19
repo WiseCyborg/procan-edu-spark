@@ -200,7 +200,7 @@ const MCAComplianceReview = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CheckCircle className="h-6 w-6 text-green-600" />
-              COMAR 14.17.05 Alignment Matrix
+              COMAR 14.17.15.05 Alignment Matrix
             </CardTitle>
             <CardDescription>
               Module-by-module mapping to Maryland regulations
@@ -208,7 +208,7 @@ const MCAComplianceReview = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-muted-foreground">
-              Our 23-module curriculum is specifically designed to meet and exceed COMAR 14.17.05 requirements for Responsible Vendor Training in Maryland.
+              Our 23-module curriculum is specifically designed to meet and exceed COMAR 14.17.15.05 requirements for Responsible Vendor Training in Maryland.
             </p>
             <div className="space-y-2">
               <div className="flex items-start gap-2">
@@ -347,7 +347,7 @@ const MCAComplianceReview = () => {
             <div>
               <h3 className="font-semibold text-foreground mb-2">Content Review Cycle</h3>
               <p className="text-muted-foreground">
-                Monthly monitoring of regulatory changes with immediate content updates when MCA issues new guidance or revisions to COMAR 14.17.05
+                Monthly monitoring of regulatory changes with immediate content updates when MCA issues new guidance or revisions to COMAR 14.17.15.05
               </p>
             </div>
             <div>

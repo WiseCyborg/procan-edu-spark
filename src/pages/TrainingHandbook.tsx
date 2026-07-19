@@ -233,7 +233,7 @@ const TrainingHandbook = () => {
               </CardHeader>
               <CardContent className="space-y-6">
                 <p className="text-lg leading-relaxed text-muted-foreground">
-                  ProCann's expertise shines in this annual training requirement (COMAR 14.17.05, Dispensary Agent Topics 2—5). You'll explore the pharmacology of cannabis, focusing on active components like THC and CBD, and their potential therapeutic benefits and adverse effects. This section covers dosage forms—edibles, tinctures, topicals—and their pharmacodynamic impacts, alongside potential drug interactions and consumer safety concerns. Our goal is to make you a knowledgeable resource for customers, able to explain how cannabis interacts with the body and address common questions about its use.
+                  ProCann's expertise shines in this annual training requirement (COMAR 14.17.15.05, Dispensary Agent Topics 2—5). You'll explore the pharmacology of cannabis, focusing on active components like THC and CBD, and their potential therapeutic benefits and adverse effects. This section covers dosage forms—edibles, tinctures, topicals—and their pharmacodynamic impacts, alongside potential drug interactions and consumer safety concerns. Our goal is to make you a knowledgeable resource for customers, able to explain how cannabis interacts with the body and address common questions about its use.
                 </p>
                 <div className="rounded-lg overflow-hidden bg-muted">
                   <div className="aspect-video">
@@ -261,7 +261,7 @@ const TrainingHandbook = () => {
               </CardHeader>
               <CardContent className="space-y-6">
                 <p className="text-lg leading-relaxed text-muted-foreground">
-                  Recognizing and addressing substance use issues is critical for dispensary agents, as outlined in COMAR 14.17.05, Topic 6. This section trains you to identify symptoms of substance use disorders and acute intoxication in customers, ensuring you can respond appropriately—whether by limiting sales or offering support resources. ProCann emphasizes consumer safety, teaching you how to spot red flags, educate clients on responsible use, and maintain a safe retail environment. This knowledge protects both your customers and your license's integrity.
+                  Recognizing and addressing substance use issues is critical for dispensary agents, as outlined in COMAR 14.17.15.05, Topic 6. This section trains you to identify symptoms of substance use disorders and acute intoxication in customers, ensuring you can respond appropriately—whether by limiting sales or offering support resources. ProCann emphasizes consumer safety, teaching you how to spot red flags, educate clients on responsible use, and maintain a safe retail environment. This knowledge protects both your customers and your license's integrity.
                 </p>
                 <div className="rounded-lg overflow-hidden bg-muted">
                   <div className="aspect-video">

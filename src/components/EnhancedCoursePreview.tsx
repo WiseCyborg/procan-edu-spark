@@ -229,7 +229,7 @@ export const CoursePreviewSystem: React.FC = () => {
         <Card>
           <CardContent className="p-4 text-center">
             <BookOpen className="h-6 w-6 mx-auto mb-2 text-primary" />
-            <div className="text-2xl font-bold">18</div>
+            <div className="text-2xl font-bold">19</div>
             <div className="text-sm text-muted-foreground">Modules</div>
           </CardContent>
         </Card>
