@@ -13,6 +13,8 @@ import { getDocumentContent, DocumentContent } from '@/data/moduleDocuments';
 import { sanitizeHtml } from "@/utils/sanitize-html";
 import { markdownToHtml } from "@/utils/markdown-to-html";
 import { useUserProgress } from '@/hooks/useUserProgress';
+import { useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '@/hooks/useAuth';
 import { useResumeState } from '@/hooks/useResumeState';
 import { useSignedVideoUrl } from '@/hooks/useSignedVideoUrl';
 import { useVideoEngagementTracking } from '@/hooks/useVideoEngagementTracking';
