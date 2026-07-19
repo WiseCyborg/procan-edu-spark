@@ -336,7 +336,7 @@ serve(async (req) => {
       executed_at: startedAt.toISOString(),
       status: "failed",
       execution_time_ms: Math.round(performance.now() - t0),
-      error_message: JSON.stringify({ fatal: msg, sectionsChecked, errors }),
+      error_message: JSON.stringify({ fatal: msg, sectionsChecked, chapters: CHAPTERS, errors }),
     });
     return new Response(
       JSON.stringify({ success: false, status: "failed", error: msg, sections_checked: sectionsChecked, errors }),
