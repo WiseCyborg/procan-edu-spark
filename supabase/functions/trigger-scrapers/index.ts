@@ -252,7 +252,7 @@ async function logScraperError(
 }
 
 async function sendFailureEmail(
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseClient<any, "public", any>,
   runId: string,
   status: string,
   results: ScraperResult[],
