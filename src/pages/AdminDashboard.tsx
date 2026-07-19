@@ -157,16 +157,8 @@ const AdminDashboard = () => {
       )
       .subscribe();
 
-    // Payments subscription
-    const paymentsChannel = supabase
-      .channel('admin-payments-realtime')
-      .on('postgres_changes',
-        { event: '*', schema: 'public', table: 'payments' },
-        () => fetchAdminData()
-      )
-      .subscribe();
+    channels.push(usersChannel, orgsChannel, certsChannel);
 
-    channels.push(usersChannel, orgsChannel, certsChannel, paymentsChannel);
 
     return () => {
       channels.forEach(ch => supabase.removeChannel(ch));
@@ -230,12 +222,6 @@ const AdminDashboard = () => {
 
       if (organizationsError) throw organizationsError;
 
-      // Fetch payments data
-      const { data: paymentsData, error: paymentsError } = await supabase
-        .from('payments')
-        .select('*');
-
-      if (paymentsError) throw paymentsError;
 
       // Fetch user progress
       const { data: progressData, error: progressError } = await supabase
@@ -248,7 +234,7 @@ const AdminDashboard = () => {
       const totalUsers = usersData?.length || 0;
       const totalOrganizations = organizationsData?.length || 0;
       const totalCertificates = certificatesData?.filter(cert => !cert.is_revoked).length || 0;
-      const totalRevenue = paymentsData?.reduce((sum, payment) => sum + (payment.amount || 0), 0) || 0;
+      const totalRevenue = 0;
       
       // Calculate completion rate
       const completedUsers = certificatesData?.filter(cert => !cert.is_revoked).length || 0;
