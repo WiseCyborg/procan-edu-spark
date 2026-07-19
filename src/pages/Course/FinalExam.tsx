@@ -622,9 +622,10 @@ const FinalExam: React.FC = () => {
 
 
 
-  // Compute final results, persist to exam_attempts, and transition to the
-  // results screen. Grading runs through the canonical `gradeExam` helper —
-  // the same one that's covered by selfTestGrader().
+  // Submit the answer snapshot to the server, persist the resulting scores,
+  // and transition to the results screen. All grading and the write of
+  // total_score / is_passed / topic_scores / completed_at happen server-side
+  // in the submit_exam RPC — the client no longer holds the answer key.
   const finalizeExam = async (answerSnapshot: Record<string, string> = { ...answersRef.current }) => {
     if (finalizingRef.current) return;
     finalizingRef.current = true;
@@ -641,26 +642,19 @@ const FinalExam: React.FC = () => {
     if (totalTimerRef.current) clearInterval(totalTimerRef.current);
     if (sectionTimerRef.current) clearInterval(sectionTimerRef.current);
 
-    // Grade from the latest raw answers map (stable question id -> selected option text).
-    const latestAnswers = { ...answerSnapshot };
-    console.log('FINALIZE answers keys', Object.keys(latestAnswers));
-    const graded = gradeExam(latestAnswers);
-    console.log('FINALIZE graded', graded.overallPercent, graded.topicScores.length);
-    console.log('FINALIZE examAttemptId', attemptId);
-
-    const { overallPercent, isPassed, topicScores: calculatedTopicScores } = graded;
-
-    setTopicScores(calculatedTopicScores);
-    setTotalScore(overallPercent); // total_score now represents the overall percentage 0–100
+    const answerArray = Object.entries(answerSnapshot).map(([question_id, answer]) => ({
+      question_id,
+      answer,
+    }));
 
     if (!attemptId || !validUuid.test(attemptId)) {
       console.error('FINALIZE update error', new Error(`Invalid examAttemptId: ${attemptId ?? 'null'}`));
       toast.error('Could not save your exam results. Please contact support.');
       setPersistedAttempt({
-        total_score: overallPercent,
+        total_score: 0,
         is_passed: false,
         passing_score: PASSING_SCORE,
-        topic_scores: calculatedTopicScores,
+        topic_scores: [],
         time_taken: timeTakenSec,
         completed_at: completedAtIso,
       });
@@ -669,38 +663,68 @@ const FinalExam: React.FC = () => {
       return;
     }
 
+    const { data, error } = await supabase.rpc('submit_exam', {
+      p_attempt_id: attemptId,
+      p_answers: answerArray as unknown as Record<string, never>,
+    });
+
+    const response = data as unknown as {
+      ok: boolean;
+      score?: number;
+      passed?: boolean;
+      correct_count?: number;
+      total_questions?: number;
+      passing_score?: number;
+      topic_scores?: TopicScore[];
+      sections_failed?: number[];
+      error?: string;
+    } | null;
+
+    if (error || !response || response.ok !== true) {
+      console.error('FINALIZE submit_exam error', error, response);
+      toast.error('Could not submit your exam. Please contact support.');
+      setPersistedAttempt({
+        total_score: 0,
+        is_passed: false,
+        passing_score: PASSING_SCORE,
+        topic_scores: [],
+        time_taken: timeTakenSec,
+        completed_at: completedAtIso,
+      });
+      setExamStage('results');
+      setIsFinalizing(false);
+      return;
+    }
+
+    const serverScore = response.score ?? 0;
+    const serverPassed = response.passed === true;
+    const serverPassing = response.passing_score ?? PASSING_SCORE;
+    const serverTopics = response.topic_scores ?? [];
+
+    setTopicScores(serverTopics);
+    setTotalScore(serverScore);
+    setPersistedAttempt({
+      total_score: serverScore,
+      is_passed: serverPassed,
+      passing_score: serverPassing,
+      topic_scores: serverTopics,
+      time_taken: timeTakenSec,
+      completed_at: completedAtIso,
+    });
+
+    // RPC does not persist time_taken. Best-effort update, non-fatal.
     try {
-      if (calculatedTopicScores.length !== TOTAL_SECTIONS) {
-        console.error('FINALIZE update error', new Error(`Expected ${TOTAL_SECTIONS} topic scores, got ${calculatedTopicScores.length}`));
-      }
-
-      const { data: updatedAttempt, error: updateError } = await supabase
+      await supabase
         .from('exam_attempts')
-        .update({
-          total_score: overallPercent,
-          passing_score: PASSING_SCORE,
-          is_passed: isPassed,
-          time_taken: timeTakenSec,
-          completed_at: completedAtIso,
-          topic_scores: calculatedTopicScores as any,
-        })
-        .eq('id', attemptId)
-        .select('total_score, is_passed, passing_score, topic_scores, time_taken, completed_at')
-        .maybeSingle();
+        .update({ time_taken: timeTakenSec })
+        .eq('id', attemptId);
+    } catch (err) {
+      console.error('[FinalExam] time_taken update failed', err);
+    }
 
-      if (updateError) {
-        console.error('FINALIZE update error', updateError);
-        throw updateError;
-      }
-
-      if (!updatedAttempt) {
-        const noRowError = new Error('Exam attempt update returned no row. RLS or an invalid attempt id likely blocked persistence.');
-        console.error('FINALIZE update error', noRowError);
-        throw noRowError;
-      }
-
-      // Also store individual topic scores (best-effort)
-      const topicScoreInserts = calculatedTopicScores.map(ts => ({
+    // Also store individual topic scores from the server response (best-effort)
+    try {
+      const topicScoreInserts = serverTopics.map(ts => ({
         exam_attempt_id: attemptId,
         section_number: ts.section_number,
         comar_section: ts.comar_section,
@@ -708,42 +732,26 @@ const FinalExam: React.FC = () => {
         questions_correct: ts.questions_correct,
         questions_total: ts.questions_total,
         score_percentage: ts.score_percentage,
-        needs_remediation: ts.needs_remediation
+        needs_remediation: ts.needs_remediation,
       }));
-
-      const { error: topicScoreError } = await supabase.from('exam_topic_scores').insert(topicScoreInserts);
-      if (topicScoreError) {
-        console.error('[FinalExam] topic score insert error', topicScoreError);
+      if (topicScoreInserts.length > 0) {
+        const { error: topicScoreError } = await supabase
+          .from('exam_topic_scores')
+          .insert(topicScoreInserts);
+        if (topicScoreError) {
+          console.error('[FinalExam] topic score insert error', topicScoreError);
+        }
       }
-
-      setPersistedAttempt({
-        total_score: updatedAttempt.total_score ?? overallPercent,
-        is_passed: updatedAttempt.is_passed === true,
-        passing_score: updatedAttempt.passing_score ?? PASSING_SCORE,
-        topic_scores: (updatedAttempt.topic_scores as unknown as TopicScore[]) || calculatedTopicScores,
-        time_taken: updatedAttempt.time_taken ?? timeTakenSec,
-        completed_at: updatedAttempt.completed_at ?? completedAtIso,
-      });
-
-      refetchAttempts();
-      refetchStats();
-      setExamStage('results');
-    } catch (error) {
-      console.error('FINALIZE update error', error);
-      toast.error('Failed to save exam results. Please contact support.');
-      setPersistedAttempt({
-        total_score: overallPercent,
-        is_passed: false,
-        passing_score: PASSING_SCORE,
-        topic_scores: calculatedTopicScores,
-        time_taken: timeTakenSec,
-        completed_at: completedAtIso,
-      });
-      setExamStage('results');
+    } catch (err) {
+      console.error('[FinalExam] topic score insert threw', err);
     }
 
+    refetchAttempts();
+    refetchStats();
+    setExamStage('results');
     setIsFinalizing(false);
   };
+
 
 
 
