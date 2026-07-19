@@ -371,7 +371,7 @@ const StudentDashboard = () => {
           <CardDescription className="text-sm md:text-base">Pick up where you left off</CardDescription>
         </CardHeader>
         <CardContent className="p-4 md:p-6">
-          {completedModules < TOTAL_MODULES ? (
+          {completedModules < (agentModules.length || TOTAL_MODULES) ? (
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 border rounded-lg bg-accent/50 gap-4">
               <div className="flex-1 w-full md:w-auto">
                 <h3 className="font-semibold text-base md:text-lg">
