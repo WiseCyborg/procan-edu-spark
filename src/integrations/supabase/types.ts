@@ -3424,6 +3424,32 @@ export type Database = {
         }
         Relationships: []
       }
+      exam_answer_key: {
+        Row: {
+          correct_answer: string
+          created_at: string
+          question_id: string
+        }
+        Insert: {
+          correct_answer: string
+          created_at?: string
+          question_id: string
+        }
+        Update: {
+          correct_answer?: string
+          created_at?: string
+          question_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_answer_key_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: true
+            referencedRelation: "exam_questions"
+            referencedColumns: ["question_id"]
+          },
+        ]
+      }
       exam_attempts: {
         Row: {
           attempt_number: number | null
@@ -3600,6 +3626,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      exam_questions: {
+        Row: {
+          comar_section: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          needs_review: boolean
+          options: Json
+          question_id: string
+          question_index: number
+          question_text: string
+          review_note: string | null
+          section_number: number
+          section_title: string
+          topic_area: string | null
+          updated_at: string
+        }
+        Insert: {
+          comar_section?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          needs_review?: boolean
+          options: Json
+          question_id: string
+          question_index: number
+          question_text: string
+          review_note?: string | null
+          section_number: number
+          section_title: string
+          topic_area?: string | null
+          updated_at?: string
+        }
+        Update: {
+          comar_section?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          needs_review?: boolean
+          options?: Json
+          question_id?: string
+          question_index?: number
+          question_text?: string
+          review_note?: string | null
+          section_number?: number
+          section_title?: string
+          topic_area?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       exam_topic_scores: {
         Row: {
@@ -10791,6 +10868,10 @@ export type Database = {
         Returns: Json
       }
       start_uat_run: { Args: { p_organization_id?: string }; Returns: string }
+      submit_exam: {
+        Args: { p_answers: Json; p_attempt_id: string; p_time_taken?: number }
+        Returns: Json
+      }
       submit_module_quiz: {
         Args: { p_answers: Json; p_module_id: string }
         Returns: Json
