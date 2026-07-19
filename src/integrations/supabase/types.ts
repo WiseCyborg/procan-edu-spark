@@ -3391,76 +3391,6 @@ export type Database = {
         }
         Relationships: []
       }
-      entitlements: {
-        Row: {
-          course_id: string | null
-          created_at: string
-          entitlement_type: Database["public"]["Enums"]["entitlement_type"]
-          granted_by: string | null
-          id: string
-          metadata: Json | null
-          order_id: string | null
-          seat_id: string | null
-          status: Database["public"]["Enums"]["entitlement_status"]
-          updated_at: string
-          user_id: string
-          valid_from: string
-          valid_until: string | null
-        }
-        Insert: {
-          course_id?: string | null
-          created_at?: string
-          entitlement_type?: Database["public"]["Enums"]["entitlement_type"]
-          granted_by?: string | null
-          id?: string
-          metadata?: Json | null
-          order_id?: string | null
-          seat_id?: string | null
-          status?: Database["public"]["Enums"]["entitlement_status"]
-          updated_at?: string
-          user_id: string
-          valid_from?: string
-          valid_until?: string | null
-        }
-        Update: {
-          course_id?: string | null
-          created_at?: string
-          entitlement_type?: Database["public"]["Enums"]["entitlement_type"]
-          granted_by?: string | null
-          id?: string
-          metadata?: Json | null
-          order_id?: string | null
-          seat_id?: string | null
-          status?: Database["public"]["Enums"]["entitlement_status"]
-          updated_at?: string
-          user_id?: string
-          valid_from?: string
-          valid_until?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "entitlements_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "entitlements_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "entitlements_seat_id_fkey"
-            columns: ["seat_id"]
-            isOneToOne: false
-            referencedRelation: "rvt_seats"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       escalation_log: {
         Row: {
           created_at: string | null
@@ -4470,6 +4400,60 @@ export type Database = {
           },
         ]
       }
+      module_quiz_answers: {
+        Row: {
+          correct_answer: string
+          course_id: string
+          created_at: string
+          explanation: string | null
+          id: string
+          module_id: string
+          question_index: number
+          question_text: string
+          source_question_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          correct_answer: string
+          course_id: string
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          module_id: string
+          question_index: number
+          question_text: string
+          source_question_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          correct_answer?: string
+          course_id?: string
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          module_id?: string
+          question_index?: number
+          question_text?: string
+          source_question_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_quiz_answers_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "module_quiz_answers_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "course_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       module_state_log: {
         Row: {
           course_id: string
@@ -5197,77 +5181,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "rvt_purchases"
             referencedColumns: ["id"]
-          },
-        ]
-      }
-      payments: {
-        Row: {
-          amount: number
-          course_id: string
-          created_at: string
-          currency: string | null
-          id: string
-          organization_id: string | null
-          paid_at: string | null
-          payment_method: string | null
-          status: string | null
-          transaction_id: string | null
-          user_id: string | null
-        }
-        Insert: {
-          amount: number
-          course_id: string
-          created_at?: string
-          currency?: string | null
-          id?: string
-          organization_id?: string | null
-          paid_at?: string | null
-          payment_method?: string | null
-          status?: string | null
-          transaction_id?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          amount?: number
-          course_id?: string
-          created_at?: string
-          currency?: string | null
-          id?: string
-          organization_id?: string | null
-          paid_at?: string | null
-          payment_method?: string | null
-          status?: string | null
-          transaction_id?: string | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "payments_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "payments_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "compliance_dashboard_metrics"
-            referencedColumns: ["organization_id"]
-          },
-          {
-            foreignKeyName: "payments_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "payments_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "v_pipeline_compliance_health"
-            referencedColumns: ["organization_id"]
           },
         ]
       }
@@ -10858,6 +10771,10 @@ export type Database = {
         Returns: Json
       }
       start_uat_run: { Args: { p_organization_id?: string }; Returns: string }
+      submit_module_quiz: {
+        Args: { p_answers: Json; p_module_id: string }
+        Returns: Json
+      }
       submit_uat_step: {
         Args: {
           p_evidence_path?: string

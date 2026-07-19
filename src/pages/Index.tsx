@@ -212,7 +212,7 @@ const Index = () => {
                 <div className="space-y-2 text-sm mb-4">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
-                    <span><strong>18 modules</strong> • 4-6 hours</span>
+                    <span><strong>19 modules</strong> • 4-6 hours</span>
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
@@ -366,9 +366,9 @@ const Index = () => {
                 <h4 className={`font-semibold text-primary ${isMobile ? 'text-lg mb-3' : 'text-xl mb-4'}`}>Course Details</h4>
                 <ul className="space-y-2 text-muted-foreground">
                   <li><strong>Duration:</strong> Self-paced (typically 4-6 hours)</li>
-                  <li><strong>Modules:</strong> 24 comprehensive modules</li>
+                  <li><strong>Modules:</strong> 19 required modules (plus 5 optional Manager Track modules)</li>
                   <li><strong>Exam:</strong> Final certification exam</li>
-                  <li><strong>Certificate:</strong> Valid through 2025</li>
+                  <li><strong>Certificate:</strong> Issued on completion, publicly verifiable</li>
                   <li><strong>Access:</strong> 24/7 online availability</li>
                 </ul>
               </div>
