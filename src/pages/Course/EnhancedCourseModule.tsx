@@ -171,6 +171,8 @@ const EnhancedCourseModule: React.FC = () => {
 
   const { updateProgress, isModuleCompletedByNumber, canAccessModule, getModuleUUID, getFirstIncompleteModule, isLoading: isProgressLoading } = useUserProgress(COURSE_ID);
   const { saveResumeState } = useResumeState(COURSE_ID);
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
   
   const currentModuleNumber = parseInt(moduleId?.replace('part', '') || '0');
 
