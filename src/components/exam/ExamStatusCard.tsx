@@ -56,7 +56,7 @@ export const ExamStatusCard: React.FC = () => {
         </CardHeader>
         <CardContent>
           <Button 
-            onClick={() => navigate('/final-exam')} 
+            onClick={() => navigate('/exam')} 
             className="w-full"
           >
             Start Final Exam
