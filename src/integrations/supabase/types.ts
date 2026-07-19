@@ -10579,6 +10579,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_org_manager: {
+        Args: { _organization_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_org_member: {
         Args: { check_org_id: string; check_user_id: string }
         Returns: boolean
@@ -10589,6 +10593,22 @@ export type Database = {
       }
       is_same_organization: {
         Args: { target_user_id: string; viewer_id: string }
+        Returns: boolean
+      }
+      is_scheduled_call_host: {
+        Args: { _call_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_scheduled_call_invitee: {
+        Args: { _call_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_session_host: {
+        Args: { _session_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_session_participant: {
+        Args: { _session_id: string; _user_id: string }
         Returns: boolean
       }
       issue_manager_certificate: { Args: { p_user_id: string }; Returns: Json }

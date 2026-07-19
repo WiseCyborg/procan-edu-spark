@@ -32,7 +32,13 @@ interface InteractiveQuizProps {
   timeLimit?: number; // in minutes
   passingScore?: number; // percentage
   maxQuestions?: number; // default 10 - randomly select this many questions from pool
-  onQuizComplete: (score: number, passed: boolean, timeSpent: number, weakTopics?: WeakTopic[]) => void;
+  onQuizComplete: (
+    score: number,
+    passed: boolean,
+    timeSpent: number,
+    weakTopics?: WeakTopic[],
+    answers?: { question_index: number; answer: string }[]
+  ) => void;
   onQuestionAnswer?: (questionId: string, answer: string, isCorrect: boolean) => void;
   allowRetry?: boolean;
 }
@@ -176,8 +182,18 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
     const timeSpent = Math.round((Date.now() - startTime) / 1000);
     const weakTopics = calculateWeakTopics();
 
+    // Build answers array indexed by each question's position in the original `questions` prop
+    const rawAnswers: { question_index: number; answer: string }[] = [];
+    shuffledQuestions.forEach(q => {
+      const selected = answers[q.id];
+      if (selected === undefined) return;
+      const originalIndex = questions.findIndex(orig => orig.id === q.id);
+      if (originalIndex === -1) return;
+      rawAnswers.push({ question_index: originalIndex, answer: selected });
+    });
+
     setShowResults(true);
-    onQuizComplete(score, passed, timeSpent, weakTopics);
+    onQuizComplete(score, passed, timeSpent, weakTopics, rawAnswers);
   };
 
   const handleRetry = () => {
