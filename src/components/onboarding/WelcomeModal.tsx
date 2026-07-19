@@ -126,7 +126,7 @@ export const WelcomeModal = () => {
               {[
                 { step: 1, text: 'Complete your profile', subtext: 'Add your name, photo, and contact info' },
                 { step: 2, text: 'Watch the welcome video', subtext: 'Quick introduction to the platform' },
-                { step: 3, text: 'Complete all 24 modules', subtext: 'Learn everything about Maryland cannabis regulations' },
+                { step: 3, text: 'Complete all 19 required modules', subtext: 'Learn everything about Maryland cannabis regulations' },
                 { step: 4, text: 'Pass the final exam', subtext: '80% score required for certification' },
                 { step: 5, text: 'Download your certificate', subtext: 'Official Maryland RVT certificate' }
               ].map(({ step, text, subtext }) => (
