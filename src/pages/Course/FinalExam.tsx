@@ -888,13 +888,9 @@ const FinalExam: React.FC = () => {
           </h2>
           <p className="text-sm md:text-base text-gray-600 mb-4 md:mb-6">Test your knowledge of {sectionTitles[section].toLowerCase()}.</p>
           
-          {(shuffledQuizzes[section] || quizzes[section] || []).map((question, index) => {
-            // Use the canonical, shuffle-independent question id from finalExamData,
-            // not a positional key derived from this render.
+          {(examQuestions[section] || []).map((question, index) => {
+            // Use the canonical, shuffle-independent question id from the DB row.
             const qid = question.id;
-            if (import.meta.env.DEV && !expectedQuestionIds.has(qid)) {
-              console.error('[FinalExam] Rendered question id is not in grader expected id set', { section, qid });
-            }
             return (
               <div key={qid} className="mb-4 md:mb-6 p-3 md:p-4 bg-gray-50 rounded-lg">
                 <p className="font-medium mb-3 text-base md:text-lg">{index + 1}. {question.q}</p>
