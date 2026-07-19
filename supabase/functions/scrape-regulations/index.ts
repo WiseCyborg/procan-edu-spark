@@ -18,7 +18,12 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-cron-secret",
 };
 
-const CHAPTERS = ["05", "08", "09", "12", "13", "14", "15", "18"] as const;
+// Minimum chapters we must always attempt, drawn from MCA's RVT Application
+// Guidance required-curriculum list. Discovery may add more; it may never
+// return fewer than these.
+const FLOOR_CHAPTERS = [
+  "04", "05", "06", "07", "08", "09", "12", "13", "14", "15", "16", "18", "20", "21",
+] as const;
 const BASE = "https://regs.maryland.gov/us/md/exec/comar/14.17";
 const MCA_LAW_URL = "https://cannabis.maryland.gov/pages/law.aspx";
 const UA = "ProCannEdu-RegBot/2.0 (+https://www.procannedu.com; compliance monitoring)";
@@ -32,6 +37,23 @@ interface SectionRecord {
 }
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+async function discoverChapters(): Promise<string[]> {
+  const found = new Set<string>(FLOOR_CHAPTERS);
+  try {
+    const res = await fetchText(BASE); // https://regs.maryland.gov/us/md/exec/comar/14.17
+    if (res.ok) {
+      for (const m of res.body.matchAll(/\/us\/md\/exec\/comar\/14\.17\.(\d{2})(?![\d.])/g)) {
+        found.add(m[1]);
+      }
+    } else {
+      console.warn(`[scrape-regulations] chapter discovery HTTP ${res.status}; using floor list only`);
+    }
+  } catch (e) {
+    console.warn('[scrape-regulations] chapter discovery failed; using floor list only:', e instanceof Error ? e.message : e);
+  }
+  return [...found].sort();
+}
 
 async function fetchText(url: string): Promise<{ ok: boolean; status: number; body: string }> {
   try {
@@ -144,6 +166,9 @@ serve(async (req) => {
   let changesDetected = 0;
   const errors: Array<{ where: string; message: string }> = [];
 
+  const CHAPTERS = await discoverChapters();
+  console.log(`[scrape-regulations] scraping ${CHAPTERS.length} chapters: ${CHAPTERS.join(', ')}`);
+
   try {
     // ---- 1. Walk each chapter and collect section numbers ----
     for (const chapter of CHAPTERS) {
@@ -159,7 +184,7 @@ serve(async (req) => {
       const sections = extractSectionLinksFromChapter(chRes.body, chapter);
       if (sections.length === 0) {
         // Some chapters render sections as .01–.20 without explicit anchors — probe .01 through .30.
-        for (let i = 1; i <= 30; i++) sections.push(String(i).padStart(2, "0"));
+        for (let i = 1; i <= 22; i++) sections.push(String(i).padStart(2, "0"));
       }
 
       for (const section of sections) {
@@ -285,6 +310,7 @@ serve(async (req) => {
         sectionsChecked,
         sectionsUpdated,
         changesDetected,
+        chapters: CHAPTERS,
         errorCount: errors.length,
         errors: errors.slice(0, 25),
       }),
@@ -310,7 +336,7 @@ serve(async (req) => {
       executed_at: startedAt.toISOString(),
       status: "failed",
       execution_time_ms: Math.round(performance.now() - t0),
-      error_message: JSON.stringify({ fatal: msg, sectionsChecked, errors }),
+      error_message: JSON.stringify({ fatal: msg, sectionsChecked, chapters: CHAPTERS, errors }),
     });
     return new Response(
       JSON.stringify({ success: false, status: "failed", error: msg, sections_checked: sectionsChecked, errors }),
