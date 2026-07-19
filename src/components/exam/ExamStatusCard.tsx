@@ -168,20 +168,13 @@ export const ExamStatusCard: React.FC = () => {
             </Button>
           ) : (
             <Button 
-              onClick={() => navigate('/final-exam')} 
+              onClick={() => navigate('/exam')} 
               disabled={!canRetakeNow}
-              className="flex-1"
+              className="w-full"
             >
               {canRetakeNow ? 'Retake Exam' : 'Cooldown Active'}
             </Button>
           )}
-          <Button 
-            variant="outline" 
-            onClick={() => navigate('/final-exam')}
-            className="flex-1"
-          >
-            View History
-          </Button>
         </div>
       </CardContent>
     </Card>
