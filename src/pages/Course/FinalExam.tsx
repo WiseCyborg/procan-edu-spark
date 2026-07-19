@@ -82,7 +82,8 @@ const FinalExam: React.FC = () => {
   >('verification');
   const [checkinId, setCheckinId] = useState<string | null>(null);
   const [currentSection, setCurrentSection] = useState(1);
-  const [totalScore, setTotalScore] = useState(0); // raw correct count during exam; equals overall percentage after finalize
+  const [totalScore, setTotalScore] = useState(0); // set from server response
+  const [examQuestions, setExamQuestions] = useState<Record<number, QuizQuestion[]>>({});
   const [submittedSections, setSubmittedSections] = useState<Set<number>>(new Set());
   const [results, setResults] = useState<ExamResult>({});
   const [topicScores, setTopicScores] = useState<TopicScore[]>([]);
