@@ -1,0 +1,1 @@
+ALTER TABLE public.regulatory_updates ADD COLUMN IF NOT EXISTS ai_affected_topics jsonb;

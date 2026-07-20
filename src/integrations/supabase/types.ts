@@ -2150,6 +2150,7 @@ export type Database = {
           id: string
           is_active: boolean | null
           is_public: boolean | null
+          max_exam_attempts: number | null
           module_count: number | null
           passing_score: number | null
           payment_required: boolean | null
@@ -2174,6 +2175,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_public?: boolean | null
+          max_exam_attempts?: number | null
           module_count?: number | null
           passing_score?: number | null
           payment_required?: boolean | null
@@ -2198,6 +2200,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_public?: boolean | null
+          max_exam_attempts?: number | null
           module_count?: number | null
           passing_score?: number | null
           payment_required?: boolean | null
@@ -6170,6 +6173,7 @@ export type Database = {
         Row: {
           admin_notes: string | null
           affected_modules: string[] | null
+          ai_affected_topics: Json | null
           ai_impact_analysis: string | null
           change_type: string
           created_at: string | null
@@ -6185,6 +6189,7 @@ export type Database = {
         Insert: {
           admin_notes?: string | null
           affected_modules?: string[] | null
+          ai_affected_topics?: Json | null
           ai_impact_analysis?: string | null
           change_type: string
           created_at?: string | null
@@ -6200,6 +6205,7 @@ export type Database = {
         Update: {
           admin_notes?: string | null
           affected_modules?: string[] | null
+          ai_affected_topics?: Json | null
           ai_impact_analysis?: string | null
           change_type?: string
           created_at?: string | null
@@ -8325,6 +8331,74 @@ export type Database = {
           },
         ]
       }
+      training_evaluation_questions: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          is_active: boolean
+          is_required: boolean
+          question_key: string
+          question_text: string
+          response_type: string
+          source: string
+        }
+        Insert: {
+          created_at?: string
+          display_order: number
+          id?: string
+          is_active?: boolean
+          is_required?: boolean
+          question_key: string
+          question_text: string
+          response_type: string
+          source?: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          is_required?: boolean
+          question_key?: string
+          question_text?: string
+          response_type?: string
+          source?: string
+        }
+        Relationships: []
+      }
+      training_evaluation_responses: {
+        Row: {
+          course_id: string
+          id: string
+          responses: Json
+          submitted_at: string
+          user_id: string
+        }
+        Insert: {
+          course_id: string
+          id?: string
+          responses: Json
+          submitted_at?: string
+          user_id: string
+        }
+        Update: {
+          course_id?: string
+          id?: string
+          responses?: Json
+          submitted_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_evaluation_responses_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       training_questions: {
         Row: {
           answered_at: string | null
@@ -9331,6 +9405,7 @@ export type Database = {
           is_completed: boolean | null
           module_id: string | null
           score: number | null
+          started_at: string | null
           tier_unlocked_at: string | null
           time_spent: number | null
           trainer_id: string | null
@@ -9348,6 +9423,7 @@ export type Database = {
           is_completed?: boolean | null
           module_id?: string | null
           score?: number | null
+          started_at?: string | null
           tier_unlocked_at?: string | null
           time_spent?: number | null
           trainer_id?: string | null
@@ -9365,6 +9441,7 @@ export type Database = {
           is_completed?: boolean | null
           module_id?: string | null
           score?: number | null
+          started_at?: string | null
           tier_unlocked_at?: string | null
           time_spent?: number | null
           trainer_id?: string | null
@@ -10599,6 +10676,21 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_video_regeneration_queue: {
+        Args: never
+        Returns: {
+          asset_id: string
+          asset_key: string
+          comar_reference: string
+          course_title: string
+          flagged_since: string
+          has_draft_script: boolean
+          module_number: number
+          module_title: string
+          reason: string
+          review_status: string
+        }[]
+      }
       has_any_member_type: {
         Args: {
           _member_types: Database["public"]["Enums"]["member_type"][]
@@ -10722,6 +10814,10 @@ export type Database = {
           p_review_notes?: string
         }
         Returns: string
+      }
+      mark_video_regenerated: {
+        Args: { p_asset_id: string; p_new_public_url?: string; p_note?: string }
+        Returns: Json
       }
       move_to_deadletter: { Args: { p_job_id: string }; Returns: undefined }
       purge_uat_seed_entities: { Args: { _batch?: string }; Returns: Json }
@@ -10868,6 +10964,7 @@ export type Database = {
         }
         Returns: Json
       }
+      start_module: { Args: { p_module_id: string }; Returns: Json }
       start_uat_run: { Args: { p_organization_id?: string }; Returns: string }
       submit_exam: {
         Args: { p_answers: Json; p_attempt_id: string; p_time_taken?: number }
@@ -10875,6 +10972,10 @@ export type Database = {
       }
       submit_module_quiz: {
         Args: { p_answers: Json; p_module_id: string }
+        Returns: Json
+      }
+      submit_training_evaluation: {
+        Args: { p_course_id: string; p_responses: Json }
         Returns: Json
       }
       submit_uat_step: {
@@ -11048,6 +11149,7 @@ export type Database = {
         | "training_coordinator"
         | "consumer"
         | "trainer"
+        | "mca_observer"
       entitlement_status: "active" | "expired" | "suspended" | "revoked"
       entitlement_type: "trial" | "paid" | "org_seat" | "admin_granted"
       incident_severity: "low" | "medium" | "high" | "critical"
@@ -11226,6 +11328,7 @@ export const Constants = {
         "training_coordinator",
         "consumer",
         "trainer",
+        "mca_observer",
       ],
       entitlement_status: ["active", "expired", "suspended", "revoked"],
       entitlement_type: ["trial", "paid", "org_seat", "admin_granted"],
