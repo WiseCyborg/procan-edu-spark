@@ -9558,9 +9558,15 @@ export type Database = {
           needs_regeneration: boolean | null
           public_url: string | null
           regeneration_reason: string | null
+          render_dispatched_at: string | null
+          render_error: string | null
+          render_job_id: string | null
+          render_provider: string | null
+          render_status: string | null
           review_status: string | null
           reviewed_at: string | null
           reviewed_by: string | null
+          slide_outline: Json | null
           storage_path: string | null
           thumbnail_url: string | null
           title: string
@@ -9594,9 +9600,15 @@ export type Database = {
           needs_regeneration?: boolean | null
           public_url?: string | null
           regeneration_reason?: string | null
+          render_dispatched_at?: string | null
+          render_error?: string | null
+          render_job_id?: string | null
+          render_provider?: string | null
+          render_status?: string | null
           review_status?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          slide_outline?: Json | null
           storage_path?: string | null
           thumbnail_url?: string | null
           title: string
@@ -9630,9 +9642,15 @@ export type Database = {
           needs_regeneration?: boolean | null
           public_url?: string | null
           regeneration_reason?: string | null
+          render_dispatched_at?: string | null
+          render_error?: string | null
+          render_job_id?: string | null
+          render_provider?: string | null
+          render_status?: string | null
           review_status?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          slide_outline?: Json | null
           storage_path?: string | null
           thumbnail_url?: string | null
           title?: string
