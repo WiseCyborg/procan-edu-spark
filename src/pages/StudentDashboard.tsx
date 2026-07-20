@@ -9,7 +9,7 @@ import { useCourseState } from '@/hooks/useCourseState';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { DeadlineCountdown } from '@/components/course/DeadlineCountdown';
+
 import { ProfileCompletionBanner } from '@/components/ProfileCompletionBanner';
 import { ExamStatusCard } from '@/components/exam/ExamStatusCard';
 import { ResumePrompt } from '@/components/journey/ResumePrompt';
@@ -266,7 +266,6 @@ const StudentDashboard = () => {
       )}
 
 
-      <DeadlineCountdown />
 
       {/* Tier System Disclaimer */}
       <Card className="bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800">

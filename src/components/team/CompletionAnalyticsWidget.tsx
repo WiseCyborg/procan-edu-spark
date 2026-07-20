@@ -33,35 +33,19 @@ export function CompletionAnalyticsWidget({ organizationId }: CompletionAnalytic
 
   const fetchCompletionStats = async () => {
     try {
-      // Get enrollments
-      const { data: enrollments, error: enrollError } = await supabase
-        .from("rvt_enrollments" as any)
-        .select("*, user_progress(*)")
-        .eq("organization_id", organizationId);
-
-      if (enrollError) {
-        console.warn("CompletionAnalyticsWidget: rvt_enrollments query failed:", enrollError.code);
-        setLoading(false);
-        return;
-      }
-
       // Get at-risk students
       const { data: atRisk, error: riskError } = await supabase
         .rpc("get_at_risk_students" as any, { org_id: organizationId });
 
       if (riskError) throw riskError;
 
-      const enrollmentsArray = Array.isArray(enrollments) ? enrollments : [];
       const atRiskArray = Array.isArray(atRisk) ? atRisk : [];
-      
-      const completed = enrollmentsArray.filter((e: any) => e.completed_at !== null);
-      const avgProgress = enrollmentsArray.reduce((sum: number, e: any) => sum + (e.completion_percentage || 0), 0) / (enrollmentsArray.length || 1);
 
       setStats({
-        totalEmployees: enrollmentsArray.length,
-        completedCount: completed.length,
-        averageProgress: Math.round(avgProgress || 0),
-        averageScore: 0, // Calculate from user_progress if needed
+        totalEmployees: 0,
+        completedCount: 0,
+        averageProgress: 0,
+        averageScore: 0,
         atRiskCount: atRiskArray.length
       });
     } catch (error) {
