@@ -258,12 +258,17 @@ STYLE:
           .eq('id', asset.id);
         if (updErr) throw new Error(`update failed: ${updErr.message}`);
 
+        const scriptWords = (script.match(/\S+/g) ?? []).length;
+        const estimatedMinutes = Math.round((scriptWords / 150) * 10) / 10;
+
         succeeded++;
         results.push({
           asset_id: asset.id,
           module_number: modNum,
           status: 'succeeded',
           script_length: script.length,
+          script_words: scriptWords,
+          estimated_minutes: estimatedMinutes,
         });
       } catch (perAssetErr) {
         const reason = perAssetErr instanceof Error ? perAssetErr.message : String(perAssetErr);
