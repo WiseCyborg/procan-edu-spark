@@ -14,6 +14,8 @@ interface AssetResult {
   module_number: number | null;
   status: 'succeeded' | 'skipped' | 'error';
   script_length?: number;
+  script_words?: number;
+  estimated_minutes?: number;
   reason?: string;
 }
 
