@@ -198,12 +198,30 @@ RELEVANT COMAR SECTION TEXT (for reference — you may quote citations aloud as 
 ${comarSlice || '(none available)'}
 
 TASK:
-Write a spoken narration script for a training video of roughly 3-5 minutes. Follow these rules exactly:
-- Cover ONLY what is in the MODULE CONTENT above. Do not introduce any rule, figure, threshold, deadline, or citation that is not present in that text.
-- State specific figures, thresholds and deadlines exactly as written in the module.
-- Use plain spoken English suitable for narration. No headings, no bullet points, no stage directions, no speaker labels.
-- Cite COMAR sections aloud naturally where the module does (for example, "under COMAR 14 point 17 point 12 point 10").
-- Return ONLY the narration script text. No preamble, no title, no markdown, no closing remarks about the script itself.`;
+Write a spoken narration script for a training video.
+
+LENGTH — this is a hard requirement:
+- Target 700 to 800 words. Never exceed 850 words.
+- At roughly 150 words per minute this produces a video of about 5 minutes, which is the maximum a learner will reliably watch without disengaging.
+- Do NOT attempt to cover every point in the module. The module text remains the complete, authoritative version. The video is an overview that carries the most consequential material.
+
+WHAT TO PRIORITISE when the module contains more than fits:
+1. Any rule with a specific figure, threshold, deadline or percentage — these must appear, stated exactly as written in the module. Examples of the kind of thing that must never be cut: reporting thresholds, retention periods, notification deadlines, dose limits, age requirements.
+2. Any rule where following the wrong version causes a violation — obligations the agent must act on, not background context.
+3. One or two concrete scenarios showing the rule applied at the counter.
+
+WHAT TO CUT FIRST:
+- Background, history, and rationale
+- Repetition and summary sections
+- Lists of examples where two or three suffice
+- Encouragement and closing motivational passages
+
+STYLE:
+- Plain spoken English suitable for narration. No headings, no bullet points, no stage directions, no speaker labels.
+- State figures exactly as the module states them.
+- Cite COMAR sections aloud naturally where the module does, spelling out the numbers for speech — for example "COMAR fourteen point seventeen point twelve point ten".
+- End with one short sentence telling the learner the full detail is in the module text below the video.
+- Return ONLY the narration script text. No preamble, no title, no markdown, no commentary about the script.`;
 
       try {
         const response = await fetch('https://api.anthropic.com/v1/messages', {
