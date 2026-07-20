@@ -6173,6 +6173,7 @@ export type Database = {
         Row: {
           admin_notes: string | null
           affected_modules: string[] | null
+          ai_affected_topics: Json | null
           ai_impact_analysis: string | null
           change_type: string
           created_at: string | null
@@ -6188,6 +6189,7 @@ export type Database = {
         Insert: {
           admin_notes?: string | null
           affected_modules?: string[] | null
+          ai_affected_topics?: Json | null
           ai_impact_analysis?: string | null
           change_type: string
           created_at?: string | null
@@ -6203,6 +6205,7 @@ export type Database = {
         Update: {
           admin_notes?: string | null
           affected_modules?: string[] | null
+          ai_affected_topics?: Json | null
           ai_impact_analysis?: string | null
           change_type?: string
           created_at?: string | null
