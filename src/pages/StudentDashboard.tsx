@@ -266,7 +266,6 @@ const StudentDashboard = () => {
       )}
 
 
-      <DeadlineCountdown />
 
       {/* Tier System Disclaimer */}
       <Card className="bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800">
