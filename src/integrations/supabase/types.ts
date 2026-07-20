@@ -9539,6 +9539,10 @@ export type Database = {
           created_at: string | null
           descript_project_id: string | null
           description: string | null
+          draft_audio_duration_seconds: number | null
+          draft_audio_generated_at: string | null
+          draft_audio_provider: string | null
+          draft_audio_url: string | null
           draft_generated_at: string | null
           draft_script: string | null
           draft_video_url: string | null
@@ -9571,6 +9575,10 @@ export type Database = {
           created_at?: string | null
           descript_project_id?: string | null
           description?: string | null
+          draft_audio_duration_seconds?: number | null
+          draft_audio_generated_at?: string | null
+          draft_audio_provider?: string | null
+          draft_audio_url?: string | null
           draft_generated_at?: string | null
           draft_script?: string | null
           draft_video_url?: string | null
@@ -9603,6 +9611,10 @@ export type Database = {
           created_at?: string | null
           descript_project_id?: string | null
           description?: string | null
+          draft_audio_duration_seconds?: number | null
+          draft_audio_generated_at?: string | null
+          draft_audio_provider?: string | null
+          draft_audio_url?: string | null
           draft_generated_at?: string | null
           draft_script?: string | null
           draft_video_url?: string | null
