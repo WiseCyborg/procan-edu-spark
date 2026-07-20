@@ -10585,6 +10585,7 @@ export type Database = {
           created_at: string
         }[]
       }
+      get_student_dashboard: { Args: { p_course_id: string }; Returns: Json }
       get_user_organization: { Args: { _user_id: string }; Returns: string }
       get_user_organization_id: { Args: { _user_id: string }; Returns: string }
       get_user_tier: { Args: { _user_id: string }; Returns: string }
