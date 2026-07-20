@@ -230,18 +230,28 @@ serve(async (req) => {
               review_status: "pending",
             });
 
-            // Best-effort AI analysis; do not fail the run if this errors.
-            supabase.functions
-              .invoke("analyze-regulatory-impact", {
-                body: {
-                  section_number: rec.number,
-                  old_content: existing?.content_text ?? null,
-                  new_content: rec.content,
+            // AI analysis; non-fatal to the scrape, but surfaced in the run log.
+            try {
+              const { error: analyzeErr } = await supabase.functions.invoke(
+                "analyze-regulatory-impact",
+                {
+                  body: {
+                    section_number: rec.number,
+                    old_content: existing?.content_text ?? null,
+                    new_content: rec.content,
+                  },
                 },
-              })
-              .catch((e) =>
-                console.error(`[scrape-regulations] analyze-regulatory-impact ${rec.number}:`, e?.message ?? e),
               );
+              if (analyzeErr) {
+                const msg = analyzeErr.message ?? String(analyzeErr);
+                console.error(`[scrape-regulations] analyze-regulatory-impact ${rec.number}:`, msg);
+                errors.push({ where: `analyze:${rec.number}`, message: msg });
+              }
+            } catch (e) {
+              const msg = e instanceof Error ? e.message : String(e);
+              console.error(`[scrape-regulations] analyze-regulatory-impact ${rec.number}:`, msg);
+              errors.push({ where: `analyze:${rec.number}`, message: msg });
+            }
           }
         } catch (e) {
           const msg = e instanceof Error ? e.message : String(e);
