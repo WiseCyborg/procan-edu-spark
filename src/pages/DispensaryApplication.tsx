@@ -67,59 +67,72 @@ const DispensaryApplication = () => {
 
       console.log('Full submission response:', { result, error, status, raw });
 
-      // "Never-block" pattern: Always succeed from user's perspective
-      // Even if backend had issues, we show success and queue for support
-      if (error) {
-        console.error('Submission had backend issues (queued for review):', {
-          message: error.message,
-          status,
-          raw,
+      // Success: backend confirmed the save
+      if (!error && (result?.success === true || status === 201)) {
+        setSubmitted(true);
+        toast({
+          title: "Application Received ✅",
+          description: "Your dispensary profile has been saved and is pending review.",
+          duration: 6000,
         });
-
-        // Check for truly blocking errors (rate limit, duplicate)
-        const errorCode = raw?.code || error?.message || '';
-
-        if (errorCode?.includes('RATE_LIMIT_EXCEEDED')) {
-          toast({
-            title: "Please Wait",
-            description: "Too many submissions recently. Please try again in a few minutes.",
-            variant: "destructive",
-          });
-          return;
-        }
-
-        if (errorCode?.includes('DUPLICATE_APPLICATION')) {
-          // Duplicate is actually fine - treat as success
-          setSubmitted(true);
-          toast({
-            title: "Application Received ✅",
-            description: "We already have your application on file. Check your email for updates.",
-            duration: 6000,
-          });
-          return;
-        }
-
-        // For ALL other errors: still show success, backend will handle
-        // This prevents blocking the user during onboarding
-        console.warn('Backend error occurred but showing success to user:', error.message);
+        return;
       }
 
-      // Always succeed from user perspective
-      setSubmitted(true);
+      const errorCode = raw?.code || error?.message || '';
+
+      if (errorCode?.includes('RATE_LIMIT_EXCEEDED')) {
+        toast({
+          title: "Please Wait",
+          description: "Too many submissions recently. Please try again in a few minutes.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (errorCode?.includes('DUPLICATE_APPLICATION') || errorCode?.includes('DUPLICATE_EMAIL')) {
+        setSubmitted(true);
+        toast({
+          title: "Application Received ✅",
+          description: "We already have your application on file. Check your email for updates.",
+          duration: 6000,
+        });
+        return;
+      }
+
+      if (errorCode?.includes('RESUBMIT_TOO_SOON')) {
+        toast({
+          title: "Please Wait",
+          description: raw?.error || "Please wait a few days before resubmitting.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (errorCode?.includes('VALIDATION_ERROR')) {
+        const failedFields = raw?.failedFields;
+        const description = Array.isArray(failedFields) && failedFields.length > 0
+          ? failedFields.join(", ")
+          : (raw?.error || "Please review your entries and try again.");
+        toast({
+          title: "Please check your entries",
+          description,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Any other backend error or non-2xx response
       toast({
-        title: "Application Received ✅",
-        description: "Your dispensary profile has been saved and is pending review.",
-        duration: 6000,
+        title: "Submission not completed",
+        description: "We couldn't confirm your submission. Please try again, or contact support if this continues.",
+        variant: "destructive",
       });
     } catch (error: any) {
-      console.error('Submission exception (showing success anyway):', error);
-
-      // Even on exception, show success - support will follow up
-      setSubmitted(true);
+      console.error('Submission exception:', error);
       toast({
-        title: "Application Received ✅",
-        description: "Your information has been saved. If we need anything, we'll contact you.",
-        duration: 6000,
+        title: "Submission not completed",
+        description: "We couldn't confirm your submission. Please try again, or contact support if this continues.",
+        variant: "destructive",
       });
     }
   };

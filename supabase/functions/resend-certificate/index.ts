@@ -81,13 +81,13 @@ serve(async (req) => {
     const { data: profile, error: profileErr } = await supabase
       .from("profiles")
       .select("first_name, last_name")
-      .eq("id", cert.user_id)
+      .eq("user_id", cert.user_id)
       .maybeSingle();
 
     const { data: authUser, error: authUserErr } = await supabase.auth.admin.getUserById(cert.user_id);
     const recipientEmail = authUser?.user?.email;
 
-    if (profileErr || !profile || authUserErr || !recipientEmail) {
+    if (authUserErr || !recipientEmail) {
       return new Response(JSON.stringify({ error: "Recipient email not found" }), {
         status: 404,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -96,7 +96,7 @@ serve(async (req) => {
 
     // --- Render + send ---
     const html = await loadEmailTemplate("certificate", {
-      FirstName: profile.first_name ?? "Student",
+      FirstName: profile?.first_name ?? "Student",
       CertificateNumber: cert.certificate_number ?? "",
       DownloadURL: cert.pdf_url ?? "https://www.procannedu.com/certificates",
     });
