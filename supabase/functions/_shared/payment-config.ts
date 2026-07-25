@@ -7,5 +7,5 @@ export function deriveQuantity(opts: {
   estimated_employees?: number | null;
   requested_credits?: number | null;
 }): number {
-  return opts.estimated_employees || opts.requested_credits || DEFAULT_QUANTITY;
+  return opts.requested_credits || opts.estimated_employees || DEFAULT_QUANTITY;
 }
