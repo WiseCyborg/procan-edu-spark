@@ -1,5 +1,5 @@
 // Shared payment constants used by both the create and verify PayPal edge functions
-export const PRICE_PER_SEAT = 49;
+export const PRICE_PER_SEAT = 49.99;
 export const DEFAULT_QUANTITY = 10;
 export const PAYMENT_CURRENCY = "USD";
 
