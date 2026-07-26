@@ -68,34 +68,24 @@ export const SeatAssignmentManager: React.FC<SeatAssignmentManagerProps> = ({
         .select('email, status, sent_at')
         .eq('organization_id', organizationId);
       
-      // Calculate profile completion for each employee
-      const REQUIRED_FIELDS = ['first_name', 'last_name', 'phone', 'date_of_birth', 'emergency_contact_name', 'emergency_contact_phone'];
+      // Calculate profile completion server-side (managers never receive raw PII)
       const employeesWithCompletion = await Promise.all(
         (empData || []).map(async (emp) => {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('first_name, last_name, phone, date_of_birth, emergency_contact_name, emergency_contact_phone')
-            .eq('user_id', emp.user_id)
-            .single();
-          
-          let completedFields = 0;
-          if (profile) {
-            REQUIRED_FIELDS.forEach(field => {
-              if (profile[field]) completedFields++;
-            });
-          }
+          const { data: completion } = await supabase
+            .rpc('get_org_profile_completion', { _user_id: emp.user_id });
 
           // Find invitation status for this employee
           const invitation = invitations?.find(inv => inv.email === emp.email);
-          
+
           return {
             ...emp,
-            profile_completion: Math.round((completedFields / REQUIRED_FIELDS.length) * 100),
+            profile_completion: completion ?? 0,
             invitation_status: (invitation?.status as 'pending' | 'sent' | 'failed' | null) || null,
             invitation_sent_at: invitation?.sent_at || null
           };
         })
       );
+
       
       setEmployees(employeesWithCompletion);
       
