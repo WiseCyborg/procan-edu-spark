@@ -45,9 +45,8 @@ export const VersionMismatchAlert = ({ organizationId }: { organizationId?: stri
       const mismatchesWithProfiles = await Promise.all(
         (data || []).map(async (mismatch) => {
           const { data: profile } = await supabase
-            .from('profiles')
-            .select('first_name, last_name')
-            .eq('user_id', mismatch.user_id)
+            .rpc('get_org_employee_directory')
+            .then((r) => ({ data: (r.data || []).find((x: any) => x.user_id === mismatch.user_id)
             .single();
           return { ...mismatch, profiles: profile } as VersionMismatch;
         })

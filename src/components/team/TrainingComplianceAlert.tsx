@@ -47,9 +47,8 @@ export const TrainingComplianceAlert = ({ organizationId }: { organizationId?: s
       const alertsWithProfiles = await Promise.all(
         (data || []).map(async (alert) => {
           const { data: profile } = await supabase
-            .from('profiles')
-            .select('first_name, last_name')
-            .eq('user_id', alert.employee_user_id)
+            .rpc('get_org_employee_directory')
+            .then((r) => ({ data: (r.data || []).find((x: any) => x.user_id === alert.employee_user_id)
             .single();
           return { ...alert, profiles: profile } as ComplianceAlert;
         })

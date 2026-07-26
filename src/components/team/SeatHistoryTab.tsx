@@ -72,10 +72,8 @@ export function SeatHistoryTab({ organizationId }: SeatHistoryTabProps) {
         if (op.to_user_id) userIds.add(op.to_user_id);
       });
 
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('user_id, first_name, last_name')
-        .in('user_id', Array.from(userIds));
+      const { data: allProfiles } = await supabase.rpc('get_org_employee_directory');
+      const profiles = (allProfiles || []).filter((p: any) => userIds.has(p.user_id));
 
       const userMap = new Map(
         profiles?.map((p) => [

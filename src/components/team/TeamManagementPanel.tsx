@@ -86,9 +86,7 @@ export function TeamManagementPanel({ organizationId, organizationName }: TeamMa
 
       // Fetch employees (non-coordinators)
       const { data: empData } = await supabase
-        .from('profiles')
-        .select('user_id, first_name, last_name, email_cache')
-        .eq('organization_id', organizationId);
+        .rpc('get_org_employee_directory', { _organization_id: organizationId });
 
       const coordIds = new Set(coords.map(c => c.user_id));
       const emps = empData?.filter((e: any) => !coordIds.has(e.user_id)).map((e: any) => ({
