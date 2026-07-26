@@ -10134,6 +10134,103 @@ export type Database = {
           },
         ]
       }
+      org_employee_directory: {
+        Row: {
+          created_at: string | null
+          deactivated_at: string | null
+          deleted_at: string | null
+          email_cache: string | null
+          first_name: string | null
+          first_shift_date: string | null
+          id: string | null
+          is_verified: boolean | null
+          job_role: Database["public"]["Enums"]["job_role"] | null
+          job_title: string | null
+          last_name: string | null
+          organization: string | null
+          organization_id: string | null
+          phone_verified: boolean | null
+          preferred_language: string | null
+          profile_photo_url: string | null
+          tier_status: string | null
+          training_verified_at: string | null
+          training_verified_by: string | null
+          updated_at: string | null
+          user_id: string | null
+          welcome_video_watched: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          deactivated_at?: string | null
+          deleted_at?: string | null
+          email_cache?: string | null
+          first_name?: string | null
+          first_shift_date?: string | null
+          id?: string | null
+          is_verified?: boolean | null
+          job_role?: Database["public"]["Enums"]["job_role"] | null
+          job_title?: string | null
+          last_name?: string | null
+          organization?: string | null
+          organization_id?: string | null
+          phone_verified?: boolean | null
+          preferred_language?: string | null
+          profile_photo_url?: string | null
+          tier_status?: string | null
+          training_verified_at?: string | null
+          training_verified_by?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          welcome_video_watched?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          deactivated_at?: string | null
+          deleted_at?: string | null
+          email_cache?: string | null
+          first_name?: string | null
+          first_shift_date?: string | null
+          id?: string | null
+          is_verified?: boolean | null
+          job_role?: Database["public"]["Enums"]["job_role"] | null
+          job_title?: string | null
+          last_name?: string | null
+          organization?: string | null
+          organization_id?: string | null
+          phone_verified?: boolean | null
+          preferred_language?: string | null
+          profile_photo_url?: string | null
+          tier_status?: string | null
+          training_verified_at?: string | null
+          training_verified_by?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          welcome_video_watched?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "compliance_dashboard_metrics"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "profiles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "v_pipeline_compliance_health"
+            referencedColumns: ["organization_id"]
+          },
+        ]
+      }
       payment_audit_user_hint: {
         Row: {
           created_at: string | null
