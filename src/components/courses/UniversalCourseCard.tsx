@@ -224,6 +224,11 @@ export const UniversalCourseCard = ({
         >
           {getButtonContent()}
         </Button>
+        {course.course_type === 'specialty' && (
+          <Button variant="ghost" size="sm" className="w-full" asChild>
+            <Link to={`/courses/${course.id}`}>View details</Link>
+          </Button>
+        )}
         {course.is_public && !hasCertificate && (
           <p className="text-xs text-center text-muted-foreground">
             No account required • Earn certificate
