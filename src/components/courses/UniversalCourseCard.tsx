@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Clock, BookOpen, Award, ArrowRight, Lock, CheckCircle2, Loader2, ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -224,6 +225,11 @@ export const UniversalCourseCard = ({
         >
           {getButtonContent()}
         </Button>
+        {course.course_type === 'specialty' && (
+          <Button variant="ghost" size="sm" className="w-full" asChild>
+            <Link to={`/courses/${course.id}`}>View details</Link>
+          </Button>
+        )}
         {course.is_public && !hasCertificate && (
           <p className="text-xs text-center text-muted-foreground">
             No account required • Earn certificate

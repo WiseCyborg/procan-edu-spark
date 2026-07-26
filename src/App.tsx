@@ -104,6 +104,8 @@ import UATEvidenceSubmission from "./pages/UATEvidenceSubmission";
 import UATFeedback from "./pages/uat/UATFeedback";
 import UATDispensaryOnboarding from "./pages/UATDispensaryOnboarding";
 import AllCourses from "./pages/AllCourses";
+import CourseDetailPage from "./pages/CourseDetailPage";
+import SpecialtyCoursePlayer from "./pages/SpecialtyCoursePlayer";
 import DemoPreview from "./pages/DemoPreview";
 import Resources from "./pages/Resources";
 import VerifyCertificate from "./pages/VerifyCertificate";
@@ -235,6 +237,12 @@ const AppRoutesLayout = () => {
             <Route path="/consumer-education/:courseId" element={<ConsumerCourse />} />
             <Route path="/consumer-certificates" element={<ConsumerCertificates />} />
             <Route path="/courses" element={<AllCourses />} />
+            <Route path="/courses/:courseId" element={<CourseDetailPage />} />
+            <Route path="/courses/:courseId/learn" element={
+              <ProtectedRoute>
+                <SpecialtyCoursePlayer />
+              </ProtectedRoute>
+            } />
             <Route path="/demo" element={<DemoPreview />} />
             <Route path="/resources" element={<Resources />} />
             <Route path="/verify" element={<VerifyCertificate />} />
