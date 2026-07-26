@@ -25,7 +25,7 @@ serve(async (req) => {
       throw new Error('Unauthorized');
     }
 
-    const { roomName, participantName, isHost } = await req.json();
+    const { roomName, participantName } = await req.json();
 
     if (!roomName || !participantName) {
       throw new Error('Missing required fields: roomName, participantName');
@@ -38,6 +38,30 @@ serve(async (req) => {
       throw new Error('LiveKit credentials not configured');
     }
 
+    // Determine host status server-side — never trust a client-supplied flag
+    const serviceClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
+    const { data: call } = await serviceClient
+      .from('video_calls')
+      .select('id, host_id')
+      .eq('room_name', roomName)
+      .maybeSingle();
+
+    let isHost = !!call && call.host_id === user.id;
+
+    if (!isHost && call) {
+      const { data: participant } = await serviceClient
+        .from('video_call_participants')
+        .select('role')
+        .eq('call_id', call.id)
+        .eq('user_id', user.id)
+        .maybeSingle();
+      isHost = participant?.role === 'host' || participant?.role === 'moderator';
+    }
+
     // Create access token
     const at = new AccessToken(apiKey, apiSecret, {
       identity: user.id,
@@ -45,7 +69,7 @@ serve(async (req) => {
       ttl: '1h',
     });
 
-    // Grant permissions based on role
+    // Grant permissions based on server-verified role
     at.addGrant({
       roomJoin: true,
       room: roomName,
@@ -59,6 +83,7 @@ serve(async (req) => {
         roomAdmin: true,
       }),
     });
+
 
     const token = await at.toJwt();
 
