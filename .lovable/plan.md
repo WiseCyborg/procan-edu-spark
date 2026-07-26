@@ -1,42 +1,38 @@
-This is an investigation report, not an implementation plan. No files will be changed.
+Current state: the Lovable project is linked to an unresolved Supabase project ref `zhmpwczrvitomsxjwpzc`. The `.env` still contains the old `VITE_SUPABASE_*` values, and several source/config files hardcode that same ref. Reconnecting Supabase via Lovable will repopulate `.env` automatically, but the hardcoded references in code must then be updated to match the new project.
 
-## Files
+Plan
 
-- Widget: `src/components/chat/DraggableVoiceAssistant.tsx` (934 lines)
-- Message card: `src/components/chat/DraggableMessage.tsx`
-- Scroll wrapper: `src/components/chat/EnhancedScrollArea.tsx`
-- Global mount: `src/App.tsx:190` — rendered on every route except `/auth`, `/forgot-password`, `/accept-invitation`, `/manager-registration`, and `?mode=reset`.
-- Separate avatar surface (not the same component): `src/components/ailean/AiLeanCoach.tsx`, persona in `src/types/avatarAgent.ts` (`MASTER_PERSONA` = "ProCann Edu Guide").
+1. Reconnect Supabase through Lovable UI
+   - Project Settings → Integrations/Supabase → Disconnect the unresolved connection.
+   - Connect Supabase again: either create a new project or link an existing one in your Supabase organization.
+   - This automatically writes the new `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, and `VITE_SUPABASE_PROJECT_ID` into `.env`.
 
-## Likely UX issues found
+2. Capture the new project ref
+   - After reconnecting, read the new `.env` values (or the Cloud view) to get the new project ID and URL.
 
-1. Drag capture is too broad. `onMouseDown={handleToggleMouseDown}` is on the whole floating launcher button (`DraggableVoiceAssistant.tsx:716`). `handleMouseDown` (line 275) calls `preventDefault` + `stopPropagation` on every mousedown and sets `isDragging=true`; the click handler at line 710 then suppresses the open/close toggle whenever `isDragging` is true. A tiny cursor jitter turns "open chat" into a reposition. The header `<Move />` icon at line 741 is decorative — it has no listener, so the panel itself is not draggable even though the icon implies it is.
+3. Update hardcoded project references in code
+   Replace the old ref everywhere it is baked into runtime/published code:
+   - `supabase/config.toml` — `project_id`
+   - `src/integrations/supabase/client.ts` — `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` (auto-generated file; update if it does not regenerate)
+   - `src/config/domains.ts` — `SUPABASE` domain constant
+   - `src/lib/publicEdgeFunctions.ts` — `SUPABASE_URL`
+   - `supabase/functions/_shared/domains.ts` — `SUPABASE` domain constant
+   - `src/pages/admin/VideoLibrary.tsx` — `SUPABASE_PROJECT_REF`
+   - `scripts/load-test-registration.ts` — `SUPABASE_URL`
+   - `src/pages/SystemHealthDashboard.tsx` — Supabase dashboard link
+   - `src/components/admin/PayPalManagementPanel.tsx` — Supabase dashboard link
+   - `src/pages/EmployersPage.tsx` — example endpoint string shown in UI
 
-2. No per-message playback control. `DraggableMessage.tsx` renders only Copy / Pin / Unpin. TTS auto-fires from `DraggableVoiceAssistant.tsx:600` (`speak(data.response)` when `voiceSettings.enabled && voiceSettings.volume > 0`). The header `<Volume2 />` at line 750 is a passive pulse indicator, not a button. There is no visible play, pause, replay, or stop control anywhere in the widget; `stop()` is only invoked on language change (line 204).
+4. Verify environment and types
+   - Confirm `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, and `VITE_SUPABASE_PROJECT_ID` are present in `.env`.
+   - Run TypeScript checks to ensure no broken references.
 
-3. Scroll container is not directly intercepted by drag, but is cramped. Messages live in `<EnhancedScrollArea className="flex-1 pr-3 max-h-60">` at line 825 inside a panel capped at `maxHeight: '70vh'`. Drag listeners are on the launcher, not the panel, so wheel/touch scroll works — but the 240px cap makes multi-turn conversations feel broken.
+5. Redeploy edge functions (if needed)
+   - If a new Supabase project is created, the existing edge functions and database schema will need to be redeployed/reapplied so the app works against the new backend.
 
-## Persona / greeting source
+Out of scope
+   - Historical audit/docs files under `docs/` will not be rewritten.
+   - No database migrations will be created unless the new project requires schema seeding.
 
-Both the "AiLean" name and the "Beautiful day in Maryland! I'm AiLean…" greeting are hardcoded inside `DraggableVoiceAssistant.tsx`:
-
-- Name appears in five `systemPrompt` strings inside `getContextInfo()` at lines 79, 94, 119, 134, 148.
-- Greeting is assembled inline in the welcome `useEffect` at lines 472–485 via `getWeatherContext()` + a template literal.
-
-There is no shared persona module. `AiLeanCoach` / `MASTER_PERSONA` in `src/types/avatarAgent.ts` is a separate config still named "ProCann Edu Guide" — the two surfaces have drifted.
-
-## Exam vs training visibility
-
-The widget is mounted on exam pages, not unmounted. `getContextInfo()` (lines 98–107) only checks `pathname.includes('final-exam')`. When matched:
-
-- `isChatDisabled = true` (line 224).
-- The launcher is not rendered; a "Chat Unavailable" card renders instead (lines 638–671) with a dismiss X.
-
-The gate is substring-only. Section quizzes, module quizzes, and any other assessment routes that do not contain the literal `final-exam` get the full chat + auto-TTS widget.
-
-## Suggested follow-up scopes (for later, not now)
-
-- Move drag listener onto a dedicated drag handle on the panel header (or the `Move` icon) and drop it from the launcher button; keep the launcher a pure click target.
-- Add a per-assistant-message speaker button in `DraggableMessage.tsx` that calls `speak(message.content)` / `stop()` from `useUnifiedVoice`; add a stop control in the header while `isSpeaking`.
-- Extract the "AiLean" persona name and greeting into a shared persona module used by both the widget and `AiLeanCoach`.
-- Broaden the exam gate beyond the `final-exam` substring if the product wants the widget hidden during all graded assessments.
+Next step
+   Please reconnect Supabase in Project Settings, then reply with the new project ref (or confirm the Cloud view shows a resolved connection) so I can update the hardcoded references.
