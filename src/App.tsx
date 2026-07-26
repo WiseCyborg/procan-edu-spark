@@ -235,6 +235,12 @@ const AppRoutesLayout = () => {
             <Route path="/consumer-education/:courseId" element={<ConsumerCourse />} />
             <Route path="/consumer-certificates" element={<ConsumerCertificates />} />
             <Route path="/courses" element={<AllCourses />} />
+            <Route path="/courses/:courseId" element={<CourseDetailPage />} />
+            <Route path="/courses/:courseId/learn" element={
+              <ProtectedRoute>
+                <SpecialtyCoursePlayer />
+              </ProtectedRoute>
+            } />
             <Route path="/demo" element={<DemoPreview />} />
             <Route path="/resources" element={<Resources />} />
             <Route path="/verify" element={<VerifyCertificate />} />
