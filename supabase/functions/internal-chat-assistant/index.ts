@@ -1,5 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import {
   GUARDRAIL_BLOCK,
   filterOutput,
@@ -181,25 +182,25 @@ serve(async (req) => {
     const rawResponse = data.choices[0].message.content;
     const assistantResponse = filterOutput(rawResponse, {
       fn: 'internal-chat-assistant',
-      userId: userContext.user_id,
+      userId: trustedContext.user_id,
     });
 
     console.log('Internal chat interaction:', {
-      user: userContext.first_name,
-      role: userContext.role,
+      user: trustedContext.first_name,
+      role: trustedContext.role,
       message_length: message.length,
       response_length: assistantResponse.length,
       timestamp: new Date().toISOString()
     });
 
     // Generate suggested actions based on role
-    const suggestedActions = getSuggestedActions(userContext.role);
+    const suggestedActions = getSuggestedActions(trustedContext.role);
 
     return new Response(
       JSON.stringify({ 
         response: assistantResponse,
         suggestedActions,
-        userContext: userContext
+        userContext: trustedContext
       }), 
       {
         headers: { 
