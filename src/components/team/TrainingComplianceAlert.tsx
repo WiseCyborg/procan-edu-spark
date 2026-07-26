@@ -43,17 +43,16 @@ export const TrainingComplianceAlert = ({ organizationId }: { organizationId?: s
       const { data, error } = await query;
       if (error) throw error;
 
-      // Fetch profiles separately
-      const alertsWithProfiles = await Promise.all(
-        (data || []).map(async (alert) => {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('first_name, last_name')
-            .eq('user_id', alert.employee_user_id)
-            .single();
-          return { ...alert, profiles: profile } as ComplianceAlert;
-        })
-      );
+      // Fetch names from the org employee directory (no PII exposure)
+      const { data: directory } = await supabase.rpc('get_org_employee_directory');
+      const alertsWithProfiles = (data || []).map((alert) => {
+        const match = (directory || []).find((p: any) => p.user_id === alert.employee_user_id);
+        const profile = match
+          ? { first_name: match.first_name, last_name: match.last_name }
+          : null;
+        return { ...alert, profiles: profile } as ComplianceAlert;
+      });
+
       return alertsWithProfiles;
     },
     refetchInterval: 60000,

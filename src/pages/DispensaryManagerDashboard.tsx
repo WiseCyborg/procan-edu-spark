@@ -158,9 +158,7 @@ const DispensaryManagerDashboard = () => {
 
       // Fetch employee profiles
       const { data: empsData } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('organization_id', organization.id);
+        .rpc('get_org_employee_directory', { _organization_id: organization.id });
       setEmployees(empsData || []);
     } catch (error) {
       console.error('Error fetching compliance data:', error);

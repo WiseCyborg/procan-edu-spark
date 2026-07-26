@@ -65,10 +65,7 @@ export function TransferSeatDialog({
   const fetchEmployees = async () => {
     try {
       const { data: profiles, error } = await supabase
-        .from('profiles')
-        .select('user_id, first_name, last_name, email_cache')
-        .eq('organization_id', organizationId)
-        .order('first_name');
+        .rpc('get_org_employee_directory', { _organization_id: organizationId });
 
       if (error) throw error;
 

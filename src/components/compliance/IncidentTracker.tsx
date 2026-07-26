@@ -120,9 +120,7 @@ export const IncidentTracker: React.FC<IncidentTrackerProps> = ({ organizationId
   const fetchEmployees = async () => {
     try {
       const { data, error } = await supabase
-        .from('profiles')
-        .select('user_id, first_name, last_name')
-        .eq('organization_id', organizationId);
+        .rpc('get_org_employee_directory', { _organization_id: organizationId });
 
       if (error) throw error;
       setEmployees(

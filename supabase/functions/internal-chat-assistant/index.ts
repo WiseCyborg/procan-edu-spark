@@ -1,5 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import {
   GUARDRAIL_BLOCK,
   filterOutput,
@@ -69,14 +70,72 @@ serve(async (req) => {
       throw new Error('Lovable API key not configured');
     }
 
+    // --- Authentication: require a valid Supabase JWT ---
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_ANON_KEY')!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const { data: authData, error: authError } = await supabase.auth.getUser(
+      authHeader.replace('Bearer ', '')
+    );
+    if (authError || !authData?.user) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    const authUser = authData.user;
+
     const { message, userContext, conversationHistory = [] } = await req.json() as ChatRequest;
 
     if (!message || !userContext) {
       throw new Error('Message and user context are required');
     }
 
-    // Build personalized system prompt based on user context
-    const systemPrompt = buildPersonalizedPrompt(userContext);
+    // --- Derive identity/roles server-side; never trust client-supplied values ---
+    const serviceClient = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    );
+
+    const [{ data: roleRows }, { data: profileRow }] = await Promise.all([
+      serviceClient.from('user_roles').select('role').eq('user_id', authUser.id),
+      serviceClient
+        .from('profiles')
+        .select('first_name, last_name, organization_id')
+        .eq('user_id', authUser.id)
+        .maybeSingle(),
+    ]);
+
+    const serverRoles = (roleRows ?? []).map((r: { role: string }) => r.role);
+    const rolePriority = ['admin', 'training_coordinator', 'dispensary_manager', 'trainer', 'mca_observer', 'student', 'consumer'];
+    const serverRole = rolePriority.find((r) => serverRoles.includes(r)) ?? 'student';
+
+    const trustedContext: UserContext = {
+      ...userContext,
+      user_id: authUser.id,
+      email: authUser.email ?? '',
+      first_name: profileRow?.first_name ?? userContext.first_name,
+      last_name: profileRow?.last_name ?? userContext.last_name,
+      org_id: profileRow?.organization_id ?? null,
+      role: serverRole,
+      roles: serverRoles,
+    };
+
+    // Build personalized system prompt based on verified user context
+    const systemPrompt = buildPersonalizedPrompt(trustedContext);
+
+
 
     // Prepare messages for AI
     const messages = [
@@ -123,25 +182,25 @@ serve(async (req) => {
     const rawResponse = data.choices[0].message.content;
     const assistantResponse = filterOutput(rawResponse, {
       fn: 'internal-chat-assistant',
-      userId: userContext.user_id,
+      userId: trustedContext.user_id,
     });
 
     console.log('Internal chat interaction:', {
-      user: userContext.first_name,
-      role: userContext.role,
+      user: trustedContext.first_name,
+      role: trustedContext.role,
       message_length: message.length,
       response_length: assistantResponse.length,
       timestamp: new Date().toISOString()
     });
 
     // Generate suggested actions based on role
-    const suggestedActions = getSuggestedActions(userContext.role);
+    const suggestedActions = getSuggestedActions(trustedContext.role);
 
     return new Response(
       JSON.stringify({ 
         response: assistantResponse,
         suggestedActions,
-        userContext: userContext
+        userContext: trustedContext
       }), 
       {
         headers: { 

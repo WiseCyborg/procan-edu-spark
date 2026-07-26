@@ -41,17 +41,16 @@ export const VersionMismatchAlert = ({ organizationId }: { organizationId?: stri
 
       if (error) throw error;
 
-      // Fetch profiles separately
-      const mismatchesWithProfiles = await Promise.all(
-        (data || []).map(async (mismatch) => {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('first_name, last_name')
-            .eq('user_id', mismatch.user_id)
-            .single();
-          return { ...mismatch, profiles: profile } as VersionMismatch;
-        })
-      );
+      // Fetch names from the org employee directory (no PII exposure)
+      const { data: directory } = await supabase.rpc('get_org_employee_directory');
+      const mismatchesWithProfiles = (data || []).map((mismatch) => {
+        const match = (directory || []).find((p: any) => p.user_id === mismatch.user_id);
+        const profile = match
+          ? { first_name: match.first_name, last_name: match.last_name }
+          : null;
+        return { ...mismatch, profiles: profile } as VersionMismatch;
+      });
+
       return mismatchesWithProfiles;
     },
     refetchInterval: 120000,

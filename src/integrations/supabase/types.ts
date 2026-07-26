@@ -10609,6 +10609,36 @@ export type Database = {
           module_title: string
         }[]
       }
+      get_org_employee_directory: {
+        Args: { _organization_id?: string }
+        Returns: {
+          created_at: string
+          deactivated_at: string
+          deleted_at: string
+          email_cache: string
+          first_name: string
+          first_shift_date: string
+          id: string
+          is_verified: boolean
+          job_role: Database["public"]["Enums"]["job_role"]
+          job_title: string
+          last_name: string
+          organization: string
+          organization_id: string
+          phone_verified: boolean
+          preferred_language: string
+          profile_photo_url: string
+          tier_status: string
+          training_verified_at: string
+          updated_at: string
+          user_id: string
+          welcome_video_watched: boolean
+        }[]
+      }
+      get_org_profile_completion: {
+        Args: { _user_id: string }
+        Returns: number
+      }
       get_organization_certificates: {
         Args: { org_id: string }
         Returns: {
@@ -10767,6 +10797,7 @@ export type Database = {
         Args: { p_email: string; p_organization_id?: string }
         Returns: number
       }
+      is_caller_email_confirmed: { Args: never; Returns: boolean }
       is_conversation_participant: {
         Args: { _conversation_id: string; _user_id: string }
         Returns: boolean
