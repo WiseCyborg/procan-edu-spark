@@ -10,8 +10,14 @@
  */
 export const GHOST_COURSE_IDS: readonly string[] = [] as const;
 
-/** PostgREST `in.(...)` list literal for use with `.not('id', 'in', ...)` */
-export const GHOST_COURSE_IDS_PG_LIST = `(${GHOST_COURSE_IDS.map((id) => `"${id}"`).join(',')})`;
+/**
+ * PostgREST `in.(...)` list literal for use with `.not('id', 'in', ...)`.
+ * When there are no ghost courses we emit a sentinel UUID that matches nothing,
+ * because an empty `()` list is invalid PostgREST syntax.
+ */
+export const GHOST_COURSE_IDS_PG_LIST = GHOST_COURSE_IDS.length
+  ? `(${GHOST_COURSE_IDS.map((id) => `"${id}"`).join(',')})`
+  : '("00000000-0000-0000-0000-000000000000")';
 
 /** Whether any ghost courses are currently configured. */
 export const HAS_GHOST_COURSES = GHOST_COURSE_IDS.length > 0;
