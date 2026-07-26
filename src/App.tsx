@@ -104,6 +104,8 @@ import UATEvidenceSubmission from "./pages/UATEvidenceSubmission";
 import UATFeedback from "./pages/uat/UATFeedback";
 import UATDispensaryOnboarding from "./pages/UATDispensaryOnboarding";
 import AllCourses from "./pages/AllCourses";
+import CourseDetailPage from "./pages/CourseDetailPage";
+import SpecialtyCoursePlayer from "./pages/SpecialtyCoursePlayer";
 import DemoPreview from "./pages/DemoPreview";
 import Resources from "./pages/Resources";
 import VerifyCertificate from "./pages/VerifyCertificate";
