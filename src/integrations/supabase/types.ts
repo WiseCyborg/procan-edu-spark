@@ -10635,6 +10635,10 @@ export type Database = {
           welcome_video_watched: boolean
         }[]
       }
+      get_org_profile_completion: {
+        Args: { _user_id: string }
+        Returns: number
+      }
       get_organization_certificates: {
         Args: { org_id: string }
         Returns: {
