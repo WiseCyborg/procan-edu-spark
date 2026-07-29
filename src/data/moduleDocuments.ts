@@ -21,7 +21,7 @@ export const documentContent: Record<string, DocumentContent> = {
     category: 'Legal & Regulatory',
     version: '2.1',
     lastUpdated: '2025-01-15',
-    comarReferences: ['14.17.01', '14.17.15.05', '14.17.08'],
+    comarReferences: ['14.17.01', '14.17.14.04'],
     content: `
       <h2>Maryland Cannabis Legal Framework</h2>
       <p>This comprehensive guide covers all Maryland cannabis laws and regulations that dispensary agents must understand to ensure full compliance with state requirements.</p>
@@ -30,21 +30,16 @@ export const documentContent: Record<string, DocumentContent> = {
       <p>Maryland legalized adult-use cannabis effective <strong>July 1, 2023</strong>, following voter approval of Question 4 in November 2022. The Maryland Cannabis Administration (MCA) regulates all aspects of the industry under COMAR Title 14, Subtitle 17.</p>
       
       <h3>Key Regulatory Requirements</h3>
-      <h4>Age Verification (COMAR 14.17.05.03)</h4>
+      <h4>Age Verification</h4>
       <ul>
         <li><strong>Adult-Use:</strong> Customers must be 21 years or older</li>
-        <li><strong>Medical:</strong> Valid MMCC registration card required</li>
+        <li><strong>Medical:</strong> Valid MCA (Maryland Cannabis Administration) patient or caregiver registration required</li>
         <li><strong>ID Requirements:</strong> Valid government-issued photo ID must be checked for every transaction</li>
         <li><strong>Acceptable IDs:</strong> Driver's license, state ID, passport, military ID</li>
       </ul>
       
-      <h4>Purchase Limits (COMAR 14.17.05.08)</h4>
-      <p><strong>Adult-Use Limits (30 days):</strong></p>
-      <ul>
-        <li>Flower: 1.5 oz per transaction</li>
-        <li>Concentrates: 12 grams</li>
-        <li>Edibles: 750mg THC</li>
-      </ul>
+      <h4>Purchase Limits</h4>
+      <p><strong>Adult-Use:</strong> Sales may not exceed the Maryland "personal use amount" (1.5 ounces of usable cannabis or its equivalent). A dispensary agent may not dispense in a manner that exceeds the personal use amount (COMAR 14.17.14.04).</p>
       
       <p><strong>Medical Limits (30 days):</strong></p>
       <ul>
@@ -61,12 +56,12 @@ export const documentContent: Record<string, DocumentContent> = {
     category: 'Certification',
     version: '2.0',
     lastUpdated: '2025-01-15',
-    comarReferences: ['14.17.05.01'],
+    comarReferences: ['14.17.15.05'],
     content: `
       <h2>Responsible Vendor Training (RVT) Certification</h2>
       <p>All Maryland dispensary agents must complete Responsible Vendor Training and pass a certification exam before selling cannabis products.</p>
       
-      <h3>RVT Requirements (COMAR 14.17.05.01)</h3>
+      <h3>RVT Requirements (COMAR 14.17.15.05)</h3>
       <ul>
         <li>Complete an approved RVT training program (minimum 4 hours)</li>
         <li>Pass a certification exam with a score of 80% or higher</li>
@@ -76,8 +71,8 @@ export const documentContent: Record<string, DocumentContent> = {
       
       <h3>Certification Exam Details</h3>
       <ul>
-        <li><strong>Format:</strong> 50 multiple choice questions</li>
-        <li><strong>Passing Score:</strong> 40/50 correct (80%)</li>
+        <li><strong>Format:</strong> 90 multiple choice questions</li>
+        <li><strong>Passing Score:</strong> 80% or higher</li>
         <li><strong>Time Limit:</strong> 90 minutes</li>
         <li><strong>Certificate:</strong> Valid for 12 months from issue date</li>
       </ul>
@@ -90,13 +85,13 @@ export const documentContent: Record<string, DocumentContent> = {
     category: 'Operations',
     version: '3.1',
     lastUpdated: '2025-01-15',
-    comarReferences: ['14.17.05.02', '14.17.05.06'],
+    comarReferences: ['14.17.14.02'],
     content: `
       <h2>Standard Operating Procedures (SOPs)</h2>
       <p>Comprehensive daily operational procedures for dispensary staff to ensure compliance, security, and excellent customer service.</p>
       
       <h3>Opening Procedures</h3>
-      <h4>Security System Checks (COMAR 14.17.05.06)</h4>
+      <h4>Security System Checks</h4>
       <ol>
         <li><strong>Alarm System:</strong> Disarm alarm within 60 seconds of entry</li>
         <li><strong>Surveillance:</strong> Verify all cameras are recording</li>
@@ -123,7 +118,7 @@ export const documentContent: Record<string, DocumentContent> = {
     category: 'Operations',
     version: '2.3',
     lastUpdated: '2025-01-15',
-    comarReferences: ['14.17.05.09'],
+    comarReferences: ['14.17.12.10'],
     content: `
       <h2>METRC Track-and-Trace System Guide</h2>
       <p>Maryland uses METRC to track all cannabis from cultivation to sale. Every dispensary agent must understand METRC operations.</p>
@@ -165,7 +160,7 @@ export const documentContent: Record<string, DocumentContent> = {
         <li>Run physical inventory count of high-volume products</li>
         <li>Compare physical count to METRC quantities</li>
         <li>Document any discrepancies immediately</li>
-        <li>Report variances over 5% to manager</li>
+        <li>Report inventory discrepancies greater than 0.5% of total product weight or item count to your manager; an investigation must begin within 1 business day (COMAR 14.17.12.10)</li>
       </ul>
       
       <h3>Receiving Procedures</h3>
@@ -173,7 +168,7 @@ export const documentContent: Record<string, DocumentContent> = {
         <li>Verify incoming transfer in METRC</li>
         <li>Count all packages and check for damage</li>
         <li>Compare to manifest</li>
-        <li>Accept transfer in METRC within 24 hours</li>
+        <li>Accept the transfer in METRC promptly, following your dispensary's standard operating procedures</li>
       </ol>
     `
   },
@@ -240,7 +235,7 @@ export const documentContent: Record<string, DocumentContent> = {
     lastUpdated: '2025-01-15',
     content: `
       <h2>Maryland Medical Cannabis Program</h2>
-      <p>Overview of Maryland's medical cannabis program (MMCC) for dispensary agents.</p>
+      <p>Overview of Maryland's medical cannabis program, regulated by the Maryland Cannabis Administration (MCA), for dispensary agents.</p>
       
       <h3>Patient Registration</h3>
       <ul>
@@ -636,28 +631,9 @@ export const documentContent: Record<string, DocumentContent> = {
       <h2>Document Retention Requirements</h2>
       <p>Maryland cannabis regulations require specific document retention periods.</p>
       
-      <h3>Retention Periods</h3>
-      <p><strong>7 Years:</strong></p>
-      <ul>
-        <li>Sales records and receipts</li>
-        <li>Inventory records</li>
-        <li>Financial records</li>
-        <li>Tax documents</li>
-      </ul>
-      
-      <p><strong>5 Years:</strong></p>
-      <ul>
-        <li>Employee records</li>
-        <li>Training documentation</li>
-        <li>Incident reports</li>
-      </ul>
-      
-      <p><strong>3 Years:</strong></p>
-      <ul>
-        <li>Visitor logs</li>
-        <li>Maintenance records</li>
-        <li>Surveillance footage</li>
-      </ul>
+      <h3>Retention Period</h3>
+      <p>Unless otherwise specified, a licensee or certifying provider must retain records for a period of <strong>2 years</strong> (COMAR 14.17.14.02B). This includes sales and distribution records, inventory records, daily checklists, test results, and visitor logs.</p>
+      <p>Note: separate obligations may apply to specific record types (for example, Responsible Vendor training records) — follow your dispensary's SOPs where a longer period is specified.</p>
     `
   },
   
