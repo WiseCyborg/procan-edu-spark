@@ -235,7 +235,7 @@ export const documentContent: Record<string, DocumentContent> = {
     lastUpdated: '2025-01-15',
     content: `
       <h2>Maryland Medical Cannabis Program</h2>
-      <p>Overview of Maryland's medical cannabis program (MMCC) for dispensary agents.</p>
+      <p>Overview of Maryland's medical cannabis program, regulated by the Maryland Cannabis Administration (MCA), for dispensary agents.</p>
       
       <h3>Patient Registration</h3>
       <ul>
