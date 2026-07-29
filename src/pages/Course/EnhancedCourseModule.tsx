@@ -438,18 +438,17 @@ const EnhancedCourseModule: React.FC = () => {
     weakTopicsData?: WeakTopic[],
     answers?: { question_index: number; answer: string }[]
   ) => {
-    setQuizScore(score);
-    setQuizPassed(passed);
-    setQuizComplete(true);
-    setWeakTopics(weakTopicsData || []);
+  setQuizScore(score);
+  setQuizPassed(passed);
+  setQuizComplete(true);
+  setWeakTopics(weakTopicsData || []);
 
-    if (weakTopicsData && weakTopicsData.length > 0) {
-      setShowQuizResults(true);
-      return;
-    }
-
-    if (!passed) return;
-
+  // Persist a PASSING attempt to the server FIRST — before any weak-topics
+  // review UI. The weak-topics screen is presentation only and must never
+  // short-circuit the completion write. The server (submit_module_quiz) is the
+  // source of truth for pass/fail and persistence; it is idempotent and refuses
+  // to record incomplete work.
+  if (passed) {
     try {
       const { data, error } = await supabase.rpc('submit_module_quiz', {
         p_module_id: moduleData!.id,
@@ -470,18 +469,17 @@ const EnhancedCourseModule: React.FC = () => {
           description: "We couldn't record your quiz result. Please try again.",
           variant: 'destructive',
         });
-        return;
-      }
+      } else {
+        // Server is source of truth. Refresh cached progress so UI reflects the write.
+        queryClient.invalidateQueries({ queryKey: ['user-progress', user?.id] });
+        queryClient.invalidateQueries({ queryKey: ['dashboard-data', user?.id] });
 
-      // Server is source of truth. Refresh cached progress so UI reflects the write.
-      queryClient.invalidateQueries({ queryKey: ['user-progress', user?.id] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard-data', user?.id] });
-
-      if (result.passed) {
-        toast({
-          title: 'Congratulations!',
-          description: `You passed with ${result.score}%! Module completed.`,
-        });
+        if (result.passed) {
+          toast({
+            title: 'Congratulations!',
+            description: `You passed with ${result.score}%! Module completed.`,
+          });
+        }
       }
     } catch (err) {
       console.error('submit_module_quiz threw:', err);
@@ -491,7 +489,14 @@ const EnhancedCourseModule: React.FC = () => {
         variant: 'destructive',
       });
     }
-  };
+  }
+
+  // AFTER the write, decide whether to show the weak-areas review screen.
+  // This no longer prevents the completion from being recorded.
+  if (weakTopicsData && weakTopicsData.length > 0) {
+    setShowQuizResults(true);
+  }
+};
 
   const handlePracticeComplete = async (score: number, passed: boolean) => {
     // WeakAreaPractice does not supply answers in the shape required by
