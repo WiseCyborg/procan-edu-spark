@@ -160,7 +160,7 @@ export const documentContent: Record<string, DocumentContent> = {
         <li>Run physical inventory count of high-volume products</li>
         <li>Compare physical count to METRC quantities</li>
         <li>Document any discrepancies immediately</li>
-        <li>Report variances over 5% to manager</li>
+        <li>Report inventory discrepancies greater than 0.5% of total product weight or item count to your manager; an investigation must begin within 1 business day (COMAR 14.17.12.10)</li>
       </ul>
       
       <h3>Receiving Procedures</h3>
@@ -168,7 +168,7 @@ export const documentContent: Record<string, DocumentContent> = {
         <li>Verify incoming transfer in METRC</li>
         <li>Count all packages and check for damage</li>
         <li>Compare to manifest</li>
-        <li>Accept transfer in METRC within 24 hours</li>
+        <li>Accept the transfer in METRC promptly, following your dispensary's standard operating procedures</li>
       </ol>
     `
   },
