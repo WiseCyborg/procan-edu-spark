@@ -3630,6 +3630,32 @@ export type Database = {
           },
         ]
       }
+      exam_course_sections: {
+        Row: {
+          course_id: string
+          created_at: string
+          section_number: number
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          section_number: number
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          section_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_course_sections_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exam_questions: {
         Row: {
           comar_section: string | null
