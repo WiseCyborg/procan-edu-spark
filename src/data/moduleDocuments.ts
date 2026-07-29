@@ -21,7 +21,7 @@ export const documentContent: Record<string, DocumentContent> = {
     category: 'Legal & Regulatory',
     version: '2.1',
     lastUpdated: '2025-01-15',
-    comarReferences: ['14.17.01', '14.17.15.05', '14.17.08'],
+    comarReferences: ['14.17.01', '14.17.14.04'],
     content: `
       <h2>Maryland Cannabis Legal Framework</h2>
       <p>This comprehensive guide covers all Maryland cannabis laws and regulations that dispensary agents must understand to ensure full compliance with state requirements.</p>
@@ -30,21 +30,16 @@ export const documentContent: Record<string, DocumentContent> = {
       <p>Maryland legalized adult-use cannabis effective <strong>July 1, 2023</strong>, following voter approval of Question 4 in November 2022. The Maryland Cannabis Administration (MCA) regulates all aspects of the industry under COMAR Title 14, Subtitle 17.</p>
       
       <h3>Key Regulatory Requirements</h3>
-      <h4>Age Verification (COMAR 14.17.05.03)</h4>
+      <h4>Age Verification</h4>
       <ul>
         <li><strong>Adult-Use:</strong> Customers must be 21 years or older</li>
-        <li><strong>Medical:</strong> Valid MMCC registration card required</li>
+        <li><strong>Medical:</strong> Valid MCA (Maryland Cannabis Administration) patient or caregiver registration required</li>
         <li><strong>ID Requirements:</strong> Valid government-issued photo ID must be checked for every transaction</li>
         <li><strong>Acceptable IDs:</strong> Driver's license, state ID, passport, military ID</li>
       </ul>
       
-      <h4>Purchase Limits (COMAR 14.17.05.08)</h4>
-      <p><strong>Adult-Use Limits (30 days):</strong></p>
-      <ul>
-        <li>Flower: 1.5 oz per transaction</li>
-        <li>Concentrates: 12 grams</li>
-        <li>Edibles: 750mg THC</li>
-      </ul>
+      <h4>Purchase Limits</h4>
+      <p><strong>Adult-Use:</strong> Sales may not exceed the Maryland "personal use amount" (1.5 ounces of usable cannabis or its equivalent). A dispensary agent may not dispense in a manner that exceeds the personal use amount (COMAR 14.17.14.04).</p>
       
       <p><strong>Medical Limits (30 days):</strong></p>
       <ul>
