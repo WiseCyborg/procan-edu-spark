@@ -56,12 +56,12 @@ export const documentContent: Record<string, DocumentContent> = {
     category: 'Certification',
     version: '2.0',
     lastUpdated: '2025-01-15',
-    comarReferences: ['14.17.05.01'],
+    comarReferences: ['14.17.15.05'],
     content: `
       <h2>Responsible Vendor Training (RVT) Certification</h2>
       <p>All Maryland dispensary agents must complete Responsible Vendor Training and pass a certification exam before selling cannabis products.</p>
       
-      <h3>RVT Requirements (COMAR 14.17.05.01)</h3>
+      <h3>RVT Requirements (COMAR 14.17.15.05)</h3>
       <ul>
         <li>Complete an approved RVT training program (minimum 4 hours)</li>
         <li>Pass a certification exam with a score of 80% or higher</li>
@@ -71,8 +71,8 @@ export const documentContent: Record<string, DocumentContent> = {
       
       <h3>Certification Exam Details</h3>
       <ul>
-        <li><strong>Format:</strong> 50 multiple choice questions</li>
-        <li><strong>Passing Score:</strong> 40/50 correct (80%)</li>
+        <li><strong>Format:</strong> 90 multiple choice questions</li>
+        <li><strong>Passing Score:</strong> 80% or higher</li>
         <li><strong>Time Limit:</strong> 90 minutes</li>
         <li><strong>Certificate:</strong> Valid for 12 months from issue date</li>
       </ul>
