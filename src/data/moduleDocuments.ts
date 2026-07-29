@@ -631,28 +631,9 @@ export const documentContent: Record<string, DocumentContent> = {
       <h2>Document Retention Requirements</h2>
       <p>Maryland cannabis regulations require specific document retention periods.</p>
       
-      <h3>Retention Periods</h3>
-      <p><strong>7 Years:</strong></p>
-      <ul>
-        <li>Sales records and receipts</li>
-        <li>Inventory records</li>
-        <li>Financial records</li>
-        <li>Tax documents</li>
-      </ul>
-      
-      <p><strong>5 Years:</strong></p>
-      <ul>
-        <li>Employee records</li>
-        <li>Training documentation</li>
-        <li>Incident reports</li>
-      </ul>
-      
-      <p><strong>3 Years:</strong></p>
-      <ul>
-        <li>Visitor logs</li>
-        <li>Maintenance records</li>
-        <li>Surveillance footage</li>
-      </ul>
+      <h3>Retention Period</h3>
+      <p>Unless otherwise specified, a licensee or certifying provider must retain records for a period of <strong>2 years</strong> (COMAR 14.17.14.02B). This includes sales and distribution records, inventory records, daily checklists, test results, and visitor logs.</p>
+      <p>Note: separate obligations may apply to specific record types (for example, Responsible Vendor training records) — follow your dispensary's SOPs where a longer period is specified.</p>
     `
   },
   
