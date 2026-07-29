@@ -118,7 +118,7 @@ export const documentContent: Record<string, DocumentContent> = {
     category: 'Operations',
     version: '2.3',
     lastUpdated: '2025-01-15',
-    comarReferences: ['14.17.05.09'],
+    comarReferences: ['14.17.12.10'],
     content: `
       <h2>METRC Track-and-Trace System Guide</h2>
       <p>Maryland uses METRC to track all cannabis from cultivation to sale. Every dispensary agent must understand METRC operations.</p>
