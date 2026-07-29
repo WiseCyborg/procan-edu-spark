@@ -85,13 +85,13 @@ export const documentContent: Record<string, DocumentContent> = {
     category: 'Operations',
     version: '3.1',
     lastUpdated: '2025-01-15',
-    comarReferences: ['14.17.05.02', '14.17.05.06'],
+    comarReferences: ['14.17.14.02'],
     content: `
       <h2>Standard Operating Procedures (SOPs)</h2>
       <p>Comprehensive daily operational procedures for dispensary staff to ensure compliance, security, and excellent customer service.</p>
       
       <h3>Opening Procedures</h3>
-      <h4>Security System Checks (COMAR 14.17.05.06)</h4>
+      <h4>Security System Checks</h4>
       <ol>
         <li><strong>Alarm System:</strong> Disarm alarm within 60 seconds of entry</li>
         <li><strong>Surveillance:</strong> Verify all cameras are recording</li>
