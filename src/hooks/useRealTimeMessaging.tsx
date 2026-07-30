@@ -502,7 +502,7 @@ export const useRealTimeMessaging = () => {
     if (!user) return;
 
     const channel = supabase
-      .channel('messaging_realtime')
+      .channel(channelId)
       .on(
         'postgres_changes',
         {
@@ -512,18 +512,32 @@ export const useRealTimeMessaging = () => {
         },
         (payload) => {
           const newMessage = payload.new as Message;
-          setMessages(prev => ({
-            ...prev,
-            [newMessage.conversation_id]: [
-              ...(prev[newMessage.conversation_id] || []),
-              newMessage
-            ]
-          }));
+          const active = activeConversationRef.current;
+
+          setMessages(prev => {
+            const existing = prev[newMessage.conversation_id] || [];
+            // Reconcile optimistic echo (same sender + content, temp id)
+            const withoutOptimistic = existing.filter(
+              m =>
+                !(
+                  m.id.startsWith('optimistic-') &&
+                  m.sender_id === newMessage.sender_id &&
+                  m.content === newMessage.content
+                )
+            );
+            if (withoutOptimistic.some(m => m.id === newMessage.id)) {
+              return { ...prev, [newMessage.conversation_id]: withoutOptimistic };
+            }
+            return {
+              ...prev,
+              [newMessage.conversation_id]: [...withoutOptimistic, newMessage],
+            };
+          });
 
           setConversations(prev => 
             prev.map(conv => {
               if (conv.id !== newMessage.conversation_id) return conv;
-              const isActive = activeConversation === newMessage.conversation_id;
+              const isActive = active === newMessage.conversation_id;
               const isMine = newMessage.sender_id === user.id;
               const nextUnread = isActive || isMine
                 ? (conv.unread_count || 0)
@@ -537,11 +551,11 @@ export const useRealTimeMessaging = () => {
             }).sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
           );
 
-          if (newMessage.sender_id !== user.id && activeConversation !== newMessage.conversation_id) {
+          if (newMessage.sender_id !== user.id && active !== newMessage.conversation_id) {
             toast.info('New message received');
-          } else if (activeConversation === newMessage.conversation_id) {
+          } else if (active === newMessage.conversation_id) {
             // Auto-mark as read while viewing
-            markConversationRead(newMessage.conversation_id);
+            markConversationReadRef.current?.(newMessage.conversation_id);
           }
         }
       )
@@ -553,15 +567,20 @@ export const useRealTimeMessaging = () => {
           table: 'conversations'
         },
         () => {
-          fetchConversations();
+          fetchConversationsRef.current?.();
         }
       )
-      .subscribe();
+      .subscribe((status, err) => {
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.warn('[Realtime] messaging channel status:', status, err?.message);
+        }
+      });
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, activeConversation, fetchConversations, markConversationRead]);
+  }, [user, channelId]);
+
 
   // Initial load
   useEffect(() => {
