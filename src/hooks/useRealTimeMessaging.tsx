@@ -49,6 +49,18 @@ export const useRealTimeMessaging = () => {
   const [loading, setLoading] = useState(true);
   const [activeConversation, setActiveConversationState] = useState<string | null>(null);
 
+  // Stable per-instance realtime channel name (avoids duplicate-topic errors
+  // when several components mount this hook at the same time).
+  const channelId = useMemo(
+    () => `messaging_realtime_${Math.random().toString(36).slice(2)}`,
+    []
+  );
+  const activeConversationRef = useRef<string | null>(null);
+  useEffect(() => {
+    activeConversationRef.current = activeConversation;
+  }, [activeConversation]);
+
+
   // Fetch conversations
   const fetchConversations = useCallback(async () => {
     if (!user) return;
