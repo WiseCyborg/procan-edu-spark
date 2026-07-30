@@ -279,6 +279,23 @@ export const useRealTimeMessaging = () => {
   ) => {
     if (!user || !content.trim()) return;
 
+    // Optimistic local echo — reconciled when the realtime INSERT arrives
+    const optimisticId = `optimistic-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const optimisticMessage: Message = {
+      id: optimisticId,
+      conversation_id: conversationId,
+      sender_id: user.id,
+      content: content.trim(),
+      message_type: messageType,
+      metadata: metadata || {},
+      is_edited: false,
+      created_at: new Date().toISOString(),
+    };
+    setMessages(prev => ({
+      ...prev,
+      [conversationId]: [...(prev[conversationId] || []), optimisticMessage],
+    }));
+
     try {
       const { data: message, error } = await supabase
         .from('messages')
@@ -293,6 +310,21 @@ export const useRealTimeMessaging = () => {
         .single();
 
       if (error) throw error;
+
+      // Reconcile the optimistic echo with the persisted row
+      setMessages(prev => {
+        const existing = prev[conversationId] || [];
+        if (existing.some(m => m.id === message.id)) {
+          return { ...prev, [conversationId]: existing.filter(m => m.id !== optimisticId) };
+        }
+        return {
+          ...prev,
+          [conversationId]: existing.map(m =>
+            m.id === optimisticId ? ({ ...m, id: message.id, created_at: message.created_at }) : m
+          ),
+        };
+      });
+
 
       const { data: senderProfile } = await supabase
         .from('profiles')
