@@ -49,36 +49,61 @@ export const ChannelSidebar = ({
     setCollapsedCategories(newCollapsed);
   };
 
-  // Organize conversations into categories
+  // Organize conversations into categories.
+  // Every conversation MUST land in exactly one group — unknown categories
+  // fall through to a generic "Channels" group so nothing is ever dropped.
+  const all = conversations as ChannelConversation[];
+  const assigned = new Set<string>();
+
+  const take = (predicate: (c: ChannelConversation) => boolean) => {
+    const picked = all.filter(c => !assigned.has(c.id) && predicate(c));
+    picked.forEach(c => assigned.add(c.id));
+    return picked;
+  };
+
+  const announcements = take(c => c.conversation_type === 'announcement');
+  const direct = take(c => c.conversation_type === 'direct');
+  const orgChannels = take(
+    c => !!userOrganizationId && c.organization_id === userOrganizationId
+  );
+  const training = take(
+    c => ['study_help', 'study', 'orientation', 'training'].includes(c.channel_category || '')
+  );
+  const other = all.filter(c => !assigned.has(c.id));
+
   const categories: ChannelCategory[] = [
     {
       id: 'announcements',
       title: 'Announcements',
       icon: <Bell className="w-4 h-4" />,
-      conversations: conversations.filter(c => c.conversation_type === 'announcement') as ChannelConversation[],
+      conversations: announcements,
     },
     {
       id: 'organization',
       title: 'Organization Channels',
       icon: <Hash className="w-4 h-4" />,
-      conversations: conversations.filter(
-        c => c.organization_id === userOrganizationId && 
-        ['group', 'study_help', 'orientation', 'uat'].includes(c.conversation_type)
-      ) as ChannelConversation[],
+      conversations: orgChannels,
     },
     {
       id: 'training',
       title: 'Training & Study',
       icon: <Users className="w-4 h-4" />,
-      conversations: conversations.filter(c => c.conversation_type === 'group') as ChannelConversation[],
+      conversations: training,
+    },
+    {
+      id: 'channels',
+      title: 'Channels',
+      icon: <Hash className="w-4 h-4" />,
+      conversations: other,
     },
     {
       id: 'direct',
       title: 'Direct Messages',
       icon: <MessageSquare className="w-4 h-4" />,
-      conversations: conversations.filter(c => c.conversation_type === 'direct') as ChannelConversation[],
+      conversations: direct,
     },
   ].filter(cat => cat.conversations.length > 0);
+
 
   const renderConversation = (conversation: ChannelConversation, isFirst: boolean = false) => {
     const isActive = conversation.id === activeConversationId;
