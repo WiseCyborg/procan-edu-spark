@@ -50,13 +50,20 @@ export const NewDirectMessageDialog = ({
           setMembers([]);
           return;
         }
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('user_id, first_name, last_name')
-          .eq('organization_id', myProfile.organization_id)
-          .neq('user_id', user.id);
+        // Direct profiles reads are restricted by RLS; use the security-definer
+        // org directory RPC so co-members load reliably.
+        const { data, error } = await supabase.rpc('get_org_employee_directory', {
+          _organization_id: myProfile.organization_id,
+        });
         if (error) throw error;
-        if (!cancelled) setMembers(data || []);
+        const mapped: OrgMember[] = (data || [])
+          .filter((m: any) => m.user_id && m.user_id !== user.id && !m.deleted_at)
+          .map((m: any) => ({
+            user_id: m.user_id,
+            first_name: m.first_name,
+            last_name: m.last_name,
+          }));
+        if (!cancelled) setMembers(mapped);
       } catch (err) {
         console.error('Error loading org members:', err);
         toast.error('Failed to load team members');
@@ -64,6 +71,7 @@ export const NewDirectMessageDialog = ({
         if (!cancelled) setLoading(false);
       }
     })();
+
     return () => { cancelled = true; };
   }, [open, user]);
 
