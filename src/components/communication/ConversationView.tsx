@@ -22,6 +22,15 @@ import { ScheduleCallDialog } from './ScheduleCallDialog';
 import { UpcomingCallsList } from './UpcomingCallsList';
 import { useScheduledCalls } from '@/hooks/useScheduledCalls';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
 import { InviteProCannSupport } from './InviteProCannSupport';
 import { useUserRole } from '@/hooks/useUserRole';
 
