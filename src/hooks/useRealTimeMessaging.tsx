@@ -198,6 +198,15 @@ export const useRealTimeMessaging = () => {
     }
   }, [user]);
 
+  // Keep latest callbacks in refs so the realtime subscription can stay mounted
+  const fetchConversationsRef = useRef(fetchConversations);
+  const markConversationReadRef = useRef(markConversationRead);
+  useEffect(() => {
+    fetchConversationsRef.current = fetchConversations;
+    markConversationReadRef.current = markConversationRead;
+  }, [fetchConversations, markConversationRead]);
+
+
   const setActiveConversation = useCallback((conversationId: string | null) => {
     setActiveConversationState(conversationId);
     if (conversationId) {
