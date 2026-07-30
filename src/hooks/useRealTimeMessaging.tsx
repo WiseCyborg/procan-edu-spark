@@ -402,8 +402,14 @@ export const useRealTimeMessaging = () => {
 
     } catch (error) {
       console.error('Error sending message:', error);
+      // Roll back the optimistic echo
+      setMessages(prev => ({
+        ...prev,
+        [conversationId]: (prev[conversationId] || []).filter(m => m.id !== optimisticId),
+      }));
       toast.error('Failed to send message');
     }
+
   }, [user]);
 
   // Create a conversation
