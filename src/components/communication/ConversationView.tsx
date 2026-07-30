@@ -74,6 +74,14 @@ export const ConversationView = ({
     }
   }, [conversationId, fetchMessages]);
 
+  // Keep the current message list in a ref so the realtime subscription below
+  // does not tear down and re-create the channel on every new message
+  // (which caused "[Realtime] Channel error").
+  const conversationMessagesRef = useRef(conversationMessages);
+  useEffect(() => {
+    conversationMessagesRef.current = conversationMessages;
+  }, [conversationMessages]);
+
   // Realtime: reactions & mentions for this conversation
   useEffect(() => {
     if (!conversationId) return;
@@ -85,7 +93,7 @@ export const ConversationView = ({
         (payload: any) => {
           const msgId = payload.new?.message_id || payload.old?.message_id;
           if (!msgId) return;
-          const belongs = conversationMessages.some(m => m.id === msgId);
+          const belongs = conversationMessagesRef.current.some(m => m.id === msgId);
           if (belongs) fetchMessages(conversationId);
         }
       )
@@ -95,15 +103,20 @@ export const ConversationView = ({
         (payload: any) => {
           const msgId = payload.new?.message_id || payload.old?.message_id;
           if (!msgId) return;
-          const belongs = conversationMessages.some(m => m.id === msgId);
+          const belongs = conversationMessagesRef.current.some(m => m.id === msgId);
           if (belongs) fetchMessages(conversationId);
         }
       )
-      .subscribe();
+      .subscribe((status, err) => {
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.warn('[Realtime] reactions channel status:', status, err?.message);
+        }
+      });
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [conversationId, conversationMessages, fetchMessages]);
+  }, [conversationId, fetchMessages]);
+
 
   // Scroll to bottom when new messages arrive
   useEffect(() => {
