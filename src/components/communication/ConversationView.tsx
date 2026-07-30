@@ -22,6 +22,15 @@ import { ScheduleCallDialog } from './ScheduleCallDialog';
 import { UpcomingCallsList } from './UpcomingCallsList';
 import { useScheduledCalls } from '@/hooks/useScheduledCalls';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
 import { InviteProCannSupport } from './InviteProCannSupport';
 import { useUserRole } from '@/hooks/useUserRole';
 
@@ -74,6 +83,14 @@ export const ConversationView = ({
     }
   }, [conversationId, fetchMessages]);
 
+  // Keep the current message list in a ref so the realtime subscription below
+  // does not tear down and re-create the channel on every new message
+  // (which caused "[Realtime] Channel error").
+  const conversationMessagesRef = useRef(conversationMessages);
+  useEffect(() => {
+    conversationMessagesRef.current = conversationMessages;
+  }, [conversationMessages]);
+
   // Realtime: reactions & mentions for this conversation
   useEffect(() => {
     if (!conversationId) return;
@@ -85,7 +102,7 @@ export const ConversationView = ({
         (payload: any) => {
           const msgId = payload.new?.message_id || payload.old?.message_id;
           if (!msgId) return;
-          const belongs = conversationMessages.some(m => m.id === msgId);
+          const belongs = conversationMessagesRef.current.some(m => m.id === msgId);
           if (belongs) fetchMessages(conversationId);
         }
       )
@@ -95,15 +112,20 @@ export const ConversationView = ({
         (payload: any) => {
           const msgId = payload.new?.message_id || payload.old?.message_id;
           if (!msgId) return;
-          const belongs = conversationMessages.some(m => m.id === msgId);
+          const belongs = conversationMessagesRef.current.some(m => m.id === msgId);
           if (belongs) fetchMessages(conversationId);
         }
       )
-      .subscribe();
+      .subscribe((status, err) => {
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.warn('[Realtime] reactions channel status:', status, err?.message);
+        }
+      });
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [conversationId, conversationMessages, fetchMessages]);
+  }, [conversationId, fetchMessages]);
+
 
   // Scroll to bottom when new messages arrive
   useEffect(() => {
@@ -312,9 +334,41 @@ export const ConversationView = ({
             />
           )}
           
-          <Button variant="ghost" size="sm">
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" aria-label="Channel options">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>
+                Members ({participants.length})
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {participants.length === 0 ? (
+                <DropdownMenuItem disabled>No members found</DropdownMenuItem>
+              ) : (
+                participants.slice(0, 10).map(p => (
+                  <DropdownMenuItem key={p.id} className="text-sm">
+                    {`${p.first_name} ${p.last_name}`.trim() || 'Unnamed member'}
+                  </DropdownMenuItem>
+                ))
+              )}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => {
+                  setShowUpcomingCalls(false);
+                  setShowScheduleDialog(true);
+                }}
+              >
+                Schedule a call
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => fetchMessages(conversationId)}>
+                Refresh messages
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
         </div>
       </div>
 

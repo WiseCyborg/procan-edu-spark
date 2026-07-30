@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
@@ -48,6 +48,18 @@ export const useRealTimeMessaging = () => {
   const [messages, setMessages] = useState<Record<string, Message[]>>({});
   const [loading, setLoading] = useState(true);
   const [activeConversation, setActiveConversationState] = useState<string | null>(null);
+
+  // Stable per-instance realtime channel name (avoids duplicate-topic errors
+  // when several components mount this hook at the same time).
+  const channelId = useMemo(
+    () => `messaging_realtime_${Math.random().toString(36).slice(2)}`,
+    []
+  );
+  const activeConversationRef = useRef<string | null>(null);
+  useEffect(() => {
+    activeConversationRef.current = activeConversation;
+  }, [activeConversation]);
+
 
   // Fetch conversations
   const fetchConversations = useCallback(async () => {
@@ -186,6 +198,15 @@ export const useRealTimeMessaging = () => {
     }
   }, [user]);
 
+  // Keep latest callbacks in refs so the realtime subscription can stay mounted
+  const fetchConversationsRef = useRef(fetchConversations);
+  const markConversationReadRef = useRef(markConversationRead);
+  useEffect(() => {
+    fetchConversationsRef.current = fetchConversations;
+    markConversationReadRef.current = markConversationRead;
+  }, [fetchConversations, markConversationRead]);
+
+
   const setActiveConversation = useCallback((conversationId: string | null) => {
     setActiveConversationState(conversationId);
     if (conversationId) {
@@ -258,6 +279,23 @@ export const useRealTimeMessaging = () => {
   ) => {
     if (!user || !content.trim()) return;
 
+    // Optimistic local echo — reconciled when the realtime INSERT arrives
+    const optimisticId = `optimistic-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const optimisticMessage: Message = {
+      id: optimisticId,
+      conversation_id: conversationId,
+      sender_id: user.id,
+      content: content.trim(),
+      message_type: messageType,
+      metadata: metadata || {},
+      is_edited: false,
+      created_at: new Date().toISOString(),
+    };
+    setMessages(prev => ({
+      ...prev,
+      [conversationId]: [...(prev[conversationId] || []), optimisticMessage],
+    }));
+
     try {
       const { data: message, error } = await supabase
         .from('messages')
@@ -272,6 +310,21 @@ export const useRealTimeMessaging = () => {
         .single();
 
       if (error) throw error;
+
+      // Reconcile the optimistic echo with the persisted row
+      setMessages(prev => {
+        const existing = prev[conversationId] || [];
+        if (existing.some(m => m.id === message.id)) {
+          return { ...prev, [conversationId]: existing.filter(m => m.id !== optimisticId) };
+        }
+        return {
+          ...prev,
+          [conversationId]: existing.map(m =>
+            m.id === optimisticId ? ({ ...m, id: message.id, created_at: message.created_at }) : m
+          ),
+        };
+      });
+
 
       const { data: senderProfile } = await supabase
         .from('profiles')
@@ -349,8 +402,14 @@ export const useRealTimeMessaging = () => {
 
     } catch (error) {
       console.error('Error sending message:', error);
+      // Roll back the optimistic echo
+      setMessages(prev => ({
+        ...prev,
+        [conversationId]: (prev[conversationId] || []).filter(m => m.id !== optimisticId),
+      }));
       toast.error('Failed to send message');
     }
+
   }, [user]);
 
   // Create a conversation
@@ -481,7 +540,7 @@ export const useRealTimeMessaging = () => {
     if (!user) return;
 
     const channel = supabase
-      .channel('messaging_realtime')
+      .channel(channelId)
       .on(
         'postgres_changes',
         {
@@ -491,18 +550,32 @@ export const useRealTimeMessaging = () => {
         },
         (payload) => {
           const newMessage = payload.new as Message;
-          setMessages(prev => ({
-            ...prev,
-            [newMessage.conversation_id]: [
-              ...(prev[newMessage.conversation_id] || []),
-              newMessage
-            ]
-          }));
+          const active = activeConversationRef.current;
+
+          setMessages(prev => {
+            const existing = prev[newMessage.conversation_id] || [];
+            // Reconcile optimistic echo (same sender + content, temp id)
+            const withoutOptimistic = existing.filter(
+              m =>
+                !(
+                  m.id.startsWith('optimistic-') &&
+                  m.sender_id === newMessage.sender_id &&
+                  m.content === newMessage.content
+                )
+            );
+            if (withoutOptimistic.some(m => m.id === newMessage.id)) {
+              return { ...prev, [newMessage.conversation_id]: withoutOptimistic };
+            }
+            return {
+              ...prev,
+              [newMessage.conversation_id]: [...withoutOptimistic, newMessage],
+            };
+          });
 
           setConversations(prev => 
             prev.map(conv => {
               if (conv.id !== newMessage.conversation_id) return conv;
-              const isActive = activeConversation === newMessage.conversation_id;
+              const isActive = active === newMessage.conversation_id;
               const isMine = newMessage.sender_id === user.id;
               const nextUnread = isActive || isMine
                 ? (conv.unread_count || 0)
@@ -516,11 +589,11 @@ export const useRealTimeMessaging = () => {
             }).sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
           );
 
-          if (newMessage.sender_id !== user.id && activeConversation !== newMessage.conversation_id) {
+          if (newMessage.sender_id !== user.id && active !== newMessage.conversation_id) {
             toast.info('New message received');
-          } else if (activeConversation === newMessage.conversation_id) {
+          } else if (active === newMessage.conversation_id) {
             // Auto-mark as read while viewing
-            markConversationRead(newMessage.conversation_id);
+            markConversationReadRef.current?.(newMessage.conversation_id);
           }
         }
       )
@@ -532,15 +605,20 @@ export const useRealTimeMessaging = () => {
           table: 'conversations'
         },
         () => {
-          fetchConversations();
+          fetchConversationsRef.current?.();
         }
       )
-      .subscribe();
+      .subscribe((status, err) => {
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.warn('[Realtime] messaging channel status:', status, err?.message);
+        }
+      });
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, activeConversation, fetchConversations, markConversationRead]);
+  }, [user, channelId]);
+
 
   // Initial load
   useEffect(() => {
