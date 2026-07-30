@@ -325,9 +325,41 @@ export const ConversationView = ({
             />
           )}
           
-          <Button variant="ghost" size="sm">
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" aria-label="Channel options">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>
+                Members ({participants.length})
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {participants.length === 0 ? (
+                <DropdownMenuItem disabled>No members found</DropdownMenuItem>
+              ) : (
+                participants.slice(0, 10).map(p => (
+                  <DropdownMenuItem key={p.id} className="text-sm">
+                    {`${p.first_name} ${p.last_name}`.trim() || 'Unnamed member'}
+                  </DropdownMenuItem>
+                ))
+              )}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => {
+                  setShowUpcomingCalls(false);
+                  setShowScheduleDialog(true);
+                }}
+              >
+                Schedule a call
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => fetchMessages(conversationId)}>
+                Refresh messages
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
         </div>
       </div>
 
