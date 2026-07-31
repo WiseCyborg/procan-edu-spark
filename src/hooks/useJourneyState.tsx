@@ -45,7 +45,7 @@ export const useJourneyState = () => {
 
   // Fetch or create journey state
   useEffect(() => {
-    if (!user) {
+    if (!userId) {
       setLoading(false);
       return;
     }
@@ -55,7 +55,7 @@ export const useJourneyState = () => {
         let { data, error } = await supabase
           .from('user_journey_state')
           .select('*')
-          .eq('user_id', user.id)
+          .eq('user_id', userId)
           .maybeSingle();
 
         if (error && error.code !== 'PGRST116') {
@@ -69,7 +69,7 @@ export const useJourneyState = () => {
           const { data: newData, error: insertError } = await supabase
             .from('user_journey_state')
             .upsert({
-              user_id: user.id,
+              user_id: userId,
               current_stage: 'new_user',
               current_wizard: null,
               current_step: 1,
