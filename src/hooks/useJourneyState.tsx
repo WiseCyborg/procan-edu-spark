@@ -96,7 +96,7 @@ export const useJourneyState = () => {
     };
 
     fetchJourneyState();
-  }, [user]);
+  }, [userId]);
 
   // Update journey state (stable identity — reads latest state from a ref)
   const updateJourneyState = useCallback(async (updates: Partial<JourneyState>) => {
