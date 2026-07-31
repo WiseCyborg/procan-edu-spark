@@ -50,6 +50,13 @@ const StudentAuthForm = () => {
   const regPassword = watch('password');
   const joinCode = watch('joinCode');
 
+  // Keep registration mode in sync when ?register=true is added to the URL
+  useEffect(() => {
+    if (forceRegister) setIsRegistering(true);
+  }, [forceRegister]);
+
+
+
   useEffect(() => {
     // Handle invite token
     if (invitationToken) {
