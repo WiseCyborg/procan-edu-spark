@@ -100,9 +100,23 @@ const Auth = () => {
             <LogoutBanner />
             <div className="text-center mb-4 text-sm text-muted-foreground">
               If you received an email invitation, click the link in your email.
-              Otherwise, sign in below.
+              Otherwise, sign in below — or register with your organization's join code.
             </div>
             <StudentAuthForm />
+
+            {/* Join-code registration entry point */}
+            <div className="mt-4 text-center">
+              <p className="text-xs text-muted-foreground">
+                Have an <strong>organization join code</strong>?{' '}
+                <button
+                  onClick={() => navigate('/auth?role=student&register=true')}
+                  className="text-primary hover:underline"
+                >
+                  Register with a join code
+                </button>
+              </p>
+            </div>
+
 
             
             {/* Role routing info */}
