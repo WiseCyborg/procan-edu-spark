@@ -232,7 +232,17 @@ const StudentAuthForm = () => {
                 <div>
                   <Label>Join Code *</Label>
                   <div className="relative">
-                    <Input {...register('joinCode')} placeholder="JOIN-XXXXXXXX" className="uppercase" maxLength={30} />
+                    <Input
+                      {...register('joinCode', {
+                        setValueAs: (v: string) => (v || '').trim().toUpperCase(),
+                      })}
+                      placeholder="JOIN-XX-XXXXXX"
+                      className="uppercase"
+                      maxLength={32}
+                      autoCapitalize="characters"
+                      autoCorrect="off"
+                      spellCheck={false}
+                    />
                     {isValidatingCode && (
                       <div className="absolute right-3 top-1/2 -translate-y-1/2">
                         <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
