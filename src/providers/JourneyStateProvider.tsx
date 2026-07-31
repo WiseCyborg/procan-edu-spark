@@ -25,13 +25,18 @@ export const JourneyStateProvider: React.FC<JourneyStateProviderProps> = ({ chil
   const { user } = useAuth();
   const location = useLocation();
   const { trackPageVisit } = useJourneyState();
+  const trackRef = useRef(trackPageVisit);
+  trackRef.current = trackPageVisit;
+  const lastTrackedRef = useRef<string | null>(null);
 
-  // Auto-track page visits
+  // Auto-track page visits (once per pathname change)
   useEffect(() => {
-    if (user && location.pathname) {
-      trackPageVisit(location.pathname);
-    }
-  }, [user, location.pathname, trackPageVisit]);
+    if (!user || !location.pathname) return;
+    const key = `${user.id}:${location.pathname}`;
+    if (lastTrackedRef.current === key) return;
+    lastTrackedRef.current = key;
+    trackRef.current(location.pathname);
+  }, [user, location.pathname]);
 
   const value: JourneyStateContextType = {};
 
