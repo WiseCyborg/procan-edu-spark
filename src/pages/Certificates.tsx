@@ -354,13 +354,27 @@ export default function Certificates() {
           <Card>
             <CardContent className="text-center py-12">
               <FileCheck className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No Certificates Yet</h3>
-              <p className="text-gray-600 mb-6">
-                Complete your training courses to earn certificates.
-              </p>
-              <Button onClick={() => window.location.href = '/course'}>
-                Start Training
-              </Button>
+              {passedAttempt ? (
+                <>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Certificate Not Issued Yet</h3>
+                  <p className="text-gray-600 mb-6">
+                    You passed your final exam, but no certificate was issued. Generate it now.
+                  </p>
+                  <Button onClick={handleGenerateMissingCertificate} disabled={generating}>
+                    {generating ? 'Generating…' : 'Get My Certificate'}
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Certificates Yet</h3>
+                  <p className="text-gray-600 mb-6">
+                    Complete your training courses to earn certificates.
+                  </p>
+                  <Button onClick={() => window.location.href = '/course'}>
+                    Start Training
+                  </Button>
+                </>
+              )}
             </CardContent>
           </Card>
         ) : (
