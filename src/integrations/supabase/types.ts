@@ -14,6 +14,21 @@ export type Database = {
   }
   public: {
     Tables: {
+      _cleanup_bak_20260731: {
+        Row: {
+          d: Json | null
+          k: string | null
+        }
+        Insert: {
+          d?: Json | null
+          k?: string | null
+        }
+        Update: {
+          d?: Json | null
+          k?: string | null
+        }
+        Relationships: []
+      }
       admin_operations_audit: {
         Row: {
           created_at: string | null

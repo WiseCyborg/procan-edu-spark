@@ -28,10 +28,13 @@ export default function Certificates() {
   const { toast } = useToast();
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [loading, setLoading] = useState(true);
+  const [passedAttempt, setPassedAttempt] = useState<any>(null);
+  const [generating, setGenerating] = useState(false);
 
   useEffect(() => {
     if (user) {
       fetchCertificates();
+      fetchPassedAttempt();
     }
   }, [user]);
 
@@ -60,6 +63,68 @@ export default function Certificates() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Recovery path: a passing exam attempt that never produced a certificate
+  const fetchPassedAttempt = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('exam_attempts')
+        .select('*')
+        .eq('user_id', user?.id)
+        .eq('is_passed', true)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (error) throw error;
+      setPassedAttempt(data || null);
+    } catch (error) {
+      console.error('Error checking passed exam attempts:', error);
+    }
+  };
+
+  const handleGenerateMissingCertificate = async () => {
+    if (!passedAttempt || !user) return;
+    setGenerating(true);
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('first_name, last_name, phone')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      const { error } = await supabase.functions.invoke('generate-certificate', {
+        body: {
+          exam_attempt_id: passedAttempt.id,
+          user_data: {
+            name: `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || user.email,
+            email: user.email,
+            phone: profile?.phone || '',
+          },
+          exam_results: {
+            total_score: passedAttempt.total_score,
+            total_questions: passedAttempt.total_questions,
+            time_taken: passedAttempt.time_taken,
+            passing_score: passedAttempt.passing_score,
+          },
+        },
+      });
+
+      if (error) throw error;
+
+      toast({ title: 'Certificate Generated', description: 'Your certificate is now available.' });
+      await fetchCertificates();
+    } catch (error: any) {
+      console.error('Error generating certificate:', error);
+      toast({
+        title: 'Generation Failed',
+        description: error.message || 'Could not generate your certificate. Please contact support.',
+        variant: 'destructive',
+      });
+    } finally {
+      setGenerating(false);
     }
   };
 
@@ -289,13 +354,27 @@ export default function Certificates() {
           <Card>
             <CardContent className="text-center py-12">
               <FileCheck className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No Certificates Yet</h3>
-              <p className="text-gray-600 mb-6">
-                Complete your training courses to earn certificates.
-              </p>
-              <Button onClick={() => window.location.href = '/course'}>
-                Start Training
-              </Button>
+              {passedAttempt ? (
+                <>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Certificate Not Issued Yet</h3>
+                  <p className="text-gray-600 mb-6">
+                    You passed your final exam, but no certificate was issued. Generate it now.
+                  </p>
+                  <Button onClick={handleGenerateMissingCertificate} disabled={generating}>
+                    {generating ? 'Generating…' : 'Get My Certificate'}
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Certificates Yet</h3>
+                  <p className="text-gray-600 mb-6">
+                    Complete your training courses to earn certificates.
+                  </p>
+                  <Button onClick={() => window.location.href = '/course'}>
+                    Start Training
+                  </Button>
+                </>
+              )}
             </CardContent>
           </Card>
         ) : (

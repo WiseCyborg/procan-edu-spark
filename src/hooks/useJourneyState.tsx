@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from './useAuth';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -35,9 +35,17 @@ export const useJourneyState = () => {
   const [journeyState, setJourneyState] = useState<JourneyState | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Keep a ref to the latest state so callbacks can stay referentially stable
+  const journeyStateRef = useRef<JourneyState | null>(null);
+  useEffect(() => {
+    journeyStateRef.current = journeyState;
+  }, [journeyState]);
+
+  const userId = user?.id;
+
   // Fetch or create journey state
   useEffect(() => {
-    if (!user) {
+    if (!userId) {
       setLoading(false);
       return;
     }
@@ -47,7 +55,7 @@ export const useJourneyState = () => {
         let { data, error } = await supabase
           .from('user_journey_state')
           .select('*')
-          .eq('user_id', user.id)
+          .eq('user_id', userId)
           .maybeSingle();
 
         if (error && error.code !== 'PGRST116') {
@@ -61,7 +69,7 @@ export const useJourneyState = () => {
           const { data: newData, error: insertError } = await supabase
             .from('user_journey_state')
             .upsert({
-              user_id: user.id,
+              user_id: userId,
               current_stage: 'new_user',
               current_wizard: null,
               current_step: 1,
@@ -88,11 +96,11 @@ export const useJourneyState = () => {
     };
 
     fetchJourneyState();
-  }, [user]);
+  }, [userId]);
 
-  // Update journey state
+  // Update journey state (stable identity — reads latest state from a ref)
   const updateJourneyState = useCallback(async (updates: Partial<JourneyState>) => {
-    if (!user || !journeyState) return;
+    if (!userId || !journeyStateRef.current) return;
 
     try {
       const { data, error } = await supabase
@@ -101,7 +109,7 @@ export const useJourneyState = () => {
           ...updates,
           last_activity_at: new Date().toISOString(),
         })
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .select()
         .single();
 
@@ -113,7 +121,7 @@ export const useJourneyState = () => {
     } catch (err) {
       console.error('[useJourneyState] Exception updating:', err);
     }
-  }, [user, journeyState]);
+  }, [userId]);
 
   // Update current step in wizard
   const updateStep = useCallback((step: number) => {
@@ -135,25 +143,26 @@ export const useJourneyState = () => {
     updateJourneyState({
       current_wizard: wizard,
       current_step: step,
-      current_stage: wizard === 'manager_onboarding' ? 'onboarding_in_progress' : journeyState?.current_stage || 'new_user',
+      current_stage: wizard === 'manager_onboarding' ? 'onboarding_in_progress' : journeyStateRef.current?.current_stage || 'new_user',
     });
-  }, [updateJourneyState, journeyState]);
+  }, [updateJourneyState]);
 
   // Complete a wizard
   const completeWizard = useCallback(() => {
-    const newStage = journeyState?.current_wizard === 'manager_onboarding' 
+    const newStage = journeyStateRef.current?.current_wizard === 'manager_onboarding' 
       ? 'onboarding_complete' 
-      : journeyState?.current_stage || 'new_user';
+      : journeyStateRef.current?.current_stage || 'new_user';
 
     updateJourneyState({
       current_wizard: null,
       current_step: 1,
       current_stage: newStage,
     });
-  }, [updateJourneyState, journeyState]);
+  }, [updateJourneyState]);
 
   // Track page visit
   const trackPageVisit = useCallback((page: string) => {
+    if (journeyStateRef.current?.last_page_visited === page) return;
     updateJourneyState({ last_page_visited: page });
   }, [updateJourneyState]);
 
@@ -170,10 +179,10 @@ export const useJourneyState = () => {
   // Increment resume prompt count
   const incrementResumePrompt = useCallback(() => {
     updateJourneyState({
-      resume_prompt_count: (journeyState?.resume_prompt_count || 0) + 1,
+      resume_prompt_count: (journeyStateRef.current?.resume_prompt_count || 0) + 1,
       last_resume_prompt_at: new Date().toISOString(),
     });
-  }, [updateJourneyState, journeyState]);
+  }, [updateJourneyState]);
 
   // Get resume message
   const getResumeMessage = useCallback(() => {
