@@ -35,6 +35,14 @@ export const useJourneyState = () => {
   const [journeyState, setJourneyState] = useState<JourneyState | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Keep a ref to the latest state so callbacks can stay referentially stable
+  const journeyStateRef = useRef<JourneyState | null>(null);
+  useEffect(() => {
+    journeyStateRef.current = journeyState;
+  }, [journeyState]);
+
+  const userId = user?.id;
+
   // Fetch or create journey state
   useEffect(() => {
     if (!user) {
