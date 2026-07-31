@@ -11,8 +11,8 @@ import AccessKeyEntry from '@/components/auth/AccessKeyEntry';
 import { PasswordReset } from '@/components/auth/PasswordReset';
 import { Info, Building2 } from 'lucide-react';
 
-// (Join-code entry removed — join codes were never a real feature.
-// Students access the platform via email invitation or individual purchase.)
+// Student access paths: email invitation, individual purchase, or an
+// organization join code (rvt_join_codes) entered on the registration form.
 
 const Auth = () => {
   const [searchParams] = useSearchParams();
