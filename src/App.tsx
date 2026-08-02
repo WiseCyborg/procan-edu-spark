@@ -408,21 +408,12 @@ const AppRoutesLayout = () => {
                 <AdminUtilities />
               </ProtectedRoute>
             } />
-            <Route path="/admin/demo-setup" element={
-              <ProtectedRoute>
-                <DemoAccountsSetup />
-              </ProtectedRoute>
-            } />
             <Route path="/admin/video-library" element={
               <ProtectedRoute>
                 <VideoLibrary />
               </ProtectedRoute>
             } />
-            <Route path="/admin/uat-controls" element={
-              <ProtectedRoute>
-                <UATControls />
-              </ProtectedRoute>
-            } />
+
             <Route path="/admin/launch-readiness" element={
               <ProtectedRoute>
                 <LaunchReadiness />
