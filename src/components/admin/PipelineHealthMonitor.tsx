@@ -46,29 +46,6 @@ export const PipelineHealthMonitor = () => {
     }
   };
 
-  const regenerateTokens = async () => {
-    setFixing('tokens');
-    try {
-      const { data, error } = await supabase.functions.invoke('batch-regenerate-tokens');
-      
-      if (error) throw error;
-      
-      toast({
-        title: "Tokens Regenerated",
-        description: `${data.regenerated} tokens regenerated successfully`,
-      });
-      
-      checkHealth(); // Refresh status
-    } catch (error: any) {
-      toast({
-        title: "Token Regeneration Failed",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setFixing(null);
-    }
-  };
 
   const reconcileSeats = async () => {
     setFixing('seats');
