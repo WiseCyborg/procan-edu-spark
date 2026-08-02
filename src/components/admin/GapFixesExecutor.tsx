@@ -12,55 +12,11 @@ interface FixResult {
 }
 
 export function GapFixesExecutor() {
-  const [isExecutingGap2, setIsExecutingGap2] = useState(false);
   const [isExecutingGap4, setIsExecutingGap4] = useState(false);
-  const [gap2Result, setGap2Result] = useState<FixResult | null>(null);
   const [gap4Result, setGap4Result] = useState<FixResult | null>(null);
   const { toast } = useToast();
 
-  const executeGap2Fix = async () => {
-    setIsExecutingGap2(true);
-    setGap2Result(null);
 
-    try {
-      console.log('🔄 Invoking batch-regenerate-tokens edge function...');
-      
-      const { data, error } = await supabase.functions.invoke('batch-regenerate-tokens', {
-        body: {}
-      });
-
-      if (error) throw error;
-
-      console.log('✅ batch-regenerate-tokens result:', data);
-
-      setGap2Result({
-        success: true,
-        message: `Successfully regenerated ${data.regenerated} tokens and sent approval emails`,
-        details: data
-      });
-
-      toast({
-        title: "Gap #2 Fixed",
-        description: `Regenerated ${data.regenerated} expired tokens. Check email_logs for sent emails.`,
-      });
-
-    } catch (error: any) {
-      console.error('❌ Error executing Gap #2 fix:', error);
-      
-      setGap2Result({
-        success: false,
-        message: error.message || 'Failed to regenerate tokens'
-      });
-
-      toast({
-        title: "Gap #2 Fix Failed",
-        description: error.message,
-        variant: "destructive"
-      });
-    } finally {
-      setIsExecutingGap2(false);
-    }
-  };
 
   const executeGap4Fix = async () => {
     setIsExecutingGap4(true);
