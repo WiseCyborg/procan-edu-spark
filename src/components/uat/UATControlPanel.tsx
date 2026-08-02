@@ -250,36 +250,6 @@ export const UATControlPanel: React.FC<UATControlPanelProps> = ({ organizationId
     }
   };
 
-  const handleSendDigest = async () => {
-    if (!currentRun?.id || !uatEmail) return;
-
-    setIsSendingEmail(true);
-    try {
-      const { error } = await supabase.functions.invoke('send-uat-digest', {
-        body: { 
-          runId: currentRun.id, 
-          email: uatEmail,
-          organizationId 
-        },
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: 'Digest Sent',
-        description: `UAT task digest sent to ${uatEmail}`,
-      });
-    } catch (error) {
-      console.error('Error sending digest:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to send UAT digest email',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsSendingEmail(false);
-    }
-  };
 
   const handleCompleteRun = async () => {
     if (!currentRun?.id || !organizationId) return;
