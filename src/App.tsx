@@ -68,7 +68,6 @@ import OwnersIntelligence from "./pages/OwnersIntelligence";
 import CompetitiveIntelligence from "./pages/CompetitiveIntelligence";
 import { ProfileOnboardingWizard } from "./components/onboarding/ProfileOnboardingWizard";
 import ForgotPassword from "./pages/ForgotPassword";
-import DemoAccountsSetup from "./pages/DemoAccountsSetup";
 import SystemHealthDashboard from "./pages/SystemHealthDashboard";
 import UnifiedHealthReport from "./pages/UnifiedHealthReport";
 import AcceptInvitation from "./pages/AcceptInvitation";
@@ -96,7 +95,6 @@ import RVTComplete from "./pages/RVTComplete";
 import AdminUtilities from "./pages/AdminUtilities";
 import UATTestMatrix from "./pages/admin/UATTestMatrix";
 import VideoLibrary from "./pages/admin/VideoLibrary";
-import UATControls from "./pages/admin/UATControls";
 import LaunchReadiness from "./pages/admin/LaunchReadiness";
 
 import UATValidationPage from "./pages/UATValidationPage";
