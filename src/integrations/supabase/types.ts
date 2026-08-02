@@ -29,6 +29,81 @@ export type Database = {
         }
         Relationships: []
       }
+      _cleanup_bak_ent_20260731: {
+        Row: {
+          course_id: string | null
+          created_at: string | null
+          expires_at: string | null
+          granted_by: string | null
+          id: string | null
+          metadata: Json | null
+          purchased_at: string | null
+          source: string | null
+          status: string | null
+          stripe_checkout_session_id: string | null
+          stripe_payment_intent_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          course_id?: string | null
+          created_at?: string | null
+          expires_at?: string | null
+          granted_by?: string | null
+          id?: string | null
+          metadata?: Json | null
+          purchased_at?: string | null
+          source?: string | null
+          status?: string | null
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          course_id?: string | null
+          created_at?: string | null
+          expires_at?: string | null
+          granted_by?: string | null
+          id?: string | null
+          metadata?: Json | null
+          purchased_at?: string | null
+          source?: string | null
+          status?: string | null
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      _cleanup_bak_orgs_20260731: {
+        Row: {
+          id: string | null
+          name: string | null
+        }
+        Insert: {
+          id?: string | null
+          name?: string | null
+        }
+        Update: {
+          id?: string | null
+          name?: string | null
+        }
+        Relationships: []
+      }
+      _cleanup_bak_purch_20260731: {
+        Row: {
+          id: string | null
+          quantity: number | null
+        }
+        Insert: {
+          id?: string | null
+          quantity?: number | null
+        }
+        Update: {
+          id?: string | null
+          quantity?: number | null
+        }
+        Relationships: []
+      }
       admin_operations_audit: {
         Row: {
           created_at: string | null
