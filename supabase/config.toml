@@ -162,9 +162,6 @@ verify_jwt = true
 [functions.auto-generate-join-codes]
 verify_jwt = false
 
-[functions.create-demo-accounts]
-verify_jwt = true
-
 [functions.send-application-confirmation]
 verify_jwt = false
 
@@ -309,9 +306,6 @@ verify_jwt = false
 [functions.reconcile-seats]
 verify_jwt = true
 
-[functions.batch-regenerate-tokens]
-verify_jwt = true
-
 [functions.reset-email-circuit-breaker]
 verify_jwt = true
 
@@ -338,12 +332,6 @@ verify_jwt = true
 
 [functions.jobs-processor]
 verify_jwt = false
-
-[functions.reset-uat-account]
-verify_jwt = true
-
-[functions.create-uat-account]
-verify_jwt = true
 
 [functions.populate-consumer-courses]
 verify_jwt = true
@@ -438,9 +426,6 @@ verify_jwt = true
 [functions.paypal-webhook]
 verify_jwt = false
 
-[functions.send-uat-digest]
-verify_jwt = true
-
 [functions.admin-impersonate-user]
 verify_jwt = true
 
@@ -468,15 +453,6 @@ verify_jwt = true
 verify_jwt = true
 
 [functions.create-user]
-verify_jwt = true
-
-[functions.install-regression-vault-secret]
-verify_jwt = true
-
-[functions.seed-uat-dataset]
-verify_jwt = true
-
-[functions.purge-uat-seed-dataset]
 verify_jwt = true
 
 [functions.request-additional-seats]
