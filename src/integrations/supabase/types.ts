@@ -9669,10 +9669,16 @@ export type Database = {
           id: string
           is_active: boolean | null
           last_regenerated_at: string | null
+          legacy_bucket_id: string | null
+          legacy_storage_path: string | null
+          migrated_at: string | null
+          migration_error: string | null
+          migration_status: string | null
           mime_type: string
           module_id: string | null
           needs_regeneration: boolean | null
           public_url: string | null
+          r2_key: string | null
           regeneration_reason: string | null
           render_dispatched_at: string | null
           render_error: string | null
@@ -9684,6 +9690,7 @@ export type Database = {
           reviewed_by: string | null
           slide_outline: Json | null
           storage_path: string | null
+          storage_provider: string
           thumbnail_url: string | null
           title: string
           unmapped_reason: string | null
@@ -9711,10 +9718,16 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           last_regenerated_at?: string | null
+          legacy_bucket_id?: string | null
+          legacy_storage_path?: string | null
+          migrated_at?: string | null
+          migration_error?: string | null
+          migration_status?: string | null
           mime_type?: string
           module_id?: string | null
           needs_regeneration?: boolean | null
           public_url?: string | null
+          r2_key?: string | null
           regeneration_reason?: string | null
           render_dispatched_at?: string | null
           render_error?: string | null
@@ -9726,6 +9739,7 @@ export type Database = {
           reviewed_by?: string | null
           slide_outline?: Json | null
           storage_path?: string | null
+          storage_provider?: string
           thumbnail_url?: string | null
           title: string
           unmapped_reason?: string | null
@@ -9753,10 +9767,16 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           last_regenerated_at?: string | null
+          legacy_bucket_id?: string | null
+          legacy_storage_path?: string | null
+          migrated_at?: string | null
+          migration_error?: string | null
+          migration_status?: string | null
           mime_type?: string
           module_id?: string | null
           needs_regeneration?: boolean | null
           public_url?: string | null
+          r2_key?: string | null
           regeneration_reason?: string | null
           render_dispatched_at?: string | null
           render_error?: string | null
@@ -9768,6 +9788,7 @@ export type Database = {
           reviewed_by?: string | null
           slide_outline?: Json | null
           storage_path?: string | null
+          storage_provider?: string
           thumbnail_url?: string | null
           title?: string
           unmapped_reason?: string | null
