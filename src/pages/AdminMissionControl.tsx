@@ -409,29 +409,8 @@ const AdminMissionControl = () => {
             )}
           </Card>
 
-          {/* UAT Testing */}
-          <Card>
-            <CardHeader 
-              className="cursor-pointer hover:bg-muted/50 transition-colors"
-              onClick={() => toggleSection('uat')}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <TestTube2 className="h-5 w-5 text-primary" />
-                  <div>
-                    <CardTitle>UAT Testing</CardTitle>
-                    <CardDescription>Create & manage test accounts for Managers and Employees</CardDescription>
-                  </div>
-                </div>
-                {expandedSection === 'uat' ? <ChevronUp /> : <ChevronDown />}
-              </div>
-            </CardHeader>
-            {expandedSection === 'uat' && (
-              <CardContent className="pt-6">
-                <UATAccountManager />
-              </CardContent>
-            )}
-          </Card>
+
+
 
           {/* Consumer Courses */}
           <Card>
