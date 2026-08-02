@@ -40,23 +40,6 @@ export const EmailSystemRecovery = () => {
     },
   });
 
-  // Regenerate expired tokens mutation
-  const regenerateTokens = useMutation({
-    mutationFn: async () => {
-      const { data, error } = await supabase.functions.invoke("batch-regenerate-tokens");
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: (data) => {
-      toast.success(`Regenerated ${data.regenerated} expired tokens`);
-      if (data.failed > 0) {
-        toast.warning(`${data.failed} tokens failed to regenerate`);
-      }
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to regenerate tokens: ${error.message}`);
-    },
-  });
 
   // Reconcile seats mutation
   const reconcileSeats = useMutation({
