@@ -75,14 +75,6 @@ export function TestingTab() {
         </CardContent>
       </Card>
       
-      <Card>
-        <CardHeader>
-          <CardTitle>Test Account Creator</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <TestAccountCreator />
-        </CardContent>
-      </Card>
     </div>
   );
 }
