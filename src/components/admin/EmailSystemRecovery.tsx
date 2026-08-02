@@ -40,23 +40,6 @@ export const EmailSystemRecovery = () => {
     },
   });
 
-  // Regenerate expired tokens mutation
-  const regenerateTokens = useMutation({
-    mutationFn: async () => {
-      const { data, error } = await supabase.functions.invoke("batch-regenerate-tokens");
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: (data) => {
-      toast.success(`Regenerated ${data.regenerated} expired tokens`);
-      if (data.failed > 0) {
-        toast.warning(`${data.failed} tokens failed to regenerate`);
-      }
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to regenerate tokens: ${error.message}`);
-    },
-  });
 
   // Reconcile seats mutation
   const reconcileSeats = useMutation({
@@ -147,26 +130,6 @@ export const EmailSystemRecovery = () => {
           )}
         </div>
 
-        {/* Regenerate Expired Tokens */}
-        <div className="border rounded-lg p-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="font-semibold">Regenerate Expired Registration Tokens</div>
-              <div className="text-sm text-muted-foreground mt-1">
-                Find all approved applications with expired tokens and send new registration links
-              </div>
-            </div>
-            <Button
-              onClick={() => regenerateTokens.mutate()}
-              disabled={regenerateTokens.isPending}
-              variant="outline"
-              size="sm"
-            >
-              <RefreshCw className={`h-4 w-4 mr-2 ${regenerateTokens.isPending ? 'animate-spin' : ''}`} />
-              Regenerate
-            </Button>
-          </div>
-        </div>
 
         {/* Reconcile Seats */}
         <div className="border rounded-lg p-4 space-y-3">

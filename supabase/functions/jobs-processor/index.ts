@@ -303,7 +303,85 @@ const JOB_HANDLERS: Record<string, (job: Job, supabase: any) => Promise<void>> =
       throw error;
     }
   },
+
+  // ---- Video pipeline (R2 migration + regeneration) ----------------------
+
+  'video_migrate_asset': async (job, supabase) => {
+    const { asset_id, asset_key, limit } = job.payload || {};
+    const { data, error } = await supabase.functions.invoke('video-migrate', {
+      body: { action: 'migrate', assetId: asset_id, assetKey: asset_key, limit: limit ?? 1 },
+    });
+    if (error) throw error;
+    if (data && data.success === false) throw new Error(data.error_code || 'video_migrate_failed');
+    const failedCount = data?.failed ?? 0;
+    if (failedCount > 0) throw new Error(`video-migrate reported ${failedCount} failure(s)`);
+    console.log('[video_migrate_asset] ✅', JSON.stringify(data?.results ?? []));
+  },
+
+  'video_migrate_verify': async (job, supabase) => {
+    const { asset_id, asset_key, limit } = job.payload || {};
+    const { data, error } = await supabase.functions.invoke('video-migrate', {
+      body: { action: 'verify', assetId: asset_id, assetKey: asset_key, limit: limit ?? 5 },
+    });
+    if (error) throw error;
+    if (data && data.success === false) throw new Error(data.error_code || 'video_verify_failed');
+    const failedCount = data?.failed ?? 0;
+    if (failedCount > 0) throw new Error(`video-migrate verify reported ${failedCount} failure(s)`);
+    console.log('[video_migrate_verify] ✅', JSON.stringify(data?.results ?? []));
+  },
+
+  'video_render_dispatch': async (job, supabase) => {
+    const { asset_id, limit } = job.payload || {};
+    const { data, error } = await supabase.functions.invoke('render-video', {
+      body: { action: 'dispatch', asset_id, limit: limit ?? 1 },
+    });
+    if (error) throw error;
+    if (data && data.ok === false) throw new Error(data.error || 'render_dispatch_failed');
+
+    // Queue the collector for anything that actually got dispatched.
+    for (const r of (data?.results ?? [])) {
+      if (r.status === 'dispatched') {
+        await supabase.from('system_jobs').insert({
+          job_type: 'video_render_collect',
+          payload: { asset_id: r.asset_id },
+          status: 'pending',
+          scheduled_for: new Date(Date.now() + 60_000).toISOString(),
+        });
+      }
+    }
+    console.log('[video_render_dispatch] ✅', JSON.stringify(data?.results ?? []));
+  },
+
+  'video_render_collect': async (job, supabase) => {
+    const { asset_id } = job.payload || {};
+    const { data, error } = await supabase.functions.invoke('render-video', {
+      body: { action: 'collect', asset_id, limit: 1 },
+    });
+    if (error) throw error;
+    if (data && data.ok === false) throw new Error(data.error || 'render_collect_failed');
+
+    const result = (data?.results ?? [])[0];
+    if (result?.status === 'error') throw new Error(result.reason || 'render_collect_failed');
+
+    // Still transcoding — requeue with backoff instead of burning a retry.
+    if (!result || result.status === 'pending') {
+      const attempt = Number(job.payload?.poll_attempt ?? 0) + 1;
+      if (attempt > 40) throw new Error('render_collect_timeout: transcode still running after 40 polls');
+      const delayMs = Math.min(60_000 * attempt, 600_000);
+      await supabase.from('system_jobs').insert({
+        job_type: 'video_render_collect',
+        payload: { asset_id, poll_attempt: attempt },
+        status: 'pending',
+        scheduled_for: new Date(Date.now() + delayMs).toISOString(),
+      });
+      console.log(`[video_render_collect] still rendering, requeued (attempt ${attempt})`);
+      return;
+    }
+
+    console.log('[video_render_collect] ✅', JSON.stringify(result));
+  },
 };
+
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {

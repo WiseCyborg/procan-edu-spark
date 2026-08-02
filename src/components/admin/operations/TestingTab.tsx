@@ -1,7 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FastTrackTestPanel } from '@/components/admin/FastTrackTestPanel';
 import { TestEmailSender } from '@/components/admin/TestEmailSender';
-import TestAccountCreator from '@/components/admin/TestAccountCreator';
 import RVTSystemAuditorPanel from '@/components/admin/RVTSystemAuditorPanel';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
@@ -76,14 +75,6 @@ export function TestingTab() {
         </CardContent>
       </Card>
       
-      <Card>
-        <CardHeader>
-          <CardTitle>Test Account Creator</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <TestAccountCreator />
-        </CardContent>
-      </Card>
     </div>
   );
 }

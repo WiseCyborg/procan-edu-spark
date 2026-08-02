@@ -250,36 +250,6 @@ export const UATControlPanel: React.FC<UATControlPanelProps> = ({ organizationId
     }
   };
 
-  const handleSendDigest = async () => {
-    if (!currentRun?.id || !uatEmail) return;
-
-    setIsSendingEmail(true);
-    try {
-      const { error } = await supabase.functions.invoke('send-uat-digest', {
-        body: { 
-          runId: currentRun.id, 
-          email: uatEmail,
-          organizationId 
-        },
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: 'Digest Sent',
-        description: `UAT task digest sent to ${uatEmail}`,
-      });
-    } catch (error) {
-      console.error('Error sending digest:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to send UAT digest email',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsSendingEmail(false);
-    }
-  };
 
   const handleCompleteRun = async () => {
     if (!currentRun?.id || !organizationId) return;
@@ -462,18 +432,6 @@ export const UATControlPanel: React.FC<UATControlPanelProps> = ({ organizationId
                       <RefreshCw className="h-4 w-4 mr-2" />
                     )}
                     Regenerate Tasks
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={handleSendDigest}
-                    disabled={isSendingEmail || !uatEmail}
-                  >
-                    {isSendingEmail ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <Mail className="h-4 w-4 mr-2" />
-                    )}
-                    Send Today's Tasks Email
                   </Button>
                   <Button variant="outline">
                     <Download className="h-4 w-4 mr-2" />

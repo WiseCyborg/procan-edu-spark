@@ -37,7 +37,6 @@ import { PredictiveAnalyticsDashboard } from '@/components/admin/PredictiveAnaly
 import { EnhancedSearchFilter } from '@/components/admin/EnhancedSearchFilter';
 import DispensaryApplicationManager from '@/components/admin/DispensaryApplicationManager';
 import DispensaryManagerSetup from '@/components/admin/DispensaryManagerSetup';
-import TestAccountCreator from '@/components/admin/TestAccountCreator';
 import { PipelineTestHarness } from '@/components/admin/PipelineTestHarness';
 import { ComprehensiveAdminOversight } from '@/components/admin/ComprehensiveAdminOversight';
 import { StaffInvitationSystem } from '@/components/admin/StaffInvitationSystem';
@@ -494,7 +493,6 @@ const AdminDashboard = () => {
                       <TabsTrigger value="applications" className="justify-start">📋 Applications</TabsTrigger>
                       <TabsTrigger value="setup" className="justify-start">⚙️ Setup</TabsTrigger>
                       <TabsTrigger value="invitations" className="justify-start">✉️ Invitations</TabsTrigger>
-                      <TabsTrigger value="test-accounts" className="justify-start">🧪 Test Accounts</TabsTrigger>
                       <TabsTrigger value="pipeline-test" className="justify-start">🚀 Pipeline Test</TabsTrigger>
                       <TabsTrigger value="employees" className="justify-start">👥 Employees</TabsTrigger>
                     </div>
@@ -639,10 +637,6 @@ const AdminDashboard = () => {
 
           <TabsContent value="setup">
             <DispensaryManagerSetup />
-          </TabsContent>
-
-          <TabsContent value="test-accounts">
-            <TestAccountCreator />
           </TabsContent>
 
           <TabsContent value="pipeline-test">
