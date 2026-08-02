@@ -515,3 +515,6 @@ verify_jwt = false
 
 [functions.resolve-duplicate-license]
 verify_jwt = true
+
+[functions.video-migrate]
+verify_jwt = true

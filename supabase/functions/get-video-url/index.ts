@@ -33,7 +33,7 @@ Deno.serve(async (req) => {
 
     const { data: asset, error: assetError } = await admin
       .from("video_assets")
-      .select("id, asset_key, title, description, duration_seconds, thumbnail_url, storage_path, public_url, bucket_id, access_level, course_id, is_active, fallback_storage_path, fallback_bucket_id")
+      .select("id, asset_key, title, description, duration_seconds, thumbnail_url, storage_path, public_url, bucket_id, access_level, course_id, is_active, fallback_storage_path, fallback_bucket_id, storage_provider, r2_key")
       .eq("asset_key", assetKey)
       .eq("is_active", true)
       .maybeSingle();
@@ -92,6 +92,20 @@ Deno.serve(async (req) => {
         thumbnail_url: asset.thumbnail_url,
         duration_seconds: asset.duration_seconds,
       }, 200);
+    }
+
+    // R2-hosted asset — the object is served from the R2 public base URL,
+    // so there is nothing to sign. Access is still gated by the checks above.
+    if ((asset as any).storage_provider === "r2" && asset.public_url) {
+      return json({
+        success: true,
+        provider: "r2",
+        url: asset.public_url,
+        expires_at: null,
+        title: asset.title,
+        thumbnail_url: asset.thumbnail_url,
+        duration_seconds: asset.duration_seconds,
+      });
     }
 
     // Public bucket fast-path
