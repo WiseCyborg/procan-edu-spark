@@ -562,7 +562,8 @@ serve(async (req) => {
               completed_at: new Date().toISOString(),
               goes_live_at: new Date().toISOString(),
             })
-            .eq("video_asset_id", asset.id)
+            .eq("content_type", "video")
+            .eq("content_id", asset.id)
             .neq("status", "completed");
 
           collected++;
