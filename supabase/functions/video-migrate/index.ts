@@ -46,11 +46,11 @@ interface AssetRow {
   migration_status: string | null;
   legacy_storage_path: string | null;
   legacy_bucket_id: string | null;
-  module_number?: number | null;
+  module_id: string | null;
 }
 
 const ASSET_COLUMNS =
-  "id, asset_key, title, course_id, bucket_id, storage_path, public_url, storage_provider, r2_key, migration_status, legacy_storage_path, legacy_bucket_id, module_number";
+  "id, asset_key, title, course_id, bucket_id, storage_path, public_url, storage_provider, r2_key, migration_status, legacy_storage_path, legacy_bucket_id, module_id";
 
 async function isAdminCaller(req: Request, admin: ReturnType<typeof createClient>) {
   const authHeader = req.headers.get("Authorization") ?? "";
@@ -77,14 +77,25 @@ async function resolveKey(admin: any, asset: AssetRow) {
   if (asset.course_id) {
     const { data: course } = await admin
       .from("courses")
-      .select("slug, title")
+      .select("title")
       .eq("id", asset.course_id)
       .maybeSingle();
-    courseSlug = course?.slug ?? course?.title ?? null;
+    courseSlug = course?.title ?? null;
   }
+
+  let moduleNumber: number | null = null;
+  if (asset.module_id) {
+    const { data: mod } = await admin
+      .from("course_modules")
+      .select("module_number")
+      .eq("id", asset.module_id)
+      .maybeSingle();
+    moduleNumber = mod?.module_number ?? null;
+  }
+
   return canonicalKey({
     courseSlug,
-    moduleNumber: asset.module_number ?? null,
+    moduleNumber,
     assetKey: asset.asset_key,
     title: asset.title,
   });
