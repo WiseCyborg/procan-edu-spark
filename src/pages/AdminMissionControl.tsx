@@ -14,7 +14,6 @@ import { AdminDispensarySection } from '@/components/admin/AdminDispensarySectio
 import { AdminTrainingSection } from '@/components/admin/AdminTrainingSection';
 import { AdminSystemHealth } from '@/components/admin/AdminSystemHealth';
 import { AdminCommunications } from '@/components/admin/AdminCommunications';
-import { UATAccountManager } from '@/components/admin/UATAccountManager';
 import { ConsumerCoursesSection } from '@/components/admin/ConsumerCoursesSection';
 import { SupportRequestsPanel } from '@/components/admin/SupportRequestsPanel';
 import { E2EValidationReport } from '@/components/admin/E2EValidationReport';
