@@ -463,18 +463,6 @@ export const UATControlPanel: React.FC<UATControlPanelProps> = ({ organizationId
                     )}
                     Regenerate Tasks
                   </Button>
-                  <Button
-                    variant="outline"
-                    onClick={handleSendDigest}
-                    disabled={isSendingEmail || !uatEmail}
-                  >
-                    {isSendingEmail ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <Mail className="h-4 w-4 mr-2" />
-                    )}
-                    Send Today's Tasks Email
-                  </Button>
                   <Button variant="outline">
                     <Download className="h-4 w-4 mr-2" />
                     Export Evidence Bundle
