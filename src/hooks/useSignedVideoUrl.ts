@@ -19,6 +19,8 @@ export interface SignedVideoResponse {
   is_admin_preview?: boolean;
 }
 
+// Cloudflare Worker that serves training videos from R2, gated by Supabase RLS.
+const VIDEO_WORKER_BASE = 'https://procannedu-video.wisecyborg.workers.dev';
 
 async function fetchSignedUrl(assetKey: string): Promise<SignedVideoResponse> {
   // Forward the user's JWT when signed in (needed for authenticated/enrolled assets),
@@ -33,12 +35,20 @@ async function fetchSignedUrl(assetKey: string): Promise<SignedVideoResponse> {
   if (error) {
     return { success: false, error_code: 'request_failed' };
   }
-  return data as SignedVideoResponse;
+  const resp = data as SignedVideoResponse;
+
+  // Deliver storage-backed videos from Cloudflare R2 via the Worker. get-video-url still
+  // runs the entitlement check and returns title/thumbnail/duration; we only swap the
+  // delivery URL. Vimeo-hosted assets are left untouched.
+  if (resp?.success && resp.provider !== 'vimeo') {
+    const q = accessToken ? `?token=${encodeURIComponent(accessToken)}` : '';
+    resp.url = `${VIDEO_WORKER_BASE}/v/${encodeURIComponent(assetKey)}${q}`;
+  }
+  return resp;
 }
 
 /**
- * Returns a short-lived signed URL for a private training video,
- * refreshing it ~30s before expiry so playback never breaks.
+ * Returns a short-lived video URL, refreshing it ~30s before expiry so playback never breaks.
  */
 export function useSignedVideoUrl(assetKey: string, enabled = true) {
   const [refreshTick, setRefreshTick] = useState(0);
