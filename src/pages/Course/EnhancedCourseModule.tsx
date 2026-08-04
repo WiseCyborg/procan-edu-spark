@@ -394,6 +394,7 @@ const EnhancedCourseModule: React.FC = () => {
           module_number: data.module_number,
           comar_reference: data.comar_reference,
           comar_section_ref: data.comar_section_ref ?? null,
+          last_comar_review_date: data.last_comar_review_date ?? null,
           video_url: data.video_url,
           asset_key: primary?.asset_key ?? null,
           video_pending: primary?.unmapped_reason === 'pending_ai_generation',
