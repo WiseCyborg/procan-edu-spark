@@ -10614,6 +10614,7 @@ export type Database = {
         Args: { p_application_id: string; p_user_email: string }
         Returns: Json
       }
+      flag_rvt_videos_on_comar_change: { Args: never; Returns: number }
       generate_certificate_number: { Args: never; Returns: string }
       generate_compliance_report: {
         Args: { org_id?: string }

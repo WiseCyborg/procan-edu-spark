@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Progress } from '@/components/ui/progress';
-import { BookOpen, Video, FileText, CheckCircle2, ArrowLeft, Info, Lock } from 'lucide-react';
+import { BookOpen, Video, FileText, CheckCircle2, ArrowLeft, Info, Lock, ShieldCheck } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { getModuleDocuments } from '@/data/moduleDocumentMapping';
 import { getDocumentContent, DocumentContent } from '@/data/moduleDocuments';
@@ -68,6 +68,7 @@ interface ModuleData {
   module_number: number;
   comar_reference?: string;
   comar_section_ref?: string | null;
+  last_comar_review_date?: string | null;
   video_url?: string;
   lessons?: Lesson[];
   asset_key?: string | null;
@@ -393,6 +394,7 @@ const EnhancedCourseModule: React.FC = () => {
           module_number: data.module_number,
           comar_reference: data.comar_reference,
           comar_section_ref: data.comar_section_ref ?? null,
+          last_comar_review_date: data.last_comar_review_date ?? null,
           video_url: data.video_url,
           asset_key: primary?.asset_key ?? null,
           video_pending: primary?.unmapped_reason === 'pending_ai_generation',
@@ -932,6 +934,20 @@ const EnhancedCourseModule: React.FC = () => {
                         setActiveTab('documents');
                       }}
                     />
+                  )}
+
+                  {(moduleData.comar_reference || moduleData.comar_section_ref) && (
+                    <div className="flex items-center gap-1.5 mt-2">
+                      <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+                      <span className="text-xs text-muted-foreground">
+                        {(() => {
+                          const reviewedLabel = moduleData.last_comar_review_date
+                            ? ` · last reviewed ${new Date(moduleData.last_comar_review_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}`
+                            : '';
+                          return `Aligned to Maryland MCA — COMAR ${moduleData.comar_reference ?? moduleData.comar_section_ref}${reviewedLabel}`;
+                        })()}
+                      </span>
+                    </div>
                   )}
 
                   {supplementAsset && supplementVideoData?.success && supplementVideoData.url && (
