@@ -95,6 +95,7 @@ import RVTComplete from "./pages/RVTComplete";
 import AdminUtilities from "./pages/AdminUtilities";
 import UATTestMatrix from "./pages/admin/UATTestMatrix";
 import VideoLibrary from "./pages/admin/VideoLibrary";
+import VideoStudio from "./pages/admin/VideoStudio";
 import LaunchReadiness from "./pages/admin/LaunchReadiness";
 
 import UATValidationPage from "./pages/UATValidationPage";
