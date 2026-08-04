@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Progress } from '@/components/ui/progress';
-import { BookOpen, Video, FileText, CheckCircle2, ArrowLeft, Info, Lock } from 'lucide-react';
+import { BookOpen, Video, FileText, CheckCircle2, ArrowLeft, Info, Lock, ShieldCheck } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { getModuleDocuments } from '@/data/moduleDocumentMapping';
 import { getDocumentContent, DocumentContent } from '@/data/moduleDocuments';
