@@ -104,6 +104,24 @@ export type Database = {
         }
         Relationships: []
       }
+      _cleanup_bak_vpublic_20260803: {
+        Row: {
+          asset_key: string | null
+          id: string | null
+          public_url: string | null
+        }
+        Insert: {
+          asset_key?: string | null
+          id?: string | null
+          public_url?: string | null
+        }
+        Update: {
+          asset_key?: string | null
+          id?: string | null
+          public_url?: string | null
+        }
+        Relationships: []
+      }
       admin_operations_audit: {
         Row: {
           created_at: string | null
@@ -9689,6 +9707,7 @@ export type Database = {
           reviewed_at: string | null
           reviewed_by: string | null
           slide_outline: Json | null
+          slide_spec: Json | null
           storage_path: string | null
           storage_provider: string
           thumbnail_url: string | null
@@ -9738,6 +9757,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           slide_outline?: Json | null
+          slide_spec?: Json | null
           storage_path?: string | null
           storage_provider?: string
           thumbnail_url?: string | null
@@ -9787,6 +9807,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           slide_outline?: Json | null
+          slide_spec?: Json | null
           storage_path?: string | null
           storage_provider?: string
           thumbnail_url?: string | null
