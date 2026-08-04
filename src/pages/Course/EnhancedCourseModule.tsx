@@ -68,6 +68,7 @@ interface ModuleData {
   module_number: number;
   comar_reference?: string;
   comar_section_ref?: string | null;
+  last_comar_review_date?: string | null;
   video_url?: string;
   lessons?: Lesson[];
   asset_key?: string | null;
