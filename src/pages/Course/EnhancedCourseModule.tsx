@@ -936,6 +936,20 @@ const EnhancedCourseModule: React.FC = () => {
                     />
                   )}
 
+                  {(moduleData.comar_reference || moduleData.comar_section_ref) && (
+                    <div className="flex items-center gap-1.5 mt-2">
+                      <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+                      <span className="text-xs text-muted-foreground">
+                        {(() => {
+                          const reviewedLabel = moduleData.last_comar_review_date
+                            ? ` · last reviewed ${new Date(moduleData.last_comar_review_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}`
+                            : '';
+                          return `Aligned to Maryland MCA — COMAR ${moduleData.comar_reference ?? moduleData.comar_section_ref}${reviewedLabel}`;
+                        })()}
+                      </span>
+                    </div>
+                  )}
+
                   {supplementAsset && supplementVideoData?.success && supplementVideoData.url && (
                     <Card className="border-primary/30">
                       <CardHeader>
