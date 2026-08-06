@@ -37,6 +37,16 @@ async function fetchSignedUrl(assetKey: string): Promise<SignedVideoResponse> {
   }
   const resp = data as SignedVideoResponse;
 
+  // Storage originals were migrated to R2 and removed from Supabase; get-video-url
+  // returns 'signing_failed' for entitled viewers of storage-backed videos. The R2
+  // Worker re-checks entitlement via RLS, so treat this as deliverable and let the
+  // existing Worker-URL swap below build the URL. Unentitled viewers get
+  // 'not_authorized'/'not_authenticated' instead and remain blocked.
+  if (!resp?.success && resp?.error_code === 'signing_failed') {
+    resp.success = true;
+    resp.provider = undefined;
+  }
+
   // Deliver storage-backed videos from Cloudflare R2 via the Worker. get-video-url still
   // runs the entitlement check and returns title/thumbnail/duration; we only swap the
   // delivery URL. Vimeo-hosted assets are left untouched.
