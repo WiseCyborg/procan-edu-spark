@@ -29,6 +29,24 @@ export type Database = {
         }
         Relationships: []
       }
+      _cleanup_bak_consumer_vurl_20260807: {
+        Row: {
+          backed_up_at: string | null
+          id: string | null
+          old_video_url: string | null
+        }
+        Insert: {
+          backed_up_at?: string | null
+          id?: string | null
+          old_video_url?: string | null
+        }
+        Update: {
+          backed_up_at?: string | null
+          id?: string | null
+          old_video_url?: string | null
+        }
+        Relationships: []
+      }
       _cleanup_bak_ent_20260731: {
         Row: {
           course_id: string | null
