@@ -93,10 +93,12 @@ export const RemedialRecommendations: React.FC<RemedialRecommendationsProps> = (
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-destructive">
               <AlertTriangle className="h-5 w-5" />
-              Topics Requiring Review ({failedTopics.length})
+              Topics to Review ({failedTopics.length})
             </CardTitle>
             <CardDescription>
-              These topics scored below 80% and require additional study before retaking the exam.
+              {overallPassed
+                ? 'These topics scored below 80%. You passed the exam — we recommend reviewing them to strengthen your mastery.'
+                : 'These topics scored below 80% and require additional study before retaking the exam.'}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
