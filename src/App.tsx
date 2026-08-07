@@ -417,6 +417,11 @@ const AppRoutesLayout = () => {
                 <VideoStudio />
               </ProtectedRoute>
             } />
+            <Route path="/admin/video-regeneration" element={
+              <ProtectedRoute>
+                <VideoRegenerationQueue />
+              </ProtectedRoute>
+            } />
 
             <Route path="/admin/launch-readiness" element={
               <ProtectedRoute>
