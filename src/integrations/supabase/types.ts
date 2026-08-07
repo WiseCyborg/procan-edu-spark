@@ -9697,6 +9697,7 @@ export type Database = {
           needs_regeneration: boolean | null
           public_url: string | null
           r2_key: string | null
+          regeneration_notified_at: string | null
           regeneration_reason: string | null
           render_dispatched_at: string | null
           render_error: string | null
@@ -9747,6 +9748,7 @@ export type Database = {
           needs_regeneration?: boolean | null
           public_url?: string | null
           r2_key?: string | null
+          regeneration_notified_at?: string | null
           regeneration_reason?: string | null
           render_dispatched_at?: string | null
           render_error?: string | null
@@ -9797,6 +9799,7 @@ export type Database = {
           needs_regeneration?: boolean | null
           public_url?: string | null
           r2_key?: string | null
+          regeneration_notified_at?: string | null
           regeneration_reason?: string | null
           render_dispatched_at?: string | null
           render_error?: string | null
@@ -10473,6 +10476,10 @@ export type Database = {
           success: boolean
         }[]
       }
+      approve_video_regeneration: {
+        Args: { p_asset_id: string }
+        Returns: Json
+      }
       archive_user_seat: {
         Args: { p_performed_by?: string; p_reason?: string; p_user_id: string }
         Returns: Json
@@ -11040,6 +11047,7 @@ export type Database = {
         Returns: Json
       }
       move_to_deadletter: { Args: { p_job_id: string }; Returns: undefined }
+      notify_pending_video_regenerations: { Args: never; Returns: number }
       purge_uat_seed_entities: { Args: { _batch?: string }; Returns: Json }
       queue_job: {
         Args: {
