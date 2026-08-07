@@ -46,8 +46,10 @@ export class EmailRouter {
     const startTime = Date.now();
     const emailLogId = crypto.randomUUID();
     
-    // SMTP fallback ENABLED to handle Resend domain verification issues
-    const SMTP_FALLBACK_ENABLED = true;
+    // SMTP fallback DISABLED (2026-08-07): denomailer SMTP client can hang indefinitely.
+    // Resend domain is verified and the primary path has a 10s AbortController timeout,
+    // so failures now fail fast + log (status='failed') instead of hanging.
+    const SMTP_FALLBACK_ENABLED = false;
     
     // Log initial attempt if supabase client provided
     if (supabaseClient) {
