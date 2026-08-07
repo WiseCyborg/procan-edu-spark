@@ -313,8 +313,8 @@ export default function Certificates() {
   };
 
   const viewCertificate = (certificateNumber: string) => {
-    // Navigate to certificate verification page
-    window.open(`/certificate-verification?cert=${certificateNumber}`, '_blank');
+    // Navigate to the public certificate verification page (/verify reads ?code=)
+    window.open(`/verify?code=${certificateNumber}`, '_blank');
   };
 
   if (!user) {

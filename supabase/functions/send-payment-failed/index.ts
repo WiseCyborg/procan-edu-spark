@@ -33,7 +33,7 @@ serve(async (req) => {
       ContactPerson: purchase.organizations?.contact_person || "Customer",
       OrganizationName: purchase.organizations?.name || "",
       ErrorMessage: error_message || "Payment processing failed",
-      RetryURL: `https://www.procannedu.com/payment/retry?purchase_id=${purchase_id}`,
+      RetryURL: `https://www.procannedu.com/purchase-seats`,
     });
 
     const emailService = new EmailService();
