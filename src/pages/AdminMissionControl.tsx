@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Shield, AlertTriangle, TrendingUp, Building2, Users, Award, ChevronDown, ChevronUp, TestTube2, BookOpen, ClipboardCheck, CreditCard } from 'lucide-react';
+import { Shield, AlertTriangle, TrendingUp, Building2, Users, Award, ChevronDown, ChevronUp, TestTube2, BookOpen, ClipboardCheck, CreditCard, Video } from 'lucide-react';
 import { PaymentTransactionsPanel } from '@/components/admin/PaymentTransactionsPanel';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -114,6 +114,19 @@ const AdminMissionControl = () => {
 
         {/* Admin next action guidance */}
         <NextActionBanner variant="compact" className="mb-2" />
+
+        {/* Video Regeneration Queue link */}
+        <Card className="hover:bg-muted/50 transition-colors">
+          <CardHeader>
+            <a href="/admin/video-regeneration" className="flex items-center gap-3">
+              <Video className="h-5 w-5 text-primary" />
+              <div>
+                <CardTitle>Video Regeneration Queue</CardTitle>
+                <CardDescription>Training videos flagged by COMAR regulation changes</CardDescription>
+              </div>
+            </a>
+          </CardHeader>
+        </Card>
 
         {/* Environment Controls */}
         <EnvironmentControls />
