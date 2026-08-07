@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -27,72 +27,73 @@ const REQUIRED_FIELDS: (keyof ProfileCompletionData)[] = [
   'emergency_contact_phone'
 ];
 
+const calculateCompletion = (profileData: Partial<ProfileCompletionData> | null): {
+  completionPercentage: number;
+  missingFields: string[];
+} => {
+  if (!profileData) {
+    return {
+      completionPercentage: 0,
+      missingFields: REQUIRED_FIELDS.map(field =>
+        field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+      )
+    };
+  }
+
+  const completedFields = REQUIRED_FIELDS.filter(field => {
+    const value = profileData[field];
+    return value !== null && value !== undefined && value.toString().trim().length > 0;
+  });
+
+  const missingFields = REQUIRED_FIELDS.filter(field => {
+    const value = profileData[field];
+    return value === null || value === undefined || value.toString().trim().length === 0;
+  }).map(field =>
+    field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+  );
+
+  return {
+    completionPercentage: Math.round((completedFields.length / REQUIRED_FIELDS.length) * 100),
+    missingFields
+  };
+};
+
 export const useProfileCompletion = () => {
   const { user } = useAuth();
-  const [profile, setProfile] = useState<Partial<ProfileCompletionData> | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [completionPercentage, setCompletionPercentage] = useState(0);
-  const [missingFields, setMissingFields] = useState<string[]>([]);
+  const queryClient = useQueryClient();
+  const queryKey = ['profile-completion', user?.id];
 
-  useEffect(() => {
-    if (!user) {
-      setIsLoading(false);
-      return;
-    }
+  const { data, isLoading: queryIsLoading } = useQuery({
+    queryKey,
+    enabled: !!user,
+    staleTime: 2 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    queryFn: async (): Promise<Partial<ProfileCompletionData> | null> => {
+      if (!user) return null;
 
-    fetchProfile();
-  }, [user]);
+      try {
+        const { data: profileData, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
 
-  const fetchProfile = async () => {
-    if (!user) return;
+        if (error && error.code !== 'PGRST116') {
+          console.error('Error fetching profile:', error);
+          return null;
+        }
 
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
-
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching profile:', error);
-        return;
+        return profileData ?? null;
+      } catch (error) {
+        console.error('Error in fetchProfile:', error);
+        return null;
       }
-
-      setProfile(data);
-      calculateCompletion(data);
-    } catch (error) {
-      console.error('Error in fetchProfile:', error);
-    } finally {
-      setIsLoading(false);
     }
-  };
+  });
 
-  const calculateCompletion = (profileData: Partial<ProfileCompletionData> | null) => {
-    if (!profileData) {
-      setCompletionPercentage(0);
-      setMissingFields(REQUIRED_FIELDS.map(field => 
-        field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
-      ));
-      return;
-    }
-
-    const completedFields = REQUIRED_FIELDS.filter(field => {
-      const value = profileData[field];
-      return value !== null && value !== undefined && value.toString().trim().length > 0;
-    });
-
-    const missing = REQUIRED_FIELDS.filter(field => {
-      const value = profileData[field];
-      return value === null || value === undefined || value.toString().trim().length === 0;
-    }).map(field => 
-      field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
-    );
-
-    const percentage = Math.round((completedFields.length / REQUIRED_FIELDS.length) * 100);
-    
-    setCompletionPercentage(percentage);
-    setMissingFields(missing);
-  };
+  const profile = data ?? null;
+  const { completionPercentage, missingFields } = calculateCompletion(profile);
+  const isLoading = !!user && queryIsLoading;
 
   const isProfileComplete = () => {
     return completionPercentage === 100;
@@ -106,6 +107,10 @@ export const useProfileCompletion = () => {
     return Math.round((completionPercentage / 100) * REQUIRED_FIELDS.length);
   };
 
+  const refreshProfile = async () => {
+    await queryClient.invalidateQueries({ queryKey });
+  };
+
   return {
     profile,
     isLoading,
@@ -114,6 +119,6 @@ export const useProfileCompletion = () => {
     isProfileComplete,
     getRequiredFieldsCount,
     getCompletedFieldsCount,
-    refreshProfile: fetchProfile
+    refreshProfile
   };
 };
