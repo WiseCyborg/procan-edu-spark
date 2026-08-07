@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
 export type Tier = 'green' | 'yellow' | 'red';
 
-interface TierAchievement {
+export interface TierAchievement {
   tier: Tier;
   unlocked_at: string;
   modules_completed: number;
@@ -13,52 +13,50 @@ interface TierAchievement {
 
 export const useTierProgress = () => {
   const { user } = useAuth();
-  const [currentTier, setCurrentTier] = useState<Tier>('green');
-  const [tierAchievements, setTierAchievements] = useState<TierAchievement[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const queryKey = ['tier-progress', user?.id];
 
-  useEffect(() => {
-    if (!user) {
-      setCurrentTier('green');
-      setTierAchievements([]);
-      setIsLoading(false);
-      return;
-    }
-
-    fetchTierProgress();
-  }, [user]);
-
-  const fetchTierProgress = async () => {
-    try {
-      // Get current tier from RPC
-      const { data: tierData } = await supabase.rpc('get_user_tier', {
-        _user_id: user!.id
-      });
-
-      if (tierData) {
-        setCurrentTier(tierData as Tier);
+  const { data, isFetching } = useQuery({
+    queryKey,
+    enabled: !!user,
+    staleTime: 2 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    queryFn: async (): Promise<{ currentTier: Tier; tierAchievements: TierAchievement[] }> => {
+      if (!user) {
+        return { currentTier: 'green', tierAchievements: [] };
       }
 
-      // Get tier achievements
-      const { data: achievements } = await supabase
-        .from('tier_achievements')
-        .select('*')
-        .eq('user_id', user!.id)
-        .order('unlocked_at', { ascending: false });
+      try {
+        // Get current tier from RPC
+        const { data: tierData } = await supabase.rpc('get_user_tier', {
+          _user_id: user.id
+        });
 
-      if (achievements) {
-        setTierAchievements(achievements.map(a => ({
-          tier: a.tier as Tier,
-          unlocked_at: a.unlocked_at,
-          modules_completed: a.modules_completed
-        })));
+        // Get tier achievements
+        const { data: achievements } = await supabase
+          .from('tier_achievements')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('unlocked_at', { ascending: false });
+
+        return {
+          currentTier: (tierData as Tier) ?? 'green',
+          tierAchievements: (achievements ?? []).map(a => ({
+            tier: a.tier as Tier,
+            unlocked_at: a.unlocked_at,
+            modules_completed: a.modules_completed
+          }))
+        };
+      } catch (error) {
+        console.error('Error fetching tier progress:', error);
+        return { currentTier: 'green', tierAchievements: [] };
       }
-    } catch (error) {
-      console.error('Error fetching tier progress:', error);
-    } finally {
-      setIsLoading(false);
     }
-  };
+  });
+
+  const currentTier = data?.currentTier ?? 'green';
+  const tierAchievements = data?.tierAchievements ?? [];
+  const isLoading = !!user && isFetching && !data;
 
   const canAccessModule = (moduleNumber: number): boolean => {
     if (currentTier === 'green') return moduleNumber <= 6;
@@ -91,14 +89,14 @@ export const useTierProgress = () => {
       achievement => achievement.tier === nextTier
     );
 
-    if (alreadyUnlocked) {
+    if (alreadyUnlocked || !user) {
       return false;
     }
 
     try {
       // Unlock via RPC
       const { data, error } = await supabase.rpc('unlock_tier', {
-        _user_id: user!.id,
+        _user_id: user.id,
         _tier: nextTier,
         _modules_completed: completedModules
       });
@@ -107,7 +105,7 @@ export const useTierProgress = () => {
 
       if (data) {
         // Refresh tier data
-        await fetchTierProgress();
+        await queryClient.invalidateQueries({ queryKey });
         return true;
       }
     } catch (error) {
@@ -122,6 +120,10 @@ export const useTierProgress = () => {
     return false;
   };
 
+  const refetchTierProgress = async () => {
+    await queryClient.invalidateQueries({ queryKey });
+  };
+
   return {
     currentTier,
     tierAchievements,
@@ -130,6 +132,6 @@ export const useTierProgress = () => {
     getNextTier,
     getModulesNeededForNextTier,
     checkAndUnlockTier,
-    refetchTierProgress: fetchTierProgress
+    refetchTierProgress
   };
 };
