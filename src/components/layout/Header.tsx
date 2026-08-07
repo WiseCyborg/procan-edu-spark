@@ -108,24 +108,9 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
     if (!user) return;
 
     const fetchUnreadCount = async () => {
-      const { data, error } = await supabase
-        .from('conversation_participants')
-        .select('conversation_id, last_read_at, conversations(id)')
-        .eq('user_id', user.id);
-
-      if (error || !data) return;
-
-      let total = 0;
-      for (const participant of data) {
-        const { count } = await supabase
-          .from('messages')
-          .select('*', { count: 'exact', head: true })
-          .eq('conversation_id', participant.conversation_id)
-          .gt('created_at', participant.last_read_at || '1970-01-01');
-        
-        total += count || 0;
-      }
-      setUnreadCount(total);
+      const { data, error } = await supabase.rpc('get_unread_message_count');
+      if (error) return;
+      setUnreadCount(data ?? 0);
     };
 
     fetchUnreadCount();
