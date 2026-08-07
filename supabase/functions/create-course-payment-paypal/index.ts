@@ -8,32 +8,27 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
-  // Create Supabase client using the anon key for user authentication
   const supabaseClient = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
     Deno.env.get("SUPABASE_ANON_KEY") ?? ""
   );
 
   try {
-    // Parse request body to get course information
     const { courseId } = await req.json();
     if (!courseId) {
       throw new Error("Course ID is required");
     }
 
-    // Retrieve authenticated user
     const authHeader = req.headers.get("Authorization")!;
     const token = authHeader.replace("Bearer ", "");
     const { data } = await supabaseClient.auth.getUser(token);
     const user = data.user;
     if (!user?.email) throw new Error("User not authenticated or email not available");
 
-    // Get course details
     const { data: course, error: courseError } = await supabaseClient
       .from('courses')
       .select('*')
@@ -44,16 +39,14 @@ serve(async (req) => {
       throw new Error("Course not found");
     }
 
-    // Get PayPal environment and credentials
     const paypalEnv = await getActivePayPalEnv();
-    const { id: PAYPAL_CLIENT_ID, secret: PAYPAL_CLIENT_SECRET, baseUrl: PAYPAL_API_BASE } = 
+    const { id: PAYPAL_CLIENT_ID, secret: PAYPAL_CLIENT_SECRET, baseUrl: PAYPAL_API_BASE } =
       resolvePayPalCreds(paypalEnv);
 
     console.log(`Using PayPal ${paypalEnv} mode for course payment`);
 
-    // Get PayPal access token
     const paypalAuth = btoa(`${PAYPAL_CLIENT_ID}:${PAYPAL_CLIENT_SECRET}`);
-    
+
     const tokenResponse = await fetch(`${PAYPAL_API_BASE}/v1/oauth2/token`, {
       method: "POST",
       headers: {
@@ -66,10 +59,48 @@ serve(async (req) => {
     const tokenData = await tokenResponse.json();
     const accessToken = tokenData.access_token;
 
-    // Calculate amount (PayPal expects decimal format)
+    const supabaseService = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { persistSession: false } }
+    );
+
+    // IDEMPOTENCY FIX (2026-08-07): reuse an existing still-approvable pending
+    // order for this user+course instead of stacking a new PayPal order on
+    // every click.
+    const { data: existingPending } = await supabaseService
+      .from("orders")
+      .select("id, paypal_order_id")
+      .eq("user_id", user.id)
+      .eq("course_id", courseId)
+      .eq("status", "pending")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (existingPending?.paypal_order_id) {
+      try {
+        const existingRes = await fetch(`${PAYPAL_API_BASE}/v2/checkout/orders/${existingPending.paypal_order_id}`, {
+          method: "GET",
+          headers: { "Authorization": `Bearer ${accessToken}`, "Content-Type": "application/json" },
+        });
+        const existingData = await existingRes.json();
+        if (existingRes.ok && existingData.status === "CREATED") {
+          const reuseUrl = existingData.links?.find((l: any) => l.rel === "approve")?.href;
+          if (reuseUrl) {
+            return new Response(JSON.stringify({ url: reuseUrl, orderId: existingData.id, reused: true }), {
+              headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200,
+            });
+          }
+        }
+      } catch (e) {
+        console.error("[create-course-payment-paypal] existing order reuse check failed", e);
+        // fall through to create a fresh order
+      }
+    }
+
     const amount = ((course.price_cents || 4999) / 100).toFixed(2);
 
-    // Create PayPal order
     const orderPayload = {
       intent: "CAPTURE",
       purchase_units: [{
@@ -106,14 +137,8 @@ serve(async (req) => {
       throw new Error(`PayPal order creation failed: ${orderData.message || "Unknown error"}`);
     }
 
-    // Create order record in database
-    const supabaseService = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-      { auth: { persistSession: false } }
-    );
-
-    await supabaseService.from("orders").insert({
+    // CORRECTNESS FIX (2026-08-07): check the insert result instead of swallowing it.
+    const { error: orderInsertErr } = await supabaseService.from("orders").insert({
       user_id: user.id,
       course_id: courseId,
       paypal_order_id: orderData.id,
@@ -127,16 +152,20 @@ serve(async (req) => {
       }
     });
 
-    // Find the approval URL from PayPal response
+    if (orderInsertErr) {
+      console.error("[create-course-payment-paypal] orders insert failed", orderInsertErr);
+      throw new Error(`Failed to record order: ${orderInsertErr.message}`);
+    }
+
     const approvalUrl = orderData.links?.find((link: any) => link.rel === "approve")?.href;
 
     if (!approvalUrl) {
       throw new Error("PayPal approval URL not found");
     }
 
-    return new Response(JSON.stringify({ 
+    return new Response(JSON.stringify({
       url: approvalUrl,
-      orderId: orderData.id 
+      orderId: orderData.id
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
