@@ -87,6 +87,53 @@ function parseDispensaryCustomId(customId: string | undefined | null) {
   return { purchaseId, organizationId, quantity };
 }
 
+async function reverseProvisioning(
+  supabase: ReturnType<typeof createClient>,
+  ctx: { customId?: string | null; orderId?: string; eventType: string }
+) {
+  const parsed = parseDispensaryCustomId(ctx.customId);
+  if (parsed) {
+    // Dispensary: mark the purchase reversed and revoke UNASSIGNED seats only.
+    // Assigned seats (an active learner) are left intact and logged for operator review.
+    const newStatus = ctx.eventType === "PAYMENT.CAPTURE.REFUNDED" ? "refunded" : "denied";
+    await supabase.from("rvt_purchases").update({ status: newStatus }).eq("id", parsed.purchaseId);
+    await supabase.from("rvt_seats")
+      .update({ status: "revoked" })
+      .eq("purchase_id", parsed.purchaseId)
+      .is("assigned_user_id", null);
+    const { count: assignedCount } = await supabase.from("rvt_seats")
+      .select("id", { count: "exact", head: true })
+      .eq("purchase_id", parsed.purchaseId)
+      .not("assigned_user_id", "is", null);
+    if (assignedCount && assignedCount > 0) {
+      console.warn(`[paypal-webhook] ${ctx.eventType} on purchase ${parsed.purchaseId}: ${assignedCount} ASSIGNED seat(s) left intact — operator review needed`);
+    }
+    return;
+  }
+  const cid = ctx.customId || "";
+  if (cid.startsWith("course:") || cid.startsWith("course_")) {
+    let userId: string | undefined;
+    let courseId: string | undefined;
+    if (cid.startsWith("course:")) {
+      const [, u, c] = cid.split(":");
+      userId = u; courseId = c;
+    } else {
+      const m = cid.match(/^course_([^_]+(?:-[^_]+)*)_user_(.+)$/);
+      if (m) { courseId = m[1]; userId = m[2]; }
+    }
+    if (userId && courseId) {
+      await supabase.from("course_entitlements")
+        .update({ status: "revoked" })
+        .eq("user_id", userId).eq("course_id", courseId).eq("source", "paypal");
+      await supabase.from("orders")
+        .update({ status: ctx.eventType === "PAYMENT.CAPTURE.REFUNDED" ? "refunded" : "failed" })
+        .eq("user_id", userId).eq("course_id", courseId);
+    }
+  }
+}
+
+
+
 async function provisionDispensaryPayment(
   supabase: ReturnType<typeof createClient>,
   ctx: { eventId: string; orderId: string; purchaseId: string; organizationId: string; quantity: number; captureId?: string; payerId?: string; amount?: string }
@@ -451,10 +498,25 @@ serve(async (req) => {
 
       case "PAYMENT.CAPTURE.DENIED":
       case "PAYMENT.CAPTURE.REFUNDED": {
-        await supabase
-          .from("payment_events")
-          .update({ status: event.event_type.toLowerCase() })
-          .eq("paypal_event_id", event.id);
+        const resource = event.resource ?? {};
+        const customId =
+          resource.custom_id ||
+          resource.purchase_units?.[0]?.custom_id ||
+          resource.purchase_units?.[0]?.payments?.captures?.[0]?.custom_id;
+        const orderId = resource.supplementary_data?.related_ids?.order_id ?? resource.id;
+        try {
+          await reverseProvisioning(supabase, { customId, orderId, eventType: event.event_type });
+          await supabase
+            .from("payment_events")
+            .update({ status: event.event_type.toLowerCase(), paypal_order_id: orderId ?? null })
+            .eq("paypal_event_id", event.id);
+        } catch (e) {
+          console.error("[paypal-webhook] reversal failed", e);
+          await supabase
+            .from("payment_events")
+            .update({ status: "reversal_failed", error_message: String(e) })
+            .eq("paypal_event_id", event.id);
+        }
         break;
       }
 
