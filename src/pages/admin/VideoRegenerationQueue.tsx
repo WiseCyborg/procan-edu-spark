@@ -299,7 +299,7 @@ const VideoRegenerationQueue: React.FC = () => {
             <DialogTitle>Mark video as regenerated</DialogTitle>
             <DialogDescription>
               Records that a new video was produced for{' '}
-              {markTarget?.module_title || markTarget?.asset_key || 'this module'} and sets it to pending review.
+              {markTarget?.module_title || markTarget?.asset_key || 'this module'}. If you enter a new video URL it replaces the live video immediately; leave it blank to record that the existing video was re-reviewed and is still accurate. Sets the video to pending review.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -341,9 +341,8 @@ const VideoRegenerationQueue: React.FC = () => {
           <DialogHeader>
             <DialogTitle>Approve this video?</DialogTitle>
             <DialogDescription>
-              This is the final compliance sign-off for{' '}
-              {approveTarget?.module_title || approveTarget?.asset_key || 'this module'}. The video will be marked
-              approved and published to learners.
+              Final compliance sign-off for{' '}
+              {approveTarget?.module_title || approveTarget?.asset_key || 'this module'}. Marks the video approved and clears the regeneration flag. This does not change the video file itself — to replace the video, use 'Mark regenerated' with a new URL.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
