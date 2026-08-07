@@ -341,9 +341,8 @@ const VideoRegenerationQueue: React.FC = () => {
           <DialogHeader>
             <DialogTitle>Approve this video?</DialogTitle>
             <DialogDescription>
-              This is the final compliance sign-off for{' '}
-              {approveTarget?.module_title || approveTarget?.asset_key || 'this module'}. The video will be marked
-              approved and published to learners.
+              Final compliance sign-off for{' '}
+              {approveTarget?.module_title || approveTarget?.asset_key || 'this module'}. Marks the video approved and clears the regeneration flag. This does not change the video file itself — to replace the video, use 'Mark regenerated' with a new URL.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
