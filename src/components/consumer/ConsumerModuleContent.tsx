@@ -82,10 +82,11 @@ export const ConsumerModuleContent = ({
         {/* Video Section */}
         {module.video_url ? (
           <div className="rounded-lg overflow-hidden bg-muted">
-            <audio
+            <video
               src={module.video_url}
               controls
-              className="w-full"
+              playsInline
+              className="w-full aspect-video"
               preload="metadata"
             />
           </div>
