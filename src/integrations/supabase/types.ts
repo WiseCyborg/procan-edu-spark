@@ -2126,6 +2126,33 @@ export type Database = {
         }
         Relationships: []
       }
+      _bak_welcomeintro_draft_20260809: {
+        Row: {
+          draft_audio_generated_at: string | null
+          draft_audio_provider: string | null
+          draft_audio_url: string | null
+          draft_generated_at: string | null
+          draft_script: string | null
+          id: string | null
+        }
+        Insert: {
+          draft_audio_generated_at?: string | null
+          draft_audio_provider?: string | null
+          draft_audio_url?: string | null
+          draft_generated_at?: string | null
+          draft_script?: string | null
+          id?: string | null
+        }
+        Update: {
+          draft_audio_generated_at?: string | null
+          draft_audio_provider?: string | null
+          draft_audio_url?: string | null
+          draft_generated_at?: string | null
+          draft_script?: string | null
+          id?: string | null
+        }
+        Relationships: []
+      }
       _bak_welcomeintro_storagepath_20260809: {
         Row: {
           asset_key: string | null

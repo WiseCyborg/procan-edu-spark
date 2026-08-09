@@ -17,8 +17,10 @@ import LanguageDetector from "i18next-browser-languagedetector";
 import en from "./locales/en.json";
 import es from "./locales/es.json";
 import zh from "./locales/zh.json";
+import fr from "./locales/fr.json";
+import ko from "./locales/ko.json";
 
-export const SUPPORTED_LANGUAGES = ["en", "es", "zh"] as const;
+export const SUPPORTED_LANGUAGES = ["en", "es", "zh", "fr", "ko"] as const;
 export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
 
 export const LANGUAGE_STORAGE_KEY = "procann_language";
@@ -27,6 +29,8 @@ export const LANGUAGE_LABELS: Record<SupportedLanguage, { code: string; native: 
   en: { code: "EN", native: "English", english: "English" },
   es: { code: "ES", native: "Español", english: "Spanish" },
   zh: { code: "ZH", native: "中文", english: "Simplified Chinese" },
+  fr: { code: "FR", native: "Français", english: "French" },
+  ko: { code: "KO", native: "한국어", english: "Korean" },
 };
 
 export function isSupportedLanguage(value: unknown): value is SupportedLanguage {
@@ -41,6 +45,8 @@ i18n
       en: { translation: en },
       es: { translation: es },
       zh: { translation: zh },
+      fr: { translation: fr },
+      ko: { translation: ko },
     },
     fallbackLng: "en",
     supportedLngs: [...SUPPORTED_LANGUAGES],
