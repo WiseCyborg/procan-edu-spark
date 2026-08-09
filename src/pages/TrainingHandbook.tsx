@@ -237,7 +237,7 @@ const TrainingHandbook = () => {
                  </p>
                  <div className="rounded-lg overflow-hidden bg-muted">
                    <div className="aspect-video">
-                     <SecureVideoPlayer assetKey="section_3_inventory" lazy={false} />
+                     <SecureVideoPlayer assetKey="module_10" lazy={false} />
                    </div>
                    <p className="text-sm text-muted-foreground text-center py-3">
                      <em>Video: Understanding cannabis active components and dosage forms.</em>
