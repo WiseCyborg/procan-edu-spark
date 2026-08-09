@@ -45,6 +45,8 @@ i18n
       en: { translation: en },
       es: { translation: es },
       zh: { translation: zh },
+      fr: { translation: fr },
+      ko: { translation: ko },
     },
     fallbackLng: "en",
     supportedLngs: [...SUPPORTED_LANGUAGES],
