@@ -14,6 +14,2160 @@ export type Database = {
   }
   public: {
     Tables: {
+      _bak_mod02_20260807: {
+        Row: {
+          c: string | null
+          q: string | null
+          ref: string | null
+          src: string | null
+        }
+        Insert: {
+          c?: string | null
+          q?: string | null
+          ref?: string | null
+          src?: string | null
+        }
+        Update: {
+          c?: string | null
+          q?: string | null
+          ref?: string | null
+          src?: string | null
+        }
+        Relationships: []
+      }
+      _bak_mod03_20260807: {
+        Row: {
+          c: string | null
+          q: string | null
+          ref: string | null
+          src: string | null
+        }
+        Insert: {
+          c?: string | null
+          q?: string | null
+          ref?: string | null
+          src?: string | null
+        }
+        Update: {
+          c?: string | null
+          q?: string | null
+          ref?: string | null
+          src?: string | null
+        }
+        Relationships: []
+      }
+      _bak_mod04_20260807: {
+        Row: {
+          c: string | null
+          q: string | null
+          ref: string | null
+          src: string | null
+        }
+        Insert: {
+          c?: string | null
+          q?: string | null
+          ref?: string | null
+          src?: string | null
+        }
+        Update: {
+          c?: string | null
+          q?: string | null
+          ref?: string | null
+          src?: string | null
+        }
+        Relationships: []
+      }
+      _bak_mod05_20260807: {
+        Row: {
+          c: string | null
+          cref: string | null
+          q: string | null
+          ref: string | null
+          src: string | null
+        }
+        Insert: {
+          c?: string | null
+          cref?: string | null
+          q?: string | null
+          ref?: string | null
+          src?: string | null
+        }
+        Update: {
+          c?: string | null
+          cref?: string | null
+          q?: string | null
+          ref?: string | null
+          src?: string | null
+        }
+        Relationships: []
+      }
+      _bak_mod06_20260807: {
+        Row: {
+          c: string | null
+          cref: string | null
+          q: string | null
+          ref: string | null
+          src: string | null
+        }
+        Insert: {
+          c?: string | null
+          cref?: string | null
+          q?: string | null
+          ref?: string | null
+          src?: string | null
+        }
+        Update: {
+          c?: string | null
+          cref?: string | null
+          q?: string | null
+          ref?: string | null
+          src?: string | null
+        }
+        Relationships: []
+      }
+      _bak_mod07_20260807: {
+        Row: {
+          c: string | null
+          cref: string | null
+          q: string | null
+          ref: string | null
+          src: string | null
+        }
+        Insert: {
+          c?: string | null
+          cref?: string | null
+          q?: string | null
+          ref?: string | null
+          src?: string | null
+        }
+        Update: {
+          c?: string | null
+          cref?: string | null
+          q?: string | null
+          ref?: string | null
+          src?: string | null
+        }
+        Relationships: []
+      }
+      _bak_mod08_20260807: {
+        Row: {
+          content: string | null
+          draft_script: string | null
+          module_number: number | null
+          quiz_questions: Json | null
+          slide_spec: Json | null
+          snapshot_at: string | null
+          video_id: string | null
+        }
+        Insert: {
+          content?: string | null
+          draft_script?: string | null
+          module_number?: number | null
+          quiz_questions?: Json | null
+          slide_spec?: Json | null
+          snapshot_at?: string | null
+          video_id?: string | null
+        }
+        Update: {
+          content?: string | null
+          draft_script?: string | null
+          module_number?: number | null
+          quiz_questions?: Json | null
+          slide_spec?: Json | null
+          snapshot_at?: string | null
+          video_id?: string | null
+        }
+        Relationships: []
+      }
+      _bak_mod09_20260807: {
+        Row: {
+          content: string | null
+          draft_script: string | null
+          module_number: number | null
+          quiz_questions: Json | null
+          slide_spec: Json | null
+          snapshot_at: string | null
+          video_id: string | null
+        }
+        Insert: {
+          content?: string | null
+          draft_script?: string | null
+          module_number?: number | null
+          quiz_questions?: Json | null
+          slide_spec?: Json | null
+          snapshot_at?: string | null
+          video_id?: string | null
+        }
+        Update: {
+          content?: string | null
+          draft_script?: string | null
+          module_number?: number | null
+          quiz_questions?: Json | null
+          slide_spec?: Json | null
+          snapshot_at?: string | null
+          video_id?: string | null
+        }
+        Relationships: []
+      }
+      _bak_mod10_20260807: {
+        Row: {
+          content: string | null
+          draft_script: string | null
+          module_number: number | null
+          quiz_questions: Json | null
+          slide_spec: Json | null
+          snapshot_at: string | null
+          video_id: string | null
+        }
+        Insert: {
+          content?: string | null
+          draft_script?: string | null
+          module_number?: number | null
+          quiz_questions?: Json | null
+          slide_spec?: Json | null
+          snapshot_at?: string | null
+          video_id?: string | null
+        }
+        Update: {
+          content?: string | null
+          draft_script?: string | null
+          module_number?: number | null
+          quiz_questions?: Json | null
+          slide_spec?: Json | null
+          snapshot_at?: string | null
+          video_id?: string | null
+        }
+        Relationships: []
+      }
+      _bak_mod11_20260807: {
+        Row: {
+          comar_compliance_status: string | null
+          comar_reference: string | null
+          comar_section_ref: string | null
+          comar_version_id: string | null
+          content: string | null
+          course_id: string | null
+          created_at: string | null
+          description: string | null
+          estimated_minutes: number | null
+          id: string | null
+          is_active: boolean | null
+          is_manager_only: boolean | null
+          last_comar_review_date: string | null
+          learning_objectives: Json | null
+          lessons: Json | null
+          module_number: number | null
+          quiz_questions: Json | null
+          stoplight_tier: string | null
+          title: string | null
+          unmapped_reason: string | null
+          updated_at: string | null
+          version: number | null
+          video_url: string | null
+        }
+        Insert: {
+          comar_compliance_status?: string | null
+          comar_reference?: string | null
+          comar_section_ref?: string | null
+          comar_version_id?: string | null
+          content?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          estimated_minutes?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          is_manager_only?: boolean | null
+          last_comar_review_date?: string | null
+          learning_objectives?: Json | null
+          lessons?: Json | null
+          module_number?: number | null
+          quiz_questions?: Json | null
+          stoplight_tier?: string | null
+          title?: string | null
+          unmapped_reason?: string | null
+          updated_at?: string | null
+          version?: number | null
+          video_url?: string | null
+        }
+        Update: {
+          comar_compliance_status?: string | null
+          comar_reference?: string | null
+          comar_section_ref?: string | null
+          comar_version_id?: string | null
+          content?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          estimated_minutes?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          is_manager_only?: boolean | null
+          last_comar_review_date?: string | null
+          learning_objectives?: Json | null
+          lessons?: Json | null
+          module_number?: number | null
+          quiz_questions?: Json | null
+          stoplight_tier?: string | null
+          title?: string | null
+          unmapped_reason?: string | null
+          updated_at?: string | null
+          version?: number | null
+          video_url?: string | null
+        }
+        Relationships: []
+      }
+      _bak_mod11_vid_20260807: {
+        Row: {
+          access_level: string | null
+          asset_key: string | null
+          bucket_id: string | null
+          course_id: string | null
+          created_at: string | null
+          descript_project_id: string | null
+          description: string | null
+          draft_audio_duration_seconds: number | null
+          draft_audio_generated_at: string | null
+          draft_audio_provider: string | null
+          draft_audio_url: string | null
+          draft_generated_at: string | null
+          draft_script: string | null
+          draft_video_url: string | null
+          duration_seconds: number | null
+          fallback_bucket_id: string | null
+          fallback_storage_path: string | null
+          file_size_mb: number | null
+          id: string | null
+          is_active: boolean | null
+          last_regenerated_at: string | null
+          legacy_bucket_id: string | null
+          legacy_storage_path: string | null
+          migrated_at: string | null
+          migration_error: string | null
+          migration_status: string | null
+          mime_type: string | null
+          module_id: string | null
+          needs_regeneration: boolean | null
+          public_url: string | null
+          r2_key: string | null
+          regeneration_notified_at: string | null
+          regeneration_reason: string | null
+          render_dispatched_at: string | null
+          render_error: string | null
+          render_job_id: string | null
+          render_provider: string | null
+          render_status: string | null
+          review_status: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          slide_outline: Json | null
+          slide_spec: Json | null
+          storage_path: string | null
+          storage_provider: string | null
+          thumbnail_url: string | null
+          title: string | null
+          unmapped_reason: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          access_level?: string | null
+          asset_key?: string | null
+          bucket_id?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          descript_project_id?: string | null
+          description?: string | null
+          draft_audio_duration_seconds?: number | null
+          draft_audio_generated_at?: string | null
+          draft_audio_provider?: string | null
+          draft_audio_url?: string | null
+          draft_generated_at?: string | null
+          draft_script?: string | null
+          draft_video_url?: string | null
+          duration_seconds?: number | null
+          fallback_bucket_id?: string | null
+          fallback_storage_path?: string | null
+          file_size_mb?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          last_regenerated_at?: string | null
+          legacy_bucket_id?: string | null
+          legacy_storage_path?: string | null
+          migrated_at?: string | null
+          migration_error?: string | null
+          migration_status?: string | null
+          mime_type?: string | null
+          module_id?: string | null
+          needs_regeneration?: boolean | null
+          public_url?: string | null
+          r2_key?: string | null
+          regeneration_notified_at?: string | null
+          regeneration_reason?: string | null
+          render_dispatched_at?: string | null
+          render_error?: string | null
+          render_job_id?: string | null
+          render_provider?: string | null
+          render_status?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          slide_outline?: Json | null
+          slide_spec?: Json | null
+          storage_path?: string | null
+          storage_provider?: string | null
+          thumbnail_url?: string | null
+          title?: string | null
+          unmapped_reason?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          access_level?: string | null
+          asset_key?: string | null
+          bucket_id?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          descript_project_id?: string | null
+          description?: string | null
+          draft_audio_duration_seconds?: number | null
+          draft_audio_generated_at?: string | null
+          draft_audio_provider?: string | null
+          draft_audio_url?: string | null
+          draft_generated_at?: string | null
+          draft_script?: string | null
+          draft_video_url?: string | null
+          duration_seconds?: number | null
+          fallback_bucket_id?: string | null
+          fallback_storage_path?: string | null
+          file_size_mb?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          last_regenerated_at?: string | null
+          legacy_bucket_id?: string | null
+          legacy_storage_path?: string | null
+          migrated_at?: string | null
+          migration_error?: string | null
+          migration_status?: string | null
+          mime_type?: string | null
+          module_id?: string | null
+          needs_regeneration?: boolean | null
+          public_url?: string | null
+          r2_key?: string | null
+          regeneration_notified_at?: string | null
+          regeneration_reason?: string | null
+          render_dispatched_at?: string | null
+          render_error?: string | null
+          render_job_id?: string | null
+          render_provider?: string | null
+          render_status?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          slide_outline?: Json | null
+          slide_spec?: Json | null
+          storage_path?: string | null
+          storage_provider?: string | null
+          thumbnail_url?: string | null
+          title?: string | null
+          unmapped_reason?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _bak_mod12_20260807: {
+        Row: {
+          comar_compliance_status: string | null
+          comar_reference: string | null
+          comar_section_ref: string | null
+          comar_version_id: string | null
+          content: string | null
+          course_id: string | null
+          created_at: string | null
+          description: string | null
+          estimated_minutes: number | null
+          id: string | null
+          is_active: boolean | null
+          is_manager_only: boolean | null
+          last_comar_review_date: string | null
+          learning_objectives: Json | null
+          lessons: Json | null
+          module_number: number | null
+          quiz_questions: Json | null
+          stoplight_tier: string | null
+          title: string | null
+          unmapped_reason: string | null
+          updated_at: string | null
+          version: number | null
+          video_url: string | null
+        }
+        Insert: {
+          comar_compliance_status?: string | null
+          comar_reference?: string | null
+          comar_section_ref?: string | null
+          comar_version_id?: string | null
+          content?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          estimated_minutes?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          is_manager_only?: boolean | null
+          last_comar_review_date?: string | null
+          learning_objectives?: Json | null
+          lessons?: Json | null
+          module_number?: number | null
+          quiz_questions?: Json | null
+          stoplight_tier?: string | null
+          title?: string | null
+          unmapped_reason?: string | null
+          updated_at?: string | null
+          version?: number | null
+          video_url?: string | null
+        }
+        Update: {
+          comar_compliance_status?: string | null
+          comar_reference?: string | null
+          comar_section_ref?: string | null
+          comar_version_id?: string | null
+          content?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          estimated_minutes?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          is_manager_only?: boolean | null
+          last_comar_review_date?: string | null
+          learning_objectives?: Json | null
+          lessons?: Json | null
+          module_number?: number | null
+          quiz_questions?: Json | null
+          stoplight_tier?: string | null
+          title?: string | null
+          unmapped_reason?: string | null
+          updated_at?: string | null
+          version?: number | null
+          video_url?: string | null
+        }
+        Relationships: []
+      }
+      _bak_mod12_vid_20260807: {
+        Row: {
+          access_level: string | null
+          asset_key: string | null
+          bucket_id: string | null
+          course_id: string | null
+          created_at: string | null
+          descript_project_id: string | null
+          description: string | null
+          draft_audio_duration_seconds: number | null
+          draft_audio_generated_at: string | null
+          draft_audio_provider: string | null
+          draft_audio_url: string | null
+          draft_generated_at: string | null
+          draft_script: string | null
+          draft_video_url: string | null
+          duration_seconds: number | null
+          fallback_bucket_id: string | null
+          fallback_storage_path: string | null
+          file_size_mb: number | null
+          id: string | null
+          is_active: boolean | null
+          last_regenerated_at: string | null
+          legacy_bucket_id: string | null
+          legacy_storage_path: string | null
+          migrated_at: string | null
+          migration_error: string | null
+          migration_status: string | null
+          mime_type: string | null
+          module_id: string | null
+          needs_regeneration: boolean | null
+          public_url: string | null
+          r2_key: string | null
+          regeneration_notified_at: string | null
+          regeneration_reason: string | null
+          render_dispatched_at: string | null
+          render_error: string | null
+          render_job_id: string | null
+          render_provider: string | null
+          render_status: string | null
+          review_status: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          slide_outline: Json | null
+          slide_spec: Json | null
+          storage_path: string | null
+          storage_provider: string | null
+          thumbnail_url: string | null
+          title: string | null
+          unmapped_reason: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          access_level?: string | null
+          asset_key?: string | null
+          bucket_id?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          descript_project_id?: string | null
+          description?: string | null
+          draft_audio_duration_seconds?: number | null
+          draft_audio_generated_at?: string | null
+          draft_audio_provider?: string | null
+          draft_audio_url?: string | null
+          draft_generated_at?: string | null
+          draft_script?: string | null
+          draft_video_url?: string | null
+          duration_seconds?: number | null
+          fallback_bucket_id?: string | null
+          fallback_storage_path?: string | null
+          file_size_mb?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          last_regenerated_at?: string | null
+          legacy_bucket_id?: string | null
+          legacy_storage_path?: string | null
+          migrated_at?: string | null
+          migration_error?: string | null
+          migration_status?: string | null
+          mime_type?: string | null
+          module_id?: string | null
+          needs_regeneration?: boolean | null
+          public_url?: string | null
+          r2_key?: string | null
+          regeneration_notified_at?: string | null
+          regeneration_reason?: string | null
+          render_dispatched_at?: string | null
+          render_error?: string | null
+          render_job_id?: string | null
+          render_provider?: string | null
+          render_status?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          slide_outline?: Json | null
+          slide_spec?: Json | null
+          storage_path?: string | null
+          storage_provider?: string | null
+          thumbnail_url?: string | null
+          title?: string | null
+          unmapped_reason?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          access_level?: string | null
+          asset_key?: string | null
+          bucket_id?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          descript_project_id?: string | null
+          description?: string | null
+          draft_audio_duration_seconds?: number | null
+          draft_audio_generated_at?: string | null
+          draft_audio_provider?: string | null
+          draft_audio_url?: string | null
+          draft_generated_at?: string | null
+          draft_script?: string | null
+          draft_video_url?: string | null
+          duration_seconds?: number | null
+          fallback_bucket_id?: string | null
+          fallback_storage_path?: string | null
+          file_size_mb?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          last_regenerated_at?: string | null
+          legacy_bucket_id?: string | null
+          legacy_storage_path?: string | null
+          migrated_at?: string | null
+          migration_error?: string | null
+          migration_status?: string | null
+          mime_type?: string | null
+          module_id?: string | null
+          needs_regeneration?: boolean | null
+          public_url?: string | null
+          r2_key?: string | null
+          regeneration_notified_at?: string | null
+          regeneration_reason?: string | null
+          render_dispatched_at?: string | null
+          render_error?: string | null
+          render_job_id?: string | null
+          render_provider?: string | null
+          render_status?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          slide_outline?: Json | null
+          slide_spec?: Json | null
+          storage_path?: string | null
+          storage_provider?: string | null
+          thumbnail_url?: string | null
+          title?: string | null
+          unmapped_reason?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _bak_mod13_20260807: {
+        Row: {
+          comar_compliance_status: string | null
+          comar_reference: string | null
+          comar_section_ref: string | null
+          comar_version_id: string | null
+          content: string | null
+          course_id: string | null
+          created_at: string | null
+          description: string | null
+          estimated_minutes: number | null
+          id: string | null
+          is_active: boolean | null
+          is_manager_only: boolean | null
+          last_comar_review_date: string | null
+          learning_objectives: Json | null
+          lessons: Json | null
+          module_number: number | null
+          quiz_questions: Json | null
+          stoplight_tier: string | null
+          title: string | null
+          unmapped_reason: string | null
+          updated_at: string | null
+          version: number | null
+          video_url: string | null
+        }
+        Insert: {
+          comar_compliance_status?: string | null
+          comar_reference?: string | null
+          comar_section_ref?: string | null
+          comar_version_id?: string | null
+          content?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          estimated_minutes?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          is_manager_only?: boolean | null
+          last_comar_review_date?: string | null
+          learning_objectives?: Json | null
+          lessons?: Json | null
+          module_number?: number | null
+          quiz_questions?: Json | null
+          stoplight_tier?: string | null
+          title?: string | null
+          unmapped_reason?: string | null
+          updated_at?: string | null
+          version?: number | null
+          video_url?: string | null
+        }
+        Update: {
+          comar_compliance_status?: string | null
+          comar_reference?: string | null
+          comar_section_ref?: string | null
+          comar_version_id?: string | null
+          content?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          estimated_minutes?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          is_manager_only?: boolean | null
+          last_comar_review_date?: string | null
+          learning_objectives?: Json | null
+          lessons?: Json | null
+          module_number?: number | null
+          quiz_questions?: Json | null
+          stoplight_tier?: string | null
+          title?: string | null
+          unmapped_reason?: string | null
+          updated_at?: string | null
+          version?: number | null
+          video_url?: string | null
+        }
+        Relationships: []
+      }
+      _bak_mod13_vid_20260807: {
+        Row: {
+          access_level: string | null
+          asset_key: string | null
+          bucket_id: string | null
+          course_id: string | null
+          created_at: string | null
+          descript_project_id: string | null
+          description: string | null
+          draft_audio_duration_seconds: number | null
+          draft_audio_generated_at: string | null
+          draft_audio_provider: string | null
+          draft_audio_url: string | null
+          draft_generated_at: string | null
+          draft_script: string | null
+          draft_video_url: string | null
+          duration_seconds: number | null
+          fallback_bucket_id: string | null
+          fallback_storage_path: string | null
+          file_size_mb: number | null
+          id: string | null
+          is_active: boolean | null
+          last_regenerated_at: string | null
+          legacy_bucket_id: string | null
+          legacy_storage_path: string | null
+          migrated_at: string | null
+          migration_error: string | null
+          migration_status: string | null
+          mime_type: string | null
+          module_id: string | null
+          needs_regeneration: boolean | null
+          public_url: string | null
+          r2_key: string | null
+          regeneration_notified_at: string | null
+          regeneration_reason: string | null
+          render_dispatched_at: string | null
+          render_error: string | null
+          render_job_id: string | null
+          render_provider: string | null
+          render_status: string | null
+          review_status: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          slide_outline: Json | null
+          slide_spec: Json | null
+          storage_path: string | null
+          storage_provider: string | null
+          thumbnail_url: string | null
+          title: string | null
+          unmapped_reason: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          access_level?: string | null
+          asset_key?: string | null
+          bucket_id?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          descript_project_id?: string | null
+          description?: string | null
+          draft_audio_duration_seconds?: number | null
+          draft_audio_generated_at?: string | null
+          draft_audio_provider?: string | null
+          draft_audio_url?: string | null
+          draft_generated_at?: string | null
+          draft_script?: string | null
+          draft_video_url?: string | null
+          duration_seconds?: number | null
+          fallback_bucket_id?: string | null
+          fallback_storage_path?: string | null
+          file_size_mb?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          last_regenerated_at?: string | null
+          legacy_bucket_id?: string | null
+          legacy_storage_path?: string | null
+          migrated_at?: string | null
+          migration_error?: string | null
+          migration_status?: string | null
+          mime_type?: string | null
+          module_id?: string | null
+          needs_regeneration?: boolean | null
+          public_url?: string | null
+          r2_key?: string | null
+          regeneration_notified_at?: string | null
+          regeneration_reason?: string | null
+          render_dispatched_at?: string | null
+          render_error?: string | null
+          render_job_id?: string | null
+          render_provider?: string | null
+          render_status?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          slide_outline?: Json | null
+          slide_spec?: Json | null
+          storage_path?: string | null
+          storage_provider?: string | null
+          thumbnail_url?: string | null
+          title?: string | null
+          unmapped_reason?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          access_level?: string | null
+          asset_key?: string | null
+          bucket_id?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          descript_project_id?: string | null
+          description?: string | null
+          draft_audio_duration_seconds?: number | null
+          draft_audio_generated_at?: string | null
+          draft_audio_provider?: string | null
+          draft_audio_url?: string | null
+          draft_generated_at?: string | null
+          draft_script?: string | null
+          draft_video_url?: string | null
+          duration_seconds?: number | null
+          fallback_bucket_id?: string | null
+          fallback_storage_path?: string | null
+          file_size_mb?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          last_regenerated_at?: string | null
+          legacy_bucket_id?: string | null
+          legacy_storage_path?: string | null
+          migrated_at?: string | null
+          migration_error?: string | null
+          migration_status?: string | null
+          mime_type?: string | null
+          module_id?: string | null
+          needs_regeneration?: boolean | null
+          public_url?: string | null
+          r2_key?: string | null
+          regeneration_notified_at?: string | null
+          regeneration_reason?: string | null
+          render_dispatched_at?: string | null
+          render_error?: string | null
+          render_job_id?: string | null
+          render_provider?: string | null
+          render_status?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          slide_outline?: Json | null
+          slide_spec?: Json | null
+          storage_path?: string | null
+          storage_provider?: string | null
+          thumbnail_url?: string | null
+          title?: string | null
+          unmapped_reason?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _bak_mod14_20260807: {
+        Row: {
+          backed_up_at: string | null
+          comar_section_ref: string | null
+          content: string | null
+          draft_script: string | null
+          quiz_questions: string | null
+          ref_id: string | null
+          slide_spec: string | null
+          src: string | null
+        }
+        Insert: {
+          backed_up_at?: string | null
+          comar_section_ref?: string | null
+          content?: string | null
+          draft_script?: string | null
+          quiz_questions?: string | null
+          ref_id?: string | null
+          slide_spec?: string | null
+          src?: string | null
+        }
+        Update: {
+          backed_up_at?: string | null
+          comar_section_ref?: string | null
+          content?: string | null
+          draft_script?: string | null
+          quiz_questions?: string | null
+          ref_id?: string | null
+          slide_spec?: string | null
+          src?: string | null
+        }
+        Relationships: []
+      }
+      _bak_mod15_20260807: {
+        Row: {
+          backed_up_at: string | null
+          comar_section_ref: string | null
+          content: string | null
+          draft_script: string | null
+          quiz_questions: string | null
+          ref_id: string | null
+          slide_spec: string | null
+          src: string | null
+        }
+        Insert: {
+          backed_up_at?: string | null
+          comar_section_ref?: string | null
+          content?: string | null
+          draft_script?: string | null
+          quiz_questions?: string | null
+          ref_id?: string | null
+          slide_spec?: string | null
+          src?: string | null
+        }
+        Update: {
+          backed_up_at?: string | null
+          comar_section_ref?: string | null
+          content?: string | null
+          draft_script?: string | null
+          quiz_questions?: string | null
+          ref_id?: string | null
+          slide_spec?: string | null
+          src?: string | null
+        }
+        Relationships: []
+      }
+      _bak_mod16_20260807: {
+        Row: {
+          backed_up_at: string | null
+          comar_section_ref: string | null
+          content: string | null
+          draft_script: string | null
+          quiz_questions: string | null
+          ref_id: string | null
+          slide_spec: string | null
+          src: string | null
+        }
+        Insert: {
+          backed_up_at?: string | null
+          comar_section_ref?: string | null
+          content?: string | null
+          draft_script?: string | null
+          quiz_questions?: string | null
+          ref_id?: string | null
+          slide_spec?: string | null
+          src?: string | null
+        }
+        Update: {
+          backed_up_at?: string | null
+          comar_section_ref?: string | null
+          content?: string | null
+          draft_script?: string | null
+          quiz_questions?: string | null
+          ref_id?: string | null
+          slide_spec?: string | null
+          src?: string | null
+        }
+        Relationships: []
+      }
+      _bak_mod17_20260807: {
+        Row: {
+          backed_up_at: string | null
+          content: string | null
+          draft_script: string | null
+          module_id: string | null
+          needs_regeneration: boolean | null
+          quiz_questions: Json | null
+          render_status: string | null
+          review_status: string | null
+          slide_spec: Json | null
+          video_id: string | null
+        }
+        Insert: {
+          backed_up_at?: string | null
+          content?: string | null
+          draft_script?: string | null
+          module_id?: string | null
+          needs_regeneration?: boolean | null
+          quiz_questions?: Json | null
+          render_status?: string | null
+          review_status?: string | null
+          slide_spec?: Json | null
+          video_id?: string | null
+        }
+        Update: {
+          backed_up_at?: string | null
+          content?: string | null
+          draft_script?: string | null
+          module_id?: string | null
+          needs_regeneration?: boolean | null
+          quiz_questions?: Json | null
+          render_status?: string | null
+          review_status?: string | null
+          slide_spec?: Json | null
+          video_id?: string | null
+        }
+        Relationships: []
+      }
+      _bak_mod18_20260807: {
+        Row: {
+          backed_up_at: string | null
+          content: string | null
+          draft_script: string | null
+          module_id: string | null
+          needs_regeneration: boolean | null
+          quiz_questions: Json | null
+          render_status: string | null
+          review_status: string | null
+          slide_spec: Json | null
+          video_id: string | null
+        }
+        Insert: {
+          backed_up_at?: string | null
+          content?: string | null
+          draft_script?: string | null
+          module_id?: string | null
+          needs_regeneration?: boolean | null
+          quiz_questions?: Json | null
+          render_status?: string | null
+          review_status?: string | null
+          slide_spec?: Json | null
+          video_id?: string | null
+        }
+        Update: {
+          backed_up_at?: string | null
+          content?: string | null
+          draft_script?: string | null
+          module_id?: string | null
+          needs_regeneration?: boolean | null
+          quiz_questions?: Json | null
+          render_status?: string | null
+          review_status?: string | null
+          slide_spec?: Json | null
+          video_id?: string | null
+        }
+        Relationships: []
+      }
+      _bak_mod19_20260807: {
+        Row: {
+          backed_up_at: string | null
+          content: string | null
+          draft_script: string | null
+          module_id: string | null
+          needs_regeneration: boolean | null
+          quiz_questions: Json | null
+          render_status: string | null
+          review_status: string | null
+          slide_spec: Json | null
+          video_id: string | null
+        }
+        Insert: {
+          backed_up_at?: string | null
+          content?: string | null
+          draft_script?: string | null
+          module_id?: string | null
+          needs_regeneration?: boolean | null
+          quiz_questions?: Json | null
+          render_status?: string | null
+          review_status?: string | null
+          slide_spec?: Json | null
+          video_id?: string | null
+        }
+        Update: {
+          backed_up_at?: string | null
+          content?: string | null
+          draft_script?: string | null
+          module_id?: string | null
+          needs_regeneration?: boolean | null
+          quiz_questions?: Json | null
+          render_status?: string | null
+          review_status?: string | null
+          slide_spec?: Json | null
+          video_id?: string | null
+        }
+        Relationships: []
+      }
+      _bak_mod20_cm_20260807: {
+        Row: {
+          comar_compliance_status: string | null
+          comar_reference: string | null
+          comar_section_ref: string | null
+          comar_version_id: string | null
+          content: string | null
+          course_id: string | null
+          created_at: string | null
+          description: string | null
+          estimated_minutes: number | null
+          id: string | null
+          is_active: boolean | null
+          is_manager_only: boolean | null
+          last_comar_review_date: string | null
+          learning_objectives: Json | null
+          lessons: Json | null
+          module_number: number | null
+          quiz_questions: Json | null
+          stoplight_tier: string | null
+          title: string | null
+          unmapped_reason: string | null
+          updated_at: string | null
+          version: number | null
+          video_url: string | null
+        }
+        Insert: {
+          comar_compliance_status?: string | null
+          comar_reference?: string | null
+          comar_section_ref?: string | null
+          comar_version_id?: string | null
+          content?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          estimated_minutes?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          is_manager_only?: boolean | null
+          last_comar_review_date?: string | null
+          learning_objectives?: Json | null
+          lessons?: Json | null
+          module_number?: number | null
+          quiz_questions?: Json | null
+          stoplight_tier?: string | null
+          title?: string | null
+          unmapped_reason?: string | null
+          updated_at?: string | null
+          version?: number | null
+          video_url?: string | null
+        }
+        Update: {
+          comar_compliance_status?: string | null
+          comar_reference?: string | null
+          comar_section_ref?: string | null
+          comar_version_id?: string | null
+          content?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          estimated_minutes?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          is_manager_only?: boolean | null
+          last_comar_review_date?: string | null
+          learning_objectives?: Json | null
+          lessons?: Json | null
+          module_number?: number | null
+          quiz_questions?: Json | null
+          stoplight_tier?: string | null
+          title?: string | null
+          unmapped_reason?: string | null
+          updated_at?: string | null
+          version?: number | null
+          video_url?: string | null
+        }
+        Relationships: []
+      }
+      _bak_mod20_va_20260807: {
+        Row: {
+          access_level: string | null
+          asset_key: string | null
+          bucket_id: string | null
+          course_id: string | null
+          created_at: string | null
+          descript_project_id: string | null
+          description: string | null
+          draft_audio_duration_seconds: number | null
+          draft_audio_generated_at: string | null
+          draft_audio_provider: string | null
+          draft_audio_url: string | null
+          draft_generated_at: string | null
+          draft_script: string | null
+          draft_video_url: string | null
+          duration_seconds: number | null
+          fallback_bucket_id: string | null
+          fallback_storage_path: string | null
+          file_size_mb: number | null
+          id: string | null
+          is_active: boolean | null
+          last_regenerated_at: string | null
+          legacy_bucket_id: string | null
+          legacy_storage_path: string | null
+          migrated_at: string | null
+          migration_error: string | null
+          migration_status: string | null
+          mime_type: string | null
+          module_id: string | null
+          needs_regeneration: boolean | null
+          public_url: string | null
+          r2_key: string | null
+          regeneration_notified_at: string | null
+          regeneration_reason: string | null
+          render_dispatched_at: string | null
+          render_error: string | null
+          render_job_id: string | null
+          render_provider: string | null
+          render_status: string | null
+          review_status: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          slide_outline: Json | null
+          slide_spec: Json | null
+          storage_path: string | null
+          storage_provider: string | null
+          thumbnail_url: string | null
+          title: string | null
+          unmapped_reason: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          access_level?: string | null
+          asset_key?: string | null
+          bucket_id?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          descript_project_id?: string | null
+          description?: string | null
+          draft_audio_duration_seconds?: number | null
+          draft_audio_generated_at?: string | null
+          draft_audio_provider?: string | null
+          draft_audio_url?: string | null
+          draft_generated_at?: string | null
+          draft_script?: string | null
+          draft_video_url?: string | null
+          duration_seconds?: number | null
+          fallback_bucket_id?: string | null
+          fallback_storage_path?: string | null
+          file_size_mb?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          last_regenerated_at?: string | null
+          legacy_bucket_id?: string | null
+          legacy_storage_path?: string | null
+          migrated_at?: string | null
+          migration_error?: string | null
+          migration_status?: string | null
+          mime_type?: string | null
+          module_id?: string | null
+          needs_regeneration?: boolean | null
+          public_url?: string | null
+          r2_key?: string | null
+          regeneration_notified_at?: string | null
+          regeneration_reason?: string | null
+          render_dispatched_at?: string | null
+          render_error?: string | null
+          render_job_id?: string | null
+          render_provider?: string | null
+          render_status?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          slide_outline?: Json | null
+          slide_spec?: Json | null
+          storage_path?: string | null
+          storage_provider?: string | null
+          thumbnail_url?: string | null
+          title?: string | null
+          unmapped_reason?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          access_level?: string | null
+          asset_key?: string | null
+          bucket_id?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          descript_project_id?: string | null
+          description?: string | null
+          draft_audio_duration_seconds?: number | null
+          draft_audio_generated_at?: string | null
+          draft_audio_provider?: string | null
+          draft_audio_url?: string | null
+          draft_generated_at?: string | null
+          draft_script?: string | null
+          draft_video_url?: string | null
+          duration_seconds?: number | null
+          fallback_bucket_id?: string | null
+          fallback_storage_path?: string | null
+          file_size_mb?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          last_regenerated_at?: string | null
+          legacy_bucket_id?: string | null
+          legacy_storage_path?: string | null
+          migrated_at?: string | null
+          migration_error?: string | null
+          migration_status?: string | null
+          mime_type?: string | null
+          module_id?: string | null
+          needs_regeneration?: boolean | null
+          public_url?: string | null
+          r2_key?: string | null
+          regeneration_notified_at?: string | null
+          regeneration_reason?: string | null
+          render_dispatched_at?: string | null
+          render_error?: string | null
+          render_job_id?: string | null
+          render_provider?: string | null
+          render_status?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          slide_outline?: Json | null
+          slide_spec?: Json | null
+          storage_path?: string | null
+          storage_provider?: string | null
+          thumbnail_url?: string | null
+          title?: string | null
+          unmapped_reason?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _bak_mod21_cm_20260807: {
+        Row: {
+          comar_compliance_status: string | null
+          comar_reference: string | null
+          comar_section_ref: string | null
+          comar_version_id: string | null
+          content: string | null
+          course_id: string | null
+          created_at: string | null
+          description: string | null
+          estimated_minutes: number | null
+          id: string | null
+          is_active: boolean | null
+          is_manager_only: boolean | null
+          last_comar_review_date: string | null
+          learning_objectives: Json | null
+          lessons: Json | null
+          module_number: number | null
+          quiz_questions: Json | null
+          stoplight_tier: string | null
+          title: string | null
+          unmapped_reason: string | null
+          updated_at: string | null
+          version: number | null
+          video_url: string | null
+        }
+        Insert: {
+          comar_compliance_status?: string | null
+          comar_reference?: string | null
+          comar_section_ref?: string | null
+          comar_version_id?: string | null
+          content?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          estimated_minutes?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          is_manager_only?: boolean | null
+          last_comar_review_date?: string | null
+          learning_objectives?: Json | null
+          lessons?: Json | null
+          module_number?: number | null
+          quiz_questions?: Json | null
+          stoplight_tier?: string | null
+          title?: string | null
+          unmapped_reason?: string | null
+          updated_at?: string | null
+          version?: number | null
+          video_url?: string | null
+        }
+        Update: {
+          comar_compliance_status?: string | null
+          comar_reference?: string | null
+          comar_section_ref?: string | null
+          comar_version_id?: string | null
+          content?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          estimated_minutes?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          is_manager_only?: boolean | null
+          last_comar_review_date?: string | null
+          learning_objectives?: Json | null
+          lessons?: Json | null
+          module_number?: number | null
+          quiz_questions?: Json | null
+          stoplight_tier?: string | null
+          title?: string | null
+          unmapped_reason?: string | null
+          updated_at?: string | null
+          version?: number | null
+          video_url?: string | null
+        }
+        Relationships: []
+      }
+      _bak_mod21_va_20260807: {
+        Row: {
+          access_level: string | null
+          asset_key: string | null
+          bucket_id: string | null
+          course_id: string | null
+          created_at: string | null
+          descript_project_id: string | null
+          description: string | null
+          draft_audio_duration_seconds: number | null
+          draft_audio_generated_at: string | null
+          draft_audio_provider: string | null
+          draft_audio_url: string | null
+          draft_generated_at: string | null
+          draft_script: string | null
+          draft_video_url: string | null
+          duration_seconds: number | null
+          fallback_bucket_id: string | null
+          fallback_storage_path: string | null
+          file_size_mb: number | null
+          id: string | null
+          is_active: boolean | null
+          last_regenerated_at: string | null
+          legacy_bucket_id: string | null
+          legacy_storage_path: string | null
+          migrated_at: string | null
+          migration_error: string | null
+          migration_status: string | null
+          mime_type: string | null
+          module_id: string | null
+          needs_regeneration: boolean | null
+          public_url: string | null
+          r2_key: string | null
+          regeneration_notified_at: string | null
+          regeneration_reason: string | null
+          render_dispatched_at: string | null
+          render_error: string | null
+          render_job_id: string | null
+          render_provider: string | null
+          render_status: string | null
+          review_status: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          slide_outline: Json | null
+          slide_spec: Json | null
+          storage_path: string | null
+          storage_provider: string | null
+          thumbnail_url: string | null
+          title: string | null
+          unmapped_reason: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          access_level?: string | null
+          asset_key?: string | null
+          bucket_id?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          descript_project_id?: string | null
+          description?: string | null
+          draft_audio_duration_seconds?: number | null
+          draft_audio_generated_at?: string | null
+          draft_audio_provider?: string | null
+          draft_audio_url?: string | null
+          draft_generated_at?: string | null
+          draft_script?: string | null
+          draft_video_url?: string | null
+          duration_seconds?: number | null
+          fallback_bucket_id?: string | null
+          fallback_storage_path?: string | null
+          file_size_mb?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          last_regenerated_at?: string | null
+          legacy_bucket_id?: string | null
+          legacy_storage_path?: string | null
+          migrated_at?: string | null
+          migration_error?: string | null
+          migration_status?: string | null
+          mime_type?: string | null
+          module_id?: string | null
+          needs_regeneration?: boolean | null
+          public_url?: string | null
+          r2_key?: string | null
+          regeneration_notified_at?: string | null
+          regeneration_reason?: string | null
+          render_dispatched_at?: string | null
+          render_error?: string | null
+          render_job_id?: string | null
+          render_provider?: string | null
+          render_status?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          slide_outline?: Json | null
+          slide_spec?: Json | null
+          storage_path?: string | null
+          storage_provider?: string | null
+          thumbnail_url?: string | null
+          title?: string | null
+          unmapped_reason?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          access_level?: string | null
+          asset_key?: string | null
+          bucket_id?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          descript_project_id?: string | null
+          description?: string | null
+          draft_audio_duration_seconds?: number | null
+          draft_audio_generated_at?: string | null
+          draft_audio_provider?: string | null
+          draft_audio_url?: string | null
+          draft_generated_at?: string | null
+          draft_script?: string | null
+          draft_video_url?: string | null
+          duration_seconds?: number | null
+          fallback_bucket_id?: string | null
+          fallback_storage_path?: string | null
+          file_size_mb?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          last_regenerated_at?: string | null
+          legacy_bucket_id?: string | null
+          legacy_storage_path?: string | null
+          migrated_at?: string | null
+          migration_error?: string | null
+          migration_status?: string | null
+          mime_type?: string | null
+          module_id?: string | null
+          needs_regeneration?: boolean | null
+          public_url?: string | null
+          r2_key?: string | null
+          regeneration_notified_at?: string | null
+          regeneration_reason?: string | null
+          render_dispatched_at?: string | null
+          render_error?: string | null
+          render_job_id?: string | null
+          render_provider?: string | null
+          render_status?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          slide_outline?: Json | null
+          slide_spec?: Json | null
+          storage_path?: string | null
+          storage_provider?: string | null
+          thumbnail_url?: string | null
+          title?: string | null
+          unmapped_reason?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _bak_mod22_20260807: {
+        Row: {
+          comar_compliance_status: string | null
+          comar_reference: string | null
+          comar_section_ref: string | null
+          comar_version_id: string | null
+          content: string | null
+          course_id: string | null
+          created_at: string | null
+          description: string | null
+          estimated_minutes: number | null
+          id: string | null
+          is_active: boolean | null
+          is_manager_only: boolean | null
+          last_comar_review_date: string | null
+          learning_objectives: Json | null
+          lessons: Json | null
+          module_number: number | null
+          quiz_questions: Json | null
+          stoplight_tier: string | null
+          title: string | null
+          unmapped_reason: string | null
+          updated_at: string | null
+          version: number | null
+          video_url: string | null
+        }
+        Insert: {
+          comar_compliance_status?: string | null
+          comar_reference?: string | null
+          comar_section_ref?: string | null
+          comar_version_id?: string | null
+          content?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          estimated_minutes?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          is_manager_only?: boolean | null
+          last_comar_review_date?: string | null
+          learning_objectives?: Json | null
+          lessons?: Json | null
+          module_number?: number | null
+          quiz_questions?: Json | null
+          stoplight_tier?: string | null
+          title?: string | null
+          unmapped_reason?: string | null
+          updated_at?: string | null
+          version?: number | null
+          video_url?: string | null
+        }
+        Update: {
+          comar_compliance_status?: string | null
+          comar_reference?: string | null
+          comar_section_ref?: string | null
+          comar_version_id?: string | null
+          content?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          estimated_minutes?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          is_manager_only?: boolean | null
+          last_comar_review_date?: string | null
+          learning_objectives?: Json | null
+          lessons?: Json | null
+          module_number?: number | null
+          quiz_questions?: Json | null
+          stoplight_tier?: string | null
+          title?: string | null
+          unmapped_reason?: string | null
+          updated_at?: string | null
+          version?: number | null
+          video_url?: string | null
+        }
+        Relationships: []
+      }
+      _bak_mod22_video_20260807: {
+        Row: {
+          access_level: string | null
+          asset_key: string | null
+          bucket_id: string | null
+          course_id: string | null
+          created_at: string | null
+          descript_project_id: string | null
+          description: string | null
+          draft_audio_duration_seconds: number | null
+          draft_audio_generated_at: string | null
+          draft_audio_provider: string | null
+          draft_audio_url: string | null
+          draft_generated_at: string | null
+          draft_script: string | null
+          draft_video_url: string | null
+          duration_seconds: number | null
+          fallback_bucket_id: string | null
+          fallback_storage_path: string | null
+          file_size_mb: number | null
+          id: string | null
+          is_active: boolean | null
+          last_regenerated_at: string | null
+          legacy_bucket_id: string | null
+          legacy_storage_path: string | null
+          migrated_at: string | null
+          migration_error: string | null
+          migration_status: string | null
+          mime_type: string | null
+          module_id: string | null
+          needs_regeneration: boolean | null
+          public_url: string | null
+          r2_key: string | null
+          regeneration_notified_at: string | null
+          regeneration_reason: string | null
+          render_dispatched_at: string | null
+          render_error: string | null
+          render_job_id: string | null
+          render_provider: string | null
+          render_status: string | null
+          review_status: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          slide_outline: Json | null
+          slide_spec: Json | null
+          storage_path: string | null
+          storage_provider: string | null
+          thumbnail_url: string | null
+          title: string | null
+          unmapped_reason: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          access_level?: string | null
+          asset_key?: string | null
+          bucket_id?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          descript_project_id?: string | null
+          description?: string | null
+          draft_audio_duration_seconds?: number | null
+          draft_audio_generated_at?: string | null
+          draft_audio_provider?: string | null
+          draft_audio_url?: string | null
+          draft_generated_at?: string | null
+          draft_script?: string | null
+          draft_video_url?: string | null
+          duration_seconds?: number | null
+          fallback_bucket_id?: string | null
+          fallback_storage_path?: string | null
+          file_size_mb?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          last_regenerated_at?: string | null
+          legacy_bucket_id?: string | null
+          legacy_storage_path?: string | null
+          migrated_at?: string | null
+          migration_error?: string | null
+          migration_status?: string | null
+          mime_type?: string | null
+          module_id?: string | null
+          needs_regeneration?: boolean | null
+          public_url?: string | null
+          r2_key?: string | null
+          regeneration_notified_at?: string | null
+          regeneration_reason?: string | null
+          render_dispatched_at?: string | null
+          render_error?: string | null
+          render_job_id?: string | null
+          render_provider?: string | null
+          render_status?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          slide_outline?: Json | null
+          slide_spec?: Json | null
+          storage_path?: string | null
+          storage_provider?: string | null
+          thumbnail_url?: string | null
+          title?: string | null
+          unmapped_reason?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          access_level?: string | null
+          asset_key?: string | null
+          bucket_id?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          descript_project_id?: string | null
+          description?: string | null
+          draft_audio_duration_seconds?: number | null
+          draft_audio_generated_at?: string | null
+          draft_audio_provider?: string | null
+          draft_audio_url?: string | null
+          draft_generated_at?: string | null
+          draft_script?: string | null
+          draft_video_url?: string | null
+          duration_seconds?: number | null
+          fallback_bucket_id?: string | null
+          fallback_storage_path?: string | null
+          file_size_mb?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          last_regenerated_at?: string | null
+          legacy_bucket_id?: string | null
+          legacy_storage_path?: string | null
+          migrated_at?: string | null
+          migration_error?: string | null
+          migration_status?: string | null
+          mime_type?: string | null
+          module_id?: string | null
+          needs_regeneration?: boolean | null
+          public_url?: string | null
+          r2_key?: string | null
+          regeneration_notified_at?: string | null
+          regeneration_reason?: string | null
+          render_dispatched_at?: string | null
+          render_error?: string | null
+          render_job_id?: string | null
+          render_provider?: string | null
+          render_status?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          slide_outline?: Json | null
+          slide_spec?: Json | null
+          storage_path?: string | null
+          storage_provider?: string | null
+          thumbnail_url?: string | null
+          title?: string | null
+          unmapped_reason?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _bak_mod23_20260807: {
+        Row: {
+          comar_compliance_status: string | null
+          comar_reference: string | null
+          comar_section_ref: string | null
+          comar_version_id: string | null
+          content: string | null
+          course_id: string | null
+          created_at: string | null
+          description: string | null
+          estimated_minutes: number | null
+          id: string | null
+          is_active: boolean | null
+          is_manager_only: boolean | null
+          last_comar_review_date: string | null
+          learning_objectives: Json | null
+          lessons: Json | null
+          module_number: number | null
+          quiz_questions: Json | null
+          stoplight_tier: string | null
+          title: string | null
+          unmapped_reason: string | null
+          updated_at: string | null
+          version: number | null
+          video_url: string | null
+        }
+        Insert: {
+          comar_compliance_status?: string | null
+          comar_reference?: string | null
+          comar_section_ref?: string | null
+          comar_version_id?: string | null
+          content?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          estimated_minutes?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          is_manager_only?: boolean | null
+          last_comar_review_date?: string | null
+          learning_objectives?: Json | null
+          lessons?: Json | null
+          module_number?: number | null
+          quiz_questions?: Json | null
+          stoplight_tier?: string | null
+          title?: string | null
+          unmapped_reason?: string | null
+          updated_at?: string | null
+          version?: number | null
+          video_url?: string | null
+        }
+        Update: {
+          comar_compliance_status?: string | null
+          comar_reference?: string | null
+          comar_section_ref?: string | null
+          comar_version_id?: string | null
+          content?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          estimated_minutes?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          is_manager_only?: boolean | null
+          last_comar_review_date?: string | null
+          learning_objectives?: Json | null
+          lessons?: Json | null
+          module_number?: number | null
+          quiz_questions?: Json | null
+          stoplight_tier?: string | null
+          title?: string | null
+          unmapped_reason?: string | null
+          updated_at?: string | null
+          version?: number | null
+          video_url?: string | null
+        }
+        Relationships: []
+      }
+      _bak_mod23_video_20260807: {
+        Row: {
+          access_level: string | null
+          asset_key: string | null
+          bucket_id: string | null
+          course_id: string | null
+          created_at: string | null
+          descript_project_id: string | null
+          description: string | null
+          draft_audio_duration_seconds: number | null
+          draft_audio_generated_at: string | null
+          draft_audio_provider: string | null
+          draft_audio_url: string | null
+          draft_generated_at: string | null
+          draft_script: string | null
+          draft_video_url: string | null
+          duration_seconds: number | null
+          fallback_bucket_id: string | null
+          fallback_storage_path: string | null
+          file_size_mb: number | null
+          id: string | null
+          is_active: boolean | null
+          last_regenerated_at: string | null
+          legacy_bucket_id: string | null
+          legacy_storage_path: string | null
+          migrated_at: string | null
+          migration_error: string | null
+          migration_status: string | null
+          mime_type: string | null
+          module_id: string | null
+          needs_regeneration: boolean | null
+          public_url: string | null
+          r2_key: string | null
+          regeneration_notified_at: string | null
+          regeneration_reason: string | null
+          render_dispatched_at: string | null
+          render_error: string | null
+          render_job_id: string | null
+          render_provider: string | null
+          render_status: string | null
+          review_status: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          slide_outline: Json | null
+          slide_spec: Json | null
+          storage_path: string | null
+          storage_provider: string | null
+          thumbnail_url: string | null
+          title: string | null
+          unmapped_reason: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          access_level?: string | null
+          asset_key?: string | null
+          bucket_id?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          descript_project_id?: string | null
+          description?: string | null
+          draft_audio_duration_seconds?: number | null
+          draft_audio_generated_at?: string | null
+          draft_audio_provider?: string | null
+          draft_audio_url?: string | null
+          draft_generated_at?: string | null
+          draft_script?: string | null
+          draft_video_url?: string | null
+          duration_seconds?: number | null
+          fallback_bucket_id?: string | null
+          fallback_storage_path?: string | null
+          file_size_mb?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          last_regenerated_at?: string | null
+          legacy_bucket_id?: string | null
+          legacy_storage_path?: string | null
+          migrated_at?: string | null
+          migration_error?: string | null
+          migration_status?: string | null
+          mime_type?: string | null
+          module_id?: string | null
+          needs_regeneration?: boolean | null
+          public_url?: string | null
+          r2_key?: string | null
+          regeneration_notified_at?: string | null
+          regeneration_reason?: string | null
+          render_dispatched_at?: string | null
+          render_error?: string | null
+          render_job_id?: string | null
+          render_provider?: string | null
+          render_status?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          slide_outline?: Json | null
+          slide_spec?: Json | null
+          storage_path?: string | null
+          storage_provider?: string | null
+          thumbnail_url?: string | null
+          title?: string | null
+          unmapped_reason?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          access_level?: string | null
+          asset_key?: string | null
+          bucket_id?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          descript_project_id?: string | null
+          description?: string | null
+          draft_audio_duration_seconds?: number | null
+          draft_audio_generated_at?: string | null
+          draft_audio_provider?: string | null
+          draft_audio_url?: string | null
+          draft_generated_at?: string | null
+          draft_script?: string | null
+          draft_video_url?: string | null
+          duration_seconds?: number | null
+          fallback_bucket_id?: string | null
+          fallback_storage_path?: string | null
+          file_size_mb?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          last_regenerated_at?: string | null
+          legacy_bucket_id?: string | null
+          legacy_storage_path?: string | null
+          migrated_at?: string | null
+          migration_error?: string | null
+          migration_status?: string | null
+          mime_type?: string | null
+          module_id?: string | null
+          needs_regeneration?: boolean | null
+          public_url?: string | null
+          r2_key?: string | null
+          regeneration_notified_at?: string | null
+          regeneration_reason?: string | null
+          render_dispatched_at?: string | null
+          render_error?: string | null
+          render_job_id?: string | null
+          render_provider?: string | null
+          render_status?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          slide_outline?: Json | null
+          slide_spec?: Json | null
+          storage_path?: string | null
+          storage_provider?: string | null
+          thumbnail_url?: string | null
+          title?: string | null
+          unmapped_reason?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _bak_paidcert_render_20260809: {
+        Row: {
+          asset_key: string | null
+          id: string | null
+          needs_regeneration: boolean | null
+          render_status: string | null
+          review_status: string | null
+          reviewed_at: string | null
+          storage_provider: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          asset_key?: string | null
+          id?: string | null
+          needs_regeneration?: boolean | null
+          render_status?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          storage_provider?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          asset_key?: string | null
+          id?: string | null
+          needs_regeneration?: boolean | null
+          render_status?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          storage_provider?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _bak_welcomeintro_storagepath_20260809: {
+        Row: {
+          asset_key: string | null
+          id: string | null
+          old_provider: string | null
+          old_storage_path: string | null
+        }
+        Insert: {
+          asset_key?: string | null
+          id?: string | null
+          old_provider?: string | null
+          old_storage_path?: string | null
+        }
+        Update: {
+          asset_key?: string | null
+          id?: string | null
+          old_provider?: string | null
+          old_storage_path?: string | null
+        }
+        Relationships: []
+      }
+      _bak_welcomeintro_storagepath_v2_20260809: {
+        Row: {
+          asset_key: string | null
+          id: string | null
+          old_provider: string | null
+          old_storage_path: string | null
+        }
+        Insert: {
+          asset_key?: string | null
+          id?: string | null
+          old_provider?: string | null
+          old_storage_path?: string | null
+        }
+        Update: {
+          asset_key?: string | null
+          id?: string | null
+          old_provider?: string | null
+          old_storage_path?: string | null
+        }
+        Relationships: []
+      }
       _cleanup_bak_consumer_vurl_20260807: {
         Row: {
           backed_up_at: string | null
@@ -98,6 +2252,51 @@ export type Database = {
           asset_key?: string | null
           id?: string | null
           public_url?: string | null
+        }
+        Relationships: []
+      }
+      _content_bak_mod01_20260807: {
+        Row: {
+          quiz: string | null
+          ref: string | null
+          src: string | null
+          txt: string | null
+        }
+        Insert: {
+          quiz?: string | null
+          ref?: string | null
+          src?: string | null
+          txt?: string | null
+        }
+        Update: {
+          quiz?: string | null
+          ref?: string | null
+          src?: string | null
+          txt?: string | null
+        }
+        Relationships: []
+      }
+      _slidespec_bak_mod01_20260807: {
+        Row: {
+          id: string | null
+          render_status: string | null
+          review_status: string | null
+          reviewed_at: string | null
+          slide_spec: Json | null
+        }
+        Insert: {
+          id?: string | null
+          render_status?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          slide_spec?: Json | null
+        }
+        Update: {
+          id?: string | null
+          render_status?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          slide_spec?: Json | null
         }
         Relationships: []
       }
