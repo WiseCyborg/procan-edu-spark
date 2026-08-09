@@ -1,7 +1,8 @@
 import React from 'react';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { SecureVideoPlayer } from '@/components/video/SecureVideoPlayer';
+import { useSignedVideoUrl } from '@/hooks/useSignedVideoUrl';
 import welcomePoster from '@/assets/welcome-video-poster.jpg';
 
 interface WelcomeVideoSectionProps {
@@ -19,7 +20,7 @@ interface WelcomeVideoSectionProps {
   assetKey?: string;
 }
 
-/** Convert any of the supported vimeo URL forms into a player.vimeo.com embed URL. */
+/** Convert any of the supported Vimeo URL forms into an autoplaying embed URL. */
 function toVimeoEmbedUrl(url: string): string | null {
   try {
     const u = new URL(url);
@@ -27,6 +28,10 @@ function toVimeoEmbedUrl(url: string): string | null {
 
     // Already an embed URL — return as-is with our params merged.
     if (u.hostname === 'player.vimeo.com') {
+      u.searchParams.set('autoplay', '1');
+      u.searchParams.set('muted', '1');
+      u.searchParams.set('controls', '1');
+      u.searchParams.set('playsinline', '1');
       u.searchParams.set('badge', '0');
       u.searchParams.set('autopause', '0');
       u.searchParams.set('player_id', '0');
@@ -41,6 +46,10 @@ function toVimeoEmbedUrl(url: string): string | null {
     const hash = parts[1] ?? u.searchParams.get('h') ?? '';
     const qs = new URLSearchParams();
     if (hash) qs.set('h', hash);
+    qs.set('autoplay', '1');
+    qs.set('muted', '1');
+    qs.set('controls', '1');
+    qs.set('playsinline', '1');
     qs.set('badge', '0');
     qs.set('autopause', '0');
     qs.set('player_id', '0');
@@ -58,6 +67,10 @@ export const WelcomeVideoSection: React.FC<WelcomeVideoSectionProps> = ({
 }) => {
   const isMobile = useIsMobile();
   const embedUrl = videoUrl ? toVimeoEmbedUrl(videoUrl) : null;
+  const { data, isLoading, isError, refetch } = useSignedVideoUrl(assetKey, !embedUrl);
+  const assetVimeoUrl = data?.provider === 'vimeo' && data.vimeo_id
+    ? toVimeoEmbedUrl(`https://vimeo.com/${data.vimeo_id}${data.vimeo_hash ? `/${data.vimeo_hash}` : ''}`)
+    : null;
 
   return (
     <div className={`mx-auto ${isMobile ? 'max-w-md' : 'max-w-4xl'} ${className}`}>
@@ -74,10 +87,10 @@ export const WelcomeVideoSection: React.FC<WelcomeVideoSectionProps> = ({
 
       <Card className={`overflow-hidden shadow-2xl border-white/20 bg-black/30 backdrop-blur-sm ${isMobile ? 'border rounded-lg' : 'border-2'}`}>
         <CardContent className="p-0">
-          {embedUrl ? (
+          {embedUrl || assetVimeoUrl ? (
             <div className="relative w-full aspect-video bg-black">
               <iframe
-                src={embedUrl}
+                src={embedUrl || assetVimeoUrl || undefined}
                 className="absolute inset-0 w-full h-full"
                 frameBorder={0}
                 allow="autoplay; fullscreen; picture-in-picture"
@@ -85,8 +98,30 @@ export const WelcomeVideoSection: React.FC<WelcomeVideoSectionProps> = ({
                 title="Welcome video"
               />
             </div>
+          ) : isLoading ? (
+            <div className="relative w-full aspect-video bg-black flex items-center justify-center text-white/80">
+              Loading welcome video…
+            </div>
+          ) : isError || !data?.success || !data.url ? (
+            <div className="relative w-full aspect-video bg-black flex flex-col items-center justify-center gap-3 text-white/80">
+              <p>Something went wrong loading this video.</p>
+              <Button size="sm" variant="secondary" onClick={() => refetch()}>
+                Try again
+              </Button>
+            </div>
           ) : (
-            <SecureVideoPlayer assetKey={assetKey} poster={welcomePoster} />
+            <div className="relative w-full aspect-video bg-black">
+              <video
+                src={data.url}
+                poster={welcomePoster}
+                className="absolute inset-0 w-full h-full"
+                autoPlay
+                muted
+                controls
+                playsInline
+                preload="metadata"
+              />
+            </div>
           )}
         </CardContent>
       </Card>
