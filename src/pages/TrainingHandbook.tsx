@@ -265,7 +265,7 @@ const TrainingHandbook = () => {
                  </p>
                  <div className="rounded-lg overflow-hidden bg-muted">
                    <div className="aspect-video">
-                     <SecureVideoPlayer assetKey="module_09" lazy={false} />
+                     <SecureVideoPlayer assetKey="module_08" lazy={false} />
                    </div>
                    <p className="text-sm text-muted-foreground text-center py-3">
                      <em>Video: Identifying signs of intoxication and substance use disorders.</em>
