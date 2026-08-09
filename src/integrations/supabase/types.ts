@@ -5775,6 +5775,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          active_organization_id: string | null
           address: string | null
           city: string | null
           created_at: string
@@ -5811,6 +5812,7 @@ export type Database = {
           zip_code: string | null
         }
         Insert: {
+          active_organization_id?: string | null
           address?: string | null
           city?: string | null
           created_at?: string
@@ -5847,6 +5849,7 @@ export type Database = {
           zip_code?: string | null
         }
         Update: {
+          active_organization_id?: string | null
           address?: string | null
           city?: string | null
           created_at?: string
