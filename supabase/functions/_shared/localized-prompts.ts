@@ -14,9 +14,9 @@
  * weakens the anti-leak signal (the model recognises the English directive as
  * higher-priority). This is intentional.
  */
-export type ChatLanguage = "en" | "es" | "zh";
+export type ChatLanguage = "en" | "es" | "zh" | "fr" | "ko";
 
-const SUPPORTED: ChatLanguage[] = ["en", "es", "zh"];
+const SUPPORTED: ChatLanguage[] = ["en", "es", "zh", "fr", "ko"];
 
 export function normalizeChatLanguage(input?: string | null): ChatLanguage {
   if (!input) return "en";
