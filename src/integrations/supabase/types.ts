@@ -12742,6 +12742,10 @@ export type Database = {
         Returns: number
       }
       count_unmapped_modules: { Args: never; Returns: Json }
+      course_completion_already_passed: {
+        Args: { _id: string }
+        Returns: boolean
+      }
       create_initial_admin: { Args: never; Returns: string }
       create_initial_seats_for_organization: {
         Args: { org_id: string; purchased_by_id?: string; quantity?: number }
