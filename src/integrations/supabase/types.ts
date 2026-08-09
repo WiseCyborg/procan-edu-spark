@@ -10502,6 +10502,7 @@ export type Database = {
         Args: { p_performed_by?: string; p_reason?: string; p_user_id: string }
         Returns: Json
       }
+      backfill_draft_scripts_for_flagged: { Args: never; Returns: number }
       bulk_verify_users: {
         Args: { admin_notes?: string; target_user_ids: string[] }
         Returns: Json
@@ -10656,6 +10657,10 @@ export type Database = {
       }
       generate_dispensary_key: { Args: never; Returns: string }
       generate_dispensary_number: { Args: never; Returns: string }
+      generate_draft_script_for_asset: {
+        Args: { p_asset_id: string }
+        Returns: Json
+      }
       generate_invitation_token: { Args: never; Returns: string }
       generate_verification_code: {
         Args: { p_prefix: string }
