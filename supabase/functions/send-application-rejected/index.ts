@@ -33,7 +33,7 @@ serve(async (req) => {
       ContactPerson: application.contact_person,
       OrganizationName: application.organization_name,
       RejectionReason: rejection_reason || "Application did not meet program requirements",
-      ReapplyURL: "https://www.procannedu.com/apply",
+      ReapplyURL: "https://www.procannedu.com/org/apply",
     });
 
     const emailService = new EmailService();

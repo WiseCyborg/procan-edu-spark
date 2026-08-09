@@ -181,119 +181,119 @@ const TrainingHandbook = () => {
                 </p>
                 <div className="rounded-lg overflow-hidden bg-muted">
                   <div className="aspect-video">
-                    <SecureVideoPlayer assetKey="section_1_laws" lazy={false} />
-                  </div>
-                  <p className="text-sm text-muted-foreground text-center py-3">
-                    <em>Video: Overview of Federal and Maryland cannabis laws for dispensary agents.</em>
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </section>
+                     <SecureVideoPlayer assetKey="module_01" lazy={false} />
+                   </div>
+                   <p className="text-sm text-muted-foreground text-center py-3">
+                     <em>Video: Overview of Federal and Maryland cannabis laws for dispensary agents.</em>
+                   </p>
+                 </div>
+               </CardContent>
+             </Card>
+           </section>
 
-          <Separator />
+           <Separator />
 
-          {/* Section 2 */}
-          <section id="section2" className="scroll-mt-32">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-3 mb-2">
-                  <BookOpen className="w-6 h-6 text-primary" />
-                  <Badge>Section 2</Badge>
-                </div>
-                <CardTitle className="text-3xl">Operational and Safety Procedures</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <p className="text-lg leading-relaxed text-muted-foreground">
-                  Day-to-day operations require mastery of standard procedures and safety protocols, as mandated by COMAR 14.17.05.A(2)—(6). This section teaches you ProCann's standard operating procedures (SOPs) for dispensary management, alongside techniques to detect and prevent cannabis diversion. You'll learn security measures to safeguard inventory and respond to emergencies like medical incidents, fires, chemical spills, and threatening events—such as armed robberies or burglaries. Our training emphasizes practical skills, from locking down a facility during an invasion to handling a customer in distress, ensuring safety for you and your workplace.
-                </p>
-                <div className="rounded-lg overflow-hidden bg-muted">
-                  <div className="aspect-video">
-                    <SecureVideoPlayer assetKey="section_2_sops" lazy={false} />
-                  </div>
-                  <p className="text-sm text-muted-foreground text-center py-3">
-                    <em>Video: Demonstration of security procedures and emergency responses.</em>
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </section>
+           {/* Section 2 */}
+           <section id="section2" className="scroll-mt-32">
+             <Card>
+               <CardHeader>
+                 <div className="flex items-center gap-3 mb-2">
+                   <BookOpen className="w-6 h-6 text-primary" />
+                   <Badge>Section 2</Badge>
+                 </div>
+                 <CardTitle className="text-3xl">Operational and Safety Procedures</CardTitle>
+               </CardHeader>
+               <CardContent className="space-y-6">
+                 <p className="text-lg leading-relaxed text-muted-foreground">
+                   Day-to-day operations require mastery of standard procedures and safety protocols, as mandated by COMAR 14.17.05.A(2)—(6). This section teaches you ProCann's standard operating procedures (SOPs) for dispensary management, alongside techniques to detect and prevent cannabis diversion. You'll learn security measures to safeguard inventory and respond to emergencies like medical incidents, fires, chemical spills, and threatening events—such as armed robberies or burglaries. Our training emphasizes practical skills, from locking down a facility during an invasion to handling a customer in distress, ensuring safety for you and your workplace.
+                 </p>
+                 <div className="rounded-lg overflow-hidden bg-muted">
+                   <div className="aspect-video">
+                     <SecureVideoPlayer assetKey="module_15" lazy={false} />
+                   </div>
+                   <p className="text-sm text-muted-foreground text-center py-3">
+                     <em>Video: Demonstration of security procedures and emergency responses.</em>
+                   </p>
+                 </div>
+               </CardContent>
+             </Card>
+           </section>
 
-          <Separator />
+           <Separator />
 
-          {/* Section 3 */}
-          <section id="section3" className="scroll-mt-32">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-3 mb-2">
-                  <FileText className="w-6 h-6 text-primary" />
-                  <Badge>Section 3</Badge>
-                </div>
-                <CardTitle className="text-3xl">Cannabis Pharmacology and Therapeutics</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <p className="text-lg leading-relaxed text-muted-foreground">
-                  ProCann's expertise shines in this annual training requirement (COMAR 14.17.15.05, Dispensary Agent Topics 2—5). You'll explore the pharmacology of cannabis, focusing on active components like THC and CBD, and their potential therapeutic benefits and adverse effects. This section covers dosage forms—edibles, tinctures, topicals—and their pharmacodynamic impacts, alongside potential drug interactions and consumer safety concerns. Our goal is to make you a knowledgeable resource for customers, able to explain how cannabis interacts with the body and address common questions about its use.
-                </p>
-                <div className="rounded-lg overflow-hidden bg-muted">
-                  <div className="aspect-video">
-                    <SecureVideoPlayer assetKey="section_3_inventory" lazy={false} />
-                  </div>
-                  <p className="text-sm text-muted-foreground text-center py-3">
-                    <em>Video: Understanding cannabis active components and dosage forms.</em>
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </section>
+           {/* Section 3 */}
+           <section id="section3" className="scroll-mt-32">
+             <Card>
+               <CardHeader>
+                 <div className="flex items-center gap-3 mb-2">
+                   <FileText className="w-6 h-6 text-primary" />
+                   <Badge>Section 3</Badge>
+                 </div>
+                 <CardTitle className="text-3xl">Cannabis Pharmacology and Therapeutics</CardTitle>
+               </CardHeader>
+               <CardContent className="space-y-6">
+                 <p className="text-lg leading-relaxed text-muted-foreground">
+                   ProCann's expertise shines in this annual training requirement (COMAR 14.17.15.05, Dispensary Agent Topics 2—5). You'll explore the pharmacology of cannabis, focusing on active components like THC and CBD, and their potential therapeutic benefits and adverse effects. This section covers dosage forms—edibles, tinctures, topicals—and their pharmacodynamic impacts, alongside potential drug interactions and consumer safety concerns. Our goal is to make you a knowledgeable resource for customers, able to explain how cannabis interacts with the body and address common questions about its use.
+                 </p>
+                 <div className="rounded-lg overflow-hidden bg-muted">
+                   <div className="aspect-video">
+                     <SecureVideoPlayer assetKey="section_3_inventory" lazy={false} />
+                   </div>
+                   <p className="text-sm text-muted-foreground text-center py-3">
+                     <em>Video: Understanding cannabis active components and dosage forms.</em>
+                   </p>
+                 </div>
+               </CardContent>
+             </Card>
+           </section>
 
-          <Separator />
+           <Separator />
 
-          {/* Section 4 */}
-          <section id="section4" className="scroll-mt-32">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-3 mb-2">
-                  <Users className="w-6 h-6 text-primary" />
-                  <Badge>Section 4</Badge>
-                </div>
-                <CardTitle className="text-3xl">Substance Use and Customer Safety</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <p className="text-lg leading-relaxed text-muted-foreground">
-                  Recognizing and addressing substance use issues is critical for dispensary agents, as outlined in COMAR 14.17.15.05, Topic 6. This section trains you to identify symptoms of substance use disorders and acute intoxication in customers, ensuring you can respond appropriately—whether by limiting sales or offering support resources. ProCann emphasizes consumer safety, teaching you how to spot red flags, educate clients on responsible use, and maintain a safe retail environment. This knowledge protects both your customers and your license's integrity.
-                </p>
-                <div className="rounded-lg overflow-hidden bg-muted">
-                  <div className="aspect-video">
-                    <SecureVideoPlayer assetKey="section_4_sales" lazy={false} />
-                  </div>
-                  <p className="text-sm text-muted-foreground text-center py-3">
-                    <em>Video: Identifying signs of intoxication and substance use disorders.</em>
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </section>
+           {/* Section 4 */}
+           <section id="section4" className="scroll-mt-32">
+             <Card>
+               <CardHeader>
+                 <div className="flex items-center gap-3 mb-2">
+                   <Users className="w-6 h-6 text-primary" />
+                   <Badge>Section 4</Badge>
+                 </div>
+                 <CardTitle className="text-3xl">Substance Use and Customer Safety</CardTitle>
+               </CardHeader>
+               <CardContent className="space-y-6">
+                 <p className="text-lg leading-relaxed text-muted-foreground">
+                   Recognizing and addressing substance use issues is critical for dispensary agents, as outlined in COMAR 14.17.15.05, Topic 6. This section trains you to identify symptoms of substance use disorders and acute intoxication in customers, ensuring you can respond appropriately—whether by limiting sales or offering support resources. ProCann emphasizes consumer safety, teaching you how to spot red flags, educate clients on responsible use, and maintain a safe retail environment. This knowledge protects both your customers and your license's integrity.
+                 </p>
+                 <div className="rounded-lg overflow-hidden bg-muted">
+                   <div className="aspect-video">
+                     <SecureVideoPlayer assetKey="module_09" lazy={false} />
+                   </div>
+                   <p className="text-sm text-muted-foreground text-center py-3">
+                     <em>Video: Identifying signs of intoxication and substance use disorders.</em>
+                   </p>
+                 </div>
+               </CardContent>
+             </Card>
+           </section>
 
-          <Separator />
+           <Separator />
 
-          {/* Section 5 */}
-          <section id="section5" className="scroll-mt-32">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-3 mb-2">
-                  <Award className="w-6 h-6 text-primary" />
-                  <Badge>Section 5</Badge>
-                </div>
-                <CardTitle className="text-3xl">Responsible Vendor Training Program</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <p className="text-lg leading-relaxed text-muted-foreground">
-                  Beyond annual requirements, COMAR 14.17.05.C mandates a separate Responsible Vendor Training Program, which ProCann proudly offers in compliance with §§36-1001—36-1003. This section prepares you for certification by covering advanced customer service, sales ethics, and regulatory adherence. Approved by the MCA for three years (COMAR 14.17.05.E(3)), our program ensures you meet minimum educational standards while enhancing your professional skills. We maintain records for four years, as required, making compliance seamless for you and your employer.
-                </p>
-                <div className="rounded-lg overflow-hidden bg-muted">
-                  <div className="aspect-video">
-                    <SecureVideoPlayer assetKey="section_5_safety" lazy={false} />
+           {/* Section 5 */}
+           <section id="section5" className="scroll-mt-32">
+             <Card>
+               <CardHeader>
+                 <div className="flex items-center gap-3 mb-2">
+                   <Award className="w-6 h-6 text-primary" />
+                   <Badge>Section 5</Badge>
+                 </div>
+                 <CardTitle className="text-3xl">Responsible Vendor Training Program</CardTitle>
+               </CardHeader>
+               <CardContent className="space-y-6">
+                 <p className="text-lg leading-relaxed text-muted-foreground">
+                   Beyond annual requirements, COMAR 14.17.05.C mandates a separate Responsible Vendor Training Program, which ProCann proudly offers in compliance with §§36-1001—36-1003. This section prepares you for certification by covering advanced customer service, sales ethics, and regulatory adherence. Approved by the MCA for three years (COMAR 14.17.05.E(3)), our program ensures you meet minimum educational standards while enhancing your professional skills. We maintain records for four years, as required, making compliance seamless for you and your employer.
+                 </p>
+                 <div className="rounded-lg overflow-hidden bg-muted">
+                   <div className="aspect-video">
+                     <SecureVideoPlayer assetKey="module_06" lazy={false} />
                   </div>
                   <p className="text-sm text-muted-foreground text-center py-3">
                     <em>Video: Key elements of the Responsible Vendor Training Program.</em>
