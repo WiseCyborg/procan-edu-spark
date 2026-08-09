@@ -14,21 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      _cleanup_bak_20260731: {
-        Row: {
-          d: Json | null
-          k: string | null
-        }
-        Insert: {
-          d?: Json | null
-          k?: string | null
-        }
-        Update: {
-          d?: Json | null
-          k?: string | null
-        }
-        Relationships: []
-      }
       _cleanup_bak_consumer_vurl_20260807: {
         Row: {
           backed_up_at: string | null
@@ -47,78 +32,54 @@ export type Database = {
         }
         Relationships: []
       }
-      _cleanup_bak_ent_20260731: {
+      _cleanup_bak_e2ecert_20260807: {
         Row: {
+          certificate_number: string | null
+          certification_level: string | null
           course_id: string | null
           created_at: string | null
-          expires_at: string | null
-          granted_by: string | null
+          exam_attempt_id: string | null
+          expiry_date: string | null
           id: string | null
+          is_revoked: boolean | null
+          issue_date: string | null
           metadata: Json | null
-          purchased_at: string | null
-          source: string | null
+          pdf_url: string | null
           status: string | null
-          stripe_checkout_session_id: string | null
-          stripe_payment_intent_id: string | null
+          tier_badge: string | null
           user_id: string | null
         }
         Insert: {
+          certificate_number?: string | null
+          certification_level?: string | null
           course_id?: string | null
           created_at?: string | null
-          expires_at?: string | null
-          granted_by?: string | null
+          exam_attempt_id?: string | null
+          expiry_date?: string | null
           id?: string | null
+          is_revoked?: boolean | null
+          issue_date?: string | null
           metadata?: Json | null
-          purchased_at?: string | null
-          source?: string | null
+          pdf_url?: string | null
           status?: string | null
-          stripe_checkout_session_id?: string | null
-          stripe_payment_intent_id?: string | null
+          tier_badge?: string | null
           user_id?: string | null
         }
         Update: {
+          certificate_number?: string | null
+          certification_level?: string | null
           course_id?: string | null
           created_at?: string | null
-          expires_at?: string | null
-          granted_by?: string | null
+          exam_attempt_id?: string | null
+          expiry_date?: string | null
           id?: string | null
+          is_revoked?: boolean | null
+          issue_date?: string | null
           metadata?: Json | null
-          purchased_at?: string | null
-          source?: string | null
+          pdf_url?: string | null
           status?: string | null
-          stripe_checkout_session_id?: string | null
-          stripe_payment_intent_id?: string | null
+          tier_badge?: string | null
           user_id?: string | null
-        }
-        Relationships: []
-      }
-      _cleanup_bak_orgs_20260731: {
-        Row: {
-          id: string | null
-          name: string | null
-        }
-        Insert: {
-          id?: string | null
-          name?: string | null
-        }
-        Update: {
-          id?: string | null
-          name?: string | null
-        }
-        Relationships: []
-      }
-      _cleanup_bak_purch_20260731: {
-        Row: {
-          id: string | null
-          quantity: number | null
-        }
-        Insert: {
-          id?: string | null
-          quantity?: number | null
-        }
-        Update: {
-          id?: string | null
-          quantity?: number | null
         }
         Relationships: []
       }
