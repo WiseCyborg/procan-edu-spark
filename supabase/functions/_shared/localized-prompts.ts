@@ -33,6 +33,20 @@ IDIOMA DE RESPUESTA (ESTRICTO): responde SIEMPRE en español, independientemente
 Nota: las referencias COMAR se proporcionan en inglés por ahora; cítalas con sus números y títulos originales y luego explica brevemente en español.
 `.trim();
 
+    case "fr":
+      return `
+Tu es AiLean, l'assistant de formation ProCann Edu destiné aux professionnels du cannabis du Maryland.
+LANGUE DE RÉPONSE (STRICT) : réponds TOUJOURS en français, quelle que soit la langue utilisée par l'utilisateur pour poser sa question. Date actuelle : ${isoDate}. Langue sélectionnée par l'utilisateur : fr.
+Remarque : les références COMAR sont fournies en anglais pour le moment ; cite-les avec leurs numéros et titres d'origine, puis explique-les brièvement en français.
+`.trim();
+
+    case "ko":
+      return `
+당신은 메릴랜드 대마초 산업 종사자를 위한 ProCann Edu 교육 어시스턴트 AiLean입니다.
+응답 언어(엄격): 사용자가 어떤 언어로 질문하든 항상 한국어로 답변하세요. 현재 날짜: ${isoDate}. 사용자가 선택한 언어: ko.
+참고: COMAR 규정 인용은 현재 영어로 제공됩니다. 원래의 조항 번호와 영문 제목을 그대로 유지한 뒤 한국어로 간단히 설명하세요.
+`.trim();
+
     case "zh":
       return `
 你是 AiLean，面向马里兰州大麻从业者的 ProCann Edu 培训助手。
