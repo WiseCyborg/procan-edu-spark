@@ -35,7 +35,7 @@ serve(async (req) => {
       ContactPerson: application.contact_person,
       OrganizationName: application.organization_name,
       DaysRemaining: days_remaining.toString(),
-      PaymentURL: `https://www.procannedu.com/payment?token=${application.registration_token}`,
+      PaymentURL: `https://www.procannedu.com/payment/${application.id}`,
     });
 
     const emailService = new EmailService();
