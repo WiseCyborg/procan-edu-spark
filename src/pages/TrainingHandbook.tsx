@@ -294,14 +294,14 @@ const TrainingHandbook = () => {
                  <div className="rounded-lg overflow-hidden bg-muted">
                    <div className="aspect-video">
                      <SecureVideoPlayer assetKey="module_06" lazy={false} />
-                  </div>
-                  <p className="text-sm text-muted-foreground text-center py-3">
-                    <em>Video: Key elements of the Responsible Vendor Training Program.</em>
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </section>
+                   </div>
+                   <p className="text-sm text-muted-foreground text-center py-3">
+                     <em>Video: Key elements of the Responsible Vendor Training Program.</em>
+                   </p>
+                 </div>
+               </CardContent>
+             </Card>
+           </section>
 
           {/* Footer CTA */}
           <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
