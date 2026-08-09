@@ -209,7 +209,7 @@ const TrainingHandbook = () => {
                  </p>
                  <div className="rounded-lg overflow-hidden bg-muted">
                    <div className="aspect-video">
-                     <SecureVideoPlayer assetKey="module_15" lazy={false} />
+                     <SecureVideoPlayer assetKey="module_06" lazy={false} />
                    </div>
                    <p className="text-sm text-muted-foreground text-center py-3">
                      <em>Video: Demonstration of security procedures and emergency responses.</em>
@@ -237,7 +237,7 @@ const TrainingHandbook = () => {
                  </p>
                  <div className="rounded-lg overflow-hidden bg-muted">
                    <div className="aspect-video">
-                     <SecureVideoPlayer assetKey="section_3_inventory" lazy={false} />
+                     <SecureVideoPlayer assetKey="module_10" lazy={false} />
                    </div>
                    <p className="text-sm text-muted-foreground text-center py-3">
                      <em>Video: Understanding cannabis active components and dosage forms.</em>
@@ -265,7 +265,7 @@ const TrainingHandbook = () => {
                  </p>
                  <div className="rounded-lg overflow-hidden bg-muted">
                    <div className="aspect-video">
-                     <SecureVideoPlayer assetKey="module_09" lazy={false} />
+                     <SecureVideoPlayer assetKey="module_08" lazy={false} />
                    </div>
                    <p className="text-sm text-muted-foreground text-center py-3">
                      <em>Video: Identifying signs of intoxication and substance use disorders.</em>
@@ -293,7 +293,7 @@ const TrainingHandbook = () => {
                  </p>
                  <div className="rounded-lg overflow-hidden bg-muted">
                    <div className="aspect-video">
-                     <SecureVideoPlayer assetKey="module_06" lazy={false} />
+                      <SecureVideoPlayer assetKey="section_18_ethics" lazy={false} />
                    </div>
                    <p className="text-sm text-muted-foreground text-center py-3">
                      <em>Video: Key elements of the Responsible Vendor Training Program.</em>
