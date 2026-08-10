@@ -155,7 +155,7 @@ export const EmailProviderSettings = () => {
                 onClick={checkProviderStatus}
                 disabled={loading}
               >
-                <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`h-4 w-4 me-2 ${loading ? 'animate-spin' : ''}`} />
                 Refresh
               </Button>
               <Button onClick={testAllProviders} disabled={testing} size="sm">

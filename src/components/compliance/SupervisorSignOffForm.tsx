@@ -145,7 +145,7 @@ export const SupervisorSignOffForm = ({
                   selectedCompetencies.includes(area.id) 
                     ? 'bg-primary/10 border-primary' 
                     : 'hover:bg-muted'
-                }`}
+                } rtl:space-x-reverse`}
                 onClick={() => toggleCompetency(area.id)}
               >
                 <Checkbox 

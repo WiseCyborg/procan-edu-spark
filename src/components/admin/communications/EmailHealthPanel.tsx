@@ -119,7 +119,7 @@ export const EmailHealthPanel = () => {
             <CardDescription>Most recent 25 failures. Retry uses the existing edge function.</CardDescription>
           </div>
           <Button variant="outline" size="sm" onClick={load} disabled={loading}>
-            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
+            <RefreshCw className={`h-4 w-4 me-2 ${loading ? "animate-spin" : ""}`} />
             Refresh
           </Button>
         </CardHeader>

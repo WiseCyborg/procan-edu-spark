@@ -92,7 +92,7 @@ export function PipelineHealthTab() {
               disabled={runHealthCheck.isPending}
               size="sm"
             >
-              <RefreshCw className={`h-4 w-4 mr-2 ${runHealthCheck.isPending ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`h-4 w-4 me-2 ${runHealthCheck.isPending ? 'animate-spin' : ''}`} />
               Run Check
             </Button>
           </div>

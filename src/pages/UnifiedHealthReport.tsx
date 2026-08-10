@@ -100,7 +100,7 @@ export default function UnifiedHealthReport() {
         </div>
         <div className="flex gap-2">
           <Button onClick={fetchHealthReport} disabled={loading} variant="outline">
-            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-4 w-4 me-2 ${loading ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
           <Button onClick={handleExport} disabled={exporting}>

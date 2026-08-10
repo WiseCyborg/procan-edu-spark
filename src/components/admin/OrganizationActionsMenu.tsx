@@ -235,7 +235,7 @@ export const OrganizationActionsMenu = ({ organization, onRefetch }: Organizatio
               onClick={handleGenerateOrRegenerateJoinCode}
               disabled={loading === 'joincode'}
             >
-              <RefreshCw className={`h-4 w-4 mr-2 ${loading === 'joincode' ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`h-4 w-4 me-2 ${loading === 'joincode' ? 'animate-spin' : ''}`} />
               {hasJoinCode ? 'Regenerate Join Code' : 'Generate Join Code'}
             </DropdownMenuItem>
             
@@ -259,7 +259,7 @@ export const OrganizationActionsMenu = ({ organization, onRefetch }: Organizatio
                 onClick={handleSendReminder}
                 disabled={loading === 'reminder'}
               >
-                <Mail className={`h-4 w-4 mr-2 ${loading === 'reminder' ? 'animate-pulse' : ''}`} />
+                <Mail className={`h-4 w-4 me-2 ${loading === 'reminder' ? 'animate-pulse' : ''}`} />
                 Send Manager Reminder
               </DropdownMenuItem>
             ) : (
@@ -298,7 +298,7 @@ export const OrganizationActionsMenu = ({ organization, onRefetch }: Organizatio
                 onClick={handleResendRegistration}
                 disabled={loading === 'resend'}
               >
-                <Send className={`h-4 w-4 mr-2 ${loading === 'resend' ? 'animate-pulse' : ''}`} />
+                <Send className={`h-4 w-4 me-2 ${loading === 'resend' ? 'animate-pulse' : ''}`} />
                 Resend Registration Link
               </DropdownMenuItem>
             ) : (
@@ -335,7 +335,7 @@ export const OrganizationActionsMenu = ({ organization, onRefetch }: Organizatio
               onClick={handleGenerateComplianceReport}
               disabled={loading === 'compliance'}
             >
-              <FileText className={`h-4 w-4 mr-2 ${loading === 'compliance' ? 'animate-pulse' : ''}`} />
+              <FileText className={`h-4 w-4 me-2 ${loading === 'compliance' ? 'animate-pulse' : ''}`} />
               Compliance Report
             </DropdownMenuItem>
             

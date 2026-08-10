@@ -227,7 +227,7 @@ export const ExamAnalyticsDashboard: React.FC = () => {
                           </div>
                           <div>
                             <span className="text-muted-foreground">Pass Rate:</span>
-                            <span className={`font-bold ml-1 ${
+                            <span className={`font-bold ms-1 ${
                               topic.pass_rate >= 80 ? 'text-green-600' : 
                               topic.pass_rate >= 60 ? 'text-yellow-600' : 'text-red-600'
                             }`}>

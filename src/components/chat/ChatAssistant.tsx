@@ -388,7 +388,7 @@ export const ChatAssistant: React.FC = () => {
           setIsOpen(!isOpen);
           setShowProactiveTip(false);
         }}
-        className={`fixed bottom-4 right-4 z-50 h-12 w-12 rounded-full shadow-lg ${
+        className={`fixed bottom-4 end-4 z-50 h-12 w-12 rounded-full shadow-lg ${
           isUATUser ? 'bg-amber-500 hover:bg-amber-600' : ''
         }`}
         size="icon"
@@ -398,7 +398,7 @@ export const ChatAssistant: React.FC = () => {
 
       {/* Chat Window */}
       {isOpen && (
-        <Card className={`fixed bottom-20 right-4 z-40 w-80 ${isUATUser ? 'h-[480px]' : 'h-96'} flex flex-col shadow-xl`}>
+        <Card className={`fixed bottom-20 end-4 z-40 w-80 ${isUATUser ? 'h-[480px]' : 'h-96'} flex flex-col shadow-xl`}>
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <div>

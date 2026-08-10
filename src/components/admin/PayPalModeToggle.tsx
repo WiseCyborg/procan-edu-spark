@@ -217,7 +217,7 @@ export const PayPalModeToggle = () => {
               onClick={testConnection}
               disabled={loading || updating || testing}
             >
-              <RefreshCw className={`h-4 w-4 mr-2 ${testing ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`h-4 w-4 me-2 ${testing ? 'animate-spin' : ''}`} />
               Test Connection
             </Button>
             <Button
@@ -226,7 +226,7 @@ export const PayPalModeToggle = () => {
               onClick={fetchCurrentMode}
               disabled={loading || updating || testing}
             >
-              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`h-4 w-4 me-2 ${loading ? 'animate-spin' : ''}`} />
               Refresh Status
             </Button>
           </div>

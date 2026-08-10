@@ -190,7 +190,7 @@ const VideoRegenerationQueue: React.FC = () => {
               onClick={() => refetch()}
               disabled={isFetching}
             >
-              <RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? 'animate-spin' : ''}`} /> Refresh
+              <RefreshCw className={`h-4 w-4 me-2 ${isFetching ? 'animate-spin' : ''}`} /> Refresh
             </Button>
           </div>
           <p className="text-muted-foreground mt-1">

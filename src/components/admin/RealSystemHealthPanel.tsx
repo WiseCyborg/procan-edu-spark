@@ -90,7 +90,7 @@ export const RealSystemHealthPanel = () => {
           </span>
         </div>
         <Button onClick={refresh} variant="outline" size="sm" disabled={loading}>
-          <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`h-4 w-4 me-2 ${loading ? 'animate-spin' : ''}`} />
           Refresh
         </Button>
       </div>

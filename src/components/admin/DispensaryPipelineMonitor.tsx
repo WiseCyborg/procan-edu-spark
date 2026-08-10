@@ -364,7 +364,7 @@ export const DispensaryPipelineMonitor = () => {
             </div>
             <div className="flex gap-2">
               <Button onClick={fetchPipelineMetrics} variant="outline" size="sm" disabled={loading}>
-                <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`h-4 w-4 me-2 ${loading ? 'animate-spin' : ''}`} />
                 Refresh
               </Button>
               <Button onClick={testPipeline} variant="outline" size="sm" disabled={testing}>

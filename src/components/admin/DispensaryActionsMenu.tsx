@@ -229,7 +229,7 @@ export const DispensaryActionsMenu = ({
                 onClick={handleRegenerateJoinCode}
                 disabled={loading === 'regenerate'}
               >
-                <RefreshCw className={`h-4 w-4 mr-2 ${loading === 'regenerate' ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`h-4 w-4 me-2 ${loading === 'regenerate' ? 'animate-spin' : ''}`} />
                 Regenerate Join Code
               </DropdownMenuItem>
               
@@ -257,7 +257,7 @@ export const DispensaryActionsMenu = ({
                   disabled={loading === 'activate'}
                   className="text-primary font-medium"
                 >
-                  <UserPlus className={`h-4 w-4 mr-2 ${loading === 'activate' ? 'animate-spin' : ''}`} />
+                  <UserPlus className={`h-4 w-4 me-2 ${loading === 'activate' ? 'animate-spin' : ''}`} />
                   Activate User (Bypass Token)
                 </DropdownMenuItem>
               )}

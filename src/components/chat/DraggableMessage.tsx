@@ -245,7 +245,7 @@ export const DraggableMessage: React.FC<DraggableMessageProps> = ({
             }`}
           >
             <span
-              className={`text-[10px] mr-auto ${
+              className={`text-[10px] me-auto ${
                 message.isUser ? 'text-primary-foreground/70' : 'text-muted-foreground'
               }`}
             >

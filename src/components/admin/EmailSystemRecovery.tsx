@@ -108,7 +108,7 @@ export const EmailSystemRecovery = () => {
                 variant={isCircuitBreakerOpen ? "destructive" : "outline"}
                 size="sm"
               >
-                <RefreshCw className={`h-4 w-4 mr-2 ${resetCircuitBreaker.isPending ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`h-4 w-4 me-2 ${resetCircuitBreaker.isPending ? 'animate-spin' : ''}`} />
                 Reset
               </Button>
             )}
@@ -146,7 +146,7 @@ export const EmailSystemRecovery = () => {
               variant="outline"
               size="sm"
             >
-              <Settings className={`h-4 w-4 mr-2 ${reconcileSeats.isPending ? 'animate-spin' : ''}`} />
+              <Settings className={`h-4 w-4 me-2 ${reconcileSeats.isPending ? 'animate-spin' : ''}`} />
               Reconcile
             </Button>
           </div>

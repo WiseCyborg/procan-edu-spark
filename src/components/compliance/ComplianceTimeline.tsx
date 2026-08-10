@@ -93,7 +93,7 @@ export function ComplianceTimeline({ lastUpdated }: ComplianceTimelineProps) {
           <div key={index} className="relative flex gap-4 pb-8 last:pb-0">
             {/* Timeline line */}
             {!isLast && (
-              <div className={`absolute left-[11px] top-8 w-[2px] h-full ${styles.lineBg}`} />
+              <div className={`absolute start-[11px] top-8 w-[2px] h-full ${styles.lineBg}`} />
             )}
 
             {/* Timeline dot */}

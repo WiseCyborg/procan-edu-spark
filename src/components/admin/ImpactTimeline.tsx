@@ -79,7 +79,7 @@ export const ImpactTimeline = () => {
               return (
                 <div key={impact.id} className="relative flex gap-4">
                   {/* Timeline dot */}
-                  <div className={`absolute left-6 -translate-x-1/2 h-3 w-3 rounded-full border-2 border-background ${getImpactColor(impactLevel)}`} />
+                  <div className={`absolute start-6 -translate-x-1/2 h-3 w-3 rounded-full border-2 border-background ${getImpactColor(impactLevel)}`} />
                   
                   {/* Content */}
                   <div className="ms-12 flex-1">

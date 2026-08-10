@@ -82,7 +82,7 @@ export function LanguageSwitcher({ compact = true, onLanguageChange }: LanguageS
             <button
               key={lang.code}
               onClick={() => select(lang)}
-              className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left transition-colors hover:bg-accent ${
+              className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-start transition-colors hover:bg-accent ${
                 current.code === lang.code ? 'bg-primary/10 text-primary font-medium' : 'text-foreground'
               }`}
             >

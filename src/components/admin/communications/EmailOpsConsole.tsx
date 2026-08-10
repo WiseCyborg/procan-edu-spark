@@ -148,7 +148,7 @@ export const EmailOpsConsole = () => {
             onClick={handleRunAgent}
             disabled={runAgent.isPending}
           >
-            <RefreshCw className={`h-4 w-4 mr-2 ${runAgent.isPending ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-4 w-4 me-2 ${runAgent.isPending ? 'animate-spin' : ''}`} />
             Run Health Check
           </Button>
           {snapshot?.circuit_state === 'closed' ? (

@@ -337,7 +337,7 @@ export default function OwnersIntelligence() {
             <CardContent>
               <div className="space-y-3">
                 {alerts?.map(alert => (
-                  <div key={alert.id} className={`p-4 border-l-4 rounded-lg ${getSeverityBorder(alert.severity)}`}>
+                  <div key={alert.id} className={`p-4 border-s-4 rounded-lg ${getSeverityBorder(alert.severity)}`}>
                     <div className="flex items-start justify-between">
                       <div>
                         <div className="flex items-center gap-2 mb-2">
