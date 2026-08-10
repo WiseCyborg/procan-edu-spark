@@ -2264,6 +2264,162 @@ export type Database = {
         }
         Relationships: []
       }
+      _cleanup_bak_module00_20260810: {
+        Row: {
+          access_level: string | null
+          asset_key: string | null
+          bucket_id: string | null
+          course_id: string | null
+          created_at: string | null
+          descript_project_id: string | null
+          description: string | null
+          draft_audio_duration_seconds: number | null
+          draft_audio_generated_at: string | null
+          draft_audio_provider: string | null
+          draft_audio_url: string | null
+          draft_generated_at: string | null
+          draft_script: string | null
+          draft_video_url: string | null
+          duration_seconds: number | null
+          fallback_bucket_id: string | null
+          fallback_storage_path: string | null
+          file_size_mb: number | null
+          id: string | null
+          is_active: boolean | null
+          last_regenerated_at: string | null
+          legacy_bucket_id: string | null
+          legacy_storage_path: string | null
+          migrated_at: string | null
+          migration_error: string | null
+          migration_status: string | null
+          mime_type: string | null
+          module_id: string | null
+          needs_regeneration: boolean | null
+          public_url: string | null
+          r2_key: string | null
+          regeneration_notified_at: string | null
+          regeneration_reason: string | null
+          render_dispatched_at: string | null
+          render_error: string | null
+          render_job_id: string | null
+          render_provider: string | null
+          render_status: string | null
+          review_status: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          slide_outline: Json | null
+          slide_spec: Json | null
+          storage_path: string | null
+          storage_provider: string | null
+          thumbnail_url: string | null
+          title: string | null
+          unmapped_reason: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          access_level?: string | null
+          asset_key?: string | null
+          bucket_id?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          descript_project_id?: string | null
+          description?: string | null
+          draft_audio_duration_seconds?: number | null
+          draft_audio_generated_at?: string | null
+          draft_audio_provider?: string | null
+          draft_audio_url?: string | null
+          draft_generated_at?: string | null
+          draft_script?: string | null
+          draft_video_url?: string | null
+          duration_seconds?: number | null
+          fallback_bucket_id?: string | null
+          fallback_storage_path?: string | null
+          file_size_mb?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          last_regenerated_at?: string | null
+          legacy_bucket_id?: string | null
+          legacy_storage_path?: string | null
+          migrated_at?: string | null
+          migration_error?: string | null
+          migration_status?: string | null
+          mime_type?: string | null
+          module_id?: string | null
+          needs_regeneration?: boolean | null
+          public_url?: string | null
+          r2_key?: string | null
+          regeneration_notified_at?: string | null
+          regeneration_reason?: string | null
+          render_dispatched_at?: string | null
+          render_error?: string | null
+          render_job_id?: string | null
+          render_provider?: string | null
+          render_status?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          slide_outline?: Json | null
+          slide_spec?: Json | null
+          storage_path?: string | null
+          storage_provider?: string | null
+          thumbnail_url?: string | null
+          title?: string | null
+          unmapped_reason?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          access_level?: string | null
+          asset_key?: string | null
+          bucket_id?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          descript_project_id?: string | null
+          description?: string | null
+          draft_audio_duration_seconds?: number | null
+          draft_audio_generated_at?: string | null
+          draft_audio_provider?: string | null
+          draft_audio_url?: string | null
+          draft_generated_at?: string | null
+          draft_script?: string | null
+          draft_video_url?: string | null
+          duration_seconds?: number | null
+          fallback_bucket_id?: string | null
+          fallback_storage_path?: string | null
+          file_size_mb?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          last_regenerated_at?: string | null
+          legacy_bucket_id?: string | null
+          legacy_storage_path?: string | null
+          migrated_at?: string | null
+          migration_error?: string | null
+          migration_status?: string | null
+          mime_type?: string | null
+          module_id?: string | null
+          needs_regeneration?: boolean | null
+          public_url?: string | null
+          r2_key?: string | null
+          regeneration_notified_at?: string | null
+          regeneration_reason?: string | null
+          render_dispatched_at?: string | null
+          render_error?: string | null
+          render_job_id?: string | null
+          render_provider?: string | null
+          render_status?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          slide_outline?: Json | null
+          slide_spec?: Json | null
+          storage_path?: string | null
+          storage_provider?: string | null
+          thumbnail_url?: string | null
+          title?: string | null
+          unmapped_reason?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       _cleanup_bak_rvt_vpublic_20260810: {
         Row: {
           asset_key: string | null
