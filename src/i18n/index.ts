@@ -57,6 +57,8 @@ i18n
       ko: { translation: ko },
       vi: { translation: vi },
       am: { translation: am },
+      pt: { translation: pt },
+      ru: { translation: ru },
     },
     fallbackLng: "en",
     supportedLngs: [...SUPPORTED_LANGUAGES],
