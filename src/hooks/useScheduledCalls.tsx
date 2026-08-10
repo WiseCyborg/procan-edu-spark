@@ -38,11 +38,6 @@ export const useScheduledCalls = (conversationId: string) => {
         .from('scheduled_calls')
         .select(`
           *,
-          profiles:host_id (
-            first_name,
-            last_name,
-            profile_photo_url
-          ),
           scheduled_call_invites (
             user_id,
             status
@@ -54,24 +49,40 @@ export const useScheduledCalls = (conversationId: string) => {
 
       if (error) throw error;
 
-      const formatted: ScheduledCall[] = data?.map(call => ({
-        id: call.id,
-        conversation_id: call.conversation_id,
-        organization_id: call.organization_id,
-        title: call.title,
-        description: call.description,
-        scheduled_at: call.scheduled_at,
-        duration_minutes: call.duration_minutes,
-        host_id: call.host_id,
-        status: call.status as any,
-        video_call_id: call.video_call_id,
-        host: (call.profiles as any) ? {
-          first_name: (call.profiles as any).first_name,
-          last_name: (call.profiles as any).last_name,
-          profile_photo_url: (call.profiles as any).profile_photo_url
-        } : undefined,
-        invites: call.scheduled_call_invites as any
-      })) || [];
+      const hostIds = [...new Set((data || []).map(call => call.host_id))];
+      const profileMap = new Map<string, any>();
+      if (hostIds.length > 0) {
+        const { data: profiles, error: profilesError } = await supabase
+          .from('profiles')
+          .select('user_id, first_name, last_name, profile_photo_url')
+          .in('user_id', hostIds);
+
+        if (profilesError) throw profilesError;
+        (profiles || []).forEach(profile => profileMap.set(profile.user_id, profile));
+      }
+
+      const formatted: ScheduledCall[] = data?.map(call => {
+        const hostProfile = profileMap.get(call.host_id);
+
+        return {
+          id: call.id,
+          conversation_id: call.conversation_id,
+          organization_id: call.organization_id,
+          title: call.title,
+          description: call.description,
+          scheduled_at: call.scheduled_at,
+          duration_minutes: call.duration_minutes,
+          host_id: call.host_id,
+          status: call.status as any,
+          video_call_id: call.video_call_id,
+          host: hostProfile ? {
+            first_name: hostProfile.first_name,
+            last_name: hostProfile.last_name,
+            profile_photo_url: hostProfile.profile_photo_url
+          } : undefined,
+          invites: call.scheduled_call_invites as any
+        };
+      }) || [];
 
       setCalls(formatted);
     } catch (error) {
