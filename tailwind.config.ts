@@ -72,7 +72,7 @@ export default {
 				}
 			},
 			fontFamily: {
-				sans: [...defaultTheme.fontFamily.sans, 'Noto Sans Ethiopic'],
+				sans: [...defaultTheme.fontFamily.sans, 'Noto Sans Ethiopic', 'Noto Sans Arabic'],
 				poppins: ['Poppins', 'sans-serif'],
 				inter: ['Inter', 'sans-serif'],
 				playfair: ['Playfair Display', 'serif']

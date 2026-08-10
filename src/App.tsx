@@ -4,6 +4,9 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useSearchParams } from "react-router-dom";
+import { DirectionProvider } from "@radix-ui/react-direction";
+import { useTranslation } from "react-i18next";
+import { RTL_LANGUAGES } from "@/i18n";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { UnifiedVoiceProvider } from "@/providers/UnifiedVoiceProvider";
 import { AccessProvider } from "@/providers/AccessProvider";
@@ -551,8 +554,16 @@ const AppRoutesLayout = () => {
   );
 };
 
+const AppDirectionProvider = ({ children }: { children: React.ReactNode }) => {
+  const { i18n } = useTranslation();
+  const base = (i18n.resolvedLanguage ?? i18n.language ?? "en").split("-")[0];
+  const dir = RTL_LANGUAGES.has(base) ? "rtl" : "ltr";
+  return <DirectionProvider dir={dir}>{children}</DirectionProvider>;
+};
+
 const App = () => (
   <ErrorBoundary>
+    <AppDirectionProvider>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <KeyboardShortcutsProvider>
@@ -589,6 +600,7 @@ const App = () => (
         </KeyboardShortcutsProvider>
       </BrowserRouter>
     </QueryClientProvider>
+    </AppDirectionProvider>
   </ErrorBoundary>
 );
 
