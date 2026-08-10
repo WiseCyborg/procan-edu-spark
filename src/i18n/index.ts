@@ -29,16 +29,6 @@ export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
 
 export const LANGUAGE_STORAGE_KEY = "procann_language";
 
-/** Languages that render right-to-left. Foundation only — none are selectable yet. */
-export const RTL_LANGUAGES = new Set(["ar", "ur", "fa", "he"]);
-
-function applyDirection(lng: string) {
-  const base = (lng ?? "en").split("-")[0];
-  if (typeof document === "undefined") return;
-  document.documentElement.dir = RTL_LANGUAGES.has(base) ? "rtl" : "ltr";
-  document.documentElement.lang = base;
-}
-
 export const LANGUAGE_LABELS: Record<SupportedLanguage, { code: string; native: string; english: string }> = {
   en: { code: "EN", native: "English", english: "English" },
   es: { code: "ES", native: "Español", english: "Spanish" },
@@ -83,12 +73,9 @@ i18n
     returnNull: false,
   });
 
-applyDirection(i18n.resolvedLanguage ?? "en");
-
 export function setLanguage(lng: SupportedLanguage) {
   if (!isSupportedLanguage(lng)) return;
   i18n.changeLanguage(lng);
-  applyDirection(lng);
   try {
     localStorage.setItem(LANGUAGE_STORAGE_KEY, lng);
   } catch {
