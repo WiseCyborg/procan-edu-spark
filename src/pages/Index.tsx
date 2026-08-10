@@ -118,7 +118,7 @@ const Index = () => {
               Maryland cannabis training & certification
             </p>
             <p className={`text-white/90 mx-auto ${isMobile ? 'text-sm mt-2' : 'text-lg mt-3 max-w-2xl'}`}>
-              Official Maryland Responsible Vendor Training (RVT) — <span className="font-semibold">$49.99</span>, self-paced, COMAR-aligned.
+              Maryland Responsible Vendor Training (RVT) — <span className="font-semibold">$49.99</span>, self-paced, COMAR-aligned.
             </p>
           </div>
 
@@ -207,7 +207,7 @@ const Index = () => {
                 </div>
                 <h3 className="text-xl font-bold text-foreground mb-2">RVT Core Training</h3>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Official Maryland Responsible Vendor Training certification for dispensary employees.
+                  Maryland Responsible Vendor Training (RVT) aligned to COMAR 14.17.15.05 for dispensary employees.
                 </p>
                 <div className="space-y-2 text-sm mb-4">
                   <div className="flex items-center gap-2 text-muted-foreground">
@@ -309,8 +309,8 @@ const Index = () => {
           {/* Disclaimer */}
           <div className="mt-8 text-center">
             <p className="text-xs text-muted-foreground max-w-3xl mx-auto">
-              <strong>Note:</strong> Only RVT Core Training provides official Maryland Responsible Vendor Training certification 
-              as required by COMAR 14.17.05. Public Learning is for educational purposes only and does not satisfy employee compliance requirements.
+              <strong>Note:</strong> Only RVT Core Training provides Maryland Responsible Vendor Training (RVT) 
+              aligned to COMAR 14.17.15.05. Public Learning is for educational purposes only and does not satisfy employee compliance requirements.
             </p>
           </div>
         </div>

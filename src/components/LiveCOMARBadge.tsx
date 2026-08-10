@@ -16,7 +16,7 @@ export const LiveCOMARBadge = () => {
         <div className="absolute -top-1 -right-1 h-2 w-2 bg-green-400 rounded-full animate-pulse" />
       </div>
       <div className="text-sm font-semibold text-white flex items-center gap-2">
-        <span>COMAR {version} Compliance: LIVE & AUTO-UPDATING</span>
+        <span>COMAR 14.17.15.05 — tracked & updated</span>
         {!isLoading && formattedDate && (
           <Badge variant="outline" className="text-xs border-white/40 text-white/90">
             Last Updated: {formattedDate}

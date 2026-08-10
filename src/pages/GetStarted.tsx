@@ -60,7 +60,7 @@ const GetStarted = () => {
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Shield className="h-4 w-4" />
-                    <span>Official RVT Certificate issued</span>
+                    <span>RVT certificate of completion issued</span>
                   </div>
                 </div>
                 <Button className="w-full group-hover:bg-primary/90">
@@ -154,8 +154,8 @@ const GetStarted = () => {
           {/* Disclaimer */}
           <div className="mt-6 p-4 bg-muted/50 rounded-lg border border-muted-foreground/20 max-w-4xl mx-auto">
             <p className="text-xs text-muted-foreground text-center">
-              <strong>Important:</strong> Only RVT Core Training provides official Maryland Responsible Vendor Training certification 
-              as required by COMAR 14.17.05. Public Learning courses are for educational purposes only and do not satisfy 
+              <strong>Important:</strong> Only RVT Core Training provides Maryland Responsible Vendor Training (RVT) 
+              aligned to COMAR 14.17.15.05. Public Learning courses are for educational purposes only and do not satisfy 
               employee compliance requirements.
             </p>
           </div>
