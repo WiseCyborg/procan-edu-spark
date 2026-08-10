@@ -55,7 +55,7 @@ export function SectionNavButton({
             )}
           >
             {completionMessage || `Continue to ${nextSection.label}`}
-            <ArrowRight className="ms-2 h-5 w-5" />
+            <ArrowRight className="ms-2 h-5 w-5 rtl-flip" />
           </Button>
         )}
       </div>

@@ -306,7 +306,7 @@ const VideoStudio: React.FC = () => {
       <div className="max-w-6xl mx-auto space-y-6">
         <div>
           <Link to="/admin" className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
-            <ArrowLeft className="h-4 w-4" /> Admin
+            <ArrowLeft className="h-4 w-4 rtl-flip" /> Admin
           </Link>
           <h1 className="text-3xl font-bold mt-2 flex items-center gap-2">
             <Clapperboard className="h-7 w-7" /> RVT Video Studio

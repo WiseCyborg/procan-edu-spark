@@ -330,7 +330,7 @@ export const OrgSeatsManagementTab = ({ organizationId }: OrgSeatsManagementTabP
                         disabled={!members?.some(m => m.user_id && !membersWithSeats.has(m.user_id))}
                       >
                         Assign
-                        <ChevronRight className="h-4 w-4 ms-1" />
+                        <ChevronRight className="h-4 w-4 ms-1 rtl-flip" />
                       </Button>
                     )}
                     {seat.status === 'assigned' && (

@@ -116,7 +116,7 @@ export const UniversalCourseCard = ({
     return (
       <>
         {getCtaLabel(launchTarget?.cta_label || 'start')}
-        <ArrowRight className="ms-2 h-4 w-4" />
+        <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
       </>
     );
   };

@@ -148,7 +148,7 @@ export const ContextGate: React.FC<ContextGateProps> = ({ onContinue }) => {
         {/* Continue Button */}
         <Button onClick={handleContinue} className="w-full" size="lg">
           Continue to Dashboard
-          <ArrowRight className="h-4 w-4 ms-2" />
+          <ArrowRight className="h-4 w-4 ms-2 rtl-flip" />
         </Button>
 
         {/* Pending note */}

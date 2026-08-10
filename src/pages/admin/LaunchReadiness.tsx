@@ -98,7 +98,7 @@ const LaunchReadiness: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <Link to="/admin" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-2">
-            <ArrowLeft className="h-4 w-4 me-1" /> Back to Admin
+            <ArrowLeft className="h-4 w-4 me-1 rtl-flip" /> Back to Admin
           </Link>
           <h1 className="text-2xl font-semibold">Launch Readiness</h1>
           <p className="text-sm text-muted-foreground">

@@ -125,7 +125,7 @@ const WelcomeVideo = () => {
                     className="flex-1"
                   >
                     Continue to Course
-                    <ArrowRight className="h-4 w-4 ms-2" />
+                    <ArrowRight className="h-4 w-4 ms-2 rtl-flip" />
                   </Button>
                 </div>
               </div>

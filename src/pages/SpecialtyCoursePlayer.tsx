@@ -101,7 +101,7 @@ const SpecialtyCoursePlayer = () => {
 
       <div className="container mx-auto px-4 py-8">
         <Button variant="ghost" size="sm" className="mb-6" onClick={() => navigate(`/courses/${courseId}`)}>
-          <ArrowLeft className="h-4 w-4 me-2" />
+          <ArrowLeft className="h-4 w-4 me-2 rtl-flip" />
           Course overview
         </Button>
 

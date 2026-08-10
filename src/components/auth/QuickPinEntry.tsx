@@ -223,7 +223,7 @@ export const QuickPinEntry: React.FC<QuickPinEntryProps> = ({
               onClick={onCancel}
               size="sm"
             >
-              <ArrowLeft className="w-4 h-4 me-1" />
+              <ArrowLeft className="w-4 h-4 me-1 rtl-flip" />
               Back to Login
             </Button>
           </div>

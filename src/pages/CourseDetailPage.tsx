@@ -150,7 +150,7 @@ const CourseDetailPage = () => {
 
       <div className="container mx-auto px-4 py-10 max-w-3xl">
         <Button variant="ghost" size="sm" className="mb-6" onClick={() => navigate('/courses')}>
-          <ArrowLeft className="h-4 w-4 me-2" />
+          <ArrowLeft className="h-4 w-4 me-2 rtl-flip" />
           All Courses
         </Button>
 

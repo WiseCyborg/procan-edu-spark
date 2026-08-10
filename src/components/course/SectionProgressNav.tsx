@@ -53,7 +53,7 @@ export function SectionProgressNav({
               {section.isCompleted ? (
                 <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
               ) : section.isCurrent ? (
-                <ChevronRight className="h-5 w-5 text-primary flex-shrink-0" />
+                <ChevronRight className="h-5 w-5 text-primary flex-shrink-0 rtl-flip" />
               ) : section.isLocked ? (
                 <Lock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
               ) : (

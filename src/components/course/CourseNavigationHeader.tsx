@@ -69,7 +69,7 @@ export const CourseNavigationHeader = ({
             >
               Course
             </Link>
-            <ChevronRight className="h-3 w-3" />
+            <ChevronRight className="h-3 w-3 rtl-flip" />
             <span className="text-foreground font-medium">
               Module {currentModuleNumber}: {currentModuleTitle}
             </span>

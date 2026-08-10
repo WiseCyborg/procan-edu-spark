@@ -132,7 +132,7 @@ export const ConsumerModuleContent = ({
               onClick={onPrevious}
               className="sm:w-auto"
             >
-              <ChevronLeft className="h-4 w-4 me-2" />
+              <ChevronLeft className="h-4 w-4 me-2 rtl-flip" />
               Previous
             </Button>
           )}
@@ -155,7 +155,7 @@ export const ConsumerModuleContent = ({
               className="sm:w-auto"
             >
               Next Module
-              <ChevronRight className="h-4 w-4 ms-2" />
+              <ChevronRight className="h-4 w-4 ms-2 rtl-flip" />
             </Button>
           )}
 

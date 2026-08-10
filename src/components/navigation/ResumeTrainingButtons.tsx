@@ -78,7 +78,7 @@ export const ResumeTrainingButtons: React.FC<ResumeTrainingButtonsProps> = ({
         >
           <ResumeIcon className="h-5 w-5 me-2" />
           {getResumeLabel()}
-          <ChevronRight className="h-4 w-4 ms-2" />
+          <ChevronRight className="h-4 w-4 ms-2 rtl-flip" />
         </Button>
         
         {showModuleListButton && status !== 'all_complete' && (

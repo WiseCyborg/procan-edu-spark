@@ -228,7 +228,7 @@ export const PaginatedContent: React.FC<PaginatedContentProps> = ({
           disabled={currentPage === 0}
           className="flex items-center gap-2"
         >
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft className="h-4 w-4 rtl-flip" />
           Previous
         </Button>
         
@@ -242,7 +242,7 @@ export const PaginatedContent: React.FC<PaginatedContentProps> = ({
             className="flex items-center gap-2"
           >
             Continue to Course
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-4 w-4 rtl-flip" />
           </Button>
         ) : (
           <Button
@@ -251,7 +251,7 @@ export const PaginatedContent: React.FC<PaginatedContentProps> = ({
             className="flex items-center gap-2"
           >
             Next
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-4 w-4 rtl-flip" />
           </Button>
         )}
       </div>

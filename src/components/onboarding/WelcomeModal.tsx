@@ -147,7 +147,7 @@ export const WelcomeModal = () => {
           <div className="flex gap-3">
             <Button className="flex-1" size="lg" onClick={handleGetStarted}>
               Let's Get Started
-              <ArrowRight className="ms-2 h-4 w-4" />
+              <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
             </Button>
           </div>
         </div>

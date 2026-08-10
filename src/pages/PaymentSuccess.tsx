@@ -505,7 +505,7 @@ const PaymentSuccess: React.FC = () => {
               className="bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto"
             >
               Start Learning
-              <ArrowRight className="h-5 w-5 ms-2" />
+              <ArrowRight className="h-5 w-5 ms-2 rtl-flip" />
             </Button>
             <Button 
               onClick={() => navigate('/dashboard')}

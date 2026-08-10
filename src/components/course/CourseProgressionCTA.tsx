@@ -62,7 +62,7 @@ const resolveNextAction = (
       ? 'Start with the Welcome & Platform Orientation module to begin your certification journey.'
       : `You're making great progress! ${completedCount} of ${requiredCount} modules completed.`,
     buttonText: completedCount === 0 ? 'Start Course' : 'Continue Learning',
-    icon: completedCount === 0 ? <Play className="h-6 w-6" /> : <ArrowRight className="h-6 w-6" />,
+    icon: completedCount === 0 ? <Play className="h-6 w-6" /> : <ArrowRight className="h-6 w-6 rtl-flip" />,
   };
 };
 
@@ -161,7 +161,7 @@ export const CourseProgressionCTA: React.FC<CourseProgressionCTAProps> = ({
               ) : nextAction.type === 'START_EXAM' ? (
                 <Award className="h-5 w-5" />
               ) : (
-                <ArrowRight className="h-5 w-5" />
+                <ArrowRight className="h-5 w-5 rtl-flip" />
               )}
               {nextAction.buttonText}
             </Button>

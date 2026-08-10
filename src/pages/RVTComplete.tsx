@@ -101,7 +101,7 @@ const RVTComplete = () => {
                 size="lg"
               >
                 Start RVT Exam
-                <ArrowRight className="h-5 w-5 ms-2" />
+                <ArrowRight className="h-5 w-5 ms-2 rtl-flip" />
               </Button>
             </CardContent>
           </Card>
@@ -185,7 +185,7 @@ const RVTComplete = () => {
                 className="border-amber-300 text-amber-700 hover:bg-amber-100 dark:border-amber-700 dark:text-amber-300 dark:hover:bg-amber-900/50"
               >
                 Start Manager Track
-                <ArrowRight className="h-4 w-4 ms-2" />
+                <ArrowRight className="h-4 w-4 ms-2 rtl-flip" />
               </Button>
             </CardContent>
           </Card>

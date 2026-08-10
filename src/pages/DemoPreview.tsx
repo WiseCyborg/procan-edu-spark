@@ -66,7 +66,7 @@ const DemoPreview = () => {
             to="/org/apply"
             className="inline-flex items-center gap-1 font-semibold underline underline-offset-4 hover:no-underline"
           >
-            Apply for Your Dispensary <ArrowRight className="h-4 w-4" />
+            Apply for Your Dispensary <ArrowRight className="h-4 w-4 rtl-flip" />
           </Link>
         </div>
       </div>

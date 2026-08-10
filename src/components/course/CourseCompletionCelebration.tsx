@@ -110,7 +110,7 @@ export const CourseCompletionCelebration: React.FC<CourseCompletionCelebrationPr
                 >
                   <Award className="me-2 h-5 w-5" />
                   Take Final Exam
-                  <ArrowRight className="ms-2 h-5 w-5" />
+                  <ArrowRight className="ms-2 h-5 w-5 rtl-flip" />
                 </Button>
                 <Button 
                   size="lg" 

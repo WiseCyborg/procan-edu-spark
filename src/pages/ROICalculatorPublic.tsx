@@ -271,7 +271,7 @@ export default function ROICalculatorPublic() {
             >
               <DollarSign className="h-5 w-5 me-2" />
               Get Your Free Compliance Audit
-              <ArrowRight className="h-5 w-5 ms-2" />
+              <ArrowRight className="h-5 w-5 ms-2 rtl-flip" />
             </Button>
           </div>
         </div>

@@ -125,7 +125,7 @@ export const LockedModuleCard = ({
           className="w-full gap-2 bg-amber-600 hover:bg-amber-700 text-white"
         >
           {config.actionLabel}
-          <ArrowRight className="h-4 w-4" />
+          <ArrowRight className="h-4 w-4 rtl-flip" />
         </Button>
       </CardContent>
     </Card>

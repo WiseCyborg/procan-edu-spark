@@ -97,7 +97,7 @@ export const NextActionBanner: React.FC<NextActionBannerProps> = ({
           className={buttonStyles[nextAction.priority]}
         >
           {nextAction.buttonText}
-          <ArrowRight className="ms-1 h-4 w-4" />
+          <ArrowRight className="ms-1 h-4 w-4 rtl-flip" />
         </Button>
       </Card>
     );
@@ -135,7 +135,7 @@ export const NextActionBanner: React.FC<NextActionBannerProps> = ({
           className={cn('flex-shrink-0', buttonStyles[nextAction.priority])}
         >
           {nextAction.buttonText}
-          <ArrowRight className="ms-2 h-4 w-4" />
+          <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
         </Button>
       </div>
     </Card>
