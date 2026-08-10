@@ -14,9 +14,9 @@
  * weakens the anti-leak signal (the model recognises the English directive as
  * higher-priority). This is intentional.
  */
-export type ChatLanguage = "en" | "es" | "zh" | "fr" | "ko";
+export type ChatLanguage = "en" | "es" | "zh" | "fr" | "ko" | "vi" | "am";
 
-const SUPPORTED: ChatLanguage[] = ["en", "es", "zh", "fr", "ko"];
+const SUPPORTED: ChatLanguage[] = ["en", "es", "zh", "fr", "ko", "vi", "am"];
 
 export function normalizeChatLanguage(input?: string | null): ChatLanguage {
   if (!input) return "en";
@@ -45,6 +45,20 @@ Remarque : les références COMAR sont fournies en anglais pour le moment ; cite
 당신은 메릴랜드 대마초 산업 종사자를 위한 ProCann Edu 교육 어시스턴트 AiLean입니다.
 응답 언어(엄격): 사용자가 어떤 언어로 질문하든 항상 한국어로 답변하세요. 현재 날짜: ${isoDate}. 사용자가 선택한 언어: ko.
 참고: COMAR 규정 인용은 현재 영어로 제공됩니다. 원래의 조항 번호와 영문 제목을 그대로 유지한 뒤 한국어로 간단히 설명하세요.
+`.trim();
+
+    case "vi":
+      return `
+Bạn là AiLean, trợ lý đào tạo ProCann Edu dành cho các chuyên gia ngành cần sa tại Maryland.
+NGÔN NGỮ TRẢ LỜI (BẮT BUỘC): Luôn trả lời bằng tiếng Việt, bất kể người dùng đặt câu hỏi bằng ngôn ngữ nào. Ngày hiện tại: ${isoDate}. Ngôn ngữ người dùng đã chọn: vi.
+Lưu ý: các trích dẫn COMAR hiện được cung cấp bằng tiếng Anh; hãy giữ nguyên số hiệu và tiêu đề gốc tiếng Anh, sau đó giải thích ngắn gọn bằng tiếng Việt.
+`.trim();
+
+    case "am":
+      return `
+እርስዎ AiLean ነዎት፤ ለሜሪላንድ ካናቢስ ዘርፍ ባለሙያዎች የተዘጋጀ የProCann Edu የሥልጠና ረዳት።
+የምላሽ ቋንቋ (ጥብቅ)፦ ተጠቃሚው በማንኛውም ቋንቋ ቢጠይቅ ሁልጊዜ በአማርኛ ይመልሱ። የአሁኑ ቀን፦ ${isoDate}። ተጠቃሚው የመረጠው ቋንቋ፦ am።
+ማስታወሻ፦ የCOMAR ጥቅሶች በአሁኑ ሰዓት በእንግሊዝኛ ይቀርባሉ፤ የመጀመሪያዎቹን ቁጥሮችና የእንግሊዝኛ ርዕሶች እንዳሉ ይጠብቁ፣ ከዚያም በአማርኛ በአጭሩ ያብራሩ።
 `.trim();
 
     case "zh":

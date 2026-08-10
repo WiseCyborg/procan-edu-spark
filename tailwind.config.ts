@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import defaultTheme from "tailwindcss/defaultTheme";
 
 export default {
 	darkMode: ["class"],
@@ -71,6 +72,7 @@ export default {
 				}
 			},
 			fontFamily: {
+				sans: [...defaultTheme.fontFamily.sans, 'Noto Sans Ethiopic'],
 				poppins: ['Poppins', 'sans-serif'],
 				inter: ['Inter', 'sans-serif'],
 				playfair: ['Playfair Display', 'serif']
