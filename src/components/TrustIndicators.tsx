@@ -134,7 +134,7 @@ export const ComplianceBadges = () => {
         style={{ animationDelay: '0.5s' }}
       >
         <CheckCircle className="h-4 w-4 mr-2" />
-        MCA Standards
+        COMAR-Aligned
       </Badge>
       
       <Badge 

@@ -308,7 +308,7 @@ const ConsumerEducation = () => {
                     Valid Medical Card Required
                   </h3>
                   <ul className="space-y-1 text-sm text-muted-foreground ml-7">
-                    <li>• Must have active Maryland MMCC registration</li>
+                    <li>• Must have active Maryland MCA registration</li>
                     <li>• Card expires annually, requires renewal</li>
                     <li>• Out-of-state cards not accepted</li>
                   </ul>

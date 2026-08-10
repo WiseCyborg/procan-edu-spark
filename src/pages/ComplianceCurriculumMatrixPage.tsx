@@ -306,7 +306,7 @@ export default function ComplianceCurriculumMatrixPage() {
                                       Online Self-Paced
                                     </Badge>
                                     <Badge variant="secondary">
-                                      Maryland State Approved
+                                      COMAR 14.17.15.05-Aligned
                                     </Badge>
                                     <Badge variant="secondary">
                                       Interactive Content

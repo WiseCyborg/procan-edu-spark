@@ -87,7 +87,7 @@ const Welcome = () => {
                   You're now ready to begin your certification journey.
                 </p>
                 <p className="text-sm text-gray-500">
-                  Aligned to MCA Responsible Vendor Training standards under COMAR 14.17
+                  Aligned to MCA Responsible Vendor Training standards under COMAR 14.17.15.05
                 </p>
               </div>
 
@@ -181,7 +181,7 @@ const Welcome = () => {
                 <div className="text-center">
                   <Award className="h-12 w-12 text-yellow-600 mx-auto mb-4" />
                   <h3 className="font-semibold mb-2">Certification Ready</h3>
-                  <p className="text-sm text-gray-600">Earn your official certificate</p>
+                  <p className="text-sm text-gray-600">Earn your certificate of completion</p>
                 </div>
               </div>
 

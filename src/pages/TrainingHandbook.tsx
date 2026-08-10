@@ -115,12 +115,12 @@ const TrainingHandbook = () => {
       <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-background border-b">
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-4xl mx-auto">
-            <Badge className="mb-4">Official MCA Training Resource</Badge>
+            <Badge className="mb-4">COMAR 14.17.15.05-Aligned Training</Badge>
             <h1 className="text-4xl font-bold text-foreground mb-4">
               MCA Dispensary Agent Training Handbook
             </h1>
             <p className="text-lg text-muted-foreground mb-6">
-              Welcome to the MCA Dispensary Agent Training Handbook, developed by ProCann to meet the rigorous standards of COMAR 14.17.05. This handbook is your comprehensive guide to fulfilling Maryland Cannabis Administration (MCA) training requirements for registered agents.
+              Welcome to the MCA Dispensary Agent Training Handbook, developed by ProCann to meet the rigorous standards of COMAR 14.17.15.05. This handbook is your comprehensive guide to fulfilling Maryland Cannabis Administration (MCA) training requirements for registered agents.
             </p>
             <div className="flex flex-wrap gap-3">
               <Button onClick={() => navigate('/course')} variant="default">
@@ -177,7 +177,7 @@ const TrainingHandbook = () => {
               </CardHeader>
               <CardContent className="space-y-6">
                 <p className="text-lg leading-relaxed text-muted-foreground">
-                  As a registered dispensary agent, your role begins with a thorough understanding of the legal landscape. Under COMAR 14.17.05.A(1), you'll be trained annually on Federal and State cannabis laws, including Maryland's Alcoholic Beverages and Cannabis Article, §§36-1001—36-1003. ProCann's curriculum delves into these regulations, clarifying your responsibilities and the boundaries of cannabis commerce. We also cover the State's alcohol and drug-free workplace policy (COMAR 21.11.08.03) and other pertinent laws, ensuring you're equipped to operate within a compliant framework. This section sets the stage for your legal literacy in the industry.
+                  As a registered dispensary agent, your role begins with a thorough understanding of the legal landscape. Under COMAR 14.17.15.05.A(1), you'll be trained annually on Federal and State cannabis laws, including Maryland's Alcoholic Beverages and Cannabis Article, §§36-1001—36-1003. ProCann's curriculum delves into these regulations, clarifying your responsibilities and the boundaries of cannabis commerce. We also cover the State's alcohol and drug-free workplace policy (COMAR 21.11.08.03) and other pertinent laws, ensuring you're equipped to operate within a compliant framework. This section sets the stage for your legal literacy in the industry.
                 </p>
                 <div className="rounded-lg overflow-hidden bg-muted">
                   <div className="aspect-video">
@@ -205,7 +205,7 @@ const TrainingHandbook = () => {
                </CardHeader>
                <CardContent className="space-y-6">
                  <p className="text-lg leading-relaxed text-muted-foreground">
-                   Day-to-day operations require mastery of standard procedures and safety protocols, as mandated by COMAR 14.17.05.A(2)—(6). This section teaches you ProCann's standard operating procedures (SOPs) for dispensary management, alongside techniques to detect and prevent cannabis diversion. You'll learn security measures to safeguard inventory and respond to emergencies like medical incidents, fires, chemical spills, and threatening events—such as armed robberies or burglaries. Our training emphasizes practical skills, from locking down a facility during an invasion to handling a customer in distress, ensuring safety for you and your workplace.
+                   Day-to-day operations require mastery of standard procedures and safety protocols, as mandated by COMAR 14.17.15.05.A(2)—(6). This section teaches you ProCann's standard operating procedures (SOPs) for dispensary management, alongside techniques to detect and prevent cannabis diversion. You'll learn security measures to safeguard inventory and respond to emergencies like medical incidents, fires, chemical spills, and threatening events—such as armed robberies or burglaries. Our training emphasizes practical skills, from locking down a facility during an invasion to handling a customer in distress, ensuring safety for you and your workplace.
                  </p>
                  <div className="rounded-lg overflow-hidden bg-muted">
                    <div className="aspect-video">
@@ -289,7 +289,7 @@ const TrainingHandbook = () => {
                </CardHeader>
                <CardContent className="space-y-6">
                  <p className="text-lg leading-relaxed text-muted-foreground">
-                   Beyond annual requirements, COMAR 14.17.05.C mandates a separate Responsible Vendor Training Program, which ProCann proudly offers in compliance with §§36-1001—36-1003. This section prepares you for certification by covering advanced customer service, sales ethics, and regulatory adherence. Approved by the MCA for three years (COMAR 14.17.05.E(3)), our program ensures you meet minimum educational standards while enhancing your professional skills. We maintain records for four years, as required, making compliance seamless for you and your employer.
+                   Beyond annual requirements, COMAR 14.17.15.05.C mandates a separate Responsible Vendor Training Program, which ProCann proudly offers in compliance with §§36-1001—36-1003. This section prepares you for certification by covering advanced customer service, sales ethics, and regulatory adherence. An approved responsible vendor training program is registered with the MCA for three years (COMAR 14.17.15.05.E(3)); ProCann's program is designed to meet these minimum educational standards while enhancing your professional skills. We maintain records for four years, as required, making compliance seamless for you and your employer.
                  </p>
                  <div className="rounded-lg overflow-hidden bg-muted">
                    <div className="aspect-video">
@@ -308,7 +308,7 @@ const TrainingHandbook = () => {
             <CardContent className="text-center py-8">
               <h3 className="text-2xl font-bold mb-4">Ready to Start Your Training?</h3>
               <p className="text-muted-foreground mb-6">
-                Access the full course with interactive modules, quizzes, and earn your MCA certification.
+                Access the full course with interactive modules, quizzes, and earn your Responsible Vendor Training certificate.
               </p>
               <div className="flex flex-wrap gap-3 justify-center">
                 <Button onClick={() => navigate('/course')} size="lg">

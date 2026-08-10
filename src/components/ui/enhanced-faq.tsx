@@ -54,7 +54,7 @@ export const EnhancedFAQ: React.FC<EnhancedFAQProps> = ({
     {
       id: 'student-2',
       question: 'How long do I have to complete the course?',
-      answer: 'You can work through the course at your own pace. Note that COMAR 14.17.15.05C requires registered cannabis agents to complete an MCA-approved Responsible Vendor Training within 12 months of hire, so check your hire date with your manager. The MCA recommends completing training within 90 days as a best practice.',
+      answer: 'You can work through the course at your own pace. Note that COMAR 14.17.15.05.C requires registered cannabis agents to complete an approved Responsible Vendor Training within 90 days of the start of employment, and annually thereafter, so check your hire date with your manager.',
       category: 'Course Access',
       securityLevel: 'student'
     },

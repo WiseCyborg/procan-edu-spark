@@ -47,7 +47,7 @@ export default function StateOfficialsPage() {
           For Maryland State Officials
         </Badge>
         <h1 className="text-4xl font-bold mb-4">
-          Maryland Cannabis Administration Partnership
+          Engaging the Maryland Cannabis Administration
         </h1>
         <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
           Comprehensive documentation and real-time access for state regulatory oversight
