@@ -127,9 +127,9 @@ export const RemedialRecommendations: React.FC<RemedialRecommendationsProps> = (
                   size="sm"
                   variant="outline"
                   onClick={() => handleReviewModule(topic.section_number)}
-                  className="ml-4"
+                  className="ms-4"
                 >
-                  <BookOpen className="h-4 w-4 mr-2" />
+                  <BookOpen className="h-4 w-4 me-2" />
                   Review Module
                 </Button>
               </div>
@@ -176,9 +176,9 @@ export const RemedialRecommendations: React.FC<RemedialRecommendationsProps> = (
                   size="sm"
                   variant="ghost"
                   onClick={() => handleReviewModule(topic.section_number)}
-                  className="ml-4"
+                  className="ms-4"
                 >
-                  <BookOpen className="h-4 w-4 mr-2" />
+                  <BookOpen className="h-4 w-4 me-2" />
                   Review
                 </Button>
               </div>
@@ -285,7 +285,7 @@ export const RemedialRecommendations: React.FC<RemedialRecommendationsProps> = (
                 onClick={() => navigate('/course')} 
                 className="w-full"
               >
-                <BookOpen className="h-4 w-4 mr-2" />
+                <BookOpen className="h-4 w-4 me-2" />
                 Return to Course Modules
               </Button>
             </>

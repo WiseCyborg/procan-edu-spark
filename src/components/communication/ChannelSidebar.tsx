@@ -125,7 +125,7 @@ export const ChannelSidebar = ({
         <span className="text-muted-foreground">
           {conversation.metadata?.icon || '#'}
         </span>
-        <span className="flex-1 text-left truncate">
+        <span className="flex-1 text-start truncate">
           {conversation.title || 'Unnamed Channel'}
         </span>
         {hasActiveCall && (
@@ -141,7 +141,7 @@ export const ChannelSidebar = ({
   };
 
   return (
-    <div className="w-64 border-r border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex flex-col h-full" data-tour="channel-sidebar">
+    <div className="w-64 border-e border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex flex-col h-full" data-tour="channel-sidebar">
       <div className="p-4 border-b border-border">
         <div className="flex items-center justify-between gap-2">
           <h2 className="font-semibold text-lg">Communication Hub</h2>
@@ -176,7 +176,7 @@ export const ChannelSidebar = ({
                   <ChevronDown className="w-3 h-3" />
                 )}
                 {category.icon}
-                <span className="flex-1 text-left">{category.title}</span>
+                <span className="flex-1 text-start">{category.title}</span>
                 <span className="text-xs">{category.conversations.length}</span>
               </Button>
 

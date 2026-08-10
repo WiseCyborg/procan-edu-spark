@@ -153,7 +153,7 @@ export function DeactivateEmployeeDialog({
             />
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 rtl:space-x-reverse">
             <Checkbox
               id="release-seat"
               checked={releaseSeat}
@@ -179,12 +179,12 @@ export function DeactivateEmployeeDialog({
           >
             {loading ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="me-2 h-4 w-4 animate-spin" />
                 Deactivating...
               </>
             ) : (
               <>
-                <UserX className="mr-2 h-4 w-4" />
+                <UserX className="me-2 h-4 w-4" />
                 Deactivate
               </>
             )}

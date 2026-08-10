@@ -30,7 +30,7 @@ export function UATStepCard({ task, onSubmit }: Props) {
   };
 
   return (
-    <Card className="border-l-4 border-l-primary/40">
+    <Card className="border-s-4 border-s-primary/40">
       <CardContent className="p-4 space-y-3">
         <div className="flex items-start justify-between gap-3">
           <div>
@@ -45,7 +45,7 @@ export function UATStepCard({ task, onSubmit }: Props) {
           {task.deep_link && (
             <Button asChild size="sm" variant="outline" className="shrink-0">
               <a href={task.deep_link} target="_blank" rel="noopener noreferrer">
-                Open <ExternalLink className="ml-1 h-3 w-3" />
+                Open <ExternalLink className="ms-1 h-3 w-3" />
               </a>
             </Button>
           )}
@@ -66,7 +66,7 @@ export function UATStepCard({ task, onSubmit }: Props) {
             className="bg-green-600 hover:bg-green-700 text-white"
           >
             {saving === 'pass' ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
-            <span className="ml-1">Pass</span>
+            <span className="ms-1">Pass</span>
           </Button>
           <Button
             size="sm"
@@ -75,7 +75,7 @@ export function UATStepCard({ task, onSubmit }: Props) {
             disabled={!!saving}
           >
             {saving === 'fail' ? <Loader2 className="h-4 w-4 animate-spin" /> : <XCircle className="h-4 w-4" />}
-            <span className="ml-1">Fail</span>
+            <span className="ms-1">Fail</span>
           </Button>
           <Button
             size="sm"
@@ -84,7 +84,7 @@ export function UATStepCard({ task, onSubmit }: Props) {
             disabled={!!saving}
           >
             {saving === 'skip' ? <Loader2 className="h-4 w-4 animate-spin" /> : <MinusCircle className="h-4 w-4" />}
-            <span className="ml-1">Skip</span>
+            <span className="ms-1">Skip</span>
           </Button>
         </div>
       </CardContent>

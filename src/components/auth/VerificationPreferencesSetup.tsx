@@ -178,7 +178,7 @@ export const VerificationPreferencesSetup: React.FC = () => {
           <Settings className="w-5 h-5" />
           Verification Preferences
           {isHighPrivilegeUser && (
-            <Badge variant="default" className="ml-2">
+            <Badge variant="default" className="ms-2">
               Priority User
             </Badge>
           )}
@@ -205,7 +205,7 @@ export const VerificationPreferencesSetup: React.FC = () => {
             value={preferences.preferred_method}
             onValueChange={(value) => setPreferences(prev => ({ ...prev, preferred_method: value }))}
           >
-            <div className="flex items-center space-x-2 p-3 border rounded-md hover:bg-muted/50">
+            <div className="flex items-center space-x-2 p-3 border rounded-md hover:bg-muted/50 rtl:space-x-reverse">
               <RadioGroupItem value="email" id="email" />
               <Mail className="w-4 h-4 text-muted-foreground" />
               <div className="flex-1">
@@ -216,7 +216,7 @@ export const VerificationPreferencesSetup: React.FC = () => {
               </div>
             </div>
             
-            <div className="flex items-center space-x-2 p-3 border rounded-md hover:bg-muted/50">
+            <div className="flex items-center space-x-2 p-3 border rounded-md hover:bg-muted/50 rtl:space-x-reverse">
               <RadioGroupItem value="sms" id="sms" />
               <Smartphone className="w-4 h-4 text-muted-foreground" />
               <div className="flex-1">
@@ -266,7 +266,7 @@ export const VerificationPreferencesSetup: React.FC = () => {
             className="flex-1"
           >
             {loading ? 'Saving...' : 'Save Preferences'}
-            {hasExistingPrefs && <CheckCircle className="w-4 h-4 ml-2" />}
+            {hasExistingPrefs && <CheckCircle className="w-4 h-4 ms-2" />}
           </Button>
 
           {preferences.preferred_method !== 'email' && preferences.phone_number && (

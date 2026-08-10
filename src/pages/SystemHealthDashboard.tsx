@@ -99,11 +99,11 @@ const SystemHealthDashboard = () => {
         </div>
         <div className="flex gap-2">
           <Button onClick={() => navigate('/admin/health-report')} variant="default">
-            <BarChart3 className="h-4 w-4 mr-2" />
+            <BarChart3 className="h-4 w-4 me-2" />
             Full Health Report
           </Button>
           <Button onClick={fetchHealthData} variant="outline">
-            <RefreshCw className="h-4 w-4 mr-2" />
+            <RefreshCw className="h-4 w-4 me-2" />
             Refresh
           </Button>
         </div>

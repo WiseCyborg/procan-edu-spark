@@ -92,7 +92,7 @@ export const EnhancedScrollArea: React.FC<EnhancedScrollAreaProps> = ({
       
       {/* Scroll Controls */}
       {showScrollButtons && (
-        <div className="absolute right-2 top-2 flex flex-col gap-1 z-10">
+        <div className="absolute end-2 top-2 flex flex-col gap-1 z-10">
           {!isAtTop && (
             <Button
               size="sm"
@@ -114,7 +114,7 @@ export const EnhancedScrollArea: React.FC<EnhancedScrollAreaProps> = ({
               {showUnreadCount > 0 && (
                 <Badge 
                   variant="destructive" 
-                  className="absolute -top-2 -right-2 h-5 w-5 p-0 text-xs flex items-center justify-center"
+                  className="absolute -top-2 -end-2 h-5 w-5 p-0 text-xs flex items-center justify-center"
                 >
                   {showUnreadCount > 9 ? '9+' : showUnreadCount}
                 </Badge>
@@ -126,7 +126,7 @@ export const EnhancedScrollArea: React.FC<EnhancedScrollAreaProps> = ({
       
       {/* Scroll Position Indicator */}
       {showScrollButtons && (
-        <div className="absolute right-2 bottom-2">
+        <div className="absolute end-2 bottom-2">
           <div className="w-1 h-8 bg-border rounded-full overflow-hidden">
             <div 
               className="bg-primary rounded-full transition-all duration-150"

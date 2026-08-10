@@ -56,7 +56,7 @@ export const CallContextSelector = ({ onSelect }: CallContextSelectorProps) => {
               onClick={() => handleSelect(type.value as CallerType)}
               className="cursor-pointer"
             >
-              <span className="mr-2">{type.icon}</span>
+              <span className="me-2">{type.icon}</span>
               {type.label}
             </DropdownMenuItem>
           ))}

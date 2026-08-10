@@ -159,7 +159,7 @@ export const VideoCallLobby = ({ onJoin, defaultName = '' }: VideoCallLobbyProps
                 <AlertCircle className="h-8 w-8 text-destructive mb-2" />
                 <p className="text-sm text-destructive font-medium mb-2">{cameraError}</p>
                 <Button variant="outline" size="sm" onClick={retryCamera}>
-                  <RefreshCw className="h-4 w-4 mr-2" />
+                  <RefreshCw className="h-4 w-4 me-2" />
                   Retry
                 </Button>
               </div>

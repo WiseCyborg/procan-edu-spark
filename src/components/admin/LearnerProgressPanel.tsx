@@ -320,14 +320,14 @@ export function LearnerProgressPanel() {
             <div className="lg:col-span-2 flex flex-col gap-3">
               <div className="relative">
                 <Search
-                  className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4"
+                  className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4"
                   style={{ color: BRAND.textMuted }}
                 />
                 <Input
                   placeholder="Search by name or email…"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="pl-9"
+                  className="ps-9"
                   style={{
                     background: BRAND.bgSoft,
                     borderColor: BRAND.border,
@@ -341,7 +341,7 @@ export function LearnerProgressPanel() {
               >
                 {filtered.length} learner{filtered.length === 1 ? '' : 's'}
               </div>
-              <ScrollArea className="h-[520px] pr-2">
+              <ScrollArea className="h-[520px] pe-2">
                 <div className="flex flex-col gap-2">
                   {filtered.map((l) => {
                     const pct = Math.round((l.modules_completed / TOTAL_MODULES) * 100);
@@ -350,7 +350,7 @@ export function LearnerProgressPanel() {
                       <button
                         key={l.user_id}
                         onClick={() => setSelectedId(l.user_id)}
-                        className="text-left rounded-lg p-3 transition-colors"
+                        className="text-start rounded-lg p-3 transition-colors"
                         style={{
                           background: isSelected ? BRAND.bgSofter : BRAND.bgSoft,
                           border: `1px solid ${isSelected ? BRAND.accent : BRAND.border}`,

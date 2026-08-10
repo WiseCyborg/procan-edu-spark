@@ -52,12 +52,12 @@ export function PipelineHealthTab() {
     <Tabs defaultValue="agent" className="space-y-6">
       <TabsList>
         <TabsTrigger value="agent">
-          <Bot className="h-4 w-4 mr-2" />
+          <Bot className="h-4 w-4 me-2" />
           Health Agent
         </TabsTrigger>
         <TabsTrigger value="status">Health Status</TabsTrigger>
         <TabsTrigger value="settings">
-          <Settings className="h-4 w-4 mr-2" />
+          <Settings className="h-4 w-4 me-2" />
           Alert Settings
         </TabsTrigger>
       </TabsList>

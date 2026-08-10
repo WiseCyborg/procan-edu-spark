@@ -160,7 +160,7 @@ export const CameraUnavailableDialog: React.FC<CameraUnavailableDialogProps> = (
 
           <div className="flex justify-center gap-3">
             <Button onClick={onRetry} size="lg">
-              <RefreshCw className="w-4 h-4 mr-2" />
+              <RefreshCw className="w-4 h-4 me-2" />
               Try Again
             </Button>
             {errorType === 'no-camera' && (

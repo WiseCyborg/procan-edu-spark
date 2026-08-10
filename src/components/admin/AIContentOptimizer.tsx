@@ -135,12 +135,12 @@ export const AIContentOptimizer: React.FC = () => {
             >
               {isAnalyzing ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="me-2 h-4 w-4 animate-spin" />
                   Analyzing...
                 </>
               ) : (
                 <>
-                  <TrendingUp className="mr-2 h-4 w-4" />
+                  <TrendingUp className="me-2 h-4 w-4" />
                   Run Analysis
                 </>
               )}

@@ -39,7 +39,7 @@ export function SectionNavButton({
             onClick={onMarkComplete}
             className="w-full sm:w-auto border-2"
           >
-            <CheckCircle className="mr-2 h-5 w-5" />
+            <CheckCircle className="me-2 h-5 w-5" />
             {completionMessage || "Mark as Complete"}
           </Button>
         )}
@@ -55,14 +55,14 @@ export function SectionNavButton({
             )}
           >
             {completionMessage || `Continue to ${nextSection.label}`}
-            <ArrowRight className="ml-2 h-5 w-5" />
+            <ArrowRight className="ms-2 h-5 w-5" />
           </Button>
         )}
       </div>
 
       {/* Guidance message when blocked */}
       {!canContinue && nextSection && (
-        <p className="text-sm text-muted-foreground mt-3 text-center sm:text-right flex items-center justify-center sm:justify-end gap-2">
+        <p className="text-sm text-muted-foreground mt-3 text-center sm:text-end flex items-center justify-center sm:justify-end gap-2">
           <span className="inline-block w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
           {completionMessage || "Complete this section to continue"}
         </p>

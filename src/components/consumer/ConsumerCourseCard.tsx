@@ -75,7 +75,7 @@ export const ConsumerCourseCard = ({ course }: ConsumerCourseCardProps) => {
           size="lg"
         >
           Start Learning Free
-          <ArrowRight className="ml-2 h-4 w-4" />
+          <ArrowRight className="ms-2 h-4 w-4" />
         </Button>
         <p className="text-xs text-center text-muted-foreground">
           No account required • Earn certificate

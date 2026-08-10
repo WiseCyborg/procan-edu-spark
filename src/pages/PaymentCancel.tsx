@@ -31,7 +31,7 @@ const PaymentCancel: React.FC = () => {
               className="w-full"
               size="lg"
             >
-              <RotateCcw className="h-4 w-4 mr-2" /> Retry payment
+              <RotateCcw className="h-4 w-4 me-2" /> Retry payment
             </Button>
           )}
           {isTopup && (
@@ -40,7 +40,7 @@ const PaymentCancel: React.FC = () => {
               className="w-full"
               size="lg"
             >
-              <RotateCcw className="h-4 w-4 mr-2" /> Retry payment
+              <RotateCcw className="h-4 w-4 me-2" /> Retry payment
             </Button>
           )}
           <Button
@@ -48,7 +48,7 @@ const PaymentCancel: React.FC = () => {
             variant="outline"
             className="w-full"
           >
-            <Mail className="h-4 w-4 mr-2" /> Contact support
+            <Mail className="h-4 w-4 me-2" /> Contact support
           </Button>
           <Button onClick={() => navigate('/')} variant="ghost" className="w-full">
             Back to home

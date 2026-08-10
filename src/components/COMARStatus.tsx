@@ -52,7 +52,7 @@ export const COMARStatus = ({
       <div className={cn("flex items-center gap-3 p-3 bg-green-500/10 border border-green-500/30 rounded-lg", className)}>
         <div className="relative">
           <Shield className="h-6 w-6 text-green-500" />
-          <div className="absolute -top-1 -right-1 h-2 w-2 bg-green-400 rounded-full animate-pulse" />
+          <div className="absolute -top-1 -end-1 h-2 w-2 bg-green-400 rounded-full animate-pulse" />
         </div>
         <div className="flex-1">
           <div className="flex items-center gap-2">
@@ -83,7 +83,7 @@ export const COMARStatus = ({
         className
       )}
     >
-      <Shield className="h-3 w-3 mr-1" />
+      <Shield className="h-3 w-3 me-1" />
       COMAR {version} | {formattedDate}
     </Badge>
   );

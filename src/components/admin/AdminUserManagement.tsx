@@ -148,7 +148,7 @@ export const AdminUserManagement: React.FC = () => {
           <Dialog open={showAddRole} onOpenChange={setShowAddRole}>
             <DialogTrigger asChild>
               <Button>
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="h-4 w-4 me-2" />
                 Add Role
               </Button>
             </DialogTrigger>
@@ -245,7 +245,7 @@ export const AdminUserManagement: React.FC = () => {
                         });
                       }}
                     >
-                      <Edit className="h-4 w-4 mr-1" />
+                      <Edit className="h-4 w-4 me-1" />
                       Complete Profile
                     </Button>
                   </div>
@@ -263,7 +263,7 @@ export const AdminUserManagement: React.FC = () => {
                         size="sm"
                         className="text-xs"
                       >
-                        <Trash2 className="h-3 w-3 mr-1" />
+                        <Trash2 className="h-3 w-3 me-1" />
                         Remove {role}
                       </SensitiveOperationWrapper>
                     ))}

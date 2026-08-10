@@ -84,7 +84,7 @@ export const ChatWelcomeOverlay: React.FC<WelcomeOverlayProps> = ({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="absolute right-2 top-2 h-8 w-8 p-0"
+                  className="absolute end-2 top-2 h-8 w-8 p-0"
                   onClick={onClose}
                 >
                   <X className="h-4 w-4" />
@@ -161,7 +161,7 @@ export const ChatWelcomeOverlay: React.FC<WelcomeOverlayProps> = ({
                     onClick={onStartTour}
                     className="mt-3 text-sm text-muted-foreground"
                   >
-                    <Star className="h-4 w-4 mr-2" />
+                    <Star className="h-4 w-4 me-2" />
                     Take Interactive Tour
                   </Button>
                 )}

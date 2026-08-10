@@ -142,7 +142,7 @@ export const EmailDeliveryStatus: React.FC<{ recipientEmail?: string }> = ({ rec
             Email Delivery Status
           </CardTitle>
           <Button variant="outline" size="sm" onClick={loadEmailLogs}>
-            <RefreshCw className="h-4 w-4 mr-2" />
+            <RefreshCw className="h-4 w-4 me-2" />
             Refresh
           </Button>
         </div>
@@ -223,12 +223,12 @@ export const EmailDeliveryStatus: React.FC<{ recipientEmail?: string }> = ({ rec
                     >
                       {retrying === email.id ? (
                         <>
-                          <RefreshCw className="h-3 w-3 mr-2 animate-spin" />
+                          <RefreshCw className="h-3 w-3 me-2 animate-spin" />
                           Retrying...
                         </>
                       ) : (
                         <>
-                          <RefreshCw className="h-3 w-3 mr-2" />
+                          <RefreshCw className="h-3 w-3 me-2" />
                           Retry Now
                         </>
                       )}

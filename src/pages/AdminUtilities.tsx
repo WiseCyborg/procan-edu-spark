@@ -181,12 +181,12 @@ const AdminUtilities = () => {
           >
             {reconciling ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="me-2 h-4 w-4 animate-spin" />
                 Reconciling Seats...
               </>
             ) : (
               <>
-                <RefreshCw className="mr-2 h-4 w-4" />
+                <RefreshCw className="me-2 h-4 w-4" />
                 Run Seat Reconciliation
               </>
             )}
@@ -273,12 +273,12 @@ const AdminUtilities = () => {
           >
             {generatingCode ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="me-2 h-4 w-4 animate-spin" />
                 Generating...
               </>
             ) : (
               <>
-                <Key className="mr-2 h-4 w-4" />
+                <Key className="me-2 h-4 w-4" />
                 Generate Join Code
               </>
             )}

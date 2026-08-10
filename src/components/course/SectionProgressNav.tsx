@@ -42,7 +42,7 @@ export function SectionProgressNav({
               onClick={() => !section.isLocked && onSectionClick(section.id)}
               disabled={section.isLocked}
               className={cn(
-                "w-full flex items-center gap-3 p-3 rounded-md text-left transition-colors",
+                "w-full flex items-center gap-3 p-3 rounded-md text-start transition-colors",
                 section.isCurrent && "bg-primary/10 border border-primary/20",
                 section.isCompleted && !section.isCurrent && "bg-muted/50",
                 !section.isLocked && !section.isCurrent && "hover:bg-muted/50 cursor-pointer",

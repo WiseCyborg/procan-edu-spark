@@ -32,7 +32,7 @@ export const TieredProgressBar: React.FC<TieredProgressBarProps> = ({
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-2 rtl:space-x-reverse">
           <TierIcon className={`w-6 h-6 text-white ${tierConfig.color} rounded-full p-1`} />
           <Badge className={`${tierConfig.color} text-white`}>
             {tierConfig.name}

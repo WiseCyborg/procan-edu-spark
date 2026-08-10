@@ -367,20 +367,20 @@ export const OperationalEfficiencyDashboard = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-foreground">Operational Efficiency Dashboard</h2>
-        <div className="flex space-x-2">
+        <div className="flex space-x-2 rtl:space-x-reverse">
           <Button 
             onClick={() => triggerAutomatedNotifications('check_expiry')}
             variant="outline"
             disabled={loading}
           >
-            <Clock className="h-4 w-4 mr-2" />
+            <Clock className="h-4 w-4 me-2" />
             Check Expiry
           </Button>
           <Button 
             onClick={() => triggerAutomatedNotifications('bulk_notification')}
             disabled={loading}
           >
-            <Send className="h-4 w-4 mr-2" />
+            <Send className="h-4 w-4 me-2" />
             Send Pending
           </Button>
         </div>
@@ -450,14 +450,14 @@ export const OperationalEfficiencyDashboard = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <Activity className="h-5 w-5 mr-2" />
+                  <Activity className="h-5 w-5 me-2" />
                   Recent Activity
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   {analytics.recent_activity.map((activity, index) => (
-                    <div key={index} className="flex items-center space-x-3 p-2 rounded-lg bg-muted/50">
+                    <div key={index} className="flex items-center space-x-3 p-2 rounded-lg bg-muted/50 rtl:space-x-reverse">
                       <div className="flex-1">
                         <p className="text-sm font-medium">{activity.message}</p>
                         <p className="text-xs text-muted-foreground">{activity.time}</p>
@@ -471,7 +471,7 @@ export const OperationalEfficiencyDashboard = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <AlertTriangle className="h-5 w-5 mr-2" />
+                  <AlertTriangle className="h-5 w-5 me-2" />
                   Quick Actions
                 </CardTitle>
               </CardHeader>
@@ -482,7 +482,7 @@ export const OperationalEfficiencyDashboard = () => {
                   variant="outline"
                   disabled={loading}
                 >
-                  <FileText className="h-4 w-4 mr-2" />
+                  <FileText className="h-4 w-4 me-2" />
                   Generate Compliance Report
                 </Button>
                 <Button 
@@ -491,7 +491,7 @@ export const OperationalEfficiencyDashboard = () => {
                   variant="outline"
                   disabled={loading}
                 >
-                  <Bell className="h-4 w-4 mr-2" />
+                  <Bell className="h-4 w-4 me-2" />
                   Send Training Reminders
                 </Button>
                 <Button 
@@ -500,7 +500,7 @@ export const OperationalEfficiencyDashboard = () => {
                   variant="outline"
                   disabled={loading}
                 >
-                  <Users className="h-4 w-4 mr-2" />
+                  <Users className="h-4 w-4 me-2" />
                   Process Staff Onboarding
                 </Button>
               </CardContent>
@@ -513,14 +513,14 @@ export const OperationalEfficiencyDashboard = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <Settings className="h-5 w-5 mr-2" />
+                  <Settings className="h-5 w-5 me-2" />
                   Notification Rules
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {rules.map(rule => (
                   <div key={rule.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-4 rtl:space-x-reverse">
                       <Bell className="h-4 w-4" />
                       <div>
                         <h3 className="font-medium capitalize">{rule.type.replace('_', ' ')}</h3>
@@ -530,7 +530,7 @@ export const OperationalEfficiencyDashboard = () => {
                       </div>
                     </div>
                     
-                    <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-4 rtl:space-x-reverse">
                       <Select 
                         value={rule.trigger_days.toString()} 
                         onValueChange={(value) => updateNotificationRule(rule.id, { trigger_days: parseInt(value) })}
@@ -548,7 +548,7 @@ export const OperationalEfficiencyDashboard = () => {
                         </SelectContent>
                       </Select>
                       
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-2 rtl:space-x-reverse">
                         <Switch
                           checked={rule.escalation_enabled}
                           onCheckedChange={(checked) => updateNotificationRule(rule.id, { escalation_enabled: checked })}
@@ -569,7 +569,7 @@ export const OperationalEfficiencyDashboard = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <Clock className="h-5 w-5 mr-2" />
+                  <Clock className="h-5 w-5 me-2" />
                   Pending Notifications ({pendingNotifications.length})
                 </CardTitle>
               </CardHeader>
@@ -577,7 +577,7 @@ export const OperationalEfficiencyDashboard = () => {
                 <div className="space-y-3">
                   {pendingNotifications.map(notification => (
                     <div key={notification.id} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div className="flex items-center space-x-3">
+                      <div className="flex items-center space-x-3 rtl:space-x-reverse">
                         <Bell className="h-4 w-4" />
                         <div>
                           <p className="font-medium">{notification.recipient_email}</p>
@@ -588,7 +588,7 @@ export const OperationalEfficiencyDashboard = () => {
                         </div>
                       </div>
                       
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-2 rtl:space-x-reverse">
                         <Badge className={getPriorityColor(notification.priority)}>
                           {notification.priority}
                         </Badge>
@@ -616,7 +616,7 @@ export const OperationalEfficiencyDashboard = () => {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <UserPlus className="h-5 w-5 mr-2" />
+                    <UserPlus className="h-5 w-5 me-2" />
                     Invite Single Staff Member
                   </CardTitle>
                 </CardHeader>
@@ -651,7 +651,7 @@ export const OperationalEfficiencyDashboard = () => {
                     disabled={loading || !newInviteEmail}
                     className="w-full"
                   >
-                    <Send className="h-4 w-4 mr-2" />
+                    <Send className="h-4 w-4 me-2" />
                     Send Invitation
                   </Button>
                 </CardContent>
@@ -660,7 +660,7 @@ export const OperationalEfficiencyDashboard = () => {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <Users className="h-5 w-5 mr-2" />
+                    <Users className="h-5 w-5 me-2" />
                     Bulk Staff Invitations
                   </CardTitle>
                 </CardHeader>
@@ -687,7 +687,7 @@ export const OperationalEfficiencyDashboard = () => {
                     disabled={loading || !bulkInviteEmails.trim()}
                     className="w-full"
                   >
-                    <Send className="h-4 w-4 mr-2" />
+                    <Send className="h-4 w-4 me-2" />
                     Send Bulk Invitations
                   </Button>
                 </CardContent>
@@ -697,7 +697,7 @@ export const OperationalEfficiencyDashboard = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <Mail className="h-5 w-5 mr-2" />
+                  <Mail className="h-5 w-5 me-2" />
                   Active Staff Invitations
                 </CardTitle>
               </CardHeader>
@@ -712,7 +712,7 @@ export const OperationalEfficiencyDashboard = () => {
                         </p>
                       </div>
                       
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-2 rtl:space-x-reverse">
                         <Badge className="bg-yellow-100 text-yellow-800">
                           Pending
                         </Badge>
@@ -735,7 +735,7 @@ export const OperationalEfficiencyDashboard = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
-                <Settings className="h-5 w-5 mr-2" />
+                <Settings className="h-5 w-5 me-2" />
                 Workflow Automation
               </CardTitle>
             </CardHeader>
@@ -743,7 +743,7 @@ export const OperationalEfficiencyDashboard = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <Card>
                   <CardContent className="p-4">
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-3 rtl:space-x-reverse">
                       <Clock className="h-8 w-8 text-primary" />
                       <div>
                         <h3 className="font-medium">Certificate Expiry</h3>
@@ -759,7 +759,7 @@ export const OperationalEfficiencyDashboard = () => {
 
                 <Card>
                   <CardContent className="p-4">
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-3 rtl:space-x-reverse">
                       <Users className="h-8 w-8 text-primary" />
                       <div>
                         <h3 className="font-medium">Staff Onboarding</h3>
@@ -775,7 +775,7 @@ export const OperationalEfficiencyDashboard = () => {
 
                 <Card>
                   <CardContent className="p-4">
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-3 rtl:space-x-reverse">
                       <FileText className="h-8 w-8 text-primary" />
                       <div>
                         <h3 className="font-medium">Compliance Reports</h3>
@@ -798,7 +798,7 @@ export const OperationalEfficiencyDashboard = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <TrendingUp className="h-5 w-5 mr-2" />
+                  <TrendingUp className="h-5 w-5 me-2" />
                   Communication Analytics
                 </CardTitle>
               </CardHeader>

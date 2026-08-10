@@ -107,7 +107,7 @@ export const ContextGate: React.FC<ContextGateProps> = ({ onContinue }) => {
                     </div>
                   </div>
                   <Badge className={config.color}>
-                    <Icon className="h-3 w-3 mr-1" />
+                    <Icon className="h-3 w-3 me-1" />
                     {config.label}
                   </Badge>
                 </div>
@@ -148,7 +148,7 @@ export const ContextGate: React.FC<ContextGateProps> = ({ onContinue }) => {
         {/* Continue Button */}
         <Button onClick={handleContinue} className="w-full" size="lg">
           Continue to Dashboard
-          <ArrowRight className="h-4 w-4 ml-2" />
+          <ArrowRight className="h-4 w-4 ms-2" />
         </Button>
 
         {/* Pending note */}

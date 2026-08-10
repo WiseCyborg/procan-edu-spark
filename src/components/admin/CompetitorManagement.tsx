@@ -149,7 +149,7 @@ export function CompetitorManagement() {
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button onClick={() => setEditingCompetitor(null)}>
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="h-4 w-4 me-2" />
                 Add Competitor
               </Button>
             </DialogTrigger>
@@ -257,7 +257,7 @@ export function CompetitorManagement() {
               <TableHead>Pricing</TableHead>
               <TableHead>Features</TableHead>
               <TableHead>Updated</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead className="text-end">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -302,7 +302,7 @@ export function CompetitorManagement() {
                 <TableCell className="text-sm text-muted-foreground">
                   {new Date(competitor.updated_at).toLocaleDateString()}
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell className="text-end">
                   <div className="flex justify-end gap-2">
                     <Button variant="ghost" size="sm" onClick={() => handleEdit(competitor)}>
                       <Pencil className="h-4 w-4" />

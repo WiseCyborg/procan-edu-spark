@@ -94,12 +94,12 @@ export const OptimizerScheduleCard: React.FC = () => {
           >
             {triggerNowMutation.isPending ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="me-2 h-4 w-4 animate-spin" />
                 Running...
               </>
             ) : (
               <>
-                <Play className="mr-2 h-4 w-4" />
+                <Play className="me-2 h-4 w-4" />
                 Run Now
               </>
             )}
@@ -112,12 +112,12 @@ export const OptimizerScheduleCard: React.FC = () => {
           >
             {sendDigestMutation.isPending ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="me-2 h-4 w-4 animate-spin" />
                 Sending...
               </>
             ) : (
               <>
-                <Mail className="mr-2 h-4 w-4" />
+                <Mail className="me-2 h-4 w-4" />
                 Send Digest
               </>
             )}

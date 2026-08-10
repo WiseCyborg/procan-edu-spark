@@ -288,10 +288,10 @@ const EmailMonitoringDashboard = () => {
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, { className: string; icon: React.ReactNode }> = {
-      delivered: { className: 'bg-green-100 text-green-800', icon: <CheckCircle className="w-3 h-3 mr-1" /> },
-      sent: { className: 'bg-blue-100 text-blue-800', icon: <Send className="w-3 h-3 mr-1" /> },
-      failed: { className: 'bg-red-100 text-red-800', icon: <XCircle className="w-3 h-3 mr-1" /> },
-      pending: { className: 'bg-yellow-100 text-yellow-800', icon: <Clock className="w-3 h-3 mr-1" /> },
+      delivered: { className: 'bg-green-100 text-green-800', icon: <CheckCircle className="w-3 h-3 me-1" /> },
+      sent: { className: 'bg-blue-100 text-blue-800', icon: <Send className="w-3 h-3 me-1" /> },
+      failed: { className: 'bg-red-100 text-red-800', icon: <XCircle className="w-3 h-3 me-1" /> },
+      pending: { className: 'bg-yellow-100 text-yellow-800', icon: <Clock className="w-3 h-3 me-1" /> },
     };
 
     const variant = variants[status] || variants.pending;
@@ -361,7 +361,7 @@ const EmailMonitoringDashboard = () => {
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center">
-              <Mail className="mr-2 h-5 w-5" />
+              <Mail className="me-2 h-5 w-5" />
               SMTP Email Service Status
             </div>
             <Button 
@@ -372,12 +372,12 @@ const EmailMonitoringDashboard = () => {
             >
               {smtpHealth.status === 'checking' ? (
                 <>
-                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  <RefreshCw className="w-4 h-4 me-2 animate-spin" />
                   Testing...
                 </>
               ) : (
                 <>
-                  <RefreshCw className="w-4 h-4 mr-2" />
+                  <RefreshCw className="w-4 h-4 me-2" />
                   Test Connection
                 </>
               )}
@@ -387,7 +387,7 @@ const EmailMonitoringDashboard = () => {
         <CardContent>
           <div className="flex items-center justify-between">
             <div className="space-y-2">
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
                 {smtpHealth.status === 'healthy' && (
                   <>
                     <CheckCircle className="h-6 w-6 text-green-600" />
@@ -493,20 +493,20 @@ const EmailMonitoringDashboard = () => {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center">
-              <Mail className="mr-2 h-5 w-5" />
+              <Mail className="me-2 h-5 w-5" />
               Email Communications
             </CardTitle>
-            <div className="flex space-x-2">
+            <div className="flex space-x-2 rtl:space-x-reverse">
               <Button variant="outline" size="sm" onClick={sendTestEmail}>
-                <Send className="w-4 h-4 mr-2" />
+                <Send className="w-4 h-4 me-2" />
                 Send Test
               </Button>
               <Button variant="outline" size="sm" onClick={exportToCSV}>
-                <Download className="w-4 h-4 mr-2" />
+                <Download className="w-4 h-4 me-2" />
                 Export CSV
               </Button>
               <Button variant="outline" size="sm" onClick={fetchEmailLogs}>
-                <RefreshCw className="w-4 h-4 mr-2" />
+                <RefreshCw className="w-4 h-4 me-2" />
                 Refresh
               </Button>
             </div>
@@ -519,7 +519,7 @@ const EmailMonitoringDashboard = () => {
               <TabsTrigger value="failed">
                 Failed
                 {failedEmails.length > 0 && (
-                  <Badge variant="destructive" className="ml-2">
+                  <Badge variant="destructive" className="ms-2">
                     {failedEmails.length}
                   </Badge>
                 )}
@@ -531,12 +531,12 @@ const EmailMonitoringDashboard = () => {
               <div className="flex flex-wrap gap-4">
                 <div className="flex-1 min-w-[200px]">
                   <div className="relative">
-                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Search className="absolute start-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
                       placeholder="Search emails..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-9"
+                      className="ps-9"
                     />
                   </div>
                 </div>
@@ -597,7 +597,7 @@ const EmailMonitoringDashboard = () => {
                                 To: {log.recipient_email}
                               </p>
                             </div>
-                            <div className="text-right text-sm text-muted-foreground">
+                            <div className="text-end text-sm text-muted-foreground">
                               {formatDate(log.created_at)}
                             </div>
                           </div>
@@ -645,7 +645,7 @@ const EmailMonitoringDashboard = () => {
                             size="sm"
                             onClick={() => retryFailedEmail(log)}
                           >
-                            <RefreshCw className="w-4 h-4 mr-2" />
+                            <RefreshCw className="w-4 h-4 me-2" />
                             Retry
                           </Button>
                         </div>
@@ -707,7 +707,7 @@ const EmailMonitoringDashboard = () => {
               {selectedEmail.status === 'failed' && (
                 <div className="flex justify-end">
                   <Button onClick={() => retryFailedEmail(selectedEmail)}>
-                    <RefreshCw className="w-4 h-4 mr-2" />
+                    <RefreshCw className="w-4 h-4 me-2" />
                     Retry Email
                   </Button>
                 </div>

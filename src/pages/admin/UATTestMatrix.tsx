@@ -205,12 +205,12 @@ const UATTestMatrix: React.FC = () => {
         {filtered.map(test => {
           const sc = statusConfig[test.status] || statusConfig.pending;
           return (
-            <Card key={test.id} className="border-l-4" style={{ borderLeftColor: test.status === 'pass' ? 'hsl(var(--chart-2))' : test.status === 'fail' ? 'hsl(var(--destructive))' : 'hsl(var(--muted))' }}>
+            <Card key={test.id} className="border-s-4" style={{ borderLeftColor: test.status === 'pass' ? 'hsl(var(--chart-2))' : test.status === 'fail' ? 'hsl(var(--destructive))' : 'hsl(var(--muted))' }}>
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between flex-wrap gap-2">
                   <div className="flex items-center gap-2">
                     <Badge variant="outline" className="font-mono text-xs">{test.test_id}</Badge>
-                    <Badge className={sc.color}>{sc.icon}<span className="ml-1 capitalize">{test.status}</span></Badge>
+                    <Badge className={sc.color}>{sc.icon}<span className="ms-1 capitalize">{test.status}</span></Badge>
                     <Badge variant="secondary">{test.role}</Badge>
                   </div>
                   <Select

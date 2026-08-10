@@ -163,7 +163,7 @@ const Payment: React.FC = () => {
             <CardContent className="pt-6 space-y-3">
               <p className="text-sm text-destructive">{error}</p>
               <Button onClick={startPayment} className="w-full">
-                <CreditCard className="h-4 w-4 mr-2" /> Retry payment
+                <CreditCard className="h-4 w-4 me-2" /> Retry payment
               </Button>
             </CardContent>
           </Card>

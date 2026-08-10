@@ -128,7 +128,7 @@ const PipelineMonitor = () => {
               Last refresh: {formatDistanceToNow(lastRefresh, { addSuffix: true })}
             </div>
             <Button onClick={refreshAll} size="sm" variant="outline">
-              <RefreshCw className="h-4 w-4 mr-2" />
+              <RefreshCw className="h-4 w-4 me-2" />
               Refresh All
             </Button>
           </div>
@@ -331,7 +331,7 @@ const PipelineMonitor = () => {
                         <div className="text-xs text-red-600 mt-1 truncate max-w-md">{job.last_error}</div>
                       )}
                     </div>
-                    <div className="text-xs text-muted-foreground space-y-1 text-right">
+                    <div className="text-xs text-muted-foreground space-y-1 text-end">
                       <div>Queued: {formatDistanceToNow(new Date(job.queued_at), { addSuffix: true })}</div>
                       {job.completed_at && (
                         <div>

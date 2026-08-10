@@ -109,7 +109,7 @@ export const RealTimeEmailDashboard = () => {
                 <div className="flex gap-2 flex-wrap justify-end">
                   {email.opened_at && (
                     <Badge variant="outline" className="bg-green-50">
-                      <Check className="h-3 w-3 mr-1" />Opened
+                      <Check className="h-3 w-3 me-1" />Opened
                     </Badge>
                   )}
                   {email.clicked_at && (
@@ -117,12 +117,12 @@ export const RealTimeEmailDashboard = () => {
                   )}
                   {email.delivery_status === 'failed' && (
                     <Badge variant="destructive">
-                      <AlertCircle className="h-3 w-3 mr-1" />Failed
+                      <AlertCircle className="h-3 w-3 me-1" />Failed
                     </Badge>
                   )}
                   {email.delivery_status === 'pending' && (
                     <Badge variant="secondary">
-                      <Clock className="h-3 w-3 mr-1" />Pending
+                      <Clock className="h-3 w-3 me-1" />Pending
                     </Badge>
                   )}
                 </div>

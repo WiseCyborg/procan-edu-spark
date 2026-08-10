@@ -98,7 +98,7 @@ const LaunchReadiness: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <Link to="/admin" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-2">
-            <ArrowLeft className="h-4 w-4 mr-1" /> Back to Admin
+            <ArrowLeft className="h-4 w-4 me-1" /> Back to Admin
           </Link>
           <h1 className="text-2xl font-semibold">Launch Readiness</h1>
           <p className="text-sm text-muted-foreground">
@@ -108,7 +108,7 @@ const LaunchReadiness: React.FC = () => {
               onClick={(e) => { e.preventDefault(); window.open("/docs/audit/2026-07/evidence/e2e_readiness_run_2026-06-18.md", "_blank"); }}
               className="text-primary hover:underline inline-flex items-center"
             >
-              Latest evidence report <ExternalLink className="h-3 w-3 ml-0.5" />
+              Latest evidence report <ExternalLink className="h-3 w-3 ms-0.5" />
             </a>
           </p>
 
@@ -122,7 +122,7 @@ const LaunchReadiness: React.FC = () => {
           }
           disabled={runAudit.isPending}
         >
-          {runAudit.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
+          {runAudit.isPending ? <Loader2 className="h-4 w-4 me-2 animate-spin" /> : <RefreshCw className="h-4 w-4 me-2" />}
           Run Firecrawl Audit
         </Button>
       </div>
@@ -161,7 +161,7 @@ const LaunchReadiness: React.FC = () => {
             <Loader2 className="h-5 w-5 animate-spin" />
           ) : snapshot.error ? (
             <div className="text-sm text-destructive">
-              <AlertTriangle className="inline h-4 w-4 mr-1" /> {(snapshot.error as Error).message}
+              <AlertTriangle className="inline h-4 w-4 me-1" /> {(snapshot.error as Error).message}
             </div>
           ) : s ? (
             <>
@@ -237,7 +237,7 @@ const LaunchReadiness: React.FC = () => {
                       {row.screenshot_path && (
                         <a href={row.screenshot_path} target="_blank" rel="noreferrer"
                           className="text-xs inline-flex items-center text-primary hover:underline">
-                          screenshot <ExternalLink className="h-3 w-3 ml-0.5" />
+                          screenshot <ExternalLink className="h-3 w-3 ms-0.5" />
                         </a>
                       )}
                     </div>
@@ -246,7 +246,7 @@ const LaunchReadiness: React.FC = () => {
                     <div className="mt-2 text-xs text-red-700 dark:text-red-300">
                       <strong>Failures:</strong>{" "}
                       {row.failed_checks.map((fc, i) => (
-                        <span key={i} className="mr-2">
+                        <span key={i} className="me-2">
                           <code>{fc.check}</code> — {fc.reason}
                         </span>
                       ))}

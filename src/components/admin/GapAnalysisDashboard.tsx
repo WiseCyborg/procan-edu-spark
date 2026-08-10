@@ -278,7 +278,7 @@ export const GapAnalysisDashboard = () => {
                         onClick={() => setExpandedCheck(expandedCheck === check.id ? null : check.id)}
                         className="hover:no-underline"
                       >
-                        <div className="flex items-center gap-3 flex-1 text-left">
+                        <div className="flex items-center gap-3 flex-1 text-start">
                           {getSeverityIcon(check.severity)}
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
@@ -305,7 +305,7 @@ export const GapAnalysisDashboard = () => {
                         </div>
                       </AccordionTrigger>
                       <AccordionContent>
-                        <div className="space-y-4 pt-4 pl-8">
+                        <div className="space-y-4 pt-4 ps-8">
                           {/* Suggested Fix */}
                           <div>
                             <h4 className="font-medium mb-2 flex items-center gap-2">

@@ -56,7 +56,7 @@ export function EmailTab() {
               variant="default"
               className="mt-2"
             >
-              <ExternalLink className="h-4 w-4 mr-2" />
+              <ExternalLink className="h-4 w-4 me-2" />
               Fix Domain Verification Now
             </Button>
           </AlertDescription>
@@ -64,7 +64,7 @@ export function EmailTab() {
       )}
 
       {/* Email System Health Widget */}
-      <Card className="border-l-4 border-l-green-500">
+      <Card className="border-s-4 border-s-green-500">
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <span className="flex items-center gap-2">
@@ -100,7 +100,7 @@ export function EmailTab() {
               <AlertTriangle className="h-4 w-4" />
               <AlertTitle>Issues Detected</AlertTitle>
               <AlertDescription>
-                <ul className="list-disc pl-4 mt-2">
+                <ul className="list-disc ps-4 mt-2">
                   {emailHealth.errors.map((error: string, i: number) => (
                     <li key={i} className="text-sm">{error}</li>
                   ))}
@@ -199,7 +199,7 @@ export function EmailTab() {
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Email Delivery Analytics</CardTitle>
           <Button variant="outline" size="sm" onClick={refreshMetrics}>
-            <RefreshCw className="h-4 w-4 mr-2" />
+            <RefreshCw className="h-4 w-4 me-2" />
             Refresh
           </Button>
         </CardHeader>

@@ -87,7 +87,7 @@ export default function Pricing() {
                 className={`relative ${tier.isPopular ? 'border-primary shadow-lg scale-105' : ''}`}
               >
                 {tier.isPopular && (
-                  <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">
+                  <Badge className="absolute -top-3 start-1/2 -translate-x-1/2">
                     Most Popular
                   </Badge>
                 )}
@@ -107,7 +107,7 @@ export default function Pricing() {
                     <span className="text-4xl font-bold">{getPrice(tier)}</span>
                     <span className="text-muted-foreground">/year</span>
                     {showNonprofit && (
-                      <Badge variant="secondary" className="ml-2">
+                      <Badge variant="secondary" className="ms-2">
                         {SPECIAL_PRICING.nonprofit.discountPercent}% off
                       </Badge>
                     )}
@@ -135,7 +135,7 @@ export default function Pricing() {
                     onClick={() => navigate('/dispensary-application')}
                   >
                     {tier.tierName === 'unlimited' ? 'Contact Sales' : 'Get Started'}
-                    <ArrowRight className="h-4 w-4 ml-2" />
+                    <ArrowRight className="h-4 w-4 ms-2" />
                   </Button>
                 </CardFooter>
               </Card>
@@ -148,7 +148,7 @@ export default function Pricing() {
               <CardContent className="py-6">
                 <div className="flex items-center justify-center gap-4 flex-wrap">
                   <Users className="h-8 w-8 text-primary" />
-                  <div className="text-left">
+                  <div className="text-start">
                     <p className="font-medium">Need just a few seats?</p>
                     <p className="text-sm text-muted-foreground">
                       Individual seats available at $49.99/employee (Maryland max: $50.00)
@@ -171,7 +171,7 @@ export default function Pricing() {
             <Accordion type="single" collapsible className="w-full">
               {faqs.map((faq, index) => (
                 <AccordionItem key={index} value={`item-${index}`}>
-                  <AccordionTrigger className="text-left">
+                  <AccordionTrigger className="text-start">
                     {faq.question}
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground">

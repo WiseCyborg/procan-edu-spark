@@ -61,7 +61,7 @@ export const TrackSidebar = ({
         onClick={() => !isLocked && onModuleSelect(actualIndex)}
         disabled={isLocked}
         className={cn(
-          'w-full flex items-start gap-3 p-3 rounded-lg text-left transition-colors',
+          'w-full flex items-start gap-3 p-3 rounded-lg text-start transition-colors',
           isLocked && 'opacity-50 cursor-not-allowed',
           isCurrent
             ? track === 'manager' 

@@ -111,26 +111,26 @@ export const DocumentReadTracker: React.FC<DocumentReadTrackerProps> = ({
       case 'completed':
         return (
           <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800">
-            <CheckCircle2 className="h-3 w-3 mr-1" />
+            <CheckCircle2 className="h-3 w-3 me-1" />
             Completed
           </Badge>
         );
       case 'in-progress':
         return (
           <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800 animate-pulse">
-            <Eye className="h-3 w-3 mr-1" />
+            <Eye className="h-3 w-3 me-1" />
             Reading...
           </Badge>
         );
       default:
         return required ? (
           <Badge variant="destructive" className="animate-pulse">
-            <BookOpen className="h-3 w-3 mr-1" />
+            <BookOpen className="h-3 w-3 me-1" />
             Must Read
           </Badge>
         ) : (
           <Badge variant="outline">
-            <FileText className="h-3 w-3 mr-1" />
+            <FileText className="h-3 w-3 me-1" />
             Optional
           </Badge>
         );
@@ -148,7 +148,7 @@ export const DocumentReadTracker: React.FC<DocumentReadTrackerProps> = ({
     >
       <button
         onClick={() => !isRead && setIsExpanded(!isExpanded)}
-        className="w-full text-left"
+        className="w-full text-start"
         disabled={isRead}
       >
         <CardContent className="p-4">
@@ -279,7 +279,7 @@ export const DocumentReadTracker: React.FC<DocumentReadTrackerProps> = ({
                     canMarkAsRead && "animate-pulse bg-green-600 hover:bg-green-700"
                   )}
                 >
-                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                  <CheckCircle2 className="h-4 w-4 me-2" />
                   {canMarkAsRead ? 'Mark as Read' : 'Keep Reading...'}
                 </Button>
               </div>

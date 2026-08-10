@@ -52,7 +52,7 @@ const steps = [
             <li>Suspend or reactivate accounts</li>
           </ul>
         </div>
-        <div className="border-l-4 border-yellow-500 bg-yellow-50 p-4 rounded">
+        <div className="border-s-4 border-yellow-500 bg-yellow-50 p-4 rounded">
           <p className="text-sm font-semibold text-yellow-800">⚠️ Important</p>
           <p className="text-sm text-yellow-700">
             Role changes take effect immediately. Always verify before assigning admin roles.

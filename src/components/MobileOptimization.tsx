@@ -43,7 +43,7 @@ export const AccessibilityToolbar: React.FC = () => {
         }
       `}</style>
       
-      <div className="fixed top-4 right-4 z-50">
+      <div className="fixed top-4 end-4 z-50">
         <Button
           onClick={() => setIsOpen(!isOpen)}
           variant="outline"

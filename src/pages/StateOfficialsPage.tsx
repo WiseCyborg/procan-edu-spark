@@ -43,7 +43,7 @@ export default function StateOfficialsPage() {
       {/* Hero Section */}
       <div className="text-center mb-12">
         <Badge className="mb-4 text-lg px-4 py-2">
-          <Shield className="h-5 w-5 mr-2" />
+          <Shield className="h-5 w-5 me-2" />
           For Maryland State Officials
         </Badge>
         <h1 className="text-4xl font-bold mb-4">
@@ -169,7 +169,7 @@ export default function StateOfficialsPage() {
                 <p className="text-sm text-muted-foreground">Current student registrations and progress</p>
               </div>
               <Button variant="outline">
-                <Download className="h-4 w-4 mr-2" />
+                <Download className="h-4 w-4 me-2" />
                 Export
               </Button>
             </div>
@@ -188,7 +188,7 @@ export default function StateOfficialsPage() {
                 <p className="text-sm text-muted-foreground">Monthly automated reports</p>
               </div>
               <Button variant="outline">
-                <Download className="h-4 w-4 mr-2" />
+                <Download className="h-4 w-4 me-2" />
                 Latest Report
               </Button>
             </div>
@@ -208,7 +208,7 @@ export default function StateOfficialsPage() {
               className="h-auto py-4"
               onClick={() => window.location.href = '/compliance/curriculum-matrix'}
             >
-              <div className="text-left w-full">
+              <div className="text-start w-full">
                 <p className="font-semibold">COMAR 14.17.15.05 Compliance Matrix</p>
                 <p className="text-sm text-muted-foreground">Full curriculum mapping to state requirements</p>
               </div>
@@ -218,7 +218,7 @@ export default function StateOfficialsPage() {
               className="h-auto py-4"
               onClick={() => window.location.href = '/compliance/content-review'}
             >
-              <div className="text-left w-full">
+              <div className="text-start w-full">
                 <p className="font-semibold">Annual Content Review Process</p>
                 <p className="text-sm text-muted-foreground">Regulatory update tracking and integration</p>
               </div>

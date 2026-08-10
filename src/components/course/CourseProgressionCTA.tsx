@@ -117,7 +117,7 @@ export const CourseProgressionCTA: React.FC<CourseProgressionCTAProps> = ({
             </motion.div>
 
             {/* Content */}
-            <div className="flex-1 text-center md:text-left space-y-2">
+            <div className="flex-1 text-center md:text-start space-y-2">
               <div className="flex items-center justify-center md:justify-start gap-2">
                 <h3 className="text-xl font-bold text-foreground">
                   {nextAction.title}

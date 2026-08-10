@@ -93,7 +93,7 @@ const FeedItem: React.FC<FeedItemProps> = ({ event, onAcknowledge }) => {
             </Badge>
             {event.auto_fixed && (
               <Badge variant="outline" className="text-xs text-green-600 border-green-500">
-                <Wrench className="h-3 w-3 mr-1" />
+                <Wrench className="h-3 w-3 me-1" />
                 Auto-Fixed
               </Badge>
             )}
@@ -144,7 +144,7 @@ const FeedItem: React.FC<FeedItemProps> = ({ event, onAcknowledge }) => {
               className="mt-2"
               onClick={() => onAcknowledge(event.id)}
             >
-              <Eye className="h-3 w-3 mr-1" />
+              <Eye className="h-3 w-3 me-1" />
               Acknowledge
             </Button>
           )}
@@ -260,7 +260,7 @@ export const HealthFeed: React.FC<HealthFeedProps> = ({
                 onClick={() => setFilter('auto_fixed')}
                 className={filter === 'auto_fixed' ? 'bg-green-500 hover:bg-green-600' : ''}
               >
-                <Wrench className="h-3 w-3 mr-1" />
+                <Wrench className="h-3 w-3 me-1" />
                 Fixed {autoFixedCount > 0 && `(${autoFixedCount})`}
               </Button>
               <Button
@@ -276,7 +276,7 @@ export const HealthFeed: React.FC<HealthFeedProps> = ({
       </CardHeader>
       
       <CardContent>
-        <ScrollArea className="h-[400px] pr-4">
+        <ScrollArea className="h-[400px] pe-4">
           {isLoading ? (
             <div className="text-center py-8 text-muted-foreground">
               <Activity className="h-8 w-8 animate-pulse mx-auto mb-2" />

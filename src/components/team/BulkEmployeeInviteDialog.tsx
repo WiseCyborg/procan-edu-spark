@@ -201,12 +201,12 @@ export function BulkEmployeeInviteDialog({
             >
               {loading ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="me-2 h-4 w-4 animate-spin" />
                   Sending {parsedCount} invitations...
                 </>
               ) : (
                 <>
-                  <Upload className="mr-2 h-4 w-4" />
+                  <Upload className="me-2 h-4 w-4" />
                   Send {parsedCount} Invitation{parsedCount !== 1 ? 's' : ''}
                 </>
               )}

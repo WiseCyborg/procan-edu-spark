@@ -49,9 +49,9 @@ export default function RealTimeOperationsDashboard() {
           </p>
         </div>
         
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 rtl:space-x-reverse">
           <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20">
-            <Activity className="w-3 h-3 mr-1" />
+            <Activity className="w-3 h-3 me-1" />
             Live
           </Badge>
           

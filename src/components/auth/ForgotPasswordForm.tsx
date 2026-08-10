@@ -64,7 +64,7 @@ export function ForgotPasswordForm() {
         <p className="text-muted-foreground">
           We've sent password reset instructions to <strong>{email}</strong>.
         </p>
-        <Alert className="text-left">
+        <Alert className="text-start">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
             <strong>Important:</strong> Open the link only once. If you're on iOS, tap the link directly instead of letting Mail preview it.
@@ -75,7 +75,7 @@ export function ForgotPasswordForm() {
         </p>
         <Link to="/auth">
           <Button variant="outline" className="w-full">
-            <ArrowLeft className="mr-2 h-4 w-4" />
+            <ArrowLeft className="me-2 h-4 w-4" />
             Back to Login
           </Button>
         </Link>
@@ -96,7 +96,7 @@ export function ForgotPasswordForm() {
           We couldn't find an account with <strong>{email}</strong>.
         </p>
         
-        <Alert className="text-left border-amber-200 bg-amber-50">
+        <Alert className="text-start border-amber-200 bg-amber-50">
           <UserPlus className="h-4 w-4 text-amber-600" />
           <AlertDescription className="text-amber-800">
             <strong>Are you a new manager?</strong> Check your email for a registration link from your organization, or contact your administrator.
@@ -116,7 +116,7 @@ export function ForgotPasswordForm() {
           </Button>
           <Link to="/auth">
             <Button variant="ghost" className="w-full">
-              <ArrowLeft className="mr-2 h-4 w-4" />
+              <ArrowLeft className="me-2 h-4 w-4" />
               Back to Login
             </Button>
           </Link>
@@ -159,14 +159,14 @@ export function ForgotPasswordForm() {
         disabled={resetMutation.isPending || !email}
       >
         {resetMutation.isPending && (
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          <Loader2 className="me-2 h-4 w-4 animate-spin" />
         )}
         Send Reset Instructions
       </Button>
 
       <Link to="/auth">
         <Button variant="ghost" className="w-full">
-          <ArrowLeft className="mr-2 h-4 w-4" />
+          <ArrowLeft className="me-2 h-4 w-4" />
           Back to Login
         </Button>
       </Link>

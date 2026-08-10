@@ -1039,7 +1039,7 @@ const DispensaryApplicationManager = () => {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-green-700 flex items-center">
-            <FileText className="mr-3 h-6 w-6" />
+            <FileText className="me-3 h-6 w-6" />
             Dispensary Applications
           </h2>
           <p className="text-muted-foreground">Review and manage dispensary license applications</p>
@@ -1051,7 +1051,7 @@ const DispensaryApplicationManager = () => {
             onClick={resendAllConfirmations}
             disabled={isProcessing || applications.filter(a => a.application_status === 'pending').length === 0}
           >
-            <Mail className="mr-2 h-4 w-4" />
+            <Mail className="me-2 h-4 w-4" />
             Resend All Confirmations
           </Button>
           <Badge variant="outline" className="text-sm">
@@ -1062,7 +1062,7 @@ const DispensaryApplicationManager = () => {
 
       <div className="grid grid-cols-1 gap-4">
         {applications.map((application) => (
-          <Card key={application.id} className="border-l-4 border-l-blue-500">
+          <Card key={application.id} className="border-s-4 border-s-blue-500">
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
@@ -1072,7 +1072,7 @@ const DispensaryApplicationManager = () => {
                     </h3>
                     <Badge className={getStatusColor(application.application_status)}>
                       {getStatusIcon(application.application_status)}
-                      <span className="ml-1 capitalize">{application.application_status}</span>
+                      <span className="ms-1 capitalize">{application.application_status}</span>
                     </Badge>
                   </div>
                   
@@ -1104,14 +1104,14 @@ const DispensaryApplicationManager = () => {
                   <div className="mt-3 text-xs text-muted-foreground">
                     Applied: {new Date(application.created_at).toLocaleDateString()}
                     {application.reviewed_at && (
-                      <span className="ml-4">
+                      <span className="ms-4">
                         Reviewed: {new Date(application.reviewed_at).toLocaleDateString()}
                       </span>
                     )}
                   </div>
                 </div>
 
-                <div className="flex gap-2 ml-4 items-start">
+                <div className="flex gap-2 ms-4 items-start">
                   {/* Actions Dropdown Menu */}
                   <DispensaryActionsMenu
                     application={application}
@@ -1136,7 +1136,7 @@ const DispensaryApplicationManager = () => {
                           setAdminNotes(application.admin_notes || '');
                         }}
                       >
-                        <Eye className="h-4 w-4 mr-1" />
+                        <Eye className="h-4 w-4 me-1" />
                         Review
                       </Button>
                     </DialogTrigger>
@@ -1290,7 +1290,7 @@ const DispensaryApplicationManager = () => {
                                 <Dialog>
                                   <DialogTrigger asChild>
                                     <Button variant="outline" size="sm">
-                                      <Mail className="h-3 w-3 mr-1" />
+                                      <Mail className="h-3 w-3 me-1" />
                                       View Email Status
                                     </Button>
                                   </DialogTrigger>
@@ -1308,7 +1308,7 @@ const DispensaryApplicationManager = () => {
                                     onClick={() => resendApprovalEmail(application)}
                                     disabled={isProcessing}
                                   >
-                                    <RefreshCw className="h-3 w-3 mr-1" />
+                                    <RefreshCw className="h-3 w-3 me-1" />
                                     Resend Email
                                   </Button>
                                 )}
@@ -1396,7 +1396,7 @@ const DispensaryApplicationManager = () => {
                                 disabled={isProcessing}
                                 className="bg-green-600 hover:bg-green-700"
                               >
-                                <CheckCircle className="h-4 w-4 mr-1" />
+                                <CheckCircle className="h-4 w-4 me-1" />
                                 {roleAssignments.length > 0 
                                   ? `Approve & Send ${roleAssignments.length} Invite(s)`
                                   : `Approve (${application.requested_credits || 10} Credits)`
@@ -1407,7 +1407,7 @@ const DispensaryApplicationManager = () => {
                                 onClick={() => rejectApplication(application.id, adminNotes || 'Application rejected by admin')}
                                 disabled={isProcessing}
                               >
-                                <XCircle className="h-4 w-4 mr-1" />
+                                <XCircle className="h-4 w-4 me-1" />
                                 Reject
                               </Button>
                             </>
@@ -1420,7 +1420,7 @@ const DispensaryApplicationManager = () => {
                                 disabled={isProcessing}
                                 className="bg-primary hover:bg-primary/90"
                               >
-                                <Key className="h-4 w-4 mr-1" />
+                                <Key className="h-4 w-4 me-1" />
                                 Grant Access to Training
                               </Button>
                               <Button
@@ -1429,7 +1429,7 @@ const DispensaryApplicationManager = () => {
                                 variant="outline"
                                 className="border-orange-500 text-orange-600 hover:bg-orange-50"
                               >
-                                <Wrench className="h-4 w-4 mr-1" />
+                                <Wrench className="h-4 w-4 me-1" />
                                 Fix Registration
                               </Button>
                               <Button
@@ -1437,7 +1437,7 @@ const DispensaryApplicationManager = () => {
                                 disabled={isProcessing}
                                 variant="outline"
                               >
-                                <RefreshCw className="h-4 w-4 mr-1" />
+                                <RefreshCw className="h-4 w-4 me-1" />
                                 Regenerate Token & Resend
                               </Button>
                             </>
@@ -1586,7 +1586,7 @@ const TestOrganizationCreator = () => {
     <Card className="border-dashed border-2 border-primary/20 mt-6">
       <CardHeader>
         <CardTitle className="text-lg flex items-center text-primary">
-          <Building2 className="h-5 w-5 mr-2" />
+          <Building2 className="h-5 w-5 me-2" />
           Create Test Organization
         </CardTitle>
         <p className="text-sm text-muted-foreground">
@@ -1632,7 +1632,7 @@ const TestOrganizationCreator = () => {
           disabled={isCreating || !orgName.trim() || !contactEmail.trim()}
           className="w-full md:w-auto"
         >
-          <Plus className="h-4 w-4 mr-1" />
+          <Plus className="h-4 w-4 me-1" />
           {isCreating ? 'Creating...' : 'Create Test Organization'}
         </Button>
       </CardContent>

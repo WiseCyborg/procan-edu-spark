@@ -125,8 +125,8 @@ export const ModuleAttestation: React.FC<ModuleAttestationProps> = ({
                 Attested on {new Date(existingAttestation.attested_at).toLocaleDateString()}
               </p>
             </div>
-            <Badge variant="outline" className="ml-auto border-green-500 text-green-700">
-              <FileCheck className="h-3 w-3 mr-1" />
+            <Badge variant="outline" className="ms-auto border-green-500 text-green-700">
+              <FileCheck className="h-3 w-3 me-1" />
               Verified
             </Badge>
           </div>
@@ -180,7 +180,7 @@ export const ModuleAttestation: React.FC<ModuleAttestationProps> = ({
             'Recording Attestation...'
           ) : (
             <>
-              <FileCheck className="h-4 w-4 mr-2" />
+              <FileCheck className="h-4 w-4 me-2" />
               Confirm Understanding
             </>
           )}

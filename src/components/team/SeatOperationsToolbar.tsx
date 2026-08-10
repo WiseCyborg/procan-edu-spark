@@ -27,7 +27,7 @@ export function SeatOperationsToolbar({
 }: SeatOperationsToolbarProps) {
   return (
     <div className="flex flex-wrap items-center gap-2 p-4 bg-muted/30 rounded-lg border">
-      <div className="flex items-center gap-2 mr-auto">
+      <div className="flex items-center gap-2 me-auto">
         {selectedCount > 0 && (
           <Badge variant="secondary" className="text-sm">
             {selectedCount} selected
@@ -43,7 +43,7 @@ export function SeatOperationsToolbar({
             onClick={onAssignSeats}
             disabled={selectedCount === 0}
           >
-            <UserPlus className="h-4 w-4 mr-2" />
+            <UserPlus className="h-4 w-4 me-2" />
             Assign Seats
           </Button>
         )}
@@ -55,7 +55,7 @@ export function SeatOperationsToolbar({
             onClick={onUnassignSeats}
             disabled={selectedCount === 0}
           >
-            <UserMinus className="h-4 w-4 mr-2" />
+            <UserMinus className="h-4 w-4 me-2" />
             Unassign Seats
           </Button>
         )}
@@ -66,7 +66,7 @@ export function SeatOperationsToolbar({
           onClick={onSendReminders}
           disabled={selectedCount === 0}
         >
-          <Mail className="h-4 w-4 mr-2" />
+          <Mail className="h-4 w-4 me-2" />
           Send Reminders
         </Button>
 
@@ -76,7 +76,7 @@ export function SeatOperationsToolbar({
             variant="outline"
             onClick={onTransferSeat}
           >
-            <ArrowRightLeft className="h-4 w-4 mr-2" />
+            <ArrowRightLeft className="h-4 w-4 me-2" />
             Transfer Seat
           </Button>
         )}
@@ -86,7 +86,7 @@ export function SeatOperationsToolbar({
           variant="outline"
           onClick={onViewUtilization}
         >
-          <BarChart className="h-4 w-4 mr-2" />
+          <BarChart className="h-4 w-4 me-2" />
           Utilization Report
         </Button>
       </div>

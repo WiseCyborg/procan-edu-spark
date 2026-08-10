@@ -88,7 +88,7 @@ const MCAComplianceReview = () => {
                 className="text-lg"
               />
               <Button onClick={handleCertificateSearch} size="lg">
-                <Search className="h-4 w-4 mr-2" />
+                <Search className="h-4 w-4 me-2" />
                 Verify
               </Button>
             </div>
@@ -241,7 +241,7 @@ const MCAComplianceReview = () => {
               </p>
             </div>
             <Button variant="outline" className="mt-4">
-              <FileText className="h-4 w-4 mr-2" />
+              <FileText className="h-4 w-4 me-2" />
               View Detailed Curriculum Matrix
             </Button>
           </CardContent>
@@ -375,7 +375,7 @@ const MCAComplianceReview = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <Button variant="secondary" size="lg" className="w-full md:w-auto">
-              <Download className="h-4 w-4 mr-2" />
+              <Download className="h-4 w-4 me-2" />
               Download MCA Compliance Package (PDF)
             </Button>
             <div className="border-t border-white/20 pt-4">
@@ -386,7 +386,7 @@ const MCAComplianceReview = () => {
                 For questions about compliance, curriculum alignment, or platform security, our regulatory team is available to assist MCA officials.
               </p>
               <Button variant="secondary" size="lg">
-                <FileText className="h-4 w-4 mr-2" />
+                <FileText className="h-4 w-4 me-2" />
                 Email: compliance@procannedu.com
               </Button>
             </div>

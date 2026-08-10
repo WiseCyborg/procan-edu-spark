@@ -162,7 +162,7 @@ export const PaymentGapDashboard = () => {
                         variant="outline"
                         onClick={() => handleSendRenewal(gap)}
                       >
-                        <Mail className="h-3 w-3 mr-1" />
+                        <Mail className="h-3 w-3 me-1" />
                         Send Renewal
                       </Button>
                     </TableCell>

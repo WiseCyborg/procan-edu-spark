@@ -337,7 +337,7 @@ export const EnhancedChatAssistant: React.FC = () => {
 
   if (isChatDisabled) {
     return (
-      <div className="fixed bottom-4 right-4 z-50">
+      <div className="fixed bottom-4 end-4 z-50">
         <Card className="w-80 bg-muted border-border">
           <CardContent className="p-4 text-center">
             <HelpCircle className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
@@ -361,7 +361,7 @@ export const EnhancedChatAssistant: React.FC = () => {
 
       {/* Proactive Help Tooltip */}
       {showProactiveTip && !isOpen && (
-        <div className="fixed bottom-20 right-4 z-40 animate-in slide-in-from-right">
+        <div className="fixed bottom-20 end-4 z-40 animate-in slide-in-from-right">
           <Card className="w-72 bg-primary text-primary-foreground shadow-lg">
             <CardContent className="p-3">
               <div className="flex items-start justify-between">
@@ -391,7 +391,7 @@ export const EnhancedChatAssistant: React.FC = () => {
           setIsOpen(!isOpen);
           setShowProactiveTip(false);
         }}
-        className="fixed bottom-4 right-4 z-50 h-12 w-12 rounded-full shadow-lg"
+        className="fixed bottom-4 end-4 z-50 h-12 w-12 rounded-full shadow-lg"
         size="icon"
       >
         {isOpen ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
@@ -399,7 +399,7 @@ export const EnhancedChatAssistant: React.FC = () => {
 
       {/* Chat Window */}
       {isOpen && (
-        <Card className={`fixed ${isMaximized ? 'bottom-4 right-4 w-[480px] h-[600px]' : 'bottom-20 right-4 w-80 h-96'} z-40 flex flex-col shadow-xl transition-all duration-300`}>
+        <Card className={`fixed ${isMaximized ? 'bottom-4 end-4 w-[480px] h-[600px]' : 'bottom-20 end-4 w-80 h-96'} z-40 flex flex-col shadow-xl transition-all duration-300`}>
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <div>
@@ -573,7 +573,7 @@ export const EnhancedChatAssistant: React.FC = () => {
             </EnhancedScrollArea>
 
             {/* Input */}
-            <div className="flex space-x-2 mt-3">
+            <div className="flex space-x-2 mt-3 rtl:space-x-reverse">
               <Input
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}

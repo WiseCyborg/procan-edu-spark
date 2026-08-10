@@ -257,7 +257,7 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
               return (
                 <div key={question.id} className="flex items-center justify-between p-2 border rounded">
                   <span className="text-sm">Question {index + 1}</span>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2 rtl:space-x-reverse">
                     {isCorrect ? (
                       <CheckCircle className="w-4 h-4 text-green-600" />
                     ) : (
@@ -275,7 +275,7 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
           {allowRetry && !passed && (
             <div className="text-center">
               <Button onClick={handleRetry} className="w-full">
-                <RotateCcw className="w-4 h-4 mr-2" />
+                <RotateCcw className="w-4 h-4 me-2" />
                 Retry Quiz
               </Button>
             </div>
@@ -291,7 +291,7 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
         <div className="flex justify-between items-center">
           <CardTitle>{title}</CardTitle>
           {timeRemaining !== null && (
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
               <Clock className="w-4 h-4" />
               <span className={`font-mono ${timeRemaining < 300 ? 'text-red-600' : ''}`}>
                 {formatTime(timeRemaining)}
@@ -331,7 +331,7 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
                       value={option}
                       checked={answers[currentQuestion.id] === option}
                       onChange={() => handleAnswerSelect(option)}
-                      className="mr-3"
+                      className="me-3"
                     />
                     {option}
                   </label>
@@ -342,7 +342,7 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
         ) : (
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Explanation</h3>
-            <div className="p-4 bg-blue-50 border-l-4 border-blue-400">
+            <div className="p-4 bg-blue-50 border-s-4 border-blue-400">
               <p className="font-medium text-blue-800">
                 Correct Answer: {currentQuestion.correctAnswer}
               </p>

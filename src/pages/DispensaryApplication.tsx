@@ -273,19 +273,19 @@ const DispensaryApplication = () => {
             {currentStep === 4 && (
               <div className="space-y-6">
                 <div className="space-y-4">
-                  <div className="flex items-start space-x-3">
+                  <div className="flex items-start space-x-3 rtl:space-x-reverse">
                     <Checkbox id="compliance" checked={Boolean(formValues.complianceAffirmation)} onCheckedChange={(c) => setValue('complianceAffirmation', !!c)} />
                     <Label htmlFor="compliance" className="leading-normal cursor-pointer">
                       I confirm the information provided is accurate to the best of my knowledge
                     </Label>
                   </div>
-                  <div className="flex items-start space-x-3">
+                  <div className="flex items-start space-x-3 rtl:space-x-reverse">
                     <Checkbox id="privacy" checked={Boolean(formValues.privacyAcknowledgment)} onCheckedChange={(c) => setValue('privacyAcknowledgment', !!c)} />
                     <Label htmlFor="privacy" className="leading-normal cursor-pointer">
                       I agree to the ProCann Edu privacy policy
                     </Label>
                   </div>
-                  <div className="flex items-start space-x-3">
+                  <div className="flex items-start space-x-3 rtl:space-x-reverse">
                     <Checkbox id="training" checked={Boolean(formValues.trainingResponsibility)} onCheckedChange={(c) => setValue('trainingResponsibility', !!c)} />
                     <Label htmlFor="training" className="leading-normal cursor-pointer">
                       I understand that verification is required before staff certificates can be issued under this organization
@@ -301,10 +301,10 @@ const DispensaryApplication = () => {
             <div className="flex justify-between pt-6">
               {currentStep > 1 && <Button type="button" variant="outline" onClick={() => setCurrentStep(currentStep - 1)}>Previous</Button>}
               {currentStep < 4 ? (
-                <Button type="button" onClick={handleNext} disabled={!canProceed()} className="ml-auto">Next</Button>
+                <Button type="button" onClick={handleNext} disabled={!canProceed()} className="ms-auto">Next</Button>
               ) : (
-                <Button type="submit" disabled={isSubmitting || !canProceed()} className="ml-auto">
-                  {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Saving...</> : 'Finish & Save'}
+                <Button type="submit" disabled={isSubmitting || !canProceed()} className="ms-auto">
+                  {isSubmitting ? <><Loader2 className="me-2 h-4 w-4 animate-spin" />Saving...</> : 'Finish & Save'}
                 </Button>
               )}
             </div>

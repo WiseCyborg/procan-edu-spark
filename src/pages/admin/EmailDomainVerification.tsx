@@ -139,12 +139,12 @@ export default function EmailDomainVerification() {
           >
             {testing ? (
               <>
-                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                <RefreshCw className="h-4 w-4 me-2 animate-spin" />
                 Testing Domain...
               </>
             ) : (
               <>
-                <RefreshCw className="h-4 w-4 mr-2" />
+                <RefreshCw className="h-4 w-4 me-2" />
                 Test Domain Verification
               </>
             )}
@@ -339,19 +339,19 @@ export default function EmailDomainVerification() {
       <div className="mt-6 flex gap-4 flex-wrap">
         <Button variant="outline" asChild>
           <a href="https://resend.com/domains" target="_blank" rel="noopener noreferrer">
-            <ExternalLink className="h-4 w-4 mr-2" />
+            <ExternalLink className="h-4 w-4 me-2" />
             Open Resend
           </a>
         </Button>
         <Button variant="outline" asChild>
           <a href="https://dcc.godaddy.com/control/portfolio/dns" target="_blank" rel="noopener noreferrer">
-            <ExternalLink className="h-4 w-4 mr-2" />
+            <ExternalLink className="h-4 w-4 me-2" />
             Open GoDaddy DNS
           </a>
         </Button>
         <Button variant="outline" asChild>
           <a href={`https://dnschecker.org/#TXT/${domain}`} target="_blank" rel="noopener noreferrer">
-            <ExternalLink className="h-4 w-4 mr-2" />
+            <ExternalLink className="h-4 w-4 me-2" />
             Check DNS
           </a>
         </Button>

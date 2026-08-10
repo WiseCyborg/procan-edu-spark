@@ -89,12 +89,12 @@ export function GapFixesExecutor() {
           >
             {isExecutingGap4 ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="me-2 h-4 w-4 animate-spin" />
                 Executing...
               </>
             ) : (
               <>
-                <RefreshCw className="mr-2 h-4 w-4" />
+                <RefreshCw className="me-2 h-4 w-4" />
                 Execute Gap #4 Fix
               </>
             )}
@@ -133,7 +133,7 @@ export function GapFixesExecutor() {
 
         <div className="mt-4 space-y-2 text-sm text-muted-foreground">
           <p><strong>What this does:</strong></p>
-          <ul className="list-disc list-inside space-y-1 ml-2">
+          <ul className="list-disc list-inside space-y-1 ms-2">
             <li>Compares course_credits vs actual rvt_seats count for each organization</li>
             <li>Creates missing seats to match credit allocation</li>
             <li>Specifically fixes Demo Dispensary LLC (50 credits → 50 seats)</li>

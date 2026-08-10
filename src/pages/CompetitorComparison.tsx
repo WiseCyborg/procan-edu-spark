@@ -160,7 +160,7 @@ export default function CompetitorComparison() {
               onClick={() => navigate('/org/apply')}
               className="bg-white text-primary hover:bg-white/90 shadow-lg"
             >
-              <DollarSign className="h-5 w-5 mr-2" />
+              <DollarSign className="h-5 w-5 me-2" />
               Request Information
             </Button>
             <Button

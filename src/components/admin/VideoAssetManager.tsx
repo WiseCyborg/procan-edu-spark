@@ -176,7 +176,7 @@ export const VideoAssetManager = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center">
-            <Video className="h-5 w-5 mr-2" />
+            <Video className="h-5 w-5 me-2" />
             Video Asset Manager
           </CardTitle>
         </CardHeader>
@@ -280,7 +280,7 @@ export const VideoAssetManager = () => {
                             variant="outline"
                             onClick={() => setPreviewUrl(asset.public_url)}
                           >
-                            <Play className="h-3 w-3 mr-1" />
+                            <Play className="h-3 w-3 me-1" />
                             Preview
                           </Button>
                           <Button
@@ -288,7 +288,7 @@ export const VideoAssetManager = () => {
                             variant="outline"
                             onClick={() => copyUrl(asset.public_url)}
                           >
-                            <Copy className="h-3 w-3 mr-1" />
+                            <Copy className="h-3 w-3 me-1" />
                             Copy URL
                           </Button>
                           <Select

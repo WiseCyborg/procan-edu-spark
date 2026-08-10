@@ -650,23 +650,23 @@ export const UATValidationChecklist: React.FC = () => {
         <div className="flex items-center gap-3">
           {hasUnsavedChanges && (
             <Badge variant="outline" className="animate-pulse">
-              <Save className="h-3 w-3 mr-1" />
+              <Save className="h-3 w-3 me-1" />
               Saving...
             </Badge>
           )}
           {isSubmitted && (
             <Badge className="bg-emerald-500">
-              <CheckCircle2 className="h-3 w-3 mr-1" />
+              <CheckCircle2 className="h-3 w-3 me-1" />
               Submitted
             </Badge>
           )}
           <Button variant="outline" size="sm" onClick={exportToPDF}>
-            <Download className="h-4 w-4 mr-2" />
+            <Download className="h-4 w-4 me-2" />
             Export PDF
           </Button>
           {!isSubmitted && (
             <Button size="sm" onClick={handleSubmit} disabled={saving}>
-              <Send className="h-4 w-4 mr-2" />
+              <Send className="h-4 w-4 me-2" />
               Submit
             </Button>
           )}
@@ -938,11 +938,11 @@ export const UATValidationChecklist: React.FC = () => {
             onClick={() => saveChecklist(data)} 
             disabled={saving}
           >
-            <Save className="h-4 w-4 mr-2" />
+            <Save className="h-4 w-4 me-2" />
             Save Progress
           </Button>
           <Button onClick={handleSubmit} disabled={saving || progress.percentage < 50}>
-            <Send className="h-4 w-4 mr-2" />
+            <Send className="h-4 w-4 me-2" />
             Submit Checklist
           </Button>
         </div>

@@ -97,20 +97,20 @@ export const MCAReadinessTab = () => {
           </div>
 
           <div className="space-y-4 mb-6">
-            <Card className="border-l-4 border-l-orange-500">
+            <Card className="border-s-4 border-s-orange-500">
               <CardContent className="pt-6">
                 <h3 className="font-semibold mb-2">Step 1: Populate COMAR Regulatory Content</h3>
                 <p className="text-sm text-muted-foreground mb-4">
                   Load official COMAR 14.17.15.05 sections into the regulatory_content table to enable live compliance tracking
                 </p>
                 <Button onClick={populateCOMAR} disabled={isPopulating}>
-                  <Database className="h-4 w-4 mr-2" />
+                  <Database className="h-4 w-4 me-2" />
                   {isPopulating ? 'Populating...' : 'Populate COMAR 14.17.15.05 Sections'}
                 </Button>
               </CardContent>
             </Card>
 
-            <Card className="border-l-4 border-l-blue-500">
+            <Card className="border-s-4 border-s-blue-500">
               <CardContent className="pt-6">
                 <h3 className="font-semibold mb-2">Step 2: Verify Email Domain</h3>
                 <p className="text-sm text-muted-foreground mb-4">

@@ -22,7 +22,7 @@ export default function EmployersPage() {
       {/* Hero */}
       <div className="text-center mb-12">
         <Badge className="mb-4 text-lg px-4 py-2">
-          <Building2 className="h-5 w-5 mr-2" />
+          <Building2 className="h-5 w-5 me-2" />
           For Employers
         </Badge>
         <h1 className="text-4xl font-bold mb-4">
@@ -52,7 +52,7 @@ export default function EmployersPage() {
               className="flex-1"
             />
             <Button onClick={handleVerify} disabled={!certNumber}>
-              <Shield className="h-4 w-4 mr-2" />
+              <Shield className="h-4 w-4 me-2" />
               Verify
             </Button>
           </div>
@@ -81,7 +81,7 @@ export default function EmployersPage() {
               </p>
               <div className="flex gap-3 justify-center">
                 <Button variant="outline" size="sm">
-                  <Download className="h-4 w-4 mr-2" />
+                  <Download className="h-4 w-4 me-2" />
                   Download Sample CSV
                 </Button>
                 <Button size="sm">

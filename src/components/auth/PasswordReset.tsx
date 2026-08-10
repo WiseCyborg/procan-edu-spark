@@ -212,7 +212,7 @@ export const PasswordReset: React.FC = () => {
           <div className="space-y-2">
             <Link to="/forgot-password">
               <Button className="w-full">
-                <RefreshCw className="mr-2 h-4 w-4" />
+                <RefreshCw className="me-2 h-4 w-4" />
                 Request New Reset Link
               </Button>
             </Link>
@@ -246,7 +246,7 @@ export const PasswordReset: React.FC = () => {
           
           <Link to="/auth">
             <Button className="w-full">
-              <ArrowRight className="mr-2 h-4 w-4" />
+              <ArrowRight className="me-2 h-4 w-4" />
               Continue to Login
             </Button>
           </Link>
@@ -283,7 +283,7 @@ export const PasswordReset: React.FC = () => {
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                className="absolute end-0 top-0 h-full px-3 hover:bg-transparent"
                 onClick={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
@@ -307,7 +307,7 @@ export const PasswordReset: React.FC = () => {
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                className="absolute end-0 top-0 h-full px-3 hover:bg-transparent"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               >
                 {showConfirmPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}

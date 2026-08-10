@@ -281,7 +281,7 @@ export const SCORMStylePlayer: React.FC<SCORMStylePlayerProps> = ({
                     <li key={idx}>
                       <button
                         onClick={() => handleResourceClick(link.href)}
-                        className="text-sm text-primary hover:underline text-left"
+                        className="text-sm text-primary hover:underline text-start"
                       >
                         {link.label}
                       </button>
@@ -333,7 +333,7 @@ export const SCORMStylePlayer: React.FC<SCORMStylePlayerProps> = ({
             >
               {isLessonCompleted(activeLesson.id) ? (
                 <>
-                  <CheckCircle2 className="h-4 w-4 mr-1" />
+                  <CheckCircle2 className="h-4 w-4 me-1" />
                   Completed
                 </>
               ) : (

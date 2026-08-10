@@ -22,7 +22,7 @@ const StatusBadge = ({ status }: { status: 'healthy' | 'degraded' | 'down' }) =>
   
   return (
     <Badge className={`${config.className} text-white`}>
-      <Icon className="h-3 w-3 mr-1" />
+      <Icon className="h-3 w-3 me-1" />
       {config.label}
     </Badge>
   );
@@ -60,7 +60,7 @@ export const RealSystemHealthPanel = () => {
     return (
       <div className="flex items-center justify-center p-8">
         <RefreshCw className="h-6 w-6 animate-spin text-muted-foreground" />
-        <span className="ml-2 text-muted-foreground">Loading system health...</span>
+        <span className="ms-2 text-muted-foreground">Loading system health...</span>
       </div>
     );
   }
@@ -72,7 +72,7 @@ export const RealSystemHealthPanel = () => {
           <AlertOctagon className="h-8 w-8 mx-auto text-destructive mb-2" />
           <p className="text-muted-foreground">Unable to load system health data</p>
           <Button onClick={refresh} variant="outline" size="sm" className="mt-4">
-            <RefreshCw className="h-4 w-4 mr-2" /> Retry
+            <RefreshCw className="h-4 w-4 me-2" /> Retry
           </Button>
         </CardContent>
       </Card>

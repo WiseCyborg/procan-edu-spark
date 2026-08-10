@@ -87,7 +87,7 @@ export const EmailSystemRecovery = () => {
                   </Badge>
                 ) : (
                   <Badge variant="outline" className="bg-success/10 text-success border-success/20">
-                    <CheckCircle className="h-3 w-3 mr-1" />
+                    <CheckCircle className="h-3 w-3 me-1" />
                     Healthy
                   </Badge>
                 )}

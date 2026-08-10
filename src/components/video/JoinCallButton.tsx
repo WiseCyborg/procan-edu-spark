@@ -134,12 +134,12 @@ export const JoinCallButton = ({
     >
       <Video className="w-4 h-4" />
       <span>Join Active Call</span>
-      <div className="flex items-center gap-1 ml-2 px-2 py-0.5 bg-background/20 rounded text-xs">
+      <div className="flex items-center gap-1 ms-2 px-2 py-0.5 bg-background/20 rounded text-xs">
         <Users className="w-3 h-3" />
         <span>{participantCount}</span>
       </div>
       {callDuration && (
-        <span className="ml-1 text-xs opacity-70">({callDuration})</span>
+        <span className="ms-1 text-xs opacity-70">({callDuration})</span>
       )}
     </Button>
   );

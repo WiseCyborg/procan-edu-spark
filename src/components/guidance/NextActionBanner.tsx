@@ -81,7 +81,7 @@ export const NextActionBanner: React.FC<NextActionBannerProps> = ({
   if (variant === 'compact') {
     return (
       <Card className={cn(
-        'p-3 border-l-4 flex items-center justify-between gap-4',
+        'p-3 border-s-4 flex items-center justify-between gap-4',
         priorityStyles[nextAction.priority],
         className
       )}>
@@ -97,7 +97,7 @@ export const NextActionBanner: React.FC<NextActionBannerProps> = ({
           className={buttonStyles[nextAction.priority]}
         >
           {nextAction.buttonText}
-          <ArrowRight className="ml-1 h-4 w-4" />
+          <ArrowRight className="ms-1 h-4 w-4" />
         </Button>
       </Card>
     );
@@ -105,14 +105,14 @@ export const NextActionBanner: React.FC<NextActionBannerProps> = ({
 
   return (
     <Card className={cn(
-      'p-4 border-l-4 relative',
+      'p-4 border-s-4 relative',
       priorityStyles[nextAction.priority],
       className
     )}>
       {showDismiss && (
         <button 
           onClick={() => setDismissed(true)}
-          className="absolute top-2 right-2 p-1 rounded-full hover:bg-black/10 transition-colors"
+          className="absolute top-2 end-2 p-1 rounded-full hover:bg-black/10 transition-colors"
           aria-label="Dismiss"
         >
           <X className="h-4 w-4" />
@@ -135,7 +135,7 @@ export const NextActionBanner: React.FC<NextActionBannerProps> = ({
           className={cn('flex-shrink-0', buttonStyles[nextAction.priority])}
         >
           {nextAction.buttonText}
-          <ArrowRight className="ml-2 h-4 w-4" />
+          <ArrowRight className="ms-2 h-4 w-4" />
         </Button>
       </div>
     </Card>
@@ -157,7 +157,7 @@ export const NextActionFloating: React.FC = () => {
       <button
         onClick={() => setMinimized(false)}
         className={cn(
-          'fixed bottom-4 right-4 z-50 p-3 rounded-full shadow-lg transition-all hover:scale-105',
+          'fixed bottom-4 end-4 z-50 p-3 rounded-full shadow-lg transition-all hover:scale-105',
           nextAction.priority === 'critical' ? 'bg-destructive text-white' :
           nextAction.priority === 'high' ? 'bg-orange-600 text-white' :
           'bg-blue-600 text-white'
@@ -170,17 +170,17 @@ export const NextActionFloating: React.FC = () => {
 
   return (
     <div className={cn(
-      'fixed bottom-4 right-4 z-50 max-w-sm rounded-lg shadow-xl border p-4',
+      'fixed bottom-4 end-4 z-50 max-w-sm rounded-lg shadow-xl border p-4',
       priorityStyles[nextAction.priority]
     )}>
       <button 
         onClick={() => setMinimized(true)}
-        className="absolute top-2 right-2 p-1 rounded hover:bg-black/10"
+        className="absolute top-2 end-2 p-1 rounded hover:bg-black/10"
       >
         <X className="h-4 w-4" />
       </button>
       
-      <div className="flex items-start gap-3 pr-6">
+      <div className="flex items-start gap-3 pe-6">
         <Icon className="h-5 w-5 flex-shrink-0 mt-0.5" />
         <div>
           <p className="font-medium text-sm">{nextAction.title}</p>

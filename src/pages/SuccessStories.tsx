@@ -55,7 +55,7 @@ export default function SuccessStories() {
             <div className="flex flex-wrap justify-center gap-4">
               <Button size="lg" onClick={() => navigate('/signup')}>
                 Start Your Certification
-                <ArrowRight className="ml-2 h-4 w-4" />
+                <ArrowRight className="ms-2 h-4 w-4" />
               </Button>
               <Button size="lg" variant="outline" onClick={() => navigate('/faq')}>
                 Learn More
@@ -105,7 +105,7 @@ export default function SuccessStories() {
             <p className="text-lg text-muted-foreground mb-8">
               ProCann Edu was built by Marylanders for Maryland. We understand the unique challenges and opportunities in our state's cannabis industry, and we're committed to training professionals who will uphold the highest standards of compliance and customer care.
             </p>
-            <div className="grid md:grid-cols-3 gap-6 text-left">
+            <div className="grid md:grid-cols-3 gap-6 text-start">
               <div className="p-6 bg-background rounded-lg border">
                 <h3 className="font-semibold mb-2">Local Expertise</h3>
                 <p className="text-sm text-muted-foreground">
@@ -139,7 +139,7 @@ export default function SuccessStories() {
           <div className="flex flex-wrap justify-center gap-4">
             <Button size="lg" variant="secondary" onClick={() => navigate('/signup')}>
               Start Certification - $49.99
-              <ArrowRight className="ml-2 h-4 w-4" />
+              <ArrowRight className="ms-2 h-4 w-4" />
             </Button>
             <Button size="lg" variant="outline" className="bg-transparent border-white text-white hover:bg-white/10" onClick={() => navigate('/why-procann')}>
               See Full Details

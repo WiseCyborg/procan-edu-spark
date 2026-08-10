@@ -118,10 +118,10 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
             <Card key={document.id} className="hover:shadow-md transition-shadow">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between">
-                  <div className="flex items-start space-x-3 flex-1">
+                  <div className="flex items-start space-x-3 flex-1 rtl:space-x-reverse">
                     {getDocumentIcon(document.type)}
                     <div className="flex-1">
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-2 rtl:space-x-reverse">
                         <h4 className="font-semibold">{document.title}</h4>
                         {document.required && (
                           <Badge variant="destructive" className="text-xs">
@@ -145,13 +145,13 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
                     </div>
                   </div>
                   
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2 rtl:space-x-reverse">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleView(document)}
                     >
-                      <Eye className="w-4 h-4 mr-1" />
+                      <Eye className="w-4 h-4 me-1" />
                       View
                     </Button>
                     
@@ -164,7 +164,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
                           handleDownload();
                         }}
                       >
-                        <Download className="w-4 h-4 mr-1" />
+                        <Download className="w-4 h-4 me-1" />
                         Download
                       </Button>
                     )}
@@ -196,7 +196,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
                     size="sm"
                     onClick={handlePrint}
                   >
-                    <Printer className="w-4 h-4 mr-2" />
+                    <Printer className="w-4 h-4 me-2" />
                     Print
                   </Button>
                   <Button
@@ -204,7 +204,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
                     size="sm"
                     onClick={handleDownload}
                   >
-                    <Download className="w-4 h-4 mr-2" />
+                    <Download className="w-4 h-4 me-2" />
                     Save PDF
                   </Button>
                   <Button

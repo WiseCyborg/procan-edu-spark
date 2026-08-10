@@ -115,13 +115,13 @@ const VideoLibrary: React.FC = () => {
       case 'ok':
         return (
           <Badge className="bg-emerald-600 hover:bg-emerald-600 text-white">
-            <CheckCircle2 className="h-3 w-3 mr-1" /> Ready
+            <CheckCircle2 className="h-3 w-3 me-1" /> Ready
           </Badge>
         );
       case 'warn':
         return (
           <Badge variant="destructive">
-            <AlertTriangle className="h-3 w-3 mr-1" /> Action needed
+            <AlertTriangle className="h-3 w-3 me-1" /> Action needed
           </Badge>
         );
       case 'pending':
@@ -163,7 +163,7 @@ const VideoLibrary: React.FC = () => {
               target="_blank"
               rel="noopener noreferrer"
             >
-              Open bucket <ExternalLink className="h-4 w-4 ml-1" />
+              Open bucket <ExternalLink className="h-4 w-4 ms-1" />
             </a>
           </Button>
         </div>
@@ -199,12 +199,12 @@ const VideoLibrary: React.FC = () => {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="text-left border-b">
-                      <th className="py-2 pr-4 font-medium">Asset key</th>
-                      <th className="py-2 pr-4 font-medium">Title</th>
-                      <th className="py-2 pr-4 font-medium">Access</th>
-                      <th className="py-2 pr-4 font-medium">Storage path</th>
-                      <th className="py-2 pr-4 font-medium">Status</th>
+                    <tr className="text-start border-b">
+                      <th className="py-2 pe-4 font-medium">Asset key</th>
+                      <th className="py-2 pe-4 font-medium">Title</th>
+                      <th className="py-2 pe-4 font-medium">Access</th>
+                      <th className="py-2 pe-4 font-medium">Storage path</th>
+                      <th className="py-2 pe-4 font-medium">Status</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -212,14 +212,14 @@ const VideoLibrary: React.FC = () => {
                       const status = fileStatus(row);
                       return (
                         <tr key={row.id} className="border-b last:border-0 hover:bg-muted/30">
-                          <td className="py-2 pr-4 font-mono text-xs">{row.asset_key}</td>
-                          <td className="py-2 pr-4">{row.title}</td>
-                          <td className="py-2 pr-4">
+                          <td className="py-2 pe-4 font-mono text-xs">{row.asset_key}</td>
+                          <td className="py-2 pe-4">{row.title}</td>
+                          <td className="py-2 pe-4">
                             <Badge variant="outline" className="text-xs">
                               {row.access_level}
                             </Badge>
                           </td>
-                          <td className="py-2 pr-4 font-mono text-xs">
+                          <td className="py-2 pe-4 font-mono text-xs">
                             {row.storage_path ? (
                               <button
                                 onClick={() => handleCopy(row.storage_path!)}
@@ -240,7 +240,7 @@ const VideoLibrary: React.FC = () => {
                               </button>
                             )}
                           </td>
-                          <td className="py-2 pr-4">
+                          <td className="py-2 pe-4">
                             <div className="flex flex-col gap-1">
                               {toneBadge(status.tone)}
                               {status.detail && (

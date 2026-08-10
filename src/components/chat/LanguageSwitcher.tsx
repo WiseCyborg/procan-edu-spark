@@ -77,7 +77,7 @@ export function LanguageSwitcher({ compact = true, onLanguageChange }: LanguageS
       </Button>
 
       {isOpen && (
-        <div className="absolute bottom-full right-0 mb-1 bg-popover border border-border rounded-lg shadow-xl z-50 min-w-[160px] overflow-hidden animate-in slide-in-from-bottom-2 fade-in duration-150">
+        <div className="absolute bottom-full end-0 mb-1 bg-popover border border-border rounded-lg shadow-xl z-50 min-w-[160px] overflow-hidden animate-in slide-in-from-bottom-2 fade-in duration-150">
           {LANGUAGE_OPTIONS.map(lang => (
             <button
               key={lang.code}
@@ -88,7 +88,7 @@ export function LanguageSwitcher({ compact = true, onLanguageChange }: LanguageS
             >
               <span>{lang.flag}</span>
               <span>{lang.nativeLabel}</span>
-              {current.code === lang.code && <span className="ml-auto text-primary text-xs">✓</span>}
+              {current.code === lang.code && <span className="ms-auto text-primary text-xs">✓</span>}
             </button>
           ))}
         </div>

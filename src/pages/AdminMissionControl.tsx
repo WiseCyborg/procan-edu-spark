@@ -109,7 +109,7 @@ const AdminMissionControl = () => {
             <h1 className="text-3xl font-bold">Admin Mission Control</h1>
             <p className="text-muted-foreground">System health, pipeline status, and operations center</p>
           </div>
-          <Badge variant="destructive" className="ml-auto">Admin Only</Badge>
+          <Badge variant="destructive" className="ms-auto">Admin Only</Badge>
         </div>
 
         {/* Admin next action guidance */}
@@ -186,7 +186,7 @@ const AdminMissionControl = () => {
                   <span className="font-semibold">•</span>
                   <span>{alert.message}</span>
                   {alert.action && (
-                    <Button size="sm" variant="outline" className="ml-auto">
+                    <Button size="sm" variant="outline" className="ms-auto">
                       {alert.actionLabel || 'Fix Now'}
                     </Button>
                   )}

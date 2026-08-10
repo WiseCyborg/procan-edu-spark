@@ -20,7 +20,7 @@ export const RegulationChangeAlert = () => {
       {criticalNotifications.map((notification) => (
         <Alert key={notification.id} variant="destructive" className="relative">
           <AlertTriangle className="h-4 w-4" />
-          <AlertTitle className="pr-8">Critical Regulation Update</AlertTitle>
+          <AlertTitle className="pe-8">Critical Regulation Update</AlertTitle>
           <AlertDescription className="mt-2">
             <p className="mb-2">
               <strong>COMAR {notification.comar_section}</strong> has been updated.
@@ -43,7 +43,7 @@ export const RegulationChangeAlert = () => {
           <Button
             variant="ghost"
             size="sm"
-            className="absolute top-2 right-2 h-6 w-6 p-0"
+            className="absolute top-2 end-2 h-6 w-6 p-0"
             onClick={() => acknowledgeMutation.mutate(notification.id)}
           >
             <X className="h-4 w-4" />
@@ -54,7 +54,7 @@ export const RegulationChangeAlert = () => {
       {standardNotifications.map((notification) => (
         <Alert key={notification.id} className="relative">
           <AlertTriangle className="h-4 w-4" />
-          <AlertTitle className="pr-8">Regulation Update</AlertTitle>
+          <AlertTitle className="pe-8">Regulation Update</AlertTitle>
           <AlertDescription className="mt-2">
             <p className="mb-2">
               <strong>COMAR {notification.comar_section}</strong> has been updated.
@@ -77,7 +77,7 @@ export const RegulationChangeAlert = () => {
           <Button
             variant="ghost"
             size="sm"
-            className="absolute top-2 right-2 h-6 w-6 p-0"
+            className="absolute top-2 end-2 h-6 w-6 p-0"
             onClick={() => acknowledgeMutation.mutate(notification.id)}
           >
             <X className="h-4 w-4" />

@@ -80,7 +80,7 @@ export const PaymentTestingGuide: React.FC = () => {
             </div>
           </div>
           <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/30">
-            <AlertTriangle className="h-3 w-3 mr-1" />
+            <AlertTriangle className="h-3 w-3 me-1" />
             Sandbox Mode
           </Badge>
         </div>
@@ -106,10 +106,10 @@ export const PaymentTestingGuide: React.FC = () => {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b">
-                      <th className="text-left py-2 font-medium">Card Type</th>
-                      <th className="text-left py-2 font-medium">Number</th>
-                      <th className="text-left py-2 font-medium">CVV</th>
-                      <th className="text-left py-2 font-medium">Expiry</th>
+                      <th className="text-start py-2 font-medium">Card Type</th>
+                      <th className="text-start py-2 font-medium">Number</th>
+                      <th className="text-start py-2 font-medium">CVV</th>
+                      <th className="text-start py-2 font-medium">Expiry</th>
                       <th className="py-2"></th>
                     </tr>
                   </thead>

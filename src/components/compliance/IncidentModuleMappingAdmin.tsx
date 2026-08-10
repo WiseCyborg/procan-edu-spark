@@ -218,7 +218,7 @@ export const IncidentModuleMappingAdmin: React.FC<IncidentModuleMappingAdminProp
           </div>
           <Button onClick={handleAddMapping} disabled={isSaving || !newIncidentType || !newModuleId}>
             {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-            <span className="ml-2">Add</span>
+            <span className="ms-2">Add</span>
           </Button>
         </div>
 

@@ -169,7 +169,7 @@ export default function ImpactDashboardPage() {
       {/* Download Button */}
       <div className="text-center">
         <Button onClick={() => window.print()} size="lg" variant="outline">
-          <Download className="h-5 w-5 mr-2" />
+          <Download className="h-5 w-5 me-2" />
           Download Impact Report (PDF)
         </Button>
         <p className="text-xs text-muted-foreground mt-2">

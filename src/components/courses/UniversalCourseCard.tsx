@@ -76,7 +76,7 @@ export const UniversalCourseCard = ({
     if (isLoading || isPurchasing) {
       return (
         <>
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          <Loader2 className="me-2 h-4 w-4 animate-spin" />
           {isPurchasing ? 'Opening checkout...' : 'Loading...'}
         </>
       );
@@ -85,7 +85,7 @@ export const UniversalCourseCard = ({
     if (isLocked) {
       return (
         <>
-          <Lock className="mr-2 h-4 w-4" />
+          <Lock className="me-2 h-4 w-4" />
           Complete RVT First
         </>
       );
@@ -98,7 +98,7 @@ export const UniversalCourseCard = ({
     if (requiresPayment && priceCents) {
       return (
         <>
-          <ShoppingCart className="mr-2 h-4 w-4" />
+          <ShoppingCart className="me-2 h-4 w-4" />
           Purchase {formatPrice(priceCents)}
         </>
       );
@@ -107,7 +107,7 @@ export const UniversalCourseCard = ({
     if (hasCertificate) {
       return (
         <>
-          <CheckCircle2 className="mr-2 h-4 w-4" />
+          <CheckCircle2 className="me-2 h-4 w-4" />
           View Certificate
         </>
       );
@@ -116,7 +116,7 @@ export const UniversalCourseCard = ({
     return (
       <>
         {getCtaLabel(launchTarget?.cta_label || 'start')}
-        <ArrowRight className="ml-2 h-4 w-4" />
+        <ArrowRight className="ms-2 h-4 w-4" />
       </>
     );
   };
@@ -150,7 +150,7 @@ export const UniversalCourseCard = ({
               {getCourseTypeBadge()}
               {hasCertificate && (
                 <Badge variant="outline" className="border-green-500 text-green-700 dark:text-green-400">
-                  <CheckCircle2 className="mr-1 h-3 w-3" />
+                  <CheckCircle2 className="me-1 h-3 w-3" />
                   Completed
                 </Badge>
               )}

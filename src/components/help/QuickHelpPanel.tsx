@@ -77,12 +77,12 @@ export const QuickHelpPanel: React.FC<QuickHelpPanelProps> = ({
         <div className="space-y-6 mt-6">
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute start-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search help topics..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9"
+              className="ps-9"
             />
           </div>
 
@@ -98,7 +98,7 @@ export const QuickHelpPanel: React.FC<QuickHelpPanelProps> = ({
                   onOpenChange(false);
                 }}
               >
-                <Book className="h-4 w-4 mr-2" />
+                <Book className="h-4 w-4 me-2" />
                 {currentHelp.guideName}
               </Button>
               <Button
@@ -109,7 +109,7 @@ export const QuickHelpPanel: React.FC<QuickHelpPanelProps> = ({
                   onOpenChange(false);
                 }}
               >
-                <Search className="h-4 w-4 mr-2" />
+                <Search className="h-4 w-4 me-2" />
                 Help Center
               </Button>
               <Button
@@ -120,7 +120,7 @@ export const QuickHelpPanel: React.FC<QuickHelpPanelProps> = ({
                   onOpenChange(false);
                 }}
               >
-                <MessageCircle className="h-4 w-4 mr-2" />
+                <MessageCircle className="h-4 w-4 me-2" />
                 FAQ
               </Button>
             </div>
@@ -133,7 +133,7 @@ export const QuickHelpPanel: React.FC<QuickHelpPanelProps> = ({
               {currentHelp.topics.map((topic, index) => (
                 <button
                   key={index}
-                  className="w-full text-left p-3 rounded-lg border hover:bg-muted transition-colors"
+                  className="w-full text-start p-3 rounded-lg border hover:bg-muted transition-colors"
                   onClick={() => {
                     navigate(topic.link);
                     onOpenChange(false);
@@ -181,7 +181,7 @@ export const QuickHelpPanel: React.FC<QuickHelpPanelProps> = ({
               className="w-full"
               onClick={() => window.location.href = 'mailto:support@procannedu.com'}
             >
-              <MessageCircle className="h-4 w-4 mr-2" />
+              <MessageCircle className="h-4 w-4 me-2" />
               Email Support
             </Button>
           </div>

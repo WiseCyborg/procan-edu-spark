@@ -45,7 +45,7 @@ export default function ComplianceContentReviewPage() {
       {/* Hero */}
       <div className="text-center mb-12">
         <Badge className="mb-4 text-lg px-4 py-2">
-          <Shield className="h-5 w-5 mr-2" />
+          <Shield className="h-5 w-5 me-2" />
           Content Compliance
         </Badge>
         <h1 className="text-4xl font-bold mb-4">
@@ -114,7 +114,7 @@ export default function ComplianceContentReviewPage() {
                 <p className="font-semibold">Chief Compliance Officer</p>
                 <p className="text-sm text-muted-foreground">ProCann Edu</p>
               </div>
-              <div className="text-right">
+              <div className="text-end">
                 <p className="text-sm text-muted-foreground">Digital Certification</p>
                 <p className="text-sm font-mono">{new Date().toLocaleDateString('en-US')}</p>
               </div>
@@ -138,10 +138,10 @@ export default function ComplianceContentReviewPage() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b">
-                    <th className="text-left py-3 px-4">Date Detected</th>
-                    <th className="text-left py-3 px-4">COMAR Section</th>
-                    <th className="text-left py-3 px-4">Change Type</th>
-                    <th className="text-left py-3 px-4">Affected Modules</th>
+                    <th className="text-start py-3 px-4">Date Detected</th>
+                    <th className="text-start py-3 px-4">COMAR Section</th>
+                    <th className="text-start py-3 px-4">Change Type</th>
+                    <th className="text-start py-3 px-4">Affected Modules</th>
                     <th className="text-center py-3 px-4">Status</th>
                   </tr>
                 </thead>

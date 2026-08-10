@@ -236,7 +236,7 @@ export function RateLimitManager() {
                     <TableHead>Requests</TableHead>
                     <TableHead>Time Remaining</TableHead>
                     <TableHead>Started</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead className="text-end">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -281,7 +281,7 @@ export function RateLimitManager() {
                         <TableCell className="text-muted-foreground text-sm">
                           {new Date(limit.window_start).toLocaleTimeString()}
                         </TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-end">
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
                               <Button

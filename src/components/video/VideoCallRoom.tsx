@@ -76,7 +76,7 @@ export const VideoCallRoom = ({
             size="sm"
             onClick={onDisconnect}
           >
-            <PhoneOff className="w-4 h-4 mr-2" />
+            <PhoneOff className="w-4 h-4 me-2" />
             {isHost ? 'End Call' : 'Leave Call'}
           </Button>
         </div>

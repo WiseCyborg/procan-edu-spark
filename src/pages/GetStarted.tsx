@@ -32,7 +32,7 @@ const GetStarted = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Path 1: RVT Core (Employee) */}
             <Card className="hover:shadow-xl transition-shadow cursor-pointer group border-2 border-primary/20 relative overflow-hidden" onClick={() => navigate('/auth?role=student')}>
-              <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs px-3 py-1 rounded-bl-lg font-medium">
+              <div className="absolute top-0 end-0 bg-primary text-primary-foreground text-xs px-3 py-1 rounded-bl-lg font-medium">
                 Required
               </div>
               <CardHeader className="text-center pt-8">
@@ -65,14 +65,14 @@ const GetStarted = () => {
                 </div>
                 <Button className="w-full group-hover:bg-primary/90">
                   Begin RVT Training
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                  <ArrowRight className="ms-2 h-4 w-4" />
                 </Button>
               </CardContent>
             </Card>
 
             {/* Path 2: Manager Track */}
             <Card className="hover:shadow-xl transition-shadow cursor-pointer group border-2 border-amber-500/20" onClick={() => navigate('/auth?role=training_coordinator')}>
-              <div className="absolute top-0 right-0 bg-amber-500 text-white text-xs px-3 py-1 rounded-bl-lg font-medium">
+              <div className="absolute top-0 end-0 bg-amber-500 text-white text-xs px-3 py-1 rounded-bl-lg font-medium">
                 Optional
               </div>
               <CardHeader className="text-center pt-8">
@@ -105,14 +105,14 @@ const GetStarted = () => {
                 </div>
                 <Button className="w-full" variant="outline">
                   Access Manager Track
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                  <ArrowRight className="ms-2 h-4 w-4" />
                 </Button>
               </CardContent>
             </Card>
 
             {/* Path 3: Public Learning */}
             <Card className="hover:shadow-xl transition-shadow cursor-pointer group border-2 border-secondary/20" onClick={() => navigate('/consumer-education')}>
-              <div className="absolute top-0 right-0 bg-secondary text-secondary-foreground text-xs px-3 py-1 rounded-bl-lg font-medium">
+              <div className="absolute top-0 end-0 bg-secondary text-secondary-foreground text-xs px-3 py-1 rounded-bl-lg font-medium">
                 Free
               </div>
               <CardHeader className="text-center pt-8">
@@ -145,7 +145,7 @@ const GetStarted = () => {
                 </div>
                 <Button className="w-full" variant="secondary" onClick={(e) => { e.stopPropagation(); navigate('/consumer-education'); }}>
                   Start Free Learning
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                  <ArrowRight className="ms-2 h-4 w-4" />
                 </Button>
               </CardContent>
             </Card>
@@ -181,7 +181,7 @@ const GetStarted = () => {
               <CardContent>
                 <Button className="w-full" size="sm" onClick={() => navigate('/org/apply')}>
                   Apply Now
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                  <ArrowRight className="ms-2 h-4 w-4" />
                 </Button>
               </CardContent>
             </Card>
@@ -198,7 +198,7 @@ const GetStarted = () => {
               <CardContent>
                 <Button className="w-full" variant="outline" size="sm" onClick={() => navigate('/auth?role=training_coordinator')}>
                   Sign In
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                  <ArrowRight className="ms-2 h-4 w-4" />
                 </Button>
               </CardContent>
             </Card>
@@ -215,7 +215,7 @@ const GetStarted = () => {
               <CardContent>
                 <Button className="w-full" variant="outline" size="sm" onClick={() => navigate('/auth?role=student')}>
                   Begin Training
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                  <ArrowRight className="ms-2 h-4 w-4" />
                 </Button>
               </CardContent>
             </Card>
@@ -232,7 +232,7 @@ const GetStarted = () => {
               <CardContent>
                 <Button className="w-full" size="sm" onClick={() => navigate('/mca-compliance-review')}>
                   Access Portal
-                  <Shield className="ml-2 h-4 w-4" />
+                  <Shield className="ms-2 h-4 w-4" />
                 </Button>
               </CardContent>
             </Card>

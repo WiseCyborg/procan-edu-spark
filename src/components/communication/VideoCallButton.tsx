@@ -111,7 +111,7 @@ export const VideoCallButton = ({
           onClick={() => setIsOpen(true)}
           disabled={isCreating}
         >
-          <Video className="w-4 h-4 mr-2" />
+          <Video className="w-4 h-4 me-2" />
           Start Video Call
         </Button>
       )}

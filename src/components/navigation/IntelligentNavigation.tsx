@@ -181,7 +181,7 @@ export const IntelligentNavigation: React.FC = () => {
   }));
 
   return (
-    <nav className="flex items-center space-x-1">
+    <nav className="flex items-center space-x-1 rtl:space-x-reverse">
       {itemsWithActiveState.map((item) => {
         const Icon = item.icon;
         return (
@@ -194,7 +194,7 @@ export const IntelligentNavigation: React.FC = () => {
               onClick={() => navigate(item.path)}
               variant={item.isActive ? "default" : "ghost"}
               size="sm"
-              className="flex items-center space-x-2"
+              className="flex items-center space-x-2 rtl:space-x-reverse"
             >
               <Icon className="w-4 h-4" />
               <span className="hidden md:inline">{item.label}</span>

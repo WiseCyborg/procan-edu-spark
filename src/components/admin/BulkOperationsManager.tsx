@@ -310,7 +310,7 @@ export const BulkOperationsManager = () => {
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-foreground">Bulk Operations Manager</h2>
         <Button onClick={downloadSampleCsv} variant="outline">
-          <Download className="h-4 w-4 mr-2" />
+          <Download className="h-4 w-4 me-2" />
           Download Sample CSV
         </Button>
       </div>
@@ -327,7 +327,7 @@ export const BulkOperationsManager = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
-                <Users className="h-5 w-5 mr-2" />
+                <Users className="h-5 w-5 me-2" />
                 Bulk User Import
               </CardTitle>
             </CardHeader>
@@ -355,9 +355,9 @@ export const BulkOperationsManager = () => {
                 className="w-full"
               >
                 {isProcessing ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="h-4 w-4 me-2 animate-spin" />
                 ) : (
-                  <Upload className="h-4 w-4 mr-2" />
+                  <Upload className="h-4 w-4 me-2" />
                 )}
                 Import Users
               </Button>
@@ -369,7 +369,7 @@ export const BulkOperationsManager = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
-                <Mail className="h-5 w-5 mr-2" />
+                <Mail className="h-5 w-5 me-2" />
                 Bulk Email Campaign
               </CardTitle>
             </CardHeader>
@@ -427,9 +427,9 @@ export const BulkOperationsManager = () => {
                 className="w-full"
               >
                 {isProcessing ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="h-4 w-4 me-2 animate-spin" />
                 ) : (
-                  <Mail className="h-4 w-4 mr-2" />
+                  <Mail className="h-4 w-4 me-2" />
                 )}
                 Send Bulk Email
               </Button>
@@ -441,7 +441,7 @@ export const BulkOperationsManager = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
-                <Users className="h-5 w-5 mr-2" />
+                <Users className="h-5 w-5 me-2" />
                 Bulk Role Assignment
               </CardTitle>
             </CardHeader>
@@ -480,9 +480,9 @@ export const BulkOperationsManager = () => {
                 className="w-full"
               >
                 {isProcessing ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="h-4 w-4 me-2 animate-spin" />
                 ) : (
-                  <Users className="h-4 w-4 mr-2" />
+                  <Users className="h-4 w-4 me-2" />
                 )}
                 Assign Roles
               </Button>
@@ -494,7 +494,7 @@ export const BulkOperationsManager = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
-                <Award className="h-5 w-5 mr-2" />
+                <Award className="h-5 w-5 me-2" />
                 Bulk Certificate Generation
               </CardTitle>
             </CardHeader>
@@ -509,9 +509,9 @@ export const BulkOperationsManager = () => {
                 className="w-full"
               >
                 {isProcessing ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="h-4 w-4 me-2 animate-spin" />
                 ) : (
-                  <Award className="h-4 w-4 mr-2" />
+                  <Award className="h-4 w-4 me-2" />
                 )}
                 Generate Certificates
               </Button>
@@ -530,7 +530,7 @@ export const BulkOperationsManager = () => {
             {operations.map(operation => (
               <div key={operation.id} className="border rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2 rtl:space-x-reverse">
                     {getOperationIcon(operation.type)}
                     <span className="font-medium capitalize">
                       {operation.type.replace('_', ' ')}
@@ -538,13 +538,13 @@ export const BulkOperationsManager = () => {
                   </div>
                   <Badge className={getStatusColor(operation.status)}>
                     {operation.status === 'processing' && (
-                      <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                      <Loader2 className="h-3 w-3 me-1 animate-spin" />
                     )}
                     {operation.status === 'completed' && (
-                      <CheckCircle className="h-3 w-3 mr-1" />
+                      <CheckCircle className="h-3 w-3 me-1" />
                     )}
                     {operation.status === 'failed' && (
-                      <AlertCircle className="h-3 w-3 mr-1" />
+                      <AlertCircle className="h-3 w-3 me-1" />
                     )}
                     {operation.status}
                   </Badge>

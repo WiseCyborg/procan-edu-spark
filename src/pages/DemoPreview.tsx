@@ -74,7 +74,7 @@ const DemoPreview = () => {
       <main className="container mx-auto px-4 py-8 max-w-4xl space-y-8">
         {loading && (
           <div className="flex items-center justify-center py-20 text-muted-foreground">
-            <Loader2 className="h-6 w-6 animate-spin mr-2" />
+            <Loader2 className="h-6 w-6 animate-spin me-2" />
             Loading preview…
           </div>
         )}

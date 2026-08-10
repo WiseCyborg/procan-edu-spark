@@ -243,7 +243,7 @@ export const SupportRequestsPanel = () => {
                       onClick={() => updateRequestStatus(request.id, 'in_progress')}
                     >
                       Accept
-                      <ArrowRight className="ml-2 h-4 w-4" />
+                      <ArrowRight className="ms-2 h-4 w-4" />
                     </Button>
                   )}
                   {request.status === 'in_progress' && (
@@ -252,7 +252,7 @@ export const SupportRequestsPanel = () => {
                       variant="outline"
                       onClick={() => updateRequestStatus(request.id, 'resolved')}
                     >
-                      <CheckCircle className="mr-2 h-4 w-4" />
+                      <CheckCircle className="me-2 h-4 w-4" />
                       Resolve
                     </Button>
                   )}
@@ -262,7 +262,7 @@ export const SupportRequestsPanel = () => {
                       variant="secondary"
                       onClick={() => window.location.href = `/communication?conversation=${request.conversation_id}`}
                     >
-                      <MessageSquare className="mr-2 h-4 w-4" />
+                      <MessageSquare className="me-2 h-4 w-4" />
                       Join Chat
                     </Button>
                   )}

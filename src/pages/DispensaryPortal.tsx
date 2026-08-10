@@ -255,13 +255,13 @@ const DispensaryPortal = () => {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-green-700 flex items-center">
-              <Building2 className="mr-3 h-8 w-8" />
+              <Building2 className="me-3 h-8 w-8" />
               Dispensary Portal
             </h1>
             <p className="text-gray-600 mt-1">Manage your organization's cannabis training compliance</p>
           </div>
           <Button className="flex items-center">
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="me-2 h-4 w-4" />
             Add Employee
           </Button>
         </div>
@@ -365,21 +365,21 @@ const DispensaryPortal = () => {
               <CardHeader>
                 <div className="flex justify-between items-center">
                   <CardTitle className="flex items-center text-green-700">
-                    <Users className="mr-2 h-5 w-5" />
+                    <Users className="me-2 h-5 w-5" />
                     Employee Training Status
                   </CardTitle>
                   <div className="flex gap-2">
                     <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                      <Search className="absolute start-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                       <Input
                         placeholder="Search employees..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10 w-64"
+                        className="ps-10 w-64"
                       />
                     </div>
                     <Button variant="outline">
-                      <Download className="mr-2 h-4 w-4" />
+                      <Download className="me-2 h-4 w-4" />
                       Export
                     </Button>
                   </div>
@@ -415,7 +415,7 @@ const DispensaryPortal = () => {
                           </div>
                           <div className="flex items-center gap-4">
                             {certificate ? (
-                              <div className="text-right">
+                              <div className="text-end">
                                 <Badge className="bg-green-100 text-green-800 mb-1">
                                   Certified
                                 </Badge>
@@ -450,7 +450,7 @@ const DispensaryPortal = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center text-green-700">
-                  <FileText className="mr-2 h-5 w-5" />
+                  <FileText className="me-2 h-5 w-5" />
                   Compliance Reports
                 </CardTitle>
               </CardHeader>
@@ -460,19 +460,19 @@ const DispensaryPortal = () => {
                     <h3 className="text-lg font-semibold">Available Reports</h3>
                     <div className="space-y-2">
                       <Button variant="outline" className="w-full justify-start">
-                        <Download className="mr-2 h-4 w-4" />
+                        <Download className="me-2 h-4 w-4" />
                         Employee Certification Status
                       </Button>
                       <Button variant="outline" className="w-full justify-start">
-                        <Download className="mr-2 h-4 w-4" />
+                        <Download className="me-2 h-4 w-4" />
                         Training Completion Report
                       </Button>
                       <Button variant="outline" className="w-full justify-start">
-                        <Download className="mr-2 h-4 w-4" />
+                        <Download className="me-2 h-4 w-4" />
                         Certificate Expiry Schedule
                       </Button>
                       <Button variant="outline" className="w-full justify-start">
-                        <Download className="mr-2 h-4 w-4" />
+                        <Download className="me-2 h-4 w-4" />
                         MCA Compliance Audit
                       </Button>
                     </div>
@@ -509,7 +509,7 @@ const DispensaryPortal = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center text-green-700">
-                  <Award className="mr-2 h-5 w-5" />
+                  <Award className="me-2 h-5 w-5" />
                   Certificate Management
                 </CardTitle>
               </CardHeader>
@@ -532,7 +532,7 @@ const DispensaryPortal = () => {
                               Issued: {formatDate(certificate.issue_date)}
                             </p>
                           </div>
-                          <div className="text-right">
+                          <div className="text-end">
                             <div className="space-y-1">
                               {certificate.is_revoked ? (
                                 <Badge className="bg-red-100 text-red-800">Revoked</Badge>

@@ -386,17 +386,17 @@ export const StaffInvitationSystem = () => {
         </div>
         <div className="flex gap-2">
           <Button onClick={fetchData} variant="outline" disabled={loading}>
-            <RefreshCw className="h-4 w-4 mr-2" />
+            <RefreshCw className="h-4 w-4 me-2" />
             Refresh
           </Button>
           <Button onClick={exportInvitations}>
-            <Download className="h-4 w-4 mr-2" />
+            <Download className="h-4 w-4 me-2" />
             Export
           </Button>
           <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
             <DialogTrigger asChild>
               <Button>
-                <UserPlus className="h-4 w-4 mr-2" />
+                <UserPlus className="h-4 w-4 me-2" />
                 Send Invitation
               </Button>
             </DialogTrigger>
@@ -452,7 +452,7 @@ export const StaffInvitationSystem = () => {
                   disabled={loading || !inviteEmail || !selectedOrganization}
                   className="w-full"
                 >
-                  <Send className="h-4 w-4 mr-2" />
+                  <Send className="h-4 w-4 me-2" />
                   Send Invitation
                 </Button>
               </div>
@@ -518,7 +518,7 @@ export const StaffInvitationSystem = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Users className="h-5 w-5 mr-2" />
+              <Users className="h-5 w-5 me-2" />
               Recent Invitations
             </CardTitle>
           </CardHeader>
@@ -538,7 +538,7 @@ export const StaffInvitationSystem = () => {
                   <div className="flex items-center justify-between">
                     <div className="text-xs text-muted-foreground">
                       <span>Created: {new Date(invitation.created_at).toLocaleDateString()}</span>
-                      <span className="ml-3">
+                      <span className="ms-3">
                         Expires: {new Date(invitation.expires_at).toLocaleDateString()}
                       </span>
                     </div>
@@ -549,7 +549,7 @@ export const StaffInvitationSystem = () => {
                         onClick={() => resendInvitation(invitation.id)}
                         disabled={loading}
                       >
-                        <RefreshCw className="h-3 w-3 mr-1" />
+                        <RefreshCw className="h-3 w-3 me-1" />
                         Resend
                       </Button>
                     )}
@@ -603,7 +603,7 @@ export const StaffInvitationSystem = () => {
                 disabled={loading || !bulkEmails.trim() || !selectedOrganization}
                 className="w-full"
               >
-                <Send className="h-4 w-4 mr-2" />
+                <Send className="h-4 w-4 me-2" />
                 Send Bulk Invitations
               </Button>
             </CardContent>

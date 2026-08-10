@@ -235,12 +235,12 @@ export default function PurchaseSeats() {
           >
             {loading ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="me-2 h-4 w-4 animate-spin" />
                 Processing...
               </>
             ) : (
               <>
-                <ShoppingCart className="mr-2 h-4 w-4" />
+                <ShoppingCart className="me-2 h-4 w-4" />
                 Proceed to PayPal
               </>
             )}

@@ -81,12 +81,12 @@ export const CourseCompletionCelebration: React.FC<CourseCompletionCelebrationPr
             {/* Topics Mastered */}
             <div className="bg-muted/50 rounded-lg p-6 mb-8">
               <h3 className="font-semibold mb-4 text-lg">Topics Mastered:</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-left">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-start">
                 {completedTopics.map((topic, index) => (
                   <div key={index} className="flex items-center gap-3 p-2">
                     <CheckCircle2 className="h-5 w-5 text-stoplight-green flex-shrink-0" />
                     <span className="flex-1">{topic.title}</span>
-                    <Badge variant="outline" className="ml-auto flex-shrink-0">
+                    <Badge variant="outline" className="ms-auto flex-shrink-0">
                       Modules {topic.modules}
                     </Badge>
                   </div>
@@ -108,9 +108,9 @@ export const CourseCompletionCelebration: React.FC<CourseCompletionCelebrationPr
                   onClick={onTakeExam}
                   className="bg-stoplight-green hover:bg-stoplight-green/90 text-white"
                 >
-                  <Award className="mr-2 h-5 w-5" />
+                  <Award className="me-2 h-5 w-5" />
                   Take Final Exam
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  <ArrowRight className="ms-2 h-5 w-5" />
                 </Button>
                 <Button 
                   size="lg" 

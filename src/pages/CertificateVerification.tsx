@@ -193,7 +193,7 @@ const CertificateVerification = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center text-green-700">
-                <Search className="mr-2 h-5 w-5" />
+                <Search className="me-2 h-5 w-5" />
                 Verify Certificate
               </CardTitle>
             </CardHeader>
@@ -232,7 +232,7 @@ const CertificateVerification = () => {
                 <CardHeader className="bg-green-50">
                   <CardTitle className="flex items-center justify-between">
                     <div className="flex items-center text-green-700">
-                      <Award className="mr-2 h-6 w-6" />
+                      <Award className="me-2 h-6 w-6" />
                       Certificate Details
                     </div>
                     <Badge className={getCertificateStatus(certificate).color}>
@@ -278,12 +278,12 @@ const CertificateVerification = () => {
                       >
                         {copied ? (
                           <>
-                            <Check className="mr-2 h-4 w-4" />
+                            <Check className="me-2 h-4 w-4" />
                             Link Copied!
                           </>
                         ) : (
                           <>
-                            <Copy className="mr-2 h-4 w-4" />
+                            <Copy className="me-2 h-4 w-4" />
                             Copy Verification Link
                           </>
                         )}

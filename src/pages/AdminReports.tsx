@@ -198,7 +198,7 @@ export default function AdminReports() {
                   <CardDescription>{result.rows.length} row{result.rows.length === 1 ? '' : 's'}</CardDescription>
                 </div>
                 <Button variant="outline" size="sm" onClick={exportCsv} disabled={result.rows.length === 0}>
-                  <Download className="mr-2 h-4 w-4" /> Export CSV
+                  <Download className="me-2 h-4 w-4" /> Export CSV
                 </Button>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -207,7 +207,7 @@ export default function AdminReports() {
                 ) : (
                   <div className="max-h-[480px] overflow-auto rounded-md border">
                     <table className="w-full text-sm">
-                      <thead className="sticky top-0 bg-muted text-left">
+                      <thead className="sticky top-0 bg-muted text-start">
                         <tr>
                           {result.columns.map((c, i) => (
                             <th key={c} className="px-3 py-2 font-medium">
@@ -270,7 +270,7 @@ export default function AdminReports() {
                   <button
                     key={i}
                     type="button"
-                    className="block w-full rounded px-2 py-1 text-left text-sm hover:bg-muted"
+                    className="block w-full rounded px-2 py-1 text-start text-sm hover:bg-muted"
                     onClick={() => {
                       setQuestion(h.question);
                       run(h.question);

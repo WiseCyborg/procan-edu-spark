@@ -47,15 +47,15 @@ const steps = [
           </div>
         </div>
         <div className="grid gap-3">
-          <div className="p-3 border-l-4 border-green-500 bg-green-50 rounded">
+          <div className="p-3 border-s-4 border-green-500 bg-green-50 rounded">
             <h5 className="font-semibold text-sm text-green-800">Available Seats</h5>
             <p className="text-xs text-green-700">Purchased but not yet assigned - ready to use</p>
           </div>
-          <div className="p-3 border-l-4 border-blue-500 bg-blue-50 rounded">
+          <div className="p-3 border-s-4 border-blue-500 bg-blue-50 rounded">
             <h5 className="font-semibold text-sm text-blue-800">Assigned Seats</h5>
             <p className="text-xs text-blue-700">Given to a specific employee - they can now access training</p>
           </div>
-          <div className="p-3 border-l-4 border-gray-500 bg-gray-50 rounded">
+          <div className="p-3 border-s-4 border-gray-500 bg-gray-50 rounded">
             <h5 className="font-semibold text-sm text-gray-800">Used Seats</h5>
             <p className="text-xs text-gray-700">Employee has started/completed training - cannot be reassigned</p>
           </div>
@@ -99,7 +99,7 @@ const steps = [
             <li>Seat is automatically assigned when they register</li>
           </ol>
         </div>
-        <div className="border-l-4 border-blue-500 bg-blue-50 p-4 rounded">
+        <div className="border-s-4 border-blue-500 bg-blue-50 p-4 rounded">
           <p className="text-sm font-semibold text-blue-800">💡 Pro Tip</p>
           <p className="text-sm text-blue-700">
             Send invitations 2-3 days before the employee's start date so they 

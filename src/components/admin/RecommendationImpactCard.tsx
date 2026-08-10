@@ -34,7 +34,7 @@ export const RecommendationImpactCard = ({
               <Badge variant="outline">{recommendation.status}</Badge>
               {hasImpact && (
                 <Badge variant="default" className="bg-green-600">
-                  <TrendingUp className="h-3 w-3 mr-1" />
+                  <TrendingUp className="h-3 w-3 me-1" />
                   Tracked
                 </Badge>
               )}

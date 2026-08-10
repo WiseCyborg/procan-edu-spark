@@ -338,8 +338,8 @@ export const EnhancedFAQ: React.FC<EnhancedFAQProps> = ({
       <CardHeader>
         <CardTitle className="flex items-center text-primary">
           {icon}
-          <span className="ml-2">{title}</span>
-          <Badge variant="outline" className="ml-auto">
+          <span className="ms-2">{title}</span>
+          <Badge variant="outline" className="ms-auto">
             {t('faq.count', { count: faqs.length, defaultValue: `${faqs.length} questions` })}
           </Badge>
         </CardTitle>
@@ -349,10 +349,10 @@ export const EnhancedFAQ: React.FC<EnhancedFAQProps> = ({
           <Accordion type="single" collapsible className="w-full">
             {faqs.map((faq) => (
               <AccordionItem key={faq.id} value={faq.id}>
-                <AccordionTrigger className="text-left">
-                  <div className="flex items-center justify-between w-full mr-4">
+                <AccordionTrigger className="text-start">
+                  <div className="flex items-center justify-between w-full me-4">
                     <span className="flex-1">{tr(faq.id, 'q', faq.question)}</span>
-                    <div className="flex items-center gap-2 ml-2">
+                    <div className="flex items-center gap-2 ms-2">
                       {getSecurityIcon(faq.securityLevel)}
                       <Badge className={getCategoryColor(faq.category)} variant="secondary">
                         {faq.category}
@@ -407,13 +407,13 @@ export const EnhancedFAQ: React.FC<EnhancedFAQProps> = ({
       {showSearch && (
         <div className="max-w-2xl mx-auto">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Search className="absolute start-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <Input
               type="text"
               placeholder={t('faq.search.placeholder', { defaultValue: 'Search frequently asked questions...' })}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="ps-10"
             />
           </div>
         </div>
@@ -423,18 +423,18 @@ export const EnhancedFAQ: React.FC<EnhancedFAQProps> = ({
       <Card className="border-primary/20">
         <CardHeader className="bg-muted/50">
           <CardTitle className="flex items-center text-primary">
-            <HelpCircle className="mr-2 h-5 w-5" />
+            <HelpCircle className="me-2 h-5 w-5" />
             {t('faq.contact.title', { defaultValue: 'Need Additional Help?' })}
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex items-center text-muted-foreground">
-              <Mail className="mr-2 h-4 w-4 text-primary" />
+              <Mail className="me-2 h-4 w-4 text-primary" />
               <span>info@procannedu.com</span>
             </div>
             <div className="flex items-center text-muted-foreground">
-              <Clock className="mr-2 h-4 w-4 text-primary" />
+              <Clock className="me-2 h-4 w-4 text-primary" />
               <span>{t('faq.contact.hours', { defaultValue: 'Mon-Fri 9AM-6PM EST' })}</span>
             </div>
           </div>
@@ -445,23 +445,23 @@ export const EnhancedFAQ: React.FC<EnhancedFAQProps> = ({
       <Tabs defaultValue={defaultTab} className="w-full">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="student" className="flex items-center">
-            <User className="mr-2 h-4 w-4" />
+            <User className="me-2 h-4 w-4" />
             {t('faq.tabs.students', { defaultValue: 'Students' })}
           </TabsTrigger>
           {(isDispensaryManager || isAdmin) && (
             <TabsTrigger value="dispensary" className="flex items-center">
-              <Building2 className="mr-2 h-4 w-4" />
+              <Building2 className="me-2 h-4 w-4" />
               {t('faq.tabs.managers', { defaultValue: 'Managers' })}
             </TabsTrigger>
           )}
           {isAdmin && (
             <TabsTrigger value="admin" className="flex items-center">
-              <Shield className="mr-2 h-4 w-4" />
+              <Shield className="me-2 h-4 w-4" />
               {t('faq.tabs.admins', { defaultValue: 'Admins' })}
             </TabsTrigger>
           )}
           <TabsTrigger value="general" className="flex items-center">
-            <HelpCircle className="mr-2 h-4 w-4" />
+            <HelpCircle className="me-2 h-4 w-4" />
             {t('faq.tabs.general', { defaultValue: 'General' })}
           </TabsTrigger>
         </TabsList>

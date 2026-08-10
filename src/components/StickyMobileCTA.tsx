@@ -22,14 +22,14 @@ export const StickyMobileCTA = () => {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-card shadow-2xl border-t-2 border-primary p-3 md:hidden animate-slide-in-up">
+    <div className="fixed bottom-0 start-0 end-0 z-50 bg-card shadow-2xl border-t-2 border-primary p-3 md:hidden animate-slide-in-up">
       <div className="flex gap-2">
         <Button
           onClick={() => navigate('/auth?role=student')}
           className="flex-1 bg-primary text-primary-foreground h-14 text-base font-semibold shadow-lg"
           size="touch"
         >
-          <Award className="h-5 w-5 mr-2" />
+          <Award className="h-5 w-5 me-2" />
           Start Training
         </Button>
         <Button
@@ -38,7 +38,7 @@ export const StickyMobileCTA = () => {
           className="flex-1 border-2 border-primary h-14 text-base font-semibold"
           size="touch"
         >
-          <Building2 className="h-5 w-5 mr-2" />
+          <Building2 className="h-5 w-5 me-2" />
           Get Audit
         </Button>
       </div>

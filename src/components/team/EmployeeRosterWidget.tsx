@@ -230,7 +230,7 @@ export const EmployeeRosterWidget = ({ organizationId }: EmployeeRosterWidgetPro
             Employee Roster
           </div>
           <Button variant="outline" size="sm" onClick={exportToCSV}>
-            <Download className="h-4 w-4 mr-2" />
+            <Download className="h-4 w-4 me-2" />
             Export CSV
           </Button>
         </CardTitle>
@@ -242,12 +242,12 @@ export const EmployeeRosterWidget = ({ organizationId }: EmployeeRosterWidgetPro
         {/* Search and Filters */}
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute start-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search by name or email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9"
+              className="ps-9"
             />
           </div>
           <div className="flex gap-2">
@@ -481,7 +481,7 @@ export const EmployeeRosterWidget = ({ organizationId }: EmployeeRosterWidgetPro
                   onClick={() => handleSendReminder(selectedEmployee)}
                   disabled={isSendingReminder}
                 >
-                  <Mail className="h-4 w-4 mr-2" />
+                  <Mail className="h-4 w-4 me-2" />
                   Send Reminder
                 </Button>
                 {selectedEmployee.certificate_status === 'valid' && (
@@ -489,7 +489,7 @@ export const EmployeeRosterWidget = ({ organizationId }: EmployeeRosterWidgetPro
                     variant="outline"
                     onClick={() => handleViewCertificate(selectedEmployee)}
                   >
-                    <Award className="h-4 w-4 mr-2" />
+                    <Award className="h-4 w-4 me-2" />
                     View Certificate
                   </Button>
                 )}

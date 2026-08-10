@@ -52,9 +52,9 @@ export const ProfileCompletionBanner: React.FC<ProfileCompletionBannerProps> = (
         <Button 
           onClick={() => navigate('/profile')}
           size="sm"
-          className="ml-4 bg-orange-600 hover:bg-orange-700 text-white"
+          className="ms-4 bg-orange-600 hover:bg-orange-700 text-white"
         >
-          <User className="h-4 w-4 mr-1" />
+          <User className="h-4 w-4 me-1" />
           Complete Profile
         </Button>
       </AlertDescription>

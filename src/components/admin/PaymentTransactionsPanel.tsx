@@ -314,9 +314,9 @@ export function PaymentTransactionsPanel() {
                         onClick={() => handleManualApprove(p.id)}
                       >
                         {approvingId === p.id ? (
-                          <><Loader2 className="h-3 w-3 animate-spin mr-1" />Processing…</>
+                          <><Loader2 className="h-3 w-3 animate-spin me-1" />Processing…</>
                         ) : (
-                          <><CheckCircle2 className="h-3 w-3 mr-1" />Mark as Paid</>
+                          <><CheckCircle2 className="h-3 w-3 me-1" />Mark as Paid</>
                         )}
                       </Button>
                     </TableCell>
@@ -353,7 +353,7 @@ export function PaymentTransactionsPanel() {
 
       {loading && events.length === 0 ? (
         <div className="flex items-center justify-center py-12 text-muted-foreground">
-          <Loader2 className="h-6 w-6 animate-spin mr-2" /> Loading payment events…
+          <Loader2 className="h-6 w-6 animate-spin me-2" /> Loading payment events…
         </div>
       ) : events.length === 0 && !error ? (
         <div className="text-center text-muted-foreground py-12 border rounded-md">

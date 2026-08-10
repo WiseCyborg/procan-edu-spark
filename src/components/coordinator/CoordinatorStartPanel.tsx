@@ -201,12 +201,12 @@ export const CoordinatorStartPanel: React.FC<CoordinatorStartPanelProps> = ({
                 key={action.label}
                 variant={action.variant}
                 onClick={action.onClick}
-                className="h-auto py-3 flex-col items-start text-left"
+                className="h-auto py-3 flex-col items-start text-start"
               >
                 <div className="flex items-center gap-2 w-full">
                   <Icon className="h-4 w-4" />
                   <span className="font-medium">{action.label}</span>
-                  <ChevronRight className="h-4 w-4 ml-auto" />
+                  <ChevronRight className="h-4 w-4 ms-auto" />
                 </div>
                 <span className="text-xs text-muted-foreground mt-1 font-normal">
                   {action.description}
@@ -235,10 +235,10 @@ export const CoordinatorStartPanel: React.FC<CoordinatorStartPanelProps> = ({
                     <p className="text-sm font-medium truncate">{member.name}</p>
                     <p className="text-xs text-muted-foreground">{member.email}</p>
                   </div>
-                  <div className="text-right">
+                  <div className="text-end">
                     {member.status === 'completed' ? (
                       <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                        <CheckCircle2 className="h-3 w-3 mr-1" />
+                        <CheckCircle2 className="h-3 w-3 me-1" />
                         Certified
                       </Badge>
                     ) : member.status === 'invited' ? (

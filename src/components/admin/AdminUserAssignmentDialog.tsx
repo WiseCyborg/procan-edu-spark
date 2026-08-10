@@ -235,7 +235,7 @@ export function AdminUserAssignmentDialog({
                 {AVAILABLE_ROLES.map((role) => (
                   <div
                     key={role.value}
-                    className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+                    className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors rtl:space-x-reverse"
                   >
                     <Checkbox
                       id={role.value}
@@ -271,7 +271,7 @@ export function AdminUserAssignmentDialog({
           >
             {loading ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="me-2 h-4 w-4 animate-spin" />
                 Saving...
               </>
             ) : (

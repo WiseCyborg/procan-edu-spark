@@ -342,7 +342,7 @@ const AdminDashboard = () => {
   return (
     <div className="flex h-screen bg-background overflow-hidden">
       {/* LEFT SIDEBAR - Quick Lookup */}
-      <aside className="w-80 border-r bg-card overflow-y-auto">
+      <aside className="w-80 border-e bg-card overflow-y-auto">
         <div className="p-4 border-b">
           <h2 className="text-lg font-bold flex items-center gap-2">
             <Settings className="h-5 w-5" />
@@ -383,9 +383,9 @@ const AdminDashboard = () => {
                 }}
                 className="w-full md:w-auto border-orange-500 text-orange-600 hover:bg-orange-50"
               >
-                <ClipboardCheck className="w-5 h-5 mr-2" />
+                <ClipboardCheck className="w-5 h-5 me-2" />
                 Pending Applications
-                <Badge variant="destructive" className="ml-2">
+                <Badge variant="destructive" className="ms-2">
                   New
                 </Badge>
               </Button>
@@ -458,7 +458,7 @@ const AdminDashboard = () => {
           <Card className="mb-8 border-orange-200 bg-orange-50">
             <CardContent className="pt-6">
               <div className="flex items-center">
-                <AlertTriangle className="h-5 w-5 text-orange-600 mr-2" />
+                <AlertTriangle className="h-5 w-5 text-orange-600 me-2" />
                 <div>
                   <p className="font-medium text-orange-800">
                     {stats.expiringCertificates} certificates are expiring within 30 days
@@ -563,7 +563,7 @@ const AdminDashboard = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center text-green-700">
-                  <Users className="mr-2 h-5 w-5" />
+                  <Users className="me-2 h-5 w-5" />
                   User Analytics & Management
                 </CardTitle>
               </CardHeader>
@@ -597,7 +597,7 @@ const AdminDashboard = () => {
                               Joined: {formatDate(user.created_at)}
                             </p>
                           </div>
-                          <div className="text-right">
+                          <div className="text-end">
                             <Badge className={
                               user.completionStatus === 'Completed' 
                                 ? 'bg-green-100 text-green-800' 
@@ -672,12 +672,12 @@ const AdminDashboard = () => {
                 <div className="space-y-2">
                   <Label>Search User</Label>
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Search className="absolute start-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
                       placeholder="Search by name..."
                       value={userSearchTerm}
                       onChange={e => setUserSearchTerm(e.target.value)}
-                      className="pl-10"
+                      className="ps-10"
                     />
                   </div>
                   {searchLoading && (
@@ -693,7 +693,7 @@ const AdminDashboard = () => {
                             setUserSearchTerm(`${user.first_name} ${user.last_name}`);
                             setSearchResults([]);
                           }}
-                          className="w-full px-4 py-2 text-left hover:bg-accent transition-colors"
+                          className="w-full px-4 py-2 text-start hover:bg-accent transition-colors"
                         >
                           {user.first_name} {user.last_name}
                         </button>
@@ -717,7 +717,7 @@ const AdminDashboard = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center text-green-700">
-                  <DollarSign className="mr-2 h-5 w-5" />
+                  <DollarSign className="me-2 h-5 w-5" />
                   Revenue Analytics
                 </CardTitle>
               </CardHeader>
@@ -779,7 +779,7 @@ const AdminDashboard = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center text-green-700">
-                  <FileText className="mr-2 h-5 w-5" />
+                  <FileText className="me-2 h-5 w-5" />
                   System Reports & Analytics
                 </CardTitle>
               </CardHeader>
@@ -900,7 +900,7 @@ const AdminDashboard = () => {
 
       {/* RIGHT PANEL - Context Info */}
       {showRightPanel && selectedItem && (
-        <aside className="w-96 border-l bg-card overflow-y-auto">
+        <aside className="w-96 border-s bg-card overflow-y-auto">
           <div className="p-4 border-b flex items-center justify-between">
             <h2 className="text-lg font-bold">Context Info</h2>
             <Button variant="ghost" size="sm" onClick={() => setShowRightPanel(false)}>

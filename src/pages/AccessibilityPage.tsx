@@ -8,7 +8,7 @@ export default function AccessibilityPage() {
     <div className="container mx-auto px-4 py-16 max-w-4xl">
       <div className="text-center mb-12">
         <Badge className="mb-4 text-lg px-4 py-2">
-          <Accessibility className="h-5 w-5 mr-2" />
+          <Accessibility className="h-5 w-5 me-2" />
           Accessibility Statement
         </Badge>
         <h1 className="text-4xl font-bold mb-4">Accessibility Statement</h1>

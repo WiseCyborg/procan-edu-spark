@@ -70,7 +70,7 @@ export default function ComplianceCurriculumMatrixPage() {
       {/* Header */}
       <div className="text-center mb-8">
         <Badge className="mb-4 text-lg px-4 py-2">
-          <FileCheck className="h-5 w-5 mr-2" />
+          <FileCheck className="h-5 w-5 me-2" />
           Regulatory Compliance Documentation
         </Badge>
         <h1 className="text-4xl font-bold mb-4">
@@ -129,7 +129,7 @@ export default function ComplianceCurriculumMatrixPage() {
       {/* Download Button */}
       <div className="text-center mb-8">
         <Button onClick={handleDownloadPDF} size="lg">
-          <Download className="h-5 w-5 mr-2" />
+          <Download className="h-5 w-5 me-2" />
           Download PDF Matrix
         </Button>
       </div>
@@ -170,7 +170,7 @@ export default function ComplianceCurriculumMatrixPage() {
                     return (
                       <React.Fragment key={module.module_number}>
                         <TableRow 
-                          className={`cursor-pointer hover:bg-muted/50 transition-colors ${hasHighSeverity ? 'border-l-4 border-l-destructive' : hasGaps ? 'border-l-4 border-l-orange-400' : ''}`}
+                          className={`cursor-pointer hover:bg-muted/50 transition-colors ${hasHighSeverity ? 'border-s-4 border-s-destructive' : hasGaps ? 'border-s-4 border-s-orange-400' : ''}`}
                           onClick={() => toggleModule(module.module_number)}
                         >
                           <TableCell className="text-center">
@@ -220,7 +220,7 @@ export default function ComplianceCurriculumMatrixPage() {
                           </TableCell>
                         </TableRow>
                         {isExpanded && (
-                          <TableRow className="bg-muted/30 border-l-4 border-l-primary">
+                          <TableRow className="bg-muted/30 border-s-4 border-s-primary">
                             <TableCell colSpan={7} className="p-6">
                               {/* Gap Alerts */}
                               {moduleGaps.length > 0 && (
@@ -236,8 +236,8 @@ export default function ComplianceCurriculumMatrixPage() {
                                           <GapBadge severity={gap.severity} showIcon={false} />
                                           <span className="font-semibold">{gap.title}</span>
                                         </div>
-                                        <p className="text-muted-foreground ml-6">{gap.description}</p>
-                                        <p className="text-xs text-muted-foreground ml-6 mt-1">
+                                        <p className="text-muted-foreground ms-6">{gap.description}</p>
+                                        <p className="text-xs text-muted-foreground ms-6 mt-1">
                                           <strong>Action:</strong> {gap.suggested_action}
                                         </p>
                                       </div>

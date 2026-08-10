@@ -180,7 +180,7 @@ export function RoleAssignmentSection({
           disabled={disabled}
           className="text-xs"
         >
-          <Plus className="h-3 w-3 mr-1" />
+          <Plus className="h-3 w-3 me-1" />
           Add primary contact as Dispensary Admin
         </Button>
       )}

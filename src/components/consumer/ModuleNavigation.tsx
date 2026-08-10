@@ -71,7 +71,7 @@ export const ModuleNavigation = ({
               key={module.id}
               onClick={() => onModuleSelect(index)}
               className={cn(
-                'w-full flex items-start gap-3 p-3 rounded-lg text-left transition-colors',
+                'w-full flex items-start gap-3 p-3 rounded-lg text-start transition-colors',
                 isCurrent
                   ? 'bg-primary/10 text-primary'
                   : 'hover:bg-muted text-foreground'

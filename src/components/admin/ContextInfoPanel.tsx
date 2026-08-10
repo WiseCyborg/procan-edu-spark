@@ -63,15 +63,15 @@ export const ContextInfoPanel = ({ selectedItem }: ContextInfoPanelProps) => {
         <h4 className="text-sm font-semibold mb-2">Quick Actions</h4>
         <div className="space-y-1">
           <Button variant="outline" size="sm" className="w-full justify-start">
-            <Users className="h-4 w-4 mr-2" />
+            <Users className="h-4 w-4 me-2" />
             View All Employees
           </Button>
           <Button variant="outline" size="sm" className="w-full justify-start">
-            <DollarSign className="h-4 w-4 mr-2" />
+            <DollarSign className="h-4 w-4 me-2" />
             Add Training Seats
           </Button>
           <Button variant="outline" size="sm" className="w-full justify-start">
-            <Mail className="h-4 w-4 mr-2" />
+            <Mail className="h-4 w-4 me-2" />
             Contact Manager
           </Button>
         </div>
@@ -110,15 +110,15 @@ export const ContextInfoPanel = ({ selectedItem }: ContextInfoPanelProps) => {
         <h4 className="text-sm font-semibold mb-2">Quick Actions</h4>
         <div className="space-y-1">
           <Button variant="outline" size="sm" className="w-full justify-start">
-            <FileText className="h-4 w-4 mr-2" />
+            <FileText className="h-4 w-4 me-2" />
             View Progress
           </Button>
           <Button variant="outline" size="sm" className="w-full justify-start">
-            <Mail className="h-4 w-4 mr-2" />
+            <Mail className="h-4 w-4 me-2" />
             Send Reminder
           </Button>
           <Button variant="outline" size="sm" className="w-full justify-start">
-            <Award className="h-4 w-4 mr-2" />
+            <Award className="h-4 w-4 me-2" />
             Issue Certificate
           </Button>
         </div>
@@ -157,11 +157,11 @@ export const ContextInfoPanel = ({ selectedItem }: ContextInfoPanelProps) => {
         <h4 className="text-sm font-semibold mb-2">Quick Actions</h4>
         <div className="space-y-1">
           <Button variant="outline" size="sm" className="w-full justify-start">
-            <FileText className="h-4 w-4 mr-2" />
+            <FileText className="h-4 w-4 me-2" />
             Download PDF
           </Button>
           <Button variant="outline" size="sm" className="w-full justify-start">
-            <Mail className="h-4 w-4 mr-2" />
+            <Mail className="h-4 w-4 me-2" />
             Email to Holder
           </Button>
         </div>

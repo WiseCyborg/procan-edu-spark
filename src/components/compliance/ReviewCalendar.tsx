@@ -234,7 +234,7 @@ export const ReviewCalendar = ({ organizationId, showAll = false }: ReviewCalend
                           })}
                           disabled={completeReviewMutation.isPending}
                         >
-                          <CheckCircle2 className="h-4 w-4 mr-2" />
+                          <CheckCircle2 className="h-4 w-4 me-2" />
                           Mark as Completed
                         </Button>
                       </div>

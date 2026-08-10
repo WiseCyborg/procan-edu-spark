@@ -329,7 +329,7 @@ export const PredictiveAnalyticsDashboard = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="p-4 border-l-4 border-green-500 bg-green-50 dark:bg-green-950 rounded">
+              <div className="p-4 border-s-4 border-green-500 bg-green-50 dark:bg-green-950 rounded">
                 <h4 className="font-semibold flex items-center gap-2 mb-2">
                   <CheckCircle2 className="h-5 w-5 text-green-600" />
                   High-Impact Opportunity Detected
@@ -342,7 +342,7 @@ export const PredictiveAnalyticsDashboard = () => {
                 </p>
               </div>
 
-              <div className="p-4 border-l-4 border-blue-500 bg-blue-50 dark:bg-blue-950 rounded">
+              <div className="p-4 border-s-4 border-blue-500 bg-blue-50 dark:bg-blue-950 rounded">
                 <h4 className="font-semibold flex items-center gap-2 mb-2">
                   <MapPin className="h-5 w-5 text-blue-600" />
                   Maryland Market Intelligence
@@ -353,7 +353,7 @@ export const PredictiveAnalyticsDashboard = () => {
                 </p>
               </div>
 
-              <div className="p-4 border-l-4 border-orange-500 bg-orange-50 dark:bg-orange-950 rounded">
+              <div className="p-4 border-s-4 border-orange-500 bg-orange-50 dark:bg-orange-950 rounded">
                 <h4 className="font-semibold flex items-center gap-2 mb-2">
                   <Clock className="h-5 w-5 text-orange-600" />
                   Predictive Risk Alert
@@ -365,7 +365,7 @@ export const PredictiveAnalyticsDashboard = () => {
                 </p>
               </div>
 
-              <div className="p-4 border-l-4 border-purple-500 bg-purple-50 dark:bg-purple-950 rounded">
+              <div className="p-4 border-s-4 border-purple-500 bg-purple-50 dark:bg-purple-950 rounded">
                 <h4 className="font-semibold flex items-center gap-2 mb-2">
                   <Brain className="h-5 w-5 text-purple-600" />
                   COMAR Compliance Optimization

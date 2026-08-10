@@ -70,7 +70,7 @@ export const EmailFlowDiagram = ({ steps }: EmailFlowDiagramProps) => {
               </div>
 
               {index < steps.length - 1 && (
-                <div className="ml-3 my-2 h-8 border-l-2 border-muted-foreground/20" />
+                <div className="ms-3 my-2 h-8 border-s-2 border-muted-foreground/20" />
               )}
             </div>
           ))}

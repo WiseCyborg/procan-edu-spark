@@ -299,11 +299,11 @@ export const ComprehensiveAdminOversight = () => {
         </div>
         <div className="flex gap-2">
           <Button onClick={fetchAllData} variant="outline" disabled={loading}>
-            <RefreshCw className="h-4 w-4 mr-2" />
+            <RefreshCw className="h-4 w-4 me-2" />
             Refresh
           </Button>
           <Button onClick={exportOrganizationReport}>
-            <Download className="h-4 w-4 mr-2" />
+            <Download className="h-4 w-4 me-2" />
             Export Report
           </Button>
         </div>
@@ -408,12 +408,12 @@ export const ComprehensiveAdminOversight = () => {
                 <CardTitle>Organization Performance</CardTitle>
                 <div className="flex gap-2">
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Search className="absolute start-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                     <Input
                       placeholder="Search organizations..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 w-64"
+                      className="ps-10 w-64"
                     />
                   </div>
                   <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -469,7 +469,7 @@ export const ComprehensiveAdminOversight = () => {
                           <p className="font-semibold">{org.course_credits}</p>
                         </div>
                         <Button variant="outline" size="sm">
-                          <Eye className="h-4 w-4 mr-1" />
+                          <Eye className="h-4 w-4 me-1" />
                           View
                         </Button>
                       </div>

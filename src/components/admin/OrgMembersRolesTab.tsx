@@ -219,7 +219,7 @@ export const OrgMembersRolesTab = ({ organizationId }: OrgMembersRolesTabProps) 
               <TableHead>Role</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Joined</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead className="text-end">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -259,7 +259,7 @@ export const OrgMembersRolesTab = ({ organizationId }: OrgMembersRolesTabProps) 
                   <TableCell className="text-sm text-muted-foreground">
                     {new Date(member.created_at).toLocaleDateString()}
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-end">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="sm">
@@ -269,7 +269,7 @@ export const OrgMembersRolesTab = ({ organizationId }: OrgMembersRolesTabProps) 
                       <DropdownMenuContent align="end">
                         {member.status === 'invited' && (
                           <DropdownMenuItem onClick={() => handleResendInvite(member.email)}>
-                            <RefreshCw className="h-4 w-4 mr-2" />
+                            <RefreshCw className="h-4 w-4 me-2" />
                             Resend Invite
                           </DropdownMenuItem>
                         )}
@@ -277,7 +277,7 @@ export const OrgMembersRolesTab = ({ organizationId }: OrgMembersRolesTabProps) 
                           onClick={() => handleRemoveMember(member.id)}
                           className="text-destructive"
                         >
-                          <Trash2 className="h-4 w-4 mr-2" />
+                          <Trash2 className="h-4 w-4 me-2" />
                           Remove
                         </DropdownMenuItem>
                       </DropdownMenuContent>

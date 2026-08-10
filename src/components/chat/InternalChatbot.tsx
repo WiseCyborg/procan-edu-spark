@@ -131,7 +131,7 @@ export const InternalChatbot = ({
       {/* Chat Button */}
       <Button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 left-6 h-14 w-14 rounded-full shadow-lg z-50 hover:scale-110 transition-transform bg-gradient-to-r from-primary to-primary/80"
+        className="fixed bottom-6 start-6 h-14 w-14 rounded-full shadow-lg z-50 hover:scale-110 transition-transform bg-gradient-to-r from-primary to-primary/80"
         size="icon"
         title="Chat with your personal assistant"
       >
@@ -140,7 +140,7 @@ export const InternalChatbot = ({
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-24 left-6 w-[380px] h-[500px] bg-background border rounded-lg shadow-2xl flex flex-col z-50 animate-scale-in">
+        <div className="fixed bottom-24 start-6 w-[380px] h-[500px] bg-background border rounded-lg shadow-2xl flex flex-col z-50 animate-scale-in">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-primary to-primary/80 text-primary-foreground rounded-t-lg">
             <div className="flex items-center gap-2">

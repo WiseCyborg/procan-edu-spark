@@ -109,9 +109,9 @@ export const AdminSystemHealth = () => {
                 disabled={isRunningHealthCheck}
               >
                 {isRunningHealthCheck ? (
-                  <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Running...</>
+                  <><Loader2 className="h-4 w-4 me-2 animate-spin" /> Running...</>
                 ) : (
-                  <><RefreshCw className="h-4 w-4 mr-2" /> Run Health Check</>
+                  <><RefreshCw className="h-4 w-4 me-2" /> Run Health Check</>
                 )}
               </Button>
             </div>

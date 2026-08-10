@@ -328,12 +328,12 @@ export const EnhancedUserManagementView = () => {
         <CardContent className="space-y-4">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute start-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search by name, email, or organization..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
+                className="ps-10"
               />
             </div>
             
@@ -395,7 +395,7 @@ export const EnhancedUserManagementView = () => {
                   <TableHead>Org Payment</TableHead>
                   <TableHead>Seats</TableHead>
                   <TableHead>Created</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="text-end">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -459,7 +459,7 @@ export const EnhancedUserManagementView = () => {
                     <TableCell className="text-sm text-muted-foreground">
                       {format(new Date(user.created_at), 'MMM d, yyyy')}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-end">
                       <div className="flex items-center justify-end gap-1">
                         <Button
                           variant="ghost"
@@ -571,7 +571,7 @@ export const EnhancedUserManagementView = () => {
                       setShowAssignmentDialog(true);
                     }}
                   >
-                    <Building2 className="h-4 w-4 mr-2" />
+                    <Building2 className="h-4 w-4 me-2" />
                     Assign to Organization
                   </Button>
                   
@@ -583,7 +583,7 @@ export const EnhancedUserManagementView = () => {
                     }}
                     disabled={proxyLoading}
                   >
-                    <Eye className="h-4 w-4 mr-2" />
+                    <Eye className="h-4 w-4 me-2" />
                     View as User
                   </Button>
 
@@ -594,7 +594,7 @@ export const EnhancedUserManagementView = () => {
                       onExecute={() => handleManualVerify(selectedUser.user_id, `${selectedUser.first_name} ${selectedUser.last_name}`)}
                       variant="outline"
                     >
-                      <CheckCircle className="h-4 w-4 mr-2" />
+                      <CheckCircle className="h-4 w-4 me-2" />
                       Manually Verify
                     </SensitiveOperationWrapper>
                   )}
@@ -603,7 +603,7 @@ export const EnhancedUserManagementView = () => {
                     variant="outline"
                     onClick={() => handleSendVerificationEmail(selectedUser.email)}
                   >
-                    <Mail className="h-4 w-4 mr-2" />
+                    <Mail className="h-4 w-4 me-2" />
                     Send Verification Email
                   </Button>
                 </div>

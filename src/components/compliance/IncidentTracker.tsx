@@ -257,12 +257,12 @@ export const IncidentTracker: React.FC<IncidentTrackerProps> = ({ organizationId
       <div className="flex flex-col md:flex-row gap-4 justify-between">
         <div className="flex flex-wrap gap-2">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search incidents..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 w-[200px]"
+              className="ps-9 w-[200px]"
             />
           </div>
           <Select value={filterStatus} onValueChange={setFilterStatus}>
@@ -292,13 +292,13 @@ export const IncidentTracker: React.FC<IncidentTrackerProps> = ({ organizationId
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={fetchIncidents}>
-            <RefreshCw className="h-4 w-4 mr-2" />
+            <RefreshCw className="h-4 w-4 me-2" />
             Refresh
           </Button>
           <Dialog open={showReportForm} onOpenChange={setShowReportForm}>
             <DialogTrigger asChild>
               <Button>
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="h-4 w-4 me-2" />
                 Report Incident
               </Button>
             </DialogTrigger>
@@ -339,7 +339,7 @@ export const IncidentTracker: React.FC<IncidentTrackerProps> = ({ organizationId
                   <TableHead>Severity</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Description</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="text-end">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -360,7 +360,7 @@ export const IncidentTracker: React.FC<IncidentTrackerProps> = ({ organizationId
                       </Badge>
                     </TableCell>
                     <TableCell className="max-w-[200px] truncate">{incident.description}</TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-end">
                       <Dialog>
                         <DialogTrigger asChild>
                           <Button
@@ -371,7 +371,7 @@ export const IncidentTracker: React.FC<IncidentTrackerProps> = ({ organizationId
                               fetchRetrainingForIncident(incident.id);
                             }}
                           >
-                            <Eye className="h-4 w-4 mr-1" />
+                            <Eye className="h-4 w-4 me-1" />
                             View
                           </Button>
                         </DialogTrigger>
@@ -447,7 +447,7 @@ export const IncidentTracker: React.FC<IncidentTrackerProps> = ({ organizationId
                                         </Button>
                                       )}
                                       <Button onClick={() => updateIncidentStatus(incident.id, 'resolved')}>
-                                        <CheckCircle className="h-4 w-4 mr-2" />
+                                        <CheckCircle className="h-4 w-4 me-2" />
                                         Mark Resolved
                                       </Button>
                                     </div>
@@ -455,7 +455,7 @@ export const IncidentTracker: React.FC<IncidentTrackerProps> = ({ organizationId
                                 )}
                                 {incident.status === 'resolved' && (
                                   <Button onClick={() => updateIncidentStatus(incident.id, 'closed')}>
-                                    <XCircle className="h-4 w-4 mr-2" />
+                                    <XCircle className="h-4 w-4 me-2" />
                                     Close Incident
                                   </Button>
                                 )}

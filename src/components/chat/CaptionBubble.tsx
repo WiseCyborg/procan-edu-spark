@@ -78,8 +78,8 @@ export const CaptionBubble: React.FC<CaptionBubbleProps> = ({
       </Card>
       
       {/* Speech bubble tail */}
-      <div className="absolute left-1/2 top-full -translate-x-1/2 w-0 h-0 border-l-[8px] border-r-[8px] border-t-[8px] border-l-transparent border-r-transparent border-t-border" />
-      <div className="absolute left-1/2 top-full -translate-x-1/2 translate-y-[-1px] w-0 h-0 border-l-[7px] border-r-[7px] border-t-[7px] border-l-transparent border-r-transparent border-t-card" />
+      <div className="absolute start-1/2 top-full -translate-x-1/2 w-0 h-0 border-s-[8px] border-e-[8px] border-t-[8px] border-s-transparent border-e-transparent border-t-border" />
+      <div className="absolute start-1/2 top-full -translate-x-1/2 translate-y-[-1px] w-0 h-0 border-s-[7px] border-e-[7px] border-t-[7px] border-s-transparent border-e-transparent border-t-card" />
     </div>
   );
 };

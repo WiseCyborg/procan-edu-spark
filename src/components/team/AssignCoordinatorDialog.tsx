@@ -146,14 +146,14 @@ export function AssignCoordinatorDialog({
             <div className="space-y-2">
               <Label htmlFor="invite-email">Email Address</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Mail className="absolute start-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="invite-email"
                   type="email"
                   placeholder="coordinator@example.com"
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
-                  className="pl-9"
+                  className="ps-9"
                 />
               </div>
               <p className="text-sm text-muted-foreground">
@@ -173,12 +173,12 @@ export function AssignCoordinatorDialog({
           >
             {loading ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="me-2 h-4 w-4 animate-spin" />
                 {mode === 'existing' ? 'Assigning...' : 'Sending...'}
               </>
             ) : (
               <>
-                <UserPlus className="mr-2 h-4 w-4" />
+                <UserPlus className="me-2 h-4 w-4" />
                 {mode === 'existing' ? 'Assign Role' : 'Send Invitation'}
               </>
             )}

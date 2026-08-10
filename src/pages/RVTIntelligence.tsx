@@ -207,16 +207,16 @@ const RVTIntelligence = () => {
                     </div>
                     <Badge
                       variant={item.our_curriculum_aligned ? 'default' : 'destructive'}
-                      className="ml-4"
+                      className="ms-4"
                     >
                       {item.our_curriculum_aligned ? (
                         <>
-                          <CheckCircle className="h-3 w-3 mr-1" />
+                          <CheckCircle className="h-3 w-3 me-1" />
                           Aligned
                         </>
                       ) : (
                         <>
-                          <AlertTriangle className="h-3 w-3 mr-1" />
+                          <AlertTriangle className="h-3 w-3 me-1" />
                           Gap
                         </>
                       )}

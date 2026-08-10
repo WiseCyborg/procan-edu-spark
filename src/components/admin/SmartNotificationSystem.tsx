@@ -197,7 +197,7 @@ export const SmartNotificationSystem = () => {
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-foreground">Smart Notification System</h2>
         <Button onClick={triggerBulkNotifications} className="bg-primary text-primary-foreground">
-          <Send className="h-4 w-4 mr-2" />
+          <Send className="h-4 w-4 me-2" />
           Send Bulk Reminders
         </Button>
       </div>
@@ -206,14 +206,14 @@ export const SmartNotificationSystem = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center">
-            <Settings className="h-5 w-5 mr-2" />
+            <Settings className="h-5 w-5 me-2" />
             Notification Rules
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {rules.map(rule => (
             <div key={rule.id} className="flex items-center justify-between p-4 border rounded-lg">
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-4 rtl:space-x-reverse">
                 {getTypeIcon(rule.type)}
                 <div>
                   <h3 className="font-medium capitalize">
@@ -225,7 +225,7 @@ export const SmartNotificationSystem = () => {
                 </div>
               </div>
               
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-4 rtl:space-x-reverse">
                 <Select 
                   value={rule.trigger_days.toString()} 
                   onValueChange={(value) => updateRule(rule.id, { trigger_days: parseInt(value) })}
@@ -244,7 +244,7 @@ export const SmartNotificationSystem = () => {
                   </SelectContent>
                 </Select>
                 
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 rtl:space-x-reverse">
                   <Switch
                     checked={rule.escalation_enabled}
                     onCheckedChange={(checked) => updateRule(rule.id, { escalation_enabled: checked })}
@@ -266,7 +266,7 @@ export const SmartNotificationSystem = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center">
-            <Bell className="h-5 w-5 mr-2" />
+            <Bell className="h-5 w-5 me-2" />
             Pending Notifications ({pendingNotifications.filter(n => n.status === 'pending').length})
           </CardTitle>
         </CardHeader>
@@ -274,7 +274,7 @@ export const SmartNotificationSystem = () => {
           <div className="space-y-3">
             {pendingNotifications.map(notification => (
               <div key={notification.id} className="flex items-center justify-between p-3 border rounded-lg">
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-3 rtl:space-x-reverse">
                   {getTypeIcon(notification.type)}
                   <div>
                     <p className="font-medium">{notification.recipient}</p>
@@ -285,7 +285,7 @@ export const SmartNotificationSystem = () => {
                   </div>
                 </div>
                 
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 rtl:space-x-reverse">
                   <Badge className={getPriorityColor(notification.priority)}>
                     {notification.priority}
                   </Badge>

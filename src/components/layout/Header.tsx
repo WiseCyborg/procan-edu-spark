@@ -143,7 +143,7 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
   return (
     <header className="bg-white border-b shadow-sm sticky top-0 z-50" role={headerRole}>
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 rtl:space-x-reverse">
           <Button 
             onClick={() => navigate('/')}
             variant="ghost"
@@ -154,10 +154,10 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
           <span className="text-sm text-gray-600">{t('nav.tagline')}</span>
         </div>
         
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-4 rtl:space-x-reverse">
           {/* Public Marketing Navigation - show for non-logged-in users OR logged-in users on public pages */}
           {(!user || isPublicMarketingRoute) && (
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
               <Button 
                 onClick={() => navigate('/training-handbook')}
                 variant="ghost"
@@ -230,15 +230,15 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
           
           {/* App Navigation - show for logged-in users on non-public routes */}
           {user && !isPublicMarketingRoute && (
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
               {/* Desktop Navigation - Dashboard, Training, Communication */}
-              <nav className="hidden md:flex items-center space-x-1">
+              <nav className="hidden md:flex items-center space-x-1 rtl:space-x-reverse">
                 <Button 
                   onClick={handleGoToDashboard}
                   disabled={navState.isNavigating}
                   variant="ghost"
                   size="sm"
-                  className="flex items-center space-x-2"
+                  className="flex items-center space-x-2 rtl:space-x-reverse"
                 >
                   <Home className="w-4 h-4" />
                   <span>{t('nav.dashboard')}</span>
@@ -247,7 +247,7 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                   onClick={() => navigate('/course')}
                   variant="ghost"
                   size="sm"
-                  className="flex items-center space-x-2"
+                  className="flex items-center space-x-2 rtl:space-x-reverse"
                 >
                   <BookOpen className="w-4 h-4" />
                   <span>{t('nav.training')}</span>
@@ -256,12 +256,12 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                   onClick={() => navigate('/communication')}
                   variant="ghost"
                   size="sm"
-                  className="flex items-center space-x-2 relative"
+                  className="flex items-center space-x-2 relative rtl:space-x-reverse"
                 >
                   <MessageSquare className="w-4 h-4" />
                   <span>{t('nav.communication')}</span>
                   {unreadCount > 0 && (
-                    <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 min-w-5 flex items-center justify-center text-xs px-1">
+                    <Badge variant="destructive" className="absolute -top-1 -end-1 h-5 min-w-5 flex items-center justify-center text-xs px-1">
                       {unreadCount > 99 ? '99+' : unreadCount}
                     </Badge>
                   )}
@@ -272,7 +272,7 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
           
           {/* User Controls - Profile Dropdown for all logged-in users */}
           {user && (
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
               {/* Language selector — also visible inside authed app shell */}
               {!isPublicMarketingRoute && <LanguageSwitcher />}
               {/* Keyboard Shortcuts Indicator - only on app routes */}
@@ -301,8 +301,8 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="sm" className="h-9 px-3">
                     <User className="h-4 w-4" />
-                    <span className="hidden md:inline ml-2">{t('nav.profile')}</span>
-                    <ChevronDown className="h-3 w-3 ml-1" />
+                    <span className="hidden md:inline ms-2">{t('nav.profile')}</span>
+                    <ChevronDown className="h-3 w-3 ms-1" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-64">
@@ -330,19 +330,19 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                     {t('nav.quickLinks')}
                   </DropdownMenuLabel>
                   <DropdownMenuItem onClick={handleGoToDashboard}>
-                    <Home className="mr-2 h-4 w-4" />
+                    <Home className="me-2 h-4 w-4" />
                     <span>{t('nav.dashboard')}</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/course')}>
-                    <BookOpen className="mr-2 h-4 w-4" />
+                    <BookOpen className="me-2 h-4 w-4" />
                     <span>{t('nav.myTraining')}</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/certificates')}>
-                    <Award className="mr-2 h-4 w-4" />
+                    <Award className="me-2 h-4 w-4" />
                     <span>{t('nav.certificates')}</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/training-handbook')}>
-                    <FileText className="mr-2 h-4 w-4" />
+                    <FileText className="me-2 h-4 w-4" />
                     <span>{t('nav.handbook')}</span>
                   </DropdownMenuItem>
                   
@@ -354,19 +354,19 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                         {t('nav.team')}
                       </DropdownMenuLabel>
                       <DropdownMenuItem onClick={() => navigate('/team-management')}>
-                        <Users className="mr-2 h-4 w-4" />
+                        <Users className="me-2 h-4 w-4" />
                         <span>{t('nav.teamDashboard')}</span>
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => navigate('/dispensary-manager-dashboard?tab=invite')}>
-                        <Mail className="mr-2 h-4 w-4" />
+                        <Mail className="me-2 h-4 w-4" />
                         <span>{t('nav.inviteEmployee')}</span>
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => navigate('/dispensary-manager-dashboard?tab=seats')}>
-                        <CreditCard className="mr-2 h-4 w-4" />
+                        <CreditCard className="me-2 h-4 w-4" />
                         <span>{t('nav.manageSeats')}</span>
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => setShowPurchaseModal(true)}>
-                        <ShoppingCart className="mr-2 h-4 w-4" />
+                        <ShoppingCart className="me-2 h-4 w-4" />
                         <span>{t('nav.purchaseSeats')}</span>
                       </DropdownMenuItem>
                     </>
@@ -380,11 +380,11 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                         {t('nav.admin')}
                       </DropdownMenuLabel>
                       <DropdownMenuItem onClick={() => navigate('/admin')}>
-                        <Shield className="mr-2 h-4 w-4" />
+                        <Shield className="me-2 h-4 w-4" />
                         <span>{t('nav.adminDashboard')}</span>
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => navigate('/admin/reports')}>
-                        <BarChart3 className="mr-2 h-4 w-4" />
+                        <BarChart3 className="me-2 h-4 w-4" />
                         <span>Reports</span>
                       </DropdownMenuItem>
                     </>
@@ -396,15 +396,15 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                     {t('nav.resources')}
                   </DropdownMenuLabel>
                   <DropdownMenuItem onClick={() => navigate('/consumer-education')}>
-                    <GraduationCap className="mr-2 h-4 w-4" />
+                    <GraduationCap className="me-2 h-4 w-4" />
                     <span>{t('nav.consumerEducation')}</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/faq')}>
-                    <HelpCircle className="mr-2 h-4 w-4" />
+                    <HelpCircle className="me-2 h-4 w-4" />
                     <span>{t('nav.faq')}</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/resources')}>
-                    <BookOpen className="mr-2 h-4 w-4" />
+                    <BookOpen className="me-2 h-4 w-4" />
                     <span>Resources</span>
                   </DropdownMenuItem>
                   
@@ -427,7 +427,7 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                   
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOutClick} className="text-destructive focus:text-destructive">
-                    <LogOut className="mr-2 h-4 w-4" />
+                    <LogOut className="me-2 h-4 w-4" />
                     <span>{t('nav.signOut')}</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>

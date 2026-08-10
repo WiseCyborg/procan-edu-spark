@@ -192,7 +192,7 @@ export const ProfileOnboardingWizard = () => {
               <CardTitle className="text-2xl">Complete Your Profile</CardTitle>
               <CardDescription>Step {currentStep} of {totalSteps}</CardDescription>
             </div>
-            <div className="text-right">
+            <div className="text-end">
               <div className="text-sm text-muted-foreground mb-1">{progress.toFixed(0)}% Complete</div>
               <Progress value={progress} className="w-32" />
             </div>

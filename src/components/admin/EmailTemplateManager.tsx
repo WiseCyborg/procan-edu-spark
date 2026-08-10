@@ -265,15 +265,15 @@ export const EmailTemplateManager = () => {
 
                     <div className="flex gap-2 pt-2">
                       <Button size="sm" variant="outline" onClick={() => handleEdit(template)}>
-                        <Edit className="h-3 w-3 mr-1" />
+                        <Edit className="h-3 w-3 me-1" />
                         Edit
                       </Button>
                       <Button size="sm" variant="outline" onClick={() => handlePreview(template)}>
-                        <Eye className="h-3 w-3 mr-1" />
+                        <Eye className="h-3 w-3 me-1" />
                         Preview
                       </Button>
                       <Button size="sm" variant="outline" onClick={() => handleHistory(template)}>
-                        <History className="h-3 w-3 mr-1" />
+                        <History className="h-3 w-3 me-1" />
                         History
                       </Button>
                     </div>
@@ -337,11 +337,11 @@ export const EmailTemplateManager = () => {
 
             <div className="flex gap-2">
               <Button onClick={handleSave}>
-                <Save className="h-4 w-4 mr-2" />
+                <Save className="h-4 w-4 me-2" />
                 Save Changes
               </Button>
               <Button variant="outline" onClick={() => setEditing(false)}>
-                <X className="h-4 w-4 mr-2" />
+                <X className="h-4 w-4 me-2" />
                 Cancel
               </Button>
             </div>

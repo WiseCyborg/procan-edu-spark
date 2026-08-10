@@ -186,11 +186,11 @@ export default function RVTSystemAuditorPanel() {
           <div className="flex gap-2">
             {(techReport || compliance) && (
               <Button variant="outline" size="sm" onClick={exportPDF}>
-                <Download className="h-4 w-4 mr-1" /> PDF
+                <Download className="h-4 w-4 me-1" /> PDF
               </Button>
             )}
             <Button onClick={runFullAudit} disabled={running}>
-              {running ? <><Loader2 className="h-4 w-4 mr-1 animate-spin" /> Running...</> : "Run Full Audit"}
+              {running ? <><Loader2 className="h-4 w-4 me-1 animate-spin" /> Running...</> : "Run Full Audit"}
             </Button>
           </div>
         </div>
@@ -230,10 +230,10 @@ export default function RVTSystemAuditorPanel() {
         <Tabs defaultValue="tech">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="tech">
-              <FileText className="h-4 w-4 mr-1" /> Technical Report
+              <FileText className="h-4 w-4 me-1" /> Technical Report
             </TabsTrigger>
             <TabsTrigger value="compliance">
-              <Shield className="h-4 w-4 mr-1" /> Compliance Delta
+              <Shield className="h-4 w-4 me-1" /> Compliance Delta
             </TabsTrigger>
           </TabsList>
 
@@ -293,14 +293,14 @@ export default function RVTSystemAuditorPanel() {
                     <Badge variant="outline" className="cursor-pointer text-yellow-700" onClick={() => setGapFilter("UNMAPPED")}>Unmapped ({compliance.summary.unmapped})</Badge>
                   </div>
                   <Button variant="outline" size="sm" onClick={exportCSV}>
-                    <Download className="h-4 w-4 mr-1" /> CSV
+                    <Download className="h-4 w-4 me-1" /> CSV
                   </Button>
                 </div>
 
                 <div className="overflow-auto rounded-lg border">
                   <table className="min-w-full text-sm">
                     <thead>
-                      <tr className="text-left border-b bg-muted/50">
+                      <tr className="text-start border-b bg-muted/50">
                         <th className="py-2 px-3 font-medium text-foreground">COMAR Requirement</th>
                         <th className="py-2 px-3 font-medium text-foreground">System Behavior</th>
                         <th className="py-2 px-3 font-medium text-foreground">Gap?</th>

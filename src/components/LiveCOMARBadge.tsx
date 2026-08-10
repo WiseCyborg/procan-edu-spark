@@ -13,7 +13,7 @@ export const LiveCOMARBadge = () => {
     <div className="flex items-center justify-center gap-2 bg-green-500/20 border border-green-500/40 px-4 py-2 rounded-full max-w-fit mx-auto mb-6">
       <div className="relative">
         <Shield className="h-5 w-5 text-green-300" />
-        <div className="absolute -top-1 -right-1 h-2 w-2 bg-green-400 rounded-full animate-pulse" />
+        <div className="absolute -top-1 -end-1 h-2 w-2 bg-green-400 rounded-full animate-pulse" />
       </div>
       <div className="text-sm font-semibold text-white flex items-center gap-2">
         <span>COMAR 14.17.15.05 — tracked & updated</span>

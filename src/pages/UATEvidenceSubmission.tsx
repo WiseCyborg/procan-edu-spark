@@ -408,7 +408,7 @@ const UATEvidenceSubmission: React.FC = () => {
                   className={formData.passed === true ? 'bg-green-600 hover:bg-green-700' : ''}
                   onClick={() => setFormData(prev => ({ ...prev, passed: true }))}
                 >
-                  <CheckCircle className="h-4 w-4 mr-2" />
+                  <CheckCircle className="h-4 w-4 me-2" />
                   PASS
                 </Button>
                 <Button
@@ -417,7 +417,7 @@ const UATEvidenceSubmission: React.FC = () => {
                   className={formData.passed === false ? 'bg-destructive hover:bg-destructive/90' : ''}
                   onClick={() => setFormData(prev => ({ ...prev, passed: false }))}
                 >
-                  <XCircle className="h-4 w-4 mr-2" />
+                  <XCircle className="h-4 w-4 me-2" />
                   FAIL
                 </Button>
               </div>

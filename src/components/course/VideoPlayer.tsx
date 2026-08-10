@@ -169,15 +169,15 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         />
         
         {/* Progress indicator - Mobile optimized */}
-        <div className="absolute top-2 md:top-4 right-2 md:right-4 bg-black/80 text-white px-2 md:px-3 py-1 md:py-1.5 rounded text-xs md:text-sm font-medium">
+        <div className="absolute top-2 md:top-4 end-2 md:end-4 bg-black/80 text-white px-2 md:px-3 py-1 md:py-1.5 rounded text-xs md:text-sm font-medium">
           {watchedPercentage.toFixed(0)}% watched
           {hasWatchedEnough && (
-            <span className="ml-1 md:ml-2 text-green-400">✓</span>
+            <span className="ms-1 md:ms-2 text-green-400">✓</span>
           )}
         </div>
 
         {/* Video controls overlay - Touch optimized */}
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3 md:p-4 opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity">
+        <div className="absolute bottom-0 start-0 end-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3 md:p-4 opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity">
           {/* Progress bar - Larger touch target */}
           <div className="mb-3 md:mb-4">
             <Slider
@@ -191,7 +191,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
           {/* Control buttons - Mobile optimized */}
           <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center space-x-2 md:space-x-4">
+            <div className="flex items-center space-x-2 md:space-x-4 rtl:space-x-reverse">
               <Button
                 variant="ghost"
                 size="icon"
@@ -201,7 +201,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                 {isPlaying ? <Pause className="w-5 h-5 md:w-6 md:h-6" /> : <Play className="w-5 h-5 md:w-6 md:h-6" />}
               </Button>
 
-              <div className="hidden md:flex items-center space-x-2">
+              <div className="hidden md:flex items-center space-x-2 rtl:space-x-reverse">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -224,7 +224,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
               </span>
             </div>
 
-            <div className="flex items-center space-x-1 md:space-x-2">
+            <div className="flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
               <Button
                 variant="ghost"
                 size="icon"
@@ -251,7 +251,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           variant="ghost"
           size="icon"
           onClick={toggleMute}
-          className="md:hidden absolute bottom-20 left-3 text-white bg-black/50 hover:bg-black/70 h-10 w-10"
+          className="md:hidden absolute bottom-20 start-3 text-white bg-black/50 hover:bg-black/70 h-10 w-10"
         >
           {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
         </Button>

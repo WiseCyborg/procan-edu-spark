@@ -134,7 +134,7 @@ export const EmailHealthPanel = () => {
                   <TableHead>Type</TableHead>
                   <TableHead>Error</TableHead>
                   <TableHead>When</TableHead>
-                  <TableHead className="text-right">Action</TableHead>
+                  <TableHead className="text-end">Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -148,7 +148,7 @@ export const EmailHealthPanel = () => {
                     <TableCell className="text-xs text-muted-foreground">
                       {formatDistanceToNow(new Date(row.created_at), { addSuffix: true })}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-end">
                       <Button
                         size="sm"
                         variant="outline"

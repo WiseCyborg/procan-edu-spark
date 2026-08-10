@@ -35,7 +35,7 @@ export default function OperationsCommandCenter() {
               <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
                 <Activity className="h-8 w-8 text-primary" />
                 Operations Command Center
-                <Badge variant="outline" className="ml-2 animate-pulse">
+                <Badge variant="outline" className="ms-2 animate-pulse">
                   LIVE
                 </Badge>
               </h1>
@@ -71,7 +71,7 @@ export default function OperationsCommandCenter() {
               <Mail className="h-4 w-4" />
               Email
               {metrics.failedEmails > 0 && (
-                <Badge variant="destructive" className="ml-1">{metrics.failedEmails}</Badge>
+                <Badge variant="destructive" className="ms-1">{metrics.failedEmails}</Badge>
               )}
             </TabsTrigger>
             <TabsTrigger value="pipeline" className="flex items-center gap-2">

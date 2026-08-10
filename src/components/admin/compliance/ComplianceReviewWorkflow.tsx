@@ -145,7 +145,7 @@ export const ComplianceReviewWorkflow = () => {
 
           <div className="space-y-4">
             {pendingReviews.map((review: any) => (
-              <Card key={review.id} className="border-l-4 border-l-primary">
+              <Card key={review.id} className="border-s-4 border-s-primary">
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -192,11 +192,11 @@ export const ComplianceReviewWorkflow = () => {
                       })}
                       disabled={approveReviewMutation.isPending}
                     >
-                      <CheckCircle className="h-4 w-4 mr-2" />
+                      <CheckCircle className="h-4 w-4 me-2" />
                       Approve & Mark Compliant
                     </Button>
                     <Button variant="outline">
-                      <XCircle className="h-4 w-4 mr-2" />
+                      <XCircle className="h-4 w-4 me-2" />
                       Request Changes
                     </Button>
                   </div>

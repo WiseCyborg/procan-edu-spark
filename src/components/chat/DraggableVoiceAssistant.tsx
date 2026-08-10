@@ -717,7 +717,7 @@ export const DraggableVoiceAssistant: React.FC = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="absolute top-1 right-1 h-6 w-6"
+              className="absolute top-1 end-1 h-6 w-6"
               onClick={() => setIsChatDismissed(true)}
             >
               <X className="h-4 w-4" />
@@ -847,7 +847,7 @@ export const DraggableVoiceAssistant: React.FC = () => {
               
               {/* Settings Panel */}
               {showSettings && (
-                <div className="absolute top-full left-0 right-0 bg-background border rounded-lg p-3 shadow-lg z-50">
+                <div className="absolute top-full start-0 end-0 bg-background border rounded-lg p-3 shadow-lg z-50">
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-sm">Voice Output</span>
@@ -871,7 +871,7 @@ export const DraggableVoiceAssistant: React.FC = () => {
                     
                     <ChatExportDialog messages={messages}>
                       <Button size="sm" variant="outline" className="w-full text-xs">
-                        <Download className="w-4 h-4 mr-1" />
+                        <Download className="w-4 h-4 me-1" />
                         Export Chat
                       </Button>
                     </ChatExportDialog>
@@ -902,7 +902,7 @@ export const DraggableVoiceAssistant: React.FC = () => {
               )}
 
               {/* Messages */}
-              <EnhancedScrollArea className="flex-1 pr-3">
+              <EnhancedScrollArea className="flex-1 pe-3">
                 <div className="space-y-2">
                   {messages.map((message) => (
                     <div
@@ -928,7 +928,7 @@ export const DraggableVoiceAssistant: React.FC = () => {
                   {isLoading && (
                     <div className="flex justify-start">
                       <div className="bg-muted text-foreground rounded-lg px-3 py-2 text-sm">
-                        <div className="flex space-x-1">
+                        <div className="flex space-x-1 rtl:space-x-reverse">
                           <div className="w-2 h-2 bg-current rounded-full animate-bounce"></div>
                           <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
                           <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
@@ -941,7 +941,7 @@ export const DraggableVoiceAssistant: React.FC = () => {
               </EnhancedScrollArea>
 
               {/* Input */}
-              <div className="flex space-x-2 mt-3">
+              <div className="flex space-x-2 mt-3 rtl:space-x-reverse">
                 <Button
                   onClick={toggleVoiceRecording}
                   disabled={isLoading}

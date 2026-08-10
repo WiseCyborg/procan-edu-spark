@@ -53,7 +53,7 @@ export const ContinueTrainingButton: React.FC<ContinueTrainingButtonProps> = ({
           className="px-8 py-6 text-lg font-semibold rounded-xl shadow-xl hover:shadow-2xl transition-all hover:scale-105"
         >
           {getIcon()}
-          <span className="ml-2">{ctaLabel}</span>
+          <span className="ms-2">{ctaLabel}</span>
         </Button>
         {showDescription && (
           <p className="text-sm text-muted-foreground mt-3">
@@ -72,7 +72,7 @@ export const ContinueTrainingButton: React.FC<ContinueTrainingButtonProps> = ({
         className={className}
       >
         {ctaLabel}
-        <ArrowRight className="h-4 w-4 ml-1" />
+        <ArrowRight className="h-4 w-4 ms-1" />
       </Button>
     );
   }
@@ -86,7 +86,7 @@ export const ContinueTrainingButton: React.FC<ContinueTrainingButtonProps> = ({
         size="lg"
       >
         {getIcon()}
-        <span className="ml-2">{ctaLabel}</span>
+        <span className="ms-2">{ctaLabel}</span>
       </Button>
       {showDescription && (
         <p className="text-xs text-center text-muted-foreground">

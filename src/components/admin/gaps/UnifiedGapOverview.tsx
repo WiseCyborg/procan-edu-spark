@@ -108,7 +108,7 @@ export const UnifiedGapOverview = ({ onCategoryClick }: UnifiedGapOverviewProps)
                         <Icon className={`h-4 w-4 ${config.color}`} />
                         <span className="text-xs font-medium">{config.label}</span>
                       </div>
-                      <div className="text-2xl font-bold w-full text-left">
+                      <div className="text-2xl font-bold w-full text-start">
                         {count}
                       </div>
                       {count > 0 && (

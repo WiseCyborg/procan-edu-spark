@@ -42,7 +42,7 @@ const steps = [
           You must complete all modules within each tier before advancing to the next.
         </p>
         <div className="space-y-3">
-          <div className="p-4 border-l-4 border-green-500 bg-green-50 rounded-lg">
+          <div className="p-4 border-s-4 border-green-500 bg-green-50 rounded-lg">
             <div className="flex items-center gap-2 mb-2">
               <div className="w-3 h-3 rounded-full bg-green-500" />
               <h4 className="font-semibold text-green-800">Green Tier (Modules 0-5)</h4>
@@ -51,7 +51,7 @@ const steps = [
               Foundation: Cannabis basics, legal framework, product types, and customer service
             </p>
           </div>
-          <div className="p-4 border-l-4 border-yellow-500 bg-yellow-50 rounded-lg">
+          <div className="p-4 border-s-4 border-yellow-500 bg-yellow-50 rounded-lg">
             <div className="flex items-center gap-2 mb-2">
               <div className="w-3 h-3 rounded-full bg-yellow-500" />
               <h4 className="font-semibold text-yellow-800">Yellow Tier (Modules 6-11)</h4>
@@ -60,7 +60,7 @@ const steps = [
               Compliance: Security procedures, inventory management, and customer verification
             </p>
           </div>
-          <div className="p-4 border-l-4 border-red-500 bg-red-50 rounded-lg">
+          <div className="p-4 border-s-4 border-red-500 bg-red-50 rounded-lg">
             <div className="flex items-center gap-2 mb-2">
               <div className="w-3 h-3 rounded-full bg-red-500" />
               <h4 className="font-semibold text-red-800">Red Tier (Modules 12-17)</h4>
@@ -98,7 +98,7 @@ const steps = [
             <li><strong>Pass to Continue:</strong> Must score 70% or higher to progress</li>
           </ol>
         </div>
-        <div className="border-l-4 border-blue-500 bg-blue-50 p-4 rounded">
+        <div className="border-s-4 border-blue-500 bg-blue-50 p-4 rounded">
           <p className="text-sm font-semibold text-blue-800">💡 Pro Tip</p>
           <p className="text-sm text-blue-700">
             You can retake quizzes as many times as needed. Use incorrect answers 

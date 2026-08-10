@@ -317,11 +317,11 @@ const Profile: React.FC = () => {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-3 rtl:space-x-reverse">
           <User className="w-8 h-8 text-primary" />
           <h1 className="text-3xl font-bold text-foreground">My Profile</h1>
         </div>
-        <div className="flex space-x-2">
+        <div className="flex space-x-2 rtl:space-x-reverse">
           {roles.map(role => (
             <Badge key={role} variant="secondary">
               {role.replace('_', ' ').toUpperCase()}
@@ -384,7 +384,7 @@ const Profile: React.FC = () => {
           {/* Profile Photo Section */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
+              <CardTitle className="flex items-center space-x-2 rtl:space-x-reverse">
                 <Camera className="w-5 h-5" />
                 <span>Profile Photo</span>
               </CardTitle>
@@ -408,7 +408,7 @@ const Profile: React.FC = () => {
         {/* Personal Information */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
+            <CardTitle className="flex items-center space-x-2 rtl:space-x-reverse">
               <User className="w-5 h-5" />
               <span>Personal Information</span>
             </CardTitle>
@@ -525,7 +525,7 @@ const Profile: React.FC = () => {
         {/* Address Information */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
+            <CardTitle className="flex items-center space-x-2 rtl:space-x-reverse">
               <MapPin className="w-5 h-5" />
               <span>Address Information</span>
             </CardTitle>
@@ -578,7 +578,7 @@ const Profile: React.FC = () => {
         {/* Emergency Contact */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
+            <CardTitle className="flex items-center space-x-2 rtl:space-x-reverse">
               <Phone className="w-5 h-5" />
               <span>Emergency Contact</span>
             </CardTitle>
@@ -608,7 +608,7 @@ const Profile: React.FC = () => {
       </div>
 
           <div className="flex justify-end mt-6">
-            <Button onClick={handleSave} disabled={isSaving} className="flex items-center space-x-2">
+            <Button onClick={handleSave} disabled={isSaving} className="flex items-center space-x-2 rtl:space-x-reverse">
               <Save className="w-4 h-4" />
               <span>{isSaving ? 'Saving...' : 'Save Changes'}</span>
             </Button>

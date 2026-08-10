@@ -261,13 +261,13 @@ const AdvancedAnalytics: React.FC = () => {
               <div className="pt-4 border-t">
                 <h4 className="font-medium mb-2">Quick Actions</h4>
                 <div className="space-y-2">
-                  <button className="w-full text-left text-sm text-blue-600 hover:text-blue-800">
+                  <button className="w-full text-start text-sm text-blue-600 hover:text-blue-800">
                     Export compliance report
                   </button>
-                  <button className="w-full text-left text-sm text-blue-600 hover:text-blue-800">
+                  <button className="w-full text-start text-sm text-blue-600 hover:text-blue-800">
                     Download user progress CSV
                   </button>
-                  <button className="w-full text-left text-sm text-blue-600 hover:text-blue-800">
+                  <button className="w-full text-start text-sm text-blue-600 hover:text-blue-800">
                     Generate monthly summary
                   </button>
                 </div>

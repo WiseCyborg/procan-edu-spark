@@ -225,7 +225,7 @@ export const OrganizationActionsMenu = ({ organization, onRefetch }: Organizatio
             {/* Copy Join Code - only show if exists */}
             {hasJoinCode && (
               <DropdownMenuItem onClick={handleCopyJoinCode}>
-                <Copy className="h-4 w-4 mr-2" />
+                <Copy className="h-4 w-4 me-2" />
                 Copy Join Code
               </DropdownMenuItem>
             )}
@@ -245,7 +245,7 @@ export const OrganizationActionsMenu = ({ organization, onRefetch }: Organizatio
                 <TooltipTrigger asChild>
                   <div>
                     <DropdownMenuItem disabled className="opacity-50">
-                      <Mail className="h-4 w-4 mr-2" />
+                      <Mail className="h-4 w-4 me-2" />
                       Send Manager Reminder
                     </DropdownMenuItem>
                   </div>
@@ -267,7 +267,7 @@ export const OrganizationActionsMenu = ({ organization, onRefetch }: Organizatio
                 <TooltipTrigger asChild>
                   <div>
                     <DropdownMenuItem disabled className="opacity-50">
-                      <Mail className="h-4 w-4 mr-2" />
+                      <Mail className="h-4 w-4 me-2" />
                       Send Manager Reminder
                     </DropdownMenuItem>
                   </div>
@@ -284,7 +284,7 @@ export const OrganizationActionsMenu = ({ organization, onRefetch }: Organizatio
                 <TooltipTrigger asChild>
                   <div>
                     <DropdownMenuItem disabled className="opacity-50">
-                      <Send className="h-4 w-4 mr-2" />
+                      <Send className="h-4 w-4 me-2" />
                       Resend Registration
                     </DropdownMenuItem>
                   </div>
@@ -306,7 +306,7 @@ export const OrganizationActionsMenu = ({ organization, onRefetch }: Organizatio
                 <TooltipTrigger asChild>
                   <div>
                     <DropdownMenuItem disabled className="opacity-50">
-                      <Send className="h-4 w-4 mr-2" />
+                      <Send className="h-4 w-4 me-2" />
                       Resend Registration
                     </DropdownMenuItem>
                   </div>
@@ -326,7 +326,7 @@ export const OrganizationActionsMenu = ({ organization, onRefetch }: Organizatio
             
             {/* Allocate Seats - dynamic label based on existing seats */}
             <DropdownMenuItem onClick={() => setAllocateDialogOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="h-4 w-4 me-2" />
               {hasSeats ? 'Allocate More Seats' : 'Initialize Seat Allocation'}
             </DropdownMenuItem>
             
@@ -341,7 +341,7 @@ export const OrganizationActionsMenu = ({ organization, onRefetch }: Organizatio
             
             {/* Edit Details */}
             <DropdownMenuItem onClick={() => setEditDialogOpen(true)}>
-              <Edit className="h-4 w-4 mr-2" />
+              <Edit className="h-4 w-4 me-2" />
               Edit Details
             </DropdownMenuItem>
           </DropdownMenuContent>

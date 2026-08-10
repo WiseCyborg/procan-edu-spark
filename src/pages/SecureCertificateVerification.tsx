@@ -169,7 +169,7 @@ const SecureCertificateVerification = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center text-green-700">
-                <Search className="mr-2 h-5 w-5" />
+                <Search className="me-2 h-5 w-5" />
                 Verify Certificate
               </CardTitle>
             </CardHeader>
@@ -208,7 +208,7 @@ const SecureCertificateVerification = () => {
                 <CardHeader className="bg-green-50">
                   <CardTitle className="flex items-center justify-between">
                     <div className="flex items-center text-green-700">
-                      <Award className="mr-2 h-6 w-6" />
+                      <Award className="me-2 h-6 w-6" />
                       Certificate Details
                     </div>
                     <Badge className={getCertificateStatus(certificate).color}>
@@ -253,7 +253,7 @@ const SecureCertificateVerification = () => {
                         <div>
                           <h3 className="font-semibold text-gray-700 mb-2">Certificate Holder</h3>
                           <div className="flex items-center">
-                            <User className="mr-2 h-4 w-4 text-gray-400" />
+                            <User className="me-2 h-4 w-4 text-gray-400" />
                             <span className="font-medium">
                               {certificate.profiles?.first_name} {certificate.profiles?.last_name}
                             </span>

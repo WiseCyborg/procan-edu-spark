@@ -135,7 +135,7 @@ export default function AcceptInvite() {
               </p>
               
               <Button onClick={handleLoginRedirect} className="w-full" size="lg">
-                <LogIn className="h-4 w-4 mr-2" />
+                <LogIn className="h-4 w-4 me-2" />
                 Sign In to Accept
               </Button>
             </>

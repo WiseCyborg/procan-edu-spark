@@ -189,7 +189,7 @@ const Welcome = () => {
                 <Button 
                   onClick={() => navigate('/dashboard')}
                   size="lg"
-                  className="bg-green-600 hover:bg-green-700 mr-4"
+                  className="bg-green-600 hover:bg-green-700 me-4"
                 >
                   Go to Dashboard
                 </Button>

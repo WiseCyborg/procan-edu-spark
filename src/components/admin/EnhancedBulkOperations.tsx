@@ -324,7 +324,7 @@ export const EnhancedBulkOperations = () => {
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Enhanced Bulk Operations</h2>
         <Button onClick={downloadSampleCsv} variant="outline">
-          <Download className="h-4 w-4 mr-2" />
+          <Download className="h-4 w-4 me-2" />
           Download Sample CSV
         </Button>
       </div>
@@ -340,7 +340,7 @@ export const EnhancedBulkOperations = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
-                <Users className="h-5 w-5 mr-2" />
+                <Users className="h-5 w-5 me-2" />
                 Enhanced User Import
               </CardTitle>
             </CardHeader>
@@ -378,9 +378,9 @@ export const EnhancedBulkOperations = () => {
                 className="w-full"
               >
                 {isProcessing ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="h-4 w-4 me-2 animate-spin" />
                 ) : (
-                  <Upload className="h-4 w-4 mr-2" />
+                  <Upload className="h-4 w-4 me-2" />
                 )}
                 Import {csvData.length} Users
               </Button>
@@ -392,7 +392,7 @@ export const EnhancedBulkOperations = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
-                <Mail className="h-5 w-5 mr-2" />
+                <Mail className="h-5 w-5 me-2" />
                 Enhanced Email Campaign
               </CardTitle>
             </CardHeader>
@@ -424,9 +424,9 @@ export const EnhancedBulkOperations = () => {
                 className="w-full"
               >
                 {isProcessing ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="h-4 w-4 me-2 animate-spin" />
                 ) : (
-                  <Mail className="h-4 w-4 mr-2" />
+                  <Mail className="h-4 w-4 me-2" />
                 )}
                 Queue Bulk Email
               </Button>
@@ -438,7 +438,7 @@ export const EnhancedBulkOperations = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
-                <Users className="h-5 w-5 mr-2" />
+                <Users className="h-5 w-5 me-2" />
                 Enhanced Role Assignment
               </CardTitle>
             </CardHeader>
@@ -475,9 +475,9 @@ export const EnhancedBulkOperations = () => {
                 className="w-full"
               >
                 {isProcessing ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="h-4 w-4 me-2 animate-spin" />
                 ) : (
-                  <Users className="h-4 w-4 mr-2" />
+                  <Users className="h-4 w-4 me-2" />
                 )}
                 Assign Roles
               </Button>

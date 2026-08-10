@@ -195,12 +195,12 @@ export const BulkRetrainingAssignment: React.FC<BulkRetrainingAssignmentProps> =
           
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute start-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search employees..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9"
+              className="ps-9"
             />
           </div>
 
@@ -255,12 +255,12 @@ export const BulkRetrainingAssignment: React.FC<BulkRetrainingAssignmentProps> =
         >
           {isSubmitting ? (
             <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              <Loader2 className="h-4 w-4 me-2 animate-spin" />
               Assigning...
             </>
           ) : (
             <>
-              <Users className="h-4 w-4 mr-2" />
+              <Users className="h-4 w-4 me-2" />
               Assign Retraining to {selectedEmployees.length} Employee{selectedEmployees.length !== 1 ? 's' : ''}
             </>
           )}

@@ -65,7 +65,7 @@ export const OrganizationGuard = ({
 
             <div className="flex gap-3">
               <Button onClick={() => navigate('/dashboard')} variant="outline">
-                <Building2 className="w-4 h-4 mr-2" />
+                <Building2 className="w-4 h-4 me-2" />
                 Go to Dashboard
               </Button>
               <Button onClick={() => navigate('/faq')}>

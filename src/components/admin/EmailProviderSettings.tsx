@@ -159,11 +159,11 @@ export const EmailProviderSettings = () => {
                 Refresh
               </Button>
               <Button onClick={testAllProviders} disabled={testing} size="sm">
-                <Zap className="h-4 w-4 mr-2" />
+                <Zap className="h-4 w-4 me-2" />
                 {testing ? 'Testing...' : 'Test'}
               </Button>
               <Button onClick={runAutoRetry} variant="outline" size="sm">
-                <RotateCw className="h-4 w-4 mr-2" />
+                <RotateCw className="h-4 w-4 me-2" />
                 Retry Failed
               </Button>
             </div>
@@ -239,7 +239,7 @@ export const EmailProviderSettings = () => {
                         No provider data available
                       </p>
                       <Button onClick={testAllProviders} variant="outline">
-                        <Zap className="h-4 w-4 mr-2" />
+                        <Zap className="h-4 w-4 me-2" />
                         Run Initial Test
                       </Button>
                     </div>

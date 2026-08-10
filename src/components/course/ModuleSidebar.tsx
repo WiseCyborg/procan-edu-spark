@@ -58,8 +58,8 @@ export const ModuleSidebar = ({
         key={module.id}
         variant={isCurrent ? 'secondary' : 'ghost'}
         className={cn(
-          'w-full justify-start text-left h-auto py-3 px-3',
-          isCurrent && 'bg-primary/10 border-l-2 border-primary',
+          'w-full justify-start text-start h-auto py-3 px-3',
+          isCurrent && 'bg-primary/10 border-s-2 border-primary',
           isLocked && 'opacity-50 cursor-not-allowed'
         )}
         onClick={() => handleModuleClick(module)}
@@ -80,7 +80,7 @@ export const ModuleSidebar = ({
           <div className="flex-1 min-w-0">
             <div className="text-xs font-medium mb-1">
               Module {module.number}
-              {isLocked && <span className="ml-1 text-muted-foreground">(Locked)</span>}
+              {isLocked && <span className="ms-1 text-muted-foreground">(Locked)</span>}
             </div>
             <div className={cn(
               'text-sm truncate',
@@ -97,7 +97,7 @@ export const ModuleSidebar = ({
   };
 
   return (
-    <aside className="hidden lg:block w-72 border-r bg-muted/5">
+    <aside className="hidden lg:block w-72 border-e bg-muted/5">
       <ScrollArea className="h-[calc(100vh-8rem)]">
         <div className="p-4 space-y-4">
           {/* RVT Required Section */}

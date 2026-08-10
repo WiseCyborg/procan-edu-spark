@@ -228,7 +228,7 @@ export const AiLeanActivationQR = () => {
                   onClick={() => revokeToken(activeToken.id)}
                   className="w-full"
                 >
-                  <Trash2 className="w-4 h-4 mr-2" />
+                  <Trash2 className="w-4 h-4 me-2" />
                   Revoke This Token
                 </Button>
               </div>

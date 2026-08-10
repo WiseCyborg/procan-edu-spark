@@ -34,7 +34,7 @@ export const PageTransitionLoader = () => {
 
   return (
     <div 
-      className="fixed top-0 left-0 right-0 z-50 h-1 bg-transparent"
+      className="fixed top-0 start-0 end-0 z-50 h-1 bg-transparent"
       role="progressbar"
       aria-valuenow={progress}
       aria-valuemin={0}

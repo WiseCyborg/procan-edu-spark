@@ -166,7 +166,7 @@ export function FixPreviewDialog({ open, onClose, check, fixPlan, onFixComplete 
                 </div>
                 <div>
                   <span className="font-medium">Current Status:</span>
-                  <span className="text-sm ml-2">{check.status}</span>
+                  <span className="text-sm ms-2">{check.status}</span>
                 </div>
               </div>
             </div>
@@ -307,7 +307,7 @@ export function FixPreviewDialog({ open, onClose, check, fixPlan, onFixComplete 
                 <AlertCircle className="h-16 w-16 text-red-500 mx-auto" />
                 <h3 className="text-xl font-semibold">Fix Execution Failed</h3>
                 <p className="text-muted-foreground">Please review the errors and try again.</p>
-                <div className="text-left p-4 bg-muted rounded-lg">
+                <div className="text-start p-4 bg-muted rounded-lg">
                   {executionSteps.map((step, idx) => (
                     <div key={idx} className="text-sm">{step}</div>
                   ))}
@@ -328,7 +328,7 @@ export function FixPreviewDialog({ open, onClose, check, fixPlan, onFixComplete 
             >
               {isExecuting ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="me-2 h-4 w-4 animate-spin" />
                   Executing...
                 </>
               ) : (

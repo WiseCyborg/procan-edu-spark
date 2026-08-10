@@ -54,7 +54,7 @@ export default function UATFeedback() {
           </CardHeader>
           <CardContent>
             <Button onClick={() => startRun.mutate()} disabled={startRun.isPending} size="lg">
-              {startRun.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Play className="h-4 w-4 mr-2" />}
+              {startRun.isPending ? <Loader2 className="h-4 w-4 animate-spin me-2" /> : <Play className="h-4 w-4 me-2" />}
               Start UAT Run
             </Button>
           </CardContent>
@@ -80,7 +80,7 @@ export default function UATFeedback() {
               onClick={() => completeRun.mutate()}
               disabled={completeRun.isPending || done === 0}
             >
-              {completeRun.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Send className="h-4 w-4 mr-2" />}
+              {completeRun.isPending ? <Loader2 className="h-4 w-4 animate-spin me-2" /> : <Send className="h-4 w-4 me-2" />}
               Submit Run
             </Button>
           </div>
@@ -96,7 +96,7 @@ export default function UATFeedback() {
             return (
               <TabsTrigger key={r.key} value={r.key} className="text-xs md:text-sm">
                 {r.label}
-                <span className="ml-2 text-muted-foreground">{completed}/{list.length}</span>
+                <span className="ms-2 text-muted-foreground">{completed}/{list.length}</span>
               </TabsTrigger>
             );
           })}

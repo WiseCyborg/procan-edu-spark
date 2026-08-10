@@ -142,7 +142,7 @@ const UATDispensaryOnboarding: React.FC = () => {
             </p>
             <div className="pt-4 space-y-2">
               <p className="text-sm text-muted-foreground">What's next:</p>
-              <ul className="text-sm text-left space-y-2 pl-4">
+              <ul className="text-sm text-start space-y-2 ps-4">
                 <li className="flex items-start gap-2">
                   <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5" />
                   <span>Check your email and click the magic link</span>
@@ -237,12 +237,12 @@ const UATDispensaryOnboarding: React.FC = () => {
                   <div className="space-y-2">
                     <Label htmlFor="adminEmail">Email Address *</Label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Mail className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
                         id="adminEmail"
                         type="email"
                         required
-                        className="pl-10"
+                        className="ps-10"
                         value={formData.adminEmail}
                         onChange={(e) => handleInputChange('adminEmail', e.target.value)}
                         placeholder="admin@dispensary.com"
@@ -252,11 +252,11 @@ const UATDispensaryOnboarding: React.FC = () => {
                   <div className="space-y-2">
                     <Label htmlFor="adminPhone">Phone (Optional)</Label>
                     <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Phone className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
                         id="adminPhone"
                         type="tel"
-                        className="pl-10"
+                        className="ps-10"
                         value={formData.adminPhone}
                         onChange={(e) => handleInputChange('adminPhone', e.target.value)}
                         placeholder="(555) 123-4567"
@@ -296,10 +296,10 @@ const UATDispensaryOnboarding: React.FC = () => {
                 <div className="space-y-2">
                   <Label htmlFor="address">Business Address</Label>
                   <div className="relative">
-                    <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <MapPin className="absolute start-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Textarea
                       id="address"
-                      className="pl-10 min-h-[80px]"
+                      className="ps-10 min-h-[80px]"
                       value={formData.address}
                       onChange={(e) => handleInputChange('address', e.target.value)}
                       placeholder="123 Main St, Minneapolis, MN 55401"

@@ -81,7 +81,7 @@ export function SeatCapacityBanner({ organizationId }: SeatCapacityBannerProps) 
             variant={isAtCapacity ? 'default' : 'outline'}
             onClick={() => setShowUpgradeModal(true)}
           >
-            <TrendingUp className="h-4 w-4 mr-1" />
+            <TrendingUp className="h-4 w-4 me-1" />
             Upgrade Tier
           </Button>
         </AlertDescription>

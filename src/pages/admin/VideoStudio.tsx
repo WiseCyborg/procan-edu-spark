@@ -337,7 +337,7 @@ const VideoStudio: React.FC = () => {
                       <TableHead>Review</TableHead>
                       <TableHead>Render</TableHead>
                       <TableHead>Script</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead className="text-end">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -354,7 +354,7 @@ const VideoStudio: React.FC = () => {
                           <TableCell>{reviewBadge(asset?.review_status ?? null)}</TableCell>
                           <TableCell>{renderBadge(asset?.render_status ?? null)}</TableCell>
                           <TableCell>{asset?.slide_spec ? 'Yes' : 'No'}</TableCell>
-                          <TableCell className="text-right">
+                          <TableCell className="text-end">
                             <div className="flex items-center justify-end gap-2">
                               {asset?.render_status === 'published' && asset.public_url && (
                                 <a
@@ -492,7 +492,7 @@ const VideoStudio: React.FC = () => {
             ))}
 
             <Button variant="outline" onClick={addSlide} className="w-full">
-              <Plus className="h-4 w-4 mr-1" /> Add slide
+              <Plus className="h-4 w-4 me-1" /> Add slide
             </Button>
 
             {/* Closing */}
@@ -538,7 +538,7 @@ const VideoStudio: React.FC = () => {
               Cancel
             </Button>
             <Button onClick={handleSave} disabled={saving || !narrationValid}>
-              {saving && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
+              {saving && <Loader2 className="h-4 w-4 me-1 animate-spin" />}
               Save script
             </Button>
           </DialogFooter>

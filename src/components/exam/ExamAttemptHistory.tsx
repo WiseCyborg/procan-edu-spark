@@ -195,7 +195,7 @@ export const ExamAttemptHistory: React.FC<ExamAttemptHistoryProps> = ({
                         )}
                         {passed && (
                           <Badge variant="default" className="text-xs bg-green-500">
-                            <Award className="h-3 w-3 mr-1" />
+                            <Award className="h-3 w-3 me-1" />
                             Passed
                           </Badge>
                         )}

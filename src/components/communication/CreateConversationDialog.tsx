@@ -279,7 +279,7 @@ export const CreateConversationDialog = ({
               ) : (
                 <div className="max-h-40 overflow-y-auto space-y-2 border rounded-md p-2">
                   {teamMembers.map((member) => (
-                    <div key={member.user_id} className="flex items-center space-x-2">
+                    <div key={member.user_id} className="flex items-center space-x-2 rtl:space-x-reverse">
                       <Checkbox
                         id={member.user_id}
                         checked={selectedParticipants.includes(member.user_id)}
@@ -306,7 +306,7 @@ export const CreateConversationDialog = ({
                         {member?.first_name} {member?.last_name}
                         <button
                           onClick={() => toggleParticipant(userId)}
-                          className="ml-1 hover:bg-destructive/20 rounded-full p-0.5"
+                          className="ms-1 hover:bg-destructive/20 rounded-full p-0.5"
                         >
                           <X className="h-3 w-3" />
                         </button>

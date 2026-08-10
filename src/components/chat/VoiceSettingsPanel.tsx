@@ -85,7 +85,7 @@ export const VoiceSettingsPanel: React.FC<VoiceSettingsPanelProps> = ({
           <CardTitle className="text-lg">Voice Settings</CardTitle>
           <div className="flex items-center gap-2">
             <Badge variant="outline">
-              <Volume2 className="h-3 w-3 mr-1" />
+              <Volume2 className="h-3 w-3 me-1" />
               {isSpeaking ? 'Speaking' : 'Ready'}
             </Badge>
             <Button
@@ -216,12 +216,12 @@ export const VoiceSettingsPanel: React.FC<VoiceSettingsPanelProps> = ({
               >
                 {isSpeaking ? (
                   <>
-                    <Pause className="h-4 w-4 mr-2" />
+                    <Pause className="h-4 w-4 me-2" />
                     Stop Test
                   </>
                 ) : (
                   <>
-                    <Play className="h-4 w-4 mr-2" />
+                    <Play className="h-4 w-4 me-2" />
                     Test Voice
                   </>
                 )}
@@ -233,7 +233,7 @@ export const VoiceSettingsPanel: React.FC<VoiceSettingsPanelProps> = ({
         {/* Actions */}
         <div className="flex gap-2 pt-4 border-t">
           <Button variant="outline" onClick={onClose} className="flex-1">
-            <ArrowLeft className="h-4 w-4 mr-2" />
+            <ArrowLeft className="h-4 w-4 me-2" />
             Back to Chat
           </Button>
           <Button

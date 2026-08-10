@@ -50,21 +50,21 @@ export const PayPalConfigurationPanel = ({ onStatusChange }: PayPalConfigPanelPr
       case 'connected':
         return (
           <Badge className="bg-green-600 text-white">
-            <CheckCircle2 className="h-3 w-3 mr-1" />
+            <CheckCircle2 className="h-3 w-3 me-1" />
             Connected
           </Badge>
         );
       case 'error':
         return (
           <Badge variant="destructive">
-            <AlertCircle className="h-3 w-3 mr-1" />
+            <AlertCircle className="h-3 w-3 me-1" />
             Error
           </Badge>
         );
       case 'testing':
         return (
           <Badge variant="secondary">
-            <Activity className="h-3 w-3 mr-1 animate-pulse" />
+            <Activity className="h-3 w-3 me-1 animate-pulse" />
             Testing...
           </Badge>
         );

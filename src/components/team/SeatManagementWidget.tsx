@@ -98,7 +98,7 @@ export function SeatManagementWidget({ organizationId }: SeatManagementWidgetPro
             <CardDescription>Track your training seat inventory</CardDescription>
           </div>
           <Button onClick={() => navigate("/purchase-seats")} size="sm">
-            <ShoppingCart className="mr-2 h-4 w-4" />
+            <ShoppingCart className="me-2 h-4 w-4" />
             Purchase More
           </Button>
         </div>
@@ -173,7 +173,7 @@ export function SeatManagementWidget({ organizationId }: SeatManagementWidgetPro
                         size="sm"
                         className="mt-2 border-amber-600 text-amber-800 hover:bg-amber-100 dark:text-amber-200 dark:hover:bg-amber-900"
                       >
-                        <ShoppingCart className="h-4 w-4 mr-2" />
+                        <ShoppingCart className="h-4 w-4 me-2" />
                         Purchase More Seats
                       </Button>
                     </AlertDescription>
@@ -192,7 +192,7 @@ export function SeatManagementWidget({ organizationId }: SeatManagementWidgetPro
                         size="sm"
                         className="mt-2"
                       >
-                        <ShoppingCart className="h-4 w-4 mr-2" />
+                        <ShoppingCart className="h-4 w-4 me-2" />
                         Purchase Seats Now
                       </Button>
                     </AlertDescription>
@@ -209,7 +209,7 @@ export function SeatManagementWidget({ organizationId }: SeatManagementWidgetPro
                         size="sm"
                         className="mt-2 border-yellow-600 text-yellow-800 hover:bg-yellow-100 dark:text-yellow-200 dark:hover:bg-yellow-900"
                       >
-                        <ShoppingCart className="h-4 w-4 mr-2" />
+                        <ShoppingCart className="h-4 w-4 me-2" />
                         Purchase More Seats
                       </Button>
                     </AlertDescription>
