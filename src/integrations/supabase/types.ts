@@ -2195,6 +2195,30 @@ export type Database = {
         }
         Relationships: []
       }
+      _cleanup_bak_cm_video_url_20260810: {
+        Row: {
+          backed_up_at: string | null
+          course_id: string | null
+          id: string | null
+          module_number: number | null
+          old_video_url: string | null
+        }
+        Insert: {
+          backed_up_at?: string | null
+          course_id?: string | null
+          id?: string | null
+          module_number?: number | null
+          old_video_url?: string | null
+        }
+        Update: {
+          backed_up_at?: string | null
+          course_id?: string | null
+          id?: string | null
+          module_number?: number | null
+          old_video_url?: string | null
+        }
+        Relationships: []
+      }
       _cleanup_bak_consumer_vurl_20260807: {
         Row: {
           backed_up_at: string | null
@@ -2210,6 +2234,24 @@ export type Database = {
           backed_up_at?: string | null
           id?: string | null
           old_video_url?: string | null
+        }
+        Relationships: []
+      }
+      _cleanup_bak_demo_module0_content_20260810: {
+        Row: {
+          backed_up_at: string | null
+          id: string | null
+          old_content: string | null
+        }
+        Insert: {
+          backed_up_at?: string | null
+          id?: string | null
+          old_content?: string | null
+        }
+        Update: {
+          backed_up_at?: string | null
+          id?: string | null
+          old_content?: string | null
         }
         Relationships: []
       }

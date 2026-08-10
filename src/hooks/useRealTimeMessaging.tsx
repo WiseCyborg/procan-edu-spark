@@ -85,26 +85,22 @@ export const useRealTimeMessaging = () => {
 
       if (error) throw error;
 
-      // Compute unread counts in parallel per conversation
-      const unreadPromises = (data || []).map(async (conv: any) => {
-        const myParticipant = (conv.conversation_participants || []).find(
-          (p: any) => p.user_id === user.id
-        );
-        const lastReadAt: string | null = myParticipant?.last_read_at ?? null;
+      // Compute unread counts locally from the messages already returned above
+      const unreadMap = new Map(
+        (data || []).map((conv: any) => {
+          const myParticipant = (conv.conversation_participants || []).find(
+            (p: any) => p.user_id === user.id
+          );
+          const lastReadAt: string | null = myParticipant?.last_read_at ?? null;
+          const unreadCount = (conv.messages || []).filter(
+            (message: any) =>
+              message.sender_id !== user.id &&
+              (!lastReadAt || message.created_at > lastReadAt)
+          ).length;
 
-        let query = supabase
-          .from('messages')
-          .select('id', { count: 'exact', head: true })
-          .eq('conversation_id', conv.id)
-          .neq('sender_id', user.id);
-        if (lastReadAt) {
-          query = query.gt('created_at', lastReadAt);
-        }
-        const { count } = await query;
-        return { convId: conv.id, count: count || 0 };
-      });
-      const unreadResults = await Promise.all(unreadPromises);
-      const unreadMap = new Map(unreadResults.map(r => [r.convId, r.count]));
+          return [conv.id, unreadCount] as const;
+        })
+      );
 
       // Resolve direct conversation titles to the other participant's name
       const directConvIds = (data || [])
