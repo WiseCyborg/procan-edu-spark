@@ -65,7 +65,7 @@ const GetStarted = () => {
                 </div>
                 <Button className="w-full group-hover:bg-primary/90">
                   Begin RVT Training
-                  <ArrowRight className="ms-2 h-4 w-4" />
+                  <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
                 </Button>
               </CardContent>
             </Card>
@@ -105,7 +105,7 @@ const GetStarted = () => {
                 </div>
                 <Button className="w-full" variant="outline">
                   Access Manager Track
-                  <ArrowRight className="ms-2 h-4 w-4" />
+                  <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
                 </Button>
               </CardContent>
             </Card>
@@ -145,7 +145,7 @@ const GetStarted = () => {
                 </div>
                 <Button className="w-full" variant="secondary" onClick={(e) => { e.stopPropagation(); navigate('/consumer-education'); }}>
                   Start Free Learning
-                  <ArrowRight className="ms-2 h-4 w-4" />
+                  <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
                 </Button>
               </CardContent>
             </Card>
@@ -181,7 +181,7 @@ const GetStarted = () => {
               <CardContent>
                 <Button className="w-full" size="sm" onClick={() => navigate('/org/apply')}>
                   Apply Now
-                  <ArrowRight className="ms-2 h-4 w-4" />
+                  <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
                 </Button>
               </CardContent>
             </Card>
@@ -198,7 +198,7 @@ const GetStarted = () => {
               <CardContent>
                 <Button className="w-full" variant="outline" size="sm" onClick={() => navigate('/auth?role=training_coordinator')}>
                   Sign In
-                  <ArrowRight className="ms-2 h-4 w-4" />
+                  <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
                 </Button>
               </CardContent>
             </Card>
@@ -215,7 +215,7 @@ const GetStarted = () => {
               <CardContent>
                 <Button className="w-full" variant="outline" size="sm" onClick={() => navigate('/auth?role=student')}>
                   Begin Training
-                  <ArrowRight className="ms-2 h-4 w-4" />
+                  <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
                 </Button>
               </CardContent>
             </Card>
@@ -257,7 +257,7 @@ const GetStarted = () => {
                   <p className="font-semibold">Dispensary Applies</p>
                   <p className="text-xs text-muted-foreground">Submit application & pay</p>
                 </div>
-                <ArrowRight className="hidden md:block text-muted-foreground" />
+                <ArrowRight className="hidden md:block text-muted-foreground rtl-flip" />
                 <div className="text-center flex-1">
                   <div className="w-16 h-16 rounded-full bg-secondary/10 flex items-center justify-center mx-auto mb-2">
                     <UserCog className="h-8 w-8 text-secondary" />
@@ -265,7 +265,7 @@ const GetStarted = () => {
                   <p className="font-semibold">Manager Invites Team</p>
                   <p className="text-xs text-muted-foreground">Send email invitations</p>
                 </div>
-                <ArrowRight className="hidden md:block text-muted-foreground" />
+                <ArrowRight className="hidden md:block text-muted-foreground rtl-flip" />
                 <div className="text-center flex-1">
                   <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-2">
                     <GraduationCap className="h-8 w-8 text-accent" />
@@ -273,7 +273,7 @@ const GetStarted = () => {
                   <p className="font-semibold">Employees Train</p>
                   <p className="text-xs text-muted-foreground">Complete course & exam</p>
                 </div>
-                <ArrowRight className="hidden md:block text-muted-foreground" />
+                <ArrowRight className="hidden md:block text-muted-foreground rtl-flip" />
                 <div className="text-center flex-1">
                   <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-2">
                     <Shield className="h-8 w-8 text-green-600" />

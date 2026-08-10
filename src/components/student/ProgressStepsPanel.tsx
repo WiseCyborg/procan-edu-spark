@@ -170,7 +170,7 @@ export const ProgressStepsPanel: React.FC<ProgressStepsPanelProps> = ({
                 className="flex-shrink-0"
               >
                 {step.actionLabel}
-                {step.status === 'current' && <ChevronRight className="h-4 w-4 ms-1" />}
+                {step.status === 'current' && <ChevronRight className="h-4 w-4 ms-1 rtl-flip" />}
               </Button>
             )}
           </div>

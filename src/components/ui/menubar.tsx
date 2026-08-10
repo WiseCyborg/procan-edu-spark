@@ -60,7 +60,7 @@ const MenubarSubTrigger = React.forwardRef<
     {...props}
   >
     {children}
-    <ChevronRight className="ms-auto h-4 w-4" />
+    <ChevronRight className="ms-auto h-4 w-4 rtl-flip" />
   </MenubarPrimitive.SubTrigger>
 ))
 MenubarSubTrigger.displayName = MenubarPrimitive.SubTrigger.displayName

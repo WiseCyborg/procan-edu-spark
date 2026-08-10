@@ -16,7 +16,7 @@ export const CommunicationHubPage = () => {
             onClick={() => navigate(-1)}
             className="me-4"
           >
-            <ArrowLeft className="h-4 w-4 me-2" />
+            <ArrowLeft className="h-4 w-4 me-2 rtl-flip" />
             Back
           </Button>
           <h1 className="text-2xl font-bold">Team Communication</h1>

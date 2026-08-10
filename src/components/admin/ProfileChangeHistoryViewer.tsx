@@ -202,7 +202,7 @@ export function ProfileChangeHistoryViewer({ userId, showAsUser = false }: Profi
                       <span className="text-muted-foreground line-through break-all">
                         {change.old_value || '(empty)'}
                       </span>
-                      <ArrowRight className="w-4 h-4 flex-shrink-0" />
+                      <ArrowRight className="w-4 h-4 flex-shrink-0 rtl-flip" />
                       <span className="font-medium text-foreground break-all">
                         {change.new_value || '(empty)'}
                       </span>

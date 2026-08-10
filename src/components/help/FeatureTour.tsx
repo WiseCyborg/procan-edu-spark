@@ -79,7 +79,7 @@ export const FeatureTour: React.FC<FeatureTourProps> = ({
                 disabled={currentStep === 0}
                 size="sm"
               >
-                <ChevronLeft className="h-4 w-4 me-1" />
+                <ChevronLeft className="h-4 w-4 me-1 rtl-flip" />
                 Back
               </Button>
 
@@ -102,7 +102,7 @@ export const FeatureTour: React.FC<FeatureTourProps> = ({
                 ) : (
                   <>
                     Next
-                    <ChevronRight className="h-4 w-4 ms-1" />
+                    <ChevronRight className="h-4 w-4 ms-1 rtl-flip" />
                   </>
                 )}
               </Button>

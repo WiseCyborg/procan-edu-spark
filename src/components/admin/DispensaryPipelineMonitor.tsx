@@ -445,7 +445,7 @@ export const DispensaryPipelineMonitor = () => {
                 <Progress value={step.conversionRate || 0} className="h-1" />
                 {index < steps.length - 1 && (
                   <div className="flex justify-center my-2">
-                    <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                    <ArrowRight className="h-4 w-4 text-muted-foreground rtl-flip" />
                   </div>
                 )}
               </div>

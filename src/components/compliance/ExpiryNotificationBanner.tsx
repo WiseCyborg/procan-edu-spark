@@ -123,7 +123,7 @@ export const ExpiryNotificationBanner: React.FC<ExpiryNotificationBannerProps> =
             onClick={() => navigate('/compliance')}
           >
             View all expiring certificates
-            <ChevronRight className="h-4 w-4 ms-1" />
+            <ChevronRight className="h-4 w-4 ms-1 rtl-flip" />
           </Button>
         </div>
       </AlertDescription>

@@ -56,7 +56,7 @@ export const ResumePrompt = () => {
           </p>
           <Button onClick={handleResume} className="gap-2">
             {resumeInfo.action}
-            <ArrowRight className="h-4 w-4" />
+            <ArrowRight className="h-4 w-4 rtl-flip" />
           </Button>
         </div>
       </div>

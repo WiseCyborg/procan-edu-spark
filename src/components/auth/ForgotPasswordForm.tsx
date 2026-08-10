@@ -75,7 +75,7 @@ export function ForgotPasswordForm() {
         </p>
         <Link to="/auth">
           <Button variant="outline" className="w-full">
-            <ArrowLeft className="me-2 h-4 w-4" />
+            <ArrowLeft className="me-2 h-4 w-4 rtl-flip" />
             Back to Login
           </Button>
         </Link>
@@ -116,7 +116,7 @@ export function ForgotPasswordForm() {
           </Button>
           <Link to="/auth">
             <Button variant="ghost" className="w-full">
-              <ArrowLeft className="me-2 h-4 w-4" />
+              <ArrowLeft className="me-2 h-4 w-4 rtl-flip" />
               Back to Login
             </Button>
           </Link>
@@ -166,7 +166,7 @@ export function ForgotPasswordForm() {
 
       <Link to="/auth">
         <Button variant="ghost" className="w-full">
-          <ArrowLeft className="me-2 h-4 w-4" />
+          <ArrowLeft className="me-2 h-4 w-4 rtl-flip" />
           Back to Login
         </Button>
       </Link>

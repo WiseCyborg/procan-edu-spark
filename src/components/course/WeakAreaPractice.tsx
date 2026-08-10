@@ -61,7 +61,7 @@ export function WeakAreaPractice({
                 variant="outline"
                 onClick={onBack}
               >
-                <ArrowLeft className="me-2 h-4 w-4" />
+                <ArrowLeft className="me-2 h-4 w-4 rtl-flip" />
                 Back to Results
               </Button>
               <Button

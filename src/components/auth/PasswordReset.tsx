@@ -246,7 +246,7 @@ export const PasswordReset: React.FC = () => {
           
           <Link to="/auth">
             <Button className="w-full">
-              <ArrowRight className="me-2 h-4 w-4" />
+              <ArrowRight className="me-2 h-4 w-4 rtl-flip" />
               Continue to Login
             </Button>
           </Link>

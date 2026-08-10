@@ -147,7 +147,7 @@ export const ChatAnnouncementSystem: React.FC<AnnouncementProps> = ({
                   className="gap-2"
                 >
                   {current.cta}
-                  <ArrowRight className="h-3 w-3" />
+                  <ArrowRight className="h-3 w-3 rtl-flip" />
                 </Button>
               </div>
             </CardContent>

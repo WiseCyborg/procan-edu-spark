@@ -243,7 +243,7 @@ export const SupportRequestsPanel = () => {
                       onClick={() => updateRequestStatus(request.id, 'in_progress')}
                     >
                       Accept
-                      <ArrowRight className="ms-2 h-4 w-4" />
+                      <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
                     </Button>
                   )}
                   {request.status === 'in_progress' && (

@@ -244,7 +244,7 @@ const UATEvidenceSubmission: React.FC = () => {
     <div className="container mx-auto p-6 max-w-3xl space-y-6">
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-          <ArrowLeft className="h-5 w-5" />
+          <ArrowLeft className="h-5 w-5 rtl-flip" />
         </Button>
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">

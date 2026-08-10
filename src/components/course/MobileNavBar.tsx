@@ -53,7 +53,7 @@ export const MobileNavBar = ({
               onClick={onPrevious}
               className="flex-1 max-w-[120px]"
             >
-              <ChevronLeft className="h-4 w-4 me-1" />
+              <ChevronLeft className="h-4 w-4 me-1 rtl-flip" />
               <span className="hidden sm:inline">Prev</span>
             </Button>
           ) : (
@@ -95,7 +95,7 @@ export const MobileNavBar = ({
                     >
                       {!nextEnabled && <Lock className="h-3 w-3 me-1" />}
                       <span className="hidden sm:inline">Next</span>
-                      {nextEnabled && <ChevronRight className="h-4 w-4 ms-1" />}
+                      {nextEnabled && <ChevronRight className="h-4 w-4 ms-1 rtl-flip" />}
                     </Button>
                   </span>
                 </TooltipTrigger>

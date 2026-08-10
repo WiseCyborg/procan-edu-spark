@@ -135,7 +135,7 @@ export default function Pricing() {
                     onClick={() => navigate('/dispensary-application')}
                   >
                     {tier.tierName === 'unlimited' ? 'Contact Sales' : 'Get Started'}
-                    <ArrowRight className="h-4 w-4 ms-2" />
+                    <ArrowRight className="h-4 w-4 ms-2 rtl-flip" />
                   </Button>
                 </CardFooter>
               </Card>

@@ -206,7 +206,7 @@ export const CoordinatorStartPanel: React.FC<CoordinatorStartPanelProps> = ({
                 <div className="flex items-center gap-2 w-full">
                   <Icon className="h-4 w-4" />
                   <span className="font-medium">{action.label}</span>
-                  <ChevronRight className="h-4 w-4 ms-auto" />
+                  <ChevronRight className="h-4 w-4 ms-auto rtl-flip" />
                 </div>
                 <span className="text-xs text-muted-foreground mt-1 font-normal">
                   {action.description}

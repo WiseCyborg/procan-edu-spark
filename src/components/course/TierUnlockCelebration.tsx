@@ -89,7 +89,7 @@ export const TierUnlockCelebration: React.FC<TierUnlockCelebrationProps> = ({
                 size="lg"
               >
                 Continue Training
-                <ArrowRight className="w-4 h-4 ms-2" />
+                <ArrowRight className="w-4 h-4 ms-2 rtl-flip" />
               </Button>
             </div>
           </div>

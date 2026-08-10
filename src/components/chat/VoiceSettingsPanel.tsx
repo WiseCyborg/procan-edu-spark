@@ -233,7 +233,7 @@ export const VoiceSettingsPanel: React.FC<VoiceSettingsPanelProps> = ({
         {/* Actions */}
         <div className="flex gap-2 pt-4 border-t">
           <Button variant="outline" onClick={onClose} className="flex-1">
-            <ArrowLeft className="h-4 w-4 me-2" />
+            <ArrowLeft className="h-4 w-4 me-2 rtl-flip" />
             Back to Chat
           </Button>
           <Button

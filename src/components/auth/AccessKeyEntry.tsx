@@ -149,7 +149,7 @@ export const AccessKeyEntry: React.FC = () => {
         ) : (
           <>
             Continue to Registration
-            <ArrowRight className="ms-2 h-4 w-4" />
+            <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
           </>
         )}
       </Button>

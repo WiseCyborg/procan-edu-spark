@@ -40,7 +40,7 @@ export const WelcomeStep = ({ organizationName, onNext }: StepProps) => (
     
     <Button onClick={onNext} size="lg" className="mt-6">
       Let's Get Started
-      <ArrowRight className="ms-2 h-4 w-4" />
+      <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
     </Button>
   </CardContent>
 );
@@ -71,7 +71,7 @@ export const OrganizationSnapshotStep = ({ organizationName, onNext }: StepProps
     <div className="flex gap-3 justify-end">
       <Button onClick={onNext}>
         Continue
-        <ArrowRight className="ms-2 h-4 w-4" />
+        <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
       </Button>
     </div>
   </CardContent>
@@ -140,7 +140,7 @@ export const SeatOverviewStep = ({ organizationId, onNext }: StepProps) => {
       <div className="flex gap-3 justify-end">
         <Button onClick={onNext}>
           Invite Employees
-          <ArrowRight className="ms-2 h-4 w-4" />
+          <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
         </Button>
       </div>
     </CardContent>

@@ -162,7 +162,7 @@ const UATDispensaryOnboarding: React.FC = () => {
               className="w-full mt-4 gap-2"
             >
               Go to Login
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4 rtl-flip" />
             </Button>
           </CardContent>
         </Card>

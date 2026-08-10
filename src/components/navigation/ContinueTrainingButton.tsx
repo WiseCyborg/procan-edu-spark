@@ -40,7 +40,7 @@ export const ContinueTrainingButton: React.FC<ContinueTrainingButtonProps> = ({
       case 'all_complete':
         return <Award className="h-5 w-5" />;
       default:
-        return <ArrowRight className="h-5 w-5" />;
+        return <ArrowRight className="h-5 w-5 rtl-flip" />;
     }
   };
 
@@ -72,7 +72,7 @@ export const ContinueTrainingButton: React.FC<ContinueTrainingButtonProps> = ({
         className={className}
       >
         {ctaLabel}
-        <ArrowRight className="h-4 w-4 ms-1" />
+        <ArrowRight className="h-4 w-4 ms-1 rtl-flip" />
       </Button>
     );
   }

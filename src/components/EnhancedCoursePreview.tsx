@@ -197,7 +197,7 @@ export const CoursePreviewSystem: React.FC = () => {
           className="absolute start-0 z-10"
           disabled={currentModule === 0}
         >
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft className="h-4 w-4 rtl-flip" />
         </Button>
         
         <EnhancedCoursePreview
@@ -212,7 +212,7 @@ export const CoursePreviewSystem: React.FC = () => {
           className="absolute end-0 z-10"
           disabled={currentModule === modules.length - 1}
         >
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className="h-4 w-4 rtl-flip" />
         </Button>
       </div>
       
