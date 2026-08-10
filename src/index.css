@@ -192,3 +192,18 @@
     animation: shimmer-pass 10s ease-in-out infinite;
   }
 }
+/* ---- RTL support (Phase 1b) ---- */
+/* Mirror directional icons only when the document direction is RTL. No-op in LTR. */
+[dir="rtl"] .rtl-flip {
+  transform: scaleX(-1);
+}
+
+/* Indeterminate progress sweep should travel right-to-left in RTL. */
+@keyframes progress-indeterminate-rtl {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-200%); }
+}
+
+[dir="rtl"] .animate-progress-indeterminate {
+  animation-name: progress-indeterminate-rtl;
+}
