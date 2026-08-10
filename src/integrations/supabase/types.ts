@@ -2264,6 +2264,27 @@ export type Database = {
         }
         Relationships: []
       }
+      _cleanup_bak_rvt_vpublic_20260810: {
+        Row: {
+          asset_key: string | null
+          backed_up_at: string | null
+          id: string | null
+          old_public_url: string | null
+        }
+        Insert: {
+          asset_key?: string | null
+          backed_up_at?: string | null
+          id?: string | null
+          old_public_url?: string | null
+        }
+        Update: {
+          asset_key?: string | null
+          backed_up_at?: string | null
+          id?: string | null
+          old_public_url?: string | null
+        }
+        Relationships: []
+      }
       _cleanup_bak_vpublic_20260803: {
         Row: {
           asset_key: string | null
