@@ -124,7 +124,7 @@ const Index = () => {
 
           {/* Welcome Video Section - Desktop Only (keeps mobile CTA above fold) */}
           {!isMobile && (
-            <WelcomeVideoSection className="mb-6" />
+            <WelcomeVideoSection className="mb-6" assetKey="welcome-intro" />
           )}
 
           {/* Primary CTA + Secondary Link */}
