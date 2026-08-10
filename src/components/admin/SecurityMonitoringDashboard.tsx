@@ -214,7 +214,7 @@ export const SecurityMonitoringDashboard = () => {
           </p>
         </div>
         <Button onClick={fetchSecurityData} variant="outline">
-          <Activity className="h-4 w-4 mr-2" />
+          <Activity className="h-4 w-4 me-2" />
           Refresh
         </Button>
       </div>
@@ -310,12 +310,12 @@ export const SecurityMonitoringDashboard = () => {
                         {getSeverityBadge(event.severity)}
                         {event.resolved_at ? (
                           <Badge variant="outline" className="text-green-600">
-                            <CheckCircle className="h-3 w-3 mr-1" />
+                            <CheckCircle className="h-3 w-3 me-1" />
                             Resolved
                           </Badge>
                         ) : (
                           <Badge variant="destructive">
-                            <XCircle className="h-3 w-3 mr-1" />
+                            <XCircle className="h-3 w-3 me-1" />
                             Active
                           </Badge>
                         )}
@@ -382,7 +382,7 @@ export const SecurityMonitoringDashboard = () => {
                       )}
                     </div>
 
-                    <div className="text-right">
+                    <div className="text-end">
                       <div className="text-sm text-muted-foreground">
                         Record ID: {log.record_id?.slice(0, 8)}...
                       </div>

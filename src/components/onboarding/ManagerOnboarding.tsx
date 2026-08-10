@@ -207,7 +207,7 @@ export const ManagerOnboarding = ({ onComplete, onSkip }: ManagerOnboardingProps
               onClick={handleSkip}
               className="text-muted-foreground"
             >
-              <X className="h-4 w-4 mr-1" />
+              <X className="h-4 w-4 me-1" />
               Skip Setup
             </Button>
           </div>
@@ -261,7 +261,7 @@ export const ManagerOnboarding = ({ onComplete, onSkip }: ManagerOnboardingProps
                 onClick={handleBack}
                 className="w-full"
               >
-                <ArrowLeft className="mr-2 h-4 w-4" />
+                <ArrowLeft className="me-2 h-4 w-4" />
                 Back
               </Button>
             </div>

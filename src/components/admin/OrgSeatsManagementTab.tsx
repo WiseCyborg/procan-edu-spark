@@ -240,7 +240,7 @@ export const OrgSeatsManagementTab = ({ organizationId }: OrgSeatsManagementTabP
               <TableHead>Status</TableHead>
               <TableHead>Assigned To</TableHead>
               <TableHead>Assignment Date</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead className="text-end">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -321,7 +321,7 @@ export const OrgSeatsManagementTab = ({ organizationId }: OrgSeatsManagementTabP
                   <TableCell className="text-sm text-muted-foreground">
                     {seat.assigned_at ? new Date(seat.assigned_at).toLocaleDateString() : '—'}
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-end">
                     {seat.status === 'available' && !isAssigning && (
                       <Button 
                         size="sm" 
@@ -330,7 +330,7 @@ export const OrgSeatsManagementTab = ({ organizationId }: OrgSeatsManagementTabP
                         disabled={!members?.some(m => m.user_id && !membersWithSeats.has(m.user_id))}
                       >
                         Assign
-                        <ChevronRight className="h-4 w-4 ml-1" />
+                        <ChevronRight className="h-4 w-4 ms-1" />
                       </Button>
                     )}
                     {seat.status === 'assigned' && (

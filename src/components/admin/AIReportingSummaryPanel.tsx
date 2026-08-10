@@ -108,7 +108,7 @@ export function AIReportingSummaryPanel() {
             ) : (
               <div className="max-h-80 overflow-auto">
                 <table className="w-full text-sm">
-                  <thead className="bg-muted text-left">
+                  <thead className="bg-muted text-start">
                     <tr>
                       {result.columns.map((c) => (
                         <th key={c} className="px-3 py-2 font-medium">{c}</th>

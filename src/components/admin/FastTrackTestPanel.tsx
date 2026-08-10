@@ -131,7 +131,7 @@ export function FastTrackTestPanel() {
           />
         </div>
         
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 rtl:space-x-reverse">
           <Checkbox 
             id="auto-complete"
             checked={autoComplete}
@@ -168,12 +168,12 @@ export function FastTrackTestPanel() {
         >
           {loading ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <Loader2 className="me-2 h-4 w-4 animate-spin" />
               Creating Test Organization...
             </>
           ) : (
             <>
-              <Zap className="mr-2 h-4 w-4" />
+              <Zap className="me-2 h-4 w-4" />
               🚀 Create Fast Track Test
             </>
           )}
@@ -254,7 +254,7 @@ export function FastTrackTestPanel() {
                 size="sm"
                 onClick={() => window.open(`/auth?role=dispensary_manager`, '_blank')}
               >
-                <ExternalLink className="h-4 w-4 mr-2" />
+                <ExternalLink className="h-4 w-4 me-2" />
                 Login as Manager
               </Button>
               <Button 
@@ -262,7 +262,7 @@ export function FastTrackTestPanel() {
                 size="sm"
                 onClick={() => copyToClipboard(JSON.stringify(results.access_info, null, 2))}
               >
-                <Copy className="h-4 w-4 mr-2" />
+                <Copy className="h-4 w-4 me-2" />
                 Copy Credentials
               </Button>
               <Button 
@@ -270,7 +270,7 @@ export function FastTrackTestPanel() {
                 size="sm"
                 onClick={() => cleanupTest(results.organization_id)}
               >
-                <Trash2 className="h-4 w-4 mr-2" />
+                <Trash2 className="h-4 w-4 me-2" />
                 Delete Test Data
               </Button>
             </div>

@@ -136,7 +136,7 @@ const TestOrganizationCreator = () => {
         <Card className="border-dashed border-2 border-primary/20">
           <CardHeader>
             <CardTitle className="text-lg flex items-center text-primary">
-              <Building2 className="h-5 w-5 mr-2" />
+              <Building2 className="h-5 w-5 me-2" />
               Create Test Organization
             </CardTitle>
             <p className="text-sm text-muted-foreground">
@@ -196,7 +196,7 @@ const TestOrganizationCreator = () => {
                     size="sm"
                     onClick={() => setLastError(null)}
                   >
-                    <RotateCcw className="h-3 w-3 mr-1" />
+                    <RotateCcw className="h-3 w-3 me-1" />
                     Retry
                   </Button>
                 </AlertDescription>
@@ -210,12 +210,12 @@ const TestOrganizationCreator = () => {
             >
               {isCreating ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                  <Loader2 className="h-4 w-4 me-1 animate-spin" />
                   Creating...
                 </>
               ) : (
                 <>
-                  <Plus className="h-4 w-4 mr-1" />
+                  <Plus className="h-4 w-4 me-1" />
                   Create Test Organization
                 </>
               )}
@@ -226,7 +226,7 @@ const TestOrganizationCreator = () => {
         <Card className="border-2 border-green-500/50 bg-green-50/50 dark:bg-green-950/20">
           <CardHeader>
             <CardTitle className="flex items-center text-green-700 dark:text-green-400">
-              <CheckCircle2 className="h-6 w-6 mr-2" />
+              <CheckCircle2 className="h-6 w-6 me-2" />
               Test Organization Created Successfully
             </CardTitle>
           </CardHeader>

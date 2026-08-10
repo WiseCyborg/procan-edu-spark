@@ -94,7 +94,7 @@ const StoplightStandard = () => {
             {tiers.map((tier, index) => (
               <Card key={index} className={`${tier.bgColor} border-2 ${tier.borderColor}`}>
                 <CardHeader>
-                  <div className="flex items-center space-x-3 mb-2">
+                  <div className="flex items-center space-x-3 mb-2 rtl:space-x-reverse">
                     <tier.icon className={`w-8 h-8 ${tier.textColor}`} />
                     <CardTitle className={`text-2xl ${tier.textColor} font-poppins`}>
                       {tier.title}
@@ -106,7 +106,7 @@ const StoplightStandard = () => {
                   <p className="mb-4 text-gray-700 font-inter">{tier.description}</p>
                   <ul className="space-y-2">
                     {tier.keyPoints.map((point, i) => (
-                      <li key={i} className="flex items-start space-x-2">
+                      <li key={i} className="flex items-start space-x-2 rtl:space-x-reverse">
                         <ArrowRight className={`w-4 h-4 mt-0.5 ${tier.textColor} flex-shrink-0`} />
                         <span className="text-sm text-gray-600">{point}</span>
                       </li>

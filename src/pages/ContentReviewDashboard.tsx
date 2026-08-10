@@ -157,7 +157,7 @@ export default function ContentReviewDashboard() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center">
-            <FileText className="h-5 w-5 mr-2" />
+            <FileText className="h-5 w-5 me-2" />
             Review Queue
           </CardTitle>
         </CardHeader>
@@ -165,14 +165,14 @@ export default function ContentReviewDashboard() {
           <Tabs value={selectedTab} onValueChange={setSelectedTab}>
             <TabsList>
               <TabsTrigger value="pending">
-                <Clock className="h-4 w-4 mr-2" />
+                <Clock className="h-4 w-4 me-2" />
                 Pending
               </TabsTrigger>
               <TabsTrigger value="in_progress">
                 In Progress
               </TabsTrigger>
               <TabsTrigger value="completed">
-                <CheckCircle className="h-4 w-4 mr-2" />
+                <CheckCircle className="h-4 w-4 me-2" />
                 Completed
               </TabsTrigger>
             </TabsList>

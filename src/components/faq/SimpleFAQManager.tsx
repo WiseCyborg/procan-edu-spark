@@ -144,11 +144,11 @@ export const SimpleFAQManager: React.FC = () => {
             Generate and manage AI-powered FAQ suggestions
           </p>
         </div>
-        <div className="flex space-x-2">
+        <div className="flex space-x-2 rtl:space-x-reverse">
           <Button
             onClick={generateSuggestions}
             disabled={isGenerating}
-            className="flex items-center space-x-2"
+            className="flex items-center space-x-2 rtl:space-x-reverse"
           >
             <RefreshCw className={`h-4 w-4 ${isGenerating ? 'animate-spin' : ''}`} />
             <span>Generate Suggestions</span>
@@ -166,7 +166,7 @@ export const SimpleFAQManager: React.FC = () => {
       {suggestions.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
+            <CardTitle className="flex items-center space-x-2 rtl:space-x-reverse">
               <Bot className="h-5 w-5 text-blue-600" />
               <span>AI-Generated Suggestions</span>
               <Badge variant="secondary">{suggestions.length}</Badge>
@@ -179,7 +179,7 @@ export const SimpleFAQManager: React.FC = () => {
                   <div className="flex-1 space-y-2">
                     <h4 className="font-medium">{suggestion.question}</h4>
                     <p className="text-sm text-muted-foreground">{suggestion.answer}</p>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2 rtl:space-x-reverse">
                       <Badge variant="outline">{suggestion.category}</Badge>
                       <Badge 
                         variant={suggestion.confidence > 0.8 ? "default" : "secondary"}
@@ -192,7 +192,7 @@ export const SimpleFAQManager: React.FC = () => {
                       Source: {suggestion.source_context}
                     </p>
                   </div>
-                  <div className="flex space-x-2 ml-4">
+                  <div className="flex space-x-2 ms-4 rtl:space-x-reverse">
                     <Button
                       size="sm"
                       onClick={() => approveSuggestion(suggestion)}
@@ -224,7 +224,7 @@ export const SimpleFAQManager: React.FC = () => {
               Click "Generate Suggestions" to create AI-powered FAQ entries based on platform usage
             </p>
             <Button onClick={generateSuggestions} disabled={isGenerating}>
-              <RefreshCw className="h-4 w-4 mr-2" />
+              <RefreshCw className="h-4 w-4 me-2" />
               Generate Suggestions
             </Button>
           </CardContent>

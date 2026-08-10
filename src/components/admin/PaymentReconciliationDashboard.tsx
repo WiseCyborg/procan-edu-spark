@@ -268,7 +268,7 @@ export const PaymentReconciliationDashboard = () => {
             <TabsTrigger value="failed" className="relative">
               Failed
               {pendingPurchases.length > 0 && (
-                <Badge variant="destructive" className="ml-2">{pendingPurchases.length}</Badge>
+                <Badge variant="destructive" className="ms-2">{pendingPurchases.length}</Badge>
               )}
             </TabsTrigger>
             <TabsTrigger value="seats">Seat Allocation</TabsTrigger>
@@ -277,11 +277,11 @@ export const PaymentReconciliationDashboard = () => {
 
           <div className="flex gap-2">
             <Button onClick={fetchAllData} variant="outline" size="sm">
-              <RefreshCw className="mr-2 h-4 w-4" />
+              <RefreshCw className="me-2 h-4 w-4" />
               Refresh
             </Button>
             <Button onClick={exportToCSV} variant="outline" size="sm">
-              <Download className="mr-2 h-4 w-4" />
+              <Download className="me-2 h-4 w-4" />
               Export CSV
             </Button>
           </div>
@@ -341,9 +341,9 @@ export const PaymentReconciliationDashboard = () => {
                           purchase.status === 'pending' ? 'secondary' :
                           'destructive'
                         }>
-                          {purchase.status === 'paid' && <CheckCircle className="mr-1 h-3 w-3" />}
-                          {purchase.status === 'pending' && <Clock className="mr-1 h-3 w-3" />}
-                          {purchase.status === 'failed' && <AlertTriangle className="mr-1 h-3 w-3" />}
+                          {purchase.status === 'paid' && <CheckCircle className="me-1 h-3 w-3" />}
+                          {purchase.status === 'pending' && <Clock className="me-1 h-3 w-3" />}
+                          {purchase.status === 'failed' && <AlertTriangle className="me-1 h-3 w-3" />}
                           {purchase.status}
                         </Badge>
                       </TableCell>
@@ -500,7 +500,7 @@ export const PaymentReconciliationDashboard = () => {
             <CardContent>
               <div className="space-y-2 max-h-[600px] overflow-y-auto">
                 {auditLogs.map((log) => (
-                  <div key={log.id} className="border-l-2 border-primary pl-4 py-2">
+                  <div key={log.id} className="border-s-2 border-primary ps-4 py-2">
                     <div className="flex items-start justify-between">
                       <div>
                         <div className="font-semibold">{log.event_type}</div>

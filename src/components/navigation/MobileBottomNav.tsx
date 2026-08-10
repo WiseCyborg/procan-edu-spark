@@ -26,7 +26,7 @@ export const MobileBottomNav = ({}: MobileBottomNavProps) => {
   const isActive = (path?: string) => path && location.pathname === path;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t shadow-lg md:hidden">
+    <div className="fixed bottom-0 start-0 end-0 z-50 bg-card border-t shadow-lg md:hidden">
       <div className="flex justify-around items-center p-2">
         {navItems.map((item, index) => (
           <Button

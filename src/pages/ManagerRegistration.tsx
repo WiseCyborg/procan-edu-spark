@@ -270,12 +270,12 @@ export default function ManagerRegistration() {
                 >
                   {isResending ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader2 className="me-2 h-4 w-4 animate-spin" />
                       Sending...
                     </>
                   ) : (
                     <>
-                      <Mail className="mr-2 h-4 w-4" />
+                      <Mail className="me-2 h-4 w-4" />
                       Request New Registration Link
                     </>
                   )}
@@ -289,7 +289,7 @@ export default function ManagerRegistration() {
                 onClick={() => navigate('/auth')} 
                 className="flex-1"
               >
-                <LogIn className="mr-2 h-4 w-4" />
+                <LogIn className="me-2 h-4 w-4" />
                 Sign In
               </Button>
               <Button 
@@ -297,7 +297,7 @@ export default function ManagerRegistration() {
                 onClick={() => navigate('/')} 
                 className="flex-1"
               >
-                <Home className="mr-2 h-4 w-4" />
+                <Home className="me-2 h-4 w-4" />
                 Home
               </Button>
             </div>
@@ -333,7 +333,7 @@ export default function ManagerRegistration() {
                   type="button" 
                   variant="ghost" 
                   size="sm" 
-                  className="absolute right-0 top-0 h-full px-3" 
+                  className="absolute end-0 top-0 h-full px-3" 
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -350,7 +350,7 @@ export default function ManagerRegistration() {
                   type="button" 
                   variant="ghost" 
                   size="sm" 
-                  className="absolute right-0 top-0 h-full px-3" 
+                  className="absolute end-0 top-0 h-full px-3" 
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 >
                   {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -361,7 +361,7 @@ export default function ManagerRegistration() {
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="me-2 h-4 w-4 animate-spin" />
                   Creating...
                 </>
               ) : (

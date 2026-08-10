@@ -143,13 +143,13 @@ export const AccessKeyEntry: React.FC = () => {
       >
         {loading ? (
           <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <Loader2 className="me-2 h-4 w-4 animate-spin" />
             Validating...
           </>
         ) : (
           <>
             Continue to Registration
-            <ArrowRight className="ml-2 h-4 w-4" />
+            <ArrowRight className="ms-2 h-4 w-4" />
           </>
         )}
       </Button>

@@ -197,12 +197,12 @@ const VerifyCertificate = () => {
                   >
                     {isPending ? (
                       <>
-                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        <Loader2 className="h-4 w-4 animate-spin me-2" />
                         Verifying...
                       </>
                     ) : (
                       <>
-                        <Search className="h-4 w-4 mr-2" />
+                        <Search className="h-4 w-4 me-2" />
                         Verify
                       </>
                     )}
@@ -282,12 +282,12 @@ const VerifyCertificate = () => {
                   >
                     {isPending ? (
                       <>
-                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        <Loader2 className="h-4 w-4 animate-spin me-2" />
                         Searching...
                       </>
                     ) : (
                       <>
-                        <UserSearch className="h-4 w-4 mr-2" />
+                        <UserSearch className="h-4 w-4 me-2" />
                         Search Certificates
                       </>
                     )}

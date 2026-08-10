@@ -186,7 +186,7 @@ export const CommunicationManagementView = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between p-4 border rounded-lg">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-3 rtl:space-x-reverse">
               <Mail className="h-5 w-5 text-primary" />
               <div>
                 <h4 className="font-medium">Resend API Status</h4>
@@ -222,7 +222,7 @@ export const CommunicationManagementView = () => {
                         To: {email.recipient_email}
                       </p>
                     </div>
-                    <div className="flex items-center space-x-3 ml-4">
+                    <div className="flex items-center space-x-3 ms-4 rtl:space-x-reverse">
                       <span className="text-xs text-muted-foreground whitespace-nowrap">
                         {format(new Date(email.created_at), 'MMM d, h:mm a')}
                       </span>
@@ -246,7 +246,7 @@ export const CommunicationManagementView = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between p-4 border rounded-lg">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-3 rtl:space-x-reverse">
               <AlertCircle className="h-5 w-5 text-amber-500" />
               <div>
                 <h4 className="font-medium">Pending Notifications</h4>
@@ -256,7 +256,7 @@ export const CommunicationManagementView = () => {
               </div>
             </div>
             <Button variant="outline" size="sm">
-              <Send className="h-4 w-4 mr-2" />
+              <Send className="h-4 w-4 me-2" />
               Process Queue
             </Button>
           </div>

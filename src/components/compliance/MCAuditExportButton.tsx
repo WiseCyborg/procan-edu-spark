@@ -109,7 +109,7 @@ export const MCAuditExportButton = ({ organizationId, organizationName }: MCAudi
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button variant="outline">
-          <Shield className="h-4 w-4 mr-2" />
+          <Shield className="h-4 w-4 me-2" />
           MCA Audit Export
         </Button>
       </DialogTrigger>
@@ -147,7 +147,7 @@ export const MCAuditExportButton = ({ organizationId, organizationName }: MCAudi
           <div className="space-y-3">
             <Label>Include in Report</Label>
             <div className="space-y-2">
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
                 <Checkbox 
                   id="incidents" 
                   checked={includeIncidents}
@@ -157,7 +157,7 @@ export const MCAuditExportButton = ({ organizationId, organizationName }: MCAudi
                   Compliance Incidents & Remediation
                 </label>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
                 <Checkbox 
                   id="attestations" 
                   checked={includeAttestations}
@@ -167,7 +167,7 @@ export const MCAuditExportButton = ({ organizationId, organizationName }: MCAudi
                   Module Attestations
                 </label>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
                 <Checkbox 
                   id="trainers" 
                   checked={includeTrainerCerts}
@@ -180,7 +180,7 @@ export const MCAuditExportButton = ({ organizationId, organizationName }: MCAudi
             </div>
           </div>
 
-          <div className="flex items-center space-x-2 p-3 bg-primary/5 rounded-lg border border-primary/10">
+          <div className="flex items-center space-x-2 p-3 bg-primary/5 rounded-lg border border-primary/10 rtl:space-x-reverse">
             <Checkbox 
               id="saveToStorage" 
               checked={saveToStorage}
@@ -212,12 +212,12 @@ export const MCAuditExportButton = ({ organizationId, organizationName }: MCAudi
           >
             {isLoading ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="h-4 w-4 me-2 animate-spin" />
                 Generating Report...
               </>
             ) : (
               <>
-                <FileDown className="h-4 w-4 mr-2" />
+                <FileDown className="h-4 w-4 me-2" />
                 Download Audit Report
               </>
             )}

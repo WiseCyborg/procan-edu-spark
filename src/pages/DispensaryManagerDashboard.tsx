@@ -345,7 +345,7 @@ const DispensaryManagerDashboard = () => {
         </div>
         <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center w-full md:w-auto">
           <Badge variant="outline" className="text-base md:text-lg px-3 md:px-4 py-2 justify-center">
-            <Building2 className="w-4 h-4 mr-2 flex-shrink-0" />
+            <Building2 className="w-4 h-4 me-2 flex-shrink-0" />
             <span className="truncate">{organization.dispensary_number}</span>
           </Badge>
           <Button 
@@ -357,10 +357,10 @@ const DispensaryManagerDashboard = () => {
             }}
             className="w-full sm:w-auto h-11 md:h-10 bg-primary hover:bg-primary/90"
           >
-            <Mail className="mr-2 h-4 w-4 flex-shrink-0" />
+            <Mail className="me-2 h-4 w-4 flex-shrink-0" />
             Invite Employee
             {organization && organization.course_credits > 0 && (
-              <Badge variant="secondary" className="ml-2">
+              <Badge variant="secondary" className="ms-2">
                 {organization.course_credits} seats
               </Badge>
             )}
@@ -371,7 +371,7 @@ const DispensaryManagerDashboard = () => {
             variant="outline"
             className="w-full sm:w-auto h-11 md:h-10"
           >
-            <ShoppingCart className="mr-2 h-4 w-4 flex-shrink-0" />
+            <ShoppingCart className="me-2 h-4 w-4 flex-shrink-0" />
             Purchase Training Seats
           </Button>
         </div>
@@ -461,7 +461,7 @@ const DispensaryManagerDashboard = () => {
                       toast.success("Code copied to clipboard!");
                     }}
                   >
-                    <Copy className="h-4 w-4 mr-2" />
+                    <Copy className="h-4 w-4 me-2" />
                     Copy Code
                   </Button>
                 </div>
@@ -493,7 +493,7 @@ const DispensaryManagerDashboard = () => {
           <Button
             variant="ghost"
             size="icon"
-            className="absolute top-2 right-2"
+            className="absolute top-2 end-2"
             onClick={() => {
               setWelcomeDismissed(true);
               searchParams.delete('welcome');
@@ -511,7 +511,7 @@ const DispensaryManagerDashboard = () => {
           <TabsList className="inline-flex w-max md:w-auto flex-nowrap">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="employees">
-              <Users className="w-4 h-4 mr-2" />
+              <Users className="w-4 h-4 me-2" />
               Employees
             </TabsTrigger>
             <TabsTrigger value="seats">Seat Management</TabsTrigger>
@@ -519,7 +519,7 @@ const DispensaryManagerDashboard = () => {
             <TabsTrigger value="invite">Invite Employees</TabsTrigger>
             <TabsTrigger value="coordinators">Team Management</TabsTrigger>
             <TabsTrigger value="checkins">
-              <ShieldCheck className="w-4 h-4 mr-2" />
+              <ShieldCheck className="w-4 h-4 me-2" />
               Exam Check-Ins
             </TabsTrigger>
             <TabsTrigger value="compliance">Compliance Reports</TabsTrigger>
@@ -712,7 +712,7 @@ const DispensaryManagerDashboard = () => {
                 onClick={generateCompliancePDF}
                 className="w-full"
               >
-                <Download className="mr-2 h-4 w-4" />
+                <Download className="me-2 h-4 w-4" />
                 Download MCA Compliance Report (PDF)
               </Button>
             </CardContent>
@@ -739,7 +739,7 @@ const DispensaryManagerDashboard = () => {
                 <p className="text-sm text-muted-foreground">{organization.license_number}</p>
               </div>
               <Button variant="outline">
-                <Settings className="w-4 h-4 mr-2" />
+                <Settings className="w-4 h-4 me-2" />
                 Edit Organization Details
               </Button>
             </CardContent>
@@ -758,7 +758,7 @@ const DispensaryManagerDashboard = () => {
                     Re-run the initial setup wizard to configure training coordinators and invite employees.
                   </p>
                   <Button variant="outline" onClick={() => setShowRestartDialog(true)} className="w-full">
-                    <RefreshCw className="w-4 h-4 mr-2" />
+                    <RefreshCw className="w-4 h-4 me-2" />
                     Restart Setup Wizard
                   </Button>
                 </div>
@@ -771,7 +771,7 @@ const DispensaryManagerDashboard = () => {
                     Access comprehensive guides and best practices for managing your team.
                   </p>
                   <Button variant="outline" className="w-full" onClick={() => navigate('/training-handbook')}>
-                    <FileText className="w-4 h-4 mr-2" />
+                    <FileText className="w-4 h-4 me-2" />
                     View User Guide
                   </Button>
                 </div>

@@ -424,7 +424,7 @@ export const ConversationView = ({
                 </div>
 
                 {/* Message */}
-                <div className={`flex-1 max-w-[70%] ${isOwn ? 'text-right' : ''}`}>
+                <div className={`flex-1 max-w-[70%] ${isOwn ? 'text-end' : ''}`}>
                   {showAvatar && !isOwn && (
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-sm font-medium text-foreground">

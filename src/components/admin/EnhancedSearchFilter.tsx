@@ -327,13 +327,13 @@ export const EnhancedSearchFilter = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-foreground">Enhanced Search & Filter</h2>
-        <div className="flex space-x-2">
+        <div className="flex space-x-2 rtl:space-x-reverse">
           <Button onClick={exportResults} variant="outline" disabled={results.length === 0}>
-            <Download className="h-4 w-4 mr-2" />
+            <Download className="h-4 w-4 me-2" />
             Export Results
           </Button>
           <Button onClick={clearAllFilters} variant="outline">
-            <RefreshCw className="h-4 w-4 mr-2" />
+            <RefreshCw className="h-4 w-4 me-2" />
             Clear All
           </Button>
         </div>
@@ -343,13 +343,13 @@ export const EnhancedSearchFilter = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center">
-            <Search className="h-5 w-5 mr-2" />
+            <Search className="h-5 w-5 me-2" />
             Search Configuration
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Main Search */}
-          <div className="flex space-x-2">
+          <div className="flex space-x-2 rtl:space-x-reverse">
             <div className="flex-1">
               <Input
                 placeholder="Search across all entities..."
@@ -369,7 +369,7 @@ export const EnhancedSearchFilter = () => {
                 {entityOptions.map(option => (
                   <SelectItem key={option.value} value={option.value}>
                     <div className="flex items-center">
-                      <option.icon className="h-4 w-4 mr-2" />
+                      <option.icon className="h-4 w-4 me-2" />
                       {option.label}
                     </div>
                   </SelectItem>
@@ -392,7 +392,7 @@ export const EnhancedSearchFilter = () => {
                   <label className="text-sm font-medium">Status Filters</label>
                   <div className="flex flex-wrap gap-2">
                     {statusOptions[filters.entity as keyof typeof statusOptions].map(status => (
-                      <div key={status} className="flex items-center space-x-2">
+                      <div key={status} className="flex items-center space-x-2 rtl:space-x-reverse">
                         <Checkbox
                           id={status}
                           checked={filters.status.includes(status)}
@@ -421,11 +421,11 @@ export const EnhancedSearchFilter = () => {
                       <Button
                         variant="outline"
                         className={cn(
-                          "w-full justify-start text-left font-normal",
+                          "w-full justify-start text-start font-normal",
                           !filters.dateRange.from && "text-muted-foreground"
                         )}
                       >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        <CalendarIcon className="me-2 h-4 w-4" />
                         {filters.dateRange.from ? format(filters.dateRange.from, "PPP") : "Pick a date"}
                       </Button>
                     </PopoverTrigger>
@@ -450,11 +450,11 @@ export const EnhancedSearchFilter = () => {
                       <Button
                         variant="outline"
                         className={cn(
-                          "w-full justify-start text-left font-normal",
+                          "w-full justify-start text-start font-normal",
                           !filters.dateRange.to && "text-muted-foreground"
                         )}
                       >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        <CalendarIcon className="me-2 h-4 w-4" />
                         {filters.dateRange.to ? format(filters.dateRange.to, "PPP") : "Pick a date"}
                       </Button>
                     </PopoverTrigger>
@@ -490,7 +490,7 @@ export const EnhancedSearchFilter = () => {
                   <Badge key={filter} variant="secondary" className="flex items-center">
                     {filter}
                     <X 
-                      className="h-3 w-3 ml-1 cursor-pointer" 
+                      className="h-3 w-3 ms-1 cursor-pointer" 
                       onClick={() => removeFilter(filter)}
                     />
                   </Badge>
@@ -515,7 +515,7 @@ export const EnhancedSearchFilter = () => {
               {results.map(result => (
                 <div key={`${result.type}-${result.id}`} className="border rounded-lg p-4 hover:bg-accent/50">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-3 rtl:space-x-reverse">
                       {getEntityIcon(result.type)}
                       <div>
                         <h3 className="font-semibold">{result.title}</h3>
@@ -523,7 +523,7 @@ export const EnhancedSearchFilter = () => {
                       </div>
                     </div>
                     
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2 rtl:space-x-reverse">
                       <Badge className={getStatusColor(result.status)}>
                         {result.status}
                       </Badge>

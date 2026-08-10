@@ -187,7 +187,7 @@ ${msg.content}
             <Skeleton className="h-24 w-full" />
           </div>
         ) : (
-          <ScrollArea className="h-[60vh] pr-4">
+          <ScrollArea className="h-[60vh] pe-4">
             <div className="space-y-6">
               {sessions.map((session) => (
                 <div key={session.id} className="border rounded-lg p-4 space-y-4">
@@ -217,7 +217,7 @@ ${msg.content}
                         size="sm"
                         onClick={() => handleExportSession(session)}
                       >
-                        <Download className="h-4 w-4 mr-1" />
+                        <Download className="h-4 w-4 me-1" />
                         Export
                       </Button>
                       <Button
@@ -225,7 +225,7 @@ ${msg.content}
                         size="sm"
                         onClick={() => handleDeleteSession(session.id)}
                       >
-                        <Trash2 className="h-4 w-4 mr-1" />
+                        <Trash2 className="h-4 w-4 me-1" />
                         Delete
                       </Button>
                     </div>
@@ -238,8 +238,8 @@ ${msg.content}
                         key={idx}
                         className={`p-3 rounded-lg ${
                           message.role === 'user'
-                            ? 'bg-primary/10 ml-8'
-                            : 'bg-muted mr-8'
+                            ? 'bg-primary/10 ms-8'
+                            : 'bg-muted me-8'
                         }`}
                       >
                         <div className="flex items-center gap-2 mb-1">

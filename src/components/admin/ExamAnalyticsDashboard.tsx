@@ -223,11 +223,11 @@ export const ExamAnalyticsDashboard: React.FC = () => {
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
                           <div>
                             <span className="text-muted-foreground">Attempts:</span>
-                            <span className="font-medium ml-1">{topic.total_attempts}</span>
+                            <span className="font-medium ms-1">{topic.total_attempts}</span>
                           </div>
                           <div>
                             <span className="text-muted-foreground">Pass Rate:</span>
-                            <span className={`font-bold ml-1 ${
+                            <span className={`font-bold ms-1 ${
                               topic.pass_rate >= 80 ? 'text-green-600' : 
                               topic.pass_rate >= 60 ? 'text-yellow-600' : 'text-red-600'
                             }`}>
@@ -236,11 +236,11 @@ export const ExamAnalyticsDashboard: React.FC = () => {
                           </div>
                           <div>
                             <span className="text-muted-foreground">Avg Score:</span>
-                            <span className="font-medium ml-1">{topic.average_score}%</span>
+                            <span className="font-medium ms-1">{topic.average_score}%</span>
                           </div>
                           <div>
                             <span className="text-muted-foreground">Need Help:</span>
-                            <span className="font-medium ml-1 text-orange-600">
+                            <span className="font-medium ms-1 text-orange-600">
                               {topic.remediation_required_count}
                             </span>
                           </div>
@@ -248,7 +248,7 @@ export const ExamAnalyticsDashboard: React.FC = () => {
                       </div>
                       
                       {/* Pass Rate Visual */}
-                      <div className="text-right min-w-[80px]">
+                      <div className="text-end min-w-[80px]">
                         <div className="text-2xl font-bold mb-1">
                           {topic.pass_rate}%
                         </div>
@@ -305,7 +305,7 @@ export const ExamAnalyticsDashboard: React.FC = () => {
                         </div>
                       </div>
                       
-                      <div className="text-right">
+                      <div className="text-end">
                         <Badge className={getDifficultyColor(section.difficulty_level)}>
                           {section.difficulty_level.toUpperCase()}
                         </Badge>
@@ -460,11 +460,11 @@ export const ExamAnalyticsDashboard: React.FC = () => {
                     </div>
                     
                     <div className="flex items-center gap-4">
-                      <div className="text-right">
+                      <div className="text-end">
                         <div className="text-sm font-medium">{trend.avg_score}%</div>
                         <div className="text-xs text-muted-foreground">avg score</div>
                       </div>
-                      <div className="text-right min-w-[80px]">
+                      <div className="text-end min-w-[80px]">
                         <div className="text-lg font-bold">{trend.pass_rate}%</div>
                         <Progress value={trend.pass_rate} className="h-2 w-20 mt-1" />
                       </div>

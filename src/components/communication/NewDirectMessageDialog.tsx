@@ -104,12 +104,12 @@ export const NewDirectMessageDialog = ({
         </DialogHeader>
         <div className="space-y-3">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Search teammates..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="pl-10"
+              className="ps-10"
               autoFocus
             />
           </div>
@@ -130,7 +130,7 @@ export const NewDirectMessageDialog = ({
                     key={m.user_id}
                     onClick={() => handleStart(m.user_id)}
                     disabled={starting === m.user_id}
-                    className="w-full flex items-center justify-between px-3 py-2 hover:bg-accent text-left text-sm disabled:opacity-50"
+                    className="w-full flex items-center justify-between px-3 py-2 hover:bg-accent text-start text-sm disabled:opacity-50"
                   >
                     <span>{name}</span>
                     {starting === m.user_id && (

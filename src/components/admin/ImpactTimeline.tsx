@@ -68,7 +68,7 @@ export const ImpactTimeline = () => {
       <CardContent>
         <div className="relative">
           {/* Timeline line */}
-          <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-border" />
+          <div className="absolute start-6 top-0 bottom-0 w-0.5 bg-border" />
 
           {/* Timeline items */}
           <div className="space-y-6">
@@ -79,10 +79,10 @@ export const ImpactTimeline = () => {
               return (
                 <div key={impact.id} className="relative flex gap-4">
                   {/* Timeline dot */}
-                  <div className={`absolute left-6 -translate-x-1/2 h-3 w-3 rounded-full border-2 border-background ${getImpactColor(impactLevel)}`} />
+                  <div className={`absolute start-6 -translate-x-1/2 h-3 w-3 rounded-full border-2 border-background ${getImpactColor(impactLevel)}`} />
                   
                   {/* Content */}
-                  <div className="ml-12 flex-1">
+                  <div className="ms-12 flex-1">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">

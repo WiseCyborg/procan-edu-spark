@@ -117,8 +117,8 @@ export const InteractiveMessage: React.FC<InteractiveMessageProps> = ({
           flex items-center gap-1 mt-2 transition-all duration-200 
           ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1 pointer-events-none'}
         `}>
-          <Badge variant="outline" className="text-xs mr-auto">
-            <Clock className="h-3 w-3 mr-1" />
+          <Badge variant="outline" className="text-xs me-auto">
+            <Clock className="h-3 w-3 me-1" />
             {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </Badge>
           
@@ -181,13 +181,13 @@ export const InteractiveMessage: React.FC<InteractiveMessageProps> = ({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem onClick={handleCopy}>
-                <Copy className="h-4 w-4 mr-2" />
+                <Copy className="h-4 w-4 me-2" />
                 Copy Message
               </DropdownMenuItem>
               
               {!message.isUser && (
                 <DropdownMenuItem onClick={handleSpeak}>
-                  <Volume2 className="h-4 w-4 mr-2" />
+                  <Volume2 className="h-4 w-4 me-2" />
                   Read Aloud
                 </DropdownMenuItem>
               )}
@@ -195,12 +195,12 @@ export const InteractiveMessage: React.FC<InteractiveMessageProps> = ({
               <DropdownMenuItem onClick={handlePin}>
                 {isPinnedMessage ? (
                   <>
-                    <PinOff className="h-4 w-4 mr-2" />
+                    <PinOff className="h-4 w-4 me-2" />
                     Unpin Message
                   </>
                 ) : (
                   <>
-                    <Pin className="h-4 w-4 mr-2" />
+                    <Pin className="h-4 w-4 me-2" />
                     Pin Message
                   </>
                 )}
@@ -209,13 +209,13 @@ export const InteractiveMessage: React.FC<InteractiveMessageProps> = ({
               <DropdownMenuSeparator />
               
               <DropdownMenuItem onClick={handleShare}>
-                <Share className="h-4 w-4 mr-2" />
+                <Share className="h-4 w-4 me-2" />
                 Share Message
               </DropdownMenuItem>
               
               {message.pageContext && (
                 <DropdownMenuItem>
-                  <MapPin className="h-4 w-4 mr-2" />
+                  <MapPin className="h-4 w-4 me-2" />
                   Context: {message.pageContext.title}
                 </DropdownMenuItem>
               )}

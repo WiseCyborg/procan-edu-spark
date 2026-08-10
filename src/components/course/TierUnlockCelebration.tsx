@@ -63,7 +63,7 @@ export const TierUnlockCelebration: React.FC<TierUnlockCelebrationProps> = ({
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center justify-center text-2xl">
-              <Trophy className="w-8 h-8 mr-2" style={{ color: config.color }} />
+              <Trophy className="w-8 h-8 me-2" style={{ color: config.color }} />
               {config.label} Unlocked!
             </DialogTitle>
           </DialogHeader>
@@ -89,7 +89,7 @@ export const TierUnlockCelebration: React.FC<TierUnlockCelebrationProps> = ({
                 size="lg"
               >
                 Continue Training
-                <ArrowRight className="w-4 h-4 ml-2" />
+                <ArrowRight className="w-4 h-4 ms-2" />
               </Button>
             </div>
           </div>

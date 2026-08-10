@@ -278,12 +278,12 @@ export function TransferSeatDialog({
           >
             {loading ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="me-2 h-4 w-4 animate-spin" />
                 Transferring...
               </>
             ) : (
               <>
-                <ArrowRightLeft className="mr-2 h-4 w-4" />
+                <ArrowRightLeft className="me-2 h-4 w-4" />
                 Transfer Seat
               </>
             )}

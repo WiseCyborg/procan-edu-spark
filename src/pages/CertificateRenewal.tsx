@@ -280,7 +280,7 @@ const CertificateRenewal = () => {
             Maryland law requires all cannabis dispensary agents to maintain current RVT certification. 
             Renewing your certificate ensures:
           </p>
-          <ul className="space-y-2 text-sm text-muted-foreground ml-4 list-disc">
+          <ul className="space-y-2 text-sm text-muted-foreground ms-4 list-disc">
             <li>Compliance with COMAR regulations</li>
             <li>Knowledge of the latest industry guidelines</li>
             <li>Continued employment eligibility</li>

@@ -155,7 +155,7 @@ export function ArchiveUserDialog({
             onClick={handleArchive}
             disabled={!reason || !confirmed || archiving}
           >
-            {archiving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+            {archiving && <Loader2 className="h-4 w-4 me-2 animate-spin" />}
             Archive Employee
           </Button>
         </DialogFooter>

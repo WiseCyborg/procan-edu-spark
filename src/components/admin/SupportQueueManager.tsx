@@ -293,7 +293,7 @@ export const SupportQueueManager: React.FC = () => {
                     onClick={resolveTicket}
                     disabled={!resolutionNotes.trim()}
                   >
-                    <CheckCircle className="w-4 h-4 mr-2" />
+                    <CheckCircle className="w-4 h-4 me-2" />
                     Mark as Resolved
                   </Button>
                 </div>

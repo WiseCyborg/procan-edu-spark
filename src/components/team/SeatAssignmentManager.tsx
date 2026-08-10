@@ -302,7 +302,7 @@ export const SeatAssignmentManager: React.FC<SeatAssignmentManagerProps> = ({
                   size="sm"
                   className="mt-2"
                 >
-                  <ShoppingCart className="h-4 w-4 mr-2" />
+                  <ShoppingCart className="h-4 w-4 me-2" />
                   Purchase Seats to Continue
                 </Button>
               </AlertDescription>
@@ -312,12 +312,12 @@ export const SeatAssignmentManager: React.FC<SeatAssignmentManagerProps> = ({
           {/* Filter and Search */}
           <div className="flex gap-2">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Search className="absolute start-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
                 placeholder="Search employees..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="ps-10"
               />
             </div>
             <select
@@ -368,7 +368,7 @@ export const SeatAssignmentManager: React.FC<SeatAssignmentManagerProps> = ({
                           variant={employee.invitation_status === 'sent' ? 'default' : 'destructive'}
                           className="text-xs"
                         >
-                          <Mail className="h-3 w-3 mr-1" />
+                          <Mail className="h-3 w-3 me-1" />
                           {employee.invitation_status === 'sent' ? 'Invited' : 'Failed'}
                         </Badge>
                       )}
@@ -392,7 +392,7 @@ export const SeatAssignmentManager: React.FC<SeatAssignmentManagerProps> = ({
                           <Loader2 className="h-4 w-4 animate-spin" />
                         ) : (
                           <>
-                            <RefreshCw className="mr-2 h-4 w-4" />
+                            <RefreshCw className="me-2 h-4 w-4" />
                             Resend
                           </>
                         )}
@@ -405,12 +405,12 @@ export const SeatAssignmentManager: React.FC<SeatAssignmentManagerProps> = ({
                     >
                       {assigning === employee.user_id ? (
                         <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          <Loader2 className="me-2 h-4 w-4 animate-spin" />
                           Assigning...
                         </>
                       ) : (
                         <>
-                          <UserPlus className="mr-2 h-4 w-4" />
+                          <UserPlus className="me-2 h-4 w-4" />
                           Assign Seat
                         </>
                       )}

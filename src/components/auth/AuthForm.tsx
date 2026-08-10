@@ -278,11 +278,11 @@ const AuthForm = () => {
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin" disabled={emailExists === false}>
                 Sign In
-                {emailChecking && <span className="ml-1 text-xs">...</span>}
+                {emailChecking && <span className="ms-1 text-xs">...</span>}
               </TabsTrigger>
               <TabsTrigger value="signup" disabled={emailExists === true}>
                 Sign Up
-                {emailExists === false && <span className="ml-1 text-xs text-primary">•</span>}
+                {emailExists === false && <span className="ms-1 text-xs text-primary">•</span>}
               </TabsTrigger>
             </TabsList>
             
@@ -309,7 +309,7 @@ const AuthForm = () => {
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                    className="absolute end-0 top-0 h-full px-3 hover:bg-transparent"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
@@ -317,7 +317,7 @@ const AuthForm = () => {
                 </div>
                 
                 <div className="flex items-center justify-between text-sm">
-                  <label className="flex items-center space-x-2">
+                  <label className="flex items-center space-x-2 rtl:space-x-reverse">
                     <input
                       type="checkbox"
                       checked={skipMFA}
@@ -394,7 +394,7 @@ const AuthForm = () => {
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                    className="absolute end-0 top-0 h-full px-3 hover:bg-transparent"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}

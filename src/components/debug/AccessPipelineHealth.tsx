@@ -185,7 +185,7 @@ export const AccessPipelineHealth: React.FC<{ courseId?: string }> = ({ courseId
           <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
             <Wifi className="h-4 w-4" />
             Access Pipeline Health
-            <Badge variant="outline" className="text-[10px] ml-2">DEV</Badge>
+            <Badge variant="outline" className="text-[10px] ms-2">DEV</Badge>
           </CardTitle>
           <Button 
             variant="ghost" 

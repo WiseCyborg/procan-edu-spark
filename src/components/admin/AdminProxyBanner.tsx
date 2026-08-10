@@ -11,7 +11,7 @@ export const AdminProxyBanner = () => {
   }
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-[100] bg-amber-500 text-amber-950 px-4 py-2">
+    <div className="fixed top-0 start-0 end-0 z-[100] bg-amber-500 text-amber-950 px-4 py-2">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <Eye className="h-5 w-5" />
@@ -36,7 +36,7 @@ export const AdminProxyBanner = () => {
             disabled={isLoading}
             className="bg-amber-100 hover:bg-amber-200 text-amber-900 border-amber-300"
           >
-            <UserX className="h-4 w-4 mr-1" />
+            <UserX className="h-4 w-4 me-1" />
             {isLoading ? 'Ending...' : 'Exit Proxy Mode'}
           </Button>
         </div>

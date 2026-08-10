@@ -427,14 +427,14 @@ export const UATControlPanel: React.FC<UATControlPanelProps> = ({ organizationId
                     disabled={isGenerating}
                   >
                     {isGenerating ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      <Loader2 className="h-4 w-4 me-2 animate-spin" />
                     ) : (
-                      <RefreshCw className="h-4 w-4 mr-2" />
+                      <RefreshCw className="h-4 w-4 me-2" />
                     )}
                     Regenerate Tasks
                   </Button>
                   <Button variant="outline">
-                    <Download className="h-4 w-4 mr-2" />
+                    <Download className="h-4 w-4 me-2" />
                     Export Evidence Bundle
                   </Button>
                   <Button
@@ -442,7 +442,7 @@ export const UATControlPanel: React.FC<UATControlPanelProps> = ({ organizationId
                     onClick={handleCompleteRun}
                     disabled={taskStats.done < taskStats.total}
                   >
-                    <Power className="h-4 w-4 mr-2" />
+                    <Power className="h-4 w-4 me-2" />
                     Complete Run
                   </Button>
                 </div>
@@ -455,9 +455,9 @@ export const UATControlPanel: React.FC<UATControlPanelProps> = ({ organizationId
                 size="lg"
               >
                 {isStarting ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="h-4 w-4 me-2 animate-spin" />
                 ) : (
-                  <PlayCircle className="h-4 w-4 mr-2" />
+                  <PlayCircle className="h-4 w-4 me-2" />
                 )}
                 Start New UAT Run
               </Button>

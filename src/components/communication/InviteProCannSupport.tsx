@@ -110,7 +110,7 @@ export const InviteProCannSupport = ({ conversationId, conversationTitle }: Invi
             <Button onClick={handleInvite} disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="me-2 h-4 w-4 animate-spin" />
                   Sending...
                 </>
               ) : (

@@ -93,12 +93,12 @@ export const SessionsCoveredFeed = () => {
               </div>
             ) : (
               <ScrollArea className="h-[280px]">
-                <div className="space-y-2 pr-4">
+                <div className="space-y-2 pe-4">
                   {completedSessions.slice(0, 10).map(session => (
                     <button
                       key={session.id}
                       onClick={() => setSelectedSessionId(session.id)}
-                      className="w-full flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors text-left"
+                      className="w-full flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors text-start"
                     >
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">

@@ -361,14 +361,14 @@ const PaymentSuccess: React.FC = () => {
               </h3>
               <div className="bg-white p-4 sm:p-6 rounded-lg border-2 border-blue-400 mb-3">
                 <div className="flex flex-col sm:flex-row items-center sm:items-center justify-between gap-3">
-                  <code className="text-lg sm:text-3xl font-mono font-bold text-blue-600 tracking-wider break-all text-center sm:text-left">
+                  <code className="text-lg sm:text-3xl font-mono font-bold text-blue-600 tracking-wider break-all text-center sm:text-start">
                     {seatPurchaseData.joinCode}
                   </code>
                   <Button
                     size="icon"
                     variant="outline"
                     onClick={handleCopyCode}
-                    className="sm:ml-4 flex-shrink-0 h-11 w-11"
+                    className="sm:ms-4 flex-shrink-0 h-11 w-11"
                   >
                     {copied ? <Check className="h-5 w-5 text-green-600" /> : <Copy className="h-5 w-5" />}
                   </Button>
@@ -386,7 +386,7 @@ const PaymentSuccess: React.FC = () => {
                 size="lg"
                 className="bg-blue-600 hover:bg-blue-700"
               >
-                <Mail className="mr-2 h-5 w-5" />
+                <Mail className="me-2 h-5 w-5" />
                 Invite Employees Now
               </Button>
               <Button 
@@ -394,7 +394,7 @@ const PaymentSuccess: React.FC = () => {
                 size="lg"
                 onClick={() => navigate('/team-management?tab=seats')}
               >
-                <Users className="mr-2 h-5 w-5" />
+                <Users className="me-2 h-5 w-5" />
                 Manage Seats
               </Button>
             </div>
@@ -429,12 +429,12 @@ const PaymentSuccess: React.FC = () => {
                   >
                     {inviteLoading ? (
                       <>
-                        <Send className="mr-2 h-4 w-4 animate-spin" />
+                        <Send className="me-2 h-4 w-4 animate-spin" />
                         Sending...
                       </>
                     ) : (
                       <>
-                        <Send className="mr-2 h-4 w-4" />
+                        <Send className="me-2 h-4 w-4" />
                         Send Invitations
                       </>
                     )}
@@ -446,7 +446,7 @@ const PaymentSuccess: React.FC = () => {
             {/* What's Next */}
             <div className="bg-green-50 p-6 rounded-lg">
               <h3 className="font-semibold text-green-800 mb-3 flex items-center">
-                <Award className="h-5 w-5 mr-2" />
+                <Award className="h-5 w-5 me-2" />
                 What's Next?
               </h3>
               <ul className="text-green-700 space-y-2 text-sm">
@@ -487,7 +487,7 @@ const PaymentSuccess: React.FC = () => {
 
           <div className="bg-green-50 p-6 rounded-lg">
             <h3 className="font-semibold text-green-800 mb-3 flex items-center">
-              <Award className="h-5 w-5 mr-2" />
+              <Award className="h-5 w-5 me-2" />
               What happens next?
             </h3>
             <ul className="text-green-700 space-y-2">
@@ -505,7 +505,7 @@ const PaymentSuccess: React.FC = () => {
               className="bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto"
             >
               Start Learning
-              <ArrowRight className="h-5 w-5 ml-2" />
+              <ArrowRight className="h-5 w-5 ms-2" />
             </Button>
             <Button 
               onClick={() => navigate('/dashboard')}

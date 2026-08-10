@@ -70,7 +70,7 @@ export const EmailLogsTable = () => {
     const Icon = config.icon;
     return (
       <Badge className={`${config.color} text-white`}>
-        <Icon className="h-3 w-3 mr-1" />
+        <Icon className="h-3 w-3 me-1" />
         {status || 'Unknown'}
       </Badge>
     );
@@ -88,7 +88,7 @@ export const EmailLogsTable = () => {
             <CardDescription>Single source of truth for all email activity</CardDescription>
           </div>
           <Button variant="outline" size="sm" onClick={() => refetch()}>
-            <RefreshCw className="h-4 w-4 mr-2" />
+            <RefreshCw className="h-4 w-4 me-2" />
             Refresh
           </Button>
         </div>
@@ -97,12 +97,12 @@ export const EmailLogsTable = () => {
         {/* Filters */}
         <div className="flex gap-4 mb-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute start-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search by email or subject..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="ps-10"
             />
           </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}>

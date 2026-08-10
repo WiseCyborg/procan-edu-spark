@@ -100,7 +100,7 @@ export const RoleIntentSelector: React.FC<RoleIntentSelectorProps> = ({
       <div className="bg-background rounded-xl shadow-xl max-w-2xl w-full p-6 relative">
         <button
           onClick={() => onOpenChange(false)}
-          className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors"
+          className="absolute top-4 end-4 text-muted-foreground hover:text-foreground transition-colors"
         >
           <X className="h-5 w-5" />
         </button>

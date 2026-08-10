@@ -100,7 +100,7 @@ export const AwaitingVerification: React.FC<AwaitingVerificationProps> = ({
         <div className="flex justify-center mb-3">
           <div className="relative">
             <ShieldCheck className="h-12 w-12 text-primary" />
-            <div className="absolute -top-1 -right-1 h-4 w-4 bg-yellow-500 rounded-full animate-pulse" />
+            <div className="absolute -top-1 -end-1 h-4 w-4 bg-yellow-500 rounded-full animate-pulse" />
           </div>
         </div>
         <CardTitle className="text-xl">Awaiting Manager Verification</CardTitle>
@@ -134,7 +134,7 @@ export const AwaitingVerification: React.FC<AwaitingVerificationProps> = ({
               className="w-full text-muted-foreground"
               onClick={() => setShowSelfAttest(true)}
             >
-              <AlertTriangle className="h-4 w-4 mr-2" />
+              <AlertTriangle className="h-4 w-4 me-2" />
               No manager available? Self-attest instead
             </Button>
           ) : (

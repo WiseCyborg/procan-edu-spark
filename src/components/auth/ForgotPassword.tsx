@@ -139,7 +139,7 @@ export const ForgotPassword: React.FC<ForgotPasswordProps> = ({ onBack }) => {
               onClick={onBack}
               className="w-full"
             >
-              <ArrowLeft className="w-4 h-4 mr-2" />
+              <ArrowLeft className="w-4 h-4 me-2" />
               Back to Sign In
             </Button>
           </div>
@@ -185,7 +185,7 @@ export const ForgotPassword: React.FC<ForgotPasswordProps> = ({ onBack }) => {
               className="w-full"
               disabled={loading}
             >
-              <ArrowLeft className="w-4 h-4 mr-2" />
+              <ArrowLeft className="w-4 h-4 me-2" />
               Back to Sign In
             </Button>
           </div>

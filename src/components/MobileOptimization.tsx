@@ -43,7 +43,7 @@ export const AccessibilityToolbar: React.FC = () => {
         }
       `}</style>
       
-      <div className="fixed top-4 right-4 z-50">
+      <div className="fixed top-4 end-4 z-50">
         <Button
           onClick={() => setIsOpen(!isOpen)}
           variant="outline"
@@ -122,7 +122,7 @@ export const MobileNavigation: React.FC = () => {
 
   return (
     <div className={`
-      md:hidden fixed bottom-0 left-0 right-0 z-40 bg-background border-t
+      md:hidden fixed bottom-0 start-0 end-0 z-40 bg-background border-t
       transition-transform duration-300
       ${isVisible ? 'translate-y-0' : 'translate-y-full'}
     `}>

@@ -178,12 +178,12 @@ export const TestEmailSender = () => {
             >
               {sending === 'welcome' ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="me-2 h-4 w-4 animate-spin" />
                   Sending...
                 </>
               ) : (
                 <>
-                  <Send className="mr-2 h-4 w-4" />
+                  <Send className="me-2 h-4 w-4" />
                   Welcome Email
                 </>
               )}
@@ -197,12 +197,12 @@ export const TestEmailSender = () => {
             >
               {sending === 'certificate' ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="me-2 h-4 w-4 animate-spin" />
                   Sending...
                 </>
               ) : (
                 <>
-                  <Send className="mr-2 h-4 w-4" />
+                  <Send className="me-2 h-4 w-4" />
                   Certificate Email
                 </>
               )}
@@ -216,12 +216,12 @@ export const TestEmailSender = () => {
             >
               {sending === 'invitation' ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="me-2 h-4 w-4 animate-spin" />
                   Sending...
                 </>
               ) : (
                 <>
-                  <Send className="mr-2 h-4 w-4" />
+                  <Send className="me-2 h-4 w-4" />
                   Invitation Email
                 </>
               )}
@@ -294,7 +294,7 @@ export const TestEmailSender = () => {
                       </p>
                     </div>
                   </div>
-                  <div className="text-right text-sm">
+                  <div className="text-end text-sm">
                     <p className={`font-medium ${
                       log.status === 'sent' ? 'text-green-600' : 
                       log.status === 'failed' ? 'text-red-600' : 

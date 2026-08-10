@@ -290,7 +290,7 @@ const StudentDashboard = () => {
             <p className="text-sm text-purple-800 dark:text-purple-300 mb-2">
               You have access to <strong>{managerModules.length} additional manager-level modules</strong> covering:
             </p>
-            <ul className="text-sm text-purple-700 dark:text-purple-400 space-y-1 ml-4 list-disc">
+            <ul className="text-sm text-purple-700 dark:text-purple-400 space-y-1 ms-4 list-disc">
               <li>Supervising Compliance Operations</li>
               <li>Regulatory Reporting & Oversight</li>
               <li>Team Training Coordination</li>

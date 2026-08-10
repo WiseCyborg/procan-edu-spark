@@ -217,7 +217,7 @@ export function ProfileChangeHistoryViewer({ userId, showAsUser = false }: Profi
                 Showing {filteredHistory.length} change{filteredHistory.length !== 1 ? 's' : ''}
               </div>
               <Button onClick={exportToCSV} variant="outline" size="sm">
-                <Download className="w-4 h-4 mr-2" />
+                <Download className="w-4 h-4 me-2" />
                 Export to CSV
               </Button>
             </div>

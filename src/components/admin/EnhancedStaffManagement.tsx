@@ -329,15 +329,15 @@ export const EnhancedStaffManagement = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-foreground">Enhanced Staff Management</h2>
-        <div className="flex space-x-2">
+        <div className="flex space-x-2 rtl:space-x-reverse">
           <Button onClick={() => fetchStaffData()} variant="outline" disabled={loading}>
-            <RefreshCw className="h-4 w-4 mr-2" />
+            <RefreshCw className="h-4 w-4 me-2" />
             Refresh
           </Button>
           <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
             <DialogTrigger asChild>
               <Button>
-                <UserPlus className="h-4 w-4 mr-2" />
+                <UserPlus className="h-4 w-4 me-2" />
                 Invite Staff
               </Button>
             </DialogTrigger>
@@ -376,7 +376,7 @@ export const EnhancedStaffManagement = () => {
                   disabled={loading || !newInviteEmail}
                   className="w-full"
                 >
-                  <Send className="h-4 w-4 mr-2" />
+                  <Send className="h-4 w-4 me-2" />
                   Send Invitation
                 </Button>
               </div>
@@ -491,7 +491,7 @@ export const EnhancedStaffManagement = () => {
                     disabled={loading || !bulkInviteEmails.trim()}
                     className="w-full"
                   >
-                    <Send className="h-4 w-4 mr-2" />
+                    <Send className="h-4 w-4 me-2" />
                     Send Bulk Invitations
                   </Button>
                 </div>
@@ -505,12 +505,12 @@ export const EnhancedStaffManagement = () => {
             <CardHeader>
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-2 sm:space-y-0">
                 <CardTitle className="flex items-center">
-                  <Users className="h-5 w-5 mr-2" />
+                  <Users className="h-5 w-5 me-2" />
                   Staff Members ({filteredStaffMembers.length})
                 </CardTitle>
                 
-                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
-                  <div className="flex items-center space-x-2">
+                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 rtl:space-x-reverse">
+                  <div className="flex items-center space-x-2 rtl:space-x-reverse">
                     <Search className="h-4 w-4 text-muted-foreground" />
                     <Input
                       placeholder="Search staff..."
@@ -550,14 +550,14 @@ export const EnhancedStaffManagement = () => {
               <div className="space-y-3">
                 {filteredStaffMembers.map(member => (
                   <div key={member.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-4 rtl:space-x-reverse">
                       <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
                         <Users className="h-5 w-5 text-primary" />
                       </div>
                       <div>
                         <h3 className="font-medium">{member.first_name} {member.last_name}</h3>
                         <p className="text-sm text-muted-foreground">{member.email}</p>
-                        <div className="flex items-center space-x-2 mt-1">
+                        <div className="flex items-center space-x-2 mt-1 rtl:space-x-reverse">
                           <Badge className={getRoleColor(member.role)}>
                             {member.role.replace('_', ' ')}
                           </Badge>
@@ -568,7 +568,7 @@ export const EnhancedStaffManagement = () => {
                       </div>
                     </div>
                     
-                    <div className="text-right">
+                    <div className="text-end">
                       <p className="text-sm font-medium">{member.progress_percentage}% Complete</p>
                       <p className="text-xs text-muted-foreground">
                         {member.certificates_count} certificates
@@ -594,7 +594,7 @@ export const EnhancedStaffManagement = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
-                <Mail className="h-5 w-5 mr-2" />
+                <Mail className="h-5 w-5 me-2" />
                 Staff Invitations ({staffInvitations.length})
               </CardTitle>
             </CardHeader>
@@ -602,7 +602,7 @@ export const EnhancedStaffManagement = () => {
               <div className="space-y-3">
                 {staffInvitations.map(invitation => (
                   <div key={invitation.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-3 rtl:space-x-reverse">
                       <Mail className="h-4 w-4 text-muted-foreground" />
                       <div>
                         <p className="font-medium">{invitation.email}</p>
@@ -616,7 +616,7 @@ export const EnhancedStaffManagement = () => {
                       </div>
                     </div>
                     
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2 rtl:space-x-reverse">
                       <Badge className={getStatusColor(invitation.accepted_at ? 'accepted' : 'pending')}>
                         {invitation.accepted_at ? 'Accepted' : 'Pending'}
                       </Badge>
@@ -628,7 +628,7 @@ export const EnhancedStaffManagement = () => {
                           onClick={() => resendInvitation(invitation.id)}
                           disabled={loading}
                         >
-                          <RefreshCw className="h-3 w-3 mr-1" />
+                          <RefreshCw className="h-3 w-3 me-1" />
                           Resend
                         </Button>
                       )}
@@ -650,7 +650,7 @@ export const EnhancedStaffManagement = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
-                <Send className="h-5 w-5 mr-2" />
+                <Send className="h-5 w-5 me-2" />
                 Communication History ({communicationLogs.length})
               </CardTitle>
             </CardHeader>
@@ -658,7 +658,7 @@ export const EnhancedStaffManagement = () => {
               <div className="space-y-3">
                 {communicationLogs.map(log => (
                   <div key={log.id} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-3 rtl:space-x-reverse">
                       <Send className="h-4 w-4 text-muted-foreground" />
                       <div>
                         <p className="font-medium">{log.subject}</p>
@@ -671,7 +671,7 @@ export const EnhancedStaffManagement = () => {
                       </div>
                     </div>
                     
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2 rtl:space-x-reverse">
                       <Badge className={getStatusColor(log.delivery_status)}>
                         {log.delivery_status}
                       </Badge>

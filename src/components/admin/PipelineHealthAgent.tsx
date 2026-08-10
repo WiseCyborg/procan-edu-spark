@@ -83,7 +83,7 @@ const EventCard = ({ event }: { event: PipelineHealthEvent }) => (
         {getSeverityBadge(event.severity)}
         {event.auto_fixed && (
           <Badge variant="outline" className="text-green-600 border-green-600">
-            <Wrench className="h-3 w-3 mr-1" />
+            <Wrench className="h-3 w-3 me-1" />
             Auto-Fixed
           </Badge>
         )}
@@ -137,9 +137,9 @@ export const PipelineHealthAgent: React.FC = () => {
             size="sm"
           >
             {runAgent.isPending ? (
-              <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+              <RefreshCw className="h-4 w-4 me-2 animate-spin" />
             ) : (
-              <Play className="h-4 w-4 mr-2" />
+              <Play className="h-4 w-4 me-2" />
             )}
             Run Agent
           </Button>
@@ -231,19 +231,19 @@ export const PipelineHealthAgent: React.FC = () => {
             <TabsTrigger value="recent" className="text-xs">
               Recent Events
               {events && events.length > 0 && (
-                <Badge variant="secondary" className="ml-1">{events.length}</Badge>
+                <Badge variant="secondary" className="ms-1">{events.length}</Badge>
               )}
             </TabsTrigger>
             <TabsTrigger value="fixes" className="text-xs">
               Auto-Fixes
               {autoFixes && autoFixes.length > 0 && (
-                <Badge className="ml-1 bg-green-500">{autoFixes.length}</Badge>
+                <Badge className="ms-1 bg-green-500">{autoFixes.length}</Badge>
               )}
             </TabsTrigger>
             <TabsTrigger value="admin" className="text-xs">
               Needs Attention
               {adminItems && adminItems.length > 0 && (
-                <Badge variant="destructive" className="ml-1">{adminItems.length}</Badge>
+                <Badge variant="destructive" className="ms-1">{adminItems.length}</Badge>
               )}
             </TabsTrigger>
           </TabsList>
@@ -255,7 +255,7 @@ export const PipelineHealthAgent: React.FC = () => {
                   <RefreshCw className="h-6 w-6 animate-spin text-muted-foreground" />
                 </div>
               ) : events && events.length > 0 ? (
-                <div className="space-y-2 pr-4">
+                <div className="space-y-2 pe-4">
                   {events.map((event) => (
                     <EventCard key={event.id} event={event} />
                   ))}
@@ -273,7 +273,7 @@ export const PipelineHealthAgent: React.FC = () => {
           <TabsContent value="fixes">
             <ScrollArea className="h-[300px]">
               {autoFixes && autoFixes.length > 0 ? (
-                <div className="space-y-2 pr-4">
+                <div className="space-y-2 pe-4">
                   {autoFixes.map((event) => (
                     <EventCard key={event.id} event={event} />
                   ))}
@@ -291,7 +291,7 @@ export const PipelineHealthAgent: React.FC = () => {
           <TabsContent value="admin">
             <ScrollArea className="h-[300px]">
               {adminItems && adminItems.length > 0 ? (
-                <div className="space-y-2 pr-4">
+                <div className="space-y-2 pe-4">
                   {adminItems.map((event) => (
                     <EventCard key={event.id} event={event} />
                   ))}

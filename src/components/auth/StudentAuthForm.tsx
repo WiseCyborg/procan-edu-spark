@@ -208,13 +208,13 @@ const StudentAuthForm = () => {
               <div><Label>Password</Label>
                 <div className="relative">
                   <Input type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} required />
-                  <Button type="button" variant="ghost" size="sm" className="absolute right-0 top-0 h-full px-3 hover:bg-transparent" onClick={() => setShowPassword(!showPassword)}>
+                  <Button type="button" variant="ghost" size="sm" className="absolute end-0 top-0 h-full px-3 hover:bg-transparent" onClick={() => setShowPassword(!showPassword)}>
                     {showPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
                   </Button>
                 </div>
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Logging in...</> : 'Login'}
+                {loading ? <><Loader2 className="me-2 h-4 w-4 animate-spin" />Logging in...</> : 'Login'}
               </Button>
               <div className="flex justify-between items-center">
                 <Button type="button" variant="link" className="px-0" onClick={() => setIsRegistering(true)}>Need an account? Register</Button>
@@ -251,12 +251,12 @@ const StudentAuthForm = () => {
                       spellCheck={false}
                     />
                     {isValidatingCode && (
-                      <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      <div className="absolute end-3 top-1/2 -translate-y-1/2">
                         <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                       </div>
                     )}
                     {joinCodeValidation?.valid && (
-                      <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      <div className="absolute end-3 top-1/2 -translate-y-1/2">
                         <CheckCircle2 className="h-4 w-4 text-green-600" />
                       </div>
                     )}
@@ -273,7 +273,7 @@ const StudentAuthForm = () => {
               <div><Label>Password *</Label>
                 <div className="relative">
                   <Input type={showRegPassword ? 'text' : 'password'} {...register('password')} />
-                  <Button type="button" variant="ghost" size="sm" className="absolute right-0 top-0 h-full px-3 hover:bg-transparent" onClick={() => setShowRegPassword(!showRegPassword)}>
+                  <Button type="button" variant="ghost" size="sm" className="absolute end-0 top-0 h-full px-3 hover:bg-transparent" onClick={() => setShowRegPassword(!showRegPassword)}>
                     {showRegPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
                   </Button>
                 </div>
@@ -281,7 +281,7 @@ const StudentAuthForm = () => {
                 <PasswordStrengthIndicator password={regPassword || ''} showRequirements={false} />
               </div>
               <Button type="submit" className="w-full" disabled={isSubmitting || (!invitationData && !joinCodeValidation?.valid)}>
-                {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Registering...</> : 'Register'}
+                {isSubmitting ? <><Loader2 className="me-2 h-4 w-4 animate-spin" />Registering...</> : 'Register'}
               </Button>
               <Button type="button" variant="link" className="w-full" onClick={() => setIsRegistering(false)}>Have an account? Login</Button>
             </form>

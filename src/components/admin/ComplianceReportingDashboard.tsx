@@ -168,7 +168,7 @@ export const ComplianceReportingDashboard = () => {
             disabled={exporting}
             variant="outline"
           >
-            <FileDown className="h-4 w-4 mr-2" />
+            <FileDown className="h-4 w-4 me-2" />
             Export CSV
           </Button>
           <Button onClick={fetchComplianceData} variant="outline">
@@ -281,7 +281,7 @@ export const ComplianceReportingDashboard = () => {
                         </div>
                       </div>
                     </div>
-                    <div className="text-right">
+                    <div className="text-end">
                       <div className="text-2xl font-bold">{report.compliance_score}%</div>
                       <Progress 
                         value={report.compliance_score} 
@@ -313,9 +313,9 @@ export const ComplianceReportingDashboard = () => {
                         {format(new Date(metric.calculation_date), 'MMM dd, yyyy')}
                       </div>
                     </div>
-                    <div className="text-right">
+                    <div className="text-end">
                       <div className="font-bold">{metric.metric_value}</div>
-                      <Badge variant={getRiskBadgeVariant(metric.risk_level)} className="ml-2">
+                      <Badge variant={getRiskBadgeVariant(metric.risk_level)} className="ms-2">
                         {metric.risk_level}
                       </Badge>
                     </div>

@@ -42,7 +42,7 @@ export const MobileNavBar = ({
   const nextEnabled = canGoNext && isCurrentModuleComplete;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 lg:hidden bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/90 border-t z-50">
+    <div className="fixed bottom-0 start-0 end-0 lg:hidden bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/90 border-t z-50">
       <div className="container py-3">
         <div className="flex items-center justify-between gap-2">
           {/* Previous Button - conditionally render */}
@@ -53,7 +53,7 @@ export const MobileNavBar = ({
               onClick={onPrevious}
               className="flex-1 max-w-[120px]"
             >
-              <ChevronLeft className="h-4 w-4 mr-1" />
+              <ChevronLeft className="h-4 w-4 me-1" />
               <span className="hidden sm:inline">Prev</span>
             </Button>
           ) : (
@@ -93,9 +93,9 @@ export const MobileNavBar = ({
                       disabled={!nextEnabled}
                       className="w-full"
                     >
-                      {!nextEnabled && <Lock className="h-3 w-3 mr-1" />}
+                      {!nextEnabled && <Lock className="h-3 w-3 me-1" />}
                       <span className="hidden sm:inline">Next</span>
-                      {nextEnabled && <ChevronRight className="h-4 w-4 ml-1" />}
+                      {nextEnabled && <ChevronRight className="h-4 w-4 ms-1" />}
                     </Button>
                   </span>
                 </TooltipTrigger>
@@ -113,12 +113,12 @@ export const MobileNavBar = ({
 
         {/* Module Titles (visible on larger mobile) */}
         <div className="hidden sm:flex items-center justify-between text-xs text-muted-foreground mt-2 gap-2">
-          <div className="flex-1 text-left truncate">
+          <div className="flex-1 text-start truncate">
             {canGoPrevious && previousTitle && (
               <span>{previousTitle}</span>
             )}
           </div>
-          <div className="flex-1 text-right truncate">
+          <div className="flex-1 text-end truncate">
             {nextEnabled && nextTitle && (
               <span>{nextTitle}</span>
             )}

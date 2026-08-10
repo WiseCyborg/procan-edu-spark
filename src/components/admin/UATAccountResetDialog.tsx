@@ -83,7 +83,7 @@ export const UATAccountResetDialog = ({
 
           {/* Options */}
           <div className="space-y-3">
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
               <Checkbox
                 id="reset-seats"
                 checked={resetSeats}
@@ -97,7 +97,7 @@ export const UATAccountResetDialog = ({
               </label>
             </div>
 
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
               <Checkbox
                 id="confirm-reset"
                 checked={confirmed}
@@ -128,12 +128,12 @@ export const UATAccountResetDialog = ({
           >
             {isResetting ? (
               <>
-                <RotateCcw className="h-4 w-4 mr-2 animate-spin" />
+                <RotateCcw className="h-4 w-4 me-2 animate-spin" />
                 Resetting...
               </>
             ) : (
               <>
-                <RotateCcw className="h-4 w-4 mr-2" />
+                <RotateCcw className="h-4 w-4 me-2" />
                 Reset Account
               </>
             )}

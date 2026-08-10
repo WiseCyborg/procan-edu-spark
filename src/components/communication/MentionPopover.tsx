@@ -68,7 +68,7 @@ export const MentionPopover = ({
           className="w-full justify-start hover:bg-accent"
           onClick={() => onSelect(user)}
         >
-          <Avatar className="h-6 w-6 mr-2">
+          <Avatar className="h-6 w-6 me-2">
             {user.profile_photo_url && (
               <AvatarImage src={user.profile_photo_url} alt={`${user.first_name} ${user.last_name}`} />
             )}

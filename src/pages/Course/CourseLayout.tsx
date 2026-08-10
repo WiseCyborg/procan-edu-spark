@@ -159,7 +159,7 @@ const CourseLayout: React.FC = () => {
           <CardTitle className="text-3xl font-bold text-primary">
             Maryland Responsible Vendor Training (RVT) Course
             {isManagerRole && managerModules.length > 0 && (
-              <Badge variant="default" className="ml-3 bg-purple-600 text-white">
+              <Badge variant="default" className="ms-3 bg-purple-600 text-white">
                 Manager Track
               </Badge>
             )}
@@ -237,7 +237,7 @@ const CourseLayout: React.FC = () => {
                     className="block space-y-2"
                   >
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-2 rtl:space-x-reverse">
                         <BookOpen className={`w-5 h-5 ${tierColor}`} />
                         <span className="font-medium">Module {module.module_number}</span>
                         {isModuleCompleted(module.id) && (
@@ -289,7 +289,7 @@ const CourseLayout: React.FC = () => {
                       className="block space-y-2"
                     >
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center space-x-2 rtl:space-x-reverse">
                           <BookOpen className="w-5 h-5 text-purple-600" />
                           <span className="font-medium">Module {module.module_number}</span>
                           {isModuleCompleted(module.id) && (

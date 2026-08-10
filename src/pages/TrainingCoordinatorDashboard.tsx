@@ -256,7 +256,7 @@ const TrainingCoordinatorDashboard = () => {
           <TabsTrigger value="seats">Seat Management</TabsTrigger>
           <TabsTrigger value="certificates">Certificates</TabsTrigger>
           <TabsTrigger value="compliance">
-            <ShieldCheck className="h-4 w-4 mr-1" />
+            <ShieldCheck className="h-4 w-4 me-1" />
             Compliance
           </TabsTrigger>
           <TabsTrigger value="invite">Invite Employees</TabsTrigger>
@@ -267,7 +267,7 @@ const TrainingCoordinatorDashboard = () => {
             <Card className="border-destructive">
               <CardHeader>
                 <CardTitle className="flex items-center text-destructive">
-                  <AlertTriangle className="w-5 h-5 mr-2" />
+                  <AlertTriangle className="w-5 h-5 me-2" />
                   At-Risk Employees
                 </CardTitle>
                 <CardDescription>
@@ -323,7 +323,7 @@ const TrainingCoordinatorDashboard = () => {
                     </div>
                     {selectedUsers.length > 0 && (
                       <Button size="sm" onClick={handleSendBulkReminders}>
-                        <Mail className="w-4 h-4 mr-2" />
+                        <Mail className="w-4 h-4 me-2" />
                         Send Reminder ({selectedUsers.length})
                       </Button>
                     )}
@@ -372,7 +372,7 @@ const TrainingCoordinatorDashboard = () => {
                         <Dialog>
                           <DialogTrigger asChild>
                             <Button size="sm" variant="outline">
-                              <Calendar className="h-4 w-4 mr-1" />
+                              <Calendar className="h-4 w-4 me-1" />
                               Set Deadline
                             </Button>
                           </DialogTrigger>
@@ -465,7 +465,7 @@ const TrainingCoordinatorDashboard = () => {
                   onChange={(e) => setInviteEmail(e.target.value)}
                 />
                 <Button onClick={handleSendInvitation} disabled={sending || !inviteEmail}>
-                  <Mail className="w-4 h-4 mr-2" />
+                  <Mail className="w-4 h-4 me-2" />
                   {sending ? 'Sending...' : 'Send Invite'}
                 </Button>
               </div>

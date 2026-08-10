@@ -114,12 +114,12 @@ export function RequestSeatsForm({ organizationId, onRequestSubmitted }: Request
           <Button type="submit" disabled={loading || !quantity || !reason} className="w-full">
             {loading ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="me-2 h-4 w-4 animate-spin" />
                 Submitting Request...
               </>
             ) : (
               <>
-                <ShoppingCart className="mr-2 h-4 w-4" />
+                <ShoppingCart className="me-2 h-4 w-4" />
                 Submit Request
               </>
             )}

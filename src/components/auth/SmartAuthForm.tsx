@@ -285,11 +285,11 @@ const SmartAuthForm = () => {
             <TabsList className="grid w-full grid-cols-2 h-10 md:h-9">
               <TabsTrigger value="signin" disabled={emailExists === false} className="text-sm md:text-base">
                 Sign In
-                {emailChecking && <span className="ml-1 text-xs">...</span>}
+                {emailChecking && <span className="ms-1 text-xs">...</span>}
               </TabsTrigger>
               <TabsTrigger value="signup" disabled={emailExists === true} className="text-sm md:text-base">
                 Sign Up
-                {emailExists === false && <span className="ml-1 text-xs text-primary">•</span>}
+                {emailExists === false && <span className="ms-1 text-xs text-primary">•</span>}
               </TabsTrigger>
             </TabsList>
             
@@ -321,7 +321,7 @@ const SmartAuthForm = () => {
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                    className="absolute end-0 top-0 h-full px-3 hover:bg-transparent"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
@@ -335,7 +335,7 @@ const SmartAuthForm = () => {
                 >
                   {loading ? 'Signing In...' : 'Sign In'}
                   {isAdmin && hasPreferences && (
-                    <Zap className="w-4 h-4 ml-2 flex-shrink-0" />
+                    <Zap className="w-4 h-4 ms-2 flex-shrink-0" />
                   )}
                 </Button>
                 
@@ -409,7 +409,7 @@ const SmartAuthForm = () => {
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                    className="absolute end-0 top-0 h-full px-3 hover:bg-transparent"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}

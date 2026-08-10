@@ -113,14 +113,14 @@ const ReviewDialog: React.FC<ReviewDialogProps> = ({
             onClick={() => onSubmit('denied', notes)}
             disabled={isSubmitting}
           >
-            {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+            {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin me-2" /> : null}
             Deny
           </Button>
           <Button
             onClick={() => onSubmit('approved', notes)}
             disabled={isSubmitting}
           >
-            {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+            {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin me-2" /> : null}
             Approve
           </Button>
         </DialogFooter>
@@ -237,7 +237,7 @@ export const RoleRequestsPanel: React.FC = () => {
                       </div>
                     </div>
                     <Badge className={statusConfig[request.status].className}>
-                      <StatusIcon className="h-3 w-3 mr-1" />
+                      <StatusIcon className="h-3 w-3 me-1" />
                       {statusConfig[request.status].label}
                     </Badge>
                   </div>

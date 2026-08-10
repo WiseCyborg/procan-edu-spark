@@ -54,7 +54,7 @@ const ConsumerEducation = () => {
           This is <strong>NOT</strong> Maryland RVT employee certification. 
           <button 
             onClick={() => navigate('/get-started')} 
-            className="underline ml-1 hover:text-amber-600"
+            className="underline ms-1 hover:text-amber-600"
           >
             Need RVT certification?
           </button>
@@ -197,7 +197,7 @@ const ConsumerEducation = () => {
                 size="lg"
               >
                 Get RVT Certified
-                <ArrowRight className="ml-2 h-4 w-4" />
+                <ArrowRight className="ms-2 h-4 w-4" />
               </Button>
               <Button 
                 onClick={() => navigate('/org/apply')}
@@ -271,7 +271,7 @@ const ConsumerEducation = () => {
                     <CheckCircle2 className="h-5 w-5" />
                     Legal Purchase Limits
                   </h3>
-                  <ul className="space-y-1 text-sm text-muted-foreground ml-7">
+                  <ul className="space-y-1 text-sm text-muted-foreground ms-7">
                     <li>• Up to 120 grams (4.2 oz) of flower per 30 days</li>
                     <li>• Product limits vary by type and THC content</li>
                     <li>• Dispensary staff track your allotment automatically</li>
@@ -283,7 +283,7 @@ const ConsumerEducation = () => {
                     <CheckCircle2 className="h-5 w-5" />
                     Where You Can Use
                   </h3>
-                  <ul className="space-y-1 text-sm text-muted-foreground ml-7">
+                  <ul className="space-y-1 text-sm text-muted-foreground ms-7">
                     <li>• Private residences only (with owner permission)</li>
                     <li>• NOT in vehicles, public places, or federal property</li>
                     <li>• NOT in workplaces (unless employer permits)</li>
@@ -295,7 +295,7 @@ const ConsumerEducation = () => {
                     <CheckCircle2 className="h-5 w-5" />
                     Transportation Rules
                   </h3>
-                  <ul className="space-y-1 text-sm text-muted-foreground ml-7">
+                  <ul className="space-y-1 text-sm text-muted-foreground ms-7">
                     <li>• Keep products in original sealed containers</li>
                     <li>• Store in trunk or locked glove compartment</li>
                     <li>• Never consume while driving</li>
@@ -307,7 +307,7 @@ const ConsumerEducation = () => {
                     <CheckCircle2 className="h-5 w-5" />
                     Valid Medical Card Required
                   </h3>
-                  <ul className="space-y-1 text-sm text-muted-foreground ml-7">
+                  <ul className="space-y-1 text-sm text-muted-foreground ms-7">
                     <li>• Must have active Maryland MCA registration</li>
                     <li>• Card expires annually, requires renewal</li>
                     <li>• Out-of-state cards not accepted</li>

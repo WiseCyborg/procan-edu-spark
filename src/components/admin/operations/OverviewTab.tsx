@@ -22,7 +22,7 @@ export function OverviewTab() {
           <AlertTitle>Email Delivery</AlertTitle>
           <AlertDescription>
             {emailHealth.toFixed(1)}% success rate (last 24h)
-            {emailHealth < 95 && <Button variant="link" size="sm" className="p-0 h-auto ml-2">Fix Issues →</Button>}
+            {emailHealth < 95 && <Button variant="link" size="sm" className="p-0 h-auto ms-2">Fix Issues →</Button>}
           </AlertDescription>
         </Alert>
 
@@ -31,7 +31,7 @@ export function OverviewTab() {
           <AlertTitle>Dispensary Pipeline</AlertTitle>
           <AlertDescription>
             {pipelineConversion.toFixed(1)}% conversion rate
-            {pipelineConversion < 70 && <Button variant="link" size="sm" className="p-0 h-auto ml-2">Review →</Button>}
+            {pipelineConversion < 70 && <Button variant="link" size="sm" className="p-0 h-auto ms-2">Review →</Button>}
           </AlertDescription>
         </Alert>
 
@@ -40,7 +40,7 @@ export function OverviewTab() {
           <AlertTitle>System Health</AlertTitle>
           <AlertDescription>
             {systemHealth}% overall health
-            {systemHealth < 90 && <Button variant="link" size="sm" className="p-0 h-auto ml-2">Diagnose →</Button>}
+            {systemHealth < 90 && <Button variant="link" size="sm" className="p-0 h-auto ms-2">Diagnose →</Button>}
           </AlertDescription>
         </Alert>
       </div>
@@ -54,7 +54,7 @@ export function OverviewTab() {
           <CardContent>
             <div className="text-3xl font-bold">{metrics.activeUsers}</div>
             <p className="text-xs text-green-600 mt-1">
-              <TrendingUp className="h-3 w-3 inline mr-1" />
+              <TrendingUp className="h-3 w-3 inline me-1" />
               Platform users
             </p>
           </CardContent>
@@ -91,7 +91,7 @@ export function OverviewTab() {
           <CardContent>
             <div className="text-3xl font-bold">${(metrics.revenueMTD / 100).toFixed(0)}</div>
             <p className="text-xs text-green-600 mt-1">
-              <TrendingUp className="h-3 w-3 inline mr-1" />
+              <TrendingUp className="h-3 w-3 inline me-1" />
               This month
             </p>
           </CardContent>
@@ -105,19 +105,19 @@ export function OverviewTab() {
         </CardHeader>
         <CardContent className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm">
-            <Wrench className="h-4 w-4 mr-2" />
+            <Wrench className="h-4 w-4 me-2" />
             Run Fast Track Test
           </Button>
           <Button variant="outline" size="sm">
-            <Eye className="h-4 w-4 mr-2" />
+            <Eye className="h-4 w-4 me-2" />
             Review Applications
           </Button>
           <Button variant="outline" size="sm">
-            <Mail className="h-4 w-4 mr-2" />
+            <Mail className="h-4 w-4 me-2" />
             Check Email Logs
           </Button>
           <Button variant="outline" size="sm" onClick={refreshMetrics}>
-            <RefreshCw className="h-4 w-4 mr-2" />
+            <RefreshCw className="h-4 w-4 me-2" />
             Refresh Metrics
           </Button>
         </CardContent>

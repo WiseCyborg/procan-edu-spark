@@ -55,7 +55,7 @@ export const FeatureTour: React.FC<FeatureTourProps> = ({
       <div className="fixed inset-0 bg-black/50 z-[60]" />
 
       {/* Tour Callout */}
-      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[70] w-full max-w-md px-4">
+      <div className="fixed top-1/2 start-1/2 -translate-x-1/2 -translate-y-1/2 z-[70] w-full max-w-md px-4">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-start justify-between mb-4">
@@ -79,7 +79,7 @@ export const FeatureTour: React.FC<FeatureTourProps> = ({
                 disabled={currentStep === 0}
                 size="sm"
               >
-                <ChevronLeft className="h-4 w-4 mr-1" />
+                <ChevronLeft className="h-4 w-4 me-1" />
                 Back
               </Button>
 
@@ -102,7 +102,7 @@ export const FeatureTour: React.FC<FeatureTourProps> = ({
                 ) : (
                   <>
                     Next
-                    <ChevronRight className="h-4 w-4 ml-1" />
+                    <ChevronRight className="h-4 w-4 ms-1" />
                   </>
                 )}
               </Button>

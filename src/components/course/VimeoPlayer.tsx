@@ -195,7 +195,7 @@ export const VimeoPlayer: React.FC<VimeoPlayerProps> = ({
                 </div>
                 <div className="flex flex-col sm:flex-row gap-2 justify-center">
                   <Button onClick={handleRetry} variant="outline" size="sm">
-                    <RefreshCw className="w-4 h-4 mr-2" />
+                    <RefreshCw className="w-4 h-4 me-2" />
                     Retry Video
                   </Button>
                   <Button variant="secondary" size="sm" asChild>
@@ -229,14 +229,14 @@ export const VimeoPlayer: React.FC<VimeoPlayerProps> = ({
         {/* Progress indicator - Mobile optimized */}
         {!error && (
           <div 
-            className="absolute top-2 md:top-4 right-2 md:right-4 bg-black/80 text-white px-2 md:px-3 py-1 md:py-1.5 rounded-md text-xs md:text-sm font-medium"
+            className="absolute top-2 md:top-4 end-2 md:end-4 bg-black/80 text-white px-2 md:px-3 py-1 md:py-1.5 rounded-md text-xs md:text-sm font-medium"
             role="status"
             aria-live="polite"
             aria-atomic="true"
           >
             {watchedPercentage.toFixed(0)}% watched
             {hasWatchedEnough && (
-              <span className="ml-1 md:ml-2 text-green-400" aria-label="Video completed">✓</span>
+              <span className="ms-1 md:ms-2 text-green-400" aria-label="Video completed">✓</span>
             )}
           </div>
         )}

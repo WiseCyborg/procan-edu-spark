@@ -133,7 +133,7 @@ export const EmployeeCompetencyStatus = ({
                       <p className="text-xs text-muted-foreground">
                         Verified {format(new Date(signOff.signed_off_at), 'MMM d, yyyy')}
                         {signOff.is_floor_observation && (
-                          <span className="ml-2">
+                          <span className="ms-2">
                             <ClipboardCheck className="h-3 w-3 inline" /> Floor Observed
                           </span>
                         )}

@@ -71,11 +71,11 @@ const EnhancedAdminDashboard = () => {
       {/* Enhanced Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold flex items-center space-x-3">
+          <h1 className="text-3xl font-bold flex items-center space-x-3 rtl:space-x-reverse">
             <Shield className="h-8 w-8 text-primary" />
             <span>Enhanced Admin Dashboard</span>
-            <Badge variant="secondary" className="ml-2">
-              <Zap className="h-3 w-3 mr-1" />
+            <Badge variant="secondary" className="ms-2">
+              <Zap className="h-3 w-3 me-1" />
               Enhanced
             </Badge>
           </h1>
@@ -207,7 +207,7 @@ const EnhancedAdminDashboard = () => {
               onClick={() => setOpenDialog('users')}
             >
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
+                <CardTitle className="flex items-center space-x-2 rtl:space-x-reverse">
                   <Users className="h-5 w-5" />
                   <span>User Management</span>
                 </CardTitle>
@@ -242,7 +242,7 @@ const EnhancedAdminDashboard = () => {
               onClick={() => setOpenDialog('dispensary')}
             >
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
+                <CardTitle className="flex items-center space-x-2 rtl:space-x-reverse">
                   <Building2 className="h-5 w-5" />
                   <span>Dispensary Applications</span>
                 </CardTitle>
@@ -269,7 +269,7 @@ const EnhancedAdminDashboard = () => {
               onClick={() => setOpenDialog('ai')}
             >
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
+                <CardTitle className="flex items-center space-x-2 rtl:space-x-reverse">
                   <Sparkles className="h-5 w-5" />
                   <span>AI Features</span>
                 </CardTitle>
@@ -304,7 +304,7 @@ const EnhancedAdminDashboard = () => {
               onClick={() => setOpenDialog('communication')}
             >
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
+                <CardTitle className="flex items-center space-x-2 rtl:space-x-reverse">
                   <MessageSquare className="h-5 w-5" />
                   <span>Communication</span>
                 </CardTitle>
@@ -347,15 +347,15 @@ const EnhancedAdminDashboard = () => {
               </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Button variant="outline" className="justify-start">
-                  <Users className="h-4 w-4 mr-2" />
+                  <Users className="h-4 w-4 me-2" />
                   Manage Roles
                 </Button>
                 <Button variant="outline" className="justify-start">
-                  <Shield className="h-4 w-4 mr-2" />
+                  <Shield className="h-4 w-4 me-2" />
                   Security Settings
                 </Button>
                 <Button variant="outline" className="justify-start">
-                  <Settings className="h-4 w-4 mr-2" />
+                  <Settings className="h-4 w-4 me-2" />
                   User Preferences
                 </Button>
               </div>
@@ -376,23 +376,23 @@ const EnhancedAdminDashboard = () => {
               <div>
                 <h3 className="text-lg font-semibold mb-2">✨ What's New</h3>
                 <ul className="space-y-2 text-sm">
-                  <li className="flex items-center space-x-2">
+                  <li className="flex items-center space-x-2 rtl:space-x-reverse">
                     <Badge variant="secondary">NEW</Badge>
                     <span>Intelligent role-based navigation system</span>
                   </li>
-                  <li className="flex items-center space-x-2">
+                  <li className="flex items-center space-x-2 rtl:space-x-reverse">
                     <Badge variant="secondary">NEW</Badge>
                     <span>Enhanced draggable chat with persistent positioning</span>
                   </li>
-                  <li className="flex items-center space-x-2">
+                  <li className="flex items-center space-x-2 rtl:space-x-reverse">
                     <Badge variant="secondary">NEW</Badge>
                     <span>Comprehensive hover call-out system</span>
                   </li>
-                  <li className="flex items-center space-x-2">
+                  <li className="flex items-center space-x-2 rtl:space-x-reverse">
                     <Badge variant="secondary">NEW</Badge>
                     <span>AI-powered FAQ management</span>
                   </li>
-                  <li className="flex items-center space-x-2">
+                  <li className="flex items-center space-x-2 rtl:space-x-reverse">
                     <Badge variant="secondary">NEW</Badge>
                     <span>Enhanced play controls with better UX</span>
                   </li>

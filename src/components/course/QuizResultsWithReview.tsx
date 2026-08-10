@@ -124,7 +124,7 @@ export function QuizResultsWithReview({
                         size="sm"
                         onClick={() => onReviewModule(moduleId)}
                       >
-                        <BookOpen className="mr-2 h-3 w-3" />
+                        <BookOpen className="me-2 h-3 w-3" />
                         Review Material
                       </Button>
                     ))}
@@ -145,7 +145,7 @@ export function QuizResultsWithReview({
               variant="outline"
               className="flex-1"
             >
-              <RotateCcw className="mr-2 h-4 w-4" />
+              <RotateCcw className="me-2 h-4 w-4" />
               Retake Full Quiz
             </Button>
             
@@ -154,7 +154,7 @@ export function QuizResultsWithReview({
                 onClick={onPracticeWeakAreas}
                 className="flex-1"
               >
-                <Target className="mr-2 h-4 w-4" />
+                <Target className="me-2 h-4 w-4" />
                 Practice Weak Areas ({weakTopics.reduce((sum, t) => sum + t.total, 0)} questions)
               </Button>
             )}

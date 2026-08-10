@@ -100,7 +100,7 @@ export const IntegrationHealthMonitor = () => {
                   </div>
                 )}
               </div>
-              <div className="text-right space-y-1">
+              <div className="text-end space-y-1">
                 {getStatusBadge(integration.status)}
                 {integration.response_time_ms && (
                   <div className="text-xs text-muted-foreground">

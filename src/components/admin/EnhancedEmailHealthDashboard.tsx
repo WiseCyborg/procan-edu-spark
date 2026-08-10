@@ -287,7 +287,7 @@ export const EnhancedEmailHealthDashboard = () => {
               Your delivery rate is below 90%. Check provider status and review failed emails.
             </p>
             <Button onClick={testProviders} className="mt-2" size="sm">
-              <Zap className="h-4 w-4 mr-2" />
+              <Zap className="h-4 w-4 me-2" />
               Test Providers
             </Button>
           </CardContent>
@@ -309,7 +309,7 @@ export const EnhancedEmailHealthDashboard = () => {
               onKeyDown={(e) => e.key === 'Enter' && searchEmailHistory()}
             />
             <Button onClick={searchEmailHistory}>
-              <Search className="h-4 w-4 mr-2" />
+              <Search className="h-4 w-4 me-2" />
               Search
             </Button>
           </div>

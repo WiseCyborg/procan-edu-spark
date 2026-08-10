@@ -148,7 +148,7 @@ export const EmailOpsConsole = () => {
             onClick={handleRunAgent}
             disabled={runAgent.isPending}
           >
-            <RefreshCw className={`h-4 w-4 mr-2 ${runAgent.isPending ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-4 w-4 me-2 ${runAgent.isPending ? 'animate-spin' : ''}`} />
             Run Health Check
           </Button>
           {snapshot?.circuit_state === 'closed' ? (
@@ -158,7 +158,7 @@ export const EmailOpsConsole = () => {
               onClick={handlePauseSends}
               disabled={pauseSends.isPending}
             >
-              <Pause className="h-4 w-4 mr-2" />
+              <Pause className="h-4 w-4 me-2" />
               Pause Sends
             </Button>
           ) : (
@@ -168,7 +168,7 @@ export const EmailOpsConsole = () => {
               onClick={handleResumeSends}
               disabled={resumeSends.isPending}
             >
-              <Play className="h-4 w-4 mr-2" />
+              <Play className="h-4 w-4 me-2" />
               Resume Sends
             </Button>
           )}
@@ -342,15 +342,15 @@ export const EmailOpsConsole = () => {
         <CardContent>
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" size="sm">
-              <RotateCcw className="h-4 w-4 mr-2" />
+              <RotateCcw className="h-4 w-4 me-2" />
               Retry Failed (Safe)
             </Button>
             <Button variant="outline" size="sm">
-              <Users className="h-4 w-4 mr-2" />
+              <Users className="h-4 w-4 me-2" />
               Send Manager Reminders
             </Button>
             <Button variant="outline" size="sm">
-              <Mail className="h-4 w-4 mr-2" />
+              <Mail className="h-4 w-4 me-2" />
               Generate Daily Digest
             </Button>
           </div>

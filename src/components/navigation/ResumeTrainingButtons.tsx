@@ -38,7 +38,7 @@ export const ResumeTrainingButtons: React.FC<ResumeTrainingButtonsProps> = ({
     return (
       <div className={`flex items-center gap-2 ${className}`}>
         <Button disabled variant="outline">
-          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          <Loader2 className="h-4 w-4 me-2 animate-spin" />
           Loading...
         </Button>
       </div>
@@ -76,9 +76,9 @@ export const ResumeTrainingButtons: React.FC<ResumeTrainingButtonsProps> = ({
           onClick={handleResumeClick}
           className="w-full md:w-auto shadow-lg"
         >
-          <ResumeIcon className="h-5 w-5 mr-2" />
+          <ResumeIcon className="h-5 w-5 me-2" />
           {getResumeLabel()}
-          <ChevronRight className="h-4 w-4 ml-2" />
+          <ChevronRight className="h-4 w-4 ms-2" />
         </Button>
         
         {showModuleListButton && status !== 'all_complete' && (
@@ -88,13 +88,13 @@ export const ResumeTrainingButtons: React.FC<ResumeTrainingButtonsProps> = ({
             onClick={handleModuleListClick}
             className="w-full md:w-auto"
           >
-            <List className="h-5 w-5 mr-2" />
+            <List className="h-5 w-5 me-2" />
             Go to module list
           </Button>
         )}
         
         {status !== 'not_started' && status !== 'all_complete' && (
-          <p className="text-sm text-muted-foreground text-center md:text-left">
+          <p className="text-sm text-muted-foreground text-center md:text-start">
             {ctaDescription}
           </p>
         )}
@@ -106,7 +106,7 @@ export const ResumeTrainingButtons: React.FC<ResumeTrainingButtonsProps> = ({
     return (
       <div className={`flex items-center gap-2 ${className}`}>
         <Button size="sm" onClick={handleResumeClick}>
-          <ResumeIcon className="h-4 w-4 mr-1" />
+          <ResumeIcon className="h-4 w-4 me-1" />
           {status === 'not_started' ? 'Start' : 'Resume'}
         </Button>
         {showModuleListButton && status !== 'all_complete' && (
@@ -125,10 +125,10 @@ export const ResumeTrainingButtons: React.FC<ResumeTrainingButtonsProps> = ({
         onClick={handleResumeClick}
         className="flex-1 sm:flex-none"
       >
-        <ResumeIcon className="h-4 w-4 mr-2" />
+        <ResumeIcon className="h-4 w-4 me-2" />
         {getResumeLabel()}
         {rvtProgress.percentage > 0 && rvtProgress.percentage < 100 && (
-          <Badge variant="secondary" className="ml-2">
+          <Badge variant="secondary" className="ms-2">
             {rvtProgress.percentage}%
           </Badge>
         )}
@@ -140,7 +140,7 @@ export const ResumeTrainingButtons: React.FC<ResumeTrainingButtonsProps> = ({
           onClick={handleModuleListClick}
           className="flex-1 sm:flex-none"
         >
-          <List className="h-4 w-4 mr-2" />
+          <List className="h-4 w-4 me-2" />
           Go to module list
         </Button>
       )}

@@ -132,7 +132,7 @@ export const PostSessionModal = ({ sessionId, isOpen, onClose }: PostSessionModa
               </TabsList>
 
               <TabsContent value="summary" className="mt-4">
-                <ScrollArea className="h-[300px] pr-4">
+                <ScrollArea className="h-[300px] pe-4">
                   <div className="space-y-4">
                     {/* Executive Summary */}
                     <div>
@@ -194,7 +194,7 @@ export const PostSessionModal = ({ sessionId, isOpen, onClose }: PostSessionModa
               </TabsContent>
 
               <TabsContent value="actions" className="mt-4">
-                <ScrollArea className="h-[300px] pr-4">
+                <ScrollArea className="h-[300px] pe-4">
                   {actions.length === 0 ? (
                     <p className="text-sm text-muted-foreground text-center py-8">
                       No action items extracted from this session
@@ -240,7 +240,7 @@ export const PostSessionModal = ({ sessionId, isOpen, onClose }: PostSessionModa
               </TabsContent>
 
               <TabsContent value="transcript" className="mt-4">
-                <ScrollArea className="h-[300px] pr-4">
+                <ScrollArea className="h-[300px] pe-4">
                   <p className="text-sm text-muted-foreground text-center py-8">
                     Transcript available in full session view
                   </p>
@@ -251,18 +251,18 @@ export const PostSessionModal = ({ sessionId, isOpen, onClose }: PostSessionModa
             {/* Action Buttons */}
             <div className="flex flex-wrap gap-2 pt-4 border-t">
               <Button variant="outline" size="sm" onClick={handleExportPDF}>
-                <Download className="h-4 w-4 mr-2" />
+                <Download className="h-4 w-4 me-2" />
                 Export PDF
               </Button>
               <Button variant="outline" size="sm" onClick={handleSendRecap}>
-                <Mail className="h-4 w-4 mr-2" />
+                <Mail className="h-4 w-4 me-2" />
                 Send Recap Email
               </Button>
               <Button variant="outline" size="sm">
-                <Flag className="h-4 w-4 mr-2" />
+                <Flag className="h-4 w-4 me-2" />
                 Flag Issues
               </Button>
-              <Button variant="default" size="sm" onClick={onClose} className="ml-auto">
+              <Button variant="default" size="sm" onClick={onClose} className="ms-auto">
                 Done
               </Button>
             </div>

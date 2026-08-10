@@ -326,7 +326,7 @@ export const TestProfileCreator = () => {
               variant="outline"
               size="sm"
             >
-              <Download className="mr-2 h-4 w-4" />
+              <Download className="me-2 h-4 w-4" />
               Export
             </Button>
           )}
@@ -341,7 +341,7 @@ export const TestProfileCreator = () => {
             variant="secondary"
             className="w-full"
           >
-            <Users className="mr-2 h-4 w-4" />
+            <Users className="me-2 h-4 w-4" />
             {isCreating ? 'Creating...' : 'Create Complete UAT Test Suite (4 Accounts)'}
           </Button>
           <p className="text-xs text-muted-foreground text-center">
@@ -445,12 +445,12 @@ export const TestProfileCreator = () => {
             <Button onClick={createTestProfile} disabled={isCreating}>
               {isCreating ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="me-2 h-4 w-4 animate-spin" />
                   Creating...
                 </>
               ) : (
                 <>
-                  <UserPlus className="mr-2 h-4 w-4" />
+                  <UserPlus className="me-2 h-4 w-4" />
                   Create Test Profile
                 </>
               )}
@@ -458,7 +458,7 @@ export const TestProfileCreator = () => {
 
             {testProfiles.length > 0 && (
               <Button onClick={clearAllTestProfiles} variant="destructive">
-                <Trash2 className="mr-2 h-4 w-4" />
+                <Trash2 className="me-2 h-4 w-4" />
                 Clear All ({testProfiles.length})
               </Button>
             )}
@@ -497,7 +497,7 @@ export const TestProfileCreator = () => {
                         size="sm"
                         onClick={() => copyUserId(profile.user_id)}
                       >
-                        <Copy className="h-3 w-3 mr-1" />
+                        <Copy className="h-3 w-3 me-1" />
                         {profile.user_id.slice(0, 8)}...
                       </Button>
                     </TableCell>

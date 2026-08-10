@@ -325,7 +325,7 @@ export function VideoReviewPanel() {
                       onClick={() => setPendingAction({ kind: 'reject', row })}
                       className="border-red-500 text-red-400 hover:bg-red-500/10 hover:text-red-300"
                     >
-                      <XCircle className="h-4 w-4 mr-1" />
+                      <XCircle className="h-4 w-4 me-1" />
                       Reject
                     </Button>
                     <Button
@@ -334,7 +334,7 @@ export function VideoReviewPanel() {
                       style={{ backgroundColor: BRAND.accent, color: '#0e2419' }}
                       className="hover:opacity-90"
                     >
-                      <CheckCircle2 className="h-4 w-4 mr-1" />
+                      <CheckCircle2 className="h-4 w-4 me-1" />
                       {busy ? 'Working…' : 'Approve & Publish'}
                     </Button>
                   </div>

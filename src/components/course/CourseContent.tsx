@@ -56,7 +56,7 @@ const CourseContent: React.FC<CourseContentProps> = ({
             <span>{estimatedTime} minutes</span>
           </div>
           <MachineTranslationBadge />
-          <div className="ml-auto">
+          <div className="ms-auto">
             <ListenButton targetRef={readingPaneRef} />
           </div>
         </div>

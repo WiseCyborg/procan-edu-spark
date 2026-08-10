@@ -94,7 +94,7 @@ export const ChatAnnouncementSystem: React.FC<AnnouncementProps> = ({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 50, scale: 0.9 }}
           transition={{ type: "spring", duration: 0.6 }}
-          className="fixed bottom-24 right-4 z-40 w-80"
+          className="fixed bottom-24 end-4 z-40 w-80"
         >
           <Card className="bg-background border-2 border-primary/20 shadow-xl overflow-hidden">
             <div className={`h-1 ${current.color} w-full`} />
@@ -154,7 +154,7 @@ export const ChatAnnouncementSystem: React.FC<AnnouncementProps> = ({
           </Card>
           
           {/* Floating particles effect */}
-          <div className="absolute -top-2 -right-2 w-4 h-4">
+          <div className="absolute -top-2 -end-2 w-4 h-4">
             <motion.div
               animate={{
                 scale: [1, 1.2, 1],

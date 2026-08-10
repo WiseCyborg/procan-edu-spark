@@ -181,7 +181,7 @@ export function SeatHistoryTab({ organizationId }: SeatHistoryTabProps) {
             <p>No seat operations recorded yet</p>
           </div>
         ) : (
-          <ScrollArea className="h-[500px] pr-4">
+          <ScrollArea className="h-[500px] pe-4">
             <div className="space-y-3">
               {operations.map((op) => (
                 <div

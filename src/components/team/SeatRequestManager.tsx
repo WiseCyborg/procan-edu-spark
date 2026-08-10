@@ -157,7 +157,7 @@ export function SeatRequestManager({ organizationId }: { organizationId: string 
                     <p className="text-sm text-muted-foreground">{request.profiles.email}</p>
                   </div>
                   <Badge variant="outline">
-                    <Clock className="mr-1 h-3 w-3" />
+                    <Clock className="me-1 h-3 w-3" />
                     Pending
                   </Badge>
                 </div>
@@ -190,7 +190,7 @@ export function SeatRequestManager({ organizationId }: { organizationId: string 
                     disabled={processingId === request.id}
                     className="flex-1"
                   >
-                    <CheckCircle className="mr-2 h-4 w-4" />
+                    <CheckCircle className="me-2 h-4 w-4" />
                     Approve & Purchase
                   </Button>
                   <Button
@@ -200,9 +200,9 @@ export function SeatRequestManager({ organizationId }: { organizationId: string 
                     className="flex-1"
                   >
                     {processingId === request.id ? (
-                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Rejecting...</>
+                      <><Loader2 className="me-2 h-4 w-4 animate-spin" />Rejecting...</>
                     ) : (
-                      <><XCircle className="mr-2 h-4 w-4" />Reject</>
+                      <><XCircle className="me-2 h-4 w-4" />Reject</>
                     )}
                   </Button>
                 </div>

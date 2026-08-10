@@ -134,7 +134,7 @@ export const PredictiveAnalyticsPreview = () => {
                 onClick={() => navigate('/roi-calculator-public')}
                 className="w-full md:w-auto shadow-lg"
               >
-                <TrendingUp className="h-5 w-5 mr-2" />
+                <TrendingUp className="h-5 w-5 me-2" />
                 Get YOUR Actual ROI Analysis
               </Button>
             </div>

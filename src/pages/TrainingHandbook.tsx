@@ -77,7 +77,7 @@ const TrainingHandbook = () => {
               The Training Handbook is available to enrolled students. Please sign in to access this resource.
             </p>
             <Button onClick={() => navigate('/auth')} className="w-full">
-              <LogIn className="h-4 w-4 mr-2" />
+              <LogIn className="h-4 w-4 me-2" />
               Sign In
             </Button>
           </CardContent>
@@ -124,11 +124,11 @@ const TrainingHandbook = () => {
             </p>
             <div className="flex flex-wrap gap-3">
               <Button onClick={() => navigate('/course')} variant="default">
-                <BookOpen className="w-4 h-4 mr-2" />
+                <BookOpen className="w-4 h-4 me-2" />
                 Start Course
               </Button>
               <Button onClick={handleDownload} variant="outline">
-                <Download className="w-4 h-4 mr-2" />
+                <Download className="w-4 h-4 me-2" />
                 Download/Print PDF
               </Button>
             </div>
@@ -151,7 +151,7 @@ const TrainingHandbook = () => {
                     size="sm"
                     className="whitespace-nowrap"
                   >
-                    <Icon className="w-4 h-4 mr-2" />
+                    <Icon className="w-4 h-4 me-2" />
                     Section {section.id.replace('section', '')}
                   </Button>
                 );
@@ -312,11 +312,11 @@ const TrainingHandbook = () => {
               </p>
               <div className="flex flex-wrap gap-3 justify-center">
                 <Button onClick={() => navigate('/course')} size="lg">
-                  <BookOpen className="w-5 h-5 mr-2" />
+                  <BookOpen className="w-5 h-5 me-2" />
                   Begin Course
                 </Button>
                 <Button onClick={handleDownload} variant="outline" size="lg">
-                  <Download className="w-5 h-5 mr-2" />
+                  <Download className="w-5 h-5 me-2" />
                   Download Handbook
                 </Button>
               </div>

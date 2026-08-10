@@ -101,7 +101,7 @@ const SpecialtyCoursePlayer = () => {
 
       <div className="container mx-auto px-4 py-8">
         <Button variant="ghost" size="sm" className="mb-6" onClick={() => navigate(`/courses/${courseId}`)}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
+          <ArrowLeft className="h-4 w-4 me-2" />
           Course overview
         </Button>
 
@@ -114,7 +114,7 @@ const SpecialtyCoursePlayer = () => {
                 key={m.id}
                 onClick={() => setSearchParams({ module: m.id })}
                 className={cn(
-                  'w-full text-left px-3 py-2 rounded-md border text-sm transition-colors',
+                  'w-full text-start px-3 py-2 rounded-md border text-sm transition-colors',
                   activeModule?.id === m.id
                     ? 'bg-primary/10 border-primary text-foreground'
                     : 'border-border hover:bg-muted'

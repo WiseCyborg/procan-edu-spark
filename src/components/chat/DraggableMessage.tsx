@@ -207,7 +207,7 @@ export const DraggableMessage: React.FC<DraggableMessageProps> = ({
       ref={messageRef}
       className={`group relative transition-all duration-200 hover:shadow-md ${
         message.isUser 
-          ? 'bg-primary text-primary-foreground ml-auto max-w-[80%]' 
+          ? 'bg-primary text-primary-foreground ms-auto max-w-[80%]' 
           : 'bg-muted max-w-[80%]'
       } ${isDragging ? 'shadow-lg scale-105' : ''} ${
         isPinned ? 'border-2 border-primary shadow-lg' : ''
@@ -224,7 +224,7 @@ export const DraggableMessage: React.FC<DraggableMessageProps> = ({
         {/* Drag handle for pinned messages */}
         {isPinned && (
           <div 
-            className="absolute -top-2 -left-2 cursor-grab active:cursor-grabbing"
+            className="absolute -top-2 -start-2 cursor-grab active:cursor-grabbing"
             onMouseDown={handleMouseDown}
           >
             <div className="bg-primary text-primary-foreground rounded-full p-1 shadow-md">
@@ -245,7 +245,7 @@ export const DraggableMessage: React.FC<DraggableMessageProps> = ({
             }`}
           >
             <span
-              className={`text-[10px] mr-auto ${
+              className={`text-[10px] me-auto ${
                 message.isUser ? 'text-primary-foreground/70' : 'text-muted-foreground'
               }`}
             >

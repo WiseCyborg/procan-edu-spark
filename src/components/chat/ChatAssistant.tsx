@@ -315,7 +315,7 @@ export const ChatAssistant: React.FC = () => {
 
   if (isChatDisabled) {
     return (
-      <div className="fixed bottom-4 right-4 z-50">
+      <div className="fixed bottom-4 end-4 z-50">
         <Card className="w-80 bg-muted border-border">
           <CardContent className="p-4 text-center">
             <HelpCircle className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
@@ -332,7 +332,7 @@ export const ChatAssistant: React.FC = () => {
   // Restricted chat for training routes without payment
   if (isChatRestricted) {
     return (
-      <div className="fixed bottom-4 right-4 z-50">
+      <div className="fixed bottom-4 end-4 z-50">
         <Card className="w-80 bg-muted border-border">
           <CardContent className="p-4 text-center">
             <Lock className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
@@ -353,7 +353,7 @@ export const ChatAssistant: React.FC = () => {
     <>
       {/* Proactive Help Tooltip */}
       {showProactiveTip && !isOpen && (
-        <div className="fixed bottom-20 right-4 z-40 animate-in slide-in-from-right">
+        <div className="fixed bottom-20 end-4 z-40 animate-in slide-in-from-right">
           <Card className="w-72 bg-primary text-primary-foreground shadow-lg">
             <CardContent className="p-3">
               <div className="flex items-start justify-between">
@@ -388,7 +388,7 @@ export const ChatAssistant: React.FC = () => {
           setIsOpen(!isOpen);
           setShowProactiveTip(false);
         }}
-        className={`fixed bottom-4 right-4 z-50 h-12 w-12 rounded-full shadow-lg ${
+        className={`fixed bottom-4 end-4 z-50 h-12 w-12 rounded-full shadow-lg ${
           isUATUser ? 'bg-amber-500 hover:bg-amber-600' : ''
         }`}
         size="icon"
@@ -398,7 +398,7 @@ export const ChatAssistant: React.FC = () => {
 
       {/* Chat Window */}
       {isOpen && (
-        <Card className={`fixed bottom-20 right-4 z-40 w-80 ${isUATUser ? 'h-[480px]' : 'h-96'} flex flex-col shadow-xl`}>
+        <Card className={`fixed bottom-20 end-4 z-40 w-80 ${isUATUser ? 'h-[480px]' : 'h-96'} flex flex-col shadow-xl`}>
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <div>
@@ -471,7 +471,7 @@ export const ChatAssistant: React.FC = () => {
                           className="w-full text-xs h-7 justify-start text-destructive border-destructive/30"
                           onClick={() => handleBugReport(prompt)}
                         >
-                          <Bug className="w-3 h-3 mr-1" />
+                          <Bug className="w-3 h-3 me-1" />
                           {prompt}
                         </Button>
                       ))}
@@ -499,7 +499,7 @@ export const ChatAssistant: React.FC = () => {
             )}
 
             {/* Messages */}
-            <ScrollArea className="flex-1 pr-3 overflow-y-auto overscroll-contain" style={{ scrollbarWidth: 'thin' }}>
+            <ScrollArea className="flex-1 pe-3 overflow-y-auto overscroll-contain" style={{ scrollbarWidth: 'thin' }}>
               <div className="space-y-2">
                 {messages.map((message) => (
                   <div
@@ -522,7 +522,7 @@ export const ChatAssistant: React.FC = () => {
                 {isLoading && (
                   <div className="flex justify-start">
                     <div className="bg-muted text-foreground rounded-lg px-3 py-2 text-sm">
-                      <div className="flex space-x-1">
+                      <div className="flex space-x-1 rtl:space-x-reverse">
                         <div className="w-2 h-2 bg-current rounded-full animate-bounce"></div>
                         <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
                         <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
@@ -535,7 +535,7 @@ export const ChatAssistant: React.FC = () => {
             </ScrollArea>
 
             {/* Input */}
-            <div className="flex space-x-2 mt-3">
+            <div className="flex space-x-2 mt-3 rtl:space-x-reverse">
               <Input
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
@@ -562,7 +562,7 @@ export const ChatAssistant: React.FC = () => {
                 className="mt-2 w-full text-xs text-destructive border-destructive/30"
                 onClick={() => handleBugReport('Custom issue - describe in chat')}
               >
-                <Bug className="w-3 h-3 mr-1" />
+                <Bug className="w-3 h-3 me-1" />
                 Report Bug on This Page
               </Button>
             )}

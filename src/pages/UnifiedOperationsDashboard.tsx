@@ -23,7 +23,7 @@ export default function UnifiedOperationsDashboard() {
           </p>
         </div>
         <Badge variant="secondary" className="animate-pulse">
-          <Activity className="h-3 w-3 mr-1" />
+          <Activity className="h-3 w-3 me-1" />
           LIVE
         </Badge>
       </div>
@@ -34,7 +34,7 @@ export default function UnifiedOperationsDashboard() {
           <CardHeader className="pb-3">
             <CardDescription className="text-muted-foreground">System Health</CardDescription>
             <CardTitle className="text-2xl text-foreground">
-              <CheckCircle className="h-5 w-5 inline mr-2 text-green-600" />
+              <CheckCircle className="h-5 w-5 inline me-2 text-green-600" />
               Operational
             </CardTitle>
           </CardHeader>
@@ -46,19 +46,19 @@ export default function UnifiedOperationsDashboard() {
             <CardTitle className="text-2xl text-foreground">
               {paypalStatus === 'connected' && (
                 <>
-                  <CheckCircle className="h-5 w-5 inline mr-2 text-green-600" />
+                  <CheckCircle className="h-5 w-5 inline me-2 text-green-600" />
                   Connected
                 </>
               )}
               {paypalStatus === 'error' && (
                 <>
-                  <Activity className="h-5 w-5 inline mr-2 text-red-600" />
+                  <Activity className="h-5 w-5 inline me-2 text-red-600" />
                   Error
                 </>
               )}
               {paypalStatus === 'testing' && (
                 <>
-                  <Activity className="h-5 w-5 inline mr-2 text-yellow-600 animate-pulse" />
+                  <Activity className="h-5 w-5 inline me-2 text-yellow-600 animate-pulse" />
                   Testing
                 </>
               )}
@@ -70,7 +70,7 @@ export default function UnifiedOperationsDashboard() {
           <CardHeader className="pb-3">
             <CardDescription className="text-muted-foreground">Active Users</CardDescription>
             <CardTitle className="text-2xl text-foreground">
-              <Users className="h-5 w-5 inline mr-2 text-primary" />
+              <Users className="h-5 w-5 inline me-2 text-primary" />
               <span>--</span>
             </CardTitle>
           </CardHeader>
@@ -80,7 +80,7 @@ export default function UnifiedOperationsDashboard() {
           <CardHeader className="pb-3">
             <CardDescription className="text-muted-foreground">Pending Applications</CardDescription>
             <CardTitle className="text-2xl text-foreground">
-              <FileText className="h-5 w-5 inline mr-2 text-primary" />
+              <FileText className="h-5 w-5 inline me-2 text-primary" />
               <span>--</span>
             </CardTitle>
           </CardHeader>

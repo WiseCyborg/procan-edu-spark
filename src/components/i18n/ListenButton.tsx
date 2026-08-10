@@ -93,12 +93,12 @@ export const ListenButton: React.FC<ListenButtonProps> = ({
     >
       {speaking ? (
         <>
-          <Square className="h-4 w-4 mr-2" />
+          <Square className="h-4 w-4 me-2" />
           {stopLabel}
         </>
       ) : (
         <>
-          <Volume2 className="h-4 w-4 mr-2" />
+          <Volume2 className="h-4 w-4 me-2" />
           {listenLabel}
         </>
       )}

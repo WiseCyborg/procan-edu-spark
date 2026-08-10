@@ -220,7 +220,7 @@ export const DispensaryActionsMenu = ({
               
               {joinCode && (
                 <DropdownMenuItem onClick={handleCopyJoinCode}>
-                  <Copy className="h-4 w-4 mr-2" />
+                  <Copy className="h-4 w-4 me-2" />
                   Copy Join Code
                 </DropdownMenuItem>
               )}
@@ -229,7 +229,7 @@ export const DispensaryActionsMenu = ({
                 onClick={handleRegenerateJoinCode}
                 disabled={loading === 'regenerate'}
               >
-                <RefreshCw className={`h-4 w-4 mr-2 ${loading === 'regenerate' ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`h-4 w-4 me-2 ${loading === 'regenerate' ? 'animate-spin' : ''}`} />
                 Regenerate Join Code
               </DropdownMenuItem>
               
@@ -237,7 +237,7 @@ export const DispensaryActionsMenu = ({
                 onClick={handleResendApprovalEmail}
                 disabled={loading === 'resend'}
               >
-                <Mail className="h-4 w-4 mr-2" />
+                <Mail className="h-4 w-4 me-2" />
                 Resend Approval Email
               </DropdownMenuItem>
               
@@ -246,7 +246,7 @@ export const DispensaryActionsMenu = ({
                   onClick={handleSendManagerReminder}
                   disabled={loading === 'reminder'}
                 >
-                  <Mail className="h-4 w-4 mr-2" />
+                  <Mail className="h-4 w-4 me-2" />
                   Send Manager Reminder
                 </DropdownMenuItem>
               )}
@@ -257,7 +257,7 @@ export const DispensaryActionsMenu = ({
                   disabled={loading === 'activate'}
                   className="text-primary font-medium"
                 >
-                  <UserPlus className={`h-4 w-4 mr-2 ${loading === 'activate' ? 'animate-spin' : ''}`} />
+                  <UserPlus className={`h-4 w-4 me-2 ${loading === 'activate' ? 'animate-spin' : ''}`} />
                   Activate User (Bypass Token)
                 </DropdownMenuItem>
               )}
@@ -274,17 +274,17 @@ export const DispensaryActionsMenu = ({
               </DropdownMenuLabel>
               
               <DropdownMenuItem onClick={() => setAllocateDialogOpen(true)}>
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="h-4 w-4 me-2" />
                 Allocate More Seats
               </DropdownMenuItem>
               
               <DropdownMenuItem onClick={handleViewCompliance}>
-                <FileText className="h-4 w-4 mr-2" />
+                <FileText className="h-4 w-4 me-2" />
                 Compliance Report
               </DropdownMenuItem>
               
               <DropdownMenuItem onClick={() => setEditDialogOpen(true)}>
-                <Edit className="h-4 w-4 mr-2" />
+                <Edit className="h-4 w-4 me-2" />
                 Edit Details
               </DropdownMenuItem>
               
@@ -302,7 +302,7 @@ export const DispensaryActionsMenu = ({
               onClick={onApprove}
               className="text-green-600"
             >
-              <CheckCircle className="h-4 w-4 mr-2" />
+              <CheckCircle className="h-4 w-4 me-2" />
               Approve Dispensary
             </DropdownMenuItem>
           )}
@@ -312,7 +312,7 @@ export const DispensaryActionsMenu = ({
               onClick={onSuspend}
               className="text-orange-600"
             >
-              <Ban className="h-4 w-4 mr-2" />
+              <Ban className="h-4 w-4 me-2" />
               Suspend Organization
             </DropdownMenuItem>
           )}
@@ -323,7 +323,7 @@ export const DispensaryActionsMenu = ({
               disabled={loading === 'reactivate'}
               className="text-green-600"
             >
-              <Power className="h-4 w-4 mr-2" />
+              <Power className="h-4 w-4 me-2" />
               Reactivate Organization
             </DropdownMenuItem>
           )}
@@ -332,7 +332,7 @@ export const DispensaryActionsMenu = ({
             onClick={onDelete}
             className="text-destructive"
           >
-            <Trash2 className="h-4 w-4 mr-2" />
+            <Trash2 className="h-4 w-4 me-2" />
             Delete Application
           </DropdownMenuItem>
         </DropdownMenuContent>

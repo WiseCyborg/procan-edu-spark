@@ -120,7 +120,7 @@ const Resources: React.FC = () => {
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      <Download className="h-4 w-4 mr-2" />
+                      <Download className="h-4 w-4 me-2" />
                       Download Guide (PDF)
                     </a>
                   </Button>

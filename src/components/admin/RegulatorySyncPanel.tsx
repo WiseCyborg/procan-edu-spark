@@ -102,7 +102,7 @@ export const RegulatorySyncPanel = () => {
               badge={
                 data.staleWarning
                   ? <Badge variant="destructive">stale</Badge>
-                  : <Badge variant="secondary" className="bg-green-500/15 text-green-700"><CheckCircle2 className="h-3 w-3 mr-1" />fresh</Badge>
+                  : <Badge variant="secondary" className="bg-green-500/15 text-green-700"><CheckCircle2 className="h-3 w-3 me-1" />fresh</Badge>
               } />
             <Stat label="Freshest section" value={data.freshestSection ?? "—"} />
           </div>
@@ -115,7 +115,7 @@ export const RegulatorySyncPanel = () => {
             </p>
             <ul className="space-y-1 text-xs max-h-40 overflow-auto">
               {data.recentErrors.map((e) => (
-                <li key={e.id} className="border-l-2 border-destructive pl-2">
+                <li key={e.id} className="border-s-2 border-destructive ps-2">
                   <div className="font-mono">{e.section_number}</div>
                   <div className="text-muted-foreground">{fmt(e.detected_at)}</div>
                   <div className="text-destructive truncate">{e.new_content.slice(0, 160)}</div>

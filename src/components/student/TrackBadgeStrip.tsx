@@ -64,7 +64,7 @@ export const TrackBadgeStrip: React.FC<TrackBadgeStripProps> = ({
         )}
       </div>
       {track.prerequisiteId && (
-        <Badge variant="outline" className="ml-auto text-xs">
+        <Badge variant="outline" className="ms-auto text-xs">
           Requires {TRACKS[Object.keys(TRACKS).find(k => TRACKS[k as keyof typeof TRACKS].id === track.prerequisiteId) as keyof typeof TRACKS]?.shortName || 'prerequisite'}
         </Badge>
       )}

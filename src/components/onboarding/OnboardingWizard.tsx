@@ -84,7 +84,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({
               onClick={handleBack}
               disabled={currentStep === 0}
             >
-              <ChevronLeft className="h-4 w-4 mr-2" />
+              <ChevronLeft className="h-4 w-4 me-2" />
               Back
             </Button>
 
@@ -96,12 +96,12 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({
               {currentStep === steps.length - 1 ? (
                 <>
                   Complete
-                  <Check className="h-4 w-4 ml-2" />
+                  <Check className="h-4 w-4 ms-2" />
                 </>
               ) : (
                 <>
                   Next
-                  <ChevronRight className="h-4 w-4 ml-2" />
+                  <ChevronRight className="h-4 w-4 ms-2" />
                 </>
               )}
             </Button>

@@ -237,14 +237,14 @@ const EnhancedDispensaryPortal: React.FC = () => {
     <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-3 rtl:space-x-reverse">
           <Building className="w-8 h-8 text-primary" />
           <div>
             <h1 className="text-3xl font-bold text-foreground">Dispensary Management Portal</h1>
             <p className="text-muted-foreground">Manage employee training and compliance</p>
           </div>
         </div>
-        <Button onClick={exportReport} className="flex items-center space-x-2">
+        <Button onClick={exportReport} className="flex items-center space-x-2 rtl:space-x-reverse">
           <Download className="w-4 h-4" />
           <span>Export Report</span>
         </Button>
@@ -313,7 +313,7 @@ const EnhancedDispensaryPortal: React.FC = () => {
         <TabsContent value="employees" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
+              <CardTitle className="flex items-center space-x-2 rtl:space-x-reverse">
                 <Users className="w-5 h-5" />
                 <span>Employee Training Progress</span>
               </CardTitle>
@@ -361,7 +361,7 @@ const EnhancedDispensaryPortal: React.FC = () => {
           
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
+              <CardTitle className="flex items-center space-x-2 rtl:space-x-reverse">
                 <BarChart3 className="w-5 h-5" />
                 <span>Training Analytics</span>
               </CardTitle>
@@ -411,13 +411,13 @@ const EnhancedDispensaryPortal: React.FC = () => {
         <TabsContent value="invitations" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
+              <CardTitle className="flex items-center space-x-2 rtl:space-x-reverse">
                 <UserPlus className="w-5 h-5" />
                 <span>Send Training Invitations</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex space-x-4">
+              <div className="flex space-x-4 rtl:space-x-reverse">
                 <div className="flex-1">
                   <Label htmlFor="employee-email">Employee Email</Label>
                   <Input
@@ -432,7 +432,7 @@ const EnhancedDispensaryPortal: React.FC = () => {
                   <Button 
                     onClick={sendInvitation} 
                     disabled={isSendingInvite}
-                    className="flex items-center space-x-2"
+                    className="flex items-center space-x-2 rtl:space-x-reverse"
                   >
                     <Mail className="w-4 h-4" />
                     <span>{isSendingInvite ? 'Sending...' : 'Send Invitation'}</span>

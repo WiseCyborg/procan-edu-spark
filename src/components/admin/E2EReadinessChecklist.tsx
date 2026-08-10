@@ -118,7 +118,7 @@ export const E2EReadinessChecklist: React.FC<Props> = ({ snapshot, refetchSnapsh
           state={crawler}
           action={
             <Button size="sm" onClick={handleRunCrawler} disabled={runAudit.isPending}>
-              {runAudit.isPending ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <Play className="h-3 w-3 mr-1" />}
+              {runAudit.isPending ? <Loader2 className="h-3 w-3 me-1 animate-spin" /> : <Play className="h-3 w-3 me-1" />}
               Run
             </Button>
           }
@@ -134,7 +134,7 @@ export const E2EReadinessChecklist: React.FC<Props> = ({ snapshot, refetchSnapsh
           }
         />
         {showHarness && (
-          <div className="ml-8 border-l-2 pl-3 my-2">
+          <div className="ms-8 border-s-2 ps-3 my-2">
             <PipelineTestHarness />
             <div className="mt-2 flex gap-2">
               <Button
@@ -166,7 +166,7 @@ export const E2EReadinessChecklist: React.FC<Props> = ({ snapshot, refetchSnapsh
           state={refreshState}
           action={
             <Button size="sm" variant="outline" onClick={handleRefresh}>
-              <RefreshCw className="h-3 w-3 mr-1" /> Refresh
+              <RefreshCw className="h-3 w-3 me-1" /> Refresh
             </Button>
           }
         />
@@ -176,7 +176,7 @@ export const E2EReadinessChecklist: React.FC<Props> = ({ snapshot, refetchSnapsh
           state={refreshState}
           action={
             <Button size="sm" variant="outline" onClick={handleRefresh}>
-              <RefreshCw className="h-3 w-3 mr-1" /> Re-run
+              <RefreshCw className="h-3 w-3 me-1" /> Re-run
             </Button>
           }
         />
@@ -186,7 +186,7 @@ export const E2EReadinessChecklist: React.FC<Props> = ({ snapshot, refetchSnapsh
           state={{ status: "idle", ranAt: null, detail: "Generates markdown from current snapshot" }}
           action={
             <Button size="sm" variant="outline" onClick={handleDownload}>
-              <Download className="h-3 w-3 mr-1" /> Download
+              <Download className="h-3 w-3 me-1" /> Download
             </Button>
           }
         />

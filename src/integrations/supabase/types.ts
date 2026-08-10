@@ -13325,6 +13325,13 @@ export type Database = {
         }[]
       }
       get_student_dashboard: { Args: { p_course_id: string }; Returns: Json }
+      get_unread_counts: {
+        Args: never
+        Returns: {
+          conversation_id: string
+          unread: number
+        }[]
+      }
       get_unread_message_count: { Args: never; Returns: number }
       get_user_organization: { Args: { _user_id: string }; Returns: string }
       get_user_organization_id: { Args: { _user_id: string }; Returns: string }

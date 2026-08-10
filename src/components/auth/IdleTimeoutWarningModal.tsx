@@ -58,7 +58,7 @@ export const IdleTimeoutWarningModal: React.FC<IdleTimeoutWarningModalProps> = (
         <div className="px-6 pb-8 pt-2 text-center">
           {/* Animated circular indicator */}
           <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full border-4 border-primary">
-            <div className="h-10 w-10 rounded-full border-4 border-primary border-b-transparent border-l-transparent rotate-45 animate-pulse" />
+            <div className="h-10 w-10 rounded-full border-4 border-primary border-b-transparent border-s-transparent rotate-45 animate-pulse" />
           </div>
 
           <h2 id="idle-title" className="text-2xl font-semibold text-foreground">

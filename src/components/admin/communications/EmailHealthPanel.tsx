@@ -119,7 +119,7 @@ export const EmailHealthPanel = () => {
             <CardDescription>Most recent 25 failures. Retry uses the existing edge function.</CardDescription>
           </div>
           <Button variant="outline" size="sm" onClick={load} disabled={loading}>
-            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
+            <RefreshCw className={`h-4 w-4 me-2 ${loading ? "animate-spin" : ""}`} />
             Refresh
           </Button>
         </CardHeader>
@@ -134,7 +134,7 @@ export const EmailHealthPanel = () => {
                   <TableHead>Type</TableHead>
                   <TableHead>Error</TableHead>
                   <TableHead>When</TableHead>
-                  <TableHead className="text-right">Action</TableHead>
+                  <TableHead className="text-end">Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -148,7 +148,7 @@ export const EmailHealthPanel = () => {
                     <TableCell className="text-xs text-muted-foreground">
                       {formatDistanceToNow(new Date(row.created_at), { addSuffix: true })}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-end">
                       <Button
                         size="sm"
                         variant="outline"

@@ -427,13 +427,13 @@ export default function Certificates() {
                     <div className="grid md:grid-cols-2 gap-6">
                       <div className="space-y-4">
                         <div className="flex items-center text-sm text-gray-600">
-                          <Calendar className="h-4 w-4 mr-2" />
+                          <Calendar className="h-4 w-4 me-2" />
                           <span>Issued: {formatDate(certificate.issue_date)}</span>
                         </div>
                         
                         {certificate.expiry_date && (
                           <div className="flex items-center text-sm text-gray-600">
-                            <Calendar className="h-4 w-4 mr-2" />
+                            <Calendar className="h-4 w-4 me-2" />
                             <span>Expires: {formatDate(certificate.expiry_date)}</span>
                           </div>
                         )}

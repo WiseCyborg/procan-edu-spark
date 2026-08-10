@@ -179,7 +179,7 @@ export const AIFeaturesDashboard = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
-            <div className="flex items-start space-x-3 p-4 border rounded-lg">
+            <div className="flex items-start space-x-3 p-4 border rounded-lg rtl:space-x-reverse">
               <MessageSquare className="h-5 w-5 text-primary mt-0.5" />
               <div className="flex-1">
                 <h4 className="font-medium">Chat Assistant</h4>
@@ -190,7 +190,7 @@ export const AIFeaturesDashboard = () => {
               </div>
             </div>
 
-            <div className="flex items-start space-x-3 p-4 border rounded-lg">
+            <div className="flex items-start space-x-3 p-4 border rounded-lg rtl:space-x-reverse">
               <FileText className="h-5 w-5 text-primary mt-0.5" />
               <div className="flex-1">
                 <h4 className="font-medium">FAQ Generation</h4>
@@ -201,7 +201,7 @@ export const AIFeaturesDashboard = () => {
               </div>
             </div>
 
-            <div className="flex items-start space-x-3 p-4 border rounded-lg">
+            <div className="flex items-start space-x-3 p-4 border rounded-lg rtl:space-x-reverse">
               <Sparkles className="h-5 w-5 text-primary mt-0.5" />
               <div className="flex-1">
                 <h4 className="font-medium">Content Freshness Detection</h4>
@@ -212,7 +212,7 @@ export const AIFeaturesDashboard = () => {
               </div>
             </div>
 
-            <div className="flex items-start space-x-3 p-4 border rounded-lg">
+            <div className="flex items-start space-x-3 p-4 border rounded-lg rtl:space-x-reverse">
               <TrendingUp className="h-5 w-5 text-primary mt-0.5" />
               <div className="flex-1">
                 <h4 className="font-medium">Predictive Analytics</h4>

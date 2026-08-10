@@ -99,7 +99,7 @@ export function SystemMaintenancePanel() {
                 disabled={sendingReminders}
                 size="sm"
               >
-                {sendingReminders && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {sendingReminders && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
                 Send Reminders
               </Button>
             </div>
@@ -121,7 +121,7 @@ export function SystemMaintenancePanel() {
                 variant="destructive"
                 size="sm"
               >
-                {clearingQueue && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {clearingQueue && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
                 Clear Old Jobs
               </Button>
             </div>

@@ -156,7 +156,7 @@ export const EmployeeInvitationForm: React.FC<EmployeeInvitationFormProps> = ({
               onClick={() => document.getElementById('csv-upload')?.click()}
               disabled={sending}
             >
-              <Upload className="h-4 w-4 mr-2" />
+              <Upload className="h-4 w-4 me-2" />
               Upload CSV
             </Button>
             <input
@@ -205,12 +205,12 @@ export const EmployeeInvitationForm: React.FC<EmployeeInvitationFormProps> = ({
         >
           {sending ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <Loader2 className="me-2 h-4 w-4 animate-spin" />
               Sending Invitations...
             </>
           ) : (
             <>
-              <Mail className="mr-2 h-4 w-4" />
+              <Mail className="me-2 h-4 w-4" />
               Send {emailList.length} Invitation{emailList.length !== 1 ? 's' : ''}
             </>
           )}

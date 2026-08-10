@@ -100,11 +100,11 @@ export default function UnifiedHealthReport() {
         </div>
         <div className="flex gap-2">
           <Button onClick={fetchHealthReport} disabled={loading} variant="outline">
-            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-4 w-4 me-2 ${loading ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
           <Button onClick={handleExport} disabled={exporting}>
-            <Download className="h-4 w-4 mr-2" />
+            <Download className="h-4 w-4 me-2" />
             Export CSV
           </Button>
         </div>
@@ -127,7 +127,7 @@ export default function UnifiedHealthReport() {
                 {getHealthBadge(healthReport.overall_health)}
               </div>
             </div>
-            <div className="text-right">
+            <div className="text-end">
               <div className="text-sm text-muted-foreground">Response Time</div>
               <div className="text-2xl font-semibold">{healthReport.response_time_ms}ms</div>
             </div>

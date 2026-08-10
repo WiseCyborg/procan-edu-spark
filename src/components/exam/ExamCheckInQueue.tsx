@@ -213,7 +213,7 @@ export const ExamCheckInQueue: React.FC = () => {
                     </span>
                     {!checkin.photo_url && (
                       <Badge variant="outline" className="text-xs">
-                        <AlertTriangle className="h-3 w-3 mr-1" />
+                        <AlertTriangle className="h-3 w-3 me-1" />
                         No photo
                       </Badge>
                     )}
@@ -230,7 +230,7 @@ export const ExamCheckInQueue: React.FC = () => {
                     'Verifying...'
                   ) : (
                     <>
-                      <UserCheck className="h-4 w-4 mr-2" />
+                      <UserCheck className="h-4 w-4 me-2" />
                       Verify
                     </>
                   )}

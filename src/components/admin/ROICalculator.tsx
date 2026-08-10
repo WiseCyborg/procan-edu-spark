@@ -92,9 +92,9 @@ export const ROICalculator = () => {
         {trend !== undefined && (
           <div className="flex items-center text-xs text-muted-foreground mt-1">
             {trend >= 0 ? (
-              <TrendingUp className="h-3 w-3 text-green-600 mr-1" />
+              <TrendingUp className="h-3 w-3 text-green-600 me-1" />
             ) : (
-              <TrendingDown className="h-3 w-3 text-red-600 mr-1" />
+              <TrendingDown className="h-3 w-3 text-red-600 me-1" />
             )}
             <span className={trend >= 0 ? 'text-green-600' : 'text-red-600'}>
               {Math.abs(trend).toFixed(1)}%

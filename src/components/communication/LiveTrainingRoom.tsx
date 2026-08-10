@@ -198,7 +198,7 @@ export const LiveTrainingRoom = ({
                   <Users className="w-4 h-4" />
                   Q&A Queue
                   {questionQueue.length > 0 && (
-                    <Badge variant="destructive" className="ml-1">
+                    <Badge variant="destructive" className="ms-1">
                       {questionQueue.length}
                     </Badge>
                   )}

@@ -63,11 +63,11 @@ export const SensitiveOperationWrapper: React.FC<SensitiveOperationWrapperProps>
         )}
       >
         {needsReauth && (
-          <Shield className="h-3 w-3 mr-1 text-amber-500" />
+          <Shield className="h-3 w-3 me-1 text-amber-500" />
         )}
         {children}
         {needsReauth && (
-          <Lock className="h-3 w-3 ml-1 text-muted-foreground" />
+          <Lock className="h-3 w-3 ms-1 text-muted-foreground" />
         )}
       </Button>
 

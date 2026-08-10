@@ -49,10 +49,10 @@ export function AvatarGuidance({
   if (shouldHide || !shouldShow) return null;
 
   const positionClasses = {
-    'bottom-right': 'bottom-4 right-4',
-    'bottom-left': 'bottom-4 left-4',
-    'top-right': 'top-20 right-4',
-    'top-left': 'top-20 left-4'
+    'bottom-right': 'bottom-4 end-4',
+    'bottom-left': 'bottom-4 start-4',
+    'top-right': 'top-20 end-4',
+    'top-left': 'top-20 start-4'
   };
 
   return (
@@ -139,7 +139,7 @@ export function AvatarGuidance({
                     onClick={skipMessage}
                     className="h-7 px-2 text-xs"
                   >
-                    <SkipForward className="h-3 w-3 mr-1" />
+                    <SkipForward className="h-3 w-3 me-1" />
                     Skip
                   </Button>
                   <Button
@@ -149,7 +149,7 @@ export function AvatarGuidance({
                     className="h-7 px-2 text-xs"
                     disabled={state === 'speaking'}
                   >
-                    <RotateCcw className="h-3 w-3 mr-1" />
+                    <RotateCcw className="h-3 w-3 me-1" />
                     Replay
                   </Button>
                 </div>

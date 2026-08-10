@@ -193,7 +193,7 @@ export const PilotProgramDashboard = () => {
                     Recruit 20-30 beta testers from existing dispensary contacts to validate the training workflow
                   </p>
                   <Button className="mt-4">
-                    <Mail className="h-4 w-4 mr-2" />
+                    <Mail className="h-4 w-4 me-2" />
                     Invite Pilot Participants
                   </Button>
                 </CardContent>
@@ -209,10 +209,10 @@ export const PilotProgramDashboard = () => {
                           {participant.completedModules} of {participant.totalModules} modules completed
                         </p>
                       </div>
-                      <div className="text-right">
+                      <div className="text-end">
                         {participant.hasCertificate ? (
                           <Badge variant="default" className="bg-green-500">
-                            <Award className="h-3 w-3 mr-1" />
+                            <Award className="h-3 w-3 me-1" />
                             Certified
                           </Badge>
                         ) : (

@@ -173,12 +173,12 @@ export const OrganizationsManagementView = () => {
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+        <Search className="absolute start-3 top-3 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Search by name, license #, or dispensary #..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-9"
+          className="ps-9"
         />
       </div>
 
@@ -203,7 +203,7 @@ export const OrganizationsManagementView = () => {
                   <TableHead>Seats</TableHead>
                   <TableHead>Join Code</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="text-end">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -297,14 +297,14 @@ export const OrganizationsManagementView = () => {
                           </Badge>
                         )}
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-end">
                         <div className="flex items-center justify-end gap-2">
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => setSelectedOrg(org.org_id)}
                           >
-                            <Eye className="h-4 w-4 mr-2" />
+                            <Eye className="h-4 w-4 me-2" />
                             Details
                           </Button>
                           <OrganizationActionsMenu 

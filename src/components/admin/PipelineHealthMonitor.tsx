@@ -112,7 +112,7 @@ export const PipelineHealthMonitor = () => {
           disabled={loading}
           variant="outline"
         >
-          <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`h-4 w-4 me-2 ${loading ? 'animate-spin' : ''}`} />
           Check Health
         </Button>
       </div>
@@ -190,7 +190,7 @@ export const PipelineHealthMonitor = () => {
                   size="sm"
                   variant="outline"
                 >
-                  <Wrench className={`h-4 w-4 mr-2 ${fixing === 'seats' ? 'animate-spin' : ''}`} />
+                  <Wrench className={`h-4 w-4 me-2 ${fixing === 'seats' ? 'animate-spin' : ''}`} />
                   Reconcile
                 </Button>
               </div>

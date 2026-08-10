@@ -145,7 +145,7 @@ export const SupervisorSignOffForm = ({
                   selectedCompetencies.includes(area.id) 
                     ? 'bg-primary/10 border-primary' 
                     : 'hover:bg-muted'
-                }`}
+                } rtl:space-x-reverse`}
                 onClick={() => toggleCompetency(area.id)}
               >
                 <Checkbox 
@@ -160,7 +160,7 @@ export const SupervisorSignOffForm = ({
 
         {/* Floor Observation */}
         <div className="space-y-2">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 rtl:space-x-reverse">
             <Checkbox 
               id="floor-observation"
               checked={isFloorObservation}
@@ -172,7 +172,7 @@ export const SupervisorSignOffForm = ({
           </div>
           
           {isFloorObservation && (
-            <div className="pl-6 space-y-2">
+            <div className="ps-6 space-y-2">
               <Label className="flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
                 Observation Date
@@ -203,7 +203,7 @@ export const SupervisorSignOffForm = ({
           onClick={() => signOffMutation.mutate()}
           disabled={!selectedEmployee || selectedCompetencies.length === 0 || signOffMutation.isPending}
         >
-          <ClipboardCheck className="h-4 w-4 mr-2" />
+          <ClipboardCheck className="h-4 w-4 me-2" />
           Record Sign-Off ({selectedCompetencies.length} competencies)
         </Button>
       </CardContent>

@@ -60,7 +60,7 @@ const markdownToHtml = (markdown: string): string => {
     .replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold mt-4 mb-3">$1</h1>')
     .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
     .replace(/\*(.*?)\*/gim, '<em>$1</em>')
-    .replace(/^\s*[-*]\s+(.*)$/gim, '<li class="ml-4">$1</li>')
+    .replace(/^\s*[-*]\s+(.*)$/gim, '<li class="ms-4">$1</li>')
     .replace(/(<li.*<\/li>)/gims, '<ul class="list-disc my-2">$1</ul>')
     .replace(/\n\n/g, '</p><p class="mb-3">')
     .replace(/^(?!<[hulo])(.+)$/gim, '<p class="mb-3">$1</p>');
@@ -204,7 +204,7 @@ export const PaginatedContent: React.FC<PaginatedContentProps> = ({
             dragConstraints={{ left: 0, right: 0 }}
             dragElastic={0.2}
             onDragEnd={handleDragEnd}
-            className="cursor-grab active:cursor-grabbing h-full overflow-y-auto pr-2"
+            className="cursor-grab active:cursor-grabbing h-full overflow-y-auto pe-2"
           >
             <div 
               className="prose prose-sm max-w-none dark:prose-invert 

@@ -66,7 +66,7 @@ export default function ROICalculatorPublic() {
         {/* Hero Section */}
         <div className="text-center mb-12">
           <Badge variant="secondary" className="mb-4">
-            <Brain className="h-4 w-4 mr-2" />
+            <Brain className="h-4 w-4 me-2" />
             AI-Powered ROI Calculator
           </Badge>
           <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-green-600 bg-clip-text text-transparent">
@@ -269,9 +269,9 @@ export default function ROICalculatorPublic() {
               onClick={() => navigate('/org/apply')}
               className="w-full shadow-lg text-lg h-14"
             >
-              <DollarSign className="h-5 w-5 mr-2" />
+              <DollarSign className="h-5 w-5 me-2" />
               Get Your Free Compliance Audit
-              <ArrowRight className="h-5 w-5 ml-2" />
+              <ArrowRight className="h-5 w-5 ms-2" />
             </Button>
           </div>
         </div>

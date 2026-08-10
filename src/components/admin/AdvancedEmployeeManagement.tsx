@@ -271,13 +271,13 @@ export const AdvancedEmployeeManagement = () => {
 
   const getStatusBadge = (progress: number, certificates: number) => {
     if (certificates > 0) {
-      return <Badge variant="default" className="bg-green-500"><Award className="h-3 w-3 mr-1" />Certified</Badge>;
+      return <Badge variant="default" className="bg-green-500"><Award className="h-3 w-3 me-1" />Certified</Badge>;
     } else if (progress >= 80) {
-      return <Badge variant="secondary"><CheckCircle className="h-3 w-3 mr-1" />Complete</Badge>;
+      return <Badge variant="secondary"><CheckCircle className="h-3 w-3 me-1" />Complete</Badge>;
     } else if (progress > 0) {
-      return <Badge variant="outline"><Clock className="h-3 w-3 mr-1" />In Progress</Badge>;
+      return <Badge variant="outline"><Clock className="h-3 w-3 me-1" />In Progress</Badge>;
     } else {
-      return <Badge variant="destructive"><AlertCircle className="h-3 w-3 mr-1" />Not Started</Badge>;
+      return <Badge variant="destructive"><AlertCircle className="h-3 w-3 me-1" />Not Started</Badge>;
     }
   };
 
@@ -318,7 +318,7 @@ export const AdvancedEmployeeManagement = () => {
         </div>
         <div className="flex gap-2">
           <Button onClick={exportEmployeeData} variant="outline">
-            <Download className="h-4 w-4 mr-2" />
+            <Download className="h-4 w-4 me-2" />
             Export All
           </Button>
           <Button onClick={fetchEmployeesData} variant="outline">
@@ -385,12 +385,12 @@ export const AdvancedEmployeeManagement = () => {
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute start-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search employees..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="ps-10"
                 />
               </div>
             </div>
@@ -437,7 +437,7 @@ export const AdvancedEmployeeManagement = () => {
                     variant="outline"
                     size="sm"
                   >
-                    <action.icon className="h-4 w-4 mr-2" />
+                    <action.icon className="h-4 w-4 me-2" />
                     {action.label}
                   </Button>
                 ))}
@@ -508,7 +508,7 @@ export const AdvancedEmployeeManagement = () => {
                     <Progress value={employee.progress_percentage} className="w-24 h-2" />
                   </div>
 
-                  <div className="text-right">
+                  <div className="text-end">
                     <div className="font-medium">{employee.certificates_count} certificates</div>
                     <div className="text-sm text-muted-foreground">
                       Last active {format(new Date(employee.last_activity), 'MMM dd')}

@@ -54,15 +54,15 @@ export const QuickLookupPanel = ({ onSelectResult }: QuickLookupPanelProps) => {
       </div>
 
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Search className="absolute start-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Type name, email, cert #..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-9"
+          className="ps-9"
         />
         {loading && (
-          <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+          <Loader2 className="absolute end-3 top-1/2 transform -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
         )}
       </div>
 
@@ -73,7 +73,7 @@ export const QuickLookupPanel = ({ onSelectResult }: QuickLookupPanelProps) => {
               key={`${result.type}-${result.id}`}
               onClick={() => onSelectResult?.(result)}
               className={cn(
-                "w-full text-left p-3 rounded-lg border hover:bg-accent transition-colors",
+                "w-full text-start p-3 rounded-lg border hover:bg-accent transition-colors",
                 "flex items-start gap-3 group"
               )}
             >

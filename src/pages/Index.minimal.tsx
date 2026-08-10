@@ -30,7 +30,7 @@ const Index = () => {
             size="lg"
             className="bg-white text-primary hover:bg-white/90 px-6 py-4 h-auto"
           >
-            <Building2 className="h-5 w-5 mr-2" />
+            <Building2 className="h-5 w-5 me-2" />
             <div>Dispensary Application</div>
           </Button>
           
@@ -40,7 +40,7 @@ const Index = () => {
             size="lg"
             className="border-2 border-white/60 text-white bg-white/10 hover:bg-white/20 px-6 py-4 h-auto"
           >
-            <UserCog className="h-5 w-5 mr-2" />
+            <UserCog className="h-5 w-5 me-2" />
             <div>Training Coordinator</div>
           </Button>
           
@@ -50,7 +50,7 @@ const Index = () => {
             size="lg"
             className="border-2 border-white/60 text-white bg-white/10 hover:bg-white/20 px-6 py-4 h-auto"
           >
-            <Award className="h-5 w-5 mr-2" />
+            <Award className="h-5 w-5 me-2" />
             <div>I'm a Student</div>
           </Button>
         </div>

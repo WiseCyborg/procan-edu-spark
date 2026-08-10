@@ -307,7 +307,7 @@ export const IncidentReportForm: React.FC<IncidentReportFormProps> = ({
                   <>Submitting...</>
                 ) : (
                   <>
-                    <Send className="h-4 w-4 mr-2" />
+                    <Send className="h-4 w-4 me-2" />
                     Submit Report
                   </>
                 )}

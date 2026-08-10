@@ -86,7 +86,7 @@ export const CoursePaymentGate: React.FC<CoursePaymentGateProps> = ({
 
           <div className="bg-green-50 p-4 rounded-lg">
             <h4 className="font-semibold text-sm md:text-base text-green-800 mb-2 flex items-center">
-              <Check className="h-4 w-4 md:h-5 md:w-5 mr-2 flex-shrink-0" />
+              <Check className="h-4 w-4 md:h-5 md:w-5 me-2 flex-shrink-0" />
               What's Included:
             </h4>
             <ul className="text-xs md:text-sm text-green-700 space-y-1">
@@ -106,7 +106,7 @@ export const CoursePaymentGate: React.FC<CoursePaymentGateProps> = ({
               size="lg"
               className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 md:px-8 h-12 md:h-11 text-base md:text-lg"
             >
-              <CreditCard className="h-5 w-5 mr-2 flex-shrink-0" />
+              <CreditCard className="h-5 w-5 me-2 flex-shrink-0" />
               <span className="truncate">
                 {isProcessing ? 'Processing...' : `Pay ${formatPrice(course.price_cents, course.currency)}`}
               </span>

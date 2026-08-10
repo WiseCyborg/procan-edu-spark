@@ -132,7 +132,7 @@ export const ConsumerModuleContent = ({
               onClick={onPrevious}
               className="sm:w-auto"
             >
-              <ChevronLeft className="h-4 w-4 mr-2" />
+              <ChevronLeft className="h-4 w-4 me-2" />
               Previous
             </Button>
           )}
@@ -144,7 +144,7 @@ export const ConsumerModuleContent = ({
               onClick={handleComplete}
               className="sm:w-auto"
             >
-              <CheckCircle2 className="h-4 w-4 mr-2" />
+              <CheckCircle2 className="h-4 w-4 me-2" />
               Mark Complete
             </Button>
           )}
@@ -155,7 +155,7 @@ export const ConsumerModuleContent = ({
               className="sm:w-auto"
             >
               Next Module
-              <ChevronRight className="h-4 w-4 ml-2" />
+              <ChevronRight className="h-4 w-4 ms-2" />
             </Button>
           )}
 
@@ -164,7 +164,7 @@ export const ConsumerModuleContent = ({
               onClick={() => setShowEmailCapture(true)}
               className="sm:w-auto"
             >
-              <Award className="h-4 w-4 mr-2" />
+              <Award className="h-4 w-4 me-2" />
               Get Certificate
             </Button>
           )}

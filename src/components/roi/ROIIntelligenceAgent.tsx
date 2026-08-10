@@ -156,7 +156,7 @@ export const ROIIntelligenceAgent = ({
             onClick={onOptimize}
             className="w-full mt-2"
           >
-            <Sparkles className="h-4 w-4 mr-2" />
+            <Sparkles className="h-4 w-4 me-2" />
             Show me how to make this positive
           </Button>
         )}

@@ -125,9 +125,9 @@ export const EnhancedDraggableChat: React.FC<EnhancedDraggableChatProps> = ({
     <>
       {/* Pinned Messages Manager */}
       {pinnedMessages.length > 0 && (
-        <div className="fixed top-4 right-4 z-50">
+        <div className="fixed top-4 end-4 z-50">
           <Card className="p-2 bg-background/95 backdrop-blur-sm shadow-lg">
-            <div className="flex items-center space-x-2 text-sm">
+            <div className="flex items-center space-x-2 text-sm rtl:space-x-reverse">
               <span className="text-muted-foreground">
                 {pinnedMessages.length} pinned
               </span>
@@ -157,11 +157,11 @@ export const EnhancedDraggableChat: React.FC<EnhancedDraggableChatProps> = ({
         >
           {pinned.isMinimized ? (
             <Card className="p-2 bg-background/95 backdrop-blur-sm shadow-lg cursor-pointer max-w-xs">
-              <div className="flex items-center justify-between space-x-2">
+              <div className="flex items-center justify-between space-x-2 rtl:space-x-reverse">
                 <span className="text-sm font-medium truncate">
                   {message.content.substring(0, 30)}...
                 </span>
-                <div className="flex space-x-1">
+                <div className="flex space-x-1 rtl:space-x-reverse">
                   <Button
                     variant="ghost"
                     size="sm"
@@ -184,7 +184,7 @@ export const EnhancedDraggableChat: React.FC<EnhancedDraggableChatProps> = ({
           ) : (
             <div className="relative group">
               {/* Enhanced Controls */}
-              <div className="absolute -top-8 right-0 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="absolute -top-8 end-0 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity rtl:space-x-reverse">
                 <Button
                   variant="ghost"
                   size="sm"

@@ -14,7 +14,7 @@ export const EmailTroubleshootingGuide = () => {
       content: (
         <div className="space-y-2">
           <p>Look for emails from:</p>
-          <ul className="list-disc pl-6 space-y-1">
+          <ul className="list-disc ps-6 space-y-1">
             <li><strong>Sender:</strong> ProCann Edu (via Supabase)</li>
             <li><strong>Subject contains:</strong> ProCann Edu, verification, password reset</li>
             <li><strong>Footer shows:</strong> "Powered by Supabase"</li>
@@ -32,7 +32,7 @@ export const EmailTroubleshootingGuide = () => {
       content: (
         <div className="space-y-2">
           <p>Ensure your email address is correct:</p>
-          <ol className="list-decimal pl-6 space-y-1">
+          <ol className="list-decimal ps-6 space-y-1">
             <li>Go to your Profile Settings</li>
             <li>Check the email address on file</li>
             <li>Look for typos or extra spaces</li>
@@ -48,7 +48,7 @@ export const EmailTroubleshootingGuide = () => {
       content: (
         <div className="space-y-2">
           <p>You can request a new email from your dashboard:</p>
-          <ol className="list-decimal pl-6 space-y-1">
+          <ol className="list-decimal ps-6 space-y-1">
             <li>Click "Resend Verification Email" in your account panel</li>
             <li>Wait 2-3 minutes for delivery</li>
             <li>Check both inbox and spam folders</li>
@@ -64,7 +64,7 @@ export const EmailTroubleshootingGuide = () => {
       content: (
         <div className="space-y-2">
           <p>Some email providers have strict filtering:</p>
-          <ul className="list-disc pl-6 space-y-1">
+          <ul className="list-disc ps-6 space-y-1">
             <li><strong>Corporate emails:</strong> Ask IT to whitelist Supabase domains</li>
             <li><strong>Gmail:</strong> Check "Updates" and "Promotions" tabs</li>
             <li><strong>Outlook:</strong> Check "Clutter" and "Focused" inbox settings</li>
@@ -126,7 +126,7 @@ export const EmailTroubleshootingGuide = () => {
           <Accordion type="single" collapsible>
             {troubleshootingSteps.map((step) => (
               <AccordionItem key={step.id} value={step.id}>
-                <AccordionTrigger className="text-left">
+                <AccordionTrigger className="text-start">
                   <div className="flex items-center gap-2">
                     {step.icon}
                     {step.title}

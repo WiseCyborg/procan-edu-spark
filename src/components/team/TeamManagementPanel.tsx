@@ -149,7 +149,7 @@ export function TeamManagementPanel({ organizationId, organizationName }: TeamMa
               </CardDescription>
             </div>
             <Button onClick={() => setShowAssignDialog(true)}>
-              <UserPlus className="h-4 w-4 mr-2" />
+              <UserPlus className="h-4 w-4 me-2" />
               Add Coordinator
             </Button>
           </div>
@@ -182,11 +182,11 @@ export function TeamManagementPanel({ organizationId, organizationName }: TeamMa
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => handleRevokeClick(coord)}>
-                          <UserMinus className="h-4 w-4 mr-2" />
+                          <UserMinus className="h-4 w-4 me-2" />
                           Revoke Role
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handleResetProgressClick(coord)}>
-                          <RotateCcw className="h-4 w-4 mr-2" />
+                          <RotateCcw className="h-4 w-4 me-2" />
                           Reset Progress
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
@@ -194,7 +194,7 @@ export function TeamManagementPanel({ organizationId, organizationName }: TeamMa
                           onClick={() => handleDeactivateClick(coord)}
                           className="text-destructive"
                         >
-                          <UserX className="h-4 w-4 mr-2" />
+                          <UserX className="h-4 w-4 me-2" />
                           Deactivate
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -219,11 +219,11 @@ export function TeamManagementPanel({ organizationId, organizationName }: TeamMa
             </div>
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => setShowBulkInviteDialog(true)}>
-                <Upload className="h-4 w-4 mr-2" />
+                <Upload className="h-4 w-4 me-2" />
                 Bulk Invite
               </Button>
               <Button variant="outline" onClick={() => setShowTransferDialog(true)}>
-                <ArrowRightLeft className="h-4 w-4 mr-2" />
+                <ArrowRightLeft className="h-4 w-4 me-2" />
                 Transfer Seat
               </Button>
             </div>
@@ -258,15 +258,15 @@ export function TeamManagementPanel({ organizationId, organizationName }: TeamMa
                         setSelectedEmployee(emp);
                         setShowAssignDialog(true);
                       }}>
-                        <UserPlus className="h-4 w-4 mr-2" />
+                        <UserPlus className="h-4 w-4 me-2" />
                         Promote to Coordinator
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleTransferClick(emp)}>
-                        <ArrowRightLeft className="h-4 w-4 mr-2" />
+                        <ArrowRightLeft className="h-4 w-4 me-2" />
                         Transfer Seat
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleResetProgressClick(emp)}>
-                        <RotateCcw className="h-4 w-4 mr-2" />
+                        <RotateCcw className="h-4 w-4 me-2" />
                         Reset Progress
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
@@ -274,7 +274,7 @@ export function TeamManagementPanel({ organizationId, organizationName }: TeamMa
                         onClick={() => handleDeactivateClick(emp)}
                         className="text-destructive"
                       >
-                        <UserX className="h-4 w-4 mr-2" />
+                        <UserX className="h-4 w-4 me-2" />
                         Deactivate
                       </DropdownMenuItem>
                     </DropdownMenuContent>

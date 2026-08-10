@@ -114,7 +114,7 @@ const AgentHealthMonitor = () => {
         <div className="flex items-center justify-between">
           <CardTitle>Real-Time Agent Health</CardTitle>
           <Button size="sm" variant="outline" onClick={() => refetch()}>
-            <RefreshCw className="h-4 w-4 mr-1" />
+            <RefreshCw className="h-4 w-4 me-1" />
             Refresh
           </Button>
         </div>
@@ -142,7 +142,7 @@ const AgentHealthMonitor = () => {
                   </span>
                   <Badge 
                     variant={isHealthy ? 'default' : 'destructive'}
-                    className="ml-2"
+                    className="ms-2"
                   >
                     {isHealthy ? '✓' : '✗'}
                   </Badge>
@@ -241,7 +241,7 @@ export default function OwnersIntelligence() {
           </p>
         </div>
         <Button variant="outline" size="lg" onClick={() => window.location.reload()}>
-          <RefreshCw className="mr-2 h-5 w-5" />
+          <RefreshCw className="me-2 h-5 w-5" />
           Refresh All
         </Button>
       </div>
@@ -337,7 +337,7 @@ export default function OwnersIntelligence() {
             <CardContent>
               <div className="space-y-3">
                 {alerts?.map(alert => (
-                  <div key={alert.id} className={`p-4 border-l-4 rounded-lg ${getSeverityBorder(alert.severity)}`}>
+                  <div key={alert.id} className={`p-4 border-s-4 rounded-lg ${getSeverityBorder(alert.severity)}`}>
                     <div className="flex items-start justify-between">
                       <div>
                         <div className="flex items-center gap-2 mb-2">
@@ -470,7 +470,7 @@ const AgentCard = ({ name, description, lastRun, status, onRun }: any) => (
         </span>
         {status === 'active' && (
           <Button size="sm" onClick={onRun}>
-            <Play className="h-4 w-4 mr-1" />
+            <Play className="h-4 w-4 me-1" />
             Run Now
           </Button>
         )}
@@ -505,10 +505,10 @@ function getCategoryColor(category: string) {
 
 function getSeverityBorder(severity: string) {
   const borders: Record<string, string> = {
-    critical: 'border-l-destructive bg-destructive/5',
-    high: 'border-l-orange-500 bg-orange-50',
-    medium: 'border-l-yellow-500 bg-yellow-50',
-    low: 'border-l-blue-500 bg-blue-50'
+    critical: 'border-s-destructive bg-destructive/5',
+    high: 'border-s-orange-500 bg-orange-50',
+    medium: 'border-s-yellow-500 bg-yellow-50',
+    low: 'border-s-blue-500 bg-blue-50'
   };
   return borders[severity] || borders.medium;
 }

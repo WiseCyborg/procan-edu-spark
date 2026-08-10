@@ -54,7 +54,7 @@ export const MobileSheetNavigation = ({ items }: MobileSheetNavigationProps) => 
                 className="justify-start text-lg h-14"
                 aria-label={item.description || item.label}
               >
-                <item.icon className="mr-4 h-6 w-6" />
+                <item.icon className="me-4 h-6 w-6" />
                 {item.label}
               </Button>
             ))}

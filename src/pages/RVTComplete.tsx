@@ -58,7 +58,7 @@ const RVTComplete = () => {
           
           <div className="flex items-center justify-center gap-2 mt-6">
             <Badge variant="secondary" className="text-lg px-4 py-2 bg-primary/10 text-primary">
-              <CheckCircle2 className="h-5 w-5 mr-2" />
+              <CheckCircle2 className="h-5 w-5 me-2" />
               {RVT_MODULE_COUNT}/{RVT_MODULE_COUNT} Modules Complete
             </Badge>
           </div>
@@ -101,7 +101,7 @@ const RVTComplete = () => {
                 size="lg"
               >
                 Start RVT Exam
-                <ArrowRight className="h-5 w-5 ml-2" />
+                <ArrowRight className="h-5 w-5 ms-2" />
               </Button>
             </CardContent>
           </Card>
@@ -132,7 +132,7 @@ const RVTComplete = () => {
                 size="lg"
               >
                 View Certificates
-                <ExternalLink className="h-4 w-4 ml-2" />
+                <ExternalLink className="h-4 w-4 ms-2" />
               </Button>
             </CardContent>
           </Card>
@@ -185,7 +185,7 @@ const RVTComplete = () => {
                 className="border-amber-300 text-amber-700 hover:bg-amber-100 dark:border-amber-700 dark:text-amber-300 dark:hover:bg-amber-900/50"
               >
                 Start Manager Track
-                <ArrowRight className="h-4 w-4 ml-2" />
+                <ArrowRight className="h-4 w-4 ms-2" />
               </Button>
             </CardContent>
           </Card>

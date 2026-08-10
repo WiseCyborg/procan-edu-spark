@@ -130,7 +130,7 @@ export const UATCompletionAttestation: React.FC<UATCompletionAttestationProps> =
             <Shield className="h-4 w-4" />
             Pre-Production Verification Checklist
           </h4>
-          <div className="space-y-3 pl-6">
+          <div className="space-y-3 ps-6">
             {checklistItems.map((item) => (
               <div key={item.key} className="flex items-center gap-3">
                 <Checkbox

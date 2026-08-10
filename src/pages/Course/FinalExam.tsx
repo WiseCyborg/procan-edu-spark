@@ -902,7 +902,7 @@ const FinalExam: React.FC = () => {
                       value={option}
                       checked={answers[qid] === option}
                       onChange={() => handleAnswerChange(qid, option)}
-                      className="mr-3 h-4 w-4 md:h-5 md:w-5 flex-shrink-0"
+                      className="me-3 h-4 w-4 md:h-5 md:w-5 flex-shrink-0"
                     />
                     <span className="text-sm md:text-base">{option}</span>
                   </label>
@@ -1088,7 +1088,7 @@ const FinalExam: React.FC = () => {
               onClick={() => setShowHistory(!showHistory)}
               className="w-full"
             >
-              <History className="h-4 w-4 mr-2" />
+              <History className="h-4 w-4 me-2" />
               {showHistory ? 'Hide' : 'View'} Attempt History ({attempts.length})
             </Button>
           </div>
@@ -1189,7 +1189,7 @@ const FinalExam: React.FC = () => {
             
             {/* Gate 9: Camera bypass option - Mobile optimized */}
             <div className="border-t pt-3 md:pt-4">
-              <label className="flex items-start space-x-2 cursor-pointer min-h-[44px]">
+              <label className="flex items-start space-x-2 cursor-pointer min-h-[44px] rtl:space-x-reverse">
                 <input
                   type="checkbox"
                   checked={skipPhotoVerification}

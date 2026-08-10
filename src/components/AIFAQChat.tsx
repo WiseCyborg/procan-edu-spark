@@ -123,7 +123,7 @@ Be helpful, concise, and professional. Do not make up statistics or claims. If y
       {/* Chat Button */}
       <Button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-50 hover:scale-110 transition-transform"
+        className="fixed bottom-6 end-6 h-14 w-14 rounded-full shadow-lg z-50 hover:scale-110 transition-transform"
         size="icon"
         aria-label={t('chatbot.title', { defaultValue: 'Ask AiLean' })}
       >
@@ -132,7 +132,7 @@ Be helpful, concise, and professional. Do not make up statistics or claims. If y
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-24 right-6 w-[380px] h-[500px] bg-background border rounded-lg shadow-2xl flex flex-col z-50 animate-scale-in">
+        <div className="fixed bottom-24 end-6 w-[380px] h-[500px] bg-background border rounded-lg shadow-2xl flex flex-col z-50 animate-scale-in">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b bg-primary text-primary-foreground rounded-t-lg">
             <div className="flex items-center gap-2">

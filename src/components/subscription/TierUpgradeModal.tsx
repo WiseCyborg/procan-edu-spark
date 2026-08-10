@@ -105,7 +105,7 @@ export function TierUpgradeModal({
                 onClick={() => setSelectedTier(tier.tierName)}
               >
                 {tier.isPopular && (
-                  <Badge className="absolute -top-2 left-1/2 -translate-x-1/2">
+                  <Badge className="absolute -top-2 start-1/2 -translate-x-1/2">
                     Most Popular
                   </Badge>
                 )}
@@ -163,7 +163,7 @@ export function TierUpgradeModal({
             Cancel
           </Button>
           <Button onClick={handleUpgrade} disabled={!selectedTier || upgrading}>
-            {upgrading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+            {upgrading && <Loader2 className="h-4 w-4 me-2 animate-spin" />}
             {selectedTier 
               ? `Upgrade to ${SUBSCRIPTION_TIERS.find(t => t.tierName === selectedTier)?.displayName}`
               : 'Select a Tier'

@@ -67,12 +67,12 @@ export const AdminDispensarySection = () => {
             >
               {reconciling ? (
                 <>
-                  <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                  <RefreshCw className="me-2 h-4 w-4 animate-spin" />
                   Reconciling Seats...
                 </>
               ) : (
                 <>
-                  <RefreshCw className="mr-2 h-4 w-4" />
+                  <RefreshCw className="me-2 h-4 w-4" />
                   Reconcile All Seats
                 </>
               )}

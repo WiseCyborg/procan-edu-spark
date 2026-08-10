@@ -268,7 +268,7 @@ export function AiLeanCoach() {
 
   if (!isOpen) {
     return (
-      <div className="fixed bottom-6 right-6 z-40 flex flex-col gap-3">
+      <div className="fixed bottom-6 end-6 z-40 flex flex-col gap-3">
         {/* Quick scenario buttons */}
         <div className="flex flex-col gap-2">
           {COACHING_SCENARIOS.map((scenario, idx) => (
@@ -300,7 +300,7 @@ export function AiLeanCoach() {
   }
 
   return (
-    <Card className="fixed bottom-6 right-6 w-96 h-[600px] z-40 shadow-2xl flex flex-col">
+    <Card className="fixed bottom-6 end-6 w-96 h-[600px] z-40 shadow-2xl flex flex-col">
       <CardHeader className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground pb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -345,10 +345,10 @@ export function AiLeanCoach() {
               <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                   <DialogTitle>AiLean Coaching Options</DialogTitle>
-                  <DialogDescription className="space-y-4 pt-4 text-left">
+                  <DialogDescription className="space-y-4 pt-4 text-start">
                     <div>
                       <h4 className="font-semibold text-foreground mb-2">In-App AiLean (This Version)</h4>
-                      <ul className="text-sm space-y-1 list-disc pl-4">
+                      <ul className="text-sm space-y-1 list-disc ps-4">
                         <li>Secure, role-gated access</li>
                         <li>Voice interaction with organization context</li>
                         <li>Integrated with your ProCannEdu data</li>
@@ -357,7 +357,7 @@ export function AiLeanCoach() {
                     </div>
                     <div>
                       <h4 className="font-semibold text-foreground mb-2">ChatGPT AiLean</h4>
-                      <ul className="text-sm space-y-1 list-disc pl-4">
+                      <ul className="text-sm space-y-1 list-disc ps-4">
                         <li>General management guidance</li>
                         <li>No login required</li>
                         <li>Great for demos and quick reference</li>
@@ -396,7 +396,7 @@ export function AiLeanCoach() {
         
         {/* Session History Sidebar */}
         {showSessionHistory && sessions.length > 0 && (
-          <div className="absolute top-full left-0 right-0 mt-2 bg-background border rounded-lg shadow-lg p-4 max-h-64 overflow-y-auto z-50">
+          <div className="absolute top-full start-0 end-0 mt-2 bg-background border rounded-lg shadow-lg p-4 max-h-64 overflow-y-auto z-50">
             <h4 className="font-semibold mb-2 text-sm">Previous Sessions</h4>
             <div className="space-y-2">
               {sessions.map((session) => (
@@ -440,7 +440,7 @@ export function AiLeanCoach() {
               className="cursor-pointer bg-background/10 text-primary-foreground border-primary-foreground/20 hover:bg-background/20 text-xs"
               onClick={() => handleScenarioClick(scenario.prompt)}
             >
-              <scenario.icon className="w-3 h-3 mr-1" />
+              <scenario.icon className="w-3 h-3 me-1" />
               {scenario.title}
             </Badge>
           ))}
@@ -465,7 +465,7 @@ export function AiLeanCoach() {
           {messages.map((msg, idx) => (
             <div
               key={idx}
-              className={`mb-4 ${msg.role === 'user' ? 'text-right' : 'text-left'}`}
+              className={`mb-4 ${msg.role === 'user' ? 'text-end' : 'text-start'}`}
             >
               <div
                 className={`inline-block p-3 rounded-lg max-w-[85%] ${
@@ -480,7 +480,7 @@ export function AiLeanCoach() {
           ))}
 
           {isLoading && (
-            <div className="text-left mb-4">
+            <div className="text-start mb-4">
               <div className="inline-block p-3 rounded-lg bg-muted">
                 <div className="flex gap-1">
                   <span className="w-2 h-2 bg-foreground/40 rounded-full animate-bounce" />

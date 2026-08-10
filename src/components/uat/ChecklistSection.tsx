@@ -68,19 +68,19 @@ export const ChecklistSection: React.FC<ChecklistSectionProps> = ({
           <div className="flex items-center gap-2">
             {stats.pass > 0 && (
               <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/30">
-                <CheckCircle2 className="h-3 w-3 mr-1" />
+                <CheckCircle2 className="h-3 w-3 me-1" />
                 {stats.pass}
               </Badge>
             )}
             {stats.fail > 0 && (
               <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/30">
-                <XCircle className="h-3 w-3 mr-1" />
+                <XCircle className="h-3 w-3 me-1" />
                 {stats.fail}
               </Badge>
             )}
             {stats.pending > 0 && (
               <Badge variant="outline" className="bg-muted text-muted-foreground">
-                <AlertCircle className="h-3 w-3 mr-1" />
+                <AlertCircle className="h-3 w-3 me-1" />
                 {stats.pending}
               </Badge>
             )}

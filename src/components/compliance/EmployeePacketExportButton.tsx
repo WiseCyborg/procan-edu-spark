@@ -78,7 +78,7 @@ export const EmployeePacketExportButton: React.FC<EmployeePacketExportButtonProp
         <Package className="h-4 w-4" />
       )}
       {showLabel && size !== 'icon' && (
-        <span className="ml-2">
+        <span className="ms-2">
           {isLoading ? 'Exporting...' : 'Export Packet'}
         </span>
       )}

@@ -91,7 +91,7 @@ export const ManualFAQEntryDialog: React.FC<ManualFAQEntryDialogProps> = ({ onSu
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline">
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="h-4 w-4 me-2" />
           Add Manual Entry
         </Button>
       </DialogTrigger>
@@ -161,7 +161,7 @@ export const ManualFAQEntryDialog: React.FC<ManualFAQEntryDialogProps> = ({ onSu
             </div>
           </div>
 
-          <div className="flex justify-end space-x-2 pt-4">
+          <div className="flex justify-end space-x-2 pt-4 rtl:space-x-reverse">
             <Button 
               type="button" 
               variant="outline" 

@@ -186,11 +186,11 @@ const VideoRegenerationQueue: React.FC = () => {
             <Button
               variant="outline"
               size="sm"
-              className="ml-auto"
+              className="ms-auto"
               onClick={() => refetch()}
               disabled={isFetching}
             >
-              <RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? 'animate-spin' : ''}`} /> Refresh
+              <RefreshCw className={`h-4 w-4 me-2 ${isFetching ? 'animate-spin' : ''}`} /> Refresh
             </Button>
           </div>
           <p className="text-muted-foreground mt-1">
@@ -241,7 +241,7 @@ const VideoRegenerationQueue: React.FC = () => {
                       <TableHead>Flagged since</TableHead>
                       <TableHead>Draft script</TableHead>
                       <TableHead>Review status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead className="text-end">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -265,11 +265,11 @@ const VideoRegenerationQueue: React.FC = () => {
                           )}
                         </TableCell>
                         <TableCell>{reviewBadge(row.review_status)}</TableCell>
-                        <TableCell className="text-right whitespace-nowrap">
+                        <TableCell className="text-end whitespace-nowrap">
                           <Button
                             variant="outline"
                             size="sm"
-                            className="mr-2"
+                            className="me-2"
                             onClick={() => {
                               setNewUrl('');
                               setNote('');
@@ -328,7 +328,7 @@ const VideoRegenerationQueue: React.FC = () => {
               Cancel
             </Button>
             <Button onClick={submitMarkRegenerated} disabled={busy}>
-              {busy && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              {busy && <Loader2 className="h-4 w-4 me-2 animate-spin" />}
               Save
             </Button>
           </DialogFooter>
@@ -350,7 +350,7 @@ const VideoRegenerationQueue: React.FC = () => {
               Cancel
             </Button>
             <Button onClick={submitApprove} disabled={busy}>
-              {busy && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              {busy && <Loader2 className="h-4 w-4 me-2 animate-spin" />}
               Approve
             </Button>
           </DialogFooter>

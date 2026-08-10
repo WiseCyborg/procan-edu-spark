@@ -154,7 +154,7 @@ export function SubscriptionOverviewCard({ organizationId }: SubscriptionOvervie
                 <Calendar className="h-4 w-4 text-muted-foreground" />
                 <span>Renewal Date</span>
               </div>
-              <div className="text-right">
+              <div className="text-end">
                 <span className="font-medium">
                   {new Date(status.subscription.endDate).toLocaleDateString()}
                 </span>
@@ -173,7 +173,7 @@ export function SubscriptionOverviewCard({ organizationId }: SubscriptionOvervie
                 className="flex-1"
                 variant={isAtCapacity ? 'default' : 'outline'}
               >
-                <TrendingUp className="h-4 w-4 mr-2" />
+                <TrendingUp className="h-4 w-4 me-2" />
                 Upgrade to {nextTier.displayName}
               </Button>
             )}

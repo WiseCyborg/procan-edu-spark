@@ -155,11 +155,11 @@ export function PayPalManagementPanel() {
   const getStatusBadge = () => {
     switch (connectionStatus) {
       case "connected":
-        return <Badge className="bg-green-500"><CheckCircle className="mr-1 h-3 w-3" />Connected</Badge>;
+        return <Badge className="bg-green-500"><CheckCircle className="me-1 h-3 w-3" />Connected</Badge>;
       case "error":
-        return <Badge variant="destructive"><XCircle className="mr-1 h-3 w-3" />Error</Badge>;
+        return <Badge variant="destructive"><XCircle className="me-1 h-3 w-3" />Error</Badge>;
       case "testing":
-        return <Badge variant="secondary"><Loader2 className="mr-1 h-3 w-3 animate-spin" />Testing...</Badge>;
+        return <Badge variant="secondary"><Loader2 className="me-1 h-3 w-3 animate-spin" />Testing...</Badge>;
       default:
         return <Badge variant="outline">Not tested</Badge>;
     }
@@ -177,7 +177,7 @@ export function PayPalManagementPanel() {
       <Card className="p-6">
         <div className="flex items-center justify-center">
           <Loader2 className="h-6 w-6 animate-spin" />
-          <span className="ml-2">Loading PayPal configuration...</span>
+          <span className="ms-2">Loading PayPal configuration...</span>
         </div>
       </Card>
     );
@@ -317,12 +317,12 @@ export function PayPalManagementPanel() {
           >
             {testing ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="me-2 h-4 w-4 animate-spin" />
                 Testing...
               </>
             ) : (
               <>
-                <RefreshCw className="mr-2 h-4 w-4" />
+                <RefreshCw className="me-2 h-4 w-4" />
                 Test Connection
               </>
             )}
@@ -331,7 +331,7 @@ export function PayPalManagementPanel() {
             onClick={fetchCurrentState}
             variant="outline"
           >
-            <RefreshCw className="mr-2 h-4 w-4" />
+            <RefreshCw className="me-2 h-4 w-4" />
             Refresh
           </Button>
           <Button

@@ -364,11 +364,11 @@ export const DispensaryPipelineMonitor = () => {
             </div>
             <div className="flex gap-2">
               <Button onClick={fetchPipelineMetrics} variant="outline" size="sm" disabled={loading}>
-                <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`h-4 w-4 me-2 ${loading ? 'animate-spin' : ''}`} />
                 Refresh
               </Button>
               <Button onClick={testPipeline} variant="outline" size="sm" disabled={testing}>
-                <Play className="h-4 w-4 mr-2" />
+                <Play className="h-4 w-4 me-2" />
                 {testing ? 'Testing...' : 'Test Pipeline'}
               </Button>
             </div>
@@ -428,7 +428,7 @@ export const DispensaryPipelineMonitor = () => {
                       <p className="text-sm text-muted-foreground">{step.description}</p>
                     </div>
                   </div>
-                  <div className="text-right ml-4">
+                  <div className="text-end ms-4">
                     <div className="text-2xl font-bold">{step.count}</div>
                     {step.conversionRate !== undefined && (
                       <div className="text-sm text-muted-foreground flex items-center justify-end gap-1">

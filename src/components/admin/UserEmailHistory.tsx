@@ -154,7 +154,7 @@ export const UserEmailHistory = () => {
               onKeyDown={(e) => e.key === 'Enter' && searchHistory()}
             />
             <Button onClick={searchHistory} disabled={loading}>
-              <Search className="h-4 w-4 mr-2" />
+              <Search className="h-4 w-4 me-2" />
               {loading ? 'Searching...' : 'Search'}
             </Button>
           </div>
@@ -189,27 +189,27 @@ export const UserEmailHistory = () => {
 
                       <div className="space-y-1 text-xs text-muted-foreground">
                         <p>
-                          <Mail className="h-3 w-3 inline mr-1" />
+                          <Mail className="h-3 w-3 inline me-1" />
                           Sent: {event.sent_at ? formatDistanceToNow(new Date(event.sent_at), { addSuffix: true }) : 'Not sent'}
                         </p>
                         
                         {event.opened_at && (
                           <p className="text-green-600">
-                            <Eye className="h-3 w-3 inline mr-1" />
+                            <Eye className="h-3 w-3 inline me-1" />
                             Opened: {formatDistanceToNow(new Date(event.opened_at), { addSuffix: true })}
                           </p>
                         )}
                         
                         {event.clicked_at && (
                           <p className="text-blue-600">
-                            <MousePointerClick className="h-3 w-3 inline mr-1" />
+                            <MousePointerClick className="h-3 w-3 inline me-1" />
                             Clicked: {formatDistanceToNow(new Date(event.clicked_at), { addSuffix: true })}
                           </p>
                         )}
 
                         {event.metadata?.error && (
                           <p className="text-red-500">
-                            <XCircle className="h-3 w-3 inline mr-1" />
+                            <XCircle className="h-3 w-3 inline me-1" />
                             Error: {event.metadata.error}
                           </p>
                         )}

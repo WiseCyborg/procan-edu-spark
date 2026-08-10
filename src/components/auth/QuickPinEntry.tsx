@@ -205,7 +205,7 @@ export const QuickPinEntry: React.FC<QuickPinEntryProps> = ({
             size="lg"
           >
             {loading ? 'Verifying...' : 'Quick Entry'}
-            <Zap className="w-4 h-4 ml-2" />
+            <Zap className="w-4 h-4 ms-2" />
           </Button>
 
           <div className="grid grid-cols-2 gap-2">
@@ -223,7 +223,7 @@ export const QuickPinEntry: React.FC<QuickPinEntryProps> = ({
               onClick={onCancel}
               size="sm"
             >
-              <ArrowLeft className="w-4 h-4 mr-1" />
+              <ArrowLeft className="w-4 h-4 me-1" />
               Back to Login
             </Button>
           </div>

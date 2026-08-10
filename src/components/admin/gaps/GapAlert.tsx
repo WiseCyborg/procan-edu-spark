@@ -32,7 +32,7 @@ export const GapAlert = ({ gap, onAction, onDismiss }: GapAlertProps) => {
               onClick={() => onAction(gap)}
               className="h-7"
             >
-              <Wrench className="h-3 w-3 mr-1" />
+              <Wrench className="h-3 w-3 me-1" />
               Auto-Fix
             </Button>
           )}

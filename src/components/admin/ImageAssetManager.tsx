@@ -122,7 +122,7 @@ export const ImageAssetManager = () => {
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center">
-            <ImageIcon className="h-5 w-5 mr-2" />
+            <ImageIcon className="h-5 w-5 me-2" />
             Image Asset Manager
           </div>
           <Button onClick={runImageAudit} size="sm" variant="outline">

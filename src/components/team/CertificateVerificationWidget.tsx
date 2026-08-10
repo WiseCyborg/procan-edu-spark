@@ -71,12 +71,12 @@ export const CertificateVerificationWidget: React.FC<CertificateVerificationWidg
                       </p>
                       {cert.is_revoked ? (
                         <Badge variant="destructive">
-                          <XCircle className="w-3 h-3 mr-1" />
+                          <XCircle className="w-3 h-3 me-1" />
                           Revoked
                         </Badge>
                       ) : (
                         <Badge variant="default">
-                          <CheckCircle className="w-3 h-3 mr-1" />
+                          <CheckCircle className="w-3 h-3 me-1" />
                           Valid
                         </Badge>
                       )}
@@ -95,7 +95,7 @@ export const CertificateVerificationWidget: React.FC<CertificateVerificationWidg
                     variant="outline"
                     onClick={() => window.open(`/verify-certificate?number=${cert.certificate_number}`, '_blank')}
                   >
-                    <ExternalLink className="w-4 h-4 mr-1" />
+                    <ExternalLink className="w-4 h-4 me-1" />
                     Verify
                   </Button>
                 </div>

@@ -194,7 +194,7 @@ export const CoursePreviewSystem: React.FC = () => {
           variant="outline"
           size="sm"
           onClick={prevModule}
-          className="absolute left-0 z-10"
+          className="absolute start-0 z-10"
           disabled={currentModule === 0}
         >
           <ChevronLeft className="h-4 w-4" />
@@ -209,7 +209,7 @@ export const CoursePreviewSystem: React.FC = () => {
           variant="outline"
           size="sm"
           onClick={nextModule}
-          className="absolute right-0 z-10"
+          className="absolute end-0 z-10"
           disabled={currentModule === modules.length - 1}
         >
           <ChevronRight className="h-4 w-4" />

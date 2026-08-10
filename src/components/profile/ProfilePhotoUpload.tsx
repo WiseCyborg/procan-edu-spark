@@ -164,12 +164,12 @@ export const ProfilePhotoUpload = ({ userId, currentPhotoUrl, onPhotoUpdate }: P
         >
           {uploading ? (
             <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              <Loader2 className="h-4 w-4 me-2 animate-spin" />
               Uploading...
             </>
           ) : (
             <>
-              <Upload className="h-4 w-4 mr-2" />
+              <Upload className="h-4 w-4 me-2" />
               {previewUrl ? 'Change Photo' : 'Upload Photo'}
             </>
           )}
@@ -181,7 +181,7 @@ export const ProfilePhotoUpload = ({ userId, currentPhotoUrl, onPhotoUpdate }: P
             size="sm"
             onClick={handleRemovePhoto}
           >
-            <X className="h-4 w-4 mr-2" />
+            <X className="h-4 w-4 me-2" />
             Remove
           </Button>
         )}

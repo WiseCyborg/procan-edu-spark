@@ -78,7 +78,7 @@ export const CertificateAchievement: React.FC<CertificateAchievementProps> = ({
         >
           {/* Professional ID Photo - Top Right on desktop, centered on mobile */}
           {userPhoto && (
-            <div className="flex justify-center sm:block sm:absolute sm:top-8 sm:right-8 mb-4 sm:mb-0">
+            <div className="flex justify-center sm:block sm:absolute sm:top-8 sm:end-8 mb-4 sm:mb-0">
               <div className="relative">
                 <div className="w-24 h-32 sm:w-32 sm:h-40 rounded-lg overflow-hidden border-4 border-gray-300 shadow-lg bg-white">
                   <img 
@@ -88,14 +88,14 @@ export const CertificateAchievement: React.FC<CertificateAchievementProps> = ({
                   />
                 </div>
                 {/* Verified Badge Overlay */}
-                <div className="absolute -bottom-2 -right-2 bg-stoplight-green rounded-full p-1.5 shadow-md">
+                <div className="absolute -bottom-2 -end-2 bg-stoplight-green rounded-full p-1.5 shadow-md">
                   <BadgeCheck className="w-5 h-5 text-white" />
                 </div>
               </div>
             </div>
           )}
 
-          <div className="text-center space-y-4 sm:pr-40">
+          <div className="text-center space-y-4 sm:pe-40">
             <div className="flex items-center justify-center gap-2 flex-wrap">
               <Badge className={`${tier.bg} text-white text-lg px-4 py-2`}>
                 {tier.emoji} {tierStatus.toUpperCase()} TIER CERTIFIED
@@ -145,7 +145,7 @@ export const CertificateAchievement: React.FC<CertificateAchievementProps> = ({
             onClick={onDownload}
             className="bg-stoplight-green hover:bg-stoplight-green/90 w-full sm:w-auto"
           >
-            <Download className="w-4 h-4 mr-2" />
+            <Download className="w-4 h-4 me-2" />
             Download Certificate
           </Button>
           <Button 
@@ -154,7 +154,7 @@ export const CertificateAchievement: React.FC<CertificateAchievementProps> = ({
             onClick={onShare}
             className="w-full sm:w-auto"
           >
-            <Share2 className="w-4 h-4 mr-2" />
+            <Share2 className="w-4 h-4 me-2" />
             Share Achievement
           </Button>
         </motion.div>

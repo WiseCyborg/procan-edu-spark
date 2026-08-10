@@ -118,7 +118,7 @@ export const MeetingOptionsPanel = ({
           <Label className="text-sm font-medium">Agent Coverage</Label>
           
           <div className="grid gap-3">
-            <div className="flex items-center space-x-3 p-3 border rounded-lg">
+            <div className="flex items-center space-x-3 p-3 border rounded-lg rtl:space-x-reverse">
               <Checkbox
                 id="record"
                 checked={recordAudio}
@@ -134,7 +134,7 @@ export const MeetingOptionsPanel = ({
               <Badge variant="outline" className="text-xs">Default ON</Badge>
             </div>
 
-            <div className="flex items-center space-x-3 p-3 border rounded-lg">
+            <div className="flex items-center space-x-3 p-3 border rounded-lg rtl:space-x-reverse">
               <Checkbox
                 id="transcribe"
                 checked={transcribe}
@@ -150,7 +150,7 @@ export const MeetingOptionsPanel = ({
               <Badge variant="outline" className="text-xs">Default ON</Badge>
             </div>
 
-            <div className="flex items-center space-x-3 p-3 border rounded-lg">
+            <div className="flex items-center space-x-3 p-3 border rounded-lg rtl:space-x-reverse">
               <Checkbox
                 id="summary"
                 checked={generateSummary}
@@ -166,7 +166,7 @@ export const MeetingOptionsPanel = ({
               <Badge variant="outline" className="text-xs">Default ON</Badge>
             </div>
 
-            <div className="flex items-center space-x-3 p-3 border rounded-lg">
+            <div className="flex items-center space-x-3 p-3 border rounded-lg rtl:space-x-reverse">
               <Checkbox
                 id="actions"
                 checked={trackActions}
@@ -199,7 +199,7 @@ export const MeetingOptionsPanel = ({
             Cancel
           </Button>
           <Button onClick={handleStart} className="flex-1">
-            <Bot className="h-4 w-4 mr-2" />
+            <Bot className="h-4 w-4 me-2" />
             Start Covered Session
           </Button>
         </div>

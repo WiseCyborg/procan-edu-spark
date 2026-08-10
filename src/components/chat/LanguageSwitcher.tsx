@@ -77,18 +77,18 @@ export function LanguageSwitcher({ compact = true, onLanguageChange }: LanguageS
       </Button>
 
       {isOpen && (
-        <div className="absolute bottom-full right-0 mb-1 bg-popover border border-border rounded-lg shadow-xl z-50 min-w-[160px] overflow-hidden animate-in slide-in-from-bottom-2 fade-in duration-150">
+        <div className="absolute bottom-full end-0 mb-1 bg-popover border border-border rounded-lg shadow-xl z-50 min-w-[160px] overflow-hidden animate-in slide-in-from-bottom-2 fade-in duration-150">
           {LANGUAGE_OPTIONS.map(lang => (
             <button
               key={lang.code}
               onClick={() => select(lang)}
-              className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left transition-colors hover:bg-accent ${
+              className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-start transition-colors hover:bg-accent ${
                 current.code === lang.code ? 'bg-primary/10 text-primary font-medium' : 'text-foreground'
               }`}
             >
               <span>{lang.flag}</span>
               <span>{lang.nativeLabel}</span>
-              {current.code === lang.code && <span className="ml-auto text-primary text-xs">✓</span>}
+              {current.code === lang.code && <span className="ms-auto text-primary text-xs">✓</span>}
             </button>
           ))}
         </div>

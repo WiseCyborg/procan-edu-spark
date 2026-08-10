@@ -89,7 +89,7 @@ export function RegressionTab() {
                 <Label htmlFor="auto" className="text-sm font-normal">Auto-run after migrations</Label>
               </div>
               <Button onClick={triggerRun} disabled={triggering} size="sm">
-                {triggering ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <PlayCircle className="h-4 w-4 mr-2" />}
+                {triggering ? <Loader2 className="h-4 w-4 me-2 animate-spin" /> : <PlayCircle className="h-4 w-4 me-2" />}
                 Run now
               </Button>
               <Button onClick={load} size="sm" variant="outline"><RefreshCw className="h-4 w-4" /></Button>
@@ -109,7 +109,7 @@ export function RegressionTab() {
                     <div className="flex items-center gap-2 mb-1">
                       <code className="text-xs bg-muted px-2 py-0.5 rounded truncate">{r.migration_version}</code>
                       <Badge variant="outline" className="text-xs">{r.triggered_by}</Badge>
-                      {r.status === "running" && <Badge variant="secondary"><Loader2 className="h-3 w-3 mr-1 animate-spin" />running</Badge>}
+                      {r.status === "running" && <Badge variant="secondary"><Loader2 className="h-3 w-3 me-1 animate-spin" />running</Badge>}
                       {r.verdict && <Badge variant={verdictColor(r.verdict) as any}>{r.verdict}</Badge>}
                       {r.deterministic !== null && (
                         <Badge variant={r.deterministic ? "default" : "destructive"} className="text-xs">
@@ -127,7 +127,7 @@ export function RegressionTab() {
                   </div>
                   {r.report_path && (
                     <Button size="sm" variant="ghost" onClick={() => openReport(r.report_path!)}>
-                      <FileText className="h-4 w-4 mr-1" />Report
+                      <FileText className="h-4 w-4 me-1" />Report
                     </Button>
                   )}
                 </div>

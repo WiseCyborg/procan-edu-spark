@@ -150,7 +150,7 @@ const CourseDetailPage = () => {
 
       <div className="container mx-auto px-4 py-10 max-w-3xl">
         <Button variant="ghost" size="sm" className="mb-6" onClick={() => navigate('/courses')}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
+          <ArrowLeft className="h-4 w-4 me-2" />
           All Courses
         </Button>
 
@@ -190,15 +190,15 @@ const CourseDetailPage = () => {
 
         {hasEntitlement ? (
           <Button size="lg" className="w-full sm:w-auto" onClick={() => navigate(`/courses/${course.id}/learn`)}>
-            <CheckCircle2 className="h-5 w-5 mr-2" />
+            <CheckCircle2 className="h-5 w-5 me-2" />
             Continue Course
           </Button>
         ) : requiresPayment ? (
           <Button size="lg" className="w-full sm:w-auto" onClick={handlePurchase} disabled={isPurchasing}>
             {isPurchasing ? (
-              <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+              <Loader2 className="h-5 w-5 me-2 animate-spin" />
             ) : (
-              <ShoppingCart className="h-5 w-5 mr-2" />
+              <ShoppingCart className="h-5 w-5 me-2" />
             )}
             {isPurchasing ? 'Redirecting…' : `Purchase — ${formatPrice(priceCents, currency)}`}
           </Button>

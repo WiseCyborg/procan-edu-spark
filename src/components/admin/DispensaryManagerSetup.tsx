@@ -147,7 +147,7 @@ const DispensaryManagerSetup = () => {
     if (hasManager) {
       return (
         <Badge className="bg-green-100 text-green-800">
-          <CheckCircle2 className="h-3 w-3 mr-1" />
+          <CheckCircle2 className="h-3 w-3 me-1" />
           Setup Complete
         </Badge>
       );
@@ -155,7 +155,7 @@ const DispensaryManagerSetup = () => {
     
     return (
       <Badge className="bg-amber-100 text-amber-800">
-        <Clock className="h-3 w-3 mr-1" />
+        <Clock className="h-3 w-3 me-1" />
         Setup Needed
       </Badge>
     );
@@ -176,7 +176,7 @@ const DispensaryManagerSetup = () => {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-green-700 flex items-center">
-            <Building2 className="mr-3 h-6 w-6" />
+            <Building2 className="me-3 h-6 w-6" />
             Dispensary Manager Setup
           </h2>
           <p className="text-muted-foreground">Create manager accounts for approved organizations</p>
@@ -188,7 +188,7 @@ const DispensaryManagerSetup = () => {
 
       <div className="grid grid-cols-1 gap-4">
         {organizations.map((org) => (
-          <Card key={org.id} className="border-l-4 border-l-green-500">
+          <Card key={org.id} className="border-s-4 border-s-green-500">
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
@@ -219,7 +219,7 @@ const DispensaryManagerSetup = () => {
                   </div>
                 </div>
 
-                <div className="flex gap-2 ml-4">
+                <div className="flex gap-2 ms-4">
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button
@@ -227,7 +227,7 @@ const DispensaryManagerSetup = () => {
                         size="sm"
                         onClick={() => setSelectedOrganization(org)}
                       >
-                        <UserPlus className="h-4 w-4 mr-1" />
+                        <UserPlus className="h-4 w-4 me-1" />
                         Setup Manager
                       </Button>
                     </DialogTrigger>

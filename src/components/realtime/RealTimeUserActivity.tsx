@@ -168,7 +168,7 @@ export const RealTimeUserActivity = () => {
                           {session.firstName.charAt(0)}{session.lastName.charAt(0)}
                         </AvatarFallback>
                       </Avatar>
-                      <div className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-background ${getStatusColor(session.status)}`} />
+                      <div className={`absolute -bottom-0.5 -end-0.5 h-3 w-3 rounded-full border-2 border-background ${getStatusColor(session.status)}`} />
                     </div>
                     
                     <div className="flex-1 min-w-0">

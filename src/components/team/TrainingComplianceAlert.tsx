@@ -156,7 +156,7 @@ export const TrainingComplianceAlert = ({ organizationId }: { organizationId?: s
         <CardTitle className="flex items-center gap-2">
           <AlertTriangle className="h-5 w-5 text-warning" />
           Training Compliance Alerts
-          <Badge variant="outline" className="ml-2">{alerts.length}</Badge>
+          <Badge variant="outline" className="ms-2">{alerts.length}</Badge>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -188,7 +188,7 @@ export const TrainingComplianceAlert = ({ organizationId }: { organizationId?: s
                       variant="outline"
                       onClick={() => acknowledgeMutation.mutate(alert.id)}
                     >
-                      <Eye className="h-4 w-4 mr-1" />
+                      <Eye className="h-4 w-4 me-1" />
                       Acknowledge
                     </Button>
                   )}

@@ -124,7 +124,7 @@ export const ComplianceBadges = () => {
         variant="secondary" 
         className="floating-badge bg-white/20 text-white border-white/30 px-4 py-2 text-sm backdrop-blur-sm"
       >
-        <Shield className="h-4 w-4 mr-2" />
+        <Shield className="h-4 w-4 me-2" />
         COMAR-Aligned
       </Badge>
       
@@ -133,7 +133,7 @@ export const ComplianceBadges = () => {
         className="floating-badge bg-white/20 text-white border-white/30 px-4 py-2 text-sm backdrop-blur-sm"
         style={{ animationDelay: '0.5s' }}
       >
-        <CheckCircle className="h-4 w-4 mr-2" />
+        <CheckCircle className="h-4 w-4 me-2" />
         COMAR-Aligned
       </Badge>
       
@@ -142,7 +142,7 @@ export const ComplianceBadges = () => {
         className="floating-badge bg-white/20 text-white border-white/30 px-4 py-2 text-sm backdrop-blur-sm"
         style={{ animationDelay: '1s' }}
       >
-        <Award className="h-4 w-4 mr-2" />
+        <Award className="h-4 w-4 me-2" />
         RVT Certification
       </Badge>
     </div>

@@ -78,7 +78,7 @@ export const CertificateManagementView = () => {
 
   const getStatusBadge = (cert: typeof certificates[0]) => {
     if (cert.is_revoked) {
-      return <Badge variant="outline" className="bg-muted text-muted-foreground"><Ban className="h-3 w-3 mr-1" />Revoked</Badge>;
+      return <Badge variant="outline" className="bg-muted text-muted-foreground"><Ban className="h-3 w-3 me-1" />Revoked</Badge>;
     }
     
     const expiryDate = new Date(cert.expiry_date);
@@ -86,12 +86,12 @@ export const CertificateManagementView = () => {
     const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 
     if (expiryDate <= now) {
-      return <Badge variant="outline" className="bg-destructive/10 text-destructive"><XCircle className="h-3 w-3 mr-1" />Expired</Badge>;
+      return <Badge variant="outline" className="bg-destructive/10 text-destructive"><XCircle className="h-3 w-3 me-1" />Expired</Badge>;
     }
     if (expiryDate <= thirtyDaysFromNow) {
-      return <Badge variant="outline" className="bg-warning/10 text-warning"><AlertTriangle className="h-3 w-3 mr-1" />Expiring Soon</Badge>;
+      return <Badge variant="outline" className="bg-warning/10 text-warning"><AlertTriangle className="h-3 w-3 me-1" />Expiring Soon</Badge>;
     }
-    return <Badge variant="outline" className="bg-success/10 text-success"><CheckCircle2 className="h-3 w-3 mr-1" />Valid</Badge>;
+    return <Badge variant="outline" className="bg-success/10 text-success"><CheckCircle2 className="h-3 w-3 me-1" />Valid</Badge>;
   };
 
   const formatDate = (dateString: string) => {
@@ -137,7 +137,7 @@ export const CertificateManagementView = () => {
                 </div>
               </div>
               <Button variant="outline" size="sm">
-                <Mail className="h-4 w-4 mr-2" />
+                <Mail className="h-4 w-4 me-2" />
                 Send Reminders
               </Button>
             </div>
@@ -148,12 +148,12 @@ export const CertificateManagementView = () => {
       {/* Search and Filter */}
       <div className="flex gap-4">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute start-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search by name, cert #, or organization..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-9"
+            className="ps-9"
           />
         </div>
 
@@ -171,7 +171,7 @@ export const CertificateManagementView = () => {
         </Select>
 
         <Button variant="outline">
-          <Download className="h-4 w-4 mr-2" />
+          <Download className="h-4 w-4 me-2" />
           Export CSV
         </Button>
       </div>

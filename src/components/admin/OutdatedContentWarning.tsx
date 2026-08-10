@@ -70,7 +70,7 @@ export const OutdatedContentWarning = () => {
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center">
-            <AlertTriangle className="h-5 w-5 mr-2 text-orange-600" />
+            <AlertTriangle className="h-5 w-5 me-2 text-orange-600" />
             Outdated Content Warnings
           </div>
           {criticalCount > 0 && (
@@ -91,7 +91,7 @@ export const OutdatedContentWarning = () => {
               {outdatedContent.slice(0, 10).map((item) => (
                 <div 
                   key={`${item.content_type}-${item.content_id}`} 
-                  className="flex items-center justify-between border-l-4 pl-4 py-2" 
+                  className="flex items-center justify-between border-s-4 ps-4 py-2" 
                   style={{ borderColor: getStatusColor(item.status) }}
                 >
                   <div className="flex-1">
@@ -101,7 +101,7 @@ export const OutdatedContentWarning = () => {
                         Last updated: {formatDistance(new Date(item.last_updated_at), new Date(), { addSuffix: true })}
                       </span>
                       <span className="flex items-center">
-                        <Scale className="h-3 w-3 mr-1" />
+                        <Scale className="h-3 w-3 me-1" />
                         {item.relevant_regulatory_updates} regulation changes
                       </span>
                     </div>

@@ -99,7 +99,7 @@ const Index = () => {
         </div>
         
         {/* 24 Counties Badge */}
-        <div className={`absolute ${isMobile ? 'top-4 right-4 text-xs px-3 py-1.5' : 'top-8 right-8 px-4 py-2 text-sm'} bg-white/10 backdrop-blur-md rounded-full text-white font-medium animate-float`}>
+        <div className={`absolute ${isMobile ? 'top-4 end-4 text-xs px-3 py-1.5' : 'top-8 end-8 px-4 py-2 text-sm'} bg-white/10 backdrop-blur-md rounded-full text-white font-medium animate-float`}>
           🗺️ Serving All 24 Maryland Counties
         </div>
 
@@ -198,7 +198,7 @@ const Index = () => {
               className="relative bg-white dark:bg-card border-2 border-primary/30 rounded-xl p-6 hover:shadow-xl transition-all cursor-pointer group"
               onClick={() => navigate('/get-started')}
             >
-              <div className="absolute -top-3 left-4 bg-primary text-primary-foreground text-xs px-3 py-1 rounded-full font-semibold">
+              <div className="absolute -top-3 start-4 bg-primary text-primary-foreground text-xs px-3 py-1 rounded-full font-semibold">
                 Required for Employees
               </div>
               <div className="pt-4">
@@ -234,7 +234,7 @@ const Index = () => {
               className="relative bg-white dark:bg-card border-2 border-amber-500/30 rounded-xl p-6 hover:shadow-xl transition-all cursor-pointer group"
               onClick={() => navigate('/get-started')}
             >
-              <div className="absolute -top-3 left-4 bg-amber-500 text-white text-xs px-3 py-1 rounded-full font-semibold">
+              <div className="absolute -top-3 start-4 bg-amber-500 text-white text-xs px-3 py-1 rounded-full font-semibold">
                 Optional Add-On
               </div>
               <div className="pt-4">
@@ -272,7 +272,7 @@ const Index = () => {
               className="relative bg-white dark:bg-card border-2 border-secondary/30 rounded-xl p-6 hover:shadow-xl transition-all cursor-pointer group"
               onClick={() => navigate('/learn')}
             >
-              <div className="absolute -top-3 left-4 bg-secondary text-secondary-foreground text-xs px-3 py-1 rounded-full font-semibold">
+              <div className="absolute -top-3 start-4 bg-secondary text-secondary-foreground text-xs px-3 py-1 rounded-full font-semibold">
                 Free & Open
               </div>
               <div className="pt-4">
@@ -341,23 +341,23 @@ const Index = () => {
                 <h4 className={`font-semibold text-primary ${isMobile ? 'text-lg mb-3' : 'text-xl mb-4'}`}>What You'll Learn</h4>
                 <ul className="space-y-2 text-muted-foreground">
                   <li className="flex items-center">
-                    <CheckCircle className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
+                    <CheckCircle className="h-5 w-5 text-primary me-2 flex-shrink-0" />
                     <span>Maryland cannabis laws and regulations</span>
                   </li>
                   <li className="flex items-center">
-                    <CheckCircle className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
+                    <CheckCircle className="h-5 w-5 text-primary me-2 flex-shrink-0" />
                     <span>Responsible vendor practices</span>
                   </li>
                   <li className="flex items-center">
-                    <CheckCircle className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
+                    <CheckCircle className="h-5 w-5 text-primary me-2 flex-shrink-0" />
                     <span>Patient safety and compliance</span>
                   </li>
                   <li className="flex items-center">
-                    <CheckCircle className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
+                    <CheckCircle className="h-5 w-5 text-primary me-2 flex-shrink-0" />
                     <span>Security and inventory management</span>
                   </li>
                   <li className="flex items-center">
-                    <CheckCircle className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
+                    <CheckCircle className="h-5 w-5 text-primary me-2 flex-shrink-0" />
                     <span>Quality control standards</span>
                   </li>
                 </ul>

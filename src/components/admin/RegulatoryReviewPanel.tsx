@@ -248,7 +248,7 @@ export function RegulatoryReviewPanel() {
           {r.regulatory_updates?.section_number && (
             <Badge variant="outline">COMAR {r.regulatory_updates.section_number}</Badge>
           )}
-          <span className="ml-auto text-xs text-muted-foreground">
+          <span className="ms-auto text-xs text-muted-foreground">
             {new Date(r.created_at).toLocaleString()}
           </span>
         </div>
@@ -303,7 +303,7 @@ export function RegulatoryReviewPanel() {
               </Button>
               {r.draft_video_url && (
                 <Button size="sm" variant="ghost" onClick={() => previewDraft(r)}>
-                  <ExternalLink className="w-3 h-3 mr-1" /> Preview Draft
+                  <ExternalLink className="w-3 h-3 me-1" /> Preview Draft
                 </Button>
               )}
             </div>
@@ -334,7 +334,7 @@ export function RegulatoryReviewPanel() {
               <ShieldAlert className="w-5 h-5 text-primary" />
               Regulatory Review
               {rows.length > 0 && (
-                <Badge variant="destructive" className="ml-2">
+                <Badge variant="destructive" className="ms-2">
                   {rows.length} pending
                 </Badge>
               )}
@@ -353,7 +353,7 @@ export function RegulatoryReviewPanel() {
                 </Button>
               </div>
               {tab === 'pending' && (
-                <div className="flex gap-1 ml-auto">
+                <div className="flex gap-1 ms-auto">
                   {(['all', 'video', 'faq', 'minor', 'major'] as Filter[]).map((f) => (
                     <Button
                       key={f}

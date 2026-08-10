@@ -109,7 +109,7 @@ const WelcomeVideo = () => {
                       disabled={isMarking}
                       className="flex-1"
                     >
-                      <CheckCircle className="h-4 w-4 mr-2" />
+                      <CheckCircle className="h-4 w-4 me-2" />
                       {isMarking ? 'Saving...' : 'Mark as Watched'}
                     </Button>
                   ) : (
@@ -125,7 +125,7 @@ const WelcomeVideo = () => {
                     className="flex-1"
                   >
                     Continue to Course
-                    <ArrowRight className="h-4 w-4 ml-2" />
+                    <ArrowRight className="h-4 w-4 ms-2" />
                   </Button>
                 </div>
               </div>
@@ -139,7 +139,7 @@ const WelcomeVideo = () => {
               onClick={() => navigate('/profile')}
               className="h-auto py-4"
             >
-              <div className="text-left">
+              <div className="text-start">
                 <div className="font-semibold">Complete Profile</div>
                 <div className="text-xs text-muted-foreground">Update your information</div>
               </div>
@@ -149,7 +149,7 @@ const WelcomeVideo = () => {
               onClick={() => navigate('/student-dashboard')}
               className="h-auto py-4"
             >
-              <div className="text-left">
+              <div className="text-start">
                 <div className="font-semibold">Back to Dashboard</div>
                 <div className="text-xs text-muted-foreground">View your progress</div>
               </div>

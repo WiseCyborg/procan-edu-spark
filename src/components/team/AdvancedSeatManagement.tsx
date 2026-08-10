@@ -306,12 +306,12 @@ export function AdvancedSeatManagement({ organizationId }: AdvancedSeatManagemen
                   </CardDescription>
                 </div>
                 <div className="relative w-full sm:w-72">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="Search employees..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9"
+                    className="ps-9"
                   />
                 </div>
               </div>
@@ -368,12 +368,12 @@ export function AdvancedSeatManagement({ organizationId }: AdvancedSeatManagemen
                             >
                               {emp.seat_status === 'used' ? (
                                 <>
-                                  <CheckCircle className="h-3 w-3 mr-1" />
+                                  <CheckCircle className="h-3 w-3 me-1" />
                                   Completed
                                 </>
                               ) : (
                                 <>
-                                  <Clock className="h-3 w-3 mr-1" />
+                                  <Clock className="h-3 w-3 me-1" />
                                   In Progress
                                 </>
                               )}
@@ -384,7 +384,7 @@ export function AdvancedSeatManagement({ organizationId }: AdvancedSeatManagemen
                           </>
                         ) : (
                           <Badge variant="outline">
-                            <AlertCircle className="h-3 w-3 mr-1" />
+                            <AlertCircle className="h-3 w-3 me-1" />
                             No Seat
                           </Badge>
                         )}

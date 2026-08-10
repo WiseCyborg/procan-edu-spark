@@ -95,7 +95,7 @@ export function HealthTab() {
           <CardContent>
             <div className="text-2xl font-bold">24ms</div>
             <p className="text-xs text-green-600 mt-1">
-              <TrendingDown className="h-3 w-3 inline mr-1" />
+              <TrendingDown className="h-3 w-3 inline me-1" />
               Optimal
             </p>
           </CardContent>

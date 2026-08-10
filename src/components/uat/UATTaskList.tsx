@@ -201,7 +201,7 @@ export const UATTaskList: React.FC<UATTaskListProps> = ({ runId, organizationId,
                             </Badge>
                             {task.role_to_test && (
                               <Badge className={ROLE_COLORS[task.role_to_test] || 'bg-muted'}>
-                                <User className="h-3 w-3 mr-1" />
+                                <User className="h-3 w-3 me-1" />
                                 {task.role_to_test.replace('_', ' ')}
                               </Badge>
                             )}
@@ -227,7 +227,7 @@ export const UATTaskList: React.FC<UATTaskListProps> = ({ runId, organizationId,
                             </Button>
                           )}
                           <Badge className={STATUS_CONFIG[task.status]?.color}>
-                            <StatusIcon className="h-3 w-3 mr-1" />
+                            <StatusIcon className="h-3 w-3 me-1" />
                             {STATUS_CONFIG[task.status]?.label}
                           </Badge>
                         </div>
@@ -263,7 +263,7 @@ export const UATTaskList: React.FC<UATTaskListProps> = ({ runId, organizationId,
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-muted-foreground">Test as:</span>
                   <Badge className={ROLE_COLORS[selectedTask.role_to_test] || 'bg-muted'}>
-                    <User className="h-3 w-3 mr-1" />
+                    <User className="h-3 w-3 me-1" />
                     {selectedTask.role_to_test.replace('_', ' ')}
                   </Badge>
                 </div>
@@ -274,7 +274,7 @@ export const UATTaskList: React.FC<UATTaskListProps> = ({ runId, organizationId,
                   size="sm"
                   onClick={() => openDeepLink(selectedTask.deep_link!)}
                 >
-                  <ExternalLink className="h-4 w-4 mr-2" />
+                  <ExternalLink className="h-4 w-4 me-2" />
                   Open Test Page
                 </Button>
               )}
@@ -309,7 +309,7 @@ export const UATTaskList: React.FC<UATTaskListProps> = ({ runId, organizationId,
                 onClick={() => handleStatusChange(selectedTask!.id, 'todo')}
                 disabled={isUpdating || selectedTask?.status === 'todo'}
               >
-                <Clock className="h-4 w-4 mr-2" />
+                <Clock className="h-4 w-4 me-2" />
                 To Do
               </Button>
               <Button
@@ -317,7 +317,7 @@ export const UATTaskList: React.FC<UATTaskListProps> = ({ runId, organizationId,
                 onClick={() => handleStatusChange(selectedTask!.id, 'doing')}
                 disabled={isUpdating || selectedTask?.status === 'doing'}
               >
-                <PlayCircle className="h-4 w-4 mr-2" />
+                <PlayCircle className="h-4 w-4 me-2" />
                 In Progress
               </Button>
               <Button
@@ -326,7 +326,7 @@ export const UATTaskList: React.FC<UATTaskListProps> = ({ runId, organizationId,
                 onClick={() => handleStatusChange(selectedTask!.id, 'blocked')}
                 disabled={isUpdating || selectedTask?.status === 'blocked'}
               >
-                <AlertTriangle className="h-4 w-4 mr-2" />
+                <AlertTriangle className="h-4 w-4 me-2" />
                 Blocked
               </Button>
             </div>
@@ -335,9 +335,9 @@ export const UATTaskList: React.FC<UATTaskListProps> = ({ runId, organizationId,
               disabled={isUpdating}
             >
               {isUpdating ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="h-4 w-4 me-2 animate-spin" />
               ) : (
-                <CheckCircle2 className="h-4 w-4 mr-2" />
+                <CheckCircle2 className="h-4 w-4 me-2" />
               )}
               Mark Complete
             </Button>

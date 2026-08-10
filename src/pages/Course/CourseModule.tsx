@@ -149,7 +149,7 @@ const CourseModule: React.FC = () => {
                         checked={selectedAnswers[index] === option}
                         onChange={() => handleAnswerSelect(index, option)}
                         disabled={submitted}
-                        className="mr-3 h-4 w-4 flex-shrink-0"
+                        className="me-3 h-4 w-4 flex-shrink-0"
                       />
                       <span className="text-base">{option}</span>
                     </label>

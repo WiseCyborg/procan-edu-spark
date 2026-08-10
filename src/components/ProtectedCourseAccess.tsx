@@ -62,7 +62,7 @@ export const ProtectedCourseAccess: React.FC<ProtectedCourseAccessProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 {missingFields.map((field, index) => (
                   <div key={index} className="flex items-center text-sm text-orange-700">
-                    <div className="w-2 h-2 bg-orange-400 rounded-full mr-2"></div>
+                    <div className="w-2 h-2 bg-orange-400 rounded-full me-2"></div>
                     {field}
                   </div>
                 ))}
@@ -71,7 +71,7 @@ export const ProtectedCourseAccess: React.FC<ProtectedCourseAccessProps> = ({
 
             <div className="bg-blue-50 p-4 rounded-lg">
               <h3 className="font-semibold text-blue-800 mb-2 flex items-center">
-                <CheckCircle className="h-5 w-5 mr-2" />
+                <CheckCircle className="h-5 w-5 me-2" />
                 Why Complete Your Profile?
               </h3>
               <ul className="text-sm text-blue-700 space-y-1">
@@ -88,7 +88,7 @@ export const ProtectedCourseAccess: React.FC<ProtectedCourseAccessProps> = ({
                 size="lg"
                 className="bg-orange-600 hover:bg-orange-700 text-white px-8"
               >
-                <User className="h-5 w-5 mr-2" />
+                <User className="h-5 w-5 me-2" />
                 Complete Profile Now
               </Button>
             </div>

@@ -185,12 +185,12 @@ export const E2EValidationReport: React.FC = () => {
           >
             {isRunning ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="me-2 h-4 w-4 animate-spin" />
                 Running Journey Tests...
               </>
             ) : (
               <>
-                <Play className="mr-2 h-4 w-4" />
+                <Play className="me-2 h-4 w-4" />
                 Run E2E Validation
               </>
             )}
@@ -198,12 +198,12 @@ export const E2EValidationReport: React.FC = () => {
           {latestReport && (
             <>
               <Button variant="outline" onClick={exportReport}>
-                <Download className="mr-2 h-4 w-4" />
+                <Download className="me-2 h-4 w-4" />
                 Export
               </Button>
               {latestReport.blocker_count > 0 && (
                 <Button variant="outline" onClick={copyBlockerText}>
-                  <Copy className="mr-2 h-4 w-4" />
+                  <Copy className="me-2 h-4 w-4" />
                   Copy Blockers
                 </Button>
               )}
@@ -389,7 +389,7 @@ export const E2EValidationReport: React.FC = () => {
                     Release Blockers ({latestReport.blocker_count})
                   </CardTitle>
                   <Button variant="outline" size="sm" onClick={copyBlockerText}>
-                    <Copy className="mr-2 h-3 w-3" />
+                    <Copy className="me-2 h-3 w-3" />
                     Copy All
                   </Button>
                 </div>
@@ -596,12 +596,12 @@ export const E2EValidationReport: React.FC = () => {
             <Button onClick={() => runValidation.mutate()} disabled={isRunning}>
               {isRunning ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="me-2 h-4 w-4 animate-spin" />
                   Running...
                 </>
               ) : (
                 <>
-                  <Play className="mr-2 h-4 w-4" />
+                  <Play className="me-2 h-4 w-4" />
                   Run E2E Validation
                 </>
               )}

@@ -87,7 +87,7 @@ export const EmailSystemRecovery = () => {
                   </Badge>
                 ) : (
                   <Badge variant="outline" className="bg-success/10 text-success border-success/20">
-                    <CheckCircle className="h-3 w-3 mr-1" />
+                    <CheckCircle className="h-3 w-3 me-1" />
                     Healthy
                   </Badge>
                 )}
@@ -108,7 +108,7 @@ export const EmailSystemRecovery = () => {
                 variant={isCircuitBreakerOpen ? "destructive" : "outline"}
                 size="sm"
               >
-                <RefreshCw className={`h-4 w-4 mr-2 ${resetCircuitBreaker.isPending ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`h-4 w-4 me-2 ${resetCircuitBreaker.isPending ? 'animate-spin' : ''}`} />
                 Reset
               </Button>
             )}
@@ -146,7 +146,7 @@ export const EmailSystemRecovery = () => {
               variant="outline"
               size="sm"
             >
-              <Settings className={`h-4 w-4 mr-2 ${reconcileSeats.isPending ? 'animate-spin' : ''}`} />
+              <Settings className={`h-4 w-4 me-2 ${reconcileSeats.isPending ? 'animate-spin' : ''}`} />
               Reconcile
             </Button>
           </div>

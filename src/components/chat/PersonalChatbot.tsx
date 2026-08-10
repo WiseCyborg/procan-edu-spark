@@ -273,7 +273,7 @@ export const PersonalChatbot = () => {
       {/* Chat Button */}
       <Button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 left-6 h-14 w-14 rounded-full shadow-lg z-50 hover:scale-110 transition-transform bg-gradient-to-r from-primary to-primary/80"
+        className="fixed bottom-6 start-6 h-14 w-14 rounded-full shadow-lg z-50 hover:scale-110 transition-transform bg-gradient-to-r from-primary to-primary/80"
         size="icon"
         title={`Chat with your assistant, ${context.first_name || 'User'}`}
       >
@@ -282,7 +282,7 @@ export const PersonalChatbot = () => {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-24 left-6 w-[400px] h-[550px] bg-background border rounded-lg shadow-2xl flex flex-col z-50 animate-scale-in">
+        <div className="fixed bottom-24 start-6 w-[400px] h-[550px] bg-background border rounded-lg shadow-2xl flex flex-col z-50 animate-scale-in">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-primary to-primary/80 text-primary-foreground rounded-t-lg">
             <div className="flex items-center gap-2">
@@ -357,7 +357,7 @@ export const PersonalChatbot = () => {
                 
                 {/* Action Buttons */}
                 {msg.role === 'assistant' && msg.actions && msg.actions.length > 0 && (
-                  <div className="flex flex-wrap gap-2 ml-2">
+                  <div className="flex flex-wrap gap-2 ms-2">
                     {msg.actions.slice(0, 4).map((action) => {
                       const IconComponent = iconMap[action.icon] || BookOpen;
                       return (
@@ -369,7 +369,7 @@ export const PersonalChatbot = () => {
                           className="text-xs h-7 px-2"
                           disabled={isLoading}
                         >
-                          <IconComponent className="h-3 w-3 mr-1" />
+                          <IconComponent className="h-3 w-3 me-1" />
                           {action.label}
                         </Button>
                       );

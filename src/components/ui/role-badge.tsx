@@ -47,7 +47,7 @@ export const RoleBadge: React.FC<RoleBadgeProps> = ({ role, className }) => {
 
   return (
     <Badge className={`${config.className} ${className || ''}`}>
-      <Icon className="w-3 h-3 mr-1" />
+      <Icon className="w-3 h-3 me-1" />
       {config.label}
     </Badge>
   );

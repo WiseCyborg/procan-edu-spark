@@ -74,8 +74,8 @@ export const CourseNavigationHeader = ({
               Module {currentModuleNumber}: {currentModuleTitle}
             </span>
             {isManagerModule && (
-              <Badge variant="outline" className="ml-2 text-amber-600 border-amber-300">
-                <Users className="h-3 w-3 mr-1" />
+              <Badge variant="outline" className="ms-2 text-amber-600 border-amber-300">
+                <Users className="h-3 w-3 me-1" />
                 Manager Track
               </Badge>
             )}
