@@ -25,7 +25,28 @@ serve(async (req) => {
       );
     }
 
-    // Revoke the proxy session
+    const authorization = req.headers.get('Authorization');
+    const token = authorization?.startsWith('Bearer ')
+      ? authorization.slice('Bearer '.length)
+      : null;
+
+    if (!token) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { data: { user: caller }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !caller) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Revoke the proxy session only when the caller is a participant
     const { data: session, error: updateError } = await supabase
       .from('admin_proxy_sessions')
       .update({ 
@@ -33,14 +54,15 @@ serve(async (req) => {
         revoked_at: new Date().toISOString() 
       })
       .eq('id', sessionId)
+      .or(`admin_user_id.eq.${caller.id},target_user_id.eq.${caller.id}`)
       .select('admin_user_id, target_user_id')
       .single();
 
-    if (updateError) {
-      console.error('[admin-end-proxy-session] Error revoking session:', updateError);
+    if (updateError || !session) {
+      console.error('[admin-end-proxy-session] Session not found or caller not authorized:', updateError);
       return new Response(
-        JSON.stringify({ error: 'Failed to end proxy session' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'Session not found or not authorized' }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
