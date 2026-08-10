@@ -184,7 +184,7 @@ export const AdminProxyProvider = ({ children }: { children: ReactNode }) => {
       });
 
       // Redirect to sign-in page
-      window.location.href = '/sign-in';
+      window.location.href = '/auth';
 
     } catch (err) {
       console.error('[AdminProxy] Error ending session:', err);
