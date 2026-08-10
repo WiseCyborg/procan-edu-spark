@@ -21,8 +21,10 @@ import fr from "./locales/fr.json";
 import ko from "./locales/ko.json";
 import vi from "./locales/vi.json";
 import am from "./locales/am.json";
+import pt from "./locales/pt.json";
+import ru from "./locales/ru.json";
 
-export const SUPPORTED_LANGUAGES = ["en", "es", "zh", "fr", "ko", "vi", "am"] as const;
+export const SUPPORTED_LANGUAGES = ["en", "es", "zh", "fr", "ko", "vi", "am", "pt", "ru"] as const;
 export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
 
 export const LANGUAGE_STORAGE_KEY = "procann_language";
@@ -35,6 +37,8 @@ export const LANGUAGE_LABELS: Record<SupportedLanguage, { code: string; native: 
   ko: { code: "KO", native: "한국어", english: "Korean" },
   vi: { code: "VI", native: "Tiếng Việt", english: "Vietnamese" },
   am: { code: "AM", native: "አማርኛ", english: "Amharic" },
+  pt: { code: "PT", native: "Português", english: "Portuguese" },
+  ru: { code: "RU", native: "Русский", english: "Russian" },
 };
 
 export function isSupportedLanguage(value: unknown): value is SupportedLanguage {
@@ -53,6 +57,8 @@ i18n
       ko: { translation: ko },
       vi: { translation: vi },
       am: { translation: am },
+      pt: { translation: pt },
+      ru: { translation: ru },
     },
     fallbackLng: "en",
     supportedLngs: [...SUPPORTED_LANGUAGES],

@@ -14,9 +14,9 @@
  * weakens the anti-leak signal (the model recognises the English directive as
  * higher-priority). This is intentional.
  */
-export type ChatLanguage = "en" | "es" | "zh" | "fr" | "ko" | "vi" | "am";
+export type ChatLanguage = "en" | "es" | "zh" | "fr" | "ko" | "vi" | "am" | "pt" | "ru";
 
-const SUPPORTED: ChatLanguage[] = ["en", "es", "zh", "fr", "ko", "vi", "am"];
+const SUPPORTED: ChatLanguage[] = ["en", "es", "zh", "fr", "ko", "vi", "am", "pt", "ru"];
 
 export function normalizeChatLanguage(input?: string | null): ChatLanguage {
   if (!input) return "en";
@@ -31,6 +31,20 @@ export function localizedPromptHead(lang: ChatLanguage, isoDate: string): string
 Eres AiLean, el asistente de formación de ProCann Edu para profesionales del cannabis de Maryland.
 IDIOMA DE RESPUESTA (ESTRICTO): responde SIEMPRE en español, independientemente del idioma en que el usuario escriba su pregunta. Fecha actual: ${isoDate}. Idioma seleccionado del usuario: es.
 Nota: las referencias COMAR se proporcionan en inglés por ahora; cítalas con sus números y títulos originales y luego explica brevemente en español.
+`.trim();
+
+    case "pt":
+      return `
+Você é o AiLean, o assistente de treinamento da ProCann Edu para profissionais de cannabis de Maryland.
+IDIOMA DE RESPOSTA (ESTRITO): responda SEMPRE em português, independentemente do idioma em que o usuário escrever a pergunta. Data atual: ${isoDate}. Idioma selecionado pelo usuário: pt.
+Observação: as referências ao COMAR permanecem em inglês por enquanto; cite-as com os números e títulos originais e depois explique brevemente em português.
+`.trim();
+
+    case "ru":
+      return `
+Вы — AiLean, обучающий ассистент ProCann Edu для специалистов отрасли каннабиса штата Мэриленд.
+ЯЗЫК ОТВЕТА (СТРОГО): всегда отвечайте на русском языке, независимо от того, на каком языке пользователь задал вопрос. Текущая дата: ${isoDate}. Выбранный пользователем язык: ru.
+Примечание: ссылки на COMAR пока предоставляются на английском языке; сохраняйте исходные номера и английские заголовки, а затем кратко поясняйте на русском.
 `.trim();
 
     case "fr":
