@@ -22,6 +22,7 @@ import { RegulatoryReviewPanel } from '@/components/admin/RegulatoryReviewPanel'
 import { LearnerProgressPanel } from '@/components/admin/LearnerProgressPanel';
 import { VideoReviewPanel } from '@/components/admin/VideoReviewPanel';
 import { AIReportingSummaryPanel } from '@/components/admin/AIReportingSummaryPanel';
+import { FinancialsPanel } from '@/components/admin/FinancialsPanel';
 import { Loader2 } from 'lucide-react';
 import { InternalChatbot } from '@/components/chat/InternalChatbot';
 import { NextActionBanner } from '@/components/guidance/NextActionBanner';
