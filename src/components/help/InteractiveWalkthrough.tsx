@@ -307,7 +307,7 @@ export const InteractiveWalkthrough: React.FC<InteractiveWalkthroughProps> = ({
                 width: targetRect.width + 16,
                 height: targetRect.height + 16,
                 boxShadow: '0 0 0 9999px rgba(0,0,0,0.6)',
-                pointerEvents: 'auto'
+                pointerEvents: 'none'
               }}
             >
               <motion.div
