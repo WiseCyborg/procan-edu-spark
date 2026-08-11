@@ -322,6 +322,7 @@ export const ConversationView = ({
           
           <div data-tour="video-call-button">
             <VideoCallButton 
+              ref={videoCallButtonRef}
               conversationId={conversationId}
               conversationTitle={conversationTitle}
               conversationType={conversationType}
