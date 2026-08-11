@@ -156,6 +156,31 @@ const AdminMissionControl = () => {
           )}
         </Card>
 
+        {/* Financials — Closed-Loop Accounting (admin-only) */}
+        <Card>
+          <CardHeader
+            className="cursor-pointer hover:bg-muted/50 transition-colors"
+            onClick={() => toggleSection('financials')}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <TrendingUp className="h-5 w-5 text-primary" />
+                <div>
+                  <CardTitle>Financials — Closed-Loop Accounting</CardTitle>
+                  <CardDescription>PayPal revenue, fees, net, and QuickBooks reconciliation — for the partners</CardDescription>
+                </div>
+              </div>
+              {expandedSection === 'financials' ? <ChevronUp /> : <ChevronDown />}
+            </div>
+          </CardHeader>
+          {expandedSection === 'financials' && (
+            <CardContent className="pt-6">
+              <FinancialsPanel />
+            </CardContent>
+          )}
+        </Card>
+
+
         {/* Regulatory Review (human approval gate) */}
         <RegulatoryReviewPanel />
 
