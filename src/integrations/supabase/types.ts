@@ -8524,6 +8524,30 @@ export type Database = {
         }
         Relationships: []
       }
+      qbo_credentials: {
+        Row: {
+          environment: string
+          id: number
+          realm_id: string | null
+          refresh_token: string | null
+          updated_at: string
+        }
+        Insert: {
+          environment?: string
+          id?: number
+          realm_id?: string | null
+          refresh_token?: string | null
+          updated_at?: string
+        }
+        Update: {
+          environment?: string
+          id?: number
+          realm_id?: string | null
+          refresh_token?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       rate_limits: {
         Row: {
           action_type: string
