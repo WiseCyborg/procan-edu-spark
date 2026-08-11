@@ -20,7 +20,11 @@ const MAX_TOKENS = 400;
 const SESSION_TURN_CAP = 15;
 const IP_HOURLY_CAP = 40;
 const LLM_TIMEOUT_MS = 20000;
-const MODEL = "google/gemini-2.5-flash";
+// Primary: Gemini direct (GEMINI_API_KEY) — keeps unbounded public traffic off the
+// Lovable credit budget. Fallback: the Lovable AI gateway, so a bad/expired/quota'd
+// key can never take the public page down.
+const GEMINI_MODEL = "gemini-2.5-flash";
+const GATEWAY_MODEL = "google/gemini-2.5-flash";
 
 const GUARDRAIL_BLOCK = [
   "=== NON-NEGOTIABLE SECURITY DIRECTIVE ===",
@@ -68,8 +72,26 @@ const CONSUMER_RAILS = [
   "ALWAYS:",
   "- Assume the reader is a Maryland adult. If anything suggests the reader is under 21, or is asking on",
   "  behalf of someone under 21, decline warmly and stop.",
-  "- Keep answers short and plain: 3 to 5 sentences, no jargon, no bullet-point walls.",
   "- Say plainly when something varies by dispensary or by a person's situation.",
+  "",
+  "HOW TO WRITE (this is a public page, and your answers are also read aloud):",
+  "- Aim for a 6th-to-7th grade reading level. Plain, natural, spoken English.",
+  "- SENTENCE LENGTH IS THE WHOLE GAME. Most sentences 10 to 14 words. None over 18.",
+  "  If a sentence needs two commas to hold together, make it two sentences.",
+  "  Say it out loud in your head. If you'd run short of breath, cut it in half.",
+  "- One idea per sentence. Never join two facts with \"and\", \"which\", or \"along with\".",
+  "- Everyday words. Say \"buy\" not \"purchase\", \"rules\" not \"regulations\", \"store\" not \"retail",
+  "  establishment\", \"they check your ID\" not \"credentials are verified\".",
+  "- If an industry or legal term is unavoidable, use it once and explain it in the same breath.",
+  "- Use contractions and speak to the person directly: \"you'll need\", \"here's what happens\".",
+  "- Active voice. Never bullet lists, headings, asterisks, or emojis - it all gets spoken aloud.",
+  "- Sound like a person talking, not a pamphlet or a legal notice.",
+  "",
+  "HARD LENGTH LIMIT: 5 sentences, one paragraph, and that is the ceiling - not a target to fill.",
+  "This applies MOST when the reference material below is long and detailed. A long reference pack",
+  "is not permission to write a long answer. Pick the one or two points that actually answer what",
+  "was asked, say those plainly, and leave everything else out. Someone can always ask a follow-up.",
+  "Never string more than three items into one sentence.",
   "",
   "NEVER:",
   "- Give medical advice, diagnose, suggest cannabis for a condition, or comment on drug interactions.",
@@ -113,6 +135,86 @@ const json = (body: unknown, status = 200) =>
     status,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
+
+interface ModelResult {
+  ok: boolean;
+  answer?: string;
+  status?: number;
+  detail?: string;
+}
+
+type Msg = { role: "user" | "assistant"; content: string };
+
+// Gemini's REST shape differs from OpenAI's: system prompt goes in systemInstruction,
+// the assistant role is called "model", and 2.5-flash spends output tokens on hidden
+// reasoning unless thinkingBudget is 0 — which would otherwise return an empty answer.
+async function callGeminiDirect(
+  key: string, systemPrompt: string, history: Msg[], question: string, signal: AbortSignal,
+): Promise<ModelResult> {
+  const contents = [
+    ...history.map((m) => ({
+      role: m.role === "assistant" ? "model" : "user",
+      parts: [{ text: m.content }],
+    })),
+    { role: "user", parts: [{ text: question }] },
+  ];
+
+  const res = await fetch(
+    "https://generativelanguage.googleapis.com/v1beta/models/" + GEMINI_MODEL +
+      ":generateContent?key=" + encodeURIComponent(key),
+    {
+      method: "POST",
+      signal,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: systemPrompt }] },
+        contents,
+        generationConfig: {
+          maxOutputTokens: 600,
+          temperature: 0.5,
+          thinkingConfig: { thinkingBudget: 0 },
+        },
+      }),
+    },
+  );
+
+  if (!res.ok) {
+    return { ok: false, status: res.status, detail: (await res.text().catch(() => "")).slice(0, 300) };
+  }
+  const j = await res.json();
+  const text: string = (j?.candidates?.[0]?.content?.parts ?? [])
+    .map((p: any) => p?.text ?? "").join("").trim();
+  if (!text) {
+    return { ok: false, status: 200, detail: "empty candidate: " + JSON.stringify(j).slice(0, 300) };
+  }
+  return { ok: true, answer: text };
+}
+
+async function callLovableGateway(
+  key: string, systemPrompt: string, history: Msg[], question: string, signal: AbortSignal,
+): Promise<ModelResult> {
+  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    signal,
+    headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: GATEWAY_MODEL,
+      messages: [
+        { role: "system", content: systemPrompt },
+        ...history,
+        { role: "user", content: question },
+      ],
+      max_tokens: MAX_TOKENS,
+      temperature: 0.5,
+    }),
+  });
+  if (!res.ok) {
+    return { ok: false, status: res.status, detail: (await res.text().catch(() => "")).slice(0, 300) };
+  }
+  const j = await res.json();
+  const text: string = (j?.choices?.[0]?.message?.content ?? "").trim();
+  return text ? { ok: true, answer: text } : { ok: false, status: 200, detail: "empty completion" };
+}
 
 async function hashIp(ip: string): Promise<string> {
   const salt = Deno.env.get("PUBLIC_GUIDE_IP_SALT") ?? "procannedu-public-guide-v1";
@@ -284,8 +386,11 @@ serve(async (req) => {
       console.error("[public-guide-chat] next-step lookup failed", e);
     }
 
+    const geminiKey = Deno.env.get("GEMINI_API_KEY");
     const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
-    if (!lovableApiKey) throw new Error("LOVABLE_API_KEY not configured");
+    if (!geminiKey && !lovableApiKey) {
+      throw new Error("No model key configured (GEMINI_API_KEY or LOVABLE_API_KEY)");
+    }
 
     const systemPrompt = [
       GUARDRAIL_BLOCK,
@@ -301,40 +406,36 @@ serve(async (req) => {
 
     const ac = new AbortController();
     const timer = setTimeout(() => ac.abort(), LLM_TIMEOUT_MS);
-    let res: Response;
+    let result: ModelResult = { ok: false };
+    let provider: string | null = null;
     try {
-      res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        signal: ac.signal,
-        headers: { Authorization: "Bearer " + lovableApiKey, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: MODEL,
-          messages: [
-            { role: "system", content: systemPrompt },
-            ...history,
-            { role: "user", content: question },
-          ],
-          max_tokens: MAX_TOKENS,
-          temperature: 0.5,
-        }),
-      });
+      if (geminiKey) {
+        provider = "gemini_direct";
+        result = await callGeminiDirect(geminiKey, systemPrompt, history, question, ac.signal);
+        if (!result.ok) {
+          console.error("[public-guide-chat] gemini direct failed", result.status, result.detail);
+        }
+      }
+      if (!result.ok && lovableApiKey) {
+        provider = "lovable_gateway";
+        result = await callLovableGateway(lovableApiKey, systemPrompt, history, question, ac.signal);
+        if (!result.ok) {
+          console.error("[public-guide-chat] lovable gateway failed", result.status, result.detail);
+        }
+      }
     } finally {
       clearTimeout(timer);
     }
 
-    if (!res.ok) {
-      const status = res.status;
-      console.error("[public-guide-chat] gateway error", status, await res.text().catch(() => ""));
-      const answer = status === 429
+    if (!result.ok || !result.answer) {
+      const answer = result.status === 429
         ? "A lot of people are asking questions right now. Try me again in a moment."
         : "I couldn't reach my notes just then. Try again in a moment, or start one of the free courses below.";
-      await logTurn({ answer, blocked_reason: "gateway_" + status, lang });
+      await logTurn({ answer, blocked_reason: "model_" + (result.status ?? "error"), provider, lang });
       return json({ answer, citations: [], next_step: nextStep, turns_remaining: turnsRemaining });
     }
 
-    const data = await res.json();
-    const raw = data?.choices?.[0]?.message?.content ?? "";
-    let answer = filterOutput(raw);
+    let answer = filterOutput(result.answer);
     if (BANNED_NAMING.test(answer)) {
       console.error("[naming_violation]", { fn: "public-guide-chat", snippet: answer.slice(0, 160) });
       answer = NAMING_FALLBACK;
@@ -343,9 +444,25 @@ serve(async (req) => {
     // Never pair a refusal with a "keep learning" card — it reads as if we answered.
     const finalNextStep = (answer === REFUSAL_RESPONSE || answer === NAMING_FALLBACK) ? null : nextStep;
 
-    await logTurn({ answer, citations: usedCitations, suggested_module: finalNextStep, lang });
+    // The written answer keeps its inline "(COMAR 14.17.xx.xx)" markers — the page renders
+    // them as source chips, and the citation match above depends on them. But spoken aloud
+    // they sound like a robot reading a docket number, which breaks the 6th-grade voice.
+    // `spoken` is the same answer with those parentheticals stripped, for text-to-voice.
+    const spoken = answer
+      .replace(/\s*\((?:see\s+)?COMAR[^)]*\)/gi, "")
+      .replace(/\s+([.,;:!?])/g, "$1")
+      .replace(/\s{2,}/g, " ")
+      .trim();
 
-    return json({ answer, citations: usedCitations, next_step: finalNextStep, turns_remaining: turnsRemaining });
+    await logTurn({ answer, citations: usedCitations, suggested_module: finalNextStep, provider, lang });
+
+    return json({
+      answer,
+      spoken,
+      citations: usedCitations,
+      next_step: finalNextStep,
+      turns_remaining: turnsRemaining,
+    });
   } catch (err) {
     console.error("[public-guide-chat] unhandled", err);
     const answer = "Something went wrong on my end. The free courses below are still open, and you can always reach a person at procannedu@gmail.com.";
