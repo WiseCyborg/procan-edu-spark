@@ -527,7 +527,7 @@ export default function AskBudPanel() {
                     placeholder="Ask about your first visit, the rules, products…"
                     aria-label="Ask Bud a question"
                   />
-                  {MIC_ENABLED && null}
+                  
                   <Button type="submit" disabled={loading || exhausted || !input.trim()} aria-label="Send">
                     {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                   </Button>
