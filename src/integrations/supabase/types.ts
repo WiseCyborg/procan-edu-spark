@@ -13116,6 +13116,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      check_scraper_freshness: { Args: never; Returns: Json }
       check_seat_availability: {
         Args: { course_id: string; org_id: string }
         Returns: boolean
