@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { RVT_TRAINING_MODULE_COUNT } from '@/constants/tracks';
 import { 
   Shield, 
   FileText, 
@@ -208,7 +209,7 @@ const MCAComplianceReview = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-muted-foreground">
-              Our 23-module curriculum is specifically designed to meet and exceed COMAR 14.17.15.05 requirements for Responsible Vendor Training in Maryland.
+              Our {RVT_TRAINING_MODULE_COUNT}-module curriculum is specifically designed to meet and exceed COMAR 14.17.15.05 requirements for Responsible Vendor Training in Maryland.
             </p>
             <div className="space-y-2">
               <div className="flex items-start gap-2">
@@ -314,7 +315,7 @@ const MCAComplianceReview = () => {
             <div>
               <h3 className="font-semibold text-foreground mb-2">Team Qualifications</h3>
               <p className="text-muted-foreground">
-                Our curriculum development team includes Maryland-based cannabis educators, compliance professionals, and industry veterans with combined 50+ years of experience in cannabis regulations and training.
+                Our curriculum development team includes Maryland-based cannabis educators, compliance professionals, and a team with deep experience in cannabis regulations and training.
               </p>
             </div>
             <div>

@@ -118,7 +118,7 @@ export default function ROICalculatorPublic() {
                   step={5}
                   className="mb-2"
                 />
-                <p className="text-xs text-muted-foreground">Estimate if unsure (Maryland avg: 78%)</p>
+                <p className="text-xs text-muted-foreground">Estimate if unsure</p>
               </div>
 
               {/* Average Hourly Wage */}

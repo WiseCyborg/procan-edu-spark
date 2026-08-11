@@ -5,6 +5,8 @@
  * resume states, and access rules.
  */
 
+export const RVT_TRAINING_MODULE_COUNT = 23;
+
 export const TRACK_IDS = {
   /** RVT Core Employee Training - Maryland MCA Responsible Vendor Training */
   RVT_CORE: 'e6841a2f-4e92-47c3-9ed4-243ccc22338b',

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { RVT_TRAINING_MODULE_COUNT } from '@/constants/tracks';
 import { 
   ChevronLeft, 
   ChevronRight, 
@@ -229,7 +230,7 @@ export const CoursePreviewSystem: React.FC = () => {
         <Card>
           <CardContent className="p-4 text-center">
             <BookOpen className="h-6 w-6 mx-auto mb-2 text-primary" />
-            <div className="text-2xl font-bold">19</div>
+            <div className="text-2xl font-bold">{RVT_TRAINING_MODULE_COUNT}</div>
             <div className="text-sm text-muted-foreground">Modules</div>
           </CardContent>
         </Card>

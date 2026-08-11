@@ -39,7 +39,7 @@ export default function AboutTeamPage() {
                     Experience
                   </h4>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    15+ years of combined cannabis industry experience across Maryland's regulatory landscape. 
+                    Combined cannabis industry and compliance experience across Maryland's regulatory landscape. 
                     Our team has worked directly with the Maryland Cannabis Administration (MCA) and understands 
                     the unique challenges facing Maryland dispensaries and cannabis professionals.
                   </p>
@@ -242,7 +242,7 @@ export default function AboutTeamPage() {
                 <Award className="h-8 w-8 text-primary" />
               </div>
               <p className="font-semibold">Maryland Dispensary Partnerships</p>
-              <p className="text-xs text-muted-foreground mt-1">15+ Partner Organizations</p>
+              <p className="text-xs text-muted-foreground mt-1">Maryland dispensary partners</p>
             </div>
           </div>
         </CardContent>

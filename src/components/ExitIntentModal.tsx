@@ -101,8 +101,8 @@ export const ExitIntentModal = () => {
               <div className="text-sm text-muted-foreground">Max Allowed</div>
             </div>
             <div className="space-y-1">
-              <div className="text-2xl font-bold text-primary">100%</div>
-              <div className="text-sm text-muted-foreground">Compliant</div>
+              <div className="text-2xl font-bold text-primary">COMAR</div>
+              <div className="text-sm text-muted-foreground">Aligned</div>
             </div>
             <div className="space-y-1">
               <div className="text-2xl font-bold text-primary">Free</div>
