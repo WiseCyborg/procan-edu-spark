@@ -1,14 +1,34 @@
+import { toast } from 'sonner';
+
 // Register service worker for PWA functionality
 export const registerServiceWorker = async (): Promise<void> => {
   if ('serviceWorker' in navigator && import.meta.env.PROD) {
     try {
-      const registration = await navigator.serviceWorker.register('/service-worker.js');
+      const buildId = import.meta.env.VITE_BUILD_ID || 'dev';
+      const registration = await navigator.serviceWorker.register(
+        `/service-worker.js?v=${buildId}`
+      );
       console.log('Service Worker registered successfully:', registration);
+
+      // Reload exactly once when the new worker takes control.
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (refreshing) return;
+        refreshing = true;
+        window.location.reload();
+      });
 
       // Check for updates periodically
       setInterval(() => {
         registration.update();
       }, 60 * 60 * 1000); // Check every hour
+
+      // Also check whenever the tab becomes visible again
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          registration.update();
+        }
+      });
 
       // Handle service worker updates
       registration.addEventListener('updatefound', () => {
@@ -16,10 +36,15 @@ export const registerServiceWorker = async (): Promise<void> => {
         if (newWorker) {
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              // New service worker available, prompt user to reload
-              if (confirm('New version available! Reload to update?')) {
-                window.location.reload();
-              }
+              // Non-blocking prompt: never force a reload (a learner may be mid-exam).
+              toast('A new version of ProCann Edu is available', {
+                description: 'Reload when you are ready — your current page will refresh.',
+                duration: Infinity,
+                action: {
+                  label: 'Reload',
+                  onClick: () => window.location.reload(),
+                },
+              });
             }
           });
         }
