@@ -28,6 +28,8 @@ interface NextStep {
 
 interface GuideResponse {
   answer: string;
+  /** Same as `answer` with inline "(COMAR ...)" markers stripped, for text-to-speech. */
+  spoken?: string;
   citations?: Citation[];
   next_step?: NextStep | null;
   turns_remaining?: number | null;
@@ -283,7 +285,8 @@ export default function AskBudPanel() {
         if (payload.disabled === true || payload.turns_remaining === 0) setExhausted(true);
 
         if (soundOn) {
-          void speak(payload.answer);
+          // Display keeps the COMAR markers (they render as source chips); speech drops them.
+          void speak(payload.spoken || payload.answer);
         } else {
           setOrbState('idle');
         }
