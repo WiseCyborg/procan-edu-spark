@@ -45,9 +45,11 @@ export const UniversalCourseCard = ({
 
   const isLocked = launchTarget && !launchTarget.can_access && launchTarget.deny_reason === 'prerequisite_required';
   const isComingSoon = launchTarget && !launchTarget.can_access && launchTarget.deny_reason === 'course_not_published';
-  const requiresPayment = launchTarget && !launchTarget.can_access && launchTarget.deny_reason === 'payment_required';
-  const hasCertificate = launchTarget?.has_certificate;
   const priceCents = (launchTarget as { price_cents?: number })?.price_cents;
+  const requiresPayment = launchTarget && !launchTarget.can_access && launchTarget.deny_reason === 'payment_required';
+  const needsAuthToBuy = Boolean(launchTarget && !launchTarget.can_access && launchTarget.deny_reason === 'auth_required' && priceCents);
+  const showPaygate = Boolean(requiresPayment || needsAuthToBuy);
+  const hasCertificate = launchTarget?.has_certificate;
 
   const handlePurchase = async () => {
     setIsPurchasing(true);
@@ -95,7 +97,7 @@ export const UniversalCourseCard = ({
       return 'Coming Soon';
     }
 
-    if (requiresPayment && priceCents) {
+    if (showPaygate && priceCents) {
       return (
         <>
           <ShoppingCart className="me-2 h-4 w-4" />
@@ -220,7 +222,7 @@ export const UniversalCourseCard = ({
           onClick={() => requiresPayment ? handlePurchase() : launchCourse(course.id)}
           className="w-full"
           size="lg"
-          variant={isLocked || isComingSoon ? "outline" : requiresPayment ? "default" : hasCertificate ? "secondary" : "default"}
+          variant={isLocked || isComingSoon ? "outline" : showPaygate ? "default" : hasCertificate ? "secondary" : "default"}
           disabled={isLoading || isComingSoon || isPurchasing}
         >
           {getButtonContent()}
