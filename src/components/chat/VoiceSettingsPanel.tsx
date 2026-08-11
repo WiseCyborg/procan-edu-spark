@@ -34,7 +34,7 @@ export const VoiceSettingsPanel: React.FC<VoiceSettingsPanelProps> = ({
     if (isSpeaking) {
       stop();
     } else {
-      speak(testText, { priority: 'high' });
+      speak(testText, { priority: 'high', force: true });
     }
   };
 
