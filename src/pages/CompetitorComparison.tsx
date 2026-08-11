@@ -53,7 +53,7 @@ export default function CompetitorComparison() {
           <CardHeader>
             <CardTitle className="text-2xl md:text-3xl text-center">What Makes ProCann Edu Unique</CardTitle>
             <p className="text-center text-muted-foreground mt-2">
-              Objective comparison of Maryland-specific features (as of January 2025)
+              Objective comparison of Maryland-specific features based on publicly available information
             </p>
           </CardHeader>
           <CardContent className="overflow-x-auto">
@@ -76,7 +76,7 @@ export default function CompetitorComparison() {
               </TableBody>
             </Table>
             <p className="text-xs text-muted-foreground mt-4 text-center">
-              Data verified through public information and platform features as of January 2025
+              Based on publicly available information and platform features
             </p>
           </CardContent>
         </Card>

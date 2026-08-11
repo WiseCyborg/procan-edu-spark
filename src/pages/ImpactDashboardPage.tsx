@@ -132,7 +132,7 @@ export default function ImpactDashboardPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-4xl font-bold mb-2">{metrics?.thisYearCerts || 0}</p>
-                <p className="text-sm text-muted-foreground">Certificates issued in 2025</p>
+                <p className="text-sm text-muted-foreground">Certificates issued in {new Date().getFullYear()}</p>
               </CardContent>
             </Card>
 

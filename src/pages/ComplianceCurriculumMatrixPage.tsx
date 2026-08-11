@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { ComplianceTimeline } from '@/components/compliance/ComplianceTimeline';
 import { detectComplianceGaps } from '@/services/gapDetectionService';
 import { GapBadge } from '@/components/admin/gaps/GapBadge';
+import { RVT_TRAINING_MODULE_COUNT } from '@/constants/tracks';
 
 // COMAR mapping is now stored in the database - no hardcoded mapping needed
 
@@ -139,7 +140,7 @@ export default function ComplianceCurriculumMatrixPage() {
         <CardHeader>
           <CardTitle>Curriculum Compliance Mapping</CardTitle>
           <p className="text-sm text-muted-foreground">
-            All 23 modules mapped to COMAR 14.17.15.05 requirements, including Drug-Free Workplace (COMAR 21.11.08.03), 
+            All {RVT_TRAINING_MODULE_COUNT} modules mapped to COMAR 14.17.15.05 requirements, including Drug-Free Workplace (COMAR 21.11.08.03), 
             Diversion Prevention, and Standard Operating Procedures
           </p>
         </CardHeader>
