@@ -447,7 +447,7 @@ export const EnhancedChatAssistant: React.FC = () => {
             </div>
           </CardHeader>
           
-          <CardContent className="flex-1 flex flex-col p-3 pt-0">
+          <CardContent className="flex-1 min-h-0 flex flex-col p-3 pt-0 overflow-hidden">
             {/* Quick Tips */}
             {contextInfo.helpTips.length > 0 && messages.length <= 1 && (
               <div className="mb-3">
@@ -487,7 +487,7 @@ export const EnhancedChatAssistant: React.FC = () => {
 
             {/* Messages */}
             <EnhancedScrollArea
-              className="flex-1" 
+              className="pe-1"
               showUnreadCount={unreadCount}
               autoScroll={true}
             >
@@ -573,7 +573,7 @@ export const EnhancedChatAssistant: React.FC = () => {
             </EnhancedScrollArea>
 
             {/* Input */}
-            <div className="flex space-x-2 mt-3 rtl:space-x-reverse">
+            <div className="flex space-x-2 mt-3 rtl:space-x-reverse flex-shrink-0">
               <Input
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
