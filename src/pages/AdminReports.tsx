@@ -84,7 +84,17 @@ export default function AdminReports() {
       const { data, error } = await supabase.functions.invoke('admin-ai-report', {
         body: { question: q },
       });
-      if (error) throw new Error(error.message);
+      if (error) {
+        let detail = error.message;
+        try {
+          const ctx = (error as { context?: Response }).context;
+          if (ctx && typeof ctx.json === 'function') {
+            const body = await ctx.json();
+            if (body?.error) detail = String(body.error);
+          }
+        } catch { /* keep original message */ }
+        throw new Error(detail);
+      }
       if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
       setResult(data as ReportResult);
       setHistory((h) => [{ question: q, at: Date.now() }, ...h].slice(0, 10));

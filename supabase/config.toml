@@ -518,3 +518,6 @@ verify_jwt = true
 
 [functions.video-migrate]
 verify_jwt = true
+
+[functions.doc-library]
+verify_jwt = true
