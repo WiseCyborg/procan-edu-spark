@@ -80,16 +80,28 @@ async function appNative(svc: any, start: Date, end: Date) {
   } catch (e) { out.entitlements_error = String(e?.message || e); }
   return out;
 }
-async function quickbooks(start: Date, end: Date) {
-  const clientId = Deno.env.get("QBO_CLIENT_ID"); const clientSecret = Deno.env.get("QBO_CLIENT_SECRET");
-  const refreshToken = Deno.env.get("QBO_REFRESH_TOKEN"); const realmId = Deno.env.get("QBO_REALM_ID");
-  if (!clientId || !clientSecret || !refreshToken || !realmId) return { connected: false, reason: "not_configured", needs: ["QBO_CLIENT_ID", "QBO_CLIENT_SECRET", "QBO_REFRESH_TOKEN", "QBO_REALM_ID"] };
-  const production = (Deno.env.get("QBO_ENVIRONMENT") || "production").toLowerCase() !== "sandbox";
+async function quickbooks(svc: any, start: Date, end: Date) {
+  const clientId = Deno.env.get("QBO_CLIENT_ID");
+  const clientSecret = Deno.env.get("QBO_CLIENT_SECRET");
+  let refreshToken: string | null = null, realmId: string | null = null, envName: string | null = null;
+  try {
+    const { data: row } = await svc.from("qbo_credentials").select("refresh_token,realm_id,environment").eq("id", 1).maybeSingle();
+    if (row) { refreshToken = row.refresh_token; realmId = row.realm_id; envName = row.environment; }
+  } catch (_e) {}
+  refreshToken = refreshToken || Deno.env.get("QBO_REFRESH_TOKEN") || null;
+  realmId = realmId || Deno.env.get("QBO_REALM_ID") || null;
+  const production = (envName || Deno.env.get("QBO_ENVIRONMENT") || "production").toLowerCase() !== "sandbox";
+  if (!clientId || !clientSecret || !refreshToken || !realmId) {
+    return { connected: false, reason: "not_configured", needs: ["QBO_CLIENT_ID (secret)", "QBO_CLIENT_SECRET (secret)", "qbo_credentials.refresh_token (or QBO_REFRESH_TOKEN)", "qbo_credentials.realm_id (or QBO_REALM_ID)"] };
+  }
   const apiBase = production ? "https://quickbooks.api.intuit.com" : "https://sandbox-quickbooks.api.intuit.com";
   try {
     const tokRes = await fetch("https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer", { method: "POST", headers: { "Authorization": `Basic ${btoa(`${clientId}:${clientSecret}`)}`, "Content-Type": "application/x-www-form-urlencoded", "Accept": "application/json" }, body: `grant_type=refresh_token&refresh_token=${encodeURIComponent(refreshToken)}` });
     const tok = await tokRes.json();
     if (!tokRes.ok || !tok.access_token) return { connected: false, reason: "auth_failed", detail: tok.error_description || tok.error || null };
+    if (tok.refresh_token && tok.refresh_token !== refreshToken) {
+      try { await svc.from("qbo_credentials").upsert({ id: 1, refresh_token: tok.refresh_token, realm_id: realmId, environment: production ? "production" : "sandbox", updated_at: new Date().toISOString() }); } catch (_e) {}
+    }
     const at = tok.access_token; const sd = start.toISOString().slice(0, 10); const ed = new Date(end.getTime() - 1000).toISOString().slice(0, 10);
     const q = async (path: string) => { const r = await fetch(`${apiBase}/v3/company/${realmId}/${path}`, { headers: { "Authorization": `Bearer ${at}`, "Accept": "application/json" } }); return { ok: r.ok, body: await r.json() }; };
     const pnl = await q(`reports/ProfitAndLoss?start_date=${sd}&end_date=${ed}&minorversion=70`);
@@ -122,7 +134,7 @@ serve(async (req) => {
     const lastM = monthRange(now.getUTCFullYear(), now.getUTCMonth() - 1);
     const [ppThis, ppLast, appThis, appLast, qb] = await Promise.all([
       paypalReport(svc, thisM.start, thisM.end), paypalReport(svc, lastM.start, lastM.end),
-      appNative(svc, thisM.start, thisM.end), appNative(svc, lastM.start, lastM.end), quickbooks(thisM.start, thisM.end),
+      appNative(svc, thisM.start, thisM.end), appNative(svc, lastM.start, lastM.end), quickbooks(svc, thisM.start, thisM.end),
     ]);
     let reconciliation: any = { available: false };
     if (ppThis?.available) {
