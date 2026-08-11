@@ -78,7 +78,6 @@ serve(async (req) => {
       canSubscribe: true,
       // Host permissions
       ...(isHost && {
-        canPublishSources: ['camera', 'microphone', 'screen_share'],
         canUpdateOwnMetadata: true,
         roomAdmin: true,
       }),
