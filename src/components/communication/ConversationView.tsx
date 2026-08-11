@@ -57,6 +57,7 @@ export const ConversationView = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const videoCallButtonRef = useRef<VideoCallButtonHandle>(null);
 
   const conversationMessages = messages[conversationId] || [];
   const { activeCall, callDuration } = useActiveCall(conversationId);
