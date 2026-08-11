@@ -45,9 +45,11 @@ export const UniversalCourseCard = ({
 
   const isLocked = launchTarget && !launchTarget.can_access && launchTarget.deny_reason === 'prerequisite_required';
   const isComingSoon = launchTarget && !launchTarget.can_access && launchTarget.deny_reason === 'course_not_published';
-  const requiresPayment = launchTarget && !launchTarget.can_access && launchTarget.deny_reason === 'payment_required';
-  const hasCertificate = launchTarget?.has_certificate;
   const priceCents = (launchTarget as { price_cents?: number })?.price_cents;
+  const requiresPayment = launchTarget && !launchTarget.can_access && launchTarget.deny_reason === 'payment_required';
+  const needsAuthToBuy = Boolean(launchTarget && !launchTarget.can_access && launchTarget.deny_reason === 'auth_required' && priceCents);
+  const showPaygate = Boolean(requiresPayment || needsAuthToBuy);
+  const hasCertificate = launchTarget?.has_certificate;
 
   const handlePurchase = async () => {
     setIsPurchasing(true);
