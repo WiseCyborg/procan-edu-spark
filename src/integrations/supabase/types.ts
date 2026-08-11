@@ -8453,6 +8453,7 @@ export type Database = {
           ip_hash: string | null
           lang: string
           latency_ms: number | null
+          provider: string | null
           question: string
           session_id: string
           suggested_module: Json | null
@@ -8466,6 +8467,7 @@ export type Database = {
           ip_hash?: string | null
           lang?: string
           latency_ms?: number | null
+          provider?: string | null
           question: string
           session_id: string
           suggested_module?: Json | null
@@ -8479,6 +8481,7 @@ export type Database = {
           ip_hash?: string | null
           lang?: string
           latency_ms?: number | null
+          provider?: string | null
           question?: string
           session_id?: string
           suggested_module?: Json | null
