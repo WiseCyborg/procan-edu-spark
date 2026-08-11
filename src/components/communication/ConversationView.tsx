@@ -380,8 +380,7 @@ export const ConversationView = ({
           participantCount={activeCall.participant_count}
           callDuration={callDuration}
           onJoinCall={() => {
-            // Join call logic handled by VideoCallButton
-            toast.info('Click the video button to join the call');
+            videoCallButtonRef.current?.joinActiveCall();
           }}
           onDismiss={() => {
             // Dismiss banner (could be stored in local state)
