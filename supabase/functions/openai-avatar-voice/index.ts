@@ -44,9 +44,13 @@ serve(async (req) => {
     const audioBuffer = await response.arrayBuffer();
     
     // Convert to base64 for frontend
-    const base64Audio = btoa(
-      String.fromCharCode(...new Uint8Array(audioBuffer))
-    );
+    const bytes = new Uint8Array(audioBuffer);
+    let binary = '';
+    const chunkSize = 0x8000;
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+      binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+    }
+    const base64Audio = btoa(binary);
 
     console.log('[Avatar Voice] Generated audio, size:', audioBuffer.byteLength);
 
