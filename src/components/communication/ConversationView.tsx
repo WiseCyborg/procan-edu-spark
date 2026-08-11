@@ -9,7 +9,7 @@ import { useRealTimeMessaging } from '@/hooks/useRealTimeMessaging';
 import { formatDistanceToNow, format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { VideoCallButton } from './VideoCallButton';
+import { VideoCallButton, type VideoCallButtonHandle } from './VideoCallButton';
 import { TypingIndicator } from './TypingIndicator';
 import { MessageReactions } from './MessageReactions';
 import { ActiveCallBanner } from '../video/ActiveCallBanner';
@@ -57,6 +57,7 @@ export const ConversationView = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const videoCallButtonRef = useRef<VideoCallButtonHandle>(null);
 
   const conversationMessages = messages[conversationId] || [];
   const { activeCall, callDuration } = useActiveCall(conversationId);
@@ -321,6 +322,7 @@ export const ConversationView = ({
           
           <div data-tour="video-call-button">
             <VideoCallButton 
+              ref={videoCallButtonRef}
               conversationId={conversationId}
               conversationTitle={conversationTitle}
               conversationType={conversationType}
@@ -378,8 +380,7 @@ export const ConversationView = ({
           participantCount={activeCall.participant_count}
           callDuration={callDuration}
           onJoinCall={() => {
-            // Join call logic handled by VideoCallButton
-            toast.info('Click the video button to join the call');
+            videoCallButtonRef.current?.joinActiveCall();
           }}
           onDismiss={() => {
             // Dismiss banner (could be stored in local state)

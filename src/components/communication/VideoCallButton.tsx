@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { forwardRef, useImperativeHandle, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Video } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -18,16 +18,25 @@ interface VideoCallButtonProps {
   conversationType: string;
 }
 
-export const VideoCallButton = ({
+export interface VideoCallButtonHandle {
+  joinActiveCall: () => Promise<void>;
+}
+
+export const VideoCallButton = forwardRef<VideoCallButtonHandle, VideoCallButtonProps>(({
   conversationId,
   conversationTitle,
   conversationType,
-}: VideoCallButtonProps) => {
+}, ref) => {
   const [isOpen, setIsOpen] = useState(false);
   const [inCall, setInCall] = useState(false);
+  // Token/room for a JOINED call (as opposed to a newly created one)
+  const [joinToken, setJoinToken] = useState<string | null>(null);
+  const [joinRoomName, setJoinRoomName] = useState<string | null>(null);
+  const [activeCallId, setActiveCallId] = useState<string | null>(null);
+  const [isHost, setIsHost] = useState(true);
   const { user } = useAuth();
   const { isTrainingCoordinator, isDispensaryManager, isAdmin } = useUserRole();
-  const { createVideoCall, token, roomName, isCreating } = useVideoCall();
+  const { createVideoCall, joinVideoCall, token, roomName, isCreating } = useVideoCall();
   const { activeCall } = useActiveCall(conversationId);
 
   // All users can start/join calls now
@@ -66,20 +75,44 @@ export const VideoCallButton = ({
           participantIds: participants.map(p => p.user_id),
         });
       }
-      
+
+      setActiveCallId(result.callId);
+      setIsHost(true);
+      setJoinToken(null);
+      setJoinRoomName(null);
       setInCall(true);
     }
   };
 
-  const handleJoinActiveCall = (token: string, roomName: string) => {
-    // Handle joining an active call (called from JoinCallButton)
+  // Called by JoinCallButton once it has minted a token + added the participant
+  const handleJoinActiveCall = (joinedToken: string, joinedRoomName: string) => {
+    setJoinToken(joinedToken);
+    setJoinRoomName(joinedRoomName);
+    setActiveCallId(activeCall?.id ?? null);
+    setIsHost(false);
     setInCall(true);
     setIsOpen(true);
   };
 
+  // Imperative join used by the ActiveCallBanner "Join Call" button
+  const joinActiveCall = async () => {
+    if (!activeCall) return;
+    const result = await joinVideoCall(activeCall.id, user?.email || 'User');
+    if (result) {
+      setJoinToken(result.token);
+      setJoinRoomName(result.roomName);
+      setActiveCallId(activeCall.id);
+      setIsHost(false);
+      setInCall(true);
+      setIsOpen(true);
+    }
+  };
+
+  useImperativeHandle(ref, () => ({ joinActiveCall }), [activeCall, user?.email]);
+
   const handleDisconnect = async () => {
     // Clear active call from conversation
-    if (activeCall) {
+    if (isHost && activeCall) {
       await supabase
         .from('conversations')
         .update({ active_call_id: null })
@@ -87,9 +120,15 @@ export const VideoCallButton = ({
     }
     setInCall(false);
     setIsOpen(false);
+    setJoinToken(null);
+    setJoinRoomName(null);
+    setActiveCallId(null);
   };
 
   const livekitUrl = import.meta.env.VITE_LIVEKIT_URL || 'wss://procannedu.livekit.cloud';
+
+  const activeToken = joinToken ?? token;
+  const activeRoomName = joinRoomName ?? roomName;
 
   if (!canStartCall) {
     return null;
@@ -131,17 +170,20 @@ export const VideoCallButton = ({
             />
           )}
 
-          {inCall && token && roomName && (
+          {inCall && activeToken && activeRoomName && (
             <VideoCallRoom
-              token={token}
-              roomName={roomName}
+              token={activeToken}
+              roomName={activeRoomName}
               serverUrl={livekitUrl}
               onDisconnect={handleDisconnect}
-              isHost={true}
+              isHost={isHost}
+              callId={activeCallId ?? undefined}
             />
           )}
         </DialogContent>
       </Dialog>
     </>
   );
-};
+});
+
+VideoCallButton.displayName = 'VideoCallButton';
