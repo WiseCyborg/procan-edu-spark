@@ -13,7 +13,7 @@ interface VoiceSettings {
 interface UnifiedVoiceContextType {
   settings: VoiceSettings;
   updateSettings: (newSettings: Partial<VoiceSettings>) => void;
-  speak: (text: string, options?: { priority?: 'low' | 'high' }) => void;
+  speak: (text: string, options?: { priority?: 'low' | 'high'; force?: boolean }) => void;
   stop: () => void;
   isSupported: boolean;
   isSpeaking: boolean;
@@ -107,16 +107,28 @@ export const UnifiedVoiceProvider: React.FC<{ children: React.ReactNode }> = ({ 
           updated.voice = newVoice.name;
         }
       }
+
+      // Voice/gender changed -> allow the same preview text to be spoken again
+      if (
+        (newSettings.voice && newSettings.voice !== prev.voice) ||
+        (newSettings.gender && newSettings.gender !== prev.gender) ||
+        updated.voice !== prev.voice
+      ) {
+        lastSpokenText.current = '';
+        if (isSupported) speechSynthesis.cancel();
+        speechQueue.current = [];
+        setIsSpeaking(false);
+      }
       
       return updated;
     });
-  }, [availableVoices]);
+  }, [availableVoices, isSupported]);
 
-  const speak = useCallback((text: string, options: { priority?: 'low' | 'high' } = {}) => {
+  const speak = useCallback((text: string, options: { priority?: 'low' | 'high'; force?: boolean } = {}) => {
     if (!isSupported || !settings.enabled || !text.trim()) return;
 
-    // Debounce repeated identical text
-    if (text === lastSpokenText.current) {
+    // Debounce repeated identical text (unless the caller explicitly forces a replay)
+    if (!options.force && text === lastSpokenText.current) {
       return;
     }
 
@@ -126,29 +138,28 @@ export const UnifiedVoiceProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
 
     debounceTimeout.current = setTimeout(() => {
-      // Stop current speech if high priority
-      if (options.priority === 'high') {
+      // Stop current speech if high priority or forced replay
+      if (options.priority === 'high' || options.force) {
         speechSynthesis.cancel();
         speechQueue.current = [];
       }
 
       const utterance = new SpeechSynthesisUtterance(text);
 
-      // Language-aware voice selection (prefer voice matching stored language)
+      // Language-aware voice selection (prefer the explicitly selected voice)
       const storedLang = getStoredLanguage();
       const langMap: Record<string, string> = {
         en: 'en-US', es: 'es-US', zh: 'zh-CN', fr: 'fr-FR', vi: 'vi-VN', am: 'am-ET',
       };
       utterance.lang = langMap[storedLang] || 'en-US';
 
-      const langPreferredVoice = selectVoice(availableVoices, settings.gender, storedLang);
-      if (langPreferredVoice) {
-        utterance.voice = langPreferredVoice;
-      } else if (settings.voice) {
-        const selectedVoice = availableVoices.find(voice => voice.name === settings.voice);
-        if (selectedVoice) {
-          utterance.voice = selectedVoice;
-        }
+      const explicitVoice = settings.voice
+        ? availableVoices.find(voice => voice.name === settings.voice)
+        : undefined;
+      const chosenVoice = explicitVoice || selectVoice(availableVoices, settings.gender, storedLang);
+      if (chosenVoice) {
+        utterance.voice = chosenVoice;
+        utterance.lang = chosenVoice.lang || utterance.lang;
       }
 
       utterance.rate = settings.rate;
@@ -163,17 +174,25 @@ export const UnifiedVoiceProvider: React.FC<{ children: React.ReactNode }> = ({ 
           speak(speechQueue.current[0]);
         }
       };
-      utterance.onerror = () => setIsSpeaking(false);
+      utterance.onerror = () => {
+        setIsSpeaking(false);
+        speechQueue.current = [];
+        lastSpokenText.current = '';
+      };
 
       // Add to queue or speak immediately
-      if (isSpeaking && options.priority !== 'high') {
+      if (isSpeaking && !options.force && options.priority !== 'high') {
         speechQueue.current.push(text);
       } else {
-        speechSynthesis.speak(utterance);
+        // Chrome quirk: a cancel() immediately followed by speak() can be dropped
+        speechSynthesis.cancel();
+        if (speechSynthesis.paused) speechSynthesis.resume();
+        setTimeout(() => speechSynthesis.speak(utterance), 60);
         lastSpokenText.current = text;
       }
     }, 150); // 150ms debounce
   }, [isSupported, settings, availableVoices, isSpeaking]);
+
 
   const stop = useCallback(() => {
     if (isSupported) {
