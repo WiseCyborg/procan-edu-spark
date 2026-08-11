@@ -180,7 +180,6 @@ export default function AskBudPanel() {
 
         stopAudio();
         const audio = new Audio(`data:audio/mp3;base64,${audioContent}`);
-        audio.crossOrigin = 'anonymous';
         audioRef.current = audio;
 
         try {
@@ -189,32 +188,41 @@ export default function AskBudPanel() {
             (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
           if (AudioCtor) {
             const ctx = new AudioCtor();
-            ctxRef.current = ctx;
-            const source = ctx.createMediaElementSource(audio);
-            const analyser = ctx.createAnalyser();
-            analyser.fftSize = 256;
-            analyserRef.current = analyser;
-            source.connect(analyser);
-            analyser.connect(ctx.destination);
+            if (ctx.state === 'suspended') {
+              await ctx.resume().catch(() => undefined);
+            }
 
-            const bins = new Uint8Array(analyser.frequencyBinCount);
-            const tick = () => {
-              const a = analyserRef.current;
-              if (!a) return;
-              a.getByteFrequencyData(bins);
-              let sum = 0;
-              const count = Math.min(16, bins.length);
-              for (let i = 0; i < count; i++) sum += bins[i];
-              const level = Math.min(1, sum / count / 180);
-              if (orbCoreRef.current) {
-                orbCoreRef.current.style.transform = `scale(${(1 + level * 0.22).toFixed(3)})`;
-              }
-              if (orbRingRef.current) {
-                orbRingRef.current.style.opacity = (0.25 + level * 0.7).toFixed(3);
-              }
-              rafRef.current = requestAnimationFrame(tick);
-            };
-            if (!reducedMotion) rafRef.current = requestAnimationFrame(tick);
+            if (ctx.state !== 'suspended') {
+              ctxRef.current = ctx;
+              const source = ctx.createMediaElementSource(audio);
+              const analyser = ctx.createAnalyser();
+              analyser.fftSize = 256;
+              analyserRef.current = analyser;
+              source.connect(analyser);
+              analyser.connect(ctx.destination);
+
+              const bins = new Uint8Array(analyser.frequencyBinCount);
+              const tick = () => {
+                const a = analyserRef.current;
+                if (!a) return;
+                a.getByteFrequencyData(bins);
+                let sum = 0;
+                const count = Math.min(16, bins.length);
+                for (let i = 0; i < count; i++) sum += bins[i];
+                const level = Math.min(1, sum / count / 180);
+                if (orbCoreRef.current) {
+                  orbCoreRef.current.style.transform = `scale(${(1 + level * 0.22).toFixed(3)})`;
+                }
+                if (orbRingRef.current) {
+                  orbRingRef.current.style.opacity = (0.25 + level * 0.7).toFixed(3);
+                }
+                rafRef.current = requestAnimationFrame(tick);
+              };
+              if (!reducedMotion) rafRef.current = requestAnimationFrame(tick);
+            } else {
+              analyserRef.current = null;
+              await ctx.close().catch(() => undefined);
+            }
           }
         } catch {
           // Analyser unavailable — plain playback still fine.
@@ -519,7 +527,7 @@ export default function AskBudPanel() {
                     placeholder="Ask about your first visit, the rules, products…"
                     aria-label="Ask Bud a question"
                   />
-                  {MIC_ENABLED && null}
+                  
                   <Button type="submit" disabled={loading || exhausted || !input.trim()} aria-label="Send">
                     {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                   </Button>
