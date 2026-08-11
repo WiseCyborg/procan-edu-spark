@@ -112,7 +112,7 @@ export const VideoCallButton = forwardRef<VideoCallButtonHandle, VideoCallButton
 
   const handleDisconnect = async () => {
     // Clear active call from conversation
-    if (activeCall) {
+    if (isHost && activeCall) {
       await supabase
         .from('conversations')
         .update({ active_call_id: null })
