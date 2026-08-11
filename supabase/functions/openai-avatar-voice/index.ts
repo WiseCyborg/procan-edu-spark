@@ -5,6 +5,18 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Map an incoming voice selector (legacy OpenAI-style name, or 'male'/'female')
+// to a Google Neural2 voice. Keeps backward compatibility with existing callers.
+function mapVoice(voice: unknown) {
+  const v = String(voice ?? '').toLowerCase();
+  const femaleNames = ['nova', 'shimmer', 'alloy', 'female', 'f'];
+  const isFemale = femaleNames.includes(v) || v.includes('female');
+  return {
+    name: isFemale ? 'en-US-Neural2-F' : 'en-US-Neural2-D',
+    ssmlGender: isFemale ? 'FEMALE' : 'MALE',
+  };
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -12,53 +24,46 @@ serve(async (req) => {
 
   try {
     const { text, voice = 'nova' } = await req.json();
-    const openAIKey = Deno.env.get('OPENAI_API_KEY');
 
-    if (!openAIKey) {
-      throw new Error('OpenAI API key not configured');
+    if (!text) {
+      throw new Error('Text is required');
     }
 
-    console.log('[Avatar Voice] Generating TTS for text length:', text.length);
+    const GOOGLE_TTS_API_KEY = Deno.env.get('GOOGLE_TTS_API_KEY');
+    if (!GOOGLE_TTS_API_KEY) {
+      throw new Error('Google TTS API key not configured');
+    }
 
-    // Call OpenAI TTS API
-    const response = await fetch('https://api.openai.com/v1/audio/speech', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIKey}`,
-        'Content-Type': 'application/json'
+    const { name, ssmlGender } = mapVoice(voice);
+
+    console.log('[Avatar Voice] Google TTS voice:', name, 'text length:', String(text).length);
+
+    const response = await fetch(
+      `https://texttospeech.googleapis.com/v1/text:synthesize?key=${GOOGLE_TTS_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          input: { text: String(text).substring(0, 5000) },
+          voice: { languageCode: 'en-US', name, ssmlGender },
+          audioConfig: { audioEncoding: 'MP3', speakingRate: 1.0, pitch: 0.0 },
+        }),
       },
-      body: JSON.stringify({
-        model: 'tts-1',
-        voice: voice, // Options: alloy, echo, fable, onyx, nova, shimmer
-        input: text.substring(0, 4096), // Limit to prevent huge requests
-        speed: 1.0
-      })
-    });
+    );
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('[Avatar Voice] OpenAI TTS error:', response.status, errorText);
-      throw new Error(`OpenAI TTS error: ${response.status}`);
+    const data = await response.json();
+
+    if (!response.ok || data.error) {
+      const message = data?.error?.message || `Google TTS error: ${response.status}`;
+      console.error('[Avatar Voice] Google TTS error:', response.status, message);
+      throw new Error(message);
     }
-
-    const audioBuffer = await response.arrayBuffer();
-    
-    // Convert to base64 for frontend
-    const bytes = new Uint8Array(audioBuffer);
-    let binary = '';
-    const chunkSize = 0x8000;
-    for (let i = 0; i < bytes.length; i += chunkSize) {
-      binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
-    }
-    const base64Audio = btoa(binary);
-
-    console.log('[Avatar Voice] Generated audio, size:', audioBuffer.byteLength);
 
     return new Response(
-      JSON.stringify({ 
-        audio_base64: base64Audio,
-        voice_used: voice,
-        text_length: text.length
+      JSON.stringify({
+        audio_base64: data.audioContent,
+        voice_used: name,
+        text_length: String(text).length,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
