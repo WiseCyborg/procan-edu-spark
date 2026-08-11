@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -84,11 +83,15 @@ export const EnhancedScrollArea: React.FC<EnhancedScrollAreaProps> = ({
 
   return (
     <div className="relative flex-1 flex flex-col min-h-0">
-      <ScrollArea className={className} ref={scrollRef} onScroll={handleScrollEvent}>
+      <div
+        ref={scrollRef}
+        onScroll={handleScrollEvent}
+        className={`flex-1 min-h-0 overflow-y-auto ${className ?? ''}`}
+      >
         <div ref={contentRef}>
           {children}
         </div>
-      </ScrollArea>
+      </div>
       
       {/* Scroll Controls */}
       {showScrollButtons && (
