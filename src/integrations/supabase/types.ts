@@ -5143,6 +5143,98 @@ export type Database = {
           },
         ]
       }
+      doc_library_documents: {
+        Row: {
+          category: string
+          created_at: string
+          current_version: number
+          doc_key: string
+          first_doc_date: string | null
+          last_doc_date: string | null
+          relation_type: string
+          title: string
+          updated_at: string
+          version_count: number
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          current_version?: number
+          doc_key: string
+          first_doc_date?: string | null
+          last_doc_date?: string | null
+          relation_type?: string
+          title: string
+          updated_at?: string
+          version_count?: number
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          current_version?: number
+          doc_key?: string
+          first_doc_date?: string | null
+          last_doc_date?: string | null
+          relation_type?: string
+          title?: string
+          updated_at?: string
+          version_count?: number
+        }
+        Relationships: []
+      }
+      doc_library_versions: {
+        Row: {
+          created_at: string
+          doc_date: string | null
+          doc_key: string
+          id: string
+          is_current: boolean
+          md_sha256: string
+          pdf_bytes: number | null
+          pdf_path: string
+          source_bytes: number | null
+          source_path: string
+          version: number
+          version_title: string | null
+        }
+        Insert: {
+          created_at?: string
+          doc_date?: string | null
+          doc_key: string
+          id?: string
+          is_current?: boolean
+          md_sha256: string
+          pdf_bytes?: number | null
+          pdf_path: string
+          source_bytes?: number | null
+          source_path: string
+          version: number
+          version_title?: string | null
+        }
+        Update: {
+          created_at?: string
+          doc_date?: string | null
+          doc_key?: string
+          id?: string
+          is_current?: boolean
+          md_sha256?: string
+          pdf_bytes?: number | null
+          pdf_path?: string
+          source_bytes?: number | null
+          source_path?: string
+          version?: number
+          version_title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "doc_library_versions_doc_key_fkey"
+            columns: ["doc_key"]
+            isOneToOne: false
+            referencedRelation: "doc_library_documents"
+            referencedColumns: ["doc_key"]
+          },
+        ]
+      }
       edge_function_status: {
         Row: {
           created_at: string
@@ -8348,6 +8440,48 @@ export type Database = {
           phone_encrypted?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      public_guide_turns: {
+        Row: {
+          answer: string | null
+          blocked_reason: string | null
+          citations: Json
+          created_at: string
+          id: string
+          ip_hash: string | null
+          lang: string
+          latency_ms: number | null
+          question: string
+          session_id: string
+          suggested_module: Json | null
+        }
+        Insert: {
+          answer?: string | null
+          blocked_reason?: string | null
+          citations?: Json
+          created_at?: string
+          id?: string
+          ip_hash?: string | null
+          lang?: string
+          latency_ms?: number | null
+          question: string
+          session_id: string
+          suggested_module?: Json | null
+        }
+        Update: {
+          answer?: string | null
+          blocked_reason?: string | null
+          citations?: Json
+          created_at?: string
+          id?: string
+          ip_hash?: string | null
+          lang?: string
+          latency_ms?: number | null
+          question?: string
+          session_id?: string
+          suggested_module?: Json | null
         }
         Relationships: []
       }
@@ -13609,6 +13743,16 @@ export type Database = {
       schedule_if_missing: {
         Args: { p_jobname: string; p_spec: string; p_sql: string }
         Returns: undefined
+      }
+      search_regulatory_content: {
+        Args: { p_limit?: number; p_query: string }
+        Returns: {
+          content_text: string
+          rank: number
+          section_number: string
+          section_title: string
+          source_url: string
+        }[]
       }
       send_bulk_reminders: {
         Args: {

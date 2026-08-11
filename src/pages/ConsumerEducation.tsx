@@ -6,6 +6,7 @@ import { ConsumerCourseCard } from '@/components/consumer/ConsumerCourseCard';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { GHOST_COURSE_IDS_PG_LIST } from '@/lib/ghostCourses';
+import AskBudPanel from '@/components/consumer/AskBudPanel';
 
 interface ConsumerCourse {
   id: string;
@@ -96,6 +97,8 @@ const ConsumerEducation = () => {
           </div>
         </div>
       </section>
+
+      <AskBudPanel />
 
       {/* Value Props */}
       <section className="py-12 border-b border-border">
@@ -216,7 +219,7 @@ const ConsumerEducation = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto space-y-12">
             {/* First Dispensary Visit Timeline */}
-            <div className="space-y-6">
+            <div data-guide-topic="visit" className="space-y-6">
               <h2 className="text-3xl font-bold text-foreground text-center">
                 Your First Dispensary Visit
               </h2>
@@ -260,7 +263,7 @@ const ConsumerEducation = () => {
             </div>
 
             {/* Maryland Cannabis Laws Quick Reference */}
-            <div className="space-y-6 bg-muted/30 p-8 rounded-lg">
+            <div data-guide-topic="laws" className="space-y-6 bg-muted/30 p-8 rounded-lg">
               <h2 className="text-2xl font-bold text-foreground">
                 Maryland Cannabis Laws: Quick Reference
               </h2>
@@ -317,7 +320,7 @@ const ConsumerEducation = () => {
             </div>
 
             {/* Product Types Guide */}
-            <div className="space-y-6">
+            <div data-guide-topic="products" className="space-y-6">
               <h2 className="text-2xl font-bold text-foreground text-center">
                 Understanding Cannabis Product Types
               </h2>
@@ -386,7 +389,7 @@ const ConsumerEducation = () => {
             </div>
 
             {/* Responsible Consumption */}
-            <div className="space-y-6 bg-yellow-50 dark:bg-yellow-950/20 p-8 rounded-lg border border-yellow-200 dark:border-yellow-800">
+            <div data-guide-topic="safety" className="space-y-6 bg-yellow-50 dark:bg-yellow-950/20 p-8 rounded-lg border border-yellow-200 dark:border-yellow-800">
               <h2 className="text-2xl font-bold text-foreground">
                 Responsible Consumption Tips
               </h2>
