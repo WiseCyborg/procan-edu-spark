@@ -73,9 +73,21 @@ i18n
     returnNull: false,
   });
 
+export const RTL_LANGUAGES = new Set(["ar", "ur", "fa", "he"]);
+
+function applyDirection(lng: string) {
+  const base = (lng ?? "en").split("-")[0];
+  if (typeof document === "undefined") return;
+  document.documentElement.dir = RTL_LANGUAGES.has(base) ? "rtl" : "ltr";
+  document.documentElement.lang = base;
+}
+
+applyDirection(i18n.resolvedLanguage ?? "en");
+
 export function setLanguage(lng: SupportedLanguage) {
   if (!isSupportedLanguage(lng)) return;
   i18n.changeLanguage(lng);
+  applyDirection(lng);
   try {
     localStorage.setItem(LANGUAGE_STORAGE_KEY, lng);
   } catch {
