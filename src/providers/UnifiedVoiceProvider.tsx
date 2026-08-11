@@ -13,7 +13,7 @@ interface VoiceSettings {
 interface UnifiedVoiceContextType {
   settings: VoiceSettings;
   updateSettings: (newSettings: Partial<VoiceSettings>) => void;
-  speak: (text: string, options?: { priority?: 'low' | 'high' }) => void;
+  speak: (text: string, options?: { priority?: 'low' | 'high'; force?: boolean }) => void;
   stop: () => void;
   isSupported: boolean;
   isSpeaking: boolean;
