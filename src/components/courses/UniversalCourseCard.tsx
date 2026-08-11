@@ -97,7 +97,7 @@ export const UniversalCourseCard = ({
       return 'Coming Soon';
     }
 
-    if (requiresPayment && priceCents) {
+    if (showPaygate && priceCents) {
       return (
         <>
           <ShoppingCart className="me-2 h-4 w-4" />
@@ -222,7 +222,7 @@ export const UniversalCourseCard = ({
           onClick={() => requiresPayment ? handlePurchase() : launchCourse(course.id)}
           className="w-full"
           size="lg"
-          variant={isLocked || isComingSoon ? "outline" : requiresPayment ? "default" : hasCertificate ? "secondary" : "default"}
+          variant={isLocked || isComingSoon ? "outline" : showPaygate ? "default" : hasCertificate ? "secondary" : "default"}
           disabled={isLoading || isComingSoon || isPurchasing}
         >
           {getButtonContent()}
