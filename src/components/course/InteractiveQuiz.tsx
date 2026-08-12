@@ -9,7 +9,12 @@ export interface QuizQuestion {
   id: string;
   question: string;
   options: string[];
-  correctAnswer: string;
+  /**
+   * Optional. Answer keys are no longer shipped to the browser for course
+   * module quizzes — grading happens server-side. When absent, this component
+   * runs in "server graded" mode and requires `onSubmitAnswers`.
+   */
+  correctAnswer?: string;
   explanation?: string;
   points?: number;
   topic?: string;
@@ -26,6 +31,12 @@ export interface WeakTopic {
   relatedModules?: string[];
 }
 
+export interface ServerGradeResult {
+  score: number;
+  passed: boolean;
+  results?: { question_index: number; is_correct: boolean; explanation?: string | null }[];
+}
+
 interface InteractiveQuizProps {
   questions: QuizQuestion[];
   title: string;
@@ -37,11 +48,20 @@ interface InteractiveQuizProps {
     passed: boolean,
     timeSpent: number,
     weakTopics?: WeakTopic[],
-    answers?: { question_index: number; answer: string }[]
+    answers?: { question_index: number; answer: string }[],
+    serverGraded?: boolean
   ) => void;
+  /**
+   * Server-side grader. Required when questions carry no answer key.
+   * Returning null signals a failed submission.
+   */
+  onSubmitAnswers?: (
+    answers: { question_index: number; answer: string }[]
+  ) => Promise<ServerGradeResult | null>;
   onQuestionAnswer?: (questionId: string, answer: string, isCorrect: boolean) => void;
   allowRetry?: boolean;
 }
+
 
 // Shuffle utility function
 const shuffleArray = <T,>(array: T[]): T[] => {
