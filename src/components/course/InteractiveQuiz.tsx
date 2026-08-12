@@ -80,6 +80,7 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
   passingScore = 80,
   maxQuestions = 10,
   onQuizComplete,
+  onSubmitAnswers,
   onQuestionAnswer,
   allowRetry = true
 }) => {
@@ -94,6 +95,10 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
     );
   }
 
+  // Answer keys are stripped from learner-visible content for module quizzes.
+  // When no key is present we grade on the server instead of in the browser.
+  const hasAnswerKey = questions.some(q => !!q.correctAnswer);
+
   // Shuffle questions on initial load and select random maxQuestions (default 10)
   const [shuffledQuestions, setShuffledQuestions] = useState(() => {
     const shuffled = shuffleArray(questions);
@@ -105,6 +110,10 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
   const [timeRemaining, setTimeRemaining] = useState(timeLimit ? timeLimit * 60 : null);
   const [startTime] = useState(Date.now());
   const [showExplanation, setShowExplanation] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [serverResult, setServerResult] = useState<ServerGradeResult | null>(null);
+
 
   const currentQuestion = shuffledQuestions[currentQuestionIndex];
   const isLastQuestion = currentQuestionIndex === shuffledQuestions.length - 1;
