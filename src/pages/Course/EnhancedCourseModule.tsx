@@ -40,13 +40,16 @@ interface QuizQuestion {
   id: string;
   question: string;
   options: string[];
-  correct: string;
-  explanation: string;
+  // Answer keys are never shipped to the browser — grading is server-side
+  // via the submit_module_quiz RPC. These stay optional for legacy content.
+  correct?: string;
+  explanation?: string;
   topic?: string;
   comarRef?: string;
   difficulty?: 'easy' | 'medium' | 'hard';
   relatedModules?: string[];
 }
+
 
 interface Lesson {
   id: string;
@@ -433,12 +436,58 @@ const EnhancedCourseModule: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [moduleId, isProgressLoading]);
 
+  // Server-side grader for the module quiz. Answer keys are not exposed to the
+  // browser, so submit_module_quiz is both the grader and the source of truth.
+  const gradeQuizOnServer = async (
+    answers: { question_index: number; answer: string }[]
+  ) => {
+    try {
+      const { data, error } = await supabase.rpc('submit_module_quiz', {
+        p_module_id: moduleData!.id,
+        p_answers: answers as unknown as Record<string, never>,
+      });
+
+      const result = data as {
+        ok: boolean;
+        score?: number;
+        passed?: boolean;
+        error?: string;
+        results?: { question_index: number; is_correct: boolean; explanation?: string | null }[];
+      } | null;
+
+      if (error || !result?.ok) {
+        console.error('submit_module_quiz failed:', error, result);
+        return null;
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['user-progress', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-data', user?.id] });
+
+      if (result.passed) {
+        toast({
+          title: 'Congratulations!',
+          description: `You passed with ${result.score}%! Module completed.`,
+        });
+      }
+
+      return {
+        score: result.score ?? 0,
+        passed: !!result.passed,
+        results: result.results ?? [],
+      };
+    } catch (err) {
+      console.error('submit_module_quiz threw:', err);
+      return null;
+    }
+  };
+
   const handleQuizComplete = async (
     score: number,
     passed: boolean,
     timeSpent: number,
     weakTopicsData?: WeakTopic[],
-    answers?: { question_index: number; answer: string }[]
+    answers?: { question_index: number; answer: string }[],
+    serverGraded?: boolean
   ) => {
   setQuizScore(score);
   setQuizPassed(passed);
@@ -449,8 +498,9 @@ const EnhancedCourseModule: React.FC = () => {
   // review UI. The weak-topics screen is presentation only and must never
   // short-circuit the completion write. The server (submit_module_quiz) is the
   // source of truth for pass/fail and persistence; it is idempotent and refuses
-  // to record incomplete work.
-  if (passed) {
+  // to record incomplete work. When `serverGraded` is true the submission has
+  // already been recorded by gradeQuizOnServer.
+  if (passed && !serverGraded) {
     try {
       const { data, error } = await supabase.rpc('submit_module_quiz', {
         p_module_id: moduleData!.id,
@@ -500,6 +550,7 @@ const EnhancedCourseModule: React.FC = () => {
   }
 };
 
+
   const handlePracticeComplete = async (score: number, passed: boolean) => {
     // WeakAreaPractice does not supply answers in the shape required by
     // submit_module_quiz, so we cannot mark the module complete from this path.
@@ -532,7 +583,19 @@ const EnhancedCourseModule: React.FC = () => {
     setActiveTab('quiz');
   };
 
+  // Weak-area practice grades locally, which requires an answer key. Module
+  // answer keys are server-side only, so this path is only offered for legacy
+  // content that still carries answers.
+  const canPracticeWeakAreas = !!moduleData?.quiz_questions?.some(q => !!q.correct);
+
   const handlePracticeWeakAreas = () => {
+    if (!canPracticeWeakAreas) {
+      toast({
+        title: 'Review the module instead',
+        description: 'Practice mode is unavailable for this quiz. Review the module content and retake the quiz.',
+      });
+      return;
+    }
     setShowQuizResults(false);
     setShowWeakPractice(true);
   };
@@ -541,7 +604,7 @@ const EnhancedCourseModule: React.FC = () => {
     if (!moduleData) return [];
     const weakTopicNames = weakTopics.map(t => t.topic);
     return moduleData.quiz_questions
-      .filter(q => q.topic && weakTopicNames.includes(q.topic))
+      .filter(q => q.topic && weakTopicNames.includes(q.topic) && !!q.correct)
       .map((q, idx) => ({
         id: q.id || `q${idx}`,
         question: q.question,
@@ -554,6 +617,7 @@ const EnhancedCourseModule: React.FC = () => {
         relatedModules: q.relatedModules
       }));
   };
+
 
   const calculateSectionProgress = () => {
     if (isModuleAlreadyCompleted) return 100;
@@ -1123,8 +1187,10 @@ const EnhancedCourseModule: React.FC = () => {
                       }))}
                       title={`${moduleData.title} - Quiz`}
                       passingScore={80}
+                      onSubmitAnswers={gradeQuizOnServer}
                       onQuizComplete={handleQuizComplete}
                     />
+
                   ) : currentModuleNumber === 23 && quizComplete ? (
                     <CourseCompletionCelebration 
                       onTakeExam={() => navigate('/course/final-exam')}

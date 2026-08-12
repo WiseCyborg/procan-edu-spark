@@ -9,7 +9,12 @@ export interface QuizQuestion {
   id: string;
   question: string;
   options: string[];
-  correctAnswer: string;
+  /**
+   * Optional. Answer keys are no longer shipped to the browser for course
+   * module quizzes — grading happens server-side. When absent, this component
+   * runs in "server graded" mode and requires `onSubmitAnswers`.
+   */
+  correctAnswer?: string;
   explanation?: string;
   points?: number;
   topic?: string;
@@ -26,6 +31,12 @@ export interface WeakTopic {
   relatedModules?: string[];
 }
 
+export interface ServerGradeResult {
+  score: number;
+  passed: boolean;
+  results?: { question_index: number; is_correct: boolean; explanation?: string | null }[];
+}
+
 interface InteractiveQuizProps {
   questions: QuizQuestion[];
   title: string;
@@ -37,11 +48,20 @@ interface InteractiveQuizProps {
     passed: boolean,
     timeSpent: number,
     weakTopics?: WeakTopic[],
-    answers?: { question_index: number; answer: string }[]
+    answers?: { question_index: number; answer: string }[],
+    serverGraded?: boolean
   ) => void;
+  /**
+   * Server-side grader. Required when questions carry no answer key.
+   * Returning null signals a failed submission.
+   */
+  onSubmitAnswers?: (
+    answers: { question_index: number; answer: string }[]
+  ) => Promise<ServerGradeResult | null>;
   onQuestionAnswer?: (questionId: string, answer: string, isCorrect: boolean) => void;
   allowRetry?: boolean;
 }
+
 
 // Shuffle utility function
 const shuffleArray = <T,>(array: T[]): T[] => {
@@ -60,6 +80,7 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
   passingScore = 80,
   maxQuestions = 10,
   onQuizComplete,
+  onSubmitAnswers,
   onQuestionAnswer,
   allowRetry = true
 }) => {
@@ -74,6 +95,10 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
     );
   }
 
+  // Answer keys are stripped from learner-visible content for module quizzes.
+  // When no key is present we grade on the server instead of in the browser.
+  const hasAnswerKey = questions.some(q => !!q.correctAnswer);
+
   // Shuffle questions on initial load and select random maxQuestions (default 10)
   const [shuffledQuestions, setShuffledQuestions] = useState(() => {
     const shuffled = shuffleArray(questions);
@@ -85,6 +110,10 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
   const [timeRemaining, setTimeRemaining] = useState(timeLimit ? timeLimit * 60 : null);
   const [startTime] = useState(Date.now());
   const [showExplanation, setShowExplanation] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [serverResult, setServerResult] = useState<ServerGradeResult | null>(null);
+
 
   const currentQuestion = shuffledQuestions[currentQuestionIndex];
   const isLastQuestion = currentQuestionIndex === shuffledQuestions.length - 1;
@@ -111,8 +140,8 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
 
   const handleAnswerSelect = (answer: string) => {
     const questionId = currentQuestion.id;
-    const isCorrect = answer === currentQuestion.correctAnswer;
-    
+    const isCorrect = hasAnswerKey ? answer === currentQuestion.correctAnswer : false;
+
     setAnswers(prev => ({
       ...prev,
       [questionId]: answer
@@ -130,7 +159,7 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
         setCurrentQuestionIndex(prev => prev + 1);
       }
     } else {
-      if (currentQuestion.explanation && answers[currentQuestion.id]) {
+      if (hasAnswerKey && currentQuestion.explanation && answers[currentQuestion.id]) {
         setShowExplanation(true);
       } else if (isLastQuestion) {
         handleQuizSubmit();
@@ -147,16 +176,29 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
     }
   };
 
-  const calculateWeakTopics = (): WeakTopic[] => {
+  // Build answers array indexed by each question's position in the original `questions` prop
+  const buildRawAnswers = () => {
+    const rawAnswers: { question_index: number; answer: string }[] = [];
+    shuffledQuestions.forEach(q => {
+      const selected = answers[q.id];
+      if (selected === undefined) return;
+      const originalIndex = questions.findIndex(orig => orig.id === q.id);
+      if (originalIndex === -1) return;
+      rawAnswers.push({ question_index: originalIndex, answer: selected });
+    });
+    return rawAnswers;
+  };
+
+  const calculateWeakTopics = (correctnessByQuestionId: Record<string, boolean>): WeakTopic[] => {
     const topicStats: { [topic: string]: { correct: number; total: number; relatedModules: Set<string> } } = {};
-    
+
     shuffledQuestions.forEach(q => {
       const topic = q.topic || 'General';
       if (!topicStats[topic]) {
         topicStats[topic] = { correct: 0, total: 0, relatedModules: new Set() };
       }
       topicStats[topic].total++;
-      if (answers[q.id] === q.correctAnswer) {
+      if (correctnessByQuestionId[q.id]) {
         topicStats[topic].correct++;
       }
       if (q.relatedModules) {
@@ -175,25 +217,63 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
       .filter(t => t.percentage < 70); // Weak if < 70%
   };
 
-  const handleQuizSubmit = () => {
-    const correctAnswers = shuffledQuestions.filter(q => answers[q.id] === q.correctAnswer).length;
+  const localCorrectness = (): Record<string, boolean> => {
+    const map: Record<string, boolean> = {};
+    shuffledQuestions.forEach(q => {
+      map[q.id] = !!q.correctAnswer && answers[q.id] === q.correctAnswer;
+    });
+    return map;
+  };
+
+  const serverCorrectness = (result: ServerGradeResult): Record<string, boolean> => {
+    const map: Record<string, boolean> = {};
+    const byIndex = new Map((result.results ?? []).map(r => [r.question_index, r.is_correct]));
+    shuffledQuestions.forEach(q => {
+      const originalIndex = questions.findIndex(orig => orig.id === q.id);
+      map[q.id] = byIndex.get(originalIndex) === true;
+    });
+    return map;
+  };
+
+  const handleQuizSubmit = async () => {
+    if (submitting) return;
+    const timeSpent = Math.round((Date.now() - startTime) / 1000);
+    const rawAnswers = buildRawAnswers();
+
+    // Server-graded mode: no answer key in the browser.
+    if (!hasAnswerKey) {
+      if (!onSubmitAnswers) {
+        setSubmitError('This quiz cannot be graded right now. Please try again later.');
+        return;
+      }
+      setSubmitting(true);
+      setSubmitError(null);
+      try {
+        const result = await onSubmitAnswers(rawAnswers);
+        if (!result) {
+          setSubmitError("We couldn't grade your quiz. Please try submitting again.");
+          return;
+        }
+        setServerResult(result);
+        const weakTopics = calculateWeakTopics(serverCorrectness(result));
+        setShowResults(true);
+        onQuizComplete(result.score, result.passed, timeSpent, weakTopics, rawAnswers, true);
+      } catch {
+        setSubmitError("We couldn't grade your quiz. Please try submitting again.");
+      } finally {
+        setSubmitting(false);
+      }
+      return;
+    }
+
+    const correctness = localCorrectness();
+    const correctAnswers = shuffledQuestions.filter(q => correctness[q.id]).length;
     const score = Math.round((correctAnswers / shuffledQuestions.length) * 100);
     const passed = score >= passingScore;
-    const timeSpent = Math.round((Date.now() - startTime) / 1000);
-    const weakTopics = calculateWeakTopics();
-
-    // Build answers array indexed by each question's position in the original `questions` prop
-    const rawAnswers: { question_index: number; answer: string }[] = [];
-    shuffledQuestions.forEach(q => {
-      const selected = answers[q.id];
-      if (selected === undefined) return;
-      const originalIndex = questions.findIndex(orig => orig.id === q.id);
-      if (originalIndex === -1) return;
-      rawAnswers.push({ question_index: originalIndex, answer: selected });
-    });
+    const weakTopics = calculateWeakTopics(correctness);
 
     setShowResults(true);
-    onQuizComplete(score, passed, timeSpent, weakTopics, rawAnswers);
+    onQuizComplete(score, passed, timeSpent, weakTopics, rawAnswers, false);
   };
 
   const handleRetry = () => {
@@ -204,8 +284,11 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
     setAnswers({});
     setShowResults(false);
     setShowExplanation(false);
+    setServerResult(null);
+    setSubmitError(null);
     setTimeRemaining(timeLimit ? timeLimit * 60 : null);
   };
+
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -220,9 +303,12 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
   };
 
   if (showResults) {
-    const correctAnswers = shuffledQuestions.filter(q => answers[q.id] === q.correctAnswer).length;
-    const score = Math.round((correctAnswers / shuffledQuestions.length) * 100);
-    const passed = score >= passingScore;
+    const correctness = serverResult ? serverCorrectness(serverResult) : localCorrectness();
+    const correctAnswers = shuffledQuestions.filter(q => correctness[q.id]).length;
+    const score = serverResult
+      ? serverResult.score
+      : Math.round((correctAnswers / shuffledQuestions.length) * 100);
+    const passed = serverResult ? serverResult.passed : score >= passingScore;
 
     return (
       <Card className="max-w-2xl mx-auto">
@@ -252,7 +338,8 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
             <h4 className="font-semibold">Question Breakdown:</h4>
             {shuffledQuestions.map((question, index) => {
               const userAnswer = answers[question.id];
-              const isCorrect = userAnswer === question.correctAnswer;
+              const isCorrect = correctness[question.id];
+
               
               return (
                 <div key={question.id} className="flex items-center justify-between p-2 border rounded">
@@ -353,25 +440,34 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
           </div>
         )}
 
+        {submitError && (
+          <p className="text-sm text-destructive text-center">{submitError}</p>
+        )}
+
         <div className="flex justify-between">
           <Button
             variant="outline"
             onClick={handlePreviousQuestion}
-            disabled={currentQuestionIndex === 0}
+            disabled={currentQuestionIndex === 0 || submitting}
           >
             Previous
           </Button>
           
           <Button
             onClick={handleNextQuestion}
-            disabled={!answers[currentQuestion.id] && !showExplanation}
+            disabled={(!answers[currentQuestion.id] && !showExplanation) || submitting}
           >
-            {showExplanation 
-              ? (isLastQuestion ? 'Finish Quiz' : 'Next Question')
-              : (currentQuestion.explanation ? 'Show Explanation' : (isLastQuestion ? 'Finish Quiz' : 'Next Question'))
+            {submitting
+              ? 'Grading…'
+              : showExplanation
+                ? (isLastQuestion ? 'Finish Quiz' : 'Next Question')
+                : (hasAnswerKey && currentQuestion.explanation
+                    ? 'Show Explanation'
+                    : (isLastQuestion ? 'Finish Quiz' : 'Next Question'))
             }
           </Button>
         </div>
+
       </CardContent>
     </Card>
   );
