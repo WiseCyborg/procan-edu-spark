@@ -262,8 +262,27 @@ const JOB_HANDLERS: Record<string, (job: Job, supabase: any) => Promise<void>> =
         throw new Error(`send_progress_milestone: no email found for user ${user_id}`);
       }
 
+      // Idempotency: never send the same milestone twice for the same learner.
+      const { data: alreadySent } = await supabase
+        .from('email_logs')
+        .select('id')
+        .eq('recipient_email', email)
+        .eq('email_type', 'progress_milestone')
+        .eq('status', 'sent')
+        .contains('metadata', { user_id, milestone_percentage })
+        .limit(1);
+
+      if (alreadySent && alreadySent.length > 0) {
+        console.log(
+          `[send_progress_milestone] ⏭️ ${milestone_percentage}% milestone already sent to ${email} — skipping`,
+        );
+        return;
+      }
+
       const firstName = profile?.first_name || (authUser?.user?.user_metadata as any)?.first_name || 'Student';
       const lastName = profile?.last_name || (authUser?.user?.user_metadata as any)?.last_name || '';
+
+
 
       const html = await loadEmailTemplate('employee-progress-milestone', {
         FirstName: firstName,
