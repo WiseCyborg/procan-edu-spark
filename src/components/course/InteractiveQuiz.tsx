@@ -303,9 +303,12 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
   };
 
   if (showResults) {
-    const correctAnswers = shuffledQuestions.filter(q => answers[q.id] === q.correctAnswer).length;
-    const score = Math.round((correctAnswers / shuffledQuestions.length) * 100);
-    const passed = score >= passingScore;
+    const correctness = serverResult ? serverCorrectness(serverResult) : localCorrectness();
+    const correctAnswers = shuffledQuestions.filter(q => correctness[q.id]).length;
+    const score = serverResult
+      ? serverResult.score
+      : Math.round((correctAnswers / shuffledQuestions.length) * 100);
+    const passed = serverResult ? serverResult.passed : score >= passingScore;
 
     return (
       <Card className="max-w-2xl mx-auto">
@@ -335,7 +338,8 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
             <h4 className="font-semibold">Question Breakdown:</h4>
             {shuffledQuestions.map((question, index) => {
               const userAnswer = answers[question.id];
-              const isCorrect = userAnswer === question.correctAnswer;
+              const isCorrect = correctness[question.id];
+
               
               return (
                 <div key={question.id} className="flex items-center justify-between p-2 border rounded">
