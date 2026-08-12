@@ -1174,8 +1174,10 @@ const EnhancedCourseModule: React.FC = () => {
                       }))}
                       title={`${moduleData.title} - Quiz`}
                       passingScore={80}
+                      onSubmitAnswers={gradeQuizOnServer}
                       onQuizComplete={handleQuizComplete}
                     />
+
                   ) : currentModuleNumber === 23 && quizComplete ? (
                     <CourseCompletionCelebration 
                       onTakeExam={() => navigate('/course/final-exam')}
