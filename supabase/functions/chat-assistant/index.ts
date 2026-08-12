@@ -117,7 +117,6 @@ serve(async (req) => {
     let regulatoryContext = '';
     
     if (isRegulationQuery) {
-
       console.log('Detected regulatory query, searching COMAR database...');
       
       // Search regulatory_content via purpose-built database function (service-role)
@@ -128,8 +127,8 @@ serve(async (req) => {
         console.error('search_regulatory_content failed:', regError);
       }
 
-
       if (regulations && regulations.length > 0) {
+
         console.log(`Found ${regulations.length} relevant COMAR sections`);
         
         regulatoryContext = `\n\n=== RELEVANT MARYLAND COMAR SECTIONS ===\n`;
