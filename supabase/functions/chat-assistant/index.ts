@@ -128,8 +128,8 @@ serve(async (req) => {
       }
 
       if (regulations && regulations.length > 0) {
-
         console.log(`Found ${regulations.length} relevant COMAR sections`);
+
         
         regulatoryContext = `\n\n=== RELEVANT MARYLAND COMAR SECTIONS ===\n`;
         regulatoryContext += regulations
