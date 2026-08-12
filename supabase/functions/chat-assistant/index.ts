@@ -105,7 +105,19 @@ serve(async (req) => {
       }
     }
 
+    // Check if message is about regulations/compliance/COMAR
+    const isRegulationQuery = message.toLowerCase().includes('comar') || 
+                              message.toLowerCase().includes('regulation') ||
+                              message.toLowerCase().includes('law') ||
+                              message.toLowerCase().includes('compliance') ||
+                              message.toLowerCase().includes('maryland') ||
+                              message.toLowerCase().includes('mca') ||
+                              message.toLowerCase().includes('14.17');
+
+    let regulatoryContext = '';
+    
     if (isRegulationQuery) {
+
       console.log('Detected regulatory query, searching COMAR database...');
       
       // Search regulatory_content via purpose-built database function (service-role)
