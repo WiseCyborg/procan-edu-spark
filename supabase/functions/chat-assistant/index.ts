@@ -105,31 +105,17 @@ serve(async (req) => {
       }
     }
 
-    // Use ANON key for regulatory content lookup (RLS-scoped)
-    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
-    const supabaseAnon = createClient(supabaseUrl, supabaseAnonKey);
-
-    // Check if message is about regulations/compliance/COMAR
-    const isRegulationQuery = message.toLowerCase().includes('comar') || 
-                              message.toLowerCase().includes('regulation') ||
-                              message.toLowerCase().includes('law') ||
-                              message.toLowerCase().includes('compliance') ||
-                              message.toLowerCase().includes('maryland') ||
-                              message.toLowerCase().includes('mca') ||
-                              message.toLowerCase().includes('14.17');
-
-    let regulatoryContext = '';
-    
     if (isRegulationQuery) {
       console.log('Detected regulatory query, searching COMAR database...');
       
-      // Search regulatory_content for relevant Maryland COMAR sections
-      const { data: regulations, error: regError } = await supabaseAnon
-        .from('regulatory_content')
-        .select('section_number, section_title, content_text')
-        .eq('state', 'Maryland')
-        .textSearch('content_text', message.replace(/[^\w\s]/g, ' '))
-        .limit(3);
+      // Search regulatory_content via purpose-built database function (service-role)
+      const { data: regulations, error: regError } = await supabase
+        .rpc('search_regulatory_content', { p_query: message, p_limit: 3 });
+
+      if (regError) {
+        console.error('search_regulatory_content failed:', regError);
+      }
+
 
       if (regulations && regulations.length > 0) {
         console.log(`Found ${regulations.length} relevant COMAR sections`);
