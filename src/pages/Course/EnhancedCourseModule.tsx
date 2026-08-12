@@ -583,7 +583,19 @@ const EnhancedCourseModule: React.FC = () => {
     setActiveTab('quiz');
   };
 
+  // Weak-area practice grades locally, which requires an answer key. Module
+  // answer keys are server-side only, so this path is only offered for legacy
+  // content that still carries answers.
+  const canPracticeWeakAreas = !!moduleData?.quiz_questions?.some(q => !!q.correct);
+
   const handlePracticeWeakAreas = () => {
+    if (!canPracticeWeakAreas) {
+      toast({
+        title: 'Review the module instead',
+        description: 'Practice mode is unavailable for this quiz. Review the module content and retake the quiz.',
+      });
+      return;
+    }
     setShowQuizResults(false);
     setShowWeakPractice(true);
   };
@@ -592,7 +604,7 @@ const EnhancedCourseModule: React.FC = () => {
     if (!moduleData) return [];
     const weakTopicNames = weakTopics.map(t => t.topic);
     return moduleData.quiz_questions
-      .filter(q => q.topic && weakTopicNames.includes(q.topic))
+      .filter(q => q.topic && weakTopicNames.includes(q.topic) && !!q.correct)
       .map((q, idx) => ({
         id: q.id || `q${idx}`,
         question: q.question,
@@ -605,6 +617,7 @@ const EnhancedCourseModule: React.FC = () => {
         relatedModules: q.relatedModules
       }));
   };
+
 
   const calculateSectionProgress = () => {
     if (isModuleAlreadyCompleted) return 100;
