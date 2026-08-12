@@ -84,7 +84,7 @@ export function verifiedFactsBlock(today: string): string {
   return `
 === VERIFIED FACTS (use these exact values; do not invent figures) ===
 - Today's date: ${today}
-- RVT (Responsible Vendor Training) course price: $149 per seat
+- RVT (Responsible Vendor Training) course price: $49.99 per seat
 - RVT exam passing threshold: 80%
 - RVT module count: 23 modules + final exam
 - Certificate validity: 1 year from issue date
