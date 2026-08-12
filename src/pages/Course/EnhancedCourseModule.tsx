@@ -40,13 +40,16 @@ interface QuizQuestion {
   id: string;
   question: string;
   options: string[];
-  correct: string;
-  explanation: string;
+  // Answer keys are never shipped to the browser — grading is server-side
+  // via the submit_module_quiz RPC. These stay optional for legacy content.
+  correct?: string;
+  explanation?: string;
   topic?: string;
   comarRef?: string;
   difficulty?: 'easy' | 'medium' | 'hard';
   relatedModules?: string[];
 }
+
 
 interface Lesson {
   id: string;
