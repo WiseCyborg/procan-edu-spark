@@ -440,25 +440,34 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
           </div>
         )}
 
+        {submitError && (
+          <p className="text-sm text-destructive text-center">{submitError}</p>
+        )}
+
         <div className="flex justify-between">
           <Button
             variant="outline"
             onClick={handlePreviousQuestion}
-            disabled={currentQuestionIndex === 0}
+            disabled={currentQuestionIndex === 0 || submitting}
           >
             Previous
           </Button>
           
           <Button
             onClick={handleNextQuestion}
-            disabled={!answers[currentQuestion.id] && !showExplanation}
+            disabled={(!answers[currentQuestion.id] && !showExplanation) || submitting}
           >
-            {showExplanation 
-              ? (isLastQuestion ? 'Finish Quiz' : 'Next Question')
-              : (currentQuestion.explanation ? 'Show Explanation' : (isLastQuestion ? 'Finish Quiz' : 'Next Question'))
+            {submitting
+              ? 'Grading…'
+              : showExplanation
+                ? (isLastQuestion ? 'Finish Quiz' : 'Next Question')
+                : (hasAnswerKey && currentQuestion.explanation
+                    ? 'Show Explanation'
+                    : (isLastQuestion ? 'Finish Quiz' : 'Next Question'))
             }
           </Button>
         </div>
+
       </CardContent>
     </Card>
   );
