@@ -180,11 +180,12 @@ const EnhancedCourseModule: React.FC = () => {
   const { saveResumeState } = useResumeState(COURSE_ID);
   const queryClient = useQueryClient();
   const { user } = useAuth();
-  const { isDispensaryManager, isTrainingCoordinator, isAdmin } = useUserRole();
+  const { isDispensaryManager, isTrainingCoordinator, isAdmin, isLoading: rolesLoading } = useUserRole();
   const isManagerRole = isDispensaryManager || isTrainingCoordinator || isAdmin;
+  const rolesReady = !rolesLoading;
   
   const currentModuleNumber = parseInt(moduleId?.replace('part', '') || '0');
-  const isLastModuleForUser = isManagerRole ? currentModuleNumber === 23 : currentModuleNumber === 18;
+  const isLastModuleForUser = rolesReady && (isManagerRole ? currentModuleNumber === 23 : currentModuleNumber === 18);
 
 
   // Save resume state whenever tab or page changes
@@ -262,7 +263,8 @@ const EnhancedCourseModule: React.FC = () => {
   });
 
   // Non-managers stop at module 18; managers continue through module 23.
-  const effectiveCanGoNext = canGoNext && (isManagerRole || currentModuleNumber < 18);
+  // Wait for roles to load so managers are not briefly capped at 18.
+  const effectiveCanGoNext = rolesReady && canGoNext && (isManagerRole || currentModuleNumber < 18);
 
 
   // Transition handlers for smooth module navigation
@@ -451,15 +453,16 @@ const EnhancedCourseModule: React.FC = () => {
 
   // Redirect non-managers away from manager-only modules. The server already
   // refuses to grade these, so this is purely a content-visibility guard.
+  // Wait for roles to load so genuine managers are not bounced while auth resolves.
   useEffect(() => {
-    if (moduleData && moduleData.is_manager_only && !isManagerRole) {
+    if (rolesReady && moduleData && moduleData.is_manager_only && !isManagerRole) {
       toast({
         title: 'Supervisory track only',
         description: 'This module is part of the optional supervisory track and is not available in your current role.',
       });
       navigate('/course');
     }
-  }, [moduleData, isManagerRole, navigate]);
+  }, [moduleData, isManagerRole, navigate, rolesReady]);
 
 
   // Server-side grader for the module quiz. Answer keys are not exposed to the
@@ -1217,7 +1220,7 @@ const EnhancedCourseModule: React.FC = () => {
                       onQuizComplete={handleQuizComplete}
                     />
 
-                  ) : isLastModuleForUser && quizComplete ? (
+                  ) : isLastModuleForUser && quizComplete && quizPassed ? (
                     <CourseCompletionCelebration 
                       onTakeExam={() => navigate('/course/final-exam')}
                       onReturnToDashboard={() => navigate('/student')}
