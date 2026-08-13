@@ -14,7 +14,7 @@ interface CourseProgress {
 const getStorageKey = (courseId: string, identifier: string) =>
   `procann_progress_${courseId}_${identifier}`;
 
-export const useConsumerProgress = (courseId: string) => {
+export const useConsumerProgress = (courseId: string, totalModules: number = 0) => {
   const { user } = useAuth();
   const { sessionId } = useGuestSession();
   const [progress, setProgress] = useState<CourseProgress>({
@@ -145,32 +145,12 @@ export const useConsumerProgress = (courseId: string) => {
   const writeUserProgress = useCallback(async (moduleId: string) => {
     if (!user?.id) return; // user_progress.user_id is NOT NULL — guests can't participate
     try {
-      const nowIso = new Date().toISOString();
-      // Upsert-ish: check for existing row
-      const { data: existing } = await supabase
-        .from('user_progress')
-        .select('id, is_completed')
-        .eq('user_id', user.id)
-        .eq('course_id', courseId)
-        .eq('module_id', moduleId)
-        .maybeSingle();
-
-      if (existing) {
-        if (!existing.is_completed) {
-          await supabase
-            .from('user_progress')
-            .update({ is_completed: true, completed_at: nowIso })
-            .eq('id', existing.id);
-        }
-      } else {
-        await supabase.from('user_progress').insert({
-          user_id: user.id,
-          course_id: courseId,
-          module_id: moduleId,
-          is_completed: true,
-          completed_at: nowIso,
-        });
-      }
+      const { error } = await supabase.rpc('safe_complete_module', {
+        p_user_id: user.id,
+        p_course_id: courseId,
+        p_module_id: moduleId,
+      });
+      if (error) console.error('safe_complete_module failed:', error);
     } catch (error) {
       console.error('Error writing user_progress:', error);
     }
@@ -251,7 +231,7 @@ export const useConsumerProgress = (courseId: string) => {
     markModuleComplete,
     isModuleComplete,
     completeCourse,
-    completionPercentage: completionPercentage(progress.completedModules.length),
+    completionPercentage: completionPercentage(totalModules),
     isLoading
   };
 };
