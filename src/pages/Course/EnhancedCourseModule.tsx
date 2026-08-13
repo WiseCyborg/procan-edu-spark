@@ -412,7 +412,9 @@ const EnhancedCourseModule: React.FC = () => {
           video_url: data.video_url,
           asset_key: primary?.asset_key ?? null,
           video_pending: primary?.unmapped_reason === 'pending_ai_generation',
+          is_manager_only: data.is_manager_only ?? false,
         });
+
         setSupplementAsset(
           supplement
             ? {
