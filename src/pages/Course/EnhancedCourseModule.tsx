@@ -180,11 +180,12 @@ const EnhancedCourseModule: React.FC = () => {
   const { saveResumeState } = useResumeState(COURSE_ID);
   const queryClient = useQueryClient();
   const { user } = useAuth();
-  const { isDispensaryManager, isTrainingCoordinator, isAdmin } = useUserRole();
+  const { isDispensaryManager, isTrainingCoordinator, isAdmin, isLoading: rolesLoading } = useUserRole();
   const isManagerRole = isDispensaryManager || isTrainingCoordinator || isAdmin;
+  const rolesReady = !rolesLoading;
   
   const currentModuleNumber = parseInt(moduleId?.replace('part', '') || '0');
-  const isLastModuleForUser = isManagerRole ? currentModuleNumber === 23 : currentModuleNumber === 18;
+  const isLastModuleForUser = rolesReady && (isManagerRole ? currentModuleNumber === 23 : currentModuleNumber === 18);
 
 
   // Save resume state whenever tab or page changes
