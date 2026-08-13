@@ -37,6 +37,7 @@ export const useJourneyState = () => {
 
   // Keep a ref to the latest state so callbacks can stay referentially stable
   const journeyStateRef = useRef<JourneyState | null>(null);
+  const inFlightPayloadRef = useRef<string | null>(null);
   useEffect(() => {
     journeyStateRef.current = journeyState;
   }, [journeyState]);
