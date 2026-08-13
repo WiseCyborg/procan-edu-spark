@@ -99,10 +99,35 @@ export const useJourneyState = () => {
     fetchJourneyState();
   }, [userId]);
 
+  // Fields whose change is a *real* transition worth persisting immediately.
+  const MEANINGFUL_FIELDS: (keyof JourneyState)[] = [
+    'current_stage',
+    'current_wizard',
+    'current_step',
+    'last_page_visited',
+    'last_action',
+    'welcome_message_shown',
+    'resume_prompt_count',
+    'wizard_metadata',
+  ];
+
+  const HEARTBEAT_INTERVAL_MS = 60_000;
+  const BREAKER_WINDOW_MS = 60_000;
+  const BREAKER_MAX_WRITES = 20;
+
+  const lastHeartbeatRef = useRef<number>(0);
+  const writeTimestampsRef = useRef<number[]>([]);
+  const breakerTrippedRef = useRef(false);
+
   // Update journey state (stable identity — reads latest state from a ref)
   const updateJourneyState = useCallback(async (updates: Partial<JourneyState>) => {
     const current = journeyStateRef.current;
     if (!userId || !current) return;
+
+    const now = Date.now();
+
+    // Circuit breaker 0: hard stop for the session after a runaway write loop.
+    if (breakerTrippedRef.current) return;
 
     // Circuit breaker 1: drop writes whose payload already matches the row.
     // last_activity_at is appended below and deliberately excluded from this
@@ -110,12 +135,38 @@ export const useJourneyState = () => {
     const isNoOp = Object.entries(updates).every(
       ([k, v]) => (current as unknown as Record<string, unknown>)[k] === v
     );
-    if (isNoOp) return;
+
+    // Heartbeat throttle: a write that changes nothing meaningful is only
+    // allowed through once per HEARTBEAT_INTERVAL_MS.
+    const hasMeaningfulChange = MEANINGFUL_FIELDS.some(
+      (k) =>
+        k in updates &&
+        (current as unknown as Record<string, unknown>)[k] !==
+          (updates as unknown as Record<string, unknown>)[k]
+    );
+    if (!hasMeaningfulChange) {
+      if (isNoOp) return;
+      if (now - lastHeartbeatRef.current < HEARTBEAT_INTERVAL_MS) return;
+    }
 
     // Circuit breaker 2: never issue the same payload twice concurrently.
     // Distinct payloads are still allowed through, so no real update is lost.
     const payloadKey = JSON.stringify(updates);
     if (inFlightPayloadRef.current === payloadKey) return;
+
+    // Circuit breaker 3: cap total writes per rolling window.
+    writeTimestampsRef.current = writeTimestampsRef.current.filter(
+      (t) => now - t < BREAKER_WINDOW_MS
+    );
+    if (writeTimestampsRef.current.length >= BREAKER_MAX_WRITES) {
+      breakerTrippedRef.current = true;
+      console.warn(
+        '[useJourneyState] Write circuit breaker tripped (>20 writes/60s). Journey-state writes disabled for this session.'
+      );
+      return;
+    }
+    writeTimestampsRef.current.push(now);
+    lastHeartbeatRef.current = now;
     inFlightPayloadRef.current = payloadKey;
 
     try {
@@ -140,6 +191,7 @@ export const useJourneyState = () => {
       inFlightPayloadRef.current = null;
     }
   }, [userId]);
+
 
   // Update current step in wizard
   const updateStep = useCallback((step: number) => {
@@ -202,11 +254,18 @@ export const useJourneyState = () => {
     });
   }, [updateJourneyState]);
 
-  // Get resume message
+  // Get resume message (depends only on primitives so its identity is stable
+  // across heartbeat-only state refreshes)
+  const stage = journeyState?.current_stage ?? null;
+  const wizard = journeyState?.current_wizard ?? null;
+  const step = journeyState?.current_step ?? 1;
   const getResumeMessage = useCallback(() => {
-    if (!journeyState) return null;
+    if (!stage) return null;
 
-    const { current_stage, current_wizard, current_step } = journeyState;
+    const current_stage = stage;
+    const current_wizard = wizard;
+    const current_step = step;
+
 
     if (current_wizard === 'manager_onboarding' && current_step > 1) {
       const stepNames = ['Welcome', 'Organization Profile', 'Training Seats', 'Invite Employees'];
@@ -237,7 +296,7 @@ export const useJourneyState = () => {
     }
 
     return null;
-  }, [journeyState]);
+  }, [stage, wizard, step]);
 
   return {
     journeyState,
