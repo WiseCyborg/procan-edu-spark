@@ -13236,6 +13236,7 @@ export type Database = {
           urgency_score: number
         }[]
       }
+      email_exists: { Args: { p_email: string }; Returns: boolean }
       encrypt_pii: { Args: { plaintext: string }; Returns: string }
       enqueue_regression_if_new: { Args: never; Returns: undefined }
       evaluate_and_issue_certificate:
