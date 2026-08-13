@@ -23,64 +23,47 @@ const handler = async (req: Request): Promise<Response> => {
     );
 
     const { email }: CheckEmailRequest = await req.json();
-    
+
     if (!email || !email.includes('@')) {
       return new Response(
         JSON.stringify({ error: 'Invalid email format' }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       );
     }
 
-    console.log('Checking email existence for:', email);
+    const { data, error } = await supabase.rpc('email_exists', { p_email: email });
 
-    // Use efficient direct email lookup instead of listing all users
-    const { data, error } = await supabase.auth.admin.getUserByEmail(email);
-    
     if (error) {
-      // If error is "User not found", that means email doesn't exist
-      if (error.message?.includes('not found') || error.status === 404) {
-        console.log('Email does not exist:', email);
-        return new Response(
-          JSON.stringify({ exists: false }),
-          { 
-            status: 200, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-          }
-        );
-      }
-      
-      // Other errors
       console.error('Error checking email:', error);
       return new Response(
-        JSON.stringify({ error: 'Failed to check email', exists: false }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        JSON.stringify({ error: 'Failed to check email' }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       );
     }
 
-    const emailExists = !!data?.user;
-    console.log('Email exists:', emailExists);
+    console.log('Email lookup succeeded');
 
     return new Response(
-      JSON.stringify({ exists: emailExists }),
-      { 
-        status: 200, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      JSON.stringify({ exists: data === true }),
+      {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
     );
 
   } catch (error) {
     console.error('Error in check-email-exists function:', error);
     return new Response(
-      JSON.stringify({ error: 'Internal server error', exists: false }),
-      { 
-        status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      JSON.stringify({ error: 'Internal server error' }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
     );
   }
