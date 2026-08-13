@@ -1,5 +1,5 @@
 export const DOMAINS = {
-  PRODUCTION: 'https://www.procannedu.com',
+  PRODUCTION: 'https://procannedu.com',
   SUPABASE: 'https://zhmpwczrvitomsxjwpzc.supabase.co',
   
   // Helper functions

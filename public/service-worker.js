@@ -3,7 +3,7 @@
 // what makes the browser's own service worker update-detection (see
 // src/lib/pwa-registration.ts) notice there's a new worker and prompt the
 // user to reload.
-const CACHE_VERSION = 'v3';
+const CACHE_VERSION = 'v4';
 const CACHE_NAME = `procann-edu-${CACHE_VERSION}`;
 const OFFLINE_URL = '/offline.html';
 
