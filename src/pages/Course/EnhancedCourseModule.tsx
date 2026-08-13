@@ -453,15 +453,16 @@ const EnhancedCourseModule: React.FC = () => {
 
   // Redirect non-managers away from manager-only modules. The server already
   // refuses to grade these, so this is purely a content-visibility guard.
+  // Wait for roles to load so genuine managers are not bounced while auth resolves.
   useEffect(() => {
-    if (moduleData && moduleData.is_manager_only && !isManagerRole) {
+    if (rolesReady && moduleData && moduleData.is_manager_only && !isManagerRole) {
       toast({
         title: 'Supervisory track only',
         description: 'This module is part of the optional supervisory track and is not available in your current role.',
       });
       navigate('/course');
     }
-  }, [moduleData, isManagerRole, navigate]);
+  }, [moduleData, isManagerRole, navigate, rolesReady]);
 
 
   // Server-side grader for the module quiz. Answer keys are not exposed to the
