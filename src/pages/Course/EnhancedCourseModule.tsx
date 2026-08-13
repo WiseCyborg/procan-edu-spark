@@ -491,6 +491,12 @@ const EnhancedCourseModule: React.FC = () => {
 
       if (error || !result?.ok) {
         console.error('submit_module_quiz failed:', error, result);
+        if (result?.error === 'rvt_certificate_required') {
+          toast({
+            title: 'Supervisory track',
+            description: 'The supervisory track opens after you pass the RVT final exam and receive your certificate.',
+          });
+        }
         return null;
       }
 
@@ -550,11 +556,18 @@ const EnhancedCourseModule: React.FC = () => {
 
       if (error || !result?.ok) {
         console.error('submit_module_quiz failed:', error, result);
-        toast({
-          title: 'Error',
-          description: "We couldn't record your quiz result. Please try again.",
-          variant: 'destructive',
-        });
+        toast(
+          result?.error === 'rvt_certificate_required'
+            ? {
+                title: 'Supervisory track',
+                description: 'The supervisory track opens after you pass the RVT final exam and receive your certificate.',
+              }
+            : {
+                title: 'Error',
+                description: "We couldn't record your quiz result. Please try again.",
+                variant: 'destructive',
+              }
+        );
       } else {
         // Server is source of truth. Refresh cached progress so UI reflects the write.
         queryClient.invalidateQueries({ queryKey: ['user-progress', user?.id] });

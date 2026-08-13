@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useUserProgress } from './useUserProgress';
 import { useUserRole } from './useUserRole';
 import { useResumeState } from './useResumeState';
+import { useHasRvtCertificate } from './useHasRvtCertificate';
 
 // RVT Course ID - the main course for training
 // NOTE: This MUST be the *course* id (not a module id) to make DB-backed resume work.
@@ -82,7 +83,10 @@ export const useContinueTraining = (): ContinueTrainingResult => {
   // Get persisted resume state - THIS IS THE KEY FIX
   const { resumeTarget, isLoading: resumeLoading, getResumeRoute } = useResumeState(RVT_COURSE_ID);
   
+  const { hasRvtCertificate, isLoading: certLoading } = useHasRvtCertificate(RVT_COURSE_ID);
   const isManagerRole = isDispensaryManager || isTrainingCoordinator || isAdmin;
+  // Supervisory track requires a manager-class role AND a valid RVT certificate.
+  const canAccessManagerTrack = isManagerRole && hasRvtCertificate;
   
   const result = useMemo(() => {
     const rvtCompleted = getRvtCompletedCount();
@@ -118,7 +122,7 @@ export const useContinueTraining = (): ContinueTrainingResult => {
     
     // Determine current path
     let currentPath: TrainingPath = 'rvt';
-    if (isRvtComplete && !isManagerComplete && isManagerRole) {
+    if (isRvtComplete && !isManagerComplete && canAccessManagerTrack) {
       currentPath = 'manager';
     }
     
@@ -160,7 +164,7 @@ export const useContinueTraining = (): ContinueTrainingResult => {
       ctaLabel = 'Take RVT Exam';
       ctaDescription = 'All RVT modules complete! Ready for certification';
       
-      if (isManagerRole && managerCompleted < MANAGER_MODULE_COUNT) {
+      if (canAccessManagerTrack && managerCompleted < MANAGER_MODULE_COUNT) {
         nextModuleNumber = RVT_REQUIRED_MAX + 1 + managerCompleted;
         if (nextModuleNumber <= 23) {
           continueUrl = `/course/part${nextModuleNumber}`;
@@ -201,7 +205,7 @@ export const useContinueTraining = (): ContinueTrainingResult => {
     RVT_MODULE_COUNT, 
     MANAGER_MODULE_COUNT, 
     RVT_REQUIRED_MAX, 
-    isManagerRole,
+    canAccessManagerTrack,
     resumeTarget,
     getResumeRoute
   ]);
@@ -213,7 +217,7 @@ export const useContinueTraining = (): ContinueTrainingResult => {
   return {
     ...result,
     continueTraining,
-    isLoading: progressLoading || resumeLoading,
+    isLoading: progressLoading || resumeLoading || certLoading,
   };
 };
 
