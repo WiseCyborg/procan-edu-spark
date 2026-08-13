@@ -296,7 +296,7 @@ export const useJourneyState = () => {
     }
 
     return null;
-  }, [journeyState]);
+  }, [stage, wizard, step]);
 
   return {
     journeyState,
