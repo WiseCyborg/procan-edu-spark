@@ -13809,6 +13809,7 @@ export type Database = {
         Args: { p_course_id?: string; p_target_user_id: string }
         Returns: Json
       }
+      resolve_default_seat_course: { Args: never; Returns: string }
       run_pipeline_health_check: { Args: never; Returns: Json }
       safe_assign_role: {
         Args: {
