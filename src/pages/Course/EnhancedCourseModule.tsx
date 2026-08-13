@@ -77,7 +77,9 @@ interface ModuleData {
   lessons?: Lesson[];
   asset_key?: string | null;
   video_pending?: boolean;
+  is_manager_only?: boolean | null;
 }
+
 
 const COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
 
