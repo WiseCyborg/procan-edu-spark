@@ -1217,7 +1217,7 @@ const EnhancedCourseModule: React.FC = () => {
                       onQuizComplete={handleQuizComplete}
                     />
 
-                  ) : currentModuleNumber === 23 && quizComplete ? (
+                  ) : isLastModuleForUser && quizComplete ? (
                     <CourseCompletionCelebration 
                       onTakeExam={() => navigate('/course/final-exam')}
                       onReturnToDashboard={() => navigate('/student')}
@@ -1236,12 +1236,13 @@ const EnhancedCourseModule: React.FC = () => {
                             Return to Course
                           </Button>
                           {/* Only show Next Module when quiz is passed - single source of truth */}
-                          {canGoNext && quizPassed && (
+                          {effectiveCanGoNext && quizPassed && (
                             <Button onClick={handleNextModuleWithTransition} disabled={isTransitioning}>
                               Next Module
                             </Button>
                           )}
                         </div>
+
                         {/* Show guidance if quiz failed */}
                         {!quizPassed && quizComplete && (
                           <p className="text-sm text-muted-foreground mt-4">
