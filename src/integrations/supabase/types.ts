@@ -2483,6 +2483,33 @@ export type Database = {
         }
         Relationships: []
       }
+      _cleanup_bak_seat_course_20260813: {
+        Row: {
+          assigned_user_id: string | null
+          course_id: string | null
+          id: string | null
+          organization_id: string | null
+          snapshot_at: string | null
+          status: string | null
+        }
+        Insert: {
+          assigned_user_id?: string | null
+          course_id?: string | null
+          id?: string | null
+          organization_id?: string | null
+          snapshot_at?: string | null
+          status?: string | null
+        }
+        Update: {
+          assigned_user_id?: string | null
+          course_id?: string | null
+          id?: string | null
+          organization_id?: string | null
+          snapshot_at?: string | null
+          status?: string | null
+        }
+        Relationships: []
+      }
       _cleanup_bak_vpublic_20260803: {
         Row: {
           asset_key: string | null
