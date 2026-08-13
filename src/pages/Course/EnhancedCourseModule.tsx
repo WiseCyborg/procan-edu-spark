@@ -449,6 +449,19 @@ const EnhancedCourseModule: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [moduleId, isProgressLoading]);
 
+  // Redirect non-managers away from manager-only modules. The server already
+  // refuses to grade these, so this is purely a content-visibility guard.
+  useEffect(() => {
+    if (moduleData && moduleData.is_manager_only && !isManagerRole) {
+      toast({
+        title: 'Supervisory track only',
+        description: 'This module is part of the optional supervisory track and is not available in your current role.',
+      });
+      navigate('/course');
+    }
+  }, [moduleData, isManagerRole, navigate]);
+
+
   // Server-side grader for the module quiz. Answer keys are not exposed to the
   // browser, so submit_module_quiz is both the grader and the source of truth.
   const gradeQuizOnServer = async (
