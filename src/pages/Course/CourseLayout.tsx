@@ -36,7 +36,7 @@ interface ModuleData {
 
 const CourseLayout: React.FC = () => {
   const { user } = useAuth();
-  const { roles, isStudent, isAdmin, isDispensaryManager, isLoading: rolesLoading } = useUserRole();
+  const { roles, isStudent, isAdmin, isDispensaryManager, isTrainingCoordinator, isLoading: rolesLoading } = useUserRole();
   const [course] = useState({
     id: COURSE_ID,
     title: 'Maryland Responsible Vendor Training (RVT)',
@@ -110,7 +110,7 @@ const CourseLayout: React.FC = () => {
     return `${requiredCompleted}/${requiredTotal} required modules completed${averageScore > 0 ? ` • Average score: ${averageScore}%` : ''}`;
   };
 
-  const isManagerRole = isDispensaryManager || isAdmin;
+  const isManagerRole = isDispensaryManager || isTrainingCoordinator || isAdmin;
   const managerModules = modules.filter(m => m.is_manager_only);
   const agentModules = modules.filter(m => !m.is_manager_only);
   const managerCompletedCount = managerModules.filter(m =>
