@@ -101,7 +101,22 @@ export const useJourneyState = () => {
 
   // Update journey state (stable identity — reads latest state from a ref)
   const updateJourneyState = useCallback(async (updates: Partial<JourneyState>) => {
-    if (!userId || !journeyStateRef.current) return;
+    const current = journeyStateRef.current;
+    if (!userId || !current) return;
+
+    // Circuit breaker 1: drop writes whose payload already matches the row.
+    // last_activity_at is appended below and deliberately excluded from this
+    // comparison, so a "touch only last_activity_at" write is never issued.
+    const isNoOp = Object.entries(updates).every(
+      ([k, v]) => (current as Record<string, unknown>)[k] === v
+    );
+    if (isNoOp) return;
+
+    // Circuit breaker 2: never issue the same payload twice concurrently.
+    // Distinct payloads are still allowed through, so no real update is lost.
+    const payloadKey = JSON.stringify(updates);
+    if (inFlightPayloadRef.current === payloadKey) return;
+    inFlightPayloadRef.current = payloadKey;
 
     try {
       const { data, error } = await supabase
@@ -121,6 +136,8 @@ export const useJourneyState = () => {
       }
     } catch (err) {
       console.error('[useJourneyState] Exception updating:', err);
+    } finally {
+      inFlightPayloadRef.current = null;
     }
   }, [userId]);
 
