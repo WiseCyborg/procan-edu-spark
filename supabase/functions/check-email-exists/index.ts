@@ -34,23 +34,22 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    const { data, error } = await supabase.rpc('email_exists', { p_email: email });
+    const { data: exists, error } = await supabase.rpc('auth_email_exists', { p_email: email });
 
     if (error) {
-      console.error('Error checking email:', error);
+      console.error('Email lookup failed:', error.message);
+      // Never break the auth screen: report "unknown" with a 200.
       return new Response(
-        JSON.stringify({ error: 'Failed to check email' }),
+        JSON.stringify({ exists: null, error: 'lookup_unavailable' }),
         {
-          status: 500,
+          status: 200,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       );
     }
 
-    console.log('Email lookup succeeded');
-
     return new Response(
-      JSON.stringify({ exists: data === true }),
+      JSON.stringify({ exists: !!exists }),
       {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -58,11 +57,11 @@ const handler = async (req: Request): Promise<Response> => {
     );
 
   } catch (error) {
-    console.error('Error in check-email-exists function:', error);
+    console.error('Error in check-email-exists function:', (error as Error)?.message);
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
+      JSON.stringify({ exists: null, error: 'lookup_unavailable' }),
       {
-        status: 500,
+        status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
     );
