@@ -16,6 +16,7 @@ import { useUserProgress } from '@/hooks/useUserProgress';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { useResumeState } from '@/hooks/useResumeState';
+import { useUserRole } from '@/hooks/useUserRole';
 import { useSignedVideoUrl } from '@/hooks/useSignedVideoUrl';
 import { useVideoEngagementTracking } from '@/hooks/useVideoEngagementTracking';
 import { supabase } from '@/integrations/supabase/client';
@@ -76,7 +77,9 @@ interface ModuleData {
   lessons?: Lesson[];
   asset_key?: string | null;
   video_pending?: boolean;
+  is_manager_only?: boolean | null;
 }
+
 
 const COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
 
@@ -177,8 +180,12 @@ const EnhancedCourseModule: React.FC = () => {
   const { saveResumeState } = useResumeState(COURSE_ID);
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const { isDispensaryManager, isTrainingCoordinator, isAdmin } = useUserRole();
+  const isManagerRole = isDispensaryManager || isTrainingCoordinator || isAdmin;
   
   const currentModuleNumber = parseInt(moduleId?.replace('part', '') || '0');
+  const isLastModuleForUser = isManagerRole ? currentModuleNumber === 23 : currentModuleNumber === 18;
+
 
   // Save resume state whenever tab or page changes
   const persistResumeState = useCallback((tab: string, pageIndex: number) => {
@@ -253,6 +260,10 @@ const EnhancedCourseModule: React.FC = () => {
     currentModule: currentModuleNumber,
     totalModules: modulesWithCompletion.length,
   });
+
+  // Non-managers stop at module 18; managers continue through module 23.
+  const effectiveCanGoNext = canGoNext && (isManagerRole || currentModuleNumber < 18);
+
 
   // Transition handlers for smooth module navigation
   const handleNextModuleWithTransition = () => {
@@ -401,7 +412,9 @@ const EnhancedCourseModule: React.FC = () => {
           video_url: data.video_url,
           asset_key: primary?.asset_key ?? null,
           video_pending: primary?.unmapped_reason === 'pending_ai_generation',
+          is_manager_only: data.is_manager_only ?? false,
         });
+
         setSupplementAsset(
           supplement
             ? {
@@ -435,6 +448,19 @@ const EnhancedCourseModule: React.FC = () => {
     // toasts when tab changes triggered re-renders).
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [moduleId, isProgressLoading]);
+
+  // Redirect non-managers away from manager-only modules. The server already
+  // refuses to grade these, so this is purely a content-visibility guard.
+  useEffect(() => {
+    if (moduleData && moduleData.is_manager_only && !isManagerRole) {
+      toast({
+        title: 'Supervisory track only',
+        description: 'This module is part of the optional supervisory track and is not available in your current role.',
+      });
+      navigate('/course');
+    }
+  }, [moduleData, isManagerRole, navigate]);
+
 
   // Server-side grader for the module quiz. Answer keys are not exposed to the
   // browser, so submit_module_quiz is both the grader and the source of truth.
@@ -1150,8 +1176,8 @@ const EnhancedCourseModule: React.FC = () => {
 
                 <TabsContent value="quiz" className="space-y-4">
                   {moduleData.quiz_questions.length === 0 ? (
-                    currentModuleNumber === 23 ? (
-                      // Last module - show course completion options
+                    isLastModuleForUser ? (
+                      // Last module for this learner - show course completion options
                       <CourseCompletionCelebration 
                         onTakeExam={() => navigate('/course/final-exam')}
                         onReturnToDashboard={() => navigate('/student-dashboard')}
@@ -1166,8 +1192,8 @@ const EnhancedCourseModule: React.FC = () => {
                             This introductory module doesn't have a quiz. 
                             Continue to the next module to begin your training.
                           </p>
-                          <Button onClick={goToNext} disabled={!canGoNext}>
-                            {canGoNext ? `Continue to Module ${currentModuleNumber + 1}` : 'Complete'}
+                          <Button onClick={goToNext} disabled={!effectiveCanGoNext}>
+                            {effectiveCanGoNext ? `Continue to Module ${currentModuleNumber + 1}` : 'Complete'}
                           </Button>
                         </CardContent>
                       </Card>
@@ -1191,7 +1217,7 @@ const EnhancedCourseModule: React.FC = () => {
                       onQuizComplete={handleQuizComplete}
                     />
 
-                  ) : currentModuleNumber === 23 && quizComplete ? (
+                  ) : isLastModuleForUser && quizComplete ? (
                     <CourseCompletionCelebration 
                       onTakeExam={() => navigate('/course/final-exam')}
                       onReturnToDashboard={() => navigate('/student')}
@@ -1210,12 +1236,13 @@ const EnhancedCourseModule: React.FC = () => {
                             Return to Course
                           </Button>
                           {/* Only show Next Module when quiz is passed - single source of truth */}
-                          {canGoNext && quizPassed && (
+                          {effectiveCanGoNext && quizPassed && (
                             <Button onClick={handleNextModuleWithTransition} disabled={isTransitioning}>
                               Next Module
                             </Button>
                           )}
                         </div>
+
                         {/* Show guidance if quiz failed */}
                         {!quizPassed && quizComplete && (
                           <p className="text-sm text-muted-foreground mt-4">
@@ -1264,8 +1291,9 @@ const EnhancedCourseModule: React.FC = () => {
         modules={modulesWithCompletion}
         currentModuleNumber={currentModuleNumber}
         canGoPrevious={canGoPrevious && !isTransitioning}
-        canGoNext={canGoNext && !isTransitioning}
+        canGoNext={effectiveCanGoNext && !isTransitioning}
         onPrevious={handlePreviousModuleWithTransition}
+
         onNext={handleNextModuleWithTransition}
         onModuleSelect={(num) => navigate(`/course/part${num}`)}
         isCurrentModuleComplete={quizComplete && quizPassed}
