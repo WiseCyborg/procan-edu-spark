@@ -1220,7 +1220,7 @@ const EnhancedCourseModule: React.FC = () => {
                       onQuizComplete={handleQuizComplete}
                     />
 
-                  ) : isLastModuleForUser && quizComplete ? (
+                  ) : isLastModuleForUser && quizComplete && quizPassed ? (
                     <CourseCompletionCelebration 
                       onTakeExam={() => navigate('/course/final-exam')}
                       onReturnToDashboard={() => navigate('/student')}
