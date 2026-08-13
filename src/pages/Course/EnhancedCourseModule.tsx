@@ -1176,8 +1176,8 @@ const EnhancedCourseModule: React.FC = () => {
 
                 <TabsContent value="quiz" className="space-y-4">
                   {moduleData.quiz_questions.length === 0 ? (
-                    currentModuleNumber === 23 ? (
-                      // Last module - show course completion options
+                    isLastModuleForUser ? (
+                      // Last module for this learner - show course completion options
                       <CourseCompletionCelebration 
                         onTakeExam={() => navigate('/course/final-exam')}
                         onReturnToDashboard={() => navigate('/student-dashboard')}
@@ -1192,8 +1192,8 @@ const EnhancedCourseModule: React.FC = () => {
                             This introductory module doesn't have a quiz. 
                             Continue to the next module to begin your training.
                           </p>
-                          <Button onClick={goToNext} disabled={!canGoNext}>
-                            {canGoNext ? `Continue to Module ${currentModuleNumber + 1}` : 'Complete'}
+                          <Button onClick={goToNext} disabled={!effectiveCanGoNext}>
+                            {effectiveCanGoNext ? `Continue to Module ${currentModuleNumber + 1}` : 'Complete'}
                           </Button>
                         </CardContent>
                       </Card>
