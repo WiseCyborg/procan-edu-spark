@@ -108,7 +108,7 @@ export const useJourneyState = () => {
     // last_activity_at is appended below and deliberately excluded from this
     // comparison, so a "touch only last_activity_at" write is never issued.
     const isNoOp = Object.entries(updates).every(
-      ([k, v]) => (current as Record<string, unknown>)[k] === v
+      ([k, v]) => (current as unknown as Record<string, unknown>)[k] === v
     );
     if (isNoOp) return;
 
