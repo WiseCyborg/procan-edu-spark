@@ -49,9 +49,11 @@ const SmartAuthForm = () => {
         return;
       }
       
-      setEmailExists(data.exists);
+      // Treat a non-200 / missing `exists` field as "unknown", not "false".
+      const exists = typeof data?.exists === 'boolean' ? data.exists : null;
+      setEmailExists(exists);
       
-      if (data.exists) {
+      if (exists === true) {
         setActiveTab('signin');
         
         // Check if user has verification preferences
