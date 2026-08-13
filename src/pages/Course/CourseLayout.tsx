@@ -7,6 +7,7 @@ import { useUserProgress } from '@/hooks/useUserProgress';
 import { usePaymentStatus } from '@/hooks/usePaymentStatus';
 import { useOrganizationAccess } from '@/hooks/useOrganizationAccess';
 import { useAccessSnapshot } from '@/hooks/useAccessSnapshot';
+import { useHasRvtCertificate } from '@/hooks/useHasRvtCertificate';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Lock, BookOpen, Award } from 'lucide-react';
@@ -48,6 +49,7 @@ const CourseLayout: React.FC = () => {
   const [modules, setModules] = useState<ModuleData[]>([]);
 
   const { hasPaid, isLoading: paymentLoading } = usePaymentStatus(COURSE_ID);
+  const { hasRvtCertificate, isLoading: certLoading } = useHasRvtCertificate(COURSE_ID);
   const { hasAccess: hasOrgAccess, isLoading: orgLoading, organizationName } = useOrganizationAccess(user?.id);
   const { snapshot, isLoading: snapshotLoading } = useAccessSnapshot(COURSE_ID);
   
@@ -111,6 +113,9 @@ const CourseLayout: React.FC = () => {
   };
 
   const isManagerRole = isDispensaryManager || isTrainingCoordinator || isAdmin;
+  // Supervisory track is offered only to manager-class roles who already hold a
+  // valid RVT certificate for this course.
+  const canAccessManagerTrack = isManagerRole && hasRvtCertificate;
   const managerModules = modules.filter(m => m.is_manager_only);
   const agentModules = modules.filter(m => !m.is_manager_only);
   const managerCompletedCount = managerModules.filter(m =>
@@ -122,7 +127,7 @@ const CourseLayout: React.FC = () => {
 
 
   // Show loading state while auth/access snapshot resolves
-  if (isLoading || paymentLoading || rolesLoading || orgLoading || snapshotLoading) {
+  if (isLoading || paymentLoading || rolesLoading || certLoading || orgLoading || snapshotLoading) {
     return (
       <div className="flex justify-center items-center min-h-64">
         <LoadingSpinner size="large" label="Loading your course..." />
@@ -158,7 +163,7 @@ const CourseLayout: React.FC = () => {
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-bold text-primary">
             Maryland Responsible Vendor Training (RVT) Course
-            {isManagerRole && managerModules.length > 0 && (
+            {canAccessManagerTrack && managerModules.length > 0 && (
               <Badge variant="default" className="ms-3 bg-purple-600 text-white">
                 Manager Track
               </Badge>
@@ -200,7 +205,7 @@ const CourseLayout: React.FC = () => {
               The {requiredTotal} agent modules are required for Maryland RVT (Agent) certification. The {managerModules.length || 5} supervisory modules are optional and lead to a supplemental ProCann Edu Certificate of Completion — they are not part of MCA-required RVT certification.
             </p>
           </div>
-          {isManagerRole && managerModules.length > 0 && (
+          {canAccessManagerTrack && managerModules.length > 0 && (
             <div className="bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800 rounded-lg p-4 space-y-2">
               <p className="text-sm text-purple-800 dark:text-purple-300 text-center">
                 <span className="font-semibold">Supervisory Track (Optional):</span> {managerModules.length} additional supervisory modules. These do not block your Agent exam — complete all of them, once you hold an active Agent RVT certificate, to earn the <strong>Supervisory Compliance Training Certificate of Completion</strong>. This is a supplemental ProCann Edu credential, not a separate MCA certification.
@@ -271,7 +276,7 @@ const CourseLayout: React.FC = () => {
       </div>
 
       {/* Manager-Level Modules (19-23) - Only visible to managers */}
-      {isManagerRole && managerModules.length > 0 && (
+      {canAccessManagerTrack && managerModules.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center gap-3">
             <h2 className="text-2xl font-bold text-foreground">Supervisory Compliance Training (Optional)</h2>
@@ -330,7 +335,7 @@ const CourseLayout: React.FC = () => {
         requiredModulesCount={requiredTotal}
         firstIncompleteModule={getFirstIncompleteModule()}
         allModulesCompleted={examEligible}
-        isManagerRole={isManagerRole}
+        isManagerRole={canAccessManagerTrack}
       />
 
       </div>
