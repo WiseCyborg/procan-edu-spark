@@ -141,8 +141,8 @@ serve(async (req) => {
       );
     }
 
-    // Use estimated_employees if available, fallback to requested_credits, then 10
-    const credits = appData?.estimated_employees || appData?.requested_credits || 10;
+    // requested_credits is the authoritative seat count; estimated_employees is only a fallback
+    const credits = appData?.requested_credits || appData?.estimated_employees || 10;
 
     console.log('[APPROVE-APPLICATION] Allocating credits:', {
       application_id,
