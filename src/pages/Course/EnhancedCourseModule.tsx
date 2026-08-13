@@ -16,6 +16,7 @@ import { useUserProgress } from '@/hooks/useUserProgress';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { useResumeState } from '@/hooks/useResumeState';
+import { useUserRole } from '@/hooks/useUserRole';
 import { useSignedVideoUrl } from '@/hooks/useSignedVideoUrl';
 import { useVideoEngagementTracking } from '@/hooks/useVideoEngagementTracking';
 import { supabase } from '@/integrations/supabase/client';
