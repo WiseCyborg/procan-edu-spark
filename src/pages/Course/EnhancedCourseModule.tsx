@@ -1291,8 +1291,9 @@ const EnhancedCourseModule: React.FC = () => {
         modules={modulesWithCompletion}
         currentModuleNumber={currentModuleNumber}
         canGoPrevious={canGoPrevious && !isTransitioning}
-        canGoNext={canGoNext && !isTransitioning}
+        canGoNext={effectiveCanGoNext && !isTransitioning}
         onPrevious={handlePreviousModuleWithTransition}
+
         onNext={handleNextModuleWithTransition}
         onModuleSelect={(num) => navigate(`/course/part${num}`)}
         isCurrentModuleComplete={quizComplete && quizPassed}
