@@ -50,9 +50,11 @@ const AuthForm = () => {
         return;
       }
       
-      setEmailExists(data.exists);
+      // Treat a non-200 / missing `exists` field as "unknown", not "false".
+      const exists = typeof data?.exists === 'boolean' ? data.exists : null;
+      setEmailExists(exists);
       
-      if (data.exists && emailExists !== true) {
+      if (exists === true && emailExists !== true) {
         setActiveTab('signin');
         setShowWelcomeMessage(true);
         setTimeout(() => setShowWelcomeMessage(false), 3000);
