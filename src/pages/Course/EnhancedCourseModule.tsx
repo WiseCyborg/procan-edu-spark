@@ -263,7 +263,8 @@ const EnhancedCourseModule: React.FC = () => {
   });
 
   // Non-managers stop at module 18; managers continue through module 23.
-  const effectiveCanGoNext = canGoNext && (isManagerRole || currentModuleNumber < 18);
+  // Wait for roles to load so managers are not briefly capped at 18.
+  const effectiveCanGoNext = rolesReady && canGoNext && (isManagerRole || currentModuleNumber < 18);
 
 
   // Transition handlers for smooth module navigation
