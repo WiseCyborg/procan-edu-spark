@@ -15,6 +15,7 @@ import { markdownToHtml } from "@/utils/markdown-to-html";
 import { useUserProgress } from '@/hooks/useUserProgress';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
+import { useHasRvtCertificate } from '@/hooks/useHasRvtCertificate';
 import { useResumeState } from '@/hooks/useResumeState';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useSignedVideoUrl } from '@/hooks/useSignedVideoUrl';
@@ -182,10 +183,14 @@ const EnhancedCourseModule: React.FC = () => {
   const { user } = useAuth();
   const { isDispensaryManager, isTrainingCoordinator, isAdmin, isLoading: rolesLoading } = useUserRole();
   const isManagerRole = isDispensaryManager || isTrainingCoordinator || isAdmin;
-  const rolesReady = !rolesLoading;
+  const { hasRvtCertificate, isLoading: certLoading } = useHasRvtCertificate(COURSE_ID);
+  // Supervisory track (19-23) requires BOTH a manager-class role and a valid
+  // RVT certificate for this course.
+  const canAccessManagerTrack = isManagerRole && hasRvtCertificate;
+  const rolesReady = !rolesLoading && !certLoading;
   
   const currentModuleNumber = parseInt(moduleId?.replace('part', '') || '0');
-  const isLastModuleForUser = rolesReady && (isManagerRole ? currentModuleNumber === 23 : currentModuleNumber === 18);
+  const isLastModuleForUser = rolesReady && (canAccessManagerTrack ? currentModuleNumber === 23 : currentModuleNumber === 18);
 
 
   // Save resume state whenever tab or page changes
@@ -264,7 +269,7 @@ const EnhancedCourseModule: React.FC = () => {
 
   // Non-managers stop at module 18; managers continue through module 23.
   // Wait for roles to load so managers are not briefly capped at 18.
-  const effectiveCanGoNext = rolesReady && canGoNext && (isManagerRole || currentModuleNumber < 18);
+  const effectiveCanGoNext = rolesReady && canGoNext && (canAccessManagerTrack || currentModuleNumber < 18);
 
 
   // Transition handlers for smooth module navigation
@@ -455,14 +460,14 @@ const EnhancedCourseModule: React.FC = () => {
   // refuses to grade these, so this is purely a content-visibility guard.
   // Wait for roles to load so genuine managers are not bounced while auth resolves.
   useEffect(() => {
-    if (rolesReady && moduleData && moduleData.is_manager_only && !isManagerRole) {
+    if (rolesReady && moduleData && moduleData.is_manager_only && !canAccessManagerTrack) {
       toast({
-        title: 'Supervisory track only',
-        description: 'This module is part of the optional supervisory track and is not available in your current role.',
+        title: 'Supervisory track',
+        description: 'The supervisory track opens after you pass the RVT final exam and receive your certificate.',
       });
       navigate('/course');
     }
-  }, [moduleData, isManagerRole, navigate, rolesReady]);
+  }, [moduleData, canAccessManagerTrack, navigate, rolesReady]);
 
 
   // Server-side grader for the module quiz. Answer keys are not exposed to the
@@ -486,6 +491,12 @@ const EnhancedCourseModule: React.FC = () => {
 
       if (error || !result?.ok) {
         console.error('submit_module_quiz failed:', error, result);
+        if (result?.error === 'rvt_certificate_required') {
+          toast({
+            title: 'Supervisory track',
+            description: 'The supervisory track opens after you pass the RVT final exam and receive your certificate.',
+          });
+        }
         return null;
       }
 
@@ -545,11 +556,18 @@ const EnhancedCourseModule: React.FC = () => {
 
       if (error || !result?.ok) {
         console.error('submit_module_quiz failed:', error, result);
-        toast({
-          title: 'Error',
-          description: "We couldn't record your quiz result. Please try again.",
-          variant: 'destructive',
-        });
+        toast(
+          result?.error === 'rvt_certificate_required'
+            ? {
+                title: 'Supervisory track',
+                description: 'The supervisory track opens after you pass the RVT final exam and receive your certificate.',
+              }
+            : {
+                title: 'Error',
+                description: "We couldn't record your quiz result. Please try again.",
+                variant: 'destructive',
+              }
+        );
       } else {
         // Server is source of truth. Refresh cached progress so UI reflects the write.
         queryClient.invalidateQueries({ queryKey: ['user-progress', user?.id] });

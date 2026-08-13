@@ -7223,6 +7223,45 @@ export type Database = {
         }
         Relationships: []
       }
+      module_quiz_answers_snapshot_20260813b: {
+        Row: {
+          correct_answer: string | null
+          course_id: string | null
+          created_at: string | null
+          explanation: string | null
+          id: string | null
+          module_id: string | null
+          question_index: number | null
+          question_text: string | null
+          source_question_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          correct_answer?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          explanation?: string | null
+          id?: string | null
+          module_id?: string | null
+          question_index?: number | null
+          question_text?: string | null
+          source_question_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          correct_answer?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          explanation?: string | null
+          id?: string | null
+          module_id?: string | null
+          question_index?: number | null
+          question_text?: string | null
+          source_question_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       module_state_log: {
         Row: {
           course_id: string
