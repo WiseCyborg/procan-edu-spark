@@ -13150,6 +13150,7 @@ export type Database = {
         Args: { p_performed_by?: string; p_reason?: string; p_user_id: string }
         Returns: Json
       }
+      auth_email_exists: { Args: { p_email: string }; Returns: boolean }
       backfill_draft_scripts_for_flagged: { Args: never; Returns: number }
       bulk_verify_users: {
         Args: { admin_notes?: string; target_user_ids: string[] }
