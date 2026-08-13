@@ -261,6 +261,10 @@ const EnhancedCourseModule: React.FC = () => {
     totalModules: modulesWithCompletion.length,
   });
 
+  // Non-managers stop at module 18; managers continue through module 23.
+  const effectiveCanGoNext = canGoNext && (isManagerRole || currentModuleNumber < 18);
+
+
   // Transition handlers for smooth module navigation
   const handleNextModuleWithTransition = () => {
     if (isTransitioning) return;
