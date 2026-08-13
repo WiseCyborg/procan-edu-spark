@@ -254,11 +254,18 @@ export const useJourneyState = () => {
     });
   }, [updateJourneyState]);
 
-  // Get resume message
+  // Get resume message (depends only on primitives so its identity is stable
+  // across heartbeat-only state refreshes)
+  const stage = journeyState?.current_stage ?? null;
+  const wizard = journeyState?.current_wizard ?? null;
+  const step = journeyState?.current_step ?? 1;
   const getResumeMessage = useCallback(() => {
-    if (!journeyState) return null;
+    if (!stage) return null;
 
-    const { current_stage, current_wizard, current_step } = journeyState;
+    const current_stage = stage;
+    const current_wizard = wizard;
+    const current_step = step;
+
 
     if (current_wizard === 'manager_onboarding' && current_step > 1) {
       const stepNames = ['Welcome', 'Organization Profile', 'Training Seats', 'Invite Employees'];
