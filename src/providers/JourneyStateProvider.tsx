@@ -36,7 +36,7 @@ export const JourneyStateProvider: React.FC<JourneyStateProviderProps> = ({ chil
     if (lastTrackedRef.current === key) return;
     lastTrackedRef.current = key;
     trackRef.current(location.pathname);
-  }, [user, location.pathname]);
+  }, [user?.id, location.pathname]);
 
   const value: JourneyStateContextType = {};
 
