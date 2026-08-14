@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -43,13 +43,21 @@ export const ManagerOnboarding = ({ onComplete, onSkip }: ManagerOnboardingProps
   const totalSteps = 4;
   const progress = (currentStep / totalSteps) * 100;
 
-  // Initialize wizard in journey state
+  // Initialize wizard in journey state — exactly once per mount, and never if
+  // the wizard is already recorded (writing current_step: 1 here fought with
+  // the restore effect below and produced repeated journey-state writes).
+  const wizardInitialisedRef = useRef(false);
   useEffect(() => {
-    if (user?.id && !journeyLoading) {
-      startWizard('manager_onboarding', currentStep);
+    if (!user?.id || journeyLoading) return;
+    if (wizardInitialisedRef.current) return;
+    if (journeyState?.current_wizard === 'manager_onboarding') {
+      wizardInitialisedRef.current = true;
+      return;
     }
+    wizardInitialisedRef.current = true;
+    startWizard('manager_onboarding', 1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id, journeyLoading]);
+  }, [user?.id, journeyLoading, journeyState?.current_wizard]);
 
   // Restore step from journey state on mount
   useEffect(() => {
@@ -57,6 +65,7 @@ export const ManagerOnboarding = ({ onComplete, onSkip }: ManagerOnboardingProps
       setCurrentStep(journeyState.current_step);
     }
   }, [journeyState?.current_wizard, journeyState?.current_step]);
+
 
   // Fetch organization data
   useEffect(() => {

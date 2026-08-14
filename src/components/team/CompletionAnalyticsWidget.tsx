@@ -35,7 +35,7 @@ export function CompletionAnalyticsWidget({ organizationId }: CompletionAnalytic
     try {
       // Get at-risk students
       const { data: atRisk, error: riskError } = await supabase
-        .rpc("get_at_risk_students" as any, { org_id: organizationId });
+        .rpc("get_at_risk_students" as any, { p_org_id: organizationId });
 
       if (riskError) throw riskError;
 

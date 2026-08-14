@@ -37,7 +37,7 @@ serve(async (req) => {
     for (const org of orgs) {
       // Get at-risk students for this org
       const { data: atRisk } = await supabase.rpc('get_at_risk_students', {
-        org_id: org.id
+        p_org_id: org.id
       });
 
       if (atRisk && atRisk.length > 0) {
