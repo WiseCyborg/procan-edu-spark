@@ -45,17 +45,18 @@ export const ManagerOnboarding = ({ onComplete, onSkip }: ManagerOnboardingProps
 
   // Initialize wizard in journey state
   useEffect(() => {
-    if (user && !journeyLoading) {
+    if (user?.id && !journeyLoading) {
       startWizard('manager_onboarding', currentStep);
     }
-  }, [user, journeyLoading]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, journeyLoading]);
 
   // Restore step from journey state on mount
   useEffect(() => {
     if (journeyState?.current_wizard === 'manager_onboarding' && journeyState.current_step > 1) {
       setCurrentStep(journeyState.current_step);
     }
-  }, [journeyState]);
+  }, [journeyState?.current_wizard, journeyState?.current_step]);
 
   // Fetch organization data
   useEffect(() => {

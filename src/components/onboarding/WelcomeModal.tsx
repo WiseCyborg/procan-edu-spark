@@ -18,23 +18,29 @@ export const WelcomeModal = () => {
   const [open, setOpen] = useState(false);
   const [organization, setOrganization] = useState<Organization | null>(null);
 
+  // Depend on primitives only — the journeyState object identity changes on
+  // every refresh and would otherwise re-run this effect endlessly.
+  const userId = user?.id;
+  const stage = journeyState?.current_stage;
+  const welcomeShown = journeyState?.welcome_message_shown;
+
   useEffect(() => {
     const checkAndShowWelcome = async () => {
-      if (!user || !journeyState) return;
+      if (!userId || !stage) return;
 
       // Show welcome if:
       // 1. User has never seen welcome (welcome_message_shown is false)
       // 2. User is a new employee (stage is 'new_user' or 'profile_incomplete')
-      const shouldShow = 
-        !journeyState.welcome_message_shown && 
-        (journeyState.current_stage === 'new_user' || journeyState.current_stage === 'profile_incomplete');
+      const shouldShow =
+        !welcomeShown &&
+        (stage === 'new_user' || stage === 'profile_incomplete');
 
       if (shouldShow) {
         // Fetch organization info
         const { data: profileData } = await supabase
           .from('profiles')
           .select('organization_id, organizations(name)')
-          .eq('user_id', user.id)
+          .eq('user_id', userId)
           .single();
 
         if (profileData?.organization_id) {
@@ -48,7 +54,7 @@ export const WelcomeModal = () => {
     };
 
     checkAndShowWelcome();
-  }, [user, journeyState]);
+  }, [userId, stage, welcomeShown]);
 
   const handleGetStarted = () => {
     markWelcomeShown();
