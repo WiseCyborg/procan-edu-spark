@@ -110,7 +110,7 @@ const TrainingCoordinatorDashboard = () => {
 
       // Get at-risk students
       const { data: atRisk } = await supabase
-        .rpc('get_at_risk_students' as any, { org_id: organizationId });
+        .rpc('get_at_risk_students' as any, { p_org_id: organizationId });
 
       setAtRiskStudents(atRisk || []);
 
