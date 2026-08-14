@@ -50,11 +50,17 @@ const MEANINGFUL_FIELDS: (keyof JourneyState)[] = [
 
 const BREAKER_WINDOW_MS = 60_000;
 const BREAKER_MAX_WRITES = 20;
+// Minimum time between two writes that touch the same field signature.
+// Protects against A→B→A oscillation between two components, which would
+// otherwise defeat the "same payload" guard below.
+const MIN_SIGNATURE_INTERVAL_MS = 10_000;
 
 let writeTimestamps: number[] = [];
 let breakerTripped = false;
 const inFlightPayload = new Map<string, string>();
 const lastWrittenPayload = new Map<string, string>();
+const lastSignatureAt = new Map<string, number>();
+
 
 export const useJourneyState = () => {
   const { user } = useAuth();
