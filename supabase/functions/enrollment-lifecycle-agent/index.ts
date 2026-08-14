@@ -26,6 +26,23 @@ interface LearningJourney {
   };
 }
 
+
+// PostgREST cannot embed `profiles` from `user_learning_journey` (no usable FK),
+// which returned HTTP 400. Fetch profiles explicitly in a second step instead.
+async function attachProfiles(supabase: any, rows: any[]): Promise<any[]> {
+  if (!rows || rows.length === 0) return [];
+  const userIds = [...new Set(rows.map((r) => r.user_id).filter(Boolean))];
+  if (userIds.length === 0) return [];
+  const { data: profiles } = await supabase
+    .from('profiles')
+    .select('user_id, email_cache, first_name, last_name')
+    .in('user_id', userIds);
+  const byUser = new Map((profiles || []).map((p: any) => [p.user_id, p]));
+  return rows
+    .filter((r) => byUser.has(r.user_id))
+    .map((r) => ({ ...r, profiles: byUser.get(r.user_id) }));
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -49,7 +66,7 @@ serve(async (req) => {
     // Stage 1: Profile Completion (0-48 hours)
     const { data: incompleteProfiles } = await supabase
       .from('user_learning_journey')
-      .select('*, profiles!inner(email_cache, first_name, last_name)')
+      .select('*')
       .eq('current_stage', 'profile_incomplete')
       .lt('stage_entered_at', new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString());
 
@@ -88,7 +105,7 @@ serve(async (req) => {
     // Stage 2: Course Not Started (Days 2-7)
     const { data: notStarted } = await supabase
       .from('user_learning_journey')
-      .select('*, profiles!inner(email_cache, first_name, last_name)')
+      .select('*')
       .eq('current_stage', 'course_not_started')
       .gte('stage_entered_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
       .lt('stage_entered_at', new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString());
@@ -121,7 +138,7 @@ serve(async (req) => {
     // Stage 3: Detect Stuck Learners (No activity in 7+ days)
     const { data: inProgress } = await supabase
       .from('user_learning_journey')
-      .select('*, profiles!inner(email_cache, first_name, last_name)')
+      .select('*')
       .eq('current_stage', 'course_in_progress')
       .lt('last_activity_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
 
@@ -164,7 +181,7 @@ serve(async (req) => {
     // Stage 4: Near Completion (80%+)
     const { data: nearingCompletion } = await supabase
       .from('user_learning_journey')
-      .select('*, profiles!inner(email_cache, first_name, last_name)')
+      .select('*')
       .eq('current_stage', 'course_nearing_completion');
 
     if (nearingCompletion && nearingCompletion.length > 0) {
@@ -195,7 +212,7 @@ serve(async (req) => {
     // Stage 5: Certificate Expiring (60, 30, 7 days)
     const { data: certificates } = await supabase
       .from('certificates')
-      .select('*, profiles!inner(email_cache, first_name, last_name)')
+      .select('*')
       .not('expiry_date', 'is', null)
       .gte('expiry_date', new Date().toISOString())
       .lte('expiry_date', new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString());
