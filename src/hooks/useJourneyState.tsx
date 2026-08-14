@@ -70,9 +70,13 @@ export const useJourneyState = () => {
   // Keep a ref to the latest state so callbacks can stay referentially stable
   const journeyStateRef = useRef<JourneyState | null>(null);
 
-  useEffect(() => {
-    journeyStateRef.current = journeyState;
-  }, [journeyState]);
+  // Write the ref SYNCHRONOUSLY alongside state. Syncing it in an effect left a
+  // window where the no-op guard compared against stale values.
+  const applyState = useCallback((next: JourneyState) => {
+    journeyStateRef.current = next;
+    setJourneyState(next);
+  }, []);
+
 
   const userId = user?.id;
 
