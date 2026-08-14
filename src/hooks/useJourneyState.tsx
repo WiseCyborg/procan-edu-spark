@@ -99,26 +99,6 @@ export const useJourneyState = () => {
     fetchJourneyState();
   }, [userId]);
 
-  // Fields whose change is a *real* transition worth persisting immediately.
-  const MEANINGFUL_FIELDS: (keyof JourneyState)[] = [
-    'current_stage',
-    'current_wizard',
-    'current_step',
-    'last_page_visited',
-    'last_action',
-    'welcome_message_shown',
-    'resume_prompt_count',
-    'wizard_metadata',
-  ];
-
-  const HEARTBEAT_INTERVAL_MS = 60_000;
-  const BREAKER_WINDOW_MS = 60_000;
-  const BREAKER_MAX_WRITES = 20;
-
-  const lastHeartbeatRef = useRef<number>(0);
-  const writeTimestampsRef = useRef<number[]>([]);
-  const breakerTrippedRef = useRef(false);
-
   // Update journey state (stable identity — reads latest state from a ref)
   const updateJourneyState = useCallback(async (updates: Partial<JourneyState>) => {
     const current = journeyStateRef.current;
@@ -126,54 +106,48 @@ export const useJourneyState = () => {
 
     const now = Date.now();
 
-    // Circuit breaker 0: hard stop for the session after a runaway write loop.
-    if (breakerTrippedRef.current) return;
+    // Guard 0: hard stop for the session after a runaway write loop.
+    if (breakerTripped) return;
 
-    // Circuit breaker 1: drop writes whose payload already matches the row.
-    // last_activity_at is appended below and deliberately excluded from this
-    // comparison, so a "touch only last_activity_at" write is never issued.
-    const isNoOp = Object.entries(updates).every(
-      ([k, v]) => (current as unknown as Record<string, unknown>)[k] === v
-    );
-
-    // Heartbeat throttle: a write that changes nothing meaningful is only
-    // allowed through once per HEARTBEAT_INTERVAL_MS.
-    const hasMeaningfulChange = MEANINGFUL_FIELDS.some(
-      (k) =>
-        k in updates &&
-        (current as unknown as Record<string, unknown>)[k] !==
-          (updates as unknown as Record<string, unknown>)[k]
-    );
-    if (!hasMeaningfulChange) {
-      if (isNoOp) return;
-      if (now - lastHeartbeatRef.current < HEARTBEAT_INTERVAL_MS) return;
+    // Guard 1: only write fields that actually DIFFER from the stored row.
+    // last_activity_at is never a reason to write on its own.
+    const changed: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(updates)) {
+      if (!MEANINGFUL_FIELDS.includes(k as keyof JourneyState)) continue;
+      const currentValue = (current as unknown as Record<string, unknown>)[k];
+      const isEqual =
+        typeof v === 'object' && v !== null
+          ? JSON.stringify(currentValue) === JSON.stringify(v)
+          : currentValue === v;
+      if (!isEqual) changed[k] = v;
     }
+    if (Object.keys(changed).length === 0) return;
 
-    // Circuit breaker 2: never issue the same payload twice concurrently.
-    // Distinct payloads are still allowed through, so no real update is lost.
-    const payloadKey = JSON.stringify(updates);
-    if (inFlightPayloadRef.current === payloadKey) return;
+    // Guard 2: never issue the same payload twice for this user (in flight or
+    // already written). Cleared automatically when the values change again.
+    const payloadKey = `${userId}:${JSON.stringify(changed)}`;
+    if (lastWrittenPayload.get(userId) === payloadKey) return;
+    if (inFlightPayload.get(userId) === payloadKey) return;
 
-    // Circuit breaker 3: cap total writes per rolling window.
-    writeTimestampsRef.current = writeTimestampsRef.current.filter(
-      (t) => now - t < BREAKER_WINDOW_MS
-    );
-    if (writeTimestampsRef.current.length >= BREAKER_MAX_WRITES) {
-      breakerTrippedRef.current = true;
+    // Guard 3: cap total writes per rolling window, across all hook instances
+    // and remounts (module-scope state).
+    writeTimestamps = writeTimestamps.filter((t) => now - t < BREAKER_WINDOW_MS);
+    if (writeTimestamps.length >= BREAKER_MAX_WRITES) {
+      breakerTripped = true;
       console.warn(
         '[useJourneyState] Write circuit breaker tripped (>20 writes/60s). Journey-state writes disabled for this session.'
       );
       return;
     }
-    writeTimestampsRef.current.push(now);
-    lastHeartbeatRef.current = now;
-    inFlightPayloadRef.current = payloadKey;
+    writeTimestamps.push(now);
+    inFlightPayload.set(userId, payloadKey);
+    lastWrittenPayload.set(userId, payloadKey);
 
     try {
       const { data, error } = await supabase
         .from('user_journey_state')
         .update({
-          ...updates,
+          ...changed,
           last_activity_at: new Date().toISOString(),
         })
         .eq('user_id', userId)
@@ -188,9 +162,10 @@ export const useJourneyState = () => {
     } catch (err) {
       console.error('[useJourneyState] Exception updating:', err);
     } finally {
-      inFlightPayloadRef.current = null;
+      inFlightPayload.delete(userId);
     }
   }, [userId]);
+
 
 
   // Update current step in wizard
