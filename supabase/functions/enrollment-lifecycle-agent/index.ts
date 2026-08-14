@@ -70,8 +70,9 @@ serve(async (req) => {
       .eq('current_stage', 'profile_incomplete')
       .lt('stage_entered_at', new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString());
 
-    if (incompleteProfiles && incompleteProfiles.length > 0) {
-      for (const journey of incompleteProfiles as LearningJourney[]) {
+    const incompleteProfilesWithProfiles = await attachProfiles(supabase, incompleteProfiles || []);
+    if (incompleteProfilesWithProfiles.length > 0) {
+      for (const journey of incompleteProfilesWithProfiles as LearningJourney[]) {
         const hoursSinceCreation = (Date.now() - new Date(journey.stage_entered_at).getTime()) / (1000 * 60 * 60);
         
         // Send reminders at 6h, 24h, 48h
@@ -110,8 +111,9 @@ serve(async (req) => {
       .gte('stage_entered_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
       .lt('stage_entered_at', new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString());
 
-    if (notStarted && notStarted.length > 0) {
-      for (const journey of notStarted as LearningJourney[]) {
+    const notStartedWithProfiles = await attachProfiles(supabase, notStarted || []);
+    if (notStartedWithProfiles.length > 0) {
+      for (const journey of notStartedWithProfiles as LearningJourney[]) {
         if (journey.interventions_sent < 2) {
           await supabase.functions.invoke('send-welcome-email', {
             body: {
@@ -142,8 +144,9 @@ serve(async (req) => {
       .eq('current_stage', 'course_in_progress')
       .lt('last_activity_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
 
-    if (inProgress && inProgress.length > 0) {
-      for (const journey of inProgress as LearningJourney[]) {
+    const inProgressWithProfiles = await attachProfiles(supabase, inProgress || []);
+    if (inProgressWithProfiles.length > 0) {
+      for (const journey of inProgressWithProfiles as LearningJourney[]) {
         const daysSinceActivity = Math.floor((Date.now() - new Date(journey.last_activity_at).getTime()) / (1000 * 60 * 60 * 24));
         
         // Mark as stuck and send encouragement
@@ -184,8 +187,9 @@ serve(async (req) => {
       .select('*')
       .eq('current_stage', 'course_nearing_completion');
 
-    if (nearingCompletion && nearingCompletion.length > 0) {
-      for (const journey of nearingCompletion as LearningJourney[]) {
+    const nearingCompletionWithProfiles = await attachProfiles(supabase, nearingCompletion || []);
+    if (nearingCompletionWithProfiles.length > 0) {
+      for (const journey of nearingCompletionWithProfiles as LearningJourney[]) {
         if (journey.interventions_sent < 1) {
           await supabase.functions.invoke('send-welcome-email', {
             body: {
@@ -217,8 +221,9 @@ serve(async (req) => {
       .gte('expiry_date', new Date().toISOString())
       .lte('expiry_date', new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString());
 
-    if (certificates && certificates.length > 0) {
-      for (const cert of certificates) {
+    const certificatesWithProfiles = await attachProfiles(supabase, certificates || []);
+    if (certificatesWithProfiles.length > 0) {
+      for (const cert of certificatesWithProfiles) {
         const daysUntilExpiry = Math.floor((new Date(cert.expiry_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
         
         if ([60, 30, 7].includes(daysUntilExpiry)) {
