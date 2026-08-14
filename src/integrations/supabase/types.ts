@@ -6104,6 +6104,21 @@ export type Database = {
           },
         ]
       }
+      exam_answer_key_snapshot_20260814: {
+        Row: {
+          correct_answer: string | null
+          question_id: string | null
+        }
+        Insert: {
+          correct_answer?: string | null
+          question_id?: string | null
+        }
+        Update: {
+          correct_answer?: string | null
+          question_id?: string | null
+        }
+        Relationships: []
+      }
       exam_attempts: {
         Row: {
           attempt_number: number | null
@@ -6280,6 +6295,21 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      exam_citation_snapshot_20260814: {
+        Row: {
+          comar_section: string | null
+          question_id: string | null
+        }
+        Insert: {
+          comar_section?: string | null
+          question_id?: string | null
+        }
+        Update: {
+          comar_section?: string | null
+          question_id?: string | null
+        }
+        Relationships: []
       }
       exam_course_sections: {
         Row: {
