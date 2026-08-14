@@ -165,6 +165,12 @@ export const useJourneyState = () => {
     if (lastWrittenPayload.get(userId) === payloadKey) return;
     if (inFlightPayload.get(userId) === payloadKey) return;
 
+    // Guard 2b: throttle by FIELD SIGNATURE (not value), so an A→B→A
+    // oscillation between two components cannot slip past Guard 2.
+    const signature = `${userId}:${Object.keys(changed).sort().join(',')}`;
+    const lastAt = lastSignatureAt.get(signature) ?? 0;
+    if (now - lastAt < MIN_SIGNATURE_INTERVAL_MS) return;
+
     // Guard 3: cap total writes per rolling window, across all hook instances
     // and remounts (module-scope state).
     writeTimestamps = writeTimestamps.filter((t) => now - t < BREAKER_WINDOW_MS);
@@ -176,8 +182,10 @@ export const useJourneyState = () => {
       return;
     }
     writeTimestamps.push(now);
+    lastSignatureAt.set(signature, now);
     inFlightPayload.set(userId, payloadKey);
     lastWrittenPayload.set(userId, payloadKey);
+
 
     try {
       const { data, error } = await supabase
