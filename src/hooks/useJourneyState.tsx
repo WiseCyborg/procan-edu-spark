@@ -120,10 +120,10 @@ export const useJourneyState = () => {
           if (insertError) {
             console.error('[useJourneyState] Error creating:', insertError);
           } else {
-            setJourneyState(newData as JourneyState);
+            applyState(newData as JourneyState);
           }
         } else {
-          setJourneyState(data as JourneyState);
+          applyState(data as JourneyState);
         }
       } catch (err) {
         console.error('[useJourneyState] Exception:', err);
@@ -193,7 +193,7 @@ export const useJourneyState = () => {
       if (error) {
         console.error('[useJourneyState] Error updating:', error);
       } else {
-        setJourneyState(data as JourneyState);
+        applyState(data as JourneyState);
       }
     } catch (err) {
       console.error('[useJourneyState] Exception updating:', err);
