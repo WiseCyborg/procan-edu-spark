@@ -30,6 +30,32 @@ interface JourneyState {
   last_resume_prompt_at: string | null;
 }
 
+// ---------------------------------------------------------------------------
+// Module-scope write guards.
+// These deliberately live OUTSIDE the hook so that every hook instance (and
+// every remount) shares the same de-duplication state. Per-instance refs were
+// reset on remount, which allowed a runaway PATCH loop against
+// user_journey_state.
+// ---------------------------------------------------------------------------
+const MEANINGFUL_FIELDS: (keyof JourneyState)[] = [
+  'current_stage',
+  'current_wizard',
+  'current_step',
+  'last_page_visited',
+  'last_action',
+  'welcome_message_shown',
+  'resume_prompt_count',
+  'wizard_metadata',
+];
+
+const BREAKER_WINDOW_MS = 60_000;
+const BREAKER_MAX_WRITES = 20;
+
+let writeTimestamps: number[] = [];
+let breakerTripped = false;
+const inFlightPayload = new Map<string, string>();
+const lastWrittenPayload = new Map<string, string>();
+
 export const useJourneyState = () => {
   const { user } = useAuth();
   const [journeyState, setJourneyState] = useState<JourneyState | null>(null);
@@ -37,7 +63,7 @@ export const useJourneyState = () => {
 
   // Keep a ref to the latest state so callbacks can stay referentially stable
   const journeyStateRef = useRef<JourneyState | null>(null);
-  const inFlightPayloadRef = useRef<string | null>(null);
+
   useEffect(() => {
     journeyStateRef.current = journeyState;
   }, [journeyState]);
