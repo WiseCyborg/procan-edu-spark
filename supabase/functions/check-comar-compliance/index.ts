@@ -84,11 +84,16 @@ serve(async (req) => {
           .insert({
             content_type: 'course_module',
             content_id: module.module_id,
-            content_location: `Module ${module.module_number}: ${module.module_title}`,
+            // Column is `location` / `ai_suggested_change` — the previous
+            // names (content_location / ai_suggestions) do not exist and made
+            // every insert fail with HTTP 400.
+            location: `Module ${module.module_number}: ${module.module_title}`,
+            content_title: `Module ${module.module_number}: ${module.module_title}`,
             urgency: urgency,
-            ai_suggestions: `6-month compliance review ${module.days_overdue > 0 ? 'OVERDUE' : 'DUE'}. Last reviewed ${daysSinceReview} days ago. Verify alignment with latest COMAR 14.17 regulations. Reference: ${module.comar_reference}`,
+            ai_suggested_change: `6-month compliance review ${module.days_overdue > 0 ? 'OVERDUE' : 'DUE'}. Last reviewed ${daysSinceReview} days ago. Verify alignment with latest COMAR 14.17 regulations. Reference: ${module.comar_reference}`,
             status: 'pending'
           });
+
 
         if (!queueError) {
           reviewsCreated++;
