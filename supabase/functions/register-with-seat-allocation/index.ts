@@ -76,9 +76,9 @@ serve(async (req) => {
       phone, 
       organizationId, 
       organizationName,
-      joinCode,
       invitationToken 
     } = requestData;
+    const joinCode = requestData.joinCode ? requestData.joinCode.toUpperCase() : undefined;
 
     console.log('[ATOMIC REGISTRATION] Starting registration for:', email);
 
