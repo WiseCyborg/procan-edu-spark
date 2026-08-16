@@ -235,7 +235,7 @@ serve(async (req) => {
 
     console.log('[ATOMIC REGISTRATION] User account created:', authData.user.id);
 
-    // STEP 4: Update seat with actual user_id
+    // STEP 4: Attach the real user to the reserved seat
     const { error: seatUpdateError } = await supabaseClient
       .from('rvt_seats')
       .update({ assigned_user_id: authData.user.id })
