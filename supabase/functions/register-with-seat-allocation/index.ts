@@ -177,7 +177,7 @@ serve(async (req) => {
         .rpc('allocate_seat_to_user', {
           org_id: organizationId,
           user_id: '00000000-0000-0000-0000-000000000000',
-          course_id: courseData.id
+          course_id: seatCourseId
         });
       
       if (fallbackError || !fallbackSeatId) {
