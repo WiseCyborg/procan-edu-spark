@@ -146,57 +146,41 @@ serve(async (req) => {
     const seatCourseId = resolvedCourseId as string;
     console.log('[ATOMIC REGISTRATION] Seat course resolved:', seatCourseId);
 
-    // STEP 2: ATOMICALLY ALLOCATE SEAT using safe function (handles duplicates)
-    console.log('[ATOMIC REGISTRATION] Attempting seat allocation via safe function...');
-    
-    const { data: seatId, error: seatError } = await supabaseClient
-      .rpc('safe_assign_seat_to_user', {
-        p_user_id: '00000000-0000-0000-0000-000000000000', // Temporary placeholder
-        p_organization_id: organizationId,
-        p_course_id: seatCourseId
+    // STEP 2: RESERVE A SEAT before the user exists.
+    //
+    // This previously called safe_assign_seat_to_user() with the placeholder user id
+    // 00000000-0000-0000-0000-000000000000. rvt_seats.assigned_user_id carries a
+    // foreign key to auth.users, so that call raised 23503 on EVERY registration --
+    // the error was caught as `seatError` and returned to the learner as the false
+    // message "No training seats available", and the fallback below was never reached.
+    // allocate_seat_to_user() is the correct call here: it marks the seat assigned
+    // WITHOUT setting assigned_user_id, and Step 4 attaches the real user id once the
+    // account exists. That is the flow the fallback was written for.
+    console.log('[ATOMIC REGISTRATION] Reserving a seat...');
+
+    const { data: reservedSeatId, error: seatError } = await supabaseClient
+      .rpc('allocate_seat_to_user', {
+        org_id: organizationId,
+        user_id: null,
+        course_id: seatCourseId
       });
 
-    if (seatError) {
-      console.error('[ATOMIC REGISTRATION] Seat allocation failed:', seatError);
+    if (seatError || !reservedSeatId) {
+      console.error('[ATOMIC REGISTRATION] Seat reservation failed:', seatError);
       return new Response(
-        JSON.stringify({ 
+        JSON.stringify({
           error: 'No training seats available. Please contact your manager to purchase more seats.',
           code: 'NO_SEATS_AVAILABLE'
         }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       );
     }
 
-    // If no seat returned, try the fallback method
-    let finalSeatId = seatId;
-    if (!seatId) {
-      const { data: fallbackSeatId, error: fallbackError } = await supabaseClient
-        .rpc('allocate_seat_to_user', {
-          org_id: organizationId,
-          user_id: '00000000-0000-0000-0000-000000000000',
-          course_id: seatCourseId
-        });
-      
-      if (fallbackError || !fallbackSeatId) {
-        console.error('[ATOMIC REGISTRATION] Fallback seat allocation failed:', fallbackError);
-        return new Response(
-          JSON.stringify({ 
-            error: 'No training seats available. Please contact your manager to purchase more seats.',
-            code: 'NO_SEATS_AVAILABLE'
-          }),
-          { 
-            status: 400, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-          }
-        );
-      }
-      finalSeatId = fallbackSeatId;
-    }
-
-    console.log('[ATOMIC REGISTRATION] Seat allocated successfully:', seatId);
+    const finalSeatId = reservedSeatId as string;
+    console.log('[ATOMIC REGISTRATION] Seat reserved successfully:', finalSeatId);
 
     // STEP 3: Create user account with retry logic (Gate 7 fix)
     let authData = null;
