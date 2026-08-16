@@ -6366,6 +6366,48 @@ export type Database = {
           },
         ]
       }
+      exam_blueprint_snapshot_20260813: {
+        Row: {
+          comar_section: string | null
+          comar_section_ref: string | null
+          created_at: string | null
+          id: string | null
+          passing_threshold: number | null
+          questions_count: number | null
+          related_module_ids: string[] | null
+          section_number: number | null
+          section_title: string | null
+          topic_area: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          comar_section?: string | null
+          comar_section_ref?: string | null
+          created_at?: string | null
+          id?: string | null
+          passing_threshold?: number | null
+          questions_count?: number | null
+          related_module_ids?: string[] | null
+          section_number?: number | null
+          section_title?: string | null
+          topic_area?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          comar_section?: string | null
+          comar_section_ref?: string | null
+          created_at?: string | null
+          id?: string | null
+          passing_threshold?: number | null
+          questions_count?: number | null
+          related_module_ids?: string[] | null
+          section_number?: number | null
+          section_title?: string | null
+          topic_area?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       exam_checkins: {
         Row: {
           attempt_id: string
