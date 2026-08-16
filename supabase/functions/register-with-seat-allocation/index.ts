@@ -153,7 +153,7 @@ serve(async (req) => {
       .rpc('safe_assign_seat_to_user', {
         p_user_id: '00000000-0000-0000-0000-000000000000', // Temporary placeholder
         p_organization_id: organizationId,
-        p_course_id: courseData.id
+        p_course_id: seatCourseId
       });
 
     if (seatError) {
