@@ -76,9 +76,9 @@ serve(async (req) => {
       phone, 
       organizationId, 
       organizationName,
-      joinCode,
       invitationToken 
     } = requestData;
+    const joinCode = requestData.joinCode ? requestData.joinCode.toUpperCase() : undefined;
 
     console.log('[ATOMIC REGISTRATION] Starting registration for:', email);
 
@@ -134,16 +134,17 @@ serve(async (req) => {
     }
 
     // STEP 1: Get default course ID
-    const { data: courseData, error: courseError } = await supabaseClient
-      .from('courses')
-      .select('id')
-      .eq('is_active', true)
-      .limit(1)
-      .single();
+    // there are six active courses and every seat belongs to only one of them,
+    // so `.limit(1)` with no ORDER BY picked an empty course and falsely told learners "no seats available".
+    const { data: resolvedCourseId, error: courseError } = await supabaseClient.rpc('resolve_default_seat_course');
 
-    if (courseError || !courseData) {
-      throw new Error('No active course found');
+    if (courseError || !resolvedCourseId) {
+      console.error('[ATOMIC REGISTRATION] Could not resolve default seat course:', courseError);
+      throw new Error('Cannot resolve the training course for seat allocation');
     }
+
+    const seatCourseId = resolvedCourseId as string;
+    console.log('[ATOMIC REGISTRATION] Seat course resolved:', seatCourseId);
 
     // STEP 2: ATOMICALLY ALLOCATE SEAT using safe function (handles duplicates)
     console.log('[ATOMIC REGISTRATION] Attempting seat allocation via safe function...');
@@ -152,7 +153,7 @@ serve(async (req) => {
       .rpc('safe_assign_seat_to_user', {
         p_user_id: '00000000-0000-0000-0000-000000000000', // Temporary placeholder
         p_organization_id: organizationId,
-        p_course_id: courseData.id
+        p_course_id: seatCourseId
       });
 
     if (seatError) {
@@ -176,7 +177,7 @@ serve(async (req) => {
         .rpc('allocate_seat_to_user', {
           org_id: organizationId,
           user_id: '00000000-0000-0000-0000-000000000000',
-          course_id: courseData.id
+          course_id: seatCourseId
         });
       
       if (fallbackError || !fallbackSeatId) {
@@ -286,17 +287,27 @@ serve(async (req) => {
 
     // STEP 7: Increment join code usage (if applicable)
     if (joinCode) {
-      const { data: currentJoinCode } = await supabaseClient
+      const { data: currentJoinCode, error: joinCodeReadError } = await supabaseClient
         .from('rvt_join_codes')
         .select('current_uses')
         .eq('code', joinCode)
-        .single();
+        .maybeSingle();
 
-      if (currentJoinCode) {
-        await supabaseClient
+      if (joinCodeReadError) {
+        console.error('[ATOMIC REGISTRATION] Join code read failed for increment:', joinCodeReadError);
+      } else if (!currentJoinCode) {
+        console.error('[ATOMIC REGISTRATION] Join code not found for increment:', joinCode);
+      } else {
+        const { error: joinCodeIncrementError } = await supabaseClient
           .from('rvt_join_codes')
-          .update({ current_uses: currentJoinCode.current_uses + 1 })
+          .update({ current_uses: (currentJoinCode.current_uses ?? 0) + 1 })
           .eq('code', joinCode);
+
+        if (joinCodeIncrementError) {
+          console.error('[ATOMIC REGISTRATION] Join code increment failed:', joinCodeIncrementError);
+        } else {
+          console.log('[ATOMIC REGISTRATION] Join code usage incremented:', joinCode);
+        }
       }
     }
 
