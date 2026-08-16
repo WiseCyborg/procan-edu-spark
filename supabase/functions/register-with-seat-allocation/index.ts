@@ -220,7 +220,7 @@ serve(async (req) => {
     if (authError || !authData?.user) {
       console.error('[ATOMIC REGISTRATION] All auth attempts failed:', authError);
       
-      // ROLLBACK: Release seat using proper RPC
+      // ROLLBACK: Release the reserved seat so it is not stranded
       const { error: deallocError } = await supabaseClient
         .rpc('deallocate_seat', { seat_id_param: finalSeatId });
       
