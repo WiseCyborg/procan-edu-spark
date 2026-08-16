@@ -287,17 +287,27 @@ serve(async (req) => {
 
     // STEP 7: Increment join code usage (if applicable)
     if (joinCode) {
-      const { data: currentJoinCode } = await supabaseClient
+      const { data: currentJoinCode, error: joinCodeReadError } = await supabaseClient
         .from('rvt_join_codes')
         .select('current_uses')
         .eq('code', joinCode)
-        .single();
+        .maybeSingle();
 
-      if (currentJoinCode) {
-        await supabaseClient
+      if (joinCodeReadError) {
+        console.error('[ATOMIC REGISTRATION] Join code read failed for increment:', joinCodeReadError);
+      } else if (!currentJoinCode) {
+        console.error('[ATOMIC REGISTRATION] Join code not found for increment:', joinCode);
+      } else {
+        const { error: joinCodeIncrementError } = await supabaseClient
           .from('rvt_join_codes')
-          .update({ current_uses: currentJoinCode.current_uses + 1 })
+          .update({ current_uses: (currentJoinCode.current_uses ?? 0) + 1 })
           .eq('code', joinCode);
+
+        if (joinCodeIncrementError) {
+          console.error('[ATOMIC REGISTRATION] Join code increment failed:', joinCodeIncrementError);
+        } else {
+          console.log('[ATOMIC REGISTRATION] Join code usage incremented:', joinCode);
+        }
       }
     }
 
