@@ -13,4 +13,4 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://www.procannedu.com/sitemap.xml
+Sitemap: https://procannedu.com/sitemap.xml
