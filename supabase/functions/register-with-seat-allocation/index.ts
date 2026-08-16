@@ -134,16 +134,17 @@ serve(async (req) => {
     }
 
     // STEP 1: Get default course ID
-    const { data: courseData, error: courseError } = await supabaseClient
-      .from('courses')
-      .select('id')
-      .eq('is_active', true)
-      .limit(1)
-      .single();
+    // there are six active courses and every seat belongs to only one of them,
+    // so `.limit(1)` with no ORDER BY picked an empty course and falsely told learners "no seats available".
+    const { data: resolvedCourseId, error: courseError } = await supabaseClient.rpc('resolve_default_seat_course');
 
-    if (courseError || !courseData) {
-      throw new Error('No active course found');
+    if (courseError || !resolvedCourseId) {
+      console.error('[ATOMIC REGISTRATION] Could not resolve default seat course:', courseError);
+      throw new Error('Cannot resolve the training course for seat allocation');
     }
+
+    const seatCourseId = resolvedCourseId as string;
+    console.log('[ATOMIC REGISTRATION] Seat course resolved:', seatCourseId);
 
     // STEP 2: ATOMICALLY ALLOCATE SEAT using safe function (handles duplicates)
     console.log('[ATOMIC REGISTRATION] Attempting seat allocation via safe function...');
