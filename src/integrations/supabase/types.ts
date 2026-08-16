@@ -4545,6 +4545,51 @@ export type Database = {
           },
         ]
       }
+      course_entitlements_orphan_snapshot_20260814: {
+        Row: {
+          course_id: string | null
+          created_at: string | null
+          expires_at: string | null
+          granted_by: string | null
+          id: string | null
+          metadata: Json | null
+          purchased_at: string | null
+          source: string | null
+          status: string | null
+          stripe_checkout_session_id: string | null
+          stripe_payment_intent_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          course_id?: string | null
+          created_at?: string | null
+          expires_at?: string | null
+          granted_by?: string | null
+          id?: string | null
+          metadata?: Json | null
+          purchased_at?: string | null
+          source?: string | null
+          status?: string | null
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          course_id?: string | null
+          created_at?: string | null
+          expires_at?: string | null
+          granted_by?: string | null
+          id?: string | null
+          metadata?: Json | null
+          purchased_at?: string | null
+          source?: string | null
+          status?: string | null
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       course_modules: {
         Row: {
           comar_compliance_status: string | null
@@ -6119,6 +6164,78 @@ export type Database = {
         }
         Relationships: []
       }
+      exam_attempt_cooldown_snapshot_20260814: {
+        Row: {
+          attempt_number: number | null
+          can_retake_at: string | null
+          completed_at: string | null
+          course_id: string | null
+          created_at: string | null
+          days_since_last_attempt: number | null
+          id: string | null
+          ip_address: string | null
+          is_passed: boolean | null
+          metadata: Json | null
+          passing_score: number | null
+          photo_verification_url: string | null
+          previous_attempt_count: number | null
+          retake_cooldown_hours: number | null
+          session_metadata: Json | null
+          started_at: string | null
+          time_taken: number | null
+          topic_scores: Json | null
+          total_score: number | null
+          user_demographics: Json | null
+          user_id: string | null
+        }
+        Insert: {
+          attempt_number?: number | null
+          can_retake_at?: string | null
+          completed_at?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          days_since_last_attempt?: number | null
+          id?: string | null
+          ip_address?: string | null
+          is_passed?: boolean | null
+          metadata?: Json | null
+          passing_score?: number | null
+          photo_verification_url?: string | null
+          previous_attempt_count?: number | null
+          retake_cooldown_hours?: number | null
+          session_metadata?: Json | null
+          started_at?: string | null
+          time_taken?: number | null
+          topic_scores?: Json | null
+          total_score?: number | null
+          user_demographics?: Json | null
+          user_id?: string | null
+        }
+        Update: {
+          attempt_number?: number | null
+          can_retake_at?: string | null
+          completed_at?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          days_since_last_attempt?: number | null
+          id?: string | null
+          ip_address?: string | null
+          is_passed?: boolean | null
+          metadata?: Json | null
+          passing_score?: number | null
+          photo_verification_url?: string | null
+          previous_attempt_count?: number | null
+          retake_cooldown_hours?: number | null
+          session_metadata?: Json | null
+          started_at?: string | null
+          time_taken?: number | null
+          topic_scores?: Json | null
+          total_score?: number | null
+          user_demographics?: Json | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       exam_attempts: {
         Row: {
           attempt_number: number | null
@@ -6385,6 +6502,69 @@ export type Database = {
           section_title?: string
           topic_area?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      exam_repair_snapshot_20260814b: {
+        Row: {
+          comar_section: string | null
+          correct_answer: string | null
+          options: Json | null
+          question_id: string | null
+          question_text: string | null
+        }
+        Insert: {
+          comar_section?: string | null
+          correct_answer?: string | null
+          options?: Json | null
+          question_id?: string | null
+          question_text?: string | null
+        }
+        Update: {
+          comar_section?: string | null
+          correct_answer?: string | null
+          options?: Json | null
+          question_id?: string | null
+          question_text?: string | null
+        }
+        Relationships: []
+      }
+      exam_repair_snapshot_20260814c: {
+        Row: {
+          comar_section: string | null
+          correct_answer: string | null
+          options: Json | null
+          question_id: string | null
+          question_text: string | null
+        }
+        Insert: {
+          comar_section?: string | null
+          correct_answer?: string | null
+          options?: Json | null
+          question_id?: string | null
+          question_text?: string | null
+        }
+        Update: {
+          comar_section?: string | null
+          correct_answer?: string | null
+          options?: Json | null
+          question_id?: string | null
+          question_text?: string | null
+        }
+        Relationships: []
+      }
+      exam_repair_snapshot_20260814d: {
+        Row: {
+          comar_section: string | null
+          question_id: string | null
+        }
+        Insert: {
+          comar_section?: string | null
+          question_id?: string | null
+        }
+        Update: {
+          comar_section?: string | null
+          question_id?: string | null
         }
         Relationships: []
       }
@@ -7187,6 +7367,42 @@ export type Database = {
           },
         ]
       }
+      module_content_snapshot_20260814e: {
+        Row: {
+          content: string | null
+          id: string | null
+          module_number: number | null
+        }
+        Insert: {
+          content?: string | null
+          id?: string | null
+          module_number?: number | null
+        }
+        Update: {
+          content?: string | null
+          id?: string | null
+          module_number?: number | null
+        }
+        Relationships: []
+      }
+      module_content_snapshot_20260814f: {
+        Row: {
+          content: string | null
+          id: string | null
+          module_number: number | null
+        }
+        Insert: {
+          content?: string | null
+          id?: string | null
+          module_number?: number | null
+        }
+        Update: {
+          content?: string | null
+          id?: string | null
+          module_number?: number | null
+        }
+        Relationships: []
+      }
       module_quiz_answers: {
         Row: {
           correct_answer: string
@@ -7369,6 +7585,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      module0_content_snapshot_20260814: {
+        Row: {
+          content: string | null
+          id: string | null
+          module_number: number | null
+        }
+        Insert: {
+          content?: string | null
+          id?: string | null
+          module_number?: number | null
+        }
+        Update: {
+          content?: string | null
+          id?: string | null
+          module_number?: number | null
+        }
+        Relationships: []
       }
       notification_preferences: {
         Row: {
@@ -9947,6 +10181,24 @@ export type Database = {
             referencedColumns: ["organization_id"]
           },
         ]
+      }
+      selfcorrect_snapshot_20260814: {
+        Row: {
+          content: string | null
+          id: string | null
+          module_number: number | null
+        }
+        Insert: {
+          content?: string | null
+          id?: string | null
+          module_number?: number | null
+        }
+        Update: {
+          content?: string | null
+          id?: string | null
+          module_number?: number | null
+        }
+        Relationships: []
       }
       session_actions: {
         Row: {
