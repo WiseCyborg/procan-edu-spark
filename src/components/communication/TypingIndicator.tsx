@@ -13,17 +13,28 @@ export const TypingIndicator = ({ conversationId, currentUserId }: TypingIndicat
   useEffect(() => {
     // Fetch initial typing users
     const fetchTypingUsers = async () => {
+      // profiles has no full_name column and cannot be embedded here — two-step fetch.
       const { data, error } = await supabase
         .from('typing_indicators')
-        .select('user_id, profiles!inner(full_name)')
+        .select('user_id')
         .eq('conversation_id', conversationId)
         .neq('user_id', currentUserId)
         .gte('started_at', new Date(Date.now() - 5000).toISOString()); // Last 5 seconds
 
-      if (!error && data) {
-        const names = data.map((t: any) => t.profiles.full_name).filter(Boolean);
-        setTypingUsers(names);
+      if (error || !data?.length) {
+        setTypingUsers([]);
+        return;
       }
+
+      const { data: profs } = await supabase
+        .from('profiles')
+        .select('user_id, first_name, last_name, email_cache')
+        .in('user_id', data.map((t: any) => t.user_id));
+
+      const names = (profs || [])
+        .map((p: any) => `${p.first_name || ''} ${p.last_name || ''}`.trim() || p.email_cache)
+        .filter(Boolean);
+      setTypingUsers(names);
     };
 
     fetchTypingUsers();
