@@ -310,31 +310,7 @@ serve(async (req) => {
       console.error('[ATOMIC REGISTRATION] Profile update failed:', profileError);
     }
 
-    // STEP 7: Increment join code usage (if applicable)
-    if (joinCode) {
-      const { data: currentJoinCode, error: joinCodeReadError } = await supabaseClient
-        .from('rvt_join_codes')
-        .select('current_uses')
-        .eq('code', joinCode)
-        .maybeSingle();
-
-      if (joinCodeReadError) {
-        console.error('[ATOMIC REGISTRATION] Join code read failed for increment:', joinCodeReadError);
-      } else if (!currentJoinCode) {
-        console.error('[ATOMIC REGISTRATION] Join code not found for increment:', joinCode);
-      } else {
-        const { error: joinCodeIncrementError } = await supabaseClient
-          .from('rvt_join_codes')
-          .update({ current_uses: (currentJoinCode.current_uses ?? 0) + 1 })
-          .eq('code', joinCode);
-
-        if (joinCodeIncrementError) {
-          console.error('[ATOMIC REGISTRATION] Join code increment failed:', joinCodeIncrementError);
-        } else {
-          console.log('[ATOMIC REGISTRATION] Join code usage incremented:', joinCode);
-        }
-      }
-    }
+    // Join-code consumption moved to immediately after seat reservation so the cap is binding.
 
     // STEP 8: Set enrollment deadline
     const deadlineDate = new Date();
