@@ -56,7 +56,7 @@ export default function PrivacyPolicy() {
           <ul>
             <li><strong>Maryland Cannabis Administration (MCA):</strong> We are required to report certification data to the MCA for regulatory compliance</li>
             <li><strong>Your Employer:</strong> Training progress and certification status are shared with your registered dispensary</li>
-            <li><strong>Service Providers:</strong> Third-party vendors who assist with platform operations (e.g., email delivery, payment processing)</li>
+            <li><strong>Service Providers:</strong> Third-party vendors who assist with platform operations (e.g., email delivery, payment processing, Google Analytics (website usage analytics))</li>
             <li><strong>Legal Requirements:</strong> When required by law or to protect our rights and safety</li>
           </ul>
 
@@ -95,7 +95,7 @@ export default function PrivacyPolicy() {
           <h2>Cookies and Tracking Technologies</h2>
           <p>
             We use cookies and similar technologies to enhance your experience, analyze usage patterns, and remember your preferences. 
-            You can control cookie settings through your browser preferences.
+            You can control cookie settings through your browser preferences. We use Google Analytics to help us understand how visitors use our site — such as pages viewed, general geographic region, and device type. Google Analytics may set cookies for this purpose. You can opt out using the Google Analytics Opt-out Browser Add-on or through your browser's cookie settings.
           </p>
 
           <h2>Children's Privacy</h2>
