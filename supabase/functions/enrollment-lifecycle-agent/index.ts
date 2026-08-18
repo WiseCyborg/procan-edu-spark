@@ -69,6 +69,7 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     console.log('Starting enrollment lifecycle agent run...');
+    const startTime = Date.now();
 
     const interventions = {
       profile_incomplete: 0,
