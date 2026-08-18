@@ -820,14 +820,45 @@ const FinalExam: React.FC = () => {
         return;
       }
 
-      // Store certificate number + stored pdf path for display/download
+      // Prefer the issuing call's own response. If it came back without a number
+      // (row still being written), poll briefly with maybeSingle() instead of
+      // firing a .single() lookup that 406s on the not-yet-created row.
+      let certificateNumber: string | undefined = certData?.certificate_number;
+      let certificatePdfPath: string | undefined = certData?.pdf_path || undefined;
+
+      if (!certificateNumber) {
+        for (const waitMs of [300, 600, 1200, 1400, 1500]) {
+          await new Promise(resolve => setTimeout(resolve, waitMs));
+          const { data: certRow, error: certLookupError } = await supabase
+            .from('certificates')
+            .select('certificate_number, pdf_url')
+            .eq('exam_attempt_id', examAttemptId)
+            .maybeSingle();
+          if (certLookupError) {
+            console.error('[FinalExam] certificate lookup failed', certLookupError);
+            break;
+          }
+          if (certRow?.certificate_number) {
+            certificateNumber = certRow.certificate_number;
+            certificatePdfPath = certRow.pdf_url || undefined;
+            break;
+          }
+        }
+      }
+
+      // Store certificate number + stored pdf path for display/download.
+      // 'PROCESSING' renders the "generating your certificate…" state, not an error.
       setUserData(prev => ({
         ...prev,
-        certificateNumber: certData.certificate_number,
-        certificatePdfPath: certData.pdf_path || undefined,
+        certificateNumber,
+        certificatePdfPath,
       }));
       setExamStage('certificate');
-      toast.success('Certificate generated successfully!');
+      toast.success(
+        certificateNumber
+          ? 'Certificate generated successfully!'
+          : 'Your certificate is being generated — it will appear shortly.'
+      );
     } catch (error) {
       console.error('Error in certificate generation:', error);
       toast.error('An unexpected error occurred');
