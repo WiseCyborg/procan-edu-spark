@@ -248,6 +248,108 @@ export type Database = {
         }
         Relationships: []
       }
+      _bak_mod06_recall_20260818: {
+        Row: {
+          comar_compliance_status: string | null
+          comar_reference: string | null
+          comar_section_ref: string | null
+          comar_version_id: string | null
+          content: string | null
+          course_id: string | null
+          created_at: string | null
+          description: string | null
+          estimated_minutes: number | null
+          id: string | null
+          is_active: boolean | null
+          is_manager_only: boolean | null
+          last_comar_review_date: string | null
+          learning_objectives: Json | null
+          lessons: Json | null
+          module_number: number | null
+          quiz_questions: Json | null
+          source_module_id: string | null
+          stoplight_tier: string | null
+          title: string | null
+          unmapped_reason: string | null
+          updated_at: string | null
+          version: number | null
+          video_url: string | null
+        }
+        Insert: {
+          comar_compliance_status?: string | null
+          comar_reference?: string | null
+          comar_section_ref?: string | null
+          comar_version_id?: string | null
+          content?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          estimated_minutes?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          is_manager_only?: boolean | null
+          last_comar_review_date?: string | null
+          learning_objectives?: Json | null
+          lessons?: Json | null
+          module_number?: number | null
+          quiz_questions?: Json | null
+          source_module_id?: string | null
+          stoplight_tier?: string | null
+          title?: string | null
+          unmapped_reason?: string | null
+          updated_at?: string | null
+          version?: number | null
+          video_url?: string | null
+        }
+        Update: {
+          comar_compliance_status?: string | null
+          comar_reference?: string | null
+          comar_section_ref?: string | null
+          comar_version_id?: string | null
+          content?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          estimated_minutes?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          is_manager_only?: boolean | null
+          last_comar_review_date?: string | null
+          learning_objectives?: Json | null
+          lessons?: Json | null
+          module_number?: number | null
+          quiz_questions?: Json | null
+          source_module_id?: string | null
+          stoplight_tier?: string | null
+          title?: string | null
+          unmapped_reason?: string | null
+          updated_at?: string | null
+          version?: number | null
+          video_url?: string | null
+        }
+        Relationships: []
+      }
+      _bak_mod06_returns_20260818: {
+        Row: {
+          content: string | null
+          id: string | null
+          module_number: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          content?: string | null
+          id?: string | null
+          module_number?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          content?: string | null
+          id?: string | null
+          module_number?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       _bak_mod07_20260807: {
         Row: {
           c: string | null
@@ -1199,6 +1301,87 @@ export type Database = {
           review_status?: string | null
           slide_spec?: Json | null
           video_id?: string | null
+        }
+        Relationships: []
+      }
+      _bak_mod17_greenwaste_20260818: {
+        Row: {
+          comar_compliance_status: string | null
+          comar_reference: string | null
+          comar_section_ref: string | null
+          comar_version_id: string | null
+          content: string | null
+          course_id: string | null
+          created_at: string | null
+          description: string | null
+          estimated_minutes: number | null
+          id: string | null
+          is_active: boolean | null
+          is_manager_only: boolean | null
+          last_comar_review_date: string | null
+          learning_objectives: Json | null
+          lessons: Json | null
+          module_number: number | null
+          quiz_questions: Json | null
+          source_module_id: string | null
+          stoplight_tier: string | null
+          title: string | null
+          unmapped_reason: string | null
+          updated_at: string | null
+          version: number | null
+          video_url: string | null
+        }
+        Insert: {
+          comar_compliance_status?: string | null
+          comar_reference?: string | null
+          comar_section_ref?: string | null
+          comar_version_id?: string | null
+          content?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          estimated_minutes?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          is_manager_only?: boolean | null
+          last_comar_review_date?: string | null
+          learning_objectives?: Json | null
+          lessons?: Json | null
+          module_number?: number | null
+          quiz_questions?: Json | null
+          source_module_id?: string | null
+          stoplight_tier?: string | null
+          title?: string | null
+          unmapped_reason?: string | null
+          updated_at?: string | null
+          version?: number | null
+          video_url?: string | null
+        }
+        Update: {
+          comar_compliance_status?: string | null
+          comar_reference?: string | null
+          comar_section_ref?: string | null
+          comar_version_id?: string | null
+          content?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          estimated_minutes?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          is_manager_only?: boolean | null
+          last_comar_review_date?: string | null
+          learning_objectives?: Json | null
+          lessons?: Json | null
+          module_number?: number | null
+          quiz_questions?: Json | null
+          source_module_id?: string | null
+          stoplight_tier?: string | null
+          title?: string | null
+          unmapped_reason?: string | null
+          updated_at?: string | null
+          version?: number | null
+          video_url?: string | null
         }
         Relationships: []
       }
@@ -2245,6 +2428,288 @@ export type Database = {
           review_status?: string | null
           reviewed_at?: string | null
           storage_provider?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _bak_quiz17_greenwaste_20260818: {
+        Row: {
+          correct_answer: string | null
+          course_id: string | null
+          created_at: string | null
+          explanation: string | null
+          id: string | null
+          module_id: string | null
+          question_index: number | null
+          question_text: string | null
+          source_question_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          correct_answer?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          explanation?: string | null
+          id?: string | null
+          module_id?: string | null
+          question_index?: number | null
+          question_text?: string | null
+          source_question_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          correct_answer?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          explanation?: string | null
+          id?: string | null
+          module_id?: string | null
+          question_index?: number | null
+          question_text?: string | null
+          source_question_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _bak_vid06_recall_20260818: {
+        Row: {
+          access_level: string | null
+          asset_key: string | null
+          bucket_id: string | null
+          course_id: string | null
+          created_at: string | null
+          descript_project_id: string | null
+          description: string | null
+          draft_audio_duration_seconds: number | null
+          draft_audio_generated_at: string | null
+          draft_audio_provider: string | null
+          draft_audio_url: string | null
+          draft_generated_at: string | null
+          draft_script: string | null
+          draft_video_url: string | null
+          duration_seconds: number | null
+          fallback_bucket_id: string | null
+          fallback_storage_path: string | null
+          file_size_mb: number | null
+          id: string | null
+          is_active: boolean | null
+          last_regenerated_at: string | null
+          legacy_bucket_id: string | null
+          legacy_storage_path: string | null
+          migrated_at: string | null
+          migration_error: string | null
+          migration_status: string | null
+          mime_type: string | null
+          module_id: string | null
+          needs_regeneration: boolean | null
+          public_url: string | null
+          r2_key: string | null
+          regeneration_notified_at: string | null
+          regeneration_reason: string | null
+          render_dispatched_at: string | null
+          render_error: string | null
+          render_job_id: string | null
+          render_provider: string | null
+          render_status: string | null
+          review_status: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          slide_outline: Json | null
+          slide_spec: Json | null
+          storage_path: string | null
+          storage_provider: string | null
+          thumbnail_url: string | null
+          title: string | null
+          unmapped_reason: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          access_level?: string | null
+          asset_key?: string | null
+          bucket_id?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          descript_project_id?: string | null
+          description?: string | null
+          draft_audio_duration_seconds?: number | null
+          draft_audio_generated_at?: string | null
+          draft_audio_provider?: string | null
+          draft_audio_url?: string | null
+          draft_generated_at?: string | null
+          draft_script?: string | null
+          draft_video_url?: string | null
+          duration_seconds?: number | null
+          fallback_bucket_id?: string | null
+          fallback_storage_path?: string | null
+          file_size_mb?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          last_regenerated_at?: string | null
+          legacy_bucket_id?: string | null
+          legacy_storage_path?: string | null
+          migrated_at?: string | null
+          migration_error?: string | null
+          migration_status?: string | null
+          mime_type?: string | null
+          module_id?: string | null
+          needs_regeneration?: boolean | null
+          public_url?: string | null
+          r2_key?: string | null
+          regeneration_notified_at?: string | null
+          regeneration_reason?: string | null
+          render_dispatched_at?: string | null
+          render_error?: string | null
+          render_job_id?: string | null
+          render_provider?: string | null
+          render_status?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          slide_outline?: Json | null
+          slide_spec?: Json | null
+          storage_path?: string | null
+          storage_provider?: string | null
+          thumbnail_url?: string | null
+          title?: string | null
+          unmapped_reason?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          access_level?: string | null
+          asset_key?: string | null
+          bucket_id?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          descript_project_id?: string | null
+          description?: string | null
+          draft_audio_duration_seconds?: number | null
+          draft_audio_generated_at?: string | null
+          draft_audio_provider?: string | null
+          draft_audio_url?: string | null
+          draft_generated_at?: string | null
+          draft_script?: string | null
+          draft_video_url?: string | null
+          duration_seconds?: number | null
+          fallback_bucket_id?: string | null
+          fallback_storage_path?: string | null
+          file_size_mb?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          last_regenerated_at?: string | null
+          legacy_bucket_id?: string | null
+          legacy_storage_path?: string | null
+          migrated_at?: string | null
+          migration_error?: string | null
+          migration_status?: string | null
+          mime_type?: string | null
+          module_id?: string | null
+          needs_regeneration?: boolean | null
+          public_url?: string | null
+          r2_key?: string | null
+          regeneration_notified_at?: string | null
+          regeneration_reason?: string | null
+          render_dispatched_at?: string | null
+          render_error?: string | null
+          render_job_id?: string | null
+          render_provider?: string | null
+          render_status?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          slide_outline?: Json | null
+          slide_spec?: Json | null
+          storage_path?: string | null
+          storage_provider?: string | null
+          thumbnail_url?: string | null
+          title?: string | null
+          unmapped_reason?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _bak_vid06_returns_20260818: {
+        Row: {
+          asset_key: string | null
+          draft_script: string | null
+          id: string | null
+          needs_regeneration: boolean | null
+          regeneration_reason: string | null
+          render_status: string | null
+          review_status: string | null
+          slide_spec: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          asset_key?: string | null
+          draft_script?: string | null
+          id?: string | null
+          needs_regeneration?: boolean | null
+          regeneration_reason?: string | null
+          render_status?: string | null
+          review_status?: string | null
+          slide_spec?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          asset_key?: string | null
+          draft_script?: string | null
+          id?: string | null
+          needs_regeneration?: boolean | null
+          regeneration_reason?: string | null
+          render_status?: string | null
+          review_status?: string | null
+          slide_spec?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _bak_vid22_script_20260818: {
+        Row: {
+          asset_key: string | null
+          draft_script: string | null
+          id: string | null
+          regeneration_reason: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          asset_key?: string | null
+          draft_script?: string | null
+          id?: string | null
+          regeneration_reason?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          asset_key?: string | null
+          draft_script?: string | null
+          id?: string | null
+          regeneration_reason?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _bak_video_reflag_20260818: {
+        Row: {
+          asset_key: string | null
+          id: string | null
+          needs_regeneration: boolean | null
+          regeneration_notified_at: string | null
+          regeneration_reason: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          asset_key?: string | null
+          id?: string | null
+          needs_regeneration?: boolean | null
+          regeneration_notified_at?: string | null
+          regeneration_reason?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          asset_key?: string | null
+          id?: string | null
+          needs_regeneration?: boolean | null
+          regeneration_notified_at?: string | null
+          regeneration_reason?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -5095,6 +5560,45 @@ export type Database = {
         }
         Relationships: []
       }
+      curriculum_integrity_findings: {
+        Row: {
+          auto_healable: boolean
+          check_code: string
+          course_id: string | null
+          detail: string
+          detected_at: string
+          id: string
+          module_id: string | null
+          resolved_at: string | null
+          run_id: string
+          severity: string
+        }
+        Insert: {
+          auto_healable?: boolean
+          check_code: string
+          course_id?: string | null
+          detail: string
+          detected_at?: string
+          id?: string
+          module_id?: string | null
+          resolved_at?: string | null
+          run_id: string
+          severity: string
+        }
+        Update: {
+          auto_healable?: boolean
+          check_code?: string
+          course_id?: string | null
+          detail?: string
+          detected_at?: string
+          id?: string
+          module_id?: string | null
+          resolved_at?: string | null
+          run_id?: string
+          severity?: string
+        }
+        Relationships: []
+      }
       curriculum_recommendations: {
         Row: {
           category: string
@@ -7329,6 +7833,70 @@ export type Database = {
         }
         Relationships: []
       }
+      mca_core_element_coverage: {
+        Row: {
+          course_id: string
+          created_at: string
+          element_no: number
+          id: string
+          module_id: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          element_no: number
+          id?: string
+          module_id: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          element_no?: number
+          id?: string
+          module_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mca_core_element_coverage_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mca_core_element_coverage_element_no_fkey"
+            columns: ["element_no"]
+            isOneToOne: false
+            referencedRelation: "mca_core_elements"
+            referencedColumns: ["element_no"]
+          },
+          {
+            foreignKeyName: "mca_core_element_coverage_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "course_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mca_core_elements: {
+        Row: {
+          authority: string
+          element_no: number
+          element_text: string
+        }
+        Insert: {
+          authority?: string
+          element_no: number
+          element_text: string
+        }
+        Update: {
+          authority?: string
+          element_no?: number
+          element_text?: string
+        }
+        Relationships: []
+      }
       message_mentions: {
         Row: {
           created_at: string | null
@@ -7578,6 +8146,39 @@ export type Database = {
         }
         Relationships: []
       }
+      module_content_snapshot_20260817_tierneutral: {
+        Row: {
+          content: string | null
+          course_id: string | null
+          id: string | null
+          is_active: boolean | null
+          learning_objectives: Json | null
+          module_number: number | null
+          snapped_at: string | null
+          title: string | null
+        }
+        Insert: {
+          content?: string | null
+          course_id?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          learning_objectives?: Json | null
+          module_number?: number | null
+          snapped_at?: string | null
+          title?: string | null
+        }
+        Update: {
+          content?: string | null
+          course_id?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          learning_objectives?: Json | null
+          module_number?: number | null
+          snapped_at?: string | null
+          title?: string | null
+        }
+        Relationships: []
+      }
       module_quiz_answers: {
         Row: {
           correct_answer: string
@@ -7815,6 +8416,48 @@ export type Database = {
           content?: string | null
           id?: string | null
           module_number?: number | null
+        }
+        Relationships: []
+      }
+      mqa_snapshot_20260817_transport_fix: {
+        Row: {
+          correct_answer: string | null
+          course_id: string | null
+          created_at: string | null
+          explanation: string | null
+          id: string | null
+          module_id: string | null
+          question_index: number | null
+          question_text: string | null
+          snapped_at: string | null
+          source_question_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          correct_answer?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          explanation?: string | null
+          id?: string | null
+          module_id?: string | null
+          question_index?: number | null
+          question_text?: string | null
+          snapped_at?: string | null
+          source_question_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          correct_answer?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          explanation?: string | null
+          id?: string | null
+          module_id?: string | null
+          question_index?: number | null
+          question_text?: string | null
+          snapped_at?: string | null
+          source_question_id?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -13693,9 +14336,29 @@ export type Database = {
         Args: { user_ip: string }
         Returns: boolean
       }
+      check_authority_coverage: {
+        Args: never
+        Returns: {
+          authority: string
+          cited_in_modules: number
+          effective: string
+          impact: string
+          search_token: string
+          title: string
+        }[]
+      }
       check_course_prerequisite: {
         Args: { p_course_id: string; p_user_id: string }
         Returns: Json
+      }
+      check_curriculum_integrity: {
+        Args: never
+        Returns: {
+          auto_healable: boolean
+          check_code: string
+          findings: number
+          severity: string
+        }[]
       }
       check_email_circuit: {
         Args: never
@@ -14157,6 +14820,13 @@ export type Database = {
         Returns: boolean
       }
       hash_token: { Args: { token: string }; Returns: string }
+      heal_curriculum_safe: {
+        Args: never
+        Returns: {
+          action: string
+          rows_affected: number
+        }[]
+      }
       install_regression_vault_secret: {
         Args: { _value: string }
         Returns: string
@@ -14250,6 +14920,7 @@ export type Database = {
       }
       move_to_deadletter: { Args: { p_job_id: string }; Returns: undefined }
       notify_pending_video_regenerations: { Args: never; Returns: number }
+      prune_curriculum_findings: { Args: never; Returns: number }
       purge_e2e_test_artifacts: { Args: never; Returns: Json }
       purge_uat_seed_entities: { Args: { _batch?: string }; Returns: Json }
       queue_job: {
@@ -14557,6 +15228,18 @@ export type Database = {
       verify_token_hash: {
         Args: { stored_hash: string; token: string }
         Returns: boolean
+      }
+      video_render_preflight: {
+        Args: { p_asset_id?: string }
+        Returns: {
+          asset_id: string
+          asset_key: string
+          blockers: string[]
+          module_number: number
+          module_title: string
+          output_file: string
+          verdict: string
+        }[]
       }
     }
     Enums: {
