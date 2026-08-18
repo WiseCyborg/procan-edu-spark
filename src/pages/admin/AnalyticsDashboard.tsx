@@ -27,7 +27,7 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  BarChart,
+  BarChart as RechartsBarChart,
   Bar,
   Cell,
   PieChart,
