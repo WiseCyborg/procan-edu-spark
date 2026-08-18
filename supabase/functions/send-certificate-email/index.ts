@@ -62,9 +62,38 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // Calculate expiry date if not provided (2 years from issue)
+    // Idempotency guard: suppress duplicate certificate emails within a 15-minute window.
+    // Two independent callers (generate-certificate direct invoke + queued trigger_certificate_email
+    // job) can both reach this function for the same certificate; the second one must no-op.
+    try {
+      const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString();
+      const { data: recentDuplicates, error: duplicateCheckError } = await supabase
+        .from('email_logs')
+        .select('id, created_at')
+        .eq('email_type', 'certificate')
+        .eq('status', 'sent')
+        .eq('recipient_email', email)
+        .eq('metadata->>certificateNumber', certificateNumber)
+        .gt('created_at', fifteenMinutesAgo)
+        .limit(1);
+
+      if (duplicateCheckError) {
+        console.error('Duplicate-check query failed; continuing with send:', duplicateCheckError);
+      } else if (recentDuplicates && recentDuplicates.length > 0) {
+        const existingId = recentDuplicates[0].id;
+        console.log(`Duplicate certificate email suppressed for ${certificateNumber} (existing log: ${existingId})`);
+        return new Response(
+          JSON.stringify({ success: true, duplicate: true, suppressed: true, emailLogId: existingId }),
+          { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
+        );
+      }
+    } catch (duplicateCheckErr) {
+      console.error('Duplicate-check exception; continuing with send:', duplicateCheckErr);
+    }
+
+    // Calculate expiry date if not provided (1 year from issue, matching certificates table policy)
     const calculatedExpiryDate = expiryDate || new Date(
-      new Date(issueDate).setFullYear(new Date(issueDate).getFullYear() + 2)
+      new Date(issueDate).setFullYear(new Date(issueDate).getFullYear() + 1)
     ).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
     // Build verification URL - ensure proper formatting
