@@ -182,6 +182,37 @@ serve(async (req) => {
     const finalSeatId = reservedSeatId as string;
     console.log('[ATOMIC REGISTRATION] Seat reserved successfully:', finalSeatId);
 
+    // Consume the join-code use before creating the auth account so the cap is
+    // binding. If account creation fails below, the rollback path releases this use.
+    if (joinCode) {
+      const { data: incrementResult, error: incrementError } = await supabaseClient
+        .rpc('increment_join_code_use', { p_code: joinCode });
+
+      if (incrementError || !incrementResult || incrementResult.success !== true) {
+        console.error('[ATOMIC REGISTRATION] Join code use failed:', incrementError, incrementResult);
+
+        const { error: deallocError } = await supabaseClient
+          .rpc('deallocate_seat', { seat_id_param: finalSeatId });
+
+        if (deallocError) {
+          console.error('[ATOMIC REGISTRATION] Seat deallocation after failed join-code increment failed:', deallocError);
+        }
+
+        return new Response(
+          JSON.stringify({
+            error: 'This join code has reached its maximum usage limit or no seats are available. Please contact your manager to purchase more seats.',
+            code: 'JOIN_CODE_EXHAUSTED'
+          }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        );
+      }
+
+      console.log('[ATOMIC REGISTRATION] Join code use consumed:', joinCode, 'uses:', incrementResult.current_uses, '/', incrementResult.max_uses);
+    }
+
     // STEP 3: Create user account with retry logic (Gate 7 fix)
     let authData = null;
     let authError = null;
