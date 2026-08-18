@@ -229,9 +229,22 @@ export const detectTrainingGaps = async (): Promise<Gap[]> => {
     // Expired certificates
     const { data: expiredCerts } = await supabase
       .from('certificates')
-      .select('id, user_id, profiles(full_name)')
+      .select('id, user_id')
       .lt('expiry_date', new Date().toISOString())
       .eq('is_revoked', false);
+
+    // profiles has no full_name column — fetch names separately and join in code.
+    const certUserIds = Array.from(new Set((expiredCerts || []).map((c: any) => c.user_id).filter(Boolean)));
+    const nameByUserId: Record<string, string> = {};
+    if (certUserIds.length > 0) {
+      const { data: certProfiles } = await supabase
+        .from('profiles')
+        .select('user_id, first_name, last_name, email_cache')
+        .in('user_id', certUserIds);
+      (certProfiles || []).forEach((p: any) => {
+        nameByUserId[p.user_id] = `${p.first_name || ''} ${p.last_name || ''}`.trim() || p.email_cache || '';
+      });
+    }
 
     if (expiredCerts && expiredCerts.length > 0) {
       expiredCerts.forEach((cert: any) => {
