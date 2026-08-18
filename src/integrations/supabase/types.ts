@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      _bak_certificates_expiry_20260818: {
+        Row: {
+          certificate_number: string | null
+          certification_level: string | null
+          course_id: string | null
+          created_at: string | null
+          exam_attempt_id: string | null
+          expiry_date: string | null
+          id: string | null
+          is_revoked: boolean | null
+          issue_date: string | null
+          metadata: Json | null
+          pdf_url: string | null
+          status: string | null
+          tier_badge: string | null
+          user_id: string | null
+        }
+        Insert: {
+          certificate_number?: string | null
+          certification_level?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          exam_attempt_id?: string | null
+          expiry_date?: string | null
+          id?: string | null
+          is_revoked?: boolean | null
+          issue_date?: string | null
+          metadata?: Json | null
+          pdf_url?: string | null
+          status?: string | null
+          tier_badge?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          certificate_number?: string | null
+          certification_level?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          exam_attempt_id?: string | null
+          expiry_date?: string | null
+          id?: string | null
+          is_revoked?: boolean | null
+          issue_date?: string | null
+          metadata?: Json | null
+          pdf_url?: string | null
+          status?: string | null
+          tier_badge?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       _bak_mod02_20260807: {
         Row: {
           c: string | null
@@ -7539,6 +7590,45 @@ export type Database = {
         Relationships: []
       }
       module_quiz_answers_snapshot_20260813b: {
+        Row: {
+          correct_answer: string | null
+          course_id: string | null
+          created_at: string | null
+          explanation: string | null
+          id: string | null
+          module_id: string | null
+          question_index: number | null
+          question_text: string | null
+          source_question_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          correct_answer?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          explanation?: string | null
+          id?: string | null
+          module_id?: string | null
+          question_index?: number | null
+          question_text?: string | null
+          source_question_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          correct_answer?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          explanation?: string | null
+          id?: string | null
+          module_id?: string | null
+          question_index?: number | null
+          question_text?: string | null
+          source_question_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      module_quiz_answers_snapshot_20260817: {
         Row: {
           correct_answer: string | null
           course_id: string | null
