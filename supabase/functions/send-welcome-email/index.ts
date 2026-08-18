@@ -226,7 +226,7 @@ const handler = async (req: Request): Promise<Response> => {
       subject: subject,
       html,
       from: "ProCann Edu <noreply@procannedu.com>",
-      metadata: { email_type: 'welcome', log_id: logData?.id }
+      metadata: { email_type: emailType, log_id: logData?.id, reminder_type: reminderType }
     }, supabase);
 
     console.log("Welcome email sent successfully:", emailResponse);
