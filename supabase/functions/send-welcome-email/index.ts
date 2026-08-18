@@ -72,17 +72,20 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { email, firstName, lastName, tempPassword, organizationName, accessKey, loginUrl }: WelcomeEmailRequest = await req.json();
-    console.log(`Processing welcome email for: ${email}`);
-    
-    // Check if welcome email was already sent in the last 24 hours
+    const { email, firstName, lastName, tempPassword, organizationName, accessKey, loginUrl, reminderType, message }: WelcomeEmailRequest = await req.json();
+
+    const isLifecycle = !!reminderType && !!LIFECYCLE_SUBJECTS[reminderType];
+    const emailType = isLifecycle ? `lifecycle_${reminderType}` : 'welcome';
+    console.log(`Processing ${emailType} email for: ${email}`);
+
+    // Dedupe within 24h, scoped to this specific email type
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
     
     const { data: existingLogs, error: checkError } = await supabase
       .from('email_logs')
       .select('id')
       .eq('recipient_email', email)
-      .eq('email_type', 'welcome')
+      .eq('email_type', emailType)
       .eq('status', 'sent')
       .gte('sent_at', oneDayAgo)
       .limit(1)
@@ -92,9 +95,9 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     if (existingLogs && existingLogs.length > 0) {
-      console.log(`Welcome email already sent to ${email} in the last 24 hours, skipping`)
+      console.log(`${emailType} email already sent to ${email} in the last 24 hours, skipping`)
       return new Response(JSON.stringify({ 
-        message: 'Welcome email already sent recently',
+        message: `${emailType} email already sent recently`,
         skipped: true 
       }), {
         status: 200,
@@ -105,20 +108,22 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    console.log("Sending welcome email to:", email);
+    console.log(`Sending ${emailType} email to:`, email);
 
-    // Prepare email subject and HTML based on whether this is auto-enrollment or regular welcome
-    const isAutoEnrollment = !!tempPassword;
-    const subject = isAutoEnrollment 
-      ? "Welcome to ProCann Edu - Your Account is Ready!" 
-      : "Welcome to ProCann Edu - Your Cannabis Training Journey Begins!";
+    // Prepare email subject based on lifecycle type / auto-enrollment / regular welcome
+    const isAutoEnrollment = !isLifecycle && !!tempPassword;
+    const subject = isLifecycle
+      ? LIFECYCLE_SUBJECTS[reminderType!]
+      : isAutoEnrollment 
+        ? "Welcome to ProCann Edu - Your Account is Ready!" 
+        : "Welcome to ProCann Edu - Your Cannabis Training Journey Begins!";
 
     // Log email attempt
     const { data: logData, error: logError } = await supabase
       .from('email_logs')
       .insert({
         recipient_email: email,
-        email_type: 'welcome',
+        email_type: emailType,
         status: 'sending',
         subject: subject
       })
