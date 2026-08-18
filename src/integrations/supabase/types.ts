@@ -11521,6 +11521,7 @@ export type Database = {
         }[]
       }
       deallocate_seat: { Args: { seat_id_param: string }; Returns: boolean }
+      decrement_join_code_use: { Args: { p_code: string }; Returns: Json }
       decrypt_pii: { Args: { encrypted_data: string }; Returns: string }
       delete_dispensary_application: {
         Args: { p_application_id: string }
@@ -11911,6 +11912,7 @@ export type Database = {
           rows_affected: number
         }[]
       }
+      increment_join_code_use: { Args: { p_code: string }; Returns: Json }
       install_regression_vault_secret: {
         Args: { _value: string }
         Returns: string
