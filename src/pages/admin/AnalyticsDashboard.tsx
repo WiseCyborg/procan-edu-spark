@@ -243,7 +243,7 @@ const AnalyticsDashboard: React.FC = () => {
             <CardContent className="space-y-4">
               <div className="h-64 w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={COUNTRY_DATA} margin={{ top: 8, right: 16, bottom: 8, left: 0 }}>
+                  <RechartsBarChart data={COUNTRY_DATA} margin={{ top: 8, right: 16, bottom: 8, left: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                     <XAxis dataKey="country" stroke="hsl(var(--muted-foreground))" />
                     <YAxis tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
