@@ -455,27 +455,6 @@ Deno.serve(async (req: Request) => {
       })
       .eq('user_id', user.id);
 
-    const emailCourseTitle =
-      certificationType === 'manager'
-        ? 'Maryland RVT + Manager Leadership Training'
-        : 'Maryland Responsible Vendor Training';
-
-    supabase.functions
-      .invoke('send-certificate-email', {
-        body: {
-          email: user.email,
-          firstName: profile?.first_name || 'Student',
-          lastName: profile?.last_name || '',
-          certificateNumber: certificate.certificate_number,
-          courseTitle: emailCourseTitle,
-          issueDate: issueDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
-          expiryDate: expiryDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
-          certificateUrl: verifyUrl,
-          certificationType,
-          trainingTrack,
-        },
-      })
-      .catch((err) => console.error('Certificate email failed:', err));
 
     return new Response(
       JSON.stringify({
