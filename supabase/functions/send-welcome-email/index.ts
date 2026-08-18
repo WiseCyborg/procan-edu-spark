@@ -132,7 +132,22 @@ const handler = async (req: Request): Promise<Response> => {
 
     let html: string;
     
-    if (isAutoEnrollment) {
+    if (isLifecycle) {
+      const body = message || 'You have an update on your Maryland RVT training.';
+      try {
+        // Per-type template if one exists (DB or filesystem); otherwise graceful fallback
+        html = await loadEmailTemplate(`lifecycle-${reminderType}`, {
+          FirstName: firstName,
+          Message: body,
+          message: body,
+          Subject: subject,
+          DashboardURL: DASHBOARD_URL,
+        });
+      } catch (_templateError) {
+        console.log(`No lifecycle-${reminderType} template found, using inline lifecycle fallback`);
+        html = lifecycleFallbackHtml(firstName, body, subject);
+      }
+    } else if (isAutoEnrollment) {
       // Custom HTML for auto-enrolled dispensary managers
       html = `
 <!DOCTYPE html>
