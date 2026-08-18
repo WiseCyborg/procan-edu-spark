@@ -292,7 +292,10 @@ export const detectDataQualityGaps = async (): Promise<Gap[]> => {
           recommendation: 'Prompt user to complete profile',
           detectedAt: new Date(),
           auto_fixable: false,
-          affected_entity: profile.full_name || 'Unknown User',
+          affected_entity:
+            `${profile.first_name || ''} ${profile.last_name || ''}`.trim() ||
+            profile.email_cache ||
+            'Unknown User',
           suggested_action: 'Complete missing profile fields',
         });
       });
