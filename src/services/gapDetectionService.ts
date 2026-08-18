@@ -229,9 +229,22 @@ export const detectTrainingGaps = async (): Promise<Gap[]> => {
     // Expired certificates
     const { data: expiredCerts } = await supabase
       .from('certificates')
-      .select('id, user_id, profiles(full_name)')
+      .select('id, user_id')
       .lt('expiry_date', new Date().toISOString())
       .eq('is_revoked', false);
+
+    // profiles has no full_name column — fetch names separately and join in code.
+    const certUserIds = Array.from(new Set((expiredCerts || []).map((c: any) => c.user_id).filter(Boolean)));
+    const nameByUserId: Record<string, string> = {};
+    if (certUserIds.length > 0) {
+      const { data: certProfiles } = await supabase
+        .from('profiles')
+        .select('user_id, first_name, last_name, email_cache')
+        .in('user_id', certUserIds);
+      (certProfiles || []).forEach((p: any) => {
+        nameByUserId[p.user_id] = `${p.first_name || ''} ${p.last_name || ''}`.trim() || p.email_cache || '';
+      });
+    }
 
     if (expiredCerts && expiredCerts.length > 0) {
       expiredCerts.forEach((cert: any) => {
@@ -246,7 +259,7 @@ export const detectTrainingGaps = async (): Promise<Gap[]> => {
           recommendation: 'Send renewal notification',
           detectedAt: new Date(),
           auto_fixable: true,
-          affected_entity: cert.profiles?.full_name || 'Unknown User',
+          affected_entity: nameByUserId[cert.user_id] || 'Unknown User',
           suggested_action: 'Enroll in recertification course',
         });
       });
@@ -263,7 +276,7 @@ export const detectDataQualityGaps = async (): Promise<Gap[]> => {
     // Incomplete profiles
     const { data: incompleteProfiles } = await supabase
       .from('profiles')
-      .select('id, full_name')
+      .select('id, first_name, last_name, email_cache')
       .or('phone.is.null,bio.is.null');
 
     if (incompleteProfiles && incompleteProfiles.length > 0) {
@@ -279,7 +292,10 @@ export const detectDataQualityGaps = async (): Promise<Gap[]> => {
           recommendation: 'Prompt user to complete profile',
           detectedAt: new Date(),
           auto_fixable: false,
-          affected_entity: profile.full_name || 'Unknown User',
+          affected_entity:
+            `${profile.first_name || ''} ${profile.last_name || ''}`.trim() ||
+            profile.email_cache ||
+            'Unknown User',
           suggested_action: 'Complete missing profile fields',
         });
       });

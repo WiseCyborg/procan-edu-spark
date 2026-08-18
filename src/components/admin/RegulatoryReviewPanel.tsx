@@ -86,13 +86,16 @@ export function RegulatoryReviewPanel() {
       new Set((histData || []).map((r: any) => r.reviewed_by).filter(Boolean))
     );
     if (reviewerIds.length) {
+      // profiles has no full_name/email columns, and profiles.id is NOT the auth user id.
+      // reviewed_by holds an auth user id, so filter on profiles.user_id.
       const { data: profs } = await supabase
         .from('profiles')
-        .select('id, full_name, email')
-        .in('id', reviewerIds as string[]);
+        .select('user_id, first_name, last_name, email_cache')
+        .in('user_id', reviewerIds as string[]);
       const map: Record<string, string> = {};
       (profs || []).forEach((p: any) => {
-        map[p.id] = p.full_name || p.email || p.id.slice(0, 8);
+        const name = `${p.first_name || ''} ${p.last_name || ''}`.trim();
+        map[p.user_id] = name || p.email_cache || String(p.user_id).slice(0, 8);
       });
       setReviewerNames(map);
     }

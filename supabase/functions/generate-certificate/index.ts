@@ -193,7 +193,8 @@ Deno.serve(async (req: Request) => {
       .from('certificates')
       .select('certificate_number, pdf_url')
       .eq('exam_attempt_id', exam_attempt_id)
-      .single();
+      // maybeSingle(): "no certificate yet" is the normal path here, not a 406 error.
+      .maybeSingle();
 
     if (existingCert) {
       return new Response(
@@ -343,20 +344,10 @@ Deno.serve(async (req: Request) => {
 
     const courseTitle = course?.title || 'Maryland Responsible Vendor Training (RVT)';
 
-    // Audit log
-    await supabase.from('certificate_audit_log').insert({
-      certificate_id: certificate.id,
-      action: 'ISSUED',
-      actor_id: user.id,
-      ip_address: req.headers.get('x-forwarded-for') || 'unknown',
-      user_agent: req.headers.get('user-agent') || 'unknown',
-      metadata: {
-        certificate_number: certificate.certificate_number,
-        course_id: examAttempt.course_id,
-        exam_attempt_id,
-        certification_type: certificationType,
-      },
-    });
+    // Audit log is written by the certificates DB trigger (metadata.source = "db_trigger").
+    // The insert that used to live here was redundant and always failed.
+
+
 
     // user_certificates
     const verificationCode = `${certificationType === 'manager' ? 'MGR' : 'RVT'}-${new Date()
@@ -446,10 +437,12 @@ Deno.serve(async (req: Request) => {
       },
     });
 
-    await supabase
+    // Server-side (service role) is the ONLY writer of user_learning_journey.
+    const { error: journeyError } = await supabase
       .from('user_learning_journey')
       .update({
-        current_stage: 'certified',
+        // Must be one of the values allowed by user_learning_journey_current_stage_check.
+        current_stage: 'certificate_issued',
         stage_entered_at: new Date().toISOString(),
         last_activity_at: new Date().toISOString(),
         predicted_completion_date: null,
@@ -457,6 +450,10 @@ Deno.serve(async (req: Request) => {
         at_risk_flag: false,
       })
       .eq('user_id', user.id);
+
+    if (journeyError) {
+      console.error('[generate-certificate] user_learning_journey update failed:', journeyError);
+    }
 
 
     return new Response(

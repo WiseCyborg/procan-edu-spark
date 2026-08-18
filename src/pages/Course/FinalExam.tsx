@@ -722,25 +722,41 @@ const FinalExam: React.FC = () => {
       console.error('[FinalExam] time_taken update failed', err);
     }
 
-    // Also store individual topic scores from the server response (best-effort)
+    // Also store individual topic scores from the server response (best-effort).
+    //
+    // ROOT CAUSE of the historic 400 on this insert: exam_topic_scores.comar_section is
+    // NOT NULL, but most exam_questions rows have comar_section NULL, so submit_exam's
+    // min(comar_section) per section came back null and Postgres rejected the whole
+    // batch. Every required column is now coerced/defaulted before insert, and the real
+    // PostgREST error is logged in full rather than swallowed.
     try {
-      const topicScoreInserts = serverTopics.map(ts => ({
-        exam_attempt_id: attemptId,
-        section_number: ts.section_number,
-        comar_section: ts.comar_section,
-        topic_area: ts.topic_area,
-        questions_correct: ts.questions_correct,
-        questions_total: ts.questions_total,
-        score_percentage: ts.score_percentage,
-        needs_remediation: ts.needs_remediation,
-      }));
+      const topicScoreInserts = serverTopics
+        .filter(ts => ts && ts.section_number != null)
+        .map(ts => ({
+          exam_attempt_id: attemptId,
+          section_number: Number(ts.section_number),
+          comar_section: (ts.comar_section ?? '').toString().trim() || 'unspecified',
+          topic_area: (ts.topic_area ?? '').toString().trim() || `Section ${ts.section_number}`,
+          questions_correct: Number(ts.questions_correct ?? 0),
+          questions_total: Number(ts.questions_total ?? 0),
+          score_percentage: Math.round(Number(ts.score_percentage ?? 0)),
+          needs_remediation: ts.needs_remediation === true,
+        }));
       if (topicScoreInserts.length > 0) {
         const { error: topicScoreError } = await supabase
           .from('exam_topic_scores')
           .insert(topicScoreInserts);
         if (topicScoreError) {
-          console.error('[FinalExam] topic score insert error', topicScoreError);
+          console.error('[FinalExam] topic score insert failed', {
+            message: topicScoreError.message,
+            details: topicScoreError.details,
+            hint: topicScoreError.hint,
+            code: topicScoreError.code,
+            payload: topicScoreInserts,
+          });
         }
+      } else {
+        console.warn('[FinalExam] no topic scores returned by submit_exam', serverTopics);
       }
     } catch (err) {
       console.error('[FinalExam] topic score insert threw', err);
@@ -804,14 +820,45 @@ const FinalExam: React.FC = () => {
         return;
       }
 
-      // Store certificate number + stored pdf path for display/download
+      // Prefer the issuing call's own response. If it came back without a number
+      // (row still being written), poll briefly with maybeSingle() instead of
+      // firing a .single() lookup that 406s on the not-yet-created row.
+      let certificateNumber: string | undefined = certData?.certificate_number;
+      let certificatePdfPath: string | undefined = certData?.pdf_path || undefined;
+
+      if (!certificateNumber) {
+        for (const waitMs of [300, 600, 1200, 1400, 1500]) {
+          await new Promise(resolve => setTimeout(resolve, waitMs));
+          const { data: certRow, error: certLookupError } = await supabase
+            .from('certificates')
+            .select('certificate_number, pdf_url')
+            .eq('exam_attempt_id', examAttemptId)
+            .maybeSingle();
+          if (certLookupError) {
+            console.error('[FinalExam] certificate lookup failed', certLookupError);
+            break;
+          }
+          if (certRow?.certificate_number) {
+            certificateNumber = certRow.certificate_number;
+            certificatePdfPath = certRow.pdf_url || undefined;
+            break;
+          }
+        }
+      }
+
+      // Store certificate number + stored pdf path for display/download.
+      // 'PROCESSING' renders the "generating your certificate…" state, not an error.
       setUserData(prev => ({
         ...prev,
-        certificateNumber: certData.certificate_number,
-        certificatePdfPath: certData.pdf_path || undefined,
+        certificateNumber,
+        certificatePdfPath,
       }));
       setExamStage('certificate');
-      toast.success('Certificate generated successfully!');
+      toast.success(
+        certificateNumber
+          ? 'Certificate generated successfully!'
+          : 'Your certificate is being generated — it will appear shortly.'
+      );
     } catch (error) {
       console.error('Error in certificate generation:', error);
       toast.error('An unexpected error occurred');

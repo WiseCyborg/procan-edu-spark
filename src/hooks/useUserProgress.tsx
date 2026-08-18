@@ -151,23 +151,11 @@ export const useUserProgress = (courseId?: string) => {
           }
         }
         
-        // Update learning journey state
-        try {
-          await supabase
-            .from('user_learning_journey')
-            .update({
-              modules_completed: completedCount,
-              completion_percentage: completionPercentage,
-              current_stage: completionPercentage >= 100 ? 'course_completed' : 'course_in_progress',
-              last_activity_at: new Date().toISOString(),
-              stage_entered_at: completionPercentage === Math.round((1 / RVT_MODULE_COUNT) * 100) 
-                ? new Date().toISOString() 
-                : undefined
-            })
-            .eq('user_id', user.id);
-        } catch (error) {
-          console.error('Failed to update learning journey:', error);
-        }
+        // NOTE: user_learning_journey is written server-side only (service role).
+        // There is no update RLS policy for `authenticated`, so the client write
+        // that used to live here always returned 400. Read-only from the browser.
+
+        
         
         // Attempt to unlock tier
         const tierUnlocked = await checkAndUnlockTier(completedCount);
