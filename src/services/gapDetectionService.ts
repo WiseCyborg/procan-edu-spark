@@ -276,7 +276,7 @@ export const detectDataQualityGaps = async (): Promise<Gap[]> => {
     // Incomplete profiles
     const { data: incompleteProfiles } = await supabase
       .from('profiles')
-      .select('id, full_name')
+      .select('id, first_name, last_name, email_cache')
       .or('phone.is.null,bio.is.null');
 
     if (incompleteProfiles && incompleteProfiles.length > 0) {
