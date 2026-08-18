@@ -1,7 +1,8 @@
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { SignedAvatarImage } from '@/components/profile/SignedAvatarImage';
 import { Calendar, Clock, Users, X, Check, Download } from 'lucide-react';
 import { format, formatDistanceToNow, isBefore, addMinutes } from 'date-fns';
 import { useAuth } from '@/hooks/useAuth';
@@ -145,7 +146,7 @@ export const UpcomingCallsList = ({
                   <div className="flex items-center gap-2 mt-3">
                     <Avatar className="h-5 w-5">
                       {call.host.profile_photo_url && (
-                        <AvatarImage src={call.host.profile_photo_url} />
+                        <SignedAvatarImage src={call.host.profile_photo_url} />
                       )}
                       <AvatarFallback className="text-[10px]">
                         {call.host.first_name[0]}{call.host.last_name[0]}
