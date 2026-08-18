@@ -440,7 +440,8 @@ Deno.serve(async (req: Request) => {
     await supabase
       .from('user_learning_journey')
       .update({
-        current_stage: 'certified',
+        // Must be one of the values allowed by user_learning_journey_current_stage_check.
+        current_stage: 'certificate_issued',
         stage_entered_at: new Date().toISOString(),
         last_activity_at: new Date().toISOString(),
         predicted_completion_date: null,
