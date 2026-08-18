@@ -722,25 +722,41 @@ const FinalExam: React.FC = () => {
       console.error('[FinalExam] time_taken update failed', err);
     }
 
-    // Also store individual topic scores from the server response (best-effort)
+    // Also store individual topic scores from the server response (best-effort).
+    //
+    // ROOT CAUSE of the historic 400 on this insert: exam_topic_scores.comar_section is
+    // NOT NULL, but most exam_questions rows have comar_section NULL, so submit_exam's
+    // min(comar_section) per section came back null and Postgres rejected the whole
+    // batch. Every required column is now coerced/defaulted before insert, and the real
+    // PostgREST error is logged in full rather than swallowed.
     try {
-      const topicScoreInserts = serverTopics.map(ts => ({
-        exam_attempt_id: attemptId,
-        section_number: ts.section_number,
-        comar_section: ts.comar_section,
-        topic_area: ts.topic_area,
-        questions_correct: ts.questions_correct,
-        questions_total: ts.questions_total,
-        score_percentage: ts.score_percentage,
-        needs_remediation: ts.needs_remediation,
-      }));
+      const topicScoreInserts = serverTopics
+        .filter(ts => ts && ts.section_number != null)
+        .map(ts => ({
+          exam_attempt_id: attemptId,
+          section_number: Number(ts.section_number),
+          comar_section: (ts.comar_section ?? '').toString().trim() || 'unspecified',
+          topic_area: (ts.topic_area ?? '').toString().trim() || `Section ${ts.section_number}`,
+          questions_correct: Number(ts.questions_correct ?? 0),
+          questions_total: Number(ts.questions_total ?? 0),
+          score_percentage: Math.round(Number(ts.score_percentage ?? 0)),
+          needs_remediation: ts.needs_remediation === true,
+        }));
       if (topicScoreInserts.length > 0) {
         const { error: topicScoreError } = await supabase
           .from('exam_topic_scores')
           .insert(topicScoreInserts);
         if (topicScoreError) {
-          console.error('[FinalExam] topic score insert error', topicScoreError);
+          console.error('[FinalExam] topic score insert failed', {
+            message: topicScoreError.message,
+            details: topicScoreError.details,
+            hint: topicScoreError.hint,
+            code: topicScoreError.code,
+            payload: topicScoreInserts,
+          });
         }
+      } else {
+        console.warn('[FinalExam] no topic scores returned by submit_exam', serverTopics);
       }
     } catch (err) {
       console.error('[FinalExam] topic score insert threw', err);
