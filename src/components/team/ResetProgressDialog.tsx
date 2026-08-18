@@ -70,19 +70,9 @@ export function ResetProgressDialog({
 
       if (lessonError) console.error('Error deleting lesson progress:', lessonError);
 
-      // Update user learning journey to reset
-      const { error: journeyError } = await supabase
-        .from('user_learning_journey')
-        .update({
-          current_section: 1,
-          stoplight_tier: 'green',
-          overall_progress_pct: 0,
-          at_risk_flag: false,
-          last_activity_at: new Date().toISOString(),
-        })
-        .eq('user_id', employee.user_id);
+      // user_learning_journey is service-role-writable only (no authenticated update
+      // policy), so the client reset that used to run here always returned 400.
 
-      if (journeyError) console.error('Error resetting journey:', journeyError);
 
       toast.success('Progress reset successfully', {
         description: `${employee.first_name} ${employee.last_name}'s training progress has been cleared`,
