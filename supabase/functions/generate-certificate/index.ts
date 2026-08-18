@@ -437,7 +437,8 @@ Deno.serve(async (req: Request) => {
       },
     });
 
-    await supabase
+    // Server-side (service role) is the ONLY writer of user_learning_journey.
+    const { error: journeyError } = await supabase
       .from('user_learning_journey')
       .update({
         // Must be one of the values allowed by user_learning_journey_current_stage_check.
