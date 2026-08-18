@@ -100,6 +100,7 @@ import UATTestMatrix from "./pages/admin/UATTestMatrix";
 import VideoLibrary from "./pages/admin/VideoLibrary";
 import VideoRegenerationQueue from "./pages/admin/VideoRegenerationQueue";
 import VideoStudio from "./pages/admin/VideoStudio";
+import AnalyticsDashboard from "./pages/admin/AnalyticsDashboard";
 import LaunchReadiness from "./pages/admin/LaunchReadiness";
 
 import UATValidationPage from "./pages/UATValidationPage";
@@ -419,6 +420,11 @@ const AppRoutesLayout = () => {
             <Route path="/admin/video-studio" element={
               <ProtectedRoute>
                 <VideoStudio />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/analytics" element={
+              <ProtectedRoute>
+                <AnalyticsDashboard />
               </ProtectedRoute>
             } />
             <Route path="/admin/video-regeneration" element={
