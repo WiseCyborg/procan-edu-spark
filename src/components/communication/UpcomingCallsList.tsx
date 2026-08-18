@@ -145,7 +145,7 @@ export const UpcomingCallsList = ({
                   <div className="flex items-center gap-2 mt-3">
                     <Avatar className="h-5 w-5">
                       {call.host.profile_photo_url && (
-                        <AvatarImage src={call.host.profile_photo_url} />
+                        <SignedAvatarImage src={call.host.profile_photo_url} />
                       )}
                       <AvatarFallback className="text-[10px]">
                         {call.host.first_name[0]}{call.host.last_name[0]}

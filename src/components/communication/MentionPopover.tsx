@@ -70,7 +70,7 @@ export const MentionPopover = ({
         >
           <Avatar className="h-6 w-6 me-2">
             {user.profile_photo_url && (
-              <AvatarImage src={user.profile_photo_url} alt={`${user.first_name} ${user.last_name}`} />
+              <SignedAvatarImage src={user.profile_photo_url} alt={`${user.first_name} ${user.last_name}`} />
             )}
             <AvatarFallback className="text-xs bg-primary/10 text-primary">
               {getInitials(user.first_name, user.last_name)}

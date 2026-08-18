@@ -410,7 +410,7 @@ export const ConversationView = ({
                   {showAvatar ? (
                     <Avatar className="h-8 w-8">
                       {message.sender?.profile_photo_url && (
-                        <AvatarImage 
+                        <SignedAvatarImage 
                           src={message.sender.profile_photo_url} 
                           alt={`${message.sender.first_name} ${message.sender.last_name}`}
                         />
