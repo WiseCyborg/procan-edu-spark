@@ -371,7 +371,9 @@ serve(async (req) => {
       execution_status: runStatus,
       execution_duration_ms: Date.now() - startTime,
       items_processed: totalInterventions,
-      actions_taken: errors,
+      actions_taken: Object.entries(interventions)
+        .filter(([, count]) => (count as number) > 0)
+        .map(([type, count]) => ({ intervention_type: type, recipients: count })),
       error_message: errors.length > 0 ? errors.join('; ') : null,
       metadata: {
         ...interventions,
