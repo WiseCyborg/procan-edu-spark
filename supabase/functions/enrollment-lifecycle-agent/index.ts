@@ -362,12 +362,18 @@ serve(async (req) => {
       ? 'success'
       : (stagesSucceeded > 0 ? 'partial' : 'failed');
 
-    // Log agent run
-    await supabase.from('ai_agent_runs').insert({
+    const totalInterventions = Object.values(interventions).reduce((a, b) => a + b, 0);
+
+    // Log agent run using the actual ai_agent_runs schema
+    const { error: logError } = await supabase.from('ai_agent_runs').insert({
       agent_name: 'enrollment-lifecycle-agent',
-      run_status: runStatus,
-      records_processed: Object.values(interventions).reduce((a, b) => a + b, 0),
-      execution_metadata: {
+      agent_type: 'lifecycle',
+      execution_status: runStatus,
+      execution_duration_ms: Date.now() - startTime,
+      items_processed: totalInterventions,
+      actions_taken: errors,
+      error_message: errors.length > 0 ? errors.join('; ') : null,
+      metadata: {
         ...interventions,
         skipped_missing_profile: skippedMissingProfile,
         stages_attempted: stagesAttempted,
@@ -375,6 +381,10 @@ serve(async (req) => {
         errors,
       },
     });
+
+    if (logError) {
+      console.error('[enrollment-lifecycle-agent] ai_agent_runs insert failed:', logError.message, logError);
+    }
 
     console.log('Lifecycle agent completed:', { runStatus, interventions, errors, skippedMissingProfile });
 
