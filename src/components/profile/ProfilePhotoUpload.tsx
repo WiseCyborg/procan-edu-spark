@@ -61,24 +61,16 @@ export const ProfilePhotoUpload = ({ userId, currentPhotoUrl, onPhotoUpdate }: P
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('profile-photos')
-        .getPublicUrl(filePath);
-
-      // Add timestamp to force browser cache refresh
-      const cacheBustedUrl = `${publicUrl}?t=${Date.now()}`;
-
-      // Update profile table
+      // The bucket is private: store the object path and render via short-lived signed URLs
       const { error: updateError } = await supabase
         .from('profiles')
-        .update({ profile_photo_url: publicUrl })
+        .update({ profile_photo_url: filePath })
         .eq('user_id', userId);
 
       if (updateError) throw updateError;
 
-      setPreviewUrl(cacheBustedUrl);
-      onPhotoUpdate(cacheBustedUrl);
+      setPreviewUrl(filePath);
+      onPhotoUpdate(filePath);
 
       toast({
         title: "Success",
