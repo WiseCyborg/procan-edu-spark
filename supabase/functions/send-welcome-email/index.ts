@@ -15,6 +15,42 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+type ReminderType =
+  | 'profile_completion'
+  | 'course_start'
+  | 'stuck_learner'
+  | 'nearing_completion'
+  | 'certificate_renewal';
+
+const LIFECYCLE_SUBJECTS: Record<ReminderType, string> = {
+  profile_completion: "Finish setting up your ProCann Edu profile",
+  course_start: "Ready when you are — your Maryland RVT training is waiting",
+  stuck_learner: "Pick up where you left off in your RVT training",
+  nearing_completion: "You're almost certified — just a bit left to go",
+  certificate_renewal: "Your Maryland RVT certificate is expiring soon",
+};
+
+const DASHBOARD_URL = "https://www.procannedu.com/dashboard";
+
+function lifecycleFallbackHtml(firstName: string, message: string, subject: string): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${subject}</title></head>
+<body style="margin:0;padding:20px;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:8px;padding:32px;">
+    <h1 style="color:#16a34a;font-size:22px;margin-top:0;">${subject}</h1>
+    <p style="color:#4a4a4a;font-size:16px;">Hi ${firstName},</p>
+    <p style="color:#4a4a4a;font-size:16px;line-height:1.6;">${message}</p>
+    <p style="text-align:center;margin:32px 0;">
+      <a href="${DASHBOARD_URL}" style="display:inline-block;background:#16a34a;color:#ffffff;padding:14px 32px;text-decoration:none;border-radius:6px;font-weight:bold;">Go to My Dashboard</a>
+    </p>
+    <p style="color:#6b7280;font-size:13px;">Questions? Reply to this email or contact support@procannedu.com.</p>
+    <p style="color:#4a4a4a;font-size:15px;">— The ProCann Edu Team</p>
+  </div>
+</body>
+</html>`;
+}
+
 interface WelcomeEmailRequest {
   email: string;
   firstName: string;
@@ -23,6 +59,8 @@ interface WelcomeEmailRequest {
   organizationName?: string;
   accessKey?: string;
   loginUrl?: string;
+  reminderType?: ReminderType;
+  message?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -34,17 +72,20 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { email, firstName, lastName, tempPassword, organizationName, accessKey, loginUrl }: WelcomeEmailRequest = await req.json();
-    console.log(`Processing welcome email for: ${email}`);
-    
-    // Check if welcome email was already sent in the last 24 hours
+    const { email, firstName, lastName, tempPassword, organizationName, accessKey, loginUrl, reminderType, message }: WelcomeEmailRequest = await req.json();
+
+    const isLifecycle = !!reminderType && !!LIFECYCLE_SUBJECTS[reminderType];
+    const emailType = isLifecycle ? `lifecycle_${reminderType}` : 'welcome';
+    console.log(`Processing ${emailType} email for: ${email}`);
+
+    // Dedupe within 24h, scoped to this specific email type
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
     
     const { data: existingLogs, error: checkError } = await supabase
       .from('email_logs')
       .select('id')
       .eq('recipient_email', email)
-      .eq('email_type', 'welcome')
+      .eq('email_type', emailType)
       .eq('status', 'sent')
       .gte('sent_at', oneDayAgo)
       .limit(1)
@@ -54,9 +95,9 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     if (existingLogs && existingLogs.length > 0) {
-      console.log(`Welcome email already sent to ${email} in the last 24 hours, skipping`)
+      console.log(`${emailType} email already sent to ${email} in the last 24 hours, skipping`)
       return new Response(JSON.stringify({ 
-        message: 'Welcome email already sent recently',
+        message: `${emailType} email already sent recently`,
         skipped: true 
       }), {
         status: 200,
@@ -67,20 +108,22 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    console.log("Sending welcome email to:", email);
+    console.log(`Sending ${emailType} email to:`, email);
 
-    // Prepare email subject and HTML based on whether this is auto-enrollment or regular welcome
-    const isAutoEnrollment = !!tempPassword;
-    const subject = isAutoEnrollment 
-      ? "Welcome to ProCann Edu - Your Account is Ready!" 
-      : "Welcome to ProCann Edu - Your Cannabis Training Journey Begins!";
+    // Prepare email subject based on lifecycle type / auto-enrollment / regular welcome
+    const isAutoEnrollment = !isLifecycle && !!tempPassword;
+    const subject = isLifecycle
+      ? LIFECYCLE_SUBJECTS[reminderType!]
+      : isAutoEnrollment 
+        ? "Welcome to ProCann Edu - Your Account is Ready!" 
+        : "Welcome to ProCann Edu - Your Cannabis Training Journey Begins!";
 
     // Log email attempt
     const { data: logData, error: logError } = await supabase
       .from('email_logs')
       .insert({
         recipient_email: email,
-        email_type: 'welcome',
+        email_type: emailType,
         status: 'sending',
         subject: subject
       })
@@ -89,7 +132,22 @@ const handler = async (req: Request): Promise<Response> => {
 
     let html: string;
     
-    if (isAutoEnrollment) {
+    if (isLifecycle) {
+      const body = message || 'You have an update on your Maryland RVT training.';
+      try {
+        // Per-type template if one exists (DB or filesystem); otherwise graceful fallback
+        html = await loadEmailTemplate(`lifecycle-${reminderType}`, {
+          FirstName: firstName,
+          Message: body,
+          message: body,
+          Subject: subject,
+          DashboardURL: DASHBOARD_URL,
+        });
+      } catch (_templateError) {
+        console.log(`No lifecycle-${reminderType} template found, using inline lifecycle fallback`);
+        html = lifecycleFallbackHtml(firstName, body, subject);
+      }
+    } else if (isAutoEnrollment) {
       // Custom HTML for auto-enrolled dispensary managers
       html = `
 <!DOCTYPE html>
@@ -168,7 +226,7 @@ const handler = async (req: Request): Promise<Response> => {
       subject: subject,
       html,
       from: "ProCann Edu <noreply@procannedu.com>",
-      metadata: { email_type: 'welcome', log_id: logData?.id }
+      metadata: { email_type: emailType, log_id: logData?.id, reminder_type: reminderType }
     }, supabase);
 
     console.log("Welcome email sent successfully:", emailResponse);
