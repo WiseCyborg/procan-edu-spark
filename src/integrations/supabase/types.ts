@@ -7133,6 +7133,30 @@ export type Database = {
           },
         ]
       }
+      exam_orphan_sections_snapshot_20260818: {
+        Row: {
+          blueprint_rows: Json
+          id: string
+          key_rows: Json
+          question_rows: Json
+          taken_at: string
+        }
+        Insert: {
+          blueprint_rows: Json
+          id?: string
+          key_rows: Json
+          question_rows: Json
+          taken_at?: string
+        }
+        Update: {
+          blueprint_rows?: Json
+          id?: string
+          key_rows?: Json
+          question_rows?: Json
+          taken_at?: string
+        }
+        Relationships: []
+      }
       exam_questions: {
         Row: {
           comar_section: string | null
