@@ -268,7 +268,10 @@ Deno.serve(async (req: Request) => {
 
     const issueDate = new Date();
     const expiryDate = new Date(issueDate);
-    expiryDate.setFullYear(expiryDate.getFullYear() + 2);
+    // COMAR 14.17.15.05(C): a registered agent must complete Responsible Vendor Training
+    // within 90 days of employment start date and ANNUALLY thereafter. The 2-year clock in
+    // COMAR 14.17.15.03(C) governs the agent ID CARD, not the training certificate.
+    expiryDate.setFullYear(expiryDate.getFullYear() + 1);
 
     const verifyUrl = `https://www.procannedu.com/verify?code=${certNumber}`;
 
