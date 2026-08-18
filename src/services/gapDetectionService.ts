@@ -259,7 +259,7 @@ export const detectTrainingGaps = async (): Promise<Gap[]> => {
           recommendation: 'Send renewal notification',
           detectedAt: new Date(),
           auto_fixable: true,
-          affected_entity: cert.profiles?.full_name || 'Unknown User',
+          affected_entity: nameByUserId[cert.user_id] || 'Unknown User',
           suggested_action: 'Enroll in recertification course',
         });
       });
