@@ -193,7 +193,8 @@ Deno.serve(async (req: Request) => {
       .from('certificates')
       .select('certificate_number, pdf_url')
       .eq('exam_attempt_id', exam_attempt_id)
-      .single();
+      // maybeSingle(): "no certificate yet" is the normal path here, not a 406 error.
+      .maybeSingle();
 
     if (existingCert) {
       return new Response(
