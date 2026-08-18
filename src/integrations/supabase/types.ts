@@ -4660,6 +4660,7 @@ export type Database = {
           lessons: Json | null
           module_number: number
           quiz_questions: Json | null
+          source_module_id: string | null
           stoplight_tier: string | null
           title: string
           unmapped_reason: string | null
@@ -4685,6 +4686,7 @@ export type Database = {
           lessons?: Json | null
           module_number: number
           quiz_questions?: Json | null
+          source_module_id?: string | null
           stoplight_tier?: string | null
           title: string
           unmapped_reason?: string | null
@@ -4710,6 +4712,7 @@ export type Database = {
           lessons?: Json | null
           module_number?: number
           quiz_questions?: Json | null
+          source_module_id?: string | null
           stoplight_tier?: string | null
           title?: string
           unmapped_reason?: string | null
@@ -4737,6 +4740,13 @@ export type Database = {
             columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_modules_source_module_id_fkey"
+            columns: ["source_module_id"]
+            isOneToOne: false
+            referencedRelation: "course_modules"
             referencedColumns: ["id"]
           },
         ]
