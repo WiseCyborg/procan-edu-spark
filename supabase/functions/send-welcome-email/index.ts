@@ -1,7 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.0.0'
-import { loadEmailTemplate } from "../_shared/email-templates.ts";
+import { loadEmailTemplate, getEmailHTMLWithFallback } from "../_shared/email-templates.ts";
 import { EmailRouter } from "../_shared/email-router.ts";
 
 // Initialize Supabase client for logging
