@@ -344,20 +344,10 @@ Deno.serve(async (req: Request) => {
 
     const courseTitle = course?.title || 'Maryland Responsible Vendor Training (RVT)';
 
-    // Audit log
-    await supabase.from('certificate_audit_log').insert({
-      certificate_id: certificate.id,
-      action: 'ISSUED',
-      actor_id: user.id,
-      ip_address: req.headers.get('x-forwarded-for') || 'unknown',
-      user_agent: req.headers.get('user-agent') || 'unknown',
-      metadata: {
-        certificate_number: certificate.certificate_number,
-        course_id: examAttempt.course_id,
-        exam_attempt_id,
-        certification_type: certificationType,
-      },
-    });
+    // Audit log is written by the certificates DB trigger (metadata.source = "db_trigger").
+    // The insert that used to live here was redundant and always failed.
+
+
 
     // user_certificates
     const verificationCode = `${certificationType === 'manager' ? 'MGR' : 'RVT'}-${new Date()
