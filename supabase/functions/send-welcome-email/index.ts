@@ -15,6 +15,42 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+type ReminderType =
+  | 'profile_completion'
+  | 'course_start'
+  | 'stuck_learner'
+  | 'nearing_completion'
+  | 'certificate_renewal';
+
+const LIFECYCLE_SUBJECTS: Record<ReminderType, string> = {
+  profile_completion: "Finish setting up your ProCann Edu profile",
+  course_start: "Ready when you are — your Maryland RVT training is waiting",
+  stuck_learner: "Pick up where you left off in your RVT training",
+  nearing_completion: "You're almost certified — just a bit left to go",
+  certificate_renewal: "Your Maryland RVT certificate is expiring soon",
+};
+
+const DASHBOARD_URL = "https://www.procannedu.com/dashboard";
+
+function lifecycleFallbackHtml(firstName: string, message: string, subject: string): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${subject}</title></head>
+<body style="margin:0;padding:20px;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:8px;padding:32px;">
+    <h1 style="color:#16a34a;font-size:22px;margin-top:0;">${subject}</h1>
+    <p style="color:#4a4a4a;font-size:16px;">Hi ${firstName},</p>
+    <p style="color:#4a4a4a;font-size:16px;line-height:1.6;">${message}</p>
+    <p style="text-align:center;margin:32px 0;">
+      <a href="${DASHBOARD_URL}" style="display:inline-block;background:#16a34a;color:#ffffff;padding:14px 32px;text-decoration:none;border-radius:6px;font-weight:bold;">Go to My Dashboard</a>
+    </p>
+    <p style="color:#6b7280;font-size:13px;">Questions? Reply to this email or contact support@procannedu.com.</p>
+    <p style="color:#4a4a4a;font-size:15px;">— The ProCann Edu Team</p>
+  </div>
+</body>
+</html>`;
+}
+
 interface WelcomeEmailRequest {
   email: string;
   firstName: string;
@@ -23,6 +59,8 @@ interface WelcomeEmailRequest {
   organizationName?: string;
   accessKey?: string;
   loginUrl?: string;
+  reminderType?: ReminderType;
+  message?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
