@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Shield, AlertTriangle, TrendingUp, Building2, Users, Award, ChevronDown, ChevronUp, TestTube2, BookOpen, ClipboardCheck, CreditCard, Video } from 'lucide-react';
+import { Shield, AlertTriangle, TrendingUp, Building2, Users, Award, ChevronDown, ChevronUp, TestTube2, BookOpen, ClipboardCheck, CreditCard, Video, BarChart } from 'lucide-react';
 import { PaymentTransactionsPanel } from '@/components/admin/PaymentTransactionsPanel';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -124,6 +124,19 @@ const AdminMissionControl = () => {
               <div>
                 <CardTitle>Video Regeneration Queue</CardTitle>
                 <CardDescription>Training videos flagged by COMAR regulation changes</CardDescription>
+              </div>
+            </a>
+          </CardHeader>
+        </Card>
+
+        {/* Traffic & SEO Analytics link */}
+        <Card className="hover:bg-muted/50 transition-colors">
+          <CardHeader>
+            <a href="/admin/analytics" className="flex items-center gap-3">
+              <BarChart className="h-5 w-5 text-primary" />
+              <div>
+                <CardTitle>Traffic & SEO Analytics</CardTitle>
+                <CardDescription>Visitor trends, device split, top pages, traffic sources</CardDescription>
               </div>
             </a>
           </CardHeader>
