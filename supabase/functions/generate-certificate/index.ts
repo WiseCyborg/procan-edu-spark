@@ -451,6 +451,10 @@ Deno.serve(async (req: Request) => {
       })
       .eq('user_id', user.id);
 
+    if (journeyError) {
+      console.error('[generate-certificate] user_learning_journey update failed:', journeyError);
+    }
+
 
     return new Response(
       JSON.stringify({
