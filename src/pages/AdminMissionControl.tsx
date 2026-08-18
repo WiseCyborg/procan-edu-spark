@@ -129,6 +129,19 @@ const AdminMissionControl = () => {
           </CardHeader>
         </Card>
 
+        {/* Traffic & SEO Analytics link */}
+        <Card className="hover:bg-muted/50 transition-colors">
+          <CardHeader>
+            <a href="/admin/analytics" className="flex items-center gap-3">
+              <BarChart className="h-5 w-5 text-primary" />
+              <div>
+                <CardTitle>Traffic & SEO Analytics</CardTitle>
+                <CardDescription>Visitor trends, device split, top pages, traffic sources</CardDescription>
+              </div>
+            </a>
+          </CardHeader>
+        </Card>
+
         {/* Environment Controls */}
         <EnvironmentControls />
 
