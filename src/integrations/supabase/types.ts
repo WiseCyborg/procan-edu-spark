@@ -14078,6 +14078,7 @@ export type Database = {
       }
       move_to_deadletter: { Args: { p_job_id: string }; Returns: undefined }
       notify_pending_video_regenerations: { Args: never; Returns: number }
+      purge_e2e_test_artifacts: { Args: never; Returns: Json }
       purge_uat_seed_entities: { Args: { _batch?: string }; Returns: Json }
       queue_job: {
         Args: {
@@ -14262,6 +14263,10 @@ export type Database = {
           message: string
           success: boolean
         }[]
+      }
+      sweep_missing_certificates: {
+        Args: { p_grace_minutes?: number }
+        Returns: Json
       }
       test_system_health: { Args: never; Returns: Json }
       trigger_optimizer_now: { Args: never; Returns: Json }
