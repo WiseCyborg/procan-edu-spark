@@ -58,6 +58,7 @@ interface E2EReport {
   results: TestResult[];
   journey_summaries: JourneySummary[];
   cleanup_performed: boolean;
+  teardown_result?: any;
   test_data_created: {
     test_user_email?: string;
     test_user_id?: string;
@@ -1441,6 +1442,33 @@ Deno.serve(async (req: Request) => {
     const passedTests = results.filter(r => r.passed).length;
     const failedTests = results.filter(r => !r.passed).length;
 
+    // ==========================================
+    // TEARDOWN - remove THIS run's artifacts from production.
+    //
+    // The "cleanup" block at the top of this function only ever removed the PREVIOUS
+    // run's leftovers, so every completed run left an organization, seats, a join code,
+    // an application, a user and a certificate sitting in production until the next run
+    // happened to fire. purge_e2e_test_artifacts() is the real teardown: service-role
+    // only, matched to this harness's own naming conventions ('e2e+' emails, 'E2E-'
+    // certificate numbers), and it refuses to delete an organization that still holds a
+    // profile belonging to a non-harness user.
+    // ==========================================
+    console.log('=== E2E Teardown (end of run) ===');
+    let teardownPerformed = false;
+    let teardownResult: any = null;
+    try {
+      const { data: purgeData, error: purgeError } = await supabase.rpc('purge_e2e_test_artifacts');
+      if (purgeError) {
+        console.error('[E2E TEARDOWN] purge_e2e_test_artifacts failed:', purgeError.message);
+      } else {
+        teardownPerformed = true;
+        teardownResult = purgeData;
+        console.log('[E2E TEARDOWN] purged:', JSON.stringify(purgeData));
+      }
+    } catch (teardownError: any) {
+      console.error('[E2E TEARDOWN] exception:', teardownError?.message);
+    }
+
     const report: E2EReport = {
       test_run_id: testRunId,
       started_at: startedAt,
@@ -1453,7 +1481,8 @@ Deno.serve(async (req: Request) => {
       tier1_status: tier1Status,
       results,
       journey_summaries: journeySummaries,
-      cleanup_performed: true,
+      cleanup_performed: teardownPerformed,
+      teardown_result: teardownResult,
       test_data_created: testDataCreated
     };
 
