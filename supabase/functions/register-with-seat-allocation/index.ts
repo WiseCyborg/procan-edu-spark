@@ -261,6 +261,16 @@ serve(async (req) => {
         console.log('[ATOMIC REGISTRATION] Seat deallocated successfully');
       }
       
+      // Release the join-code use that was consumed before account creation
+      if (joinCode) {
+        const { error: decrementError } = await supabaseClient
+          .rpc('decrement_join_code_use', { p_code: joinCode });
+
+        if (decrementError) {
+          console.error('[ATOMIC REGISTRATION] Join code use decrement failed:', decrementError);
+        }
+      }
+      
       throw new Error(`Account creation failed after ${maxRetries} attempts: ${authError?.message}`);
     }
 
