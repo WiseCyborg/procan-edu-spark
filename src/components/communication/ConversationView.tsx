@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { SignedAvatarImage } from '@/components/profile/SignedAvatarImage';
 import { Badge } from '@/components/ui/badge';
 import { Send, MoreHorizontal, Paperclip, Download, FileText, Image as ImageIcon, Calendar } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';

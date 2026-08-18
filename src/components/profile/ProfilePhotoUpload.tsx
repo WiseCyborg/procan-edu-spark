@@ -142,7 +142,7 @@ export const ProfilePhotoUpload = ({ userId, currentPhotoUrl, onPhotoUpdate }: P
   return (
     <div className="flex flex-col items-center gap-4">
       <Avatar className="h-32 w-32 border-4 border-border">
-        <AvatarImage src={previewUrl || undefined} alt="Profile photo" />
+        <SignedAvatarImage src={previewUrl} alt="Profile photo" />
         <AvatarFallback className="bg-muted">
           <Camera className="h-12 w-12 text-muted-foreground" />
         </AvatarFallback>

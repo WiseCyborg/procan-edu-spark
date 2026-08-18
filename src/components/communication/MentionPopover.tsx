@@ -1,4 +1,5 @@
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { SignedAvatarImage } from '@/components/profile/SignedAvatarImage';
 import { Button } from '@/components/ui/button';
 import { useEffect, useRef } from 'react';
 
