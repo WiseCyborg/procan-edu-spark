@@ -2612,6 +2612,7 @@ export type Database = {
           last_comar_review_date: string | null
           learning_objectives: Json | null
           lessons: Json | null
+          license_lanes: string[]
           module_number: number
           quiz_questions: Json | null
           source_module_id: string | null
@@ -2638,6 +2639,7 @@ export type Database = {
           last_comar_review_date?: string | null
           learning_objectives?: Json | null
           lessons?: Json | null
+          license_lanes?: string[]
           module_number: number
           quiz_questions?: Json | null
           source_module_id?: string | null
@@ -2664,6 +2666,7 @@ export type Database = {
           last_comar_review_date?: string | null
           learning_objectives?: Json | null
           lessons?: Json | null
+          license_lanes?: string[]
           module_number?: number
           quiz_questions?: Json | null
           source_module_id?: string | null
@@ -4289,6 +4292,7 @@ export type Database = {
           comar_section_ref: string | null
           created_at: string
           id: string
+          license_lanes: string[]
           passing_threshold: number
           questions_count: number
           related_module_ids: string[] | null
@@ -4302,6 +4306,7 @@ export type Database = {
           comar_section_ref?: string | null
           created_at?: string
           id?: string
+          license_lanes?: string[]
           passing_threshold?: number
           questions_count?: number
           related_module_ids?: string[] | null
@@ -4315,6 +4320,7 @@ export type Database = {
           comar_section_ref?: string | null
           created_at?: string
           id?: string
+          license_lanes?: string[]
           passing_threshold?: number
           questions_count?: number
           related_module_ids?: string[] | null
