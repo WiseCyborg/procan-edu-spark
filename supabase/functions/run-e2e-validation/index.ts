@@ -170,6 +170,15 @@ Deno.serve(async (req: Request) => {
     // JOURNEY A: TRUE E2E AUTH - Real User + Password Reset (BLOCKER) [TIER 1]
     // ==========================================
     console.log('=== Journey A: True Auth E2E Flow [Tier 1 - Security] ===');
+
+    // Canonical reset-host check: accept procannedu.com with optional www. prefix,
+    // but reject preview hosts, lovable.app, or any other domain.
+    const CANONICAL_RESET_HOST = 'procannedu.com';
+    const isCanonicalResetHost = (hostname: string): boolean => {
+      const stripped = hostname.toLowerCase().replace(/^www\./, '');
+      return stripped === CANONICAL_RESET_HOST;
+    };
+
     
     // A1: Create real test user via admin API
     try {
