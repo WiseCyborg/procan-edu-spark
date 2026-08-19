@@ -170,6 +170,15 @@ Deno.serve(async (req: Request) => {
     // JOURNEY A: TRUE E2E AUTH - Real User + Password Reset (BLOCKER) [TIER 1]
     // ==========================================
     console.log('=== Journey A: True Auth E2E Flow [Tier 1 - Security] ===');
+
+    // Canonical reset-host check: accept procannedu.com with optional www. prefix,
+    // but reject preview hosts, lovable.app, or any other domain.
+    const CANONICAL_RESET_HOST = 'procannedu.com';
+    const isCanonicalResetHost = (hostname: string): boolean => {
+      const stripped = hostname.toLowerCase().replace(/^www\./, '');
+      return stripped === CANONICAL_RESET_HOST;
+    };
+
     
     // A1: Create real test user via admin API
     try {
@@ -302,10 +311,10 @@ Deno.serve(async (req: Request) => {
             resetUrlDomain = url.hostname;
             resetToken = url.searchParams.get('token');
             
-            addResult('Auth', 'Reset URL Domain', 'Reset URL points to www.procannedu.com',
+            addResult('Auth', 'Reset URL Domain', 'Reset URL points to the ProCannEdu domain (procannedu.com, with or without www)',
               `Domain: ${resetUrlDomain}`,
-              resetUrlDomain === 'www.procannedu.com',
-              { is_blocker: resetUrlDomain !== 'www.procannedu.com', notes: `Full URL path: ${url.pathname}` }
+              isCanonicalResetHost(resetUrlDomain),
+              { is_blocker: !isCanonicalResetHost(resetUrlDomain), notes: `Full URL path: ${url.pathname}` }
             );
             
             addResult('Auth', 'Reset Token Present', 'Token parameter present in URL',
@@ -314,7 +323,7 @@ Deno.serve(async (req: Request) => {
               { is_blocker: !resetToken }
             );
           } catch (urlError: any) {
-            addResult('Auth', 'Reset URL Domain', 'Reset URL points to www.procannedu.com',
+            addResult('Auth', 'Reset URL Domain', 'Reset URL points to the ProCannEdu domain (procannedu.com, with or without www)',
               `Invalid URL: ${urlError.message}`,
               false,
               { is_blocker: true }
@@ -332,7 +341,7 @@ Deno.serve(async (req: Request) => {
           
           if (tokenData?.token) {
             resetToken = tokenData.token;
-            addResult('Auth', 'Reset URL Domain', 'Reset URL points to www.procannedu.com',
+            addResult('Auth', 'Reset URL Domain', 'Reset URL points to the ProCannEdu domain (procannedu.com, with or without www)',
               'URL not in email, using token from DB',
               false,
               { notes: 'Email HTML did not contain parseable reset URL' }
@@ -342,7 +351,7 @@ Deno.serve(async (req: Request) => {
               true
             );
           } else {
-            addResult('Auth', 'Reset URL Domain', 'Reset URL points to www.procannedu.com',
+            addResult('Auth', 'Reset URL Domain', 'Reset URL points to the ProCannEdu domain (procannedu.com, with or without www)',
               'No reset URL found in email or DB',
               false,
               { is_blocker: true }
