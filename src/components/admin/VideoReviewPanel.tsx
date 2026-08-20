@@ -60,8 +60,21 @@ export function VideoReviewPanel() {
   const [working, setWorking] = useState<string | null>(null);
   const [pendingAction, setPendingAction] = useState<PendingAction>(null);
   const [openScripts, setOpenScripts] = useState<Record<string, boolean>>({});
+  // Same source of truth as /admin/video-regeneration so the two screens can
+  // never disagree about how much work is actually open.
+  const [openRegenCount, setOpenRegenCount] = useState<number | null>(null);
 
   const load = async () => {
+    const { data: queueData, error: queueError } = await supabase.rpc(
+      'get_video_regeneration_queue' as any
+    );
+    if (queueError) {
+      console.error(queueError);
+      setOpenRegenCount(null);
+    } else {
+      setOpenRegenCount(Array.isArray(queueData) ? queueData.length : 0);
+    }
+
     const { data, error } = await supabase
       .from('video_assets')
       .select(
@@ -174,7 +187,15 @@ export function VideoReviewPanel() {
               color: '#1a3a2a',
             }}
           >
-            {loading ? '…' : rows.length} pending
+            {loading ? '…' : rows.length} awaiting approval
+          </Badge>
+          <Badge
+            style={{
+              backgroundColor: (openRegenCount ?? 0) > 0 ? BRAND.gold : BRAND.accent,
+              color: '#1a3a2a',
+            }}
+          >
+            {loading ? '…' : openRegenCount === null ? 'open flags unknown' : `${openRegenCount} open regeneration flag${openRegenCount === 1 ? '' : 's'}`}
           </Badge>
         </div>
         <Button
@@ -197,8 +218,24 @@ export function VideoReviewPanel() {
             className="flex flex-col items-center justify-center py-12 rounded-md border border-dashed"
             style={{ borderColor: BRAND.accent, color: '#cfe9d8' }}
           >
-            <CheckCircle2 className="h-8 w-8 mb-2" style={{ color: BRAND.accent }} />
-            <p className="text-sm">No videos awaiting review. All compliance content is current.</p>
+            {openRegenCount && openRegenCount > 0 ? (
+              <>
+                <AlertTriangle className="h-8 w-8 mb-2" style={{ color: BRAND.gold }} />
+                <p className="text-sm">
+                  Nothing awaiting approval, but {openRegenCount} video{openRegenCount === 1 ? ' is' : 's are'} still
+                  flagged for regeneration. Content is not current.
+                </p>
+              </>
+            ) : (
+              <>
+                <CheckCircle2 className="h-8 w-8 mb-2" style={{ color: BRAND.accent }} />
+                <p className="text-sm">
+                  {openRegenCount === null
+                    ? 'No videos awaiting review. Open regeneration flags could not be read.'
+                    : 'No videos awaiting review and no open regeneration flags.'}
+                </p>
+              </>
+            )}
           </div>
         ) : (
           <div className="space-y-4">
