@@ -11440,6 +11440,7 @@ export type Database = {
         Returns: string
       }
       calculate_slo_metrics: { Args: never; Returns: undefined }
+      can_manage_org_roster: { Args: { p_org_id: string }; Returns: boolean }
       check_access_key_rate_limit: {
         Args: { user_ip: string }
         Returns: boolean
