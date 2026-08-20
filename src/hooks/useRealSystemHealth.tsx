@@ -206,6 +206,8 @@ export const useRealSystemHealth = (autoRefresh = true, intervalMs = 30000) => {
         avgRuntimeMs: 0,
         status: 'down',
         lastError: 'Unable to fetch status',
+        instrumented: false,
+
       };
     }
 
