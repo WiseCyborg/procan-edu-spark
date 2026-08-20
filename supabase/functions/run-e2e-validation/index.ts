@@ -78,9 +78,55 @@ Deno.serve(async (req: Request) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // ---------------------------------------------------------------------------
+  // AUTHORIZATION GATE — runs BEFORE any service-role client or test artifact.
+  // Only an active admin (or internal automation using the exact service-role
+  // key) may run the harness.
+  // ---------------------------------------------------------------------------
+  const authHeader = req.headers.get('Authorization') ?? '';
+  const bearer = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
+
+  if (!bearer) {
+    return new Response(
+      JSON.stringify({ success: false, error: 'Missing Authorization bearer token' }),
+      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+    );
+  }
+
+  const isInternalAutomation = bearer === supabaseServiceKey;
+
+  if (!isInternalAutomation) {
+    const authClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: `Bearer ${bearer}` } },
+    });
+    const { data: userData, error: userErr } = await authClient.auth.getUser();
+    if (userErr || !userData?.user) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Invalid or expired session' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+      );
+    }
+
+    const roleClient = createClient(supabaseUrl, supabaseServiceKey);
+    const { data: roleRow, error: roleErr } = await roleClient
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', userData.user.id)
+      .eq('role', 'admin')
+      .maybeSingle();
+
+    if (roleErr || !roleRow) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Admin role required' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+      );
+    }
+  }
+
   try {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     const anonClient = createClient(supabaseUrl, supabaseAnonKey);
+
     const results: TestResult[] = [];
     const testRunId = crypto.randomUUID();
     const startedAt = new Date().toISOString();
