@@ -369,14 +369,16 @@ const VideoRegenerationQueue: React.FC = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Approve confirm dialog */}
+      {/* Approve script confirm dialog */}
       <Dialog open={!!approveTarget} onOpenChange={(open) => !open && setApproveTarget(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Approve this video?</DialogTitle>
+            <DialogTitle>Approve script &amp; queue narration?</DialogTitle>
             <DialogDescription>
-              Final compliance sign-off for{' '}
-              {approveTarget?.module_title || approveTarget?.asset_key || 'this module'}. Marks the video approved and clears the regeneration flag. This does not change the video file itself — to replace the video, use 'Mark regenerated' with a new URL.
+              Compliance sign-off on the reviewed script for{' '}
+              {approveTarget?.module_title || approveTarget?.asset_key || 'this module'}. Narration and rendering
+              happen downstream. The live video is unchanged, and the regeneration flag remains open until the
+              replacement is stored in R2, mapped, playback-verified, and explicitly published.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -385,9 +387,10 @@ const VideoRegenerationQueue: React.FC = () => {
             </Button>
             <Button onClick={submitApprove} disabled={busy}>
               {busy && <Loader2 className="h-4 w-4 me-2 animate-spin" />}
-              Approve
+              Approve script &amp; queue narration
             </Button>
           </DialogFooter>
+
         </DialogContent>
       </Dialog>
     </div>
