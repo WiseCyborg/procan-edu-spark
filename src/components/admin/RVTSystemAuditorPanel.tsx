@@ -32,7 +32,7 @@ interface E2EReport {
   passed_tests: number;
   failed_tests: number;
   blocker_count: number;
-  release_gate_status: "SHIPPABLE" | "NOT_SHIPPABLE";
+  release_gate_status: "SHIPPABLE" | "NOT_SHIPPABLE" | "INCOMPLETE";
   tier1_status: "PASS" | "FAIL";
   results: any[];
   journey_summaries: any[];
@@ -56,7 +56,7 @@ export default function RVTSystemAuditorPanel() {
 
     let recommendation: Recommendation = "PENDING";
     if (techReport && compliance) {
-      if (blockerCount > 0 || technicalGate === "NOT_SHIPPABLE") recommendation = "NOT_SHIPPABLE";
+      if (blockerCount > 0 || technicalGate === "NOT_SHIPPABLE" || technicalGate === "INCOMPLETE") recommendation = "NOT_SHIPPABLE";
       else if ((gaps ?? 0) > 0) recommendation = "NEEDS_LEGAL_REVIEW";
       else recommendation = "SHIPPABLE";
     }
