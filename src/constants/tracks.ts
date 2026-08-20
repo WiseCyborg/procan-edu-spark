@@ -1,17 +1,31 @@
 /**
  * Training Track Constants
- * 
+ *
  * These are the 4 isolated training tracks with separate course_ids,
  * resume states, and access rules.
+ *
+ * Language note: ProCann EDU delivers workforce compliance education and
+ * readiness training. Nothing here is an MCA-approved credential.
  */
 
-export const RVT_TRAINING_MODULE_COUNT = 23;
+/**
+ * Count of ACTIVE core (non manager-only) modules in the workforce
+ * compliance track. Manager-only modules (5) are counted separately.
+ */
+export const RVT_TRAINING_MODULE_COUNT = 25;
+
+/** Active manager-only modules in the workforce compliance track. */
+export const MANAGER_ONLY_MODULE_COUNT = 5;
+
+/** Total active modules in the workforce compliance track. */
+export const TOTAL_ACTIVE_MODULE_COUNT =
+  RVT_TRAINING_MODULE_COUNT + MANAGER_ONLY_MODULE_COUNT;
 
 export const TRACK_IDS = {
-  /** RVT Core Employee Training - Maryland MCA Responsible Vendor Training */
+  /** Workforce compliance core training aligned to Maryland COMAR 14.17 topics */
   RVT_CORE: 'e6841a2f-4e92-47c3-9ed4-243ccc22338b',
   
-  /** Manager Compliance Training - Requires RVT Core completion */
+  /** Manager Compliance Training - Requires core completion */
   MANAGER: '11111111-1111-4111-a111-111111111111',
   
   /** Ganjier Certification - Advanced cannabis expertise */
@@ -20,6 +34,7 @@ export const TRACK_IDS = {
   /** Cannabis Sommelier Certification - Sensory evaluation and pairing */
   SOMMELIER: '33333333-3333-4333-a333-333333333333',
 } as const;
+
 
 export type TrackId = typeof TRACK_IDS[keyof typeof TRACK_IDS];
 
