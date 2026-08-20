@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -44,42 +45,21 @@ export default function AdminReports() {
   const [result, setResult] = useState<ReportResult | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [sort, setSort] = useState<{ col: number; dir: 'asc' | 'desc' } | null>(null);
+  const [lastQuestion, setLastQuestion] = useState<string | null>(null);
 
   const { user } = useAuth();
   const { isAdmin, isLoading: roleLoading } = useUserRole();
 
-  if (roleLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  if (!isAdmin) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-orange-50 p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <Shield className="h-12 w-12 text-red-600 mx-auto mb-4" />
-            <CardTitle className="text-2xl font-bold text-red-700">Access Denied</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-center text-muted-foreground">
-              You don't have permission to access admin reports.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  const run = async (q: string) => {
+  // NOTE: every hook must run on every render. Do not add early returns above
+  // this point — conditional returns before hooks caused a runtime crash
+  // ("rendered fewer hooks than expected") once role loading resolved.
+  const run = React.useCallback(async (q: string) => {
     if (!q.trim()) return;
     setLoading(true);
     setError(null);
     setResult(null);
     setSort(null);
+    setLastQuestion(q);
     try {
       const { data, error } = await supabase.functions.invoke('admin-ai-report', {
         body: { question: q },
@@ -96,23 +76,35 @@ export default function AdminReports() {
         throw new Error(detail);
       }
       if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
-      setResult(data as ReportResult);
+
+      // Defensive normalisation: the function may return null, an object with
+      // missing keys, or non-array shapes. Never trust it blindly.
+      const raw = (data ?? {}) as Partial<ReportResult>;
+      const columns = Array.isArray(raw.columns) ? raw.columns.map((c) => String(c)) : [];
+      const rows = Array.isArray(raw.rows)
+        ? raw.rows.map((r) => (Array.isArray(r) ? r : [r]))
+        : [];
+      if (columns.length === 0 && rows.length === 0) {
+        setResult({ columns: [], rows: [], sql: typeof raw.sql === 'string' ? raw.sql : '' });
+      } else {
+        setResult({ columns, rows, sql: typeof raw.sql === 'string' ? raw.sql : '' });
+      }
       setHistory((h) => [{ question: q, at: Date.now() }, ...h].slice(0, 10));
     } catch (e) {
-      setError((e as Error).message || 'Report failed');
+      setError((e as Error)?.message || 'Report failed');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const sortedRows = useMemo(() => {
-    if (!result) return [];
-    if (!sort) return result.rows;
+    const rows = Array.isArray(result?.rows) ? result!.rows : [];
+    if (!sort) return rows;
     const { col, dir } = sort;
-    const copy = [...result.rows];
+    const copy = [...rows];
     copy.sort((a, b) => {
-      const av = a[col];
-      const bv = b[col];
+      const av = Array.isArray(a) ? a[col] : undefined;
+      const bv = Array.isArray(b) ? b[col] : undefined;
       if (av === bv) return 0;
       if (av === null || av === undefined) return 1;
       if (bv === null || bv === undefined) return -1;
@@ -125,7 +117,7 @@ export default function AdminReports() {
   }, [result, sort]);
 
   const exportCsv = () => {
-    if (!result) return;
+    if (!result || !Array.isArray(result.columns)) return;
     const csv = toCsv(result.columns, sortedRows);
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -137,6 +129,38 @@ export default function AdminReports() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
+
+  if (roleLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <Shield className="h-12 w-12 text-destructive mx-auto mb-4" />
+            <CardTitle className="text-2xl font-bold text-destructive">Access Denied</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-center text-muted-foreground">
+              You don't have permission to access admin reports.
+            </p>
+            <div className="flex justify-center">
+              <Button variant="outline" asChild>
+                <Link to="/admin">Back to Mission Control</Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
 
   return (
     <div className="container mx-auto max-w-7xl space-y-6 p-4 md:p-6">
@@ -196,9 +220,28 @@ export default function AdminReports() {
           {error && (
             <Alert variant="destructive">
               <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
+              <AlertDescription className="space-y-3">
+                <p>
+                  The report could not be generated. No values are shown because none were
+                  returned. Details: {error}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={loading || !lastQuestion}
+                    onClick={() => lastQuestion && run(lastQuestion)}
+                  >
+                    Retry
+                  </Button>
+                  <Button size="sm" variant="ghost" asChild>
+                    <Link to="/admin">Back to Mission Control</Link>
+                  </Button>
+                </div>
+              </AlertDescription>
             </Alert>
           )}
+
 
           {!loading && !error && !result && (
             <Card>
