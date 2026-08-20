@@ -141,12 +141,17 @@ export const RealSystemHealthPanel = () => {
             <div className="mt-3 p-3 rounded-lg bg-destructive/10 border border-destructive/20">
               <p className="text-sm text-destructive flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4" />
-                {health.email.failureRate >= 20 
+                {health.email.failureRate >= 20
                   ? 'High failure rate detected - check email provider configuration'
-                  : 'Elevated failure rate - monitoring recommended'}
+                  : health.email.sent24h === 0 && health.email.failed24h === 0
+                    ? 'No email telemetry in the last 24h — delivery health is unknown'
+                    : health.email.delivered24h === 0
+                      ? 'Delivery unverified: provider accepted sends but no delivery events were recorded'
+                      : 'Elevated failure rate - monitoring recommended'}
               </p>
             </div>
           )}
+
         </CardContent>
       </Card>
 
