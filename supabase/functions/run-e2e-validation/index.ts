@@ -1551,6 +1551,7 @@ Deno.serve(async (req: Request) => {
       failed_tests: failedTests,
       blocker_count: blockerCount,
       release_gate_status: releaseGateStatus,
+      gate_reasons: gateReasons,
       tier1_status: tier1Status,
       results,
       journey_summaries: journeySummaries,
@@ -1562,12 +1563,16 @@ Deno.serve(async (req: Request) => {
     // Store the test results
     await supabase.from('automated_test_results').insert({
       test_name: 'E2E Validation Suite v4',
-      status: releaseGateStatus === 'SHIPPABLE' ? 'passed' : 'failed',
+      status: releaseGateStatus === 'SHIPPABLE' ? 'passed' : releaseGateStatus === 'INCOMPLETE' ? 'incomplete' : 'failed',
       metadata: report,
       duration_ms: new Date().getTime() - new Date(startedAt).getTime()
     });
 
-    console.log(`=== E2E Complete: ${passedTests}/${results.length} passed, ${blockerCount} blockers, ${releaseGateStatus} ===`);
+    console.log(
+      `=== E2E Complete: ${passedTests}/${results.length} passed, ${blockerCount} blockers, ${releaseGateStatus}` +
+        (gateReasons.length ? ` — reasons: ${gateReasons.join('; ')}` : '') +
+        ' ==='
+    );
 
     return new Response(JSON.stringify(report), {
       status: 200,
