@@ -259,11 +259,15 @@ export function LearnerProgressPanel() {
 
   const selected = learners.find((l) => l.user_id === selectedId) ?? null;
 
+  /** Current active core curriculum size, derived from live data. */
+  const currentCoreCount = coreModuleCount;
+  const coreLabel = currentCoreCount === null ? '—' : String(currentCoreCount);
+
   const statusBadge = (s: StatusKind) => {
-    if (s === 'Certified')
+    if (s === 'Certified' || s === 'Certified — historical curriculum')
       return (
         <Badge style={{ background: BRAND.gold, color: BRAND.bg, border: 'none' }}>
-          Certified
+          {s}
         </Badge>
       );
     if (s === 'In Progress')
@@ -272,6 +276,7 @@ export function LearnerProgressPanel() {
           In Progress
         </Badge>
       );
+
     return (
       <Badge
         variant="outline"
