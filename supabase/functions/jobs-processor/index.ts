@@ -418,12 +418,15 @@ const JOB_HANDLERS: Record<string, (job: Job, supabase: any) => Promise<void>> =
     if (data && data.ok === false) throw new Error(data.error || 'render_dispatch_failed');
 
     // Queue the collector for anything that actually got dispatched.
+    // queue_job cannot carry scheduled_for, so insert directly with the
+    // live-constraint-valid status 'queued' and preserve the delay.
     for (const r of (data?.results ?? [])) {
       if (r.status === 'dispatched') {
         await supabase.from('system_jobs').insert({
           job_type: 'video_render_collect',
-          payload: { asset_id: r.asset_id },
-          status: 'pending',
+          payload: { asset_id: r.asset_id, poll_attempt: 0 },
+          status: 'queued',
+          idempotency_key: `video_render_collect:${r.asset_id}:0`,
           scheduled_for: new Date(Date.now() + 60_000).toISOString(),
         });
       }
