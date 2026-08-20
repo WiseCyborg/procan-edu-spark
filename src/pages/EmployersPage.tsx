@@ -26,10 +26,10 @@ export default function EmployersPage() {
           For Employers
         </Badge>
         <h1 className="text-4xl font-bold mb-4">
-          Employer Certificate Verification
+          Employer Completion Record Verification
         </h1>
         <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-          Verify Employee Cannabis Training Credentials
+          Check the status of ProCann EDU completion records held by your staff
         </p>
       </div>
 
@@ -38,14 +38,14 @@ export default function EmployersPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Search className="h-6 w-6 text-primary" />
-            Verify a Single Certificate
+            Verify a Single Completion Record
           </CardTitle>
-          <p className="text-sm text-muted-foreground">Enter a certificate number to verify its status</p>
+          <p className="text-sm text-muted-foreground">Enter a record number to check its status</p>
         </CardHeader>
         <CardContent>
           <div className="flex gap-4">
             <Input
-              placeholder="Enter certificate number (e.g., CERT-2025-001-1234)"
+              placeholder="Enter record number (e.g., CERT-2025-001-1234)"
               value={certNumber}
               onChange={(e) => setCertNumber(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleVerify()}
@@ -57,7 +57,7 @@ export default function EmployersPage() {
             </Button>
           </div>
           <p className="text-xs text-muted-foreground mt-3">
-            Certificate numbers can be found on the employee's training certificate or digital credential
+            Record numbers can be found on the employee's ProCann EDU completion record or digital credential
           </p>
         </CardContent>
       </Card>
@@ -67,9 +67,9 @@ export default function EmployersPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Upload className="h-6 w-6 text-primary" />
-            Bulk Certificate Verification
+            Bulk Completion Record Verification
           </CardTitle>
-          <p className="text-sm text-muted-foreground">Verify up to 100 certificates at once</p>
+          <p className="text-sm text-muted-foreground">Check up to 100 completion records at once</p>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -77,7 +77,7 @@ export default function EmployersPage() {
               <Upload className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
               <p className="font-semibold mb-1">Upload CSV File</p>
               <p className="text-sm text-muted-foreground mb-3">
-                Upload a CSV file with certificate numbers (one per line)
+                Upload a CSV file with record numbers (one per line)
               </p>
               <div className="flex gap-3 justify-center">
                 <Button variant="outline" size="sm">
@@ -90,7 +90,7 @@ export default function EmployersPage() {
               </div>
             </div>
             <p className="text-xs text-muted-foreground">
-              Format: One certificate number per row. Maximum 100 certificates per upload.
+              Format: One record number per row. Maximum 100 records per upload.
             </p>
           </div>
         </CardContent>
@@ -170,17 +170,17 @@ export default function EmployersPage() {
         <CardContent>
           <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="item-1">
-              <AccordionTrigger>How do I verify a certificate?</AccordionTrigger>
+              <AccordionTrigger>How do I verify a completion record?</AccordionTrigger>
               <AccordionContent>
-                Enter the certificate number in the verification form above. The system will immediately 
-                show you the certificate's status (valid, expired, or revoked), issue date, and expiry date.
+                Enter the record number in the verification form above. The system will immediately 
+                show you the record's status (active, expired, or revoked), issue date, and expiry date.
               </AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="item-2">
-              <AccordionTrigger>What if a certificate is expired?</AccordionTrigger>
+              <AccordionTrigger>What if a completion record is expired?</AccordionTrigger>
               <AccordionContent>
-                Maryland regulations require regular re-certification. If an employee's certificate is 
+                ProCann EDU completion records are issued for one year. If an employee's record is 
                 expired, they should re-enroll in the training program. Contact us at{' '}
                 <a href="mailto:employers@procannedu.com" className="text-primary hover:underline">
                   employers@procannedu.com
@@ -192,7 +192,7 @@ export default function EmployersPage() {
             <AccordionItem value="item-3">
               <AccordionTrigger>Can I integrate verification into my HR system?</AccordionTrigger>
               <AccordionContent>
-                Yes! We offer a REST API for programmatic certificate verification. Contact{' '}
+                Yes! We offer a REST API for programmatic completion record verification. Contact{' '}
                 <a href="mailto:api@procannedu.com" className="text-primary hover:underline">
                   api@procannedu.com
                 </a>{' '}
@@ -215,8 +215,8 @@ export default function EmployersPage() {
             <AccordionItem value="item-5">
               <AccordionTrigger>Is there a cost for verification?</AccordionTrigger>
               <AccordionContent>
-                No. Certificate verification is free for all employers. This service is provided to ensure 
-                compliance and protect the integrity of Maryland's cannabis industry.
+                No. Completion record verification is free for all employers. This service is provided to help 
+                employers confirm training their staff completed with ProCann EDU.
               </AccordionContent>
             </AccordionItem>
           </Accordion>
