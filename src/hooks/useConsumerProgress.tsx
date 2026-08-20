@@ -58,7 +58,7 @@ export const useConsumerProgress = (courseId: string, totalModules: number = 0) 
     // Synchronously hydrate from localStorage so the UI never renders 0/N for a
     // returning (anonymous) learner while the async enrollment lookup runs.
     try {
-      const cached = localStorage.getItem(getStorageKey(courseId, userId));
+      const cached = localStorage.getItem(getStorageKey(courseId, userId, e2eGuestNonce));
       if (cached) setProgress(JSON.parse(cached));
     } catch (e) {
       console.error('Error reading cached progress:', e);
@@ -66,13 +66,13 @@ export const useConsumerProgress = (courseId: string, totalModules: number = 0) 
 
     const loadProgress = async () => {
       try {
-        if (user?.id) {
+        if (dbUserId) {
           // Load existing enrollment for this user + course
           const { data: existing } = await supabase
             .from('consumer_enrollments')
             .select('id, metadata, started_at, completed_at')
             .eq('course_id', courseId)
-            .eq('user_id', user.id)
+            .eq('user_id', dbUserId)
             .maybeSingle();
 
           if (existing) {
@@ -93,7 +93,7 @@ export const useConsumerProgress = (courseId: string, totalModules: number = 0) 
             const { data: created, error: createErr } = await supabase
               .from('consumer_enrollments')
               .insert({
-                user_id: user.id,
+                user_id: dbUserId,
                 course_id: courseId,
                 started_at: startedAt,
                 metadata: {
@@ -113,7 +113,7 @@ export const useConsumerProgress = (courseId: string, totalModules: number = 0) 
         }
 
         // Fall back to localStorage (also used for auth users w/o metadata yet)
-        const stored = localStorage.getItem(getStorageKey(courseId, userId));
+        const stored = localStorage.getItem(getStorageKey(courseId, userId, e2eGuestNonce));
         if (stored && !cancelled) {
           setProgress(JSON.parse(stored));
         }
@@ -137,9 +137,9 @@ export const useConsumerProgress = (courseId: string, totalModules: number = 0) 
 
   // Save progress to localStorage and (if enrollment exists) the SAME DB row
   const saveProgress = useCallback(async (updatedProgress: CourseProgress) => {
-    localStorage.setItem(getStorageKey(courseId, userId), JSON.stringify(updatedProgress));
+    localStorage.setItem(getStorageKey(courseId, userId, e2eGuestNonce), JSON.stringify(updatedProgress));
 
-    if (user?.id) {
+    if (dbUserId) {
       try {
         const currentId = enrollmentIdRef.current;
         if (currentId) {
@@ -156,7 +156,7 @@ export const useConsumerProgress = (courseId: string, totalModules: number = 0) 
           const { data: created } = await supabase
             .from('consumer_enrollments')
             .insert({
-              user_id: user.id,
+              user_id: dbUserId,
               course_id: courseId,
               metadata: updatedProgress as any,
               started_at: updatedProgress.startedAt,
@@ -177,10 +177,10 @@ export const useConsumerProgress = (courseId: string, totalModules: number = 0) 
 
   // Also write to user_progress so admin/RVT reporting sees consumer progress.
   const writeUserProgress = useCallback(async (moduleId: string) => {
-    if (!user?.id) return; // user_progress.user_id is NOT NULL — guests can't participate
+    if (!dbUserId) return; // user_progress.user_id is NOT NULL — guests can't participate
     try {
       const { error } = await supabase.rpc('safe_complete_module', {
-        p_user_id: user.id,
+        p_user_id: dbUserId,
         p_course_id: courseId,
         p_module_id: moduleId,
       });
@@ -215,7 +215,7 @@ export const useConsumerProgress = (courseId: string, totalModules: number = 0) 
       // Safety-net finalize: if the course is now complete, explicitly UPDATE
       // the enrollment row by (user_id, course_id) so completed_at is never
       // left null due to a race with enrollmentIdRef being unset.
-      if (isAllDone && user?.id) {
+      if (isAllDone && dbUserId) {
         (async () => {
           try {
             await supabase
@@ -224,7 +224,7 @@ export const useConsumerProgress = (courseId: string, totalModules: number = 0) 
                 completed_at: completedAt,
                 metadata: updatedProgress as any,
               })
-              .eq('user_id', user.id)
+              .eq('user_id', dbUserId)
               .eq('course_id', courseId)
               .is('completed_at', null);
           } catch (err) {
