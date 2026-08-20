@@ -30,15 +30,23 @@ export const useFeatureFlags = () => {
   useEffect(() => {
     const fetchFlags = async () => {
       try {
-        const conditions = ['scope.eq.global'];
-        if (user?.id) conditions.push(`scope_id.eq.${user.id}`);
-        if (organizationId) conditions.push(`scope_id.eq.${organizationId}`);
-
-        const { data, error } = await supabase
+        // Anonymous visitors may only read global flags whose key starts with
+        // `public_` (enforced by RLS). Asking for anything else just produces a
+        // guaranteed console error on every public page load.
+        let query = supabase
           .from('feature_flags')
-          .select('flag_key, flag_value, scope, scope_id')
-          .or(conditions.join(','))
-          .order('scope', { ascending: false });
+          .select('flag_key, flag_value, scope, scope_id');
+
+        if (user?.id) {
+          const conditions = ['scope.eq.global'];
+          conditions.push(`scope_id.eq.${user.id}`);
+          if (organizationId) conditions.push(`scope_id.eq.${organizationId}`);
+          query = query.or(conditions.join(','));
+        } else {
+          query = query.eq('scope', 'global').like('flag_key', 'public_%');
+        }
+
+        const { data, error } = await query.order('scope', { ascending: false });
 
         if (error) throw error;
 
