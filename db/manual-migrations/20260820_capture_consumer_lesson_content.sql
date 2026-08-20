@@ -173,7 +173,7 @@ Maryland patient registration currently lasts six years. Provider certification 
 
 ## The Regulator
 
-The Maryland Cannabis Administration (MCA) oversees the state's cannabis program. The former Maryland Maryland Cannabis Administration is no longer the regulator.
+The Maryland Cannabis Administration (MCA) oversees the state's cannabis program. The former Maryland Medical Cannabis Commission is no longer the regulator.
 
 ## Medical Questions
 
@@ -211,7 +211,7 @@ Maryland patient registration currently lasts six years. Provider certification 
 
 ## The Regulator
 
-The Maryland Cannabis Administration (MCA) oversees the state's cannabis program. The former Maryland Maryland Cannabis Administration is no longer the regulator.
+The Maryland Cannabis Administration (MCA) oversees the state's cannabis program. The former Maryland Medical Cannabis Commission is no longer the regulator.
 
 ## Medical Questions
 
