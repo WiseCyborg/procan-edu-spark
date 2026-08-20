@@ -1,10 +1,16 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { RVT_TRAINING_MODULE_COUNT } from '@/constants/tracks';
+import { supabase } from '@/integrations/supabase/client';
+import {
+  RVT_TRAINING_MODULE_COUNT,
+  MANAGER_ONLY_MODULE_COUNT,
+  TRACK_IDS,
+} from '@/constants/tracks';
+
 import { 
   Shield, 
   FileText, 
