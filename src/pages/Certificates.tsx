@@ -184,7 +184,7 @@ export default function Certificates() {
       pdf.setTextColor(255, 255, 255);
       pdf.setFontSize(10);
       pdf.setFont('helvetica', 'normal');
-      pdf.text('MARYLAND CANNABIS ADMINISTRATION — RESPONSIBLE VENDOR TRAINING', W / 2, 22, { align: 'center' });
+      pdf.text('PROCANN EDU — MARYLAND CANNABIS COMPLIANCE EDUCATION', W / 2, 22, { align: 'center' });
       pdf.setFontSize(18);
       pdf.setFont('helvetica', 'bold');
       pdf.text('ProCann Edu', W / 2, 34, { align: 'center' });
@@ -201,13 +201,13 @@ export default function Certificates() {
       pdf.setFont('helvetica', 'bold');
       pdf.text('PROCANN', 50, 105, { align: 'center' });
       pdf.text('EDU', 50, 111, { align: 'center' });
-      pdf.text('RVT', 50, 117, { align: 'center' });
+      pdf.text('EDU', 50, 117, { align: 'center' });
 
       // CERTIFICATE TYPE
       pdf.setTextColor(100, 100, 100);
       pdf.setFontSize(10);
       pdf.setFont('helvetica', 'normal');
-      pdf.text('CERTIFICATE OF COMPLETION — RESPONSIBLE VENDOR TRAINING', W / 2, 56, { align: 'center' });
+      pdf.text('PROCANN EDU COMPLETION RECORD', W / 2, 56, { align: 'center' });
 
       // GOLD DIVIDER
       pdf.setDrawColor(180, 140, 60);
@@ -243,7 +243,7 @@ export default function Certificates() {
       pdf.setTextColor(80, 80, 80);
       pdf.setFontSize(9);
       pdf.setFont('helvetica', 'italic');
-      pdf.text('has successfully completed the Maryland Responsible Vendor Training program', W / 2, 101, { align: 'center' });
+      pdf.text('has successfully completed the ProCann EDU Maryland cannabis compliance training program', W / 2, 101, { align: 'center' });
 
       // COURSE TITLE
       pdf.setTextColor(20, 20, 20);
@@ -299,7 +299,7 @@ export default function Certificates() {
       pdf.rect(12, H - 24, W - 24, 12, 'F');
       pdf.setTextColor(255, 255, 255); pdf.setFontSize(6.5); pdf.setFont('helvetica', 'normal');
       pdf.text(
-        'This certificate satisfies Maryland Cannabis Administration Responsible Vendor Training requirements per COMAR 14.17.15.05. Valid for 2 years from date of issue.',
+        'ProCann EDU completion record. Curriculum designed to align with COMAR 14.17.15.05. Valid for 1 year from date of issue.',
         W / 2, H - 16, { align: 'center' }
       );
 

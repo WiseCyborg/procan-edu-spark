@@ -58,7 +58,7 @@ async function buildCertificatePdf(opts: {
     page.drawText(text, { x: (width - w) / 2, y, size, font, color });
   };
 
-  center('CERTIFICATE OF COMPLETION', height - 90, 22, helvBold, navy);
+  center('PROCANN EDU COMPLETION RECORD', height - 90, 22, helvBold, navy);
   center('ProCannEdu — Maryland Cannabis Training', height - 115, 12, helvOblique, muted);
 
   center('This certifies that', height - 175, 13, helv, muted);
@@ -348,7 +348,7 @@ Deno.serve(async (req: Request) => {
       user.email ||
       'Certificate Holder';
 
-    const courseTitle = course?.title || 'Maryland Responsible Vendor Training (RVT)';
+    const courseTitle = course?.title || 'Maryland Cannabis Compliance Training';
 
     // Audit log is written by the certificates DB trigger (metadata.source = "db_trigger").
     // The insert that used to live here was redundant and always failed.
