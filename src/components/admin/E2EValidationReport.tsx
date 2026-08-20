@@ -83,7 +83,11 @@ const TIER_LABELS: Record<JourneyTier, string> = {
   3: 'Compliance'
 };
 
-export const E2EValidationReport: React.FC = () => {
+export interface E2EValidationReportProps {
+  onComplete?: (report: E2EReport) => void;
+}
+
+export const E2EValidationReport: React.FC<E2EValidationReportProps> = ({ onComplete }) => {
   const queryClient = useQueryClient();
   const [isRunning, setIsRunning] = useState(false);
   const [showBlockersOnly, setShowBlockersOnly] = useState(false);
