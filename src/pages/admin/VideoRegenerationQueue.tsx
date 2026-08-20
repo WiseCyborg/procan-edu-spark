@@ -132,7 +132,7 @@ const VideoRegenerationQueue: React.FC = () => {
         p_note: note.trim() ? note.trim() : null,
       });
       if (error) throw error;
-      if (handleResult(data, 'Marked as regenerated')) {
+      if (handleResult(data, 'Replacement candidate registered')) {
         setMarkTarget(null);
         setNewUrl('');
         setNote('');
@@ -152,7 +152,7 @@ const VideoRegenerationQueue: React.FC = () => {
         p_asset_id: approveTarget.asset_id,
       });
       if (error) throw error;
-      if (handleResult(data, 'Video approved')) {
+      if (handleResult(data, 'Script approved & narration queued')) {
         setApproveTarget(null);
       }
     } catch (err: any) {
