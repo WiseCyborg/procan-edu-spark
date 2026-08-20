@@ -71,7 +71,7 @@ export const GettingStartedChecklist: React.FC<GettingStartedChecklistProps> = (
     {
       id: 'certificate',
       title: 'Download Certificate',
-      description: 'Get your official RVT certificate',
+      description: 'Get your ProCann EDU completion record',
       completed: hasCertificate,
       action: 'Get Certificate',
       route: '/certificates',

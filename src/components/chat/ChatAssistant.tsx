@@ -138,7 +138,7 @@ const getContextInfo = (pathname: string): ContextInfo => {
     helpTips: [
       'Tell me about ProCann Edu',
       'What training is available?',
-      'How do I get certified?',
+      'How do I start training?',
       'Cannabis industry questions'
     ],
     systemPrompt: `You are a helpful assistant for ProCann Edu, Maryland's premier cannabis training platform. Provide general help and information. Key points:

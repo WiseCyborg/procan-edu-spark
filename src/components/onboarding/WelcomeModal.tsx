@@ -119,7 +119,7 @@ export const WelcomeModal = () => {
                   <span className="text-sm font-medium">Certificate</span>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Receive your official RVT certificate after passing the final exam
+                  Receive your ProCann EDU completion record after passing the final exam
                 </p>
               </div>
             </div>

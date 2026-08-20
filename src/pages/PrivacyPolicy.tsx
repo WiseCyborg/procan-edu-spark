@@ -44,7 +44,7 @@ export default function PrivacyPolicy() {
           <p>We use the information we collect to:</p>
           <ul>
             <li>Provide, maintain, and improve our training platform</li>
-            <li>Process certification and issue official certificates</li>
+            <li>Track course progress and issue ProCann EDU completion records</li>
             <li>Communicate with you about your training progress</li>
             <li>Comply with Maryland Cannabis Administration (MCA) reporting requirements</li>
             <li>Verify identity and prevent fraud</li>

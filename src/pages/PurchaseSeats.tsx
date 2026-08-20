@@ -219,7 +219,7 @@ export default function PurchaseSeats() {
                 <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
                   <li>• {quantity} training seat{quantity > 1 ? 's' : ''} for your organization</li>
                   <li>• Access to Maryland Responsible Vendor Training</li>
-                  <li>• Official certificates upon completion</li>
+                  <li>• ProCann EDU completion records upon completion</li>
                   <li>• Progress tracking and analytics dashboard</li>
                   <li>• Email support for all trainees</li>
                 </ul>

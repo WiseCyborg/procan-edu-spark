@@ -54,10 +54,10 @@ export default function AboutUs() {
             Employees can complete training on their smartphones during breaks or between shifts.
           </p>
 
-          <h3>4. Real Certification</h3>
+          <h3>4. Verifiable Completion Records</h3>
           <p>
-            Upon successful completion, students receive official RVT certificates recognized by the MCA and 
-            all Maryland dispensaries. Certificates are tamper-proof and instantly verifiable.
+            Upon successful completion, students receive a ProCann EDU completion record. 
+            Completion records are tamper-evident and instantly verifiable.
           </p>
 
           <h2>Our Commitment to Quality</h2>
