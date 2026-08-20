@@ -220,9 +220,28 @@ export default function AdminReports() {
           {error && (
             <Alert variant="destructive">
               <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
+              <AlertDescription className="space-y-3">
+                <p>
+                  The report could not be generated. No values are shown because none were
+                  returned. Details: {error}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={loading || !lastQuestion}
+                    onClick={() => lastQuestion && run(lastQuestion)}
+                  >
+                    Retry
+                  </Button>
+                  <Button size="sm" variant="ghost" asChild>
+                    <Link to="/admin">Back to Mission Control</Link>
+                  </Button>
+                </div>
+              </AlertDescription>
             </Alert>
           )}
+
 
           {!loading && !error && !result && (
             <Card>
