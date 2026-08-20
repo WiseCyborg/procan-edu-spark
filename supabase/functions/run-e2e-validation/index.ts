@@ -1576,9 +1576,6 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    const releaseGateStatus: 'SHIPPABLE' | 'NOT_SHIPPABLE' | 'INCOMPLETE' =
-      gateReasons.length === 0 ? 'SHIPPABLE' : blockerCount > 0 ? 'NOT_SHIPPABLE' : 'INCOMPLETE';
-
     const passedTests = results.filter(r => r.passed).length;
     const failedTests = results.filter(r => !r.passed).length;
 
@@ -1697,6 +1694,10 @@ Deno.serve(async (req: Request) => {
         `E2E cleanup residue — current-run test artifacts were not fully removed: ${cleanupResidue.join('; ')}`
       );
     }
+
+    // Release gate is computed AFTER teardown so cleanup residue can degrade the gate.
+    const releaseGateStatus: 'SHIPPABLE' | 'NOT_SHIPPABLE' | 'INCOMPLETE' =
+      gateReasons.length === 0 ? 'SHIPPABLE' : blockerCount > 0 ? 'NOT_SHIPPABLE' : 'INCOMPLETE';
 
 
     const report: E2EReport = {
