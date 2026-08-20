@@ -95,6 +95,11 @@ Deno.serve(async (req: Request) => {
 
   const isInternalAutomation = bearer === supabaseServiceKey;
 
+  // Retained after the admin check so admin-only RPCs (e.g. get_launch_readiness,
+  // which requires an admin auth.uid()) can be called as the validated admin user
+  // instead of with the service-role client.
+  let adminJwtClient: ReturnType<typeof createClient> | null = null;
+
   if (!isInternalAutomation) {
     const authClient = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: `Bearer ${bearer}` } },
@@ -126,6 +131,7 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    adminJwtClient = authClient;
   }
 
   try {
@@ -1537,27 +1543,37 @@ Deno.serve(async (req: Request) => {
     }
 
     let launchReadiness: any = null;
-    try {
-      const { data: lr, error: lrError } = await supabase.rpc('get_launch_readiness');
-      if (lrError) {
-        gateReasons.push(`Launch readiness could not be read: ${lrError.message}`);
-      } else {
-        launchReadiness = lr;
-        const verdict = String(
-          (Array.isArray(lr) ? lr[0]?.status ?? lr[0]?.verdict : (lr as any)?.status ?? (lr as any)?.verdict) ?? ''
-        ).toUpperCase();
-        if (verdict && verdict !== 'GO') {
-          gateReasons.push(`Launch readiness is ${verdict}`);
+    // get_launch_readiness requires an admin auth.uid(); the service-role client has
+    // none and is rejected. Call it through the already-validated admin JWT client.
+    // For service-role automation runs there is no admin JWT, so this subcheck is
+    // reported as not evaluated (INCOMPLETE) rather than weakening the RPC.
+    if (!adminJwtClient) {
+      gateReasons.push(
+        'Launch readiness not evaluated: admin-authenticated session required (service-role run)',
+      );
+    } else {
+      try {
+        const { data: lr, error: lrError } = await adminJwtClient.rpc('get_launch_readiness');
+        if (lrError) {
+          gateReasons.push(`Launch readiness could not be read: ${lrError.message}`);
+        } else {
+          launchReadiness = lr;
+          const verdict = String(
+            (Array.isArray(lr) ? lr[0]?.status ?? lr[0]?.verdict : (lr as any)?.status ?? (lr as any)?.verdict) ?? ''
+          ).toUpperCase();
+          if (verdict && verdict !== 'GO') {
+            gateReasons.push(`Launch readiness is ${verdict}`);
+          }
+          const openBlockers = Array.isArray(lr)
+            ? lr[0]?.open_blockers
+            : (lr as any)?.open_blockers;
+          if (typeof openBlockers === 'number' && openBlockers > 0) {
+            gateReasons.push(`${openBlockers} known public blocker(s) still open`);
+          }
         }
-        const openBlockers = Array.isArray(lr)
-          ? lr[0]?.open_blockers
-          : (lr as any)?.open_blockers;
-        if (typeof openBlockers === 'number' && openBlockers > 0) {
-          gateReasons.push(`${openBlockers} known public blocker(s) still open`);
-        }
+      } catch (lrErr) {
+        gateReasons.push(`Launch readiness check threw: ${(lrErr as Error).message}`);
       }
-    } catch (lrErr) {
-      gateReasons.push(`Launch readiness check threw: ${(lrErr as Error).message}`);
     }
 
     const releaseGateStatus: 'SHIPPABLE' | 'NOT_SHIPPABLE' | 'INCOMPLETE' =
