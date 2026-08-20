@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { GHOST_COURSE_IDS_PG_LIST } from '@/lib/ghostCourses';
 import AskBudPanel from '@/components/consumer/AskBudPanel';
+import { RvtApprovalNotice } from '@/components/RvtApprovalNotice';
+
 
 interface ConsumerCourse {
   id: string;
@@ -194,6 +196,7 @@ const ConsumerEducation = () => {
               Maryland dispensary employees are required to complete Responsible Vendor Training (RVT). 
               Ask your manager for a join code to access the official certification program.
             </p>
+            <RvtApprovalNotice />
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button 
                 onClick={() => navigate('/get-started')}

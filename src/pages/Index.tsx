@@ -18,6 +18,7 @@ import { useABTest } from '@/hooks/useABTest';
 import { RoleSelectorModal } from '@/components/RoleSelectorModal';
 import { InvestmentValueCard } from '@/components/InvestmentValueCard';
 import { ComplianceDisclaimer } from '@/components/ComplianceDisclaimer';
+import { RvtApprovalNotice } from '@/components/RvtApprovalNotice';
 import { SwipeUpIndicator } from '@/components/SwipeUpIndicator';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Seo } from '@/components/Seo';
@@ -172,6 +173,12 @@ const Index = () => {
           <SwipeUpIndicator />
         </div>
       </section>
+
+      <div className="bg-white dark:bg-background py-4 px-4">
+        <div className="container mx-auto">
+          <RvtApprovalNotice />
+        </div>
+      </div>
 
       {/* First Scroll - Social Proof & Value */}
       <section className={`bg-white dark:bg-background ${isMobile ? 'py-8 px-4' : 'py-16 px-4'}`}>
