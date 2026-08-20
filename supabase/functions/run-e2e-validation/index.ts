@@ -1544,7 +1544,17 @@ Deno.serve(async (req: Request) => {
 
     let launchReadiness: any = null;
     try {
-      const { data: lr, error: lrError } = await supabase.rpc('get_launch_readiness');
+      // get_launch_readiness requires an admin auth.uid(); the service-role client has
+      // none and is rejected. Call it through the already-validated admin JWT client.
+      // For service-role automation runs there is no admin JWT, so this subcheck is
+      // reported as INCOMPLETE rather than weakening the RPC.
+      if (!adminJwtClient) {
+        gateReasons.push(
+          'Launch readiness not evaluated: admin-authenticated session required (service-role run)',
+        );
+        throw new SkipLaunchReadiness();
+      }
+      const { data: lr, error: lrError } = await adminJwtClient.rpc('get_launch_readiness');
       if (lrError) {
         gateReasons.push(`Launch readiness could not be read: ${lrError.message}`);
       } else {
