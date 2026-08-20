@@ -26,6 +26,8 @@ interface EdgeFunctionMetrics {
   avgRuntimeMs: number;
   status: 'healthy' | 'degraded' | 'down';
   lastError: string | null;
+  /** False when no telemetry rows exist at all. */
+  instrumented: boolean;
 }
 
 interface PipelineHealthSummary {
@@ -35,7 +37,11 @@ interface PipelineHealthSummary {
   autoFixedToday: number;
   needsAttention: number;
   lastRunAt: string | null;
+  status: 'healthy' | 'degraded' | 'down';
+  /** False when the snapshot has no pipeline counts. */
+  instrumented: boolean;
 }
+
 
 export interface SystemHealthData {
   email: EmailHealthMetrics;
