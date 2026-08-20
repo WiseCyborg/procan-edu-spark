@@ -317,7 +317,9 @@ export function LearnerProgressPanel() {
             <div>
               <CardTitle style={{ color: BRAND.text }}>Learner Progress</CardTitle>
               <CardDescription style={{ color: BRAND.textMuted }}>
-                RVT course — live progress, time-on-task, and certification status
+                Compliance training — live progress, time-on-task, and completion records
+                {currentCoreCount ? ` (current curriculum: ${currentCoreCount} core modules)` : ''}
+
               </CardDescription>
             </div>
           </div>
@@ -351,7 +353,7 @@ export function LearnerProgressPanel() {
               No learners enrolled yet
             </p>
             <p className="text-sm max-w-md">
-              Once students start the RVT course, their progress will appear here in real time.
+              Once students start the compliance training, their progress will appear here in real time.
             </p>
           </div>
         ) : (
