@@ -62,7 +62,7 @@ const AllCourses = () => {
     <div className="min-h-screen bg-background">
       <Seo
         title="Cannabis Education Courses | ProCann Edu"
-        description="Browse Maryland Responsible Vendor Training and advanced cannabis education programs. State-aligned, certificate-issuing courses for dispensary staff and consumers."
+        description="Browse Maryland-focused cannabis compliance education and advanced training programs for dispensary staff and consumers."
         path="/courses"
       />
 
@@ -78,13 +78,14 @@ const AllCourses = () => {
           </h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             Comprehensive cannabis education from regulatory compliance to advanced expertise.
-            All courses issue a verifiable certificate upon completion.
+            Free public courses earn a completion badge; professional training produces a
+            verifiable ProCann EDU completion record.
           </p>
         </div>
       </section>
 
       <div className="container mx-auto px-4 py-12 space-y-16">
-        {/* Required Compliance Training */}
+        {/* Professional Compliance Training */}
         {professionalCourses.length > 0 && (
           <section>
             <div className="flex items-center gap-3 mb-6">
@@ -92,7 +93,7 @@ const AllCourses = () => {
                 <Shield className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold">Required Compliance Training</h2>
+                <h2 className="text-2xl font-bold">Professional Compliance Training</h2>
                 <p className="text-muted-foreground">Maryland-focused cannabis compliance training for dispensary employees</p>
               </div>
             </div>
@@ -124,7 +125,7 @@ const AllCourses = () => {
           </section>
         )}
 
-        {/* Specialty Certifications */}
+        {/* Specialty Training */}
         {specialtyCourses.length > 0 && (
           <section>
             <div className="flex items-center gap-3 mb-6">
@@ -132,7 +133,7 @@ const AllCourses = () => {
                 <GraduationCap className="h-5 w-5 text-amber-600 dark:text-amber-400" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold">Advanced Certifications</h2>
+                <h2 className="text-2xl font-bold">Advanced Training</h2>
                 <p className="text-muted-foreground">Specialty training for cannabis connoisseurs</p>
               </div>
             </div>
@@ -164,14 +165,14 @@ const AllCourses = () => {
           </section>
         )}
 
-        {/* Certificate Verification CTA */}
+        {/* Completion Record Verification CTA */}
         <section className="text-center py-12 border-t">
-          <h3 className="text-xl font-semibold mb-2">Verify a Certificate</h3>
+          <h3 className="text-xl font-semibold mb-2">Verify a Completion Record</h3>
           <p className="text-muted-foreground mb-4">
-            Have a certificate code? Verify its authenticity here.
+            Have a record number? Check its status here.
           </p>
           <Button variant="outline" onClick={() => navigate('/verify')}>
-            Verify Certificate
+            Verify Completion Record
           </Button>
         </section>
       </div>

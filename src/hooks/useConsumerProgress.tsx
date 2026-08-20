@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { useGuestSession } from './useGuestSession';
 import { supabase } from '@/integrations/supabase/client';
 
 interface CourseProgress {
@@ -11,12 +10,13 @@ interface CourseProgress {
   completedAt: string | null;
 }
 
-const getStorageKey = (courseId: string, identifier: string) =>
-  `procann_progress_${courseId}_${identifier}`;
+// Anonymous progress uses a STABLE per-course key (no guest session id), so it
+// survives reloads and cannot drift while the guest session hydrates.
+const getStorageKey = (courseId: string, userId?: string | null) =>
+  userId ? `procann_progress_${courseId}_${userId}` : `procann_progress_${courseId}_anon`;
 
 export const useConsumerProgress = (courseId: string, totalModules: number = 0) => {
   const { user } = useAuth();
-  const { sessionId } = useGuestSession();
   const [progress, setProgress] = useState<CourseProgress>({
     courseId,
     completedModules: [],
@@ -28,7 +28,7 @@ export const useConsumerProgress = (courseId: string, totalModules: number = 0) 
   const [isLoading, setIsLoading] = useState(true);
   const enrollmentIdRef = useRef<string | null>(null);
 
-  const identifier = user?.id || sessionId || 'anonymous';
+  const userId = user?.id ?? null;
 
   useEffect(() => {
     enrollmentIdRef.current = enrollmentId;
@@ -36,6 +36,16 @@ export const useConsumerProgress = (courseId: string, totalModules: number = 0) 
 
   // Load or create enrollment (auth users) + load progress
   useEffect(() => {
+    let cancelled = false;
+    // Synchronously hydrate from localStorage so the UI never renders 0/N for a
+    // returning (anonymous) learner while the async enrollment lookup runs.
+    try {
+      const cached = localStorage.getItem(getStorageKey(courseId, userId));
+      if (cached) setProgress(JSON.parse(cached));
+    } catch (e) {
+      console.error('Error reading cached progress:', e);
+    }
+
     const loadProgress = async () => {
       try {
         if (user?.id) {
@@ -85,25 +95,31 @@ export const useConsumerProgress = (courseId: string, totalModules: number = 0) 
         }
 
         // Fall back to localStorage (also used for auth users w/o metadata yet)
-        const stored = localStorage.getItem(getStorageKey(courseId, identifier));
-        if (stored) {
+        const stored = localStorage.getItem(getStorageKey(courseId, userId));
+        if (stored && !cancelled) {
           setProgress(JSON.parse(stored));
         }
       } catch (error) {
         console.error('Error loading progress:', error);
       } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
     };
 
-    if (courseId && identifier) {
+    if (courseId) {
       loadProgress();
+    } else {
+      setIsLoading(false);
     }
-  }, [courseId, identifier, user?.id]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [courseId, userId]);
 
   // Save progress to localStorage and (if enrollment exists) the SAME DB row
   const saveProgress = useCallback(async (updatedProgress: CourseProgress) => {
-    localStorage.setItem(getStorageKey(courseId, identifier), JSON.stringify(updatedProgress));
+    localStorage.setItem(getStorageKey(courseId, userId), JSON.stringify(updatedProgress));
 
     if (user?.id) {
       try {
@@ -139,7 +155,7 @@ export const useConsumerProgress = (courseId: string, totalModules: number = 0) 
         console.error('Error saving progress to database:', error);
       }
     }
-  }, [courseId, identifier, user?.id]);
+  }, [courseId, userId]);
 
   // Also write to user_progress so admin/RVT reporting sees consumer progress.
   const writeUserProgress = useCallback(async (moduleId: string) => {

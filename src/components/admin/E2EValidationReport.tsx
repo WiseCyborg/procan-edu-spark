@@ -54,7 +54,8 @@ interface E2EReport {
   passed_tests: number;
   failed_tests: number;
   blocker_count: number;
-  release_gate_status: 'SHIPPABLE' | 'NOT_SHIPPABLE';
+  release_gate_status: 'SHIPPABLE' | 'NOT_SHIPPABLE' | 'INCOMPLETE';
+  gate_reasons?: string[];
   tier1_status: 'PASS' | 'FAIL';
   results: TestResult[];
   journey_summaries: JourneySummary[];
@@ -117,6 +118,10 @@ export const E2EValidationReport: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['e2e-validation-report'] });
       if (data.release_gate_status === 'SHIPPABLE') {
         toast.success(`E2E Validation Complete: SHIPPABLE - ${data.passed_tests}/${data.total_tests} passed`);
+      } else if (data.release_gate_status === 'INCOMPLETE') {
+        toast.warning(
+          `E2E Validation INCOMPLETE - ${(data.gate_reasons || []).join('; ') || 'run was not representative'}`
+        );
       } else {
         toast.error(`E2E Validation Complete: NOT SHIPPABLE - ${data.blocker_count} blockers found`);
       }
@@ -235,11 +240,19 @@ export const E2EValidationReport: React.FC = () => {
                     Release Gate: {latestReport.release_gate_status}
                   </h3>
                   <p className="text-muted-foreground">
-                    {latestReport.release_gate_status === 'SHIPPABLE' 
+                    {latestReport.release_gate_status === 'SHIPPABLE'
                       ? 'All critical journey tests passed. System is ready for production.'
-                      : `${latestReport.blocker_count} blocker(s) must be resolved before release.`
-                    }
+                      : latestReport.release_gate_status === 'INCOMPLETE'
+                        ? 'This run did not prove release readiness.'
+                        : `${latestReport.blocker_count} blocker(s) must be resolved before release.`}
                   </p>
+                  {latestReport.gate_reasons && latestReport.gate_reasons.length > 0 && (
+                    <ul className="mt-2 list-disc ps-5 text-sm text-muted-foreground">
+                      {latestReport.gate_reasons.map((reason) => (
+                        <li key={reason}>{reason}</li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               </div>
               <Badge 

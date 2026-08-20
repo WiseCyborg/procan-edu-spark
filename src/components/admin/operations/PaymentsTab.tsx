@@ -16,7 +16,7 @@ export function PaymentsTab() {
       <div className="grid grid-cols-3 gap-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Total Revenue</CardTitle>
+            <CardTitle className="text-sm">Lifetime Revenue</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">${(metrics.totalRevenue / 100).toFixed(2)}</div>
@@ -26,7 +26,7 @@ export function PaymentsTab() {
         
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm">This Month</CardTitle>
+            <CardTitle className="text-sm">Revenue Month-to-Date</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">${(metrics.monthlyRevenue / 100).toFixed(2)}</div>

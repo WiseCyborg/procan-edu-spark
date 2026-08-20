@@ -74,7 +74,7 @@ export const TestProfileCreator = () => {
     firstName: '',
     lastName: '',
     role: 'student' as UserRole,
-    organizationId: '',
+    organizationId: 'none',
     jobTitle: ''
   });
 
@@ -119,7 +119,7 @@ export const TestProfileCreator = () => {
           email_cache: formData.email,
           first_name: formData.firstName,
           last_name: formData.lastName,
-          organization_id: formData.organizationId || null,
+          organization_id: formData.organizationId && formData.organizationId !== 'none' ? formData.organizationId : null,
           job_title: formData.jobTitle || null
         });
 
@@ -145,7 +145,7 @@ export const TestProfileCreator = () => {
         first_name: formData.firstName,
         last_name: formData.lastName,
         role: formData.role,
-        organization_id: formData.organizationId || undefined,
+        organization_id: formData.organizationId && formData.organizationId !== 'none' ? formData.organizationId : undefined,
         organization_name: orgName,
         job_title: formData.jobTitle || undefined
       };
@@ -162,7 +162,7 @@ export const TestProfileCreator = () => {
         firstName: '',
         lastName: '',
         role: 'student',
-        organizationId: '',
+        organizationId: 'none',
         jobTitle: ''
       });
 
@@ -420,7 +420,7 @@ export const TestProfileCreator = () => {
                   <SelectValue placeholder="None (for admins)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="none">None</SelectItem>
                   {organizations.map(org => (
                     <SelectItem key={org.id} value={org.id}>
                       {org.name}

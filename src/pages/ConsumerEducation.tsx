@@ -233,7 +233,8 @@ const ConsumerEducation = () => {
                   <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">1</div>
                   <h3 className="font-semibold">Bring Your ID</h3>
                   <p className="text-sm text-muted-foreground">
-                    Valid Maryland medical cannabis card and government-issued ID required for entry.
+                    Adult-use: you must be 21+ with a valid government-issued photo ID. Medical purchases
+                    also require active Maryland patient registration verified through the state system.
                   </p>
                 </div>
                 
@@ -273,12 +274,13 @@ const ConsumerEducation = () => {
                 <div className="space-y-2">
                   <h3 className="font-semibold text-primary flex items-center gap-2">
                     <CheckCircle2 className="h-5 w-5" />
-                    Legal Purchase Limits
+                    Adult-Use Purchase Limits (21+)
                   </h3>
                   <ul className="space-y-1 text-sm text-muted-foreground ms-7">
-                    <li>• Up to 120 grams (4.2 oz) of flower per 30 days</li>
-                    <li>• Product limits vary by type and THC content</li>
-                    <li>• Dispensary staff track your allotment automatically</li>
+                    <li>• Up to 1.5 ounces of cannabis flower</li>
+                    <li>• Up to 12 grams of concentrate</li>
+                    <li>• Or cannabis products containing up to 750 mg THC</li>
+                    <li>• Adult-use sales began July 1, 2023</li>
                   </ul>
                 </div>
                 
@@ -309,13 +311,25 @@ const ConsumerEducation = () => {
                 <div className="space-y-2">
                   <h3 className="font-semibold text-primary flex items-center gap-2">
                     <CheckCircle2 className="h-5 w-5" />
-                    Valid Medical Card Required
+                    Medical Patients (Separate Rules)
                   </h3>
                   <ul className="space-y-1 text-sm text-muted-foreground ms-7">
-                    <li>• Must have active Maryland MCA registration</li>
-                    <li>• Card expires annually, requires renewal</li>
-                    <li>• Out-of-state cards not accepted</li>
+                    <li>• Requires active Maryland patient registration, verified through the state system</li>
+                    <li>• Patient registration currently lasts six years</li>
+                    <li>• Purchase allotments are set by your provider's written certification and differ from adult-use limits</li>
+                    <li>• Government-issued photo ID is still required</li>
                   </ul>
+                  <p className="text-xs text-muted-foreground ms-7">
+                    See the{' '}
+                    <a href="https://cannabis.maryland.gov/Pages/Adult-Use-FAQs.aspx" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                      MCA Adult-Use FAQ
+                    </a>{' '}
+                    and{' '}
+                    <a href="https://cannabis.maryland.gov/Pages/Patients.aspx" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                      MCA patient information
+                    </a>{' '}
+                    for current official guidance.
+                  </p>
                 </div>
               </div>
             </div>

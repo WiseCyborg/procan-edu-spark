@@ -252,10 +252,11 @@ export const PaymentReconciliationDashboard = () => {
         
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+            <CardTitle className="text-sm font-medium">Lifetime Revenue</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">${stats.totalRevenue.toFixed(2)}</div>
+            <p className="text-xs text-muted-foreground mt-1">Paid purchases, all time</p>
           </CardContent>
         </Card>
       </div>

@@ -1,6 +1,4 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { TrendingDown } from 'lucide-react';
 import { useOperationsMetrics } from '@/hooks/useOperationsMetrics';
 import { EdgeFunctionsStatus } from '@/components/admin/EdgeFunctionsStatus';
 import { IntegrationHealthMonitor } from '@/components/admin/IntegrationHealthMonitor';
@@ -87,40 +85,18 @@ export function HealthTab() {
       </Card>
 
       {/* Database Performance */}
-      <div className="grid grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Query Performance</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">24ms</div>
-            <p className="text-xs text-green-600 mt-1">
-              <TrendingDown className="h-3 w-3 inline me-1" />
-              Optimal
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Active Connections</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">12</div>
-            <Progress value={12} className="mt-2" />
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Storage Used</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">2.4GB</div>
-            <p className="text-xs text-muted-foreground mt-1">of 10GB</p>
-          </CardContent>
-        </Card>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm">Database Performance</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            Query latency, connection count and storage usage are not instrumented in
+            this dashboard. Check the Supabase project dashboard for live database
+            metrics.
+          </p>
+        </CardContent>
+      </Card>
     </div>
   );
 }

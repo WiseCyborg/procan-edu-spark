@@ -82,8 +82,19 @@ export default function UnifiedHealthReport() {
     return (
       <div className="container mx-auto p-6">
         <Card>
-          <CardContent className="p-6">
-            <p className="text-center text-muted-foreground">No health data available</p>
+          <CardHeader className="text-center">
+            <AlertCircle className="mx-auto h-10 w-10 text-muted-foreground" />
+            <CardTitle>Health data unavailable</CardTitle>
+            <CardDescription>
+              The health check did not return a report. This usually means the
+              comprehensive-health-check function failed or timed out.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex justify-center">
+            <Button onClick={fetchHealthReport} disabled={loading}>
+              <RefreshCw className={`h-4 w-4 me-2 ${loading ? 'animate-spin' : ''}`} />
+              Retry health check
+            </Button>
           </CardContent>
         </Card>
       </div>

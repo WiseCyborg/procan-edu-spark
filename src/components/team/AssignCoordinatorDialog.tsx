@@ -124,9 +124,9 @@ export function AssignCoordinatorDialog({
                 </SelectTrigger>
                 <SelectContent>
                   {employees.length === 0 ? (
-                    <SelectItem value="" disabled>
+                    <div className="px-2 py-1.5 text-sm text-muted-foreground">
                       No employees available
-                    </SelectItem>
+                    </div>
                   ) : (
                     employees.map((emp) => (
                       <SelectItem key={emp.user_id} value={emp.user_id}>
