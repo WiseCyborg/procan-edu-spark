@@ -10,7 +10,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { format, formatDistanceToNow } from 'date-fns';
 
 const COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
-const TOTAL_MODULES = 24;
 
 // Brand palette (per spec)
 const BRAND = {
@@ -34,6 +33,10 @@ interface LearnerRow {
   total_time_minutes: number;
   certified: boolean;
   certificate_date: string | null;
+  /** Certificate was issued before core modules that the learner never completed. */
+  historical_curriculum: boolean;
+  /** Completed core modules that already existed when the certificate was issued. */
+  modules_at_issuance: number;
 }
 
 interface QuizScore {
@@ -42,13 +45,16 @@ interface QuizScore {
   completed_at: string | null;
 }
 
-type StatusKind = 'Certified' | 'In Progress' | 'Not Started';
+type StatusKind = 'Certified' | 'Certified — historical curriculum' | 'In Progress' | 'Not Started';
 
 const getStatus = (row: LearnerRow): StatusKind => {
-  if (row.certified) return 'Certified';
+  if (row.certified) {
+    return row.historical_curriculum ? 'Certified — historical curriculum' : 'Certified';
+  }
   if (row.modules_completed > 0) return 'In Progress';
   return 'Not Started';
 };
+
 
 export function LearnerProgressPanel() {
   const [loading, setLoading] = useState(true);
