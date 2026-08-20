@@ -147,17 +147,39 @@ export function LearnerProgressPanel() {
         const agg = perUser.get(p.user_id);
         const cert = certByUser.get(p.user_id);
         const name = [p.first_name, p.last_name].filter(Boolean).join(' ').trim();
+        const completedIds = agg?.completedModules ?? new Set<string>();
+
+        // A certificate is "historical curriculum" when active core modules were
+        // added AFTER it was issued and the learner never completed them.
+        let historical = false;
+        let modulesAtIssuance = completedIds.size;
+        if (cert) {
+          const issuedAt = new Date(cert.date).getTime();
+          const modulesAddedAfterIssue = activeCoreModules.filter((m: any) => {
+            const created = m.created_at ? new Date(m.created_at).getTime() : 0;
+            return created > issuedAt && !completedIds.has(m.id);
+          });
+          historical = modulesAddedAfterIssue.length > 0;
+          modulesAtIssuance = activeCoreModules.filter((m: any) => {
+            const created = m.created_at ? new Date(m.created_at).getTime() : 0;
+            return created <= issuedAt && completedIds.has(m.id);
+          }).length || completedIds.size;
+        }
+
         return {
           user_id: p.user_id,
           email: p.email_cache ?? '—',
           full_name: name || (p.email_cache ?? 'Unnamed Learner'),
-          modules_completed: agg?.completedModules.size ?? 0,
+          modules_completed: completedIds.size,
           current_module_number: agg?.currentModule ?? 0,
           last_activity: agg?.last ?? null,
           total_time_minutes: Math.round((agg?.time ?? 0) / 60),
           certified: !!cert,
           certificate_date: cert?.date ?? null,
+          historical_curriculum: historical,
+          modules_at_issuance: modulesAtIssuance,
         };
+
       });
 
       rows.sort((a, b) => {
