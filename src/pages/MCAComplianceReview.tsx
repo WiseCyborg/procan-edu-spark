@@ -134,7 +134,7 @@ const MCAComplianceReview = () => {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <Award className="h-4 w-4" />
-                Certified Employees
+                Learners with Completion Records
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -142,7 +142,8 @@ const MCAComplianceReview = () => {
                 {metrics?.totalCertifiedEmployees || 0}
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                Valid RVT certifications
+                Active ProCann EDU completion records
+
               </p>
             </CardContent>
           </Card>
