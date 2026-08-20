@@ -119,7 +119,8 @@ export const E2EValidationReport: React.FC<E2EValidationReportProps> = ({ onComp
       return data as E2EReport;
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['e2e-validation-report'] });
+      // Show the run we just did, not whatever the last stored report happens to be.
+      queryClient.setQueryData(['e2e-validation-report'], data);
       if (data.release_gate_status === 'SHIPPABLE') {
         toast.success(`E2E Validation Complete: SHIPPABLE - ${data.passed_tests}/${data.total_tests} passed`);
       } else if (data.release_gate_status === 'INCOMPLETE') {
