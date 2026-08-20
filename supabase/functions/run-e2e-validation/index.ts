@@ -1611,13 +1611,33 @@ Deno.serve(async (req: Request) => {
       test_data_created: testDataCreated
     };
 
-    // Store the test results
-    await supabase.from('automated_test_results').insert({
+    // Store the test results.
+    // automated_test_results.status only permits 'passed' | 'failed' | 'skipped',
+    // so INCOMPLETE is persisted as 'skipped'; the authoritative release gate value
+    // stays in metadata.release_gate_status.
+    const dbStatus =
+      releaseGateStatus === 'SHIPPABLE' ? 'passed' : releaseGateStatus === 'INCOMPLETE' ? 'skipped' : 'failed';
+    const { error: persistError } = await supabase.from('automated_test_results').insert({
       test_name: 'E2E Validation Suite v4',
-      status: releaseGateStatus === 'SHIPPABLE' ? 'passed' : releaseGateStatus === 'INCOMPLETE' ? 'incomplete' : 'failed',
+      status: dbStatus,
       metadata: report,
       duration_ms: new Date().getTime() - new Date(startedAt).getTime()
     });
+
+    if (persistError) {
+      // Log non-sensitive error metadata only.
+      console.error('[E2E PERSIST] automated_test_results insert failed:', {
+        code: (persistError as any).code,
+        message: persistError.message
+      });
+      report.gate_reasons = [
+        ...(report.gate_reasons ?? []),
+        `Result persistence failed (${(persistError as any).code ?? 'unknown'}); this report was not stored.`
+      ];
+      if (report.release_gate_status === 'SHIPPABLE') {
+        report.release_gate_status = 'INCOMPLETE';
+      }
+    }
 
     console.log(
       `=== E2E Complete: ${passedTests}/${results.length} passed, ${blockerCount} blockers, ${releaseGateStatus}` +
