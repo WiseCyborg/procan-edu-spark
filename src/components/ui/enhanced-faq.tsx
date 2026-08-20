@@ -181,7 +181,7 @@ export const EnhancedFAQ: React.FC<EnhancedFAQProps> = ({
     {
       id: 'general-2',
       question: 'Is ProCann Edu aligned with Maryland Cannabis Administration requirements?',
-      answer: 'ProCann Edu is designed to meet MCA Responsible Vendor Training standards under COMAR 14.17.15.05. Our curriculum is kept aligned with current Maryland cannabis regulations, which are tracked directly against the official COMAR source.',
+      answer: 'ProCann Edu's curriculum is designed to align with COMAR 14.17.15.05. Our curriculum is kept aligned with current Maryland cannabis regulations, which are tracked directly against the official COMAR source.',
       category: 'Certification',
       securityLevel: 'public'
     },

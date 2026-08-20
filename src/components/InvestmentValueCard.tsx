@@ -49,7 +49,7 @@ export const InvestmentValueCard = () => {
           What's Included in Your $49.99 Investment
         </CardTitle>
         <p className="text-muted-foreground mt-2">
-          Your Maryland RVT Certification includes:
+          Your Maryland cannabis compliance training includes:
         </p>
       </CardHeader>
       <CardContent className="space-y-6">

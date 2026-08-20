@@ -165,7 +165,7 @@ export const ConsumerModuleContent = ({
               className="sm:w-auto"
             >
               <Award className="h-4 w-4 me-2" />
-              Get Certificate
+              Get Completion Badge
             </Button>
           )}
         </div>

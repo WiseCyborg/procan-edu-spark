@@ -40,7 +40,7 @@ const CourseLayout: React.FC = () => {
   const { roles, isStudent, isAdmin, isDispensaryManager, isTrainingCoordinator, isLoading: rolesLoading } = useUserRole();
   const [course] = useState({
     id: COURSE_ID,
-    title: 'Maryland Responsible Vendor Training (RVT)',
+    title: 'Maryland Cannabis Compliance Training',
     description: 'Complete cannabis education course for Maryland compliance',
     price_cents: 4999,
     currency: 'usd',
@@ -162,7 +162,7 @@ const CourseLayout: React.FC = () => {
       <Card>
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-bold text-primary">
-            Maryland Responsible Vendor Training (RVT) Course
+            Maryland Cannabis Compliance Training Course
             {canAccessManagerTrack && managerModules.length > 0 && (
               <Badge variant="default" className="ms-3 bg-purple-600 text-white">
                 Manager Track
@@ -170,7 +170,7 @@ const CourseLayout: React.FC = () => {
             )}
           </CardTitle>
           <p className="text-muted-foreground">
-            Complete the {requiredTotal} required agent modules to unlock the final exam and earn your Maryland RVT (Agent) certificate.
+            Complete the {requiredTotal} required agent modules to unlock the final exam and earn your ProCann EDU completion record.
           </p>
           {organizationName && (
             <p className="text-sm text-muted-foreground mt-2">
@@ -202,13 +202,13 @@ const CourseLayout: React.FC = () => {
           <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
             <p className="text-sm text-blue-800 dark:text-blue-300 text-center">
               <span className="font-semibold">Note:</span> Green, Yellow, and Red tier levels are for progress tracking and motivation.
-              The {requiredTotal} agent modules are required for Maryland RVT (Agent) certification. The {managerModules.length || 5} supervisory modules are optional and lead to a supplemental ProCann Edu Certificate of Completion — they are not part of MCA-required RVT certification.
+              The {requiredTotal} agent modules make up the core cannabis compliance track. The {managerModules.length || 5} supervisory modules are optional and lead to a supplemental ProCann EDU completion record.
             </p>
           </div>
           {canAccessManagerTrack && managerModules.length > 0 && (
             <div className="bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800 rounded-lg p-4 space-y-2">
               <p className="text-sm text-purple-800 dark:text-purple-300 text-center">
-                <span className="font-semibold">Supervisory Track (Optional):</span> {managerModules.length} additional supervisory modules. These do not block your Agent exam — complete all of them, once you hold an active Agent RVT certificate, to earn the <strong>Supervisory Compliance Training Certificate of Completion</strong>. This is a supplemental ProCann Edu credential, not a separate MCA certification.
+                <span className="font-semibold">Supervisory Track (Optional):</span> {managerModules.length} additional supervisory modules. These do not block your Agent exam — complete all of them, once you hold an active Agent completion record, to earn the <strong>Supervisory Compliance Training completion record</strong>. This is a supplemental ProCann EDU record.
               </p>
               <div className="flex items-center justify-between text-xs text-purple-800 dark:text-purple-300">
                 <span>Manager Track Progress</span>

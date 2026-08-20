@@ -88,7 +88,7 @@ export const UniversalCourseCard = ({
       return (
         <>
           <Lock className="me-2 h-4 w-4" />
-          Complete RVT First
+          Complete Core Training First
         </>
       );
     }
@@ -211,7 +211,7 @@ export const UniversalCourseCard = ({
         {isLocked && showPrerequisiteHint && (
           <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
             <p className="text-xs text-amber-700 dark:text-amber-300">
-              Complete Maryland RVT Training first to unlock this course.
+              Complete Cannabis Compliance Training first to unlock this course.
             </p>
           </div>
         )}

@@ -201,7 +201,7 @@ const JOB_HANDLERS: Record<string, (job: Job, supabase: any) => Promise<void>> =
     const courseTitle =
       course?.title ||
       (certificationType === 'manager'
-        ? 'Maryland RVT + Manager Leadership Training'
+        ? 'Maryland Cannabis Compliance + Manager Leadership Training'
         : 'Maryland Responsible Vendor Training');
     const fmt = (iso: string | null | undefined) =>
       iso ? new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
@@ -291,7 +291,7 @@ const JOB_HANDLERS: Record<string, (job: Job, supabase: any) => Promise<void>> =
         ModulesCompleted: modules_completed,
         TotalModules: total_modules,
         ContinueUrl: 'https://www.procannedu.com/course',
-        NextModule: 'Continue your Maryland RVT certification training',
+        NextModule: 'Continue your Maryland cannabis compliance training',
         NextModuleDuration: '10–15',
         RecentModule: `${modules_completed} of ${total_modules} modules`,
         QuizScore: '',

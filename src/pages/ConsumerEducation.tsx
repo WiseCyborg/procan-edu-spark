@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { GHOST_COURSE_IDS_PG_LIST } from '@/lib/ghostCourses';
 import AskBudPanel from '@/components/consumer/AskBudPanel';
-import { RvtApprovalNotice } from '@/components/RvtApprovalNotice';
 
 
 interface ConsumerCourse {
@@ -54,12 +53,12 @@ const ConsumerEducation = () => {
       <div className="bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-800 py-2 px-4">
         <p className="text-center text-xs text-amber-800 dark:text-amber-300">
           <strong>Note:</strong> This is free educational content for the public. 
-          This is <strong>NOT</strong> Maryland RVT employee certification. 
+          This is <strong>NOT</strong> workforce cannabis compliance training for dispensary employees. 
           <button 
             onClick={() => navigate('/get-started')} 
             className="underline ms-1 hover:text-amber-600"
           >
-            Need RVT certification?
+            Need workforce cannabis training?
           </button>
         </p>
       </div>
@@ -126,7 +125,7 @@ const ConsumerEducation = () => {
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
                 <Award className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="font-semibold text-foreground">Get Certified</h3>
+              <h3 className="font-semibold text-foreground">Complete the Course</h3>
               <p className="text-sm text-muted-foreground">Earn digital badges</p>
             </div>
             
@@ -151,7 +150,7 @@ const ConsumerEducation = () => {
               </h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
                 Start with whichever course fits your needs. All courses are completely free 
-                and you'll earn a certificate upon completion.
+                and you'll earn a completion badge upon completion.
               </p>
             </div>
 
@@ -190,19 +189,18 @@ const ConsumerEducation = () => {
               Work at a Dispensary?
             </div>
             <h2 className="text-3xl font-bold text-foreground">
-              Need Official RVT Certification?
+              Need Workforce Cannabis Training?
             </h2>
             <p className="text-muted-foreground">
               Maryland dispensary employees are required to complete Responsible Vendor Training (RVT). 
-              Ask your manager for a join code to access the official certification program.
+              Ask your manager for a join code to access the workforce training program.
             </p>
-            <RvtApprovalNotice />
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button 
                 onClick={() => navigate('/get-started')}
                 size="lg"
               >
-                Get RVT Certified
+                Explore Professional Training
                 <ArrowRight className="ms-2 h-4 w-4" />
               </Button>
               <Button 

@@ -22,8 +22,8 @@ const roleOptions: RoleOption[] = [
   {
     id: 'student',
     memberType: 'employee',
-    title: "I'm Ready to Get Certified",
-    description: 'For individual students seeking Maryland RVT certification',
+    title: "I'm Ready to Start Training",
+    description: 'For individual students seeking Maryland cannabis compliance training',
     icon: Award,
     iconBgColor: 'bg-emerald-100',
     iconColor: 'text-emerald-600',
@@ -157,7 +157,7 @@ export const RoleIntentSelector: React.FC<RoleIntentSelectorProps> = ({
         </div>
 
         <p className="text-xs text-muted-foreground text-center mt-6">
-          Not sure? Start with "Get Certified" – you can request elevated access later.
+          Not sure? Start with "Start Training" – you can request elevated access later.
         </p>
       </div>
     </div>

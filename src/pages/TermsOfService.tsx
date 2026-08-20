@@ -55,12 +55,12 @@ export default function TermsOfService() {
             <li>Exam content is confidential and may not be shared</li>
           </ul>
 
-          <h2>5. Certification</h2>
+          <h2>5. Completion Records</h2>
           <p>
-            Upon successful completion, you will receive an official RVT certificate valid for [X years]. This certificate:
+            Upon successful completion, you will receive a ProCann EDU completion record. This completion record:
           </p>
           <ul>
-            <li>Is issued in accordance with MCA requirements</li>
+            <li>Reflects completion of ProCann EDU training designed to align with COMAR 14.17.15.05</li>
             <li>Must be renewed before expiration</li>
             <li>Can be revoked for violations of these terms or Maryland law</li>
             <li>Is non-transferable</li>

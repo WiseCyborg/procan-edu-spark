@@ -541,7 +541,7 @@ export default function AskBudPanel() {
 
           <p className="mt-4 text-center text-xs text-muted-foreground max-w-3xl mx-auto">
             Bud is free public education for adults 21+ and registered Maryland patients. Not medical or
-            legal advice, and not Maryland RVT certification. Rules come from COMAR Title 14, Subtitle 17
+            legal advice, and not professional cannabis compliance training. Rules come from COMAR Title 14, Subtitle 17
             — always confirm current rules with the Maryland Cannabis Administration.
           </p>
         </div>

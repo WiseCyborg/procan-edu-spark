@@ -75,7 +75,7 @@ const RVTComplete = () => {
                 </div>
                 <div>
                   <CardTitle>Take RVT Exam</CardTitle>
-                  <CardDescription>Earn your official certification</CardDescription>
+                  <CardDescription>Complete your training</CardDescription>
                 </div>
               </div>
             </CardHeader>
@@ -121,8 +121,8 @@ const RVTComplete = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                After passing the exam, you'll receive an official Maryland RVT certificate 
-                that can be verified by employers and regulators.
+                After passing the exam, you'll receive a ProCann EDU completion record 
+                that can be verified by employers.
               </p>
               
               <Button 

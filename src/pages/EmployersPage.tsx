@@ -144,7 +144,7 @@ export default function EmployersPage() {
       "valid": true,
       "issue_date": "2025-01-15",
       "expiry_date": "2027-01-15",
-      "course_title": "Maryland RVT Certification"
+      "course_title": "Maryland Cannabis Compliance Training"
     }
   ]
 }`}

@@ -149,7 +149,7 @@ export default function CompetitorComparison() {
         {/* CTA Section */}
         <div className="text-center bg-gradient-to-r from-primary to-accent rounded-2xl p-8 text-white">
           <h3 className="text-3xl font-bold mb-4">
-            Experience Maryland-Specific RVT Training
+            Experience Maryland-Specific Cannabis Compliance Training
           </h3>
           <p className="text-xl mb-6 text-white/90">
             See how ProCann Edu's unique features support your compliance goals

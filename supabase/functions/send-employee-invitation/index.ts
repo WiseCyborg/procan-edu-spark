@@ -82,7 +82,7 @@ serve(async (req) => {
             <li>Interactive course modules covering Maryland cannabis regulations</li>
             <li>Stoplight tier progression system (Green → Yellow → Red)</li>
             <li>Quizzes to test your knowledge</li>
-            <li>Official certificate upon completion</li>
+            <li>ProCann EDU completion record upon completion</li>
           </ul>
 
           <a href="${registrationUrl}" 

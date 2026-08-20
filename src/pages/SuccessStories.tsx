@@ -47,7 +47,7 @@ export default function SuccessStories() {
         <div className="container relative">
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              Maryland RVT Training Built for Success
+              Maryland Cannabis Compliance Training Built for Success
             </h1>
             <p className="text-xl text-muted-foreground mb-8">
               ProCann Edu provides comprehensive, COMAR-aligned Responsible Vendor Training designed specifically for Maryland cannabis professionals
@@ -132,9 +132,9 @@ export default function SuccessStories() {
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-br from-primary to-primary-glow text-primary-foreground">
         <div className="container text-center">
-          <h2 className="text-3xl font-bold mb-4">Ready to Get Certified?</h2>
+          <h2 className="text-3xl font-bold mb-4">Ready to Start Training?</h2>
           <p className="text-lg mb-8 opacity-90 max-w-2xl mx-auto">
-            Join Maryland cannabis professionals who trust ProCann Edu for comprehensive, COMAR-aligned RVT certification training
+            Join Maryland cannabis professionals who trust ProCann Edu for comprehensive, COMAR-aligned cannabis compliance training
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Button size="lg" variant="secondary" onClick={() => navigate('/signup')}>
