@@ -130,7 +130,7 @@ const CertificateRenewal = () => {
             <div className="flex items-center gap-3">
               <Award className={`h-8 w-8 ${expiryStatus.color}`} />
               <div>
-                <CardTitle>Maryland RVT Certificate</CardTitle>
+                <CardTitle>ProCann EDU Completion Record</CardTitle>
                 <CardDescription className="mt-1">
                   Certificate #{certificate.certificate_number}
                 </CardDescription>

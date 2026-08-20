@@ -39,8 +39,8 @@ const GetStarted = () => {
                 <div className="mx-auto mb-4 p-4 bg-primary/10 rounded-full w-20 h-20 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                   <Award className="h-10 w-10 text-primary" />
                 </div>
-                <CardTitle className="text-2xl">RVT Core Training</CardTitle>
-                <CardDescription>Maryland Employee Certification</CardDescription>
+                <CardTitle className="text-2xl">Cannabis Compliance Training</CardTitle>
+                <CardDescription>Maryland Cannabis Workforce Training</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -49,8 +49,8 @@ const GetStarted = () => {
                     <Badge variant="outline">4-6 Hours</Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    Complete Maryland RVT certification for dispensary employees. 
-                    Meets all COMAR 14.17.15.05 requirements.
+                    Maryland-focused cannabis workforce training for dispensary employees, 
+                    designed to align with COMAR 14.17.15.05.
                   </p>
                 </div>
                 <div className="space-y-2 text-sm">
@@ -154,9 +154,8 @@ const GetStarted = () => {
           {/* Disclaimer */}
           <div className="mt-6 p-4 bg-muted/50 rounded-lg border border-muted-foreground/20 max-w-4xl mx-auto">
             <p className="text-xs text-muted-foreground text-center">
-              <strong>Important:</strong> Only RVT Core Training provides Maryland Responsible Vendor Training (RVT) 
-              aligned to COMAR 14.17.15.05. Public Learning courses are for educational purposes only and do not satisfy 
-              employee compliance requirements.
+              <strong>Important:</strong> Only Cannabis Compliance Training is designed to align with 
+              COMAR 14.17.15.05. Public Learning courses are for general educational purposes only.
             </p>
           </div>
         </div>
@@ -245,7 +244,7 @@ const GetStarted = () => {
             <CardHeader>
               <CardTitle className="text-center flex items-center justify-center gap-2">
                 <FileText className="h-5 w-5" />
-                How RVT Certification Works
+                How Training Works
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -292,7 +291,7 @@ const GetStarted = () => {
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold mb-2">Not sure which path to choose?</h3>
               <p className="text-sm text-muted-foreground mb-4">
-                <strong>Work at a dispensary?</strong> You need RVT Core Training — your manager will send you an email invite.{' '}
+                <strong>Work at a dispensary?</strong> You need Cannabis Compliance Training — your manager will send you an email invite.{' '}
                 <strong>Dispensary owner?</strong> Apply to set up your organization.{' '}
                 <strong>Just curious?</strong> Start with our free Public Learning courses.
               </p>

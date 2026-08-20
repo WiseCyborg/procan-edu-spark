@@ -30,7 +30,7 @@ export const TrackSidebar = ({
   completedModules,
   onModuleSelect,
   courseBadgeName = 'RVT Certified',
-  courseTitle = 'Maryland RVT Training'
+  courseTitle = 'Maryland Cannabis Compliance Training'
 }: TrackSidebarProps) => {
   // Split modules into tracks
   const rvtModules = modules.filter(m => m.module_number <= RVT_REQUIRED_MAX);

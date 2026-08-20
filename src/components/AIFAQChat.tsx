@@ -28,7 +28,7 @@ export const AIFAQChat = () => {
         role: 'assistant',
         content: t('chatbot.greeting', {
           defaultValue:
-            "Hi! I'm AiLean, your ProCann training assistant. Ask me anything about Maryland RVT certification, COMAR compliance, or our training programs!",
+            "Hi! I'm AiLean, your ProCann training assistant. Ask me anything about Maryland cannabis compliance, COMAR requirements, or our training programs!",
         }),
       },
     ]);

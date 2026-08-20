@@ -144,7 +144,7 @@ export const ComplianceBadges = () => {
         style={{ animationDelay: '1s' }}
       >
         <Award className="h-4 w-4 me-2" />
-        RVT Certification
+        COMAR-Aligned Curriculum
       </Badge>
     </div>
   );

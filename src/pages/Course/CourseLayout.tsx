@@ -170,7 +170,7 @@ const CourseLayout: React.FC = () => {
             )}
           </CardTitle>
           <p className="text-muted-foreground">
-            Complete the {requiredTotal} required agent modules to unlock the final exam and earn your Maryland RVT (Agent) certificate.
+            Complete the {requiredTotal} required agent modules to unlock the final exam and earn your ProCann EDU completion record.
           </p>
           {organizationName && (
             <p className="text-sm text-muted-foreground mt-2">
@@ -202,7 +202,7 @@ const CourseLayout: React.FC = () => {
           <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
             <p className="text-sm text-blue-800 dark:text-blue-300 text-center">
               <span className="font-semibold">Note:</span> Green, Yellow, and Red tier levels are for progress tracking and motivation.
-              The {requiredTotal} agent modules are required for Maryland RVT (Agent) certification. The {managerModules.length || 5} supervisory modules are optional and lead to a supplemental ProCann Edu Certificate of Completion — they are not part of MCA-required RVT certification.
+              The {requiredTotal} agent modules make up the core cannabis compliance track. The {managerModules.length || 5} supervisory modules are optional and lead to a supplemental ProCann EDU completion record.
             </p>
           </div>
           {canAccessManagerTrack && managerModules.length > 0 && (

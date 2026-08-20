@@ -11,7 +11,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
 import { Loader2, ShoppingCart, Users, AlertCircle } from "lucide-react";
 import { BUSINESS_RULES } from "@/config/business-rules";
-import { RvtApprovalNotice } from "@/components/RvtApprovalNotice";
 
 const SEAT_PRICE = BUSINESS_RULES.SEAT_PRICE_USD;
 
@@ -227,8 +226,6 @@ export default function PurchaseSeats() {
               </div>
             </div>
           </div>
-
-          <RvtApprovalNotice />
 
           <Button
             onClick={handlePurchase}

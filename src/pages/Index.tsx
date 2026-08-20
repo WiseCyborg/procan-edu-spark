@@ -18,7 +18,6 @@ import { useABTest } from '@/hooks/useABTest';
 import { RoleSelectorModal } from '@/components/RoleSelectorModal';
 import { InvestmentValueCard } from '@/components/InvestmentValueCard';
 import { ComplianceDisclaimer } from '@/components/ComplianceDisclaimer';
-import { RvtApprovalNotice } from '@/components/RvtApprovalNotice';
 import { SwipeUpIndicator } from '@/components/SwipeUpIndicator';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Seo } from '@/components/Seo';
@@ -35,26 +34,26 @@ const Index = () => {
     testName: 'hero_headline',
     variants: [{
       id: 'comar_aligned',
-      value: "COMAR-Aligned Maryland RVT Certification Training",
+      value: "COMAR-Aligned Maryland Cannabis Compliance Training",
       weight: 1
     }, {
       id: 'comprehensive_training',
-      value: "Comprehensive Maryland RVT Training • 24 Modules • Self-Paced",
+      value: "Comprehensive Maryland Cannabis Compliance Training • 24 Modules • Self-Paced",
       weight: 1
     }, {
       id: 'maryland_focused',
-      value: "Maryland RVT Certification Built by Local Cannabis Professionals",
+      value: "Maryland Cannabis Compliance Education Built by Local Cannabis Professionals",
       weight: 1
     }, {
       id: 'accessible_pricing',
-      value: "Complete Maryland RVT Training • $49.99 • Under MD Maximum",
+      value: "Complete Maryland Cannabis Compliance Training • $49.99",
       weight: 1
     }]
   });
   return <div className="min-h-screen">
       <Seo
-        title="ProCann Edu — Maryland RVT Certification Training"
-        description="Maryland's AI-powered Responsible Vendor Training. State-aligned cannabis dispensary certification, team management, and compliance reporting in one platform."
+        title="ProCann Edu — Maryland Cannabis Compliance Education"
+        description="Maryland-focused cannabis workforce training. COMAR-aligned dispensary compliance education, team management, and reporting in one platform."
         path="/"
         jsonLd={[
           {
@@ -135,7 +134,7 @@ const Index = () => {
               size={isMobile ? 'default' : 'lg'}
               className={`bg-white text-primary hover:bg-white/90 font-semibold rounded-xl shadow-xl hover:shadow-2xl transition-all hover:scale-105 ${isMobile ? 'w-full px-6 py-5 text-base h-auto' : 'px-10 py-6 text-lg'}`}
             >
-              Get Certified — $49.99
+              Start Training — $49.99
             </Button>
             <div className="mt-3">
               <button
@@ -174,12 +173,6 @@ const Index = () => {
         </div>
       </section>
 
-      <div className="bg-white dark:bg-background py-4 px-4">
-        <div className="container mx-auto">
-          <RvtApprovalNotice />
-        </div>
-      </div>
-
       {/* First Scroll - Social Proof & Value */}
       <section className={`bg-white dark:bg-background ${isMobile ? 'py-8 px-4' : 'py-16 px-4'}`}>
         <div className="container mx-auto">
@@ -206,15 +199,15 @@ const Index = () => {
               onClick={() => navigate('/get-started')}
             >
               <div className="absolute -top-3 start-4 bg-primary text-primary-foreground text-xs px-3 py-1 rounded-full font-semibold">
-                Required for Employees
+                For Cannabis Professionals
               </div>
               <div className="pt-4">
                 <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
                   <CheckCircle className="h-7 w-7 text-primary" />
                 </div>
-                <h3 className="text-xl font-bold text-foreground mb-2">RVT Core Training</h3>
+                <h3 className="text-xl font-bold text-foreground mb-2">Cannabis Compliance Training</h3>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Maryland Responsible Vendor Training (RVT) aligned to COMAR 14.17.15.05 for dispensary employees.
+                  Maryland-focused cannabis workforce training designed to align with COMAR 14.17.15.05 for dispensary employees.
                 </p>
                 <div className="space-y-2 text-sm mb-4">
                   <div className="flex items-center gap-2 text-muted-foreground">
@@ -227,11 +220,11 @@ const Index = () => {
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                    <span>Issues <strong>RVT Certificate</strong></span>
+                    <span>Issues <strong>ProCann EDU Completion Record</strong></span>
                   </div>
                 </div>
                 <Button className="w-full group-hover:bg-primary/90" onClick={(e) => { e.stopPropagation(); navigate('/auth?role=student'); }}>
-                  Start RVT Training
+                  Start Training
                 </Button>
               </div>
             </div>
@@ -316,8 +309,8 @@ const Index = () => {
           {/* Disclaimer */}
           <div className="mt-8 text-center">
             <p className="text-xs text-muted-foreground max-w-3xl mx-auto">
-              <strong>Note:</strong> Only RVT Core Training provides Maryland Responsible Vendor Training (RVT) 
-              aligned to COMAR 14.17.15.05. Public Learning is for educational purposes only and does not satisfy employee compliance requirements.
+              <strong>Note:</strong> Only Cannabis Compliance Training is designed to align with COMAR 14.17.15.05. 
+              Public Learning is for general educational purposes only.
             </p>
           </div>
         </div>
@@ -399,7 +392,7 @@ const Index = () => {
         <div className="container mx-auto">
           <div className="text-center mb-8 pb-8 border-b border-white/10">
             <h3 className={`font-bold mb-2 ${isMobile ? 'text-xl' : 'text-2xl'}`}>ProCann Edu</h3>
-            <p className={`text-white/90 mb-2 ${isMobile ? 'text-base' : 'text-xl'}`}>Maryland's Trusted RVT Provider</p>
+            <p className={`text-white/90 mb-2 ${isMobile ? 'text-base' : 'text-xl'}`}>Maryland-Focused Cannabis Compliance Education</p>
             <p className={`text-white/70 ${isMobile ? 'text-sm' : 'text-base'}`}>Headquarters: Baltimore, Maryland</p>
             <p className={`text-white/70 ${isMobile ? 'text-sm' : 'text-base'}`}>Serving dispensaries across all 24 counties</p>
           </div>

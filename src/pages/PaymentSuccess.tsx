@@ -11,7 +11,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import Confetti from 'react-confetti';
-import { RvtApprovalNotice } from '@/components/RvtApprovalNotice';
 
 interface SeatPurchaseData {
   quantity: number;
@@ -480,8 +479,6 @@ const PaymentSuccess: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <RvtApprovalNotice />
-
           <div className="text-center text-gray-600">
             <p className="text-lg mb-4">
               Thank you for your purchase! You now have full access to your course.
@@ -496,8 +493,8 @@ const PaymentSuccess: React.FC = () => {
             <ul className="text-green-700 space-y-2">
               <li>• Start learning immediately with full course access</li>
               <li>• Complete all 23 modules at your own pace</li>
-              <li>• Take the final certification exam when ready</li>
-              <li>• Receive your official Maryland Cannabis certificate</li>
+              <li>• Take the final exam when ready</li>
+              <li>• Receive your ProCann EDU completion record</li>
             </ul>
           </div>
 

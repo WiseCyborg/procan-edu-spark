@@ -93,7 +93,7 @@ const AllCourses = () => {
               </div>
               <div>
                 <h2 className="text-2xl font-bold">Required Compliance Training</h2>
-                <p className="text-muted-foreground">Maryland RVT certification for dispensary employees</p>
+                <p className="text-muted-foreground">Maryland-focused cannabis compliance training for dispensary employees</p>
               </div>
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">

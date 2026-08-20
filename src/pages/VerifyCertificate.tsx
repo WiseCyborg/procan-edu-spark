@@ -383,7 +383,7 @@ const VerifyCertificate = () => {
                   {result.is_compliance && (
                     <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
                       <p className="text-sm text-primary font-medium">
-                        ✓ This is an official Maryland Compliance Certificate
+                        ✓ Verified ProCann EDU completion record
                       </p>
                     </div>
                   )}

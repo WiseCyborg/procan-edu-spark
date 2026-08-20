@@ -229,7 +229,7 @@ Deno.serve(async (req: Request) => {
     let certificationLevel = 'RVT Agent'; // human-readable label (PDF/email only)
     let certificationLevelDb: 'agent' | 'manager' = 'agent'; // DB CHECK constraint value
     let tierBadge = 'rvt';
-    let trainingTrack = 'Maryland RVT Required Training';
+    let trainingTrack = 'Maryland Cannabis Compliance Training';
     let rvtComplete = false;
     let managerComplete = false;
 

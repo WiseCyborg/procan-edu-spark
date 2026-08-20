@@ -134,7 +134,7 @@ export const WelcomeModal = () => {
                 { step: 2, text: 'Watch the welcome video', subtext: 'Quick introduction to the platform' },
                 { step: 3, text: 'Complete all 19 required modules', subtext: 'Learn everything about Maryland cannabis regulations' },
                 { step: 4, text: 'Pass the final exam', subtext: '80% score required for certification' },
-                { step: 5, text: 'Download your certificate', subtext: 'Official Maryland RVT certificate' }
+                { step: 5, text: 'Download your certificate', subtext: 'ProCann EDU completion record' }
               ].map(({ step, text, subtext }) => (
                 <div key={step} className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
                   <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-sm font-semibold">
