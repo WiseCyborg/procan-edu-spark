@@ -53,7 +53,8 @@ interface E2EReport {
   passed_tests: number;
   failed_tests: number;
   blocker_count: number;
-  release_gate_status: 'SHIPPABLE' | 'NOT_SHIPPABLE';
+  release_gate_status: 'SHIPPABLE' | 'NOT_SHIPPABLE' | 'INCOMPLETE';
+  gate_reasons: string[];
   tier1_status: 'PASS' | 'FAIL';
   results: TestResult[];
   journey_summaries: JourneySummary[];
@@ -68,6 +69,9 @@ interface E2EReport {
     test_org_id?: string;
   };
 }
+
+// Canonical workforce compliance course. The release gate must test THIS course.
+const CANONICAL_WORKFORCE_COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
@@ -597,12 +601,25 @@ Deno.serve(async (req: Request) => {
     console.log('=== Journey C: Training Progress Flow (Real User) ===');
     
     // C1: Get active course
-    const { data: activeCourse, error: courseError } = await supabase
+    // The release gate is only meaningful when it exercises the canonical workforce
+    // compliance course. A free consumer course passing proves nothing.
+    const { data: canonicalCourse } = await supabase
       .from('courses')
       .select('id, title, module_count')
-      .eq('is_active', true)
-      .limit(1)
-      .single();
+      .eq('id', CANONICAL_WORKFORCE_COURSE_ID)
+      .maybeSingle();
+
+    const { data: fallbackCourse, error: fallbackCourseError } = canonicalCourse
+      ? { data: null, error: null }
+      : await supabase
+          .from('courses')
+          .select('id, title, module_count')
+          .eq('is_active', true)
+          .limit(1)
+          .maybeSingle();
+
+    const activeCourse = canonicalCourse ?? fallbackCourse;
+    const courseError = canonicalCourse ? null : fallbackCourseError;
     
     if (courseError || !activeCourse) {
       addResult('Training', 'Active Course Exists', 'At least 1 active course',
@@ -1446,7 +1463,54 @@ Deno.serve(async (req: Request) => {
     const tier1Status = tier1AllPassed ? 'PASS' : 'FAIL';
 
     const blockerCount = results.filter(r => r.is_blocker && !r.passed).length;
-    const releaseGateStatus = blockerCount === 0 ? 'SHIPPABLE' : 'NOT_SHIPPABLE';
+
+    // A run only earns SHIPPABLE when it actually proved something. Anything that
+    // makes the run unrepresentative downgrades it to INCOMPLETE with reasons.
+    const gateReasons: string[] = [];
+
+    if (blockerCount > 0) {
+      gateReasons.push(`${blockerCount} blocking check${blockerCount === 1 ? '' : 's'} failed`);
+    }
+
+    const emptyTier1 = tier1Journeys.filter(j => j.required_steps.length === 0).map(j => j.name);
+    if (emptyTier1.length > 0) {
+      gateReasons.push(`Critical journey with no required steps executed: ${emptyTier1.join(', ')}`);
+    }
+
+    if (!activeCourse) {
+      gateReasons.push('No course was available to test');
+    } else if (activeCourse.id !== CANONICAL_WORKFORCE_COURSE_ID) {
+      gateReasons.push(
+        `Tested course "${activeCourse.title}" is not the canonical workforce compliance course`
+      );
+    }
+
+    let launchReadiness: any = null;
+    try {
+      const { data: lr, error: lrError } = await supabase.rpc('get_launch_readiness');
+      if (lrError) {
+        gateReasons.push(`Launch readiness could not be read: ${lrError.message}`);
+      } else {
+        launchReadiness = lr;
+        const verdict = String(
+          (Array.isArray(lr) ? lr[0]?.status ?? lr[0]?.verdict : (lr as any)?.status ?? (lr as any)?.verdict) ?? ''
+        ).toUpperCase();
+        if (verdict && verdict !== 'GO') {
+          gateReasons.push(`Launch readiness is ${verdict}`);
+        }
+        const openBlockers = Array.isArray(lr)
+          ? lr[0]?.open_blockers
+          : (lr as any)?.open_blockers;
+        if (typeof openBlockers === 'number' && openBlockers > 0) {
+          gateReasons.push(`${openBlockers} known public blocker(s) still open`);
+        }
+      }
+    } catch (lrErr) {
+      gateReasons.push(`Launch readiness check threw: ${(lrErr as Error).message}`);
+    }
+
+    const releaseGateStatus: 'SHIPPABLE' | 'NOT_SHIPPABLE' | 'INCOMPLETE' =
+      gateReasons.length === 0 ? 'SHIPPABLE' : blockerCount > 0 ? 'NOT_SHIPPABLE' : 'INCOMPLETE';
 
     const passedTests = results.filter(r => r.passed).length;
     const failedTests = results.filter(r => !r.passed).length;
