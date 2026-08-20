@@ -60,6 +60,7 @@ export function LearnerProgressPanel() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [learners, setLearners] = useState<LearnerRow[]>([]);
+  const [coreModuleCount, setCoreModuleCount] = useState<number | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [quizScores, setQuizScores] = useState<QuizScore[]>([]);
   const [detailLoading, setDetailLoading] = useState(false);
@@ -75,14 +76,20 @@ export function LearnerProgressPanel() {
         .eq('course_id', COURSE_ID);
       if (progErr) throw progErr;
 
-      // 2. Module map to translate module_id -> module_number
+      // 2. Live module inventory — the current curriculum is derived, never hardcoded.
       const { data: modules } = await supabase
         .from('course_modules')
-        .select('id, module_number')
+        .select('id, module_number, is_active, is_manager_only, created_at')
         .eq('course_id', COURSE_ID);
       const moduleNumberById = new Map<string, number>(
         (modules ?? []).map((m: any) => [m.id, m.module_number]),
       );
+      const activeCoreModules = (modules ?? []).filter(
+        (m: any) => m.is_active !== false && m.is_manager_only !== true,
+      );
+      const activeCoreCount = activeCoreModules.length;
+      setCoreModuleCount(activeCoreCount || null);
+
 
       // 3. Certificates
       const { data: certs } = await supabase
