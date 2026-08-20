@@ -21,8 +21,14 @@ const Welcome = () => {
   useEffect(() => {
     if (rolesLoading) return;
     
+    // Admin outranks every other role.
+    if (isAdmin) {
+      navigate('/admin', { replace: true });
+      return;
+    }
+
     // If employee/student only (not a manager/admin), redirect to student dashboard
-    if (isStudent && !isDispensaryManager && !isTrainingCoordinator && !isAdmin) {
+    if (isStudent && !isDispensaryManager && !isTrainingCoordinator) {
       navigate('/student-dashboard', { replace: true });
     }
   }, [rolesLoading, isStudent, isDispensaryManager, isTrainingCoordinator, isAdmin, navigate]);

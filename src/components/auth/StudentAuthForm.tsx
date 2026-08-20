@@ -132,9 +132,27 @@ const StudentAuthForm = () => {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
       const redirectParam = searchParams.get('redirect');
-      const safeRedirect = redirectParam && redirectParam.startsWith('/') && !redirectParam.startsWith('//')
+      let safeRedirect = redirectParam && redirectParam.startsWith('/') && !redirectParam.startsWith('//')
         ? redirectParam
         : '/student-dashboard';
+
+      // Admin wins over student when a user holds both roles — otherwise an admin
+      // signing in here lands on an empty student dashboard.
+      if (!redirectParam) {
+        const { data: sessionData } = await supabase.auth.getUser();
+        const uid = sessionData.user?.id;
+        if (uid) {
+          const { data: roleRows } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', uid);
+          const roles = (roleRows || []).map((r: { role: string }) => r.role);
+          if (roles.includes('admin')) safeRedirect = '/admin';
+          else if (roles.includes('dispensary_manager')) safeRedirect = '/dispensary-manager-dashboard';
+          else if (roles.includes('training_coordinator')) safeRedirect = '/training-coordinator-dashboard';
+        }
+      }
+
       window.location.href = safeRedirect;
     } catch (error: any) {
       toast({ title: "Login Failed", description: error.message, variant: "destructive" });
