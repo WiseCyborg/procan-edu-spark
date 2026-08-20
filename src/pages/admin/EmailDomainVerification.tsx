@@ -49,40 +49,9 @@ export default function EmailDomainVerification() {
     });
   };
 
-  const testDomain = async () => {
-    setTesting(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('_diagnostic-email', {
-        body: { to: 'ops@procannedu.com' }
-      });
+  // The live email diagnostic is retired: this page never sends a test email.
+  // Domain/DNS verification state must come from a real provider check.
 
-      if (error) throw error;
-
-      setTestResult(data);
-      
-      if (data.success) {
-        toast({
-          title: '✅ Domain Verified!',
-          description: 'Test email sent successfully. Domain is working.',
-        });
-      } else {
-        toast({
-          variant: 'destructive',
-          title: '❌ Domain Not Verified',
-          description: data.error || 'Domain verification failed',
-        });
-      }
-    } catch (error: any) {
-      setTestResult({ success: false, error: error.message });
-      toast({
-        variant: 'destructive',
-        title: 'Test Failed',
-        description: error.message,
-      });
-    } finally {
-      setTesting(false);
-    }
-  };
 
   return (
     <div className="container mx-auto p-6 max-w-5xl">
