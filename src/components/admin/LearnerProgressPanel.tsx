@@ -488,31 +488,44 @@ export function LearnerProgressPanel() {
                     {statusBadge(getStatus(selected))}
                   </div>
 
-                  {/* Overall progress */}
+                  {/* Progress against the CURRENT curriculum */}
                   <div>
                     <div className="flex items-baseline justify-between mb-2">
                       <div className="text-sm" style={{ color: BRAND.textMuted }}>
-                        Overall progress
+                        {selected.historical_curriculum
+                          ? 'Current-curriculum coverage'
+                          : 'Overall progress'}
                       </div>
                       <div
                         className="text-3xl font-bold tabular-nums"
                         style={{ color: BRAND.accent }}
                       >
-                        {Math.round((selected.modules_completed / TOTAL_MODULES) * 100)}%
+                        {currentCoreCount
+                          ? `${Math.round((selected.modules_completed / currentCoreCount) * 100)}%`
+                          : '—'}
                       </div>
                     </div>
                     {renderBar(
-                      (selected.modules_completed / TOTAL_MODULES) * 100,
+                      currentCoreCount
+                        ? (selected.modules_completed / currentCoreCount) * 100
+                        : 0,
                       12,
+                    )}
+                    {selected.historical_curriculum && (
+                      <p className="text-xs mt-2" style={{ color: BRAND.textMuted }}>
+                        Coverage against today's curriculum only. This learner's completion
+                        record was earned under the earlier curriculum and is unaffected.
+                      </p>
                     )}
                   </div>
 
                   {/* Stat grid */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <Stat
-                      label="Modules done"
-                      value={`${selected.modules_completed} / ${TOTAL_MODULES}`}
+                      label={selected.historical_curriculum ? 'Core modules covered' : 'Modules done'}
+                      value={`${selected.modules_completed} / ${coreLabel}`}
                     />
+
                     <Stat
                       label="Current module"
                       value={selected.current_module_number > 0 ? `#${selected.current_module_number}` : '—'}
