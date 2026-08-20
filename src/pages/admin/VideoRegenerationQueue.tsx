@@ -57,7 +57,7 @@ const relativeDate = (iso: string | null) => {
 const reviewBadge = (status: string | null) => {
   switch (status) {
     case 'approved':
-      return <Badge className="bg-emerald-600 hover:bg-emerald-600 text-white">Approved</Badge>;
+      return <Badge className="bg-emerald-600 hover:bg-emerald-600 text-white">Script approved</Badge>;
     case 'pending_review':
       return <Badge className="bg-amber-500 hover:bg-amber-500 text-white">Pending review</Badge>;
     case 'script_pending_review':
@@ -68,6 +68,20 @@ const reviewBadge = (status: string | null) => {
       return <Badge variant="secondary">{status || '—'}</Badge>;
   }
 };
+
+// Pipeline stage derived only from data the queue already returns. Anything we
+// cannot see from here is reported as unknown rather than assumed complete.
+const pipelineStage = (row: QueueRow) => {
+  if (row.review_status === 'approved') return 'Script approved — narration/render pending';
+  if (row.review_status === 'rejected') return 'Script rejected — needs rework';
+  if (row.has_draft_script) return 'Draft script ready — awaiting review';
+  return 'No draft script yet';
+};
+
+// Playback verification and publication are tracked downstream (R2 storage +
+// mapping + playback check). This view has no telemetry for them.
+const VERIFICATION_UNKNOWN = 'Not verified from this view';
+
 
 const QUEUE_KEY = ['admin', 'video-regeneration-queue'];
 
