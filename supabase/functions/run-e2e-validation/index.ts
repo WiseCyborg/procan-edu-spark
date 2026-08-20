@@ -107,6 +107,10 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    // Authorization is decided server-side. `user_roles` has no active/status
+    // column in this schema, so an existing role='admin' row is the requirement.
+    // No service-role harness client and no test artifact may be created before
+    // this check passes.
     const roleClient = createClient(supabaseUrl, supabaseServiceKey);
     const { data: roleRow, error: roleErr } = await roleClient
       .from('user_roles')
@@ -121,6 +125,7 @@ Deno.serve(async (req: Request) => {
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
       );
     }
+
   }
 
   try {

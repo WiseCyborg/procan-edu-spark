@@ -349,7 +349,64 @@ const JOB_HANDLERS: Record<string, (job: Job, supabase: any) => Promise<void>> =
     console.log('[video_migrate_verify] ✅', JSON.stringify(data?.results ?? []));
   },
 
+  'video_generate_narration': async (job, supabase) => {
+    // Single-asset worker. NEVER scans or bulk-processes flagged assets, and never
+    // touches other jobs. Fails closed unless narration is confirmed generated.
+    const assetId = job.payload?.asset_id;
+    if (!assetId) throw new Error('video_generate_narration: missing payload.asset_id');
+
+    const { data, error } = await supabase.functions.invoke('generate-video-narration', {
+      body: { asset_id: assetId, limit: 1 },
+    });
+    if (error) throw error;
+    if (!data || data.ok === false) {
+      throw new Error(data?.error || 'narration_generation_failed');
+    }
+
+    const result = (data.results ?? []).find((r: any) => r.asset_id === assetId);
+    const alreadyHadAudio = result?.status === 'skipped' && /already has draft_audio_url/i.test(result?.reason ?? '');
+    if (!result || (result.status !== 'succeeded' && !alreadyHadAudio)) {
+      throw new Error(
+        `narration_not_ready: ${result?.status ?? 'no result'}${result?.reason ? ` — ${result.reason}` : ''}`,
+      );
+    }
+
+    // Confirm narration is actually stored on the asset before moving downstream.
+    const { data: asset, error: assetErr } = await supabase
+      .from('video_assets')
+      .select('id, draft_audio_url')
+      .eq('id', assetId)
+      .maybeSingle();
+    if (assetErr) throw assetErr;
+    if (!asset?.draft_audio_url) throw new Error('narration_not_ready: draft_audio_url is still null');
+
+    // Idempotent hand-off: exactly one open render dispatch job per asset.
+    const { data: existing, error: existingErr } = await supabase
+      .from('system_jobs')
+      .select('id')
+      .eq('job_type', 'video_render_dispatch')
+      .in('status', ['queued', 'pending', 'processing'])
+      .contains('payload', { asset_id: assetId })
+      .limit(1);
+    if (existingErr) throw existingErr;
+
+    if (existing && existing.length > 0) {
+      console.log(`[video_generate_narration] render dispatch already queued for ${assetId} — skipping enqueue`);
+      return;
+    }
+
+    const { error: enqueueErr } = await supabase.from('system_jobs').insert({
+      job_type: 'video_render_dispatch',
+      payload: { asset_id: assetId, limit: 1 },
+      status: 'pending',
+    });
+    if (enqueueErr) throw enqueueErr;
+
+    console.log(`[video_generate_narration] ✅ narration ready for ${assetId}, render dispatch queued`);
+  },
+
   'video_render_dispatch': async (job, supabase) => {
+
     const { asset_id, limit } = job.payload || {};
     const { data, error } = await supabase.functions.invoke('render-video', {
       body: { action: 'dispatch', asset_id, limit: limit ?? 1 },

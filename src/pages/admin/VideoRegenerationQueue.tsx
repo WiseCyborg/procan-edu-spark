@@ -57,7 +57,7 @@ const relativeDate = (iso: string | null) => {
 const reviewBadge = (status: string | null) => {
   switch (status) {
     case 'approved':
-      return <Badge className="bg-emerald-600 hover:bg-emerald-600 text-white">Approved</Badge>;
+      return <Badge className="bg-emerald-600 hover:bg-emerald-600 text-white">Script approved</Badge>;
     case 'pending_review':
       return <Badge className="bg-amber-500 hover:bg-amber-500 text-white">Pending review</Badge>;
     case 'script_pending_review':
@@ -68,6 +68,20 @@ const reviewBadge = (status: string | null) => {
       return <Badge variant="secondary">{status || '—'}</Badge>;
   }
 };
+
+// Pipeline stage derived only from data the queue already returns. Anything we
+// cannot see from here is reported as unknown rather than assumed complete.
+const pipelineStage = (row: QueueRow) => {
+  if (row.review_status === 'approved') return 'Script approved — narration/render pending';
+  if (row.review_status === 'rejected') return 'Script rejected — needs rework';
+  if (row.has_draft_script) return 'Draft script ready — awaiting review';
+  return 'No draft script yet';
+};
+
+// Playback verification and publication are tracked downstream (R2 storage +
+// mapping + playback check). This view has no telemetry for them.
+const VERIFICATION_UNKNOWN = 'Not verified from this view';
+
 
 const QUEUE_KEY = ['admin', 'video-regeneration-queue'];
 
@@ -118,7 +132,7 @@ const VideoRegenerationQueue: React.FC = () => {
         p_note: note.trim() ? note.trim() : null,
       });
       if (error) throw error;
-      if (handleResult(data, 'Marked as regenerated')) {
+      if (handleResult(data, 'Replacement candidate registered')) {
         setMarkTarget(null);
         setNewUrl('');
         setNote('');
@@ -138,7 +152,7 @@ const VideoRegenerationQueue: React.FC = () => {
         p_asset_id: approveTarget.asset_id,
       });
       if (error) throw error;
-      if (handleResult(data, 'Video approved')) {
+      if (handleResult(data, 'Script approved & narration queued')) {
         setApproveTarget(null);
       }
     } catch (err: any) {
@@ -194,9 +208,17 @@ const VideoRegenerationQueue: React.FC = () => {
             </Button>
           </div>
           <p className="text-muted-foreground mt-1">
-            Training videos flagged for regeneration after a Maryland COMAR regulation change — record the new
-            video and sign it off once reviewed.
+            Training videos flagged for regeneration after a Maryland COMAR regulation change. Approving a script
+            queues narration; registering a replacement candidate records it for review. Neither action clears the
+            regeneration flag or swaps the live video.
           </p>
+          <div className="mt-3 rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
+            <p className="font-medium">The regeneration flag stays open until every gate is met</p>
+            <p className="text-muted-foreground mt-1">
+              A flagged video is only cleared once the replacement is stored in R2, mapped to the module,
+              playback-verified, and explicitly published. Nothing on this page performs those steps.
+            </p>
+          </div>
         </div>
 
         <Card>
@@ -204,6 +226,7 @@ const VideoRegenerationQueue: React.FC = () => {
             <CardTitle className="text-lg">Flagged videos</CardTitle>
             <CardDescription>Only videos with an open regeneration flag appear here.</CardDescription>
           </CardHeader>
+
           <CardContent>
             {isLoading ? (
               <div className="space-y-3">
@@ -241,6 +264,8 @@ const VideoRegenerationQueue: React.FC = () => {
                       <TableHead>Flagged since</TableHead>
                       <TableHead>Draft script</TableHead>
                       <TableHead>Review status</TableHead>
+                      <TableHead>Pipeline stage</TableHead>
+                      <TableHead>Playback verified</TableHead>
                       <TableHead className="text-end">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -265,6 +290,10 @@ const VideoRegenerationQueue: React.FC = () => {
                           )}
                         </TableCell>
                         <TableCell>{reviewBadge(row.review_status)}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground max-w-[220px]">
+                          {pipelineStage(row)}
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">{VERIFICATION_UNKNOWN}</TableCell>
                         <TableCell className="text-end whitespace-nowrap">
                           <Button
                             variant="outline"
@@ -276,12 +305,13 @@ const VideoRegenerationQueue: React.FC = () => {
                               setMarkTarget(row);
                             }}
                           >
-                            Mark regenerated
+                            Register replacement candidate
                           </Button>
                           <Button size="sm" onClick={() => setApproveTarget(row)}>
-                            Approve
+                            Approve script &amp; queue narration
                           </Button>
                         </TableCell>
+
                       </TableRow>
                     ))}
                   </TableBody>
@@ -292,19 +322,22 @@ const VideoRegenerationQueue: React.FC = () => {
         </Card>
       </div>
 
-      {/* Mark regenerated dialog */}
+      {/* Register replacement candidate dialog */}
       <Dialog open={!!markTarget} onOpenChange={(open) => !open && setMarkTarget(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Mark video as regenerated</DialogTitle>
+            <DialogTitle>Register replacement candidate</DialogTitle>
             <DialogDescription>
-              Records that a new video was produced for{' '}
-              {markTarget?.module_title || markTarget?.asset_key || 'this module'}. If you enter a new video URL it replaces the live video immediately; leave it blank to record that the existing video was re-reviewed and is still accurate. Sets the video to pending review.
+              Records a candidate replacement for{' '}
+              {markTarget?.module_title || markTarget?.asset_key || 'this module'} and sets it to pending review.
+              This does not clear the regeneration flag: the flag stays open until the replacement is stored in R2,
+              mapped to the module, playback-verified, and explicitly published.
             </DialogDescription>
           </DialogHeader>
+
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="new-video-url">New video URL (optional)</Label>
+              <Label htmlFor="new-video-url">Candidate video URL (optional)</Label>
               <Input
                 id="new-video-url"
                 value={newUrl}
@@ -314,6 +347,7 @@ const VideoRegenerationQueue: React.FC = () => {
             </div>
             <div className="space-y-2">
               <Label htmlFor="regeneration-note">Note (optional)</Label>
+
               <Textarea
                 id="regeneration-note"
                 value={note}
@@ -329,20 +363,22 @@ const VideoRegenerationQueue: React.FC = () => {
             </Button>
             <Button onClick={submitMarkRegenerated} disabled={busy}>
               {busy && <Loader2 className="h-4 w-4 me-2 animate-spin" />}
-              Save
+              Register candidate
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Approve confirm dialog */}
+      {/* Approve script confirm dialog */}
       <Dialog open={!!approveTarget} onOpenChange={(open) => !open && setApproveTarget(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Approve this video?</DialogTitle>
+            <DialogTitle>Approve script &amp; queue narration?</DialogTitle>
             <DialogDescription>
-              Final compliance sign-off for{' '}
-              {approveTarget?.module_title || approveTarget?.asset_key || 'this module'}. Marks the video approved and clears the regeneration flag. This does not change the video file itself — to replace the video, use 'Mark regenerated' with a new URL.
+              Compliance sign-off on the reviewed script for{' '}
+              {approveTarget?.module_title || approveTarget?.asset_key || 'this module'}. Narration and rendering
+              happen downstream. The live video is unchanged, and the regeneration flag remains open until the
+              replacement is stored in R2, mapped, playback-verified, and explicitly published.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -351,9 +387,10 @@ const VideoRegenerationQueue: React.FC = () => {
             </Button>
             <Button onClick={submitApprove} disabled={busy}>
               {busy && <Loader2 className="h-4 w-4 me-2 animate-spin" />}
-              Approve
+              Approve script &amp; queue narration
             </Button>
           </DialogFooter>
+
         </DialogContent>
       </Dialog>
     </div>

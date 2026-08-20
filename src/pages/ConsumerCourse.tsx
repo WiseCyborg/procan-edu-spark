@@ -42,7 +42,9 @@ const ConsumerCourse = () => {
     completionPercentage,
     enrollmentId,
     completeCourse,
+    isGuestE2E,
   } = useConsumerProgress(courseId || '', modules.length);
+
 
   useEffect(() => {
     const fetchCourseData = async () => {
@@ -155,9 +157,15 @@ const ConsumerCourse = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {isGuestE2E && (
+        <div className="bg-amber-500 text-black text-center text-sm font-semibold px-4 py-2">
+          Guest E2E mode — database writes disabled.
+        </div>
+      )}
       {/* Top Bar */}
       <div className="sticky top-0 z-40 bg-background border-b border-border">
         <div className="container mx-auto px-4 py-3">
+
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3 min-w-0 flex-1">
               <Dialog open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
