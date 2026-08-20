@@ -423,16 +423,17 @@ const MCAComplianceReview = () => {
         {/* Download & Contact Section */}
         <Card className="bg-gradient-to-br from-primary to-accent text-white">
           <CardHeader>
-            <CardTitle className="text-white">Download Complete Documentation</CardTitle>
+            <CardTitle className="text-white">Download Readiness Documentation</CardTitle>
             <CardDescription className="text-white/90">
-              Access the full MCA compliance package or contact our regulatory team
+              Access our internal compliance readiness package or contact our regulatory team
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <Button variant="secondary" size="lg" className="w-full md:w-auto">
               <Download className="h-4 w-4 me-2" />
-              Download MCA Compliance Package (PDF)
+              Download Compliance Readiness Package (PDF)
             </Button>
+
             <div className="border-t border-white/20 pt-4">
               <h3 className="text-lg font-semibold text-white mb-2">
                 Contact for Regulatory Inquiries
