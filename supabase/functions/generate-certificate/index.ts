@@ -348,6 +348,8 @@ Deno.serve(async (req: Request) => {
           rvt_complete: rvtComplete,
           manager_complete: managerComplete,
           verify_url: verifyUrl,
+          issuance_snapshot: issuanceSnapshot,
+
         },
       })
       .select()
