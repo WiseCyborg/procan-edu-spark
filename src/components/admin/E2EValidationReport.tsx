@@ -46,7 +46,7 @@ interface JourneySummary {
   risk_types: RiskLevel[];
 }
 
-interface E2EReport {
+export interface E2EReport {
   test_run_id: string;
   started_at: string;
   completed_at: string;
@@ -129,6 +129,7 @@ export const E2EValidationReport: React.FC<E2EValidationReportProps> = ({ onComp
       } else {
         toast.error(`E2E Validation Complete: NOT SHIPPABLE - ${data.blocker_count} blockers found`);
       }
+      onComplete?.(data);
       setIsRunning(false);
     },
     onError: (error: any) => {
