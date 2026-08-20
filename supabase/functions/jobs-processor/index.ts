@@ -381,11 +381,12 @@ const JOB_HANDLERS: Record<string, (job: Job, supabase: any) => Promise<void>> =
     if (!asset?.draft_audio_url) throw new Error('narration_not_ready: draft_audio_url is still null');
 
     // Idempotent hand-off: exactly one open render dispatch job per asset.
+    // The live system_jobs status constraint permits queued/processing/completed/failed only.
     const { data: existing, error: existingErr } = await supabase
       .from('system_jobs')
       .select('id')
       .eq('job_type', 'video_render_dispatch')
-      .in('status', ['queued', 'pending', 'processing'])
+      .in('status', ['queued', 'processing'])
       .contains('payload', { asset_id: assetId })
       .limit(1);
     if (existingErr) throw existingErr;
@@ -395,14 +396,16 @@ const JOB_HANDLERS: Record<string, (job: Job, supabase: any) => Promise<void>> =
       return;
     }
 
-    const { error: enqueueErr } = await supabase.from('system_jobs').insert({
-      job_type: 'video_render_dispatch',
-      payload: { asset_id: assetId, limit: 1 },
-      status: 'pending',
+    // Use the repository queue_job RPC so status defaults to 'queued' and the
+    // idempotency key prevents duplicate render dispatch jobs for this asset.
+    const { data: queuedJobId, error: enqueueErr } = await supabase.rpc('queue_job', {
+      p_job_type: 'video_render_dispatch',
+      p_payload: { asset_id: assetId, limit: 1 },
+      p_idempotency_key: `video_render_dispatch:${assetId}`,
     });
     if (enqueueErr) throw enqueueErr;
 
-    console.log(`[video_generate_narration] ✅ narration ready for ${assetId}, render dispatch queued`);
+    console.log(`[video_generate_narration] ✅ narration ready for ${assetId}, render dispatch queued (${queuedJobId})`);
   },
 
   'video_render_dispatch': async (job, supabase) => {
