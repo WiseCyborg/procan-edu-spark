@@ -34,12 +34,38 @@ const MCAComplianceReview = () => {
   const navigate = useNavigate();
   const { data: metrics, isLoading } = useMCAMetrics();
   const [searchQuery, setSearchQuery] = useState('');
+  const [liveCounts, setLiveCounts] = useState<{ core: number; manager: number } | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase
+        .from('course_modules')
+        .select('id, is_active, is_manager_only')
+        .eq('course_id', TRACK_IDS.RVT_CORE);
+      if (cancelled || error || !data) return;
+      const active = data.filter((m: any) => m.is_active !== false);
+      setLiveCounts({
+        core: active.filter((m: any) => m.is_manager_only !== true).length,
+        manager: active.filter((m: any) => m.is_manager_only === true).length,
+      });
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Prefer live data; otherwise fall back to the shared constants.
+  const coreModuleCount = liveCounts?.core ?? RVT_TRAINING_MODULE_COUNT;
+  const managerModuleCount = liveCounts?.manager ?? MANAGER_ONLY_MODULE_COUNT;
+  const totalActiveModules = coreModuleCount + managerModuleCount;
 
   const handleCertificateSearch = () => {
     if (searchQuery.trim()) {
       navigate(`/verify-certificate?number=${searchQuery.trim()}`);
     }
   };
+
 
   if (isLoading) {
     return (
