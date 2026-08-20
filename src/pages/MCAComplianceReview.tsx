@@ -197,8 +197,9 @@ const MCAComplianceReview = () => {
               <p className="text-muted-foreground">
                 <strong>Legal Name:</strong> ProCann Edu, LLC<br />
                 <strong>Location:</strong> Baltimore, Maryland<br />
-                <strong>Service Area:</strong> All 24 Maryland counties<br />
-                <strong>Platform Type:</strong> Online RVT training and compliance management
+                <strong>Service Area:</strong> Maryland<br />
+                <strong>Platform Type:</strong> Online workforce compliance education and training management
+
               </p>
             </div>
             <div>
@@ -220,19 +221,23 @@ const MCAComplianceReview = () => {
               COMAR 14.17.15.05 Alignment Matrix
             </CardTitle>
             <CardDescription>
-              Module-by-module mapping to Maryland regulations
+              Module-by-module mapping of our curriculum to Maryland regulatory topics
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-muted-foreground">
-              Our {RVT_TRAINING_MODULE_COUNT}-module curriculum is specifically designed to meet and exceed COMAR 14.17.15.05 requirements for Responsible Vendor Training in Maryland.
+              The workforce compliance track currently has {totalActiveModules} active modules:{' '}
+              {coreModuleCount} core modules and {managerModuleCount} manager-only modules. Content
+              is mapped to the topics described in COMAR 14.17.15.05. This mapping is our own
+              internal alignment work and has not been reviewed or approved by the MCA.
             </p>
+
             <div className="space-y-2">
               <div className="flex items-start gap-2">
                 <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
                 <div>
                   <strong className="text-foreground">Drug-Free Workplace Policy</strong>
-                  <p className="text-sm text-muted-foreground">COMAR 21.11.08.03 compliance included</p>
+                  <p className="text-sm text-muted-foreground">COMAR 21.11.08.03 topics covered</p>
                 </div>
               </div>
               <div className="flex items-start gap-2">
@@ -252,11 +257,12 @@ const MCAComplianceReview = () => {
             </div>
             <div className="bg-primary/5 p-4 rounded-lg border border-primary/20 mt-4">
               <p className="text-sm text-muted-foreground">
-                <strong className="text-foreground">Current Status:</strong> Formal COMAR compliance review in progress<br />
-                <strong className="text-foreground">Update Protocol:</strong> Automated monitoring system with formal review workflow<br />
-                <strong className="text-foreground">Review Frequency:</strong> Six-month compliance audits with continuous monitoring
+                <strong className="text-foreground">Current Status:</strong> Internal COMAR review and application preparation in progress; human sign-off pending<br />
+                <strong className="text-foreground">Update Protocol:</strong> Automated monitoring with a human review workflow before content changes ship<br />
+                <strong className="text-foreground">Review Frequency:</strong> Six-month internal reviews with continuous monitoring
               </p>
             </div>
+
             <Button variant="outline" className="mt-4">
               <FileText className="h-4 w-4 me-2" />
               View Detailed Curriculum Matrix
