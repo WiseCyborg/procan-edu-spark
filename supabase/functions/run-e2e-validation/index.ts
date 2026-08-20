@@ -1576,9 +1576,6 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    const releaseGateStatus: 'SHIPPABLE' | 'NOT_SHIPPABLE' | 'INCOMPLETE' =
-      gateReasons.length === 0 ? 'SHIPPABLE' : blockerCount > 0 ? 'NOT_SHIPPABLE' : 'INCOMPLETE';
-
     const passedTests = results.filter(r => r.passed).length;
     const failedTests = results.filter(r => !r.passed).length;
 
@@ -1596,18 +1593,112 @@ Deno.serve(async (req: Request) => {
     console.log('=== E2E Teardown (end of run) ===');
     let teardownPerformed = false;
     let teardownResult: any = null;
+    const cleanupResidue: string[] = [];
     try {
       const { data: purgeData, error: purgeError } = await supabase.rpc('purge_e2e_test_artifacts');
       if (purgeError) {
         console.error('[E2E TEARDOWN] purge_e2e_test_artifacts failed:', purgeError.message);
+        cleanupResidue.push(`purge_e2e_test_artifacts failed: ${purgeError.message}`);
       } else {
         teardownPerformed = true;
         teardownResult = purgeData;
         console.log('[E2E TEARDOWN] purged:', JSON.stringify(purgeData));
       }
+
+      // purge_e2e_test_artifacts does not remove the email_logs row written when the
+      // application confirmation email is received for THIS run. Delete it explicitly,
+      // scoped strictly to this run's harness address (e2e+<runid>@procannedu.com).
+      const { error: emailLogDeleteError } = await supabase
+        .from('email_logs')
+        .delete()
+        .eq('recipient_email', testEmail);
+      if (emailLogDeleteError) {
+        console.error('[E2E TEARDOWN] email_logs delete failed:', emailLogDeleteError.message);
+        cleanupResidue.push(`email_logs delete failed: ${emailLogDeleteError.message}`);
+      }
+
+      // Verify ZERO current-run artifacts remain before claiming cleanup_performed.
+      const residueChecks: Array<{ label: string; count: number | null; error?: string }> = [];
+
+      const countOf = async (
+        label: string,
+        run: () => Promise<{ count: number | null; error: any }>
+      ) => {
+        const { count, error } = await run();
+        residueChecks.push({ label, count: count ?? 0, error: error?.message });
+      };
+
+      await countOf('email_logs', async () =>
+        await supabase
+          .from('email_logs')
+          .select('id', { count: 'exact', head: true })
+          .eq('recipient_email', testEmail)
+      );
+      await countOf('dispensary_applications', async () =>
+        await supabase
+          .from('dispensary_applications')
+          .select('id', { count: 'exact', head: true })
+          .eq('contact_email', testEmail)
+      );
+      await countOf('profiles', async () =>
+        await supabase
+          .from('profiles')
+          .select('id', { count: 'exact', head: true })
+          .eq('email_cache', testEmail)
+      );
+      await countOf('certificates', async () =>
+        await supabase
+          .from('certificates')
+          .select('id', { count: 'exact', head: true })
+          .like('certificate_number', 'E2E-%')
+      );
+
+      // Auth user for this run's harness email
+      try {
+        const { data: authList, error: authListError } = await supabase.auth.admin.listUsers();
+        if (authListError) {
+          residueChecks.push({ label: 'auth.users', count: null, error: authListError.message });
+        } else {
+          const remaining = (authList?.users || []).filter((u: any) => u.email === testEmail).length;
+          residueChecks.push({ label: 'auth.users', count: remaining });
+        }
+      } catch (authErr: any) {
+        residueChecks.push({ label: 'auth.users', count: null, error: authErr?.message });
+      }
+
+      for (const check of residueChecks) {
+        if (check.error) {
+          cleanupResidue.push(`${check.label}: verification failed (${check.error})`);
+        } else if ((check.count ?? 0) > 0) {
+          cleanupResidue.push(`${check.label}: ${check.count} current-run artifact(s) remain`);
+        }
+      }
+
+      teardownResult = {
+        purge: teardownResult,
+        verification: residueChecks,
+        test_email: testEmail,
+      };
+
+      if (cleanupResidue.length > 0) {
+        teardownPerformed = false;
+      }
     } catch (teardownError: any) {
       console.error('[E2E TEARDOWN] exception:', teardownError?.message);
+      teardownPerformed = false;
+      cleanupResidue.push(`teardown exception: ${teardownError?.message || 'unknown error'}`);
     }
+
+    if (cleanupResidue.length > 0) {
+      gateReasons.push(
+        `E2E cleanup residue — current-run test artifacts were not fully removed: ${cleanupResidue.join('; ')}`
+      );
+    }
+
+    // Release gate is computed AFTER teardown so cleanup residue can degrade the gate.
+    const releaseGateStatus: 'SHIPPABLE' | 'NOT_SHIPPABLE' | 'INCOMPLETE' =
+      gateReasons.length === 0 ? 'SHIPPABLE' : blockerCount > 0 ? 'NOT_SHIPPABLE' : 'INCOMPLETE';
+
 
     const report: E2EReport = {
       test_run_id: testRunId,
