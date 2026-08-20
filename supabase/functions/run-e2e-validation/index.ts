@@ -95,6 +95,11 @@ Deno.serve(async (req: Request) => {
 
   const isInternalAutomation = bearer === supabaseServiceKey;
 
+  // Retained after the admin check so admin-only RPCs (e.g. get_launch_readiness,
+  // which requires an admin auth.uid()) can be called as the validated admin user
+  // instead of with the service-role client.
+  let adminJwtClient: ReturnType<typeof createClient> | null = null;
+
   if (!isInternalAutomation) {
     const authClient = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: `Bearer ${bearer}` } },
