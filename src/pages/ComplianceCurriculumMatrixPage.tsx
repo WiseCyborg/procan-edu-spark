@@ -129,7 +129,7 @@ export default function ComplianceCurriculumMatrixPage() {
       </Card>
 
       {/* Gap Alert */}
-      {totalGaps > 0 && (
+      {hasBlockingGaps && (
         <Card className="mb-8 border-destructive">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
@@ -138,7 +138,18 @@ export default function ComplianceCurriculumMatrixPage() {
                 <div>
                   <h3 className="text-lg font-bold">Compliance Gaps Detected</h3>
                   <p className="text-sm text-muted-foreground">
-                    {totalGaps} {totalGaps === 1 ? 'issue' : 'issues'} found across modules
+                    {totalGaps > 0 && (
+                      <>
+                        {totalGaps} validation {totalGaps === 1 ? 'issue' : 'issues'} across modules
+                      </>
+                    )}
+                    {totalGaps > 0 && unmappedModules > 0 && ' plus '}
+                    {unmappedModules > 0 && (
+                      <>
+                        {unmappedModules} unmapped {unmappedModules === 1 ? 'module' : 'modules'}
+                      </>
+                    )}
+                    {', '}{totalGaps + unmappedModules} outstanding total
                   </p>
                 </div>
               </div>
