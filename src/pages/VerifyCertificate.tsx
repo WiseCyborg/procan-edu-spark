@@ -39,8 +39,10 @@ const VerifyCertificate = () => {
   // Name search state
   const [firstName, setFirstName] = useState('');
   const [lastInitial, setLastInitial] = useState('');
-  const [selectedCourse, setSelectedCourse] = useState<string>('');
-  const [selectedYear, setSelectedYear] = useState<string>('');
+  const ANY_COURSE = 'all';
+  const ANY_YEAR = 'all';
+  const [selectedCourse, setSelectedCourse] = useState<string>(ANY_COURSE);
+  const [selectedYear, setSelectedYear] = useState<string>(ANY_YEAR);
 
   // Fetch courses for dropdown
   const { data: courses } = useQuery({
@@ -99,8 +101,8 @@ const VerifyCertificate = () => {
         p_code: null,
         p_first_name: firstName.trim(),
         p_last_initial: lastInitial.trim().charAt(0).toUpperCase(),
-        p_course_id: selectedCourse || null,
-        p_year: selectedYear ? parseInt(selectedYear) : null
+        p_course_id: selectedCourse && selectedCourse !== ANY_COURSE ? selectedCourse : null,
+        p_year: selectedYear && selectedYear !== ANY_YEAR ? parseInt(selectedYear) : null
       });
       
       if (error) throw error;
@@ -246,7 +248,7 @@ const VerifyCertificate = () => {
                           <SelectValue placeholder="Any course" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">Any course</SelectItem>
+                          <SelectItem value={ANY_COURSE}>Any course</SelectItem>
                           {courses?.map((course) => (
                             <SelectItem key={course.id} value={course.id}>
                               {course.title}
@@ -264,7 +266,7 @@ const VerifyCertificate = () => {
                           <SelectValue placeholder="Any year" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">Any year</SelectItem>
+                          <SelectItem value={ANY_YEAR}>Any year</SelectItem>
                           {years.map((year) => (
                             <SelectItem key={year} value={year.toString()}>
                               {year}
