@@ -60,29 +60,43 @@ const MCAComplianceReview = () => {
           <div className="flex items-center justify-center gap-3 mb-6">
             <Shield className="h-12 w-12 text-primary" />
             <h1 className="text-4xl font-bold text-foreground">
-              MCA Live Compliance Dashboard
+              MCA Compliance Readiness Review
             </h1>
           </div>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Real-time oversight and certificate verification for Maryland Cannabis Administration
+            Internal provider readiness and evidence page maintained by ProCann Edu, LLC. This
+            page is not operated by, endorsed by, or affiliated with the Maryland Cannabis
+            Administration.
           </p>
         </div>
 
-        {/* Certificate Verification Search - Prominent */}
+        <Card className="mb-8 border-yellow-500/40 bg-yellow-500/5">
+          <CardContent className="pt-6">
+            <p className="text-sm text-muted-foreground">
+              <strong className="text-foreground">Status disclosure:</strong> ProCann EDU
+              provides workforce compliance education and readiness training. It is not an
+              MCA-approved Responsible Vendor Training provider, and completion records issued
+              here are not an official Maryland credential. Formal review and application
+              preparation, including human sign-off, is in progress.
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Completion Record Verification */}
         <Card className="mb-8 border-primary/20 shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Search className="h-6 w-6" />
-              Verify Certificate
+              Completion Record Verification
             </CardTitle>
             <CardDescription>
-              Enter certificate number to instantly verify authenticity and view details
+              Enter a completion record number to verify that the record was issued by ProCann EDU
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex gap-2">
               <Input
-                placeholder="Enter certificate number (e.g., MCA-2025-00123)"
+                placeholder="Enter completion record number"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleCertificateSearch()}
@@ -95,6 +109,7 @@ const MCAComplianceReview = () => {
             </div>
           </CardContent>
         </Card>
+
 
         {/* Hero Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
