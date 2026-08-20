@@ -131,6 +131,7 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    adminJwtClient = authClient;
   }
 
   try {
