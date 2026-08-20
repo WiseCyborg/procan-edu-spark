@@ -258,7 +258,11 @@ export const RealSystemHealthPanel = () => {
               <CardTitle className="text-lg">Pipeline Health</CardTitle>
             </div>
             <Badge variant="outline">
-              {health.pipeline.healthyPipelines}/{health.pipeline.totalPipelines} Healthy
+              {!health.pipeline.instrumented
+                ? 'Not instrumented'
+                : health.pipeline.status === 'healthy'
+                  ? `${health.pipeline.healthyPipelines}/${health.pipeline.totalPipelines} Healthy`
+                  : `Needs attention — ${health.pipeline.healthyPipelines}/${health.pipeline.totalPipelines} healthy`}
             </Badge>
           </div>
           <CardDescription>
@@ -284,12 +288,17 @@ export const RealSystemHealthPanel = () => {
               value={health.pipeline.needsAttention} 
               icon={AlertOctagon}
             />
-            <MetricCard 
-              label="Healthy Pipelines" 
-              value={`${health.pipeline.healthyPipelines}/${health.pipeline.totalPipelines}`} 
+            <MetricCard
+              label="Healthy Pipelines"
+              value={
+                health.pipeline.instrumented
+                  ? `${health.pipeline.healthyPipelines}/${health.pipeline.totalPipelines}`
+                  : 'Unknown'
+              }
               icon={Activity}
             />
           </div>
+
         </CardContent>
       </Card>
     </div>
