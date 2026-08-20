@@ -1,190 +1,182 @@
-import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Activity, Database, Zap, AlertTriangle, CheckCircle, RefreshCw, Users, UserX, Shield, ExternalLink, BarChart3 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertTriangle, RefreshCw, Users, UserX, Shield, ExternalLink, BarChart3, Database } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { EmailFlowDiagram } from '@/components/admin/EmailFlowDiagram';
-import { EdgeFunctionsStatus } from '@/components/admin/EdgeFunctionsStatus';
+import { RealSystemHealthPanel } from '@/components/admin/RealSystemHealthPanel';
 import { IntegrationHealthMonitor } from '@/components/admin/IntegrationHealthMonitor';
 import { RegulatorySyncPanel } from '@/components/admin/RegulatorySyncPanel';
 import { DispensaryPipelineMonitor } from '@/components/admin/DispensaryPipelineMonitor';
 
+interface OrphanedManager {
+  id: string;
+  contact_person: string | null;
+  contact_email: string | null;
+  organization_name: string | null;
+  created_at: string;
+}
+
 const SystemHealthDashboard = () => {
   const [loading, setLoading] = useState(true);
-  const [healthData, setHealthData] = useState<any>(null);
-  const [orphanedManagers, setOrphanedManagers] = useState<any[]>([]);
-  const [emailFlowSteps, setEmailFlowSteps] = useState<any[]>([]);
-  const [securityStatus, setSecurityStatus] = useState<any>(null);
-  const { toast } = useToast();
+  const [orphanedManagers, setOrphanedManagers] = useState<OrphanedManager[] | null>(null);
+  const [queryErrors, setQueryErrors] = useState<string[]>([]);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchHealthData();
-  }, []);
-
-  const fetchHealthData = async () => {
+  const fetchHealthData = useCallback(async () => {
     setLoading(true);
+    const errors: string[] = [];
+
+    // Orphaned managers (organizations approved + registered but with no staff invitations)
+    let orphans: OrphanedManager[] | null = null;
     try {
-      // System health
-      const { data: healthData, error: healthError } = await supabase
-        .rpc('test_system_health');
-
-      if (healthError) throw healthError;
-      setHealthData(healthData);
-
-      // Orphaned managers
-      const { data: orphaned } = await supabase
+      const { data, error } = await supabase
         .from('dispensary_applications')
         .select('id, contact_person, contact_email, organization_name, created_at')
         .eq('registration_completed', true)
         .eq('application_status', 'approved');
 
-      if (orphaned) {
-        const managersWithoutInvites = [];
-        for (const app of orphaned) {
-          const { count } = await supabase
-            .from('staff_invitations')
-            .select('*', { count: 'exact', head: true })
-            .eq('organization_id', app.id);
-          
-          if (count === 0) {
-            managersWithoutInvites.push(app);
-          }
-        }
-        setOrphanedManagers(managersWithoutInvites);
+      if (error) throw error;
+
+      const withoutInvites: OrphanedManager[] = [];
+      for (const app of data || []) {
+        const { count, error: inviteError } = await supabase
+          .from('staff_invitations')
+          .select('*', { count: 'exact', head: true })
+          .eq('organization_id', app.id);
+
+        if (inviteError) throw inviteError;
+        if (count === 0) withoutInvites.push(app as OrphanedManager);
       }
-
-      // Email flow
-      const { data: recentApp } = await supabase
-        .from('dispensary_applications')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
-
-      if (recentApp) {
-        setEmailFlowSteps([
-          { id: 'application', label: 'Application Submitted', status: 'completed' as const, timestamp: recentApp.created_at },
-          { id: 'approval', label: 'Admin Approval', status: recentApp.application_status === 'approved' ? 'completed' as const : 'pending' as const, timestamp: recentApp.reviewed_at },
-          { id: 'registration', label: 'Manager Registration', status: recentApp.registration_completed ? 'completed' as const : 'pending' as const },
-          { id: 'invitations', label: 'Staff Invitations', status: orphaned?.some(a => a.id === recentApp.id) ? 'pending' as const : 'completed' as const }
-        ]);
-      }
-
-      // Security status - Phase 1 completed, Phase 3 pending
-      setSecurityStatus({
-        functionsSecured: true, // Phase 1 completed via migration
-        extensionWarning: true, // Phase 2 cannot fix (pg_net limitation)
-        postgresUpgraded: false, // Phase 3 requires manual upgrade
-        overallStatus: 'partial'
-      });
-    } catch (error: any) {
-      toast({ title: "Health Check Failed", description: error.message, variant: "destructive" });
-    } finally {
-      setLoading(false);
+      orphans = withoutInvites;
+    } catch (err: any) {
+      errors.push(`Orphaned manager query failed: ${err?.message || 'unknown error'}`);
     }
-  };
 
-  if (loading) return <div className="container p-6"><div className="animate-spin h-8 w-8 border-4 border-primary rounded-full mx-auto" /></div>;
+    setOrphanedManagers(orphans);
+    setQueryErrors(errors);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    fetchHealthData();
+  }, [fetchHealthData]);
+
+  const hasQueryErrors = queryErrors.length > 0;
+  // Any query/schema-cache error forces a degraded/error posture. Never "healthy".
+  const overallLabel = hasQueryErrors
+    ? 'Error — health cannot be determined'
+    : 'Degraded until telemetry proves otherwise';
 
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">System Health Dashboard</h1>
-          <p className="text-muted-foreground">Monitor platform performance</p>
+          <p className="text-muted-foreground">
+            Observed telemetry only — absent telemetry is reported as degraded, never healthy
+          </p>
         </div>
         <div className="flex gap-2">
           <Button onClick={() => navigate('/admin/health-report')} variant="default">
             <BarChart3 className="h-4 w-4 me-2" />
             Full Health Report
           </Button>
-          <Button onClick={fetchHealthData} variant="outline">
-            <RefreshCw className="h-4 w-4 me-2" />
+          <Button onClick={fetchHealthData} variant="outline" disabled={loading}>
+            <RefreshCw className={`h-4 w-4 me-2 ${loading ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Database className="h-5 w-5" />
-              System Status
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span>Status:</span>
-                <Badge>{healthData?.status || 'unknown'}</Badge>
-              </div>
-              <div className="flex justify-between">
-                <span>Profiles:</span>
-                <span>{healthData?.profiles_count || 0}</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      <Alert variant={hasQueryErrors ? 'destructive' : 'default'}>
+        <AlertTriangle className="h-4 w-4" />
+        <AlertTitle>Page-level status: {overallLabel}</AlertTitle>
+        <AlertDescription>
+          {hasQueryErrors ? (
+            <ul className="list-disc list-inside mt-1 space-y-1">
+              {queryErrors.map((message) => (
+                <li key={message}>{message}</li>
+              ))}
+            </ul>
+          ) : (
+            <>
+              Sub-panels report Degraded when telemetry is missing. Provider acceptance is not
+              delivery, and zero observed checks is not a passing check.
+            </>
+          )}
+        </AlertDescription>
+      </Alert>
 
-        <Card className={orphanedManagers.length > 0 ? 'border-yellow-500' : ''}>
+      {/* Real, instrumented system health (email / database / edge functions / pipeline) */}
+      <RealSystemHealthPanel />
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card className={hasQueryErrors || orphanedManagers === null || orphanedManagers.length > 0 ? 'border-yellow-500' : ''}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              {orphanedManagers.length > 0 ? <UserX className="h-5 w-5 text-yellow-600" /> : <Users className="h-5 w-5 text-green-600" />}
+              {orphanedManagers && orphanedManagers.length === 0 ? (
+                <Users className="h-5 w-5 text-green-600" />
+              ) : (
+                <UserX className="h-5 w-5 text-yellow-600" />
+              )}
               Orphaned Managers
             </CardTitle>
+            <CardDescription>Approved, registered organizations with no staff invitations</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{orphanedManagers.length}</div>
-            <p className="text-sm text-muted-foreground">Managers without invitations</p>
-            {orphanedManagers.length > 0 && (
-              <div className="mt-4 space-y-2">
-                {orphanedManagers.slice(0, 3).map((m) => (
-                  <div key={m.id} className="p-2 bg-muted rounded text-sm">
-                    <div className="font-medium">{m.contact_person}</div>
-                    <div className="text-xs text-muted-foreground">{m.contact_email}</div>
-                  </div>
-                ))}
+            {orphanedManagers === null ? (
+              <div className="space-y-1">
+                <Badge variant="secondary" className="bg-yellow-600 text-white">Degraded</Badge>
+                <p className="text-sm text-muted-foreground">
+                  Query failed — count unknown, this check did not pass.
+                </p>
               </div>
+            ) : (
+              <>
+                <div className="text-3xl font-bold">{orphanedManagers.length}</div>
+                <p className="text-sm text-muted-foreground">Managers without invitations</p>
+                {orphanedManagers.length > 0 && (
+                  <div className="mt-4 space-y-2">
+                    {orphanedManagers.slice(0, 3).map((m) => (
+                      <div key={m.id} className="p-2 bg-muted rounded text-sm">
+                        <div className="font-medium">{m.contact_person}</div>
+                        <div className="text-xs text-muted-foreground">{m.contact_email}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
             )}
           </CardContent>
         </Card>
 
-        <Card className={securityStatus?.postgresUpgraded ? 'border-green-500' : 'border-yellow-500'}>
+        <Card className="border-yellow-500">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Shield className={securityStatus?.postgresUpgraded ? "h-5 w-5 text-green-600" : "h-5 w-5 text-yellow-600"} />
+              <Shield className="h-5 w-5 text-yellow-600" />
               Security Status
             </CardTitle>
+            <CardDescription>Static remediation record — not live telemetry</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-sm">Function Search Paths</span>
-                {securityStatus?.functionsSecured ? (
-                  <Badge variant="default" className="bg-green-600">✅ Fixed</Badge>
-                ) : (
-                  <Badge variant="destructive">❌ Pending</Badge>
-                )}
+                <Badge variant="default" className="bg-green-600">Fixed via migration</Badge>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm">Extension Schema</span>
-                <Badge variant="secondary" className="bg-yellow-600 text-white">⚠️ Acceptable</Badge>
+                <Badge variant="secondary" className="bg-yellow-600 text-white">Accepted limitation</Badge>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm">Postgres Upgrade</span>
-                {securityStatus?.postgresUpgraded ? (
-                  <Badge variant="default" className="bg-green-600">✅ Done</Badge>
-                ) : (
-                  <Badge variant="destructive">❌ Required</Badge>
-                )}
+                <Badge variant="destructive">Required</Badge>
               </div>
               <div className="pt-2 border-t">
-                <a 
+                <a
                   href="https://supabase.com/dashboard/project/zhmpwczrvitomsxjwpzc/settings/infrastructure"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -201,11 +193,22 @@ const SystemHealthDashboard = () => {
         </Card>
       </div>
 
-      {emailFlowSteps.length > 0 && <EmailFlowDiagram steps={emailFlowSteps} />}
-      
-      {/* Edge Functions Status */}
-      <EdgeFunctionsStatus />
-      
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Database className="h-5 w-5" />
+            Edge Function Deployment Inventory
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            Deployment counts are not instrumented in this build. See the Edge Functions section
+            above, which reports Degraded / telemetry not instrumented / zero observed checks rather
+            than a deployed count.
+          </p>
+        </CardContent>
+      </Card>
+
       {/* Integration Health Monitor */}
       <IntegrationHealthMonitor />
 

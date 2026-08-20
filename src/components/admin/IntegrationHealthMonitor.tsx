@@ -41,15 +41,14 @@ export const IntegrationHealthMonitor = () => {
     }
   };
 
-  const retiredToast = () =>
+  // Transactional self-tests (Test Email / Test SMTP) are removed: API acceptance is not
+  // delivery, so those buttons could only produce misleading "success" signals.
+  const testPayPalEndpoint = () =>
     toast({
-      title: "Diagnostic retired",
-      description: "Integration self-tests have been removed. Check Edge Function logs in Supabase instead.",
+      title: "Endpoint check retired",
+      description:
+        "The PayPal endpoint reachability check is not instrumented in this build. Check Edge Function logs in Supabase instead.",
     });
-
-  const testPayPal = retiredToast;
-  const testEmail = retiredToast;
-  const testSMTP = retiredToast;
 
   useEffect(() => {
     fetchIntegrationHealth();
@@ -112,17 +111,22 @@ export const IntegrationHealthMonitor = () => {
           ))}
         </div>
 
-        {/* Quick Test Buttons */}
-        <div className="flex gap-2 pt-4 border-t">
-          <Button onClick={testPayPal} size="sm" variant="outline">
-            Test PayPal
+        {integrations.length === 0 && !loading && (
+          <div className="p-3 rounded-lg border border-border bg-muted/50 text-sm text-muted-foreground">
+            Degraded — integration telemetry not instrumented (zero observed checks). No integration
+            can be reported as healthy from this panel.
+          </div>
+        )}
+
+        {/* Non-transactional endpoint check only */}
+        <div className="pt-4 border-t space-y-2">
+          <Button onClick={testPayPalEndpoint} size="sm" variant="outline">
+            PayPal endpoint check (non-transactional)
           </Button>
-          <Button onClick={testEmail} size="sm" variant="outline">
-            Test Email
-          </Button>
-          <Button onClick={testSMTP} size="sm" variant="outline">
-            Test SMTP
-          </Button>
+          <p className="text-xs text-muted-foreground">
+            Endpoint reachability only — no payment is created and no email is sent. Transactional
+            email/SMTP self-tests were removed: provider acceptance is not delivery.
+          </p>
         </div>
       </CardContent>
     </Card>
