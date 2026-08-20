@@ -42,7 +42,9 @@ const ConsumerCourse = () => {
     completionPercentage,
     enrollmentId,
     completeCourse,
+    isGuestE2E,
   } = useConsumerProgress(courseId || '', modules.length);
+
 
   useEffect(() => {
     const fetchCourseData = async () => {
