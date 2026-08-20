@@ -46,7 +46,7 @@ interface JourneySummary {
   risk_types: RiskLevel[];
 }
 
-interface E2EReport {
+export interface E2EReport {
   test_run_id: string;
   started_at: string;
   completed_at: string;
@@ -83,7 +83,11 @@ const TIER_LABELS: Record<JourneyTier, string> = {
   3: 'Compliance'
 };
 
-export const E2EValidationReport: React.FC = () => {
+export interface E2EValidationReportProps {
+  onComplete?: (report: E2EReport) => void;
+}
+
+export const E2EValidationReport: React.FC<E2EValidationReportProps> = ({ onComplete }) => {
   const queryClient = useQueryClient();
   const [isRunning, setIsRunning] = useState(false);
   const [showBlockersOnly, setShowBlockersOnly] = useState(false);
@@ -125,6 +129,7 @@ export const E2EValidationReport: React.FC = () => {
       } else {
         toast.error(`E2E Validation Complete: NOT SHIPPABLE - ${data.blocker_count} blockers found`);
       }
+      onComplete?.(data);
       setIsRunning(false);
     },
     onError: (error: any) => {

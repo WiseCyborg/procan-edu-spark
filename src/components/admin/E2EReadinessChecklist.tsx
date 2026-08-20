@@ -11,7 +11,7 @@ import {
   downloadReadinessReport,
   type PipelineHarnessSummary,
 } from "@/lib/launchReadinessReport";
-import { PipelineTestHarness } from "@/components/admin/PipelineTestHarness";
+import { E2EValidationReport, type E2EReport } from "@/components/admin/E2EValidationReport";
 
 interface Props {
   snapshot: ReadinessSnapshot | undefined;
@@ -41,6 +41,30 @@ export const E2EReadinessChecklist: React.FC<Props> = ({ snapshot, refetchSnapsh
   const lastBatchPass = snapshot?.last_batch?.rollup_status === "pass";
   const pipelineOk = pipeline.status === "success";
   const overallGo = trustOk && lastBatchPass && pipelineOk && (snapshot?.duplicate_videos ?? 0) === 0;
+
+  const handleHarnessComplete = (report: E2EReport) => {
+    const ranAt = new Date().toISOString();
+    const reasons = (report.gate_reasons ?? []).join("; ");
+    if (report.release_gate_status === "SHIPPABLE") {
+      setPipeline({
+        status: "success",
+        ranAt,
+        detail: `SHIPPABLE — ${report.passed_tests}/${report.total_tests} passed. e2e+ records purged; no payment captured.`,
+      });
+    } else if (report.release_gate_status === "NOT_SHIPPABLE") {
+      setPipeline({
+        status: "failure",
+        ranAt,
+        detail: `NOT_SHIPPABLE — ${report.blocker_count} blocker(s).${reasons ? ` ${reasons}` : ""}`,
+      });
+    } else {
+      setPipeline({
+        status: "idle",
+        ranAt,
+        detail: `INCOMPLETE — run not representative.${reasons ? ` Gate reasons: ${reasons}` : ""}`,
+      });
+    }
+  };
 
   const handleRunCrawler = () => {
     setCrawler({ status: "running", ranAt: null, detail: "Invoking launch-audit-crawler…" });
@@ -125,7 +149,7 @@ export const E2EReadinessChecklist: React.FC<Props> = ({ snapshot, refetchSnapsh
         />
         <Step
           n={2}
-          label="Run pipeline harness"
+          label="Run pipeline harness (run-e2e-validation)"
           state={pipeline}
           action={
             <Button size="sm" variant="outline" onClick={() => setShowHarness((v) => !v)}>
@@ -134,28 +158,12 @@ export const E2EReadinessChecklist: React.FC<Props> = ({ snapshot, refetchSnapsh
           }
         />
         {showHarness && (
-          <div className="ms-8 border-s-2 ps-3 my-2">
-            <PipelineTestHarness />
-            <div className="mt-2 flex gap-2">
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={() =>
-                  setPipeline({ status: "success", ranAt: new Date().toISOString(), detail: "Marked passing" })
-                }
-              >
-                Mark as passing
-              </Button>
-              <Button
-                size="sm"
-                variant="destructive"
-                onClick={() =>
-                  setPipeline({ status: "failure", ranAt: new Date().toISOString(), detail: "Marked failing" })
-                }
-              >
-                Mark as failing
-              </Button>
-            </div>
+          <div className="ms-8 border-s-2 ps-3 my-2 space-y-2">
+            <p className="text-xs text-muted-foreground">
+              The hardened harness creates and then purges unique <code>e2e+</code> records for each run. No payment is
+              captured and no demo credentials are used.
+            </p>
+            <E2EValidationReport onComplete={handleHarnessComplete} />
           </div>
         )}
         <Step
