@@ -322,16 +322,19 @@ const VideoRegenerationQueue: React.FC = () => {
         </Card>
       </div>
 
-      {/* Mark regenerated dialog */}
+      {/* Register replacement candidate dialog */}
       <Dialog open={!!markTarget} onOpenChange={(open) => !open && setMarkTarget(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Mark video as regenerated</DialogTitle>
+            <DialogTitle>Register replacement candidate</DialogTitle>
             <DialogDescription>
-              Records that a new video was produced for{' '}
-              {markTarget?.module_title || markTarget?.asset_key || 'this module'}. If you enter a new video URL it replaces the live video immediately; leave it blank to record that the existing video was re-reviewed and is still accurate. Sets the video to pending review.
+              Records a candidate replacement for{' '}
+              {markTarget?.module_title || markTarget?.asset_key || 'this module'} and sets it to pending review.
+              This does not clear the regeneration flag: the flag stays open until the replacement is stored in R2,
+              mapped to the module, playback-verified, and explicitly published.
             </DialogDescription>
           </DialogHeader>
+
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="new-video-url">New video URL (optional)</Label>
