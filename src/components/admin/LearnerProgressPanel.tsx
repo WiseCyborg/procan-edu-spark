@@ -562,14 +562,25 @@ export function LearnerProgressPanel() {
                         className="text-sm font-semibold"
                         style={{ color: selected.certified ? BRAND.gold : BRAND.text }}
                       >
-                        {selected.certified ? 'Certificate earned' : 'Certificate not yet earned'}
+                        {selected.certified
+                          ? selected.historical_curriculum
+                            ? 'Completion record earned — historical curriculum'
+                            : 'Completion record earned'
+                          : 'Completion record not yet earned'}
                       </div>
                       {selected.certified && selected.certificate_date && (
                         <div className="text-xs" style={{ color: BRAND.textMuted }}>
                           Issued {format(new Date(selected.certificate_date), 'PPP')}
                         </div>
                       )}
+                      {selected.certified && selected.historical_curriculum && (
+                        <div className="text-xs mt-1" style={{ color: BRAND.textMuted }}>
+                          {selected.modules_at_issuance} modules recorded at issuance; current
+                          curriculum: {coreLabel} core modules. The record remains valid.
+                        </div>
+                      )}
                     </div>
+
                   </div>
 
                   {/* Quiz scores */}
