@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { useGuestSession } from './useGuestSession';
 import { supabase } from '@/integrations/supabase/client';
 
 interface CourseProgress {
@@ -18,7 +17,6 @@ const getStorageKey = (courseId: string, userId?: string | null) =>
 
 export const useConsumerProgress = (courseId: string, totalModules: number = 0) => {
   const { user } = useAuth();
-  const { sessionId } = useGuestSession();
   const [progress, setProgress] = useState<CourseProgress>({
     courseId,
     completedModules: [],
