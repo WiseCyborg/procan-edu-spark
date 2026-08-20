@@ -102,11 +102,18 @@ export const useRealSystemHealth = (autoRefresh = true, intervalMs = 30000) => {
     );
     const lastSentAt = sentLogs.length > 0 ? sentLogs[0].sent_at : null;
 
-    // Determine status
+    // Conservative status: absent or unverified telemetry is NEVER "healthy".
     let status: 'healthy' | 'degraded' | 'down' = 'healthy';
+    if (logs.length === 0) {
+      // No provider telemetry at all — we cannot assert health.
+      status = 'degraded';
+    } else if (delivered === 0) {
+      // Provider accepted sends but no delivery events observed.
+      status = 'degraded';
+    }
     if (failureRate >= 20 || failed >= 10) {
       status = 'down';
-    } else if (failureRate >= 5 || failed >= 3) {
+    } else if (status === 'healthy' && (failureRate >= 5 || failed >= 3)) {
       status = 'degraded';
     }
 
@@ -122,6 +129,7 @@ export const useRealSystemHealth = (autoRefresh = true, intervalMs = 30000) => {
       lastSentAt,
     };
   };
+
 
   const fetchDatabaseHealth = async (): Promise<DatabaseHealthMetrics> => {
     const startTime = performance.now();
