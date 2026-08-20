@@ -439,7 +439,7 @@ const MCAComplianceReview = () => {
                 Contact for Regulatory Inquiries
               </h3>
               <p className="text-white/90 mb-4">
-                For questions about compliance, curriculum alignment, or platform security, our regulatory team is available to assist MCA officials.
+                For questions about our curriculum alignment work, documentation, or platform security, our regulatory team can be reached directly.
               </p>
               <Button variant="secondary" size="lg">
                 <FileText className="h-4 w-4 me-2" />
