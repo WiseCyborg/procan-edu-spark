@@ -9139,7 +9139,6 @@ export type Database = {
           payload: Json
           queued_at: string
           retry_count: number
-          scheduled_for: string
           started_at: string | null
           status: string
         }
@@ -9157,7 +9156,6 @@ export type Database = {
           payload: Json
           queued_at?: string
           retry_count?: number
-          scheduled_for?: string
           started_at?: string | null
           status?: string
         }
@@ -9175,7 +9173,6 @@ export type Database = {
           payload?: Json
           queued_at?: string
           retry_count?: number
-          scheduled_for?: string
           started_at?: string | null
           status?: string
         }
@@ -10573,8 +10570,6 @@ export type Database = {
           access_level: string
           asset_key: string
           bucket_id: string
-          candidate_public_url: string | null
-          candidate_r2_key: string | null
           course_id: string | null
           created_at: string | null
           descript_project_id: string | null
@@ -10595,24 +10590,14 @@ export type Database = {
           last_regenerated_at: string | null
           legacy_bucket_id: string | null
           legacy_storage_path: string | null
-          mapping_verified_at: string | null
           migrated_at: string | null
           migration_error: string | null
           migration_status: string | null
           mime_type: string
           module_id: string | null
           needs_regeneration: boolean | null
-          pipeline_attempts: number
-          pipeline_last_error: string | null
-          pipeline_locked_at: string | null
-          pipeline_locked_by: string | null
-          pipeline_next_attempt_at: string | null
-          pipeline_stage: string
-          playback_verified_at: string | null
           public_url: string | null
-          published_at: string | null
           r2_key: string | null
-          r2_verified_at: string | null
           regeneration_notified_at: string | null
           regeneration_reason: string | null
           render_dispatched_at: string | null
@@ -10631,14 +10616,11 @@ export type Database = {
           title: string
           unmapped_reason: string | null
           updated_at: string | null
-          verification_metadata: Json
         }
         Insert: {
           access_level?: string
           asset_key: string
           bucket_id?: string
-          candidate_public_url?: string | null
-          candidate_r2_key?: string | null
           course_id?: string | null
           created_at?: string | null
           descript_project_id?: string | null
@@ -10659,24 +10641,14 @@ export type Database = {
           last_regenerated_at?: string | null
           legacy_bucket_id?: string | null
           legacy_storage_path?: string | null
-          mapping_verified_at?: string | null
           migrated_at?: string | null
           migration_error?: string | null
           migration_status?: string | null
           mime_type?: string
           module_id?: string | null
           needs_regeneration?: boolean | null
-          pipeline_attempts?: number
-          pipeline_last_error?: string | null
-          pipeline_locked_at?: string | null
-          pipeline_locked_by?: string | null
-          pipeline_next_attempt_at?: string | null
-          pipeline_stage?: string
-          playback_verified_at?: string | null
           public_url?: string | null
-          published_at?: string | null
           r2_key?: string | null
-          r2_verified_at?: string | null
           regeneration_notified_at?: string | null
           regeneration_reason?: string | null
           render_dispatched_at?: string | null
@@ -10695,14 +10667,11 @@ export type Database = {
           title: string
           unmapped_reason?: string | null
           updated_at?: string | null
-          verification_metadata?: Json
         }
         Update: {
           access_level?: string
           asset_key?: string
           bucket_id?: string
-          candidate_public_url?: string | null
-          candidate_r2_key?: string | null
           course_id?: string | null
           created_at?: string | null
           descript_project_id?: string | null
@@ -10723,24 +10692,14 @@ export type Database = {
           last_regenerated_at?: string | null
           legacy_bucket_id?: string | null
           legacy_storage_path?: string | null
-          mapping_verified_at?: string | null
           migrated_at?: string | null
           migration_error?: string | null
           migration_status?: string | null
           mime_type?: string
           module_id?: string | null
           needs_regeneration?: boolean | null
-          pipeline_attempts?: number
-          pipeline_last_error?: string | null
-          pipeline_locked_at?: string | null
-          pipeline_locked_by?: string | null
-          pipeline_next_attempt_at?: string | null
-          pipeline_stage?: string
-          playback_verified_at?: string | null
           public_url?: string | null
-          published_at?: string | null
           r2_key?: string | null
-          r2_verified_at?: string | null
           regeneration_notified_at?: string | null
           regeneration_reason?: string | null
           render_dispatched_at?: string | null
@@ -10759,7 +10718,6 @@ export type Database = {
           title?: string
           unmapped_reason?: string | null
           updated_at?: string | null
-          verification_metadata?: Json
         }
         Relationships: [
           {
@@ -11443,7 +11401,6 @@ export type Database = {
         Returns: string
       }
       calculate_slo_metrics: { Args: never; Returns: undefined }
-      can_manage_org_roster: { Args: { p_org_id: string }; Returns: boolean }
       check_access_key_rate_limit: {
         Args: { user_ip: string }
         Returns: boolean
@@ -11728,7 +11685,6 @@ export type Database = {
           payload: Json
           queued_at: string
           retry_count: number
-          scheduled_for: string
           started_at: string | null
           status: string
         }[]
@@ -12021,10 +11977,6 @@ export type Database = {
         Args: { admin_notes?: string; target_user_id: string }
         Returns: Json
       }
-      map_verified_video_candidate: {
-        Args: { p_asset_id: string }
-        Returns: Json
-      }
       mark_module_reviewed: {
         Args: {
           p_compliance_status?: string
@@ -12040,7 +11992,6 @@ export type Database = {
       move_to_deadletter: { Args: { p_job_id: string }; Returns: undefined }
       notify_pending_video_regenerations: { Args: never; Returns: number }
       prune_curriculum_findings: { Args: never; Returns: number }
-      publish_verified_video: { Args: { p_asset_id: string }; Returns: Json }
       purge_e2e_test_artifacts: { Args: never; Returns: Json }
       purge_old_automated_test_results: { Args: never; Returns: Json }
       purge_uat_seed_entities: { Args: { _batch?: string }; Returns: Json }
@@ -12079,10 +12030,6 @@ export type Database = {
         }[]
       }
       record_email_result: { Args: { p_success: boolean }; Returns: undefined }
-      record_video_playback_verification: {
-        Args: { p_asset_id: string; p_verification: Json }
-        Returns: Json
-      }
       redeem_join_code_for_user: {
         Args: {
           p_code: string
