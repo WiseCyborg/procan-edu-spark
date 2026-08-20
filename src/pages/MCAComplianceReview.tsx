@@ -160,7 +160,7 @@ const MCAComplianceReview = () => {
                 {metrics?.certificatesIssuedThisMonth || 0}
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                New certifications in {new Date().toLocaleString('default', { month: 'long' })}
+                New completion records in {new Date().toLocaleString('default', { month: 'long' })}
               </p>
             </CardContent>
           </Card>
