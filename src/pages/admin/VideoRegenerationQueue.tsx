@@ -337,7 +337,7 @@ const VideoRegenerationQueue: React.FC = () => {
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="new-video-url">New video URL (optional)</Label>
+              <Label htmlFor="new-video-url">Candidate video URL (optional)</Label>
               <Input
                 id="new-video-url"
                 value={newUrl}
@@ -347,6 +347,7 @@ const VideoRegenerationQueue: React.FC = () => {
             </div>
             <div className="space-y-2">
               <Label htmlFor="regeneration-note">Note (optional)</Label>
+
               <Textarea
                 id="regeneration-note"
                 value={note}
