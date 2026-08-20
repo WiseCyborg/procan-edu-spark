@@ -382,7 +382,7 @@ const VerifyCertificate = () => {
                     )}
                   </div>
 
-                  {result.is_compliance && (
+                  {result.valid && (
                     <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
                       <p className="text-sm text-primary font-medium">
                         ✓ Verified ProCann EDU completion record
