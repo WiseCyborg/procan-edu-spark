@@ -602,27 +602,6 @@ export type Database = {
         }
         Relationships: []
       }
-      _cleanup_bak_rvt_vpublic_20260810: {
-        Row: {
-          asset_key: string | null
-          backed_up_at: string | null
-          id: string | null
-          old_public_url: string | null
-        }
-        Insert: {
-          asset_key?: string | null
-          backed_up_at?: string | null
-          id?: string | null
-          old_public_url?: string | null
-        }
-        Update: {
-          asset_key?: string | null
-          backed_up_at?: string | null
-          id?: string | null
-          old_public_url?: string | null
-        }
-        Relationships: []
-      }
       admin_operations_audit: {
         Row: {
           created_at: string | null
@@ -12014,6 +11993,7 @@ export type Database = {
       notify_pending_video_regenerations: { Args: never; Returns: number }
       prune_curriculum_findings: { Args: never; Returns: number }
       purge_e2e_test_artifacts: { Args: never; Returns: Json }
+      purge_old_automated_test_results: { Args: never; Returns: Json }
       purge_uat_seed_entities: { Args: { _batch?: string }; Returns: Json }
       queue_job: {
         Args: {

@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import Confetti from 'react-confetti';
+import { RvtApprovalNotice } from '@/components/RvtApprovalNotice';
 
 interface SeatPurchaseData {
   quantity: number;
@@ -479,6 +480,8 @@ const PaymentSuccess: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
+          <RvtApprovalNotice />
+
           <div className="text-center text-gray-600">
             <p className="text-lg mb-4">
               Thank you for your purchase! You now have full access to your course.
