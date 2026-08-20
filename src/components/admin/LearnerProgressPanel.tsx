@@ -384,7 +384,9 @@ export function LearnerProgressPanel() {
               <ScrollArea className="h-[520px] pe-2">
                 <div className="flex flex-col gap-2">
                   {filtered.map((l) => {
-                    const pct = Math.round((l.modules_completed / TOTAL_MODULES) * 100);
+                    const pct = currentCoreCount
+                      ? Math.round((l.modules_completed / currentCoreCount) * 100)
+                      : 0;
                     const isSelected = l.user_id === selectedId;
                     return (
                       <button
@@ -411,15 +413,23 @@ export function LearnerProgressPanel() {
                           </div>
                           {statusBadge(getStatus(l))}
                         </div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <div className="flex-1">{renderBar(pct)}</div>
-                          <div
-                            className="text-xs font-mono tabular-nums"
-                            style={{ color: BRAND.textMuted }}
-                          >
-                            {l.modules_completed}/{TOTAL_MODULES}
+                        {l.historical_curriculum ? (
+                          <div className="text-xs mb-1" style={{ color: BRAND.textMuted }}>
+                            {l.modules_at_issuance} modules recorded at issuance; current
+                            curriculum: {coreLabel} core modules.
                           </div>
-                        </div>
+                        ) : (
+                          <div className="flex items-center gap-2 mb-1">
+                            <div className="flex-1">{renderBar(pct)}</div>
+                            <div
+                              className="text-xs font-mono tabular-nums"
+                              style={{ color: BRAND.textMuted }}
+                            >
+                              {l.modules_completed}/{coreLabel}
+                            </div>
+                          </div>
+                        )}
+
                         <div className="text-xs" style={{ color: BRAND.textMuted }}>
                           {l.last_activity
                             ? `Active ${formatDistanceToNow(new Date(l.last_activity), { addSuffix: true })}`
