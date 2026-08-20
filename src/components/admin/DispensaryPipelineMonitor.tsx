@@ -11,13 +11,13 @@ import {
   Clock, 
   AlertTriangle,
   ArrowRight,
-  Play,
   RefreshCw,
   TrendingUp,
   TrendingDown,
   KeyRound
 } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { useRealSystemHealth } from '@/hooks/useRealSystemHealth';
 
 interface PipelineStep {
   id: string;
@@ -99,7 +99,11 @@ export const DispensaryPipelineMonitor = () => {
   const [metrics, setMetrics] = useState<PipelineMetrics | null>(null);
   const [steps, setSteps] = useState<PipelineStep[]>([]);
   const [loading, setLoading] = useState(true);
-  const [testing, setTesting] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  // Reuse the same observed pipeline-health source as RealSystemHealthPanel so this widget
+  // can never contradict it.
+  const { health, loading: healthLoading, refresh: refreshHealth } = useRealSystemHealth(false);
+  const pipelineHealth = health?.pipeline ?? null;
 
   useEffect(() => {
     fetchPipelineMetrics();
@@ -249,7 +253,11 @@ export const DispensaryPipelineMonitor = () => {
       ];
 
       setSteps(pipelineSteps);
+      setLoadError(null);
     } catch (error: any) {
+      setSteps([]);
+      setMetrics(null);
+      setLoadError(error?.message || 'Unknown error');
       console.error('Error fetching pipeline metrics:', error);
       toast({
         title: 'Error Loading Pipeline',
@@ -258,62 +266,6 @@ export const DispensaryPipelineMonitor = () => {
       });
     } finally {
       setLoading(false);
-    }
-  };
-
-  const testPipeline = async () => {
-    setTesting(true);
-    toast({
-      title: 'Pipeline Test Starting',
-      description: 'Testing all edge functions and database operations...'
-    });
-
-    try {
-      // Test 1: Application submission endpoint
-      const { data: testApp, error: testError } = await supabase
-        .from('dispensary_applications')
-        .select('id')
-        .limit(1)
-        .single();
-
-      if (testError && testError.code !== 'PGRST116') {
-        throw new Error(`Database test failed: ${testError.message}`);
-      }
-
-      // Test 2: Email function
-      const { data: emailTest, error: emailError } = await supabase.functions.invoke(
-        'send-application-confirmation',
-        {
-          body: {
-            test: true,
-            application_id: 'test-id',
-            contact_person: 'Test User',
-            contact_email: 'test@example.com',
-            organization_name: 'Test Org',
-            license_number: 'TEST-123'
-          }
-        }
-      );
-
-      if (emailError) {
-        console.warn('Email function test failed:', emailError);
-      }
-
-      toast({
-        title: 'Pipeline Test Complete',
-        description: 'Check console for detailed results',
-        variant: emailError ? 'destructive' : 'default'
-      });
-
-      await fetchPipelineMetrics();
-    } catch (error: any) {
-      toast({
-        title: 'Pipeline Test Failed',
-        description: error.message,
-        variant: 'destructive'
-      });
-    } finally {
-      setTesting(false);
     }
   };
 
@@ -346,9 +298,18 @@ export const DispensaryPipelineMonitor = () => {
     );
   }
 
-  const overallHealth = steps.length > 0 
-    ? (steps.filter(s => s.status === 'healthy').length / steps.length) * 100 
-    : 0;
+  // Authoritative pipeline health comes from the shared snapshot when instrumented.
+  const instrumented = Boolean(pipelineHealth?.instrumented);
+  const healthyPipelines = pipelineHealth?.healthyPipelines ?? 0;
+  const totalPipelines = pipelineHealth?.totalPipelines ?? 0;
+  const overallHealth =
+    instrumented && totalPipelines > 0 ? (healthyPipelines / totalPipelines) * 100 : null;
+  const degraded =
+    !instrumented ||
+    overallHealth === null ||
+    pipelineHealth?.status !== 'healthy' ||
+    Boolean(loadError);
+  const lastObservedAt = pipelineHealth?.lastRunAt || metrics?.lastUpdated || null;
 
   return (
     <div className="space-y-6">
@@ -359,30 +320,58 @@ export const DispensaryPipelineMonitor = () => {
             <div>
               <CardTitle>Dispensary Pipeline Health</CardTitle>
               <CardDescription>
-                Last 30 days • Updated {metrics ? new Date(metrics.lastUpdated).toLocaleTimeString() : 'N/A'}
+                Last 30 days •{' '}
+                {lastObservedAt
+                  ? `Last observed ${new Date(lastObservedAt).toLocaleString()}`
+                  : 'No observed pipeline-health run'}
               </CardDescription>
             </div>
             <div className="flex gap-2">
-              <Button onClick={fetchPipelineMetrics} variant="outline" size="sm" disabled={loading}>
-                <RefreshCw className={`h-4 w-4 me-2 ${loading ? 'animate-spin' : ''}`} />
+              <Button
+                onClick={() => {
+                  fetchPipelineMetrics();
+                  refreshHealth();
+                }}
+                variant="outline"
+                size="sm"
+                disabled={loading || healthLoading}
+              >
+                <RefreshCw className={`h-4 w-4 me-2 ${loading || healthLoading ? 'animate-spin' : ''}`} />
                 Refresh
-              </Button>
-              <Button onClick={testPipeline} variant="outline" size="sm" disabled={testing}>
-                <Play className="h-4 w-4 me-2" />
-                {testing ? 'Testing...' : 'Test Pipeline'}
               </Button>
             </div>
           </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">Overall Pipeline Health</span>
-                <span className="text-2xl font-bold">{overallHealth.toFixed(0)}%</span>
+            {overallHealth === null ? (
+              <Alert>
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>Degraded — no representative telemetry</AlertTitle>
+                <AlertDescription>
+                  Zero observed pipeline-health checks{loadError ? ` (query error: ${loadError})` : ''}.
+                  Overall pipeline health cannot be scored and is not 0%.
+                </AlertDescription>
+              </Alert>
+            ) : (
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium">Overall Pipeline Health</span>
+                  <div className="flex items-center gap-2">
+                    <Badge variant={degraded ? 'secondary' : 'default'} className={degraded ? 'bg-yellow-600 text-white' : ''}>
+                      {degraded
+                        ? `Needs attention — ${healthyPipelines}/${totalPipelines} healthy`
+                        : `${healthyPipelines}/${totalPipelines} healthy`}
+                    </Badge>
+                    <span className="text-2xl font-bold">{overallHealth.toFixed(0)}%</span>
+                  </div>
+                </div>
+                <Progress value={overallHealth} className="h-2" />
+                <p className="text-xs text-muted-foreground mt-2">
+                  Sourced from the same observed pipeline-health snapshot as the System Health panel above.
+                </p>
               </div>
-              <Progress value={overallHealth} className="h-2" />
-            </div>
+            )}
 
             {steps.some(s => s.issues && s.issues.length > 0) && (
               <Alert>
