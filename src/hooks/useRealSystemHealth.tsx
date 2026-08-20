@@ -319,7 +319,7 @@ export const useRealSystemHealth = (autoRefresh = true, intervalMs = 30000) => {
       ]);
 
       // Calculate overall status
-      const statuses = [email.status, database.status, edgeFunctions.status];
+      const statuses = [email.status, database.status, edgeFunctions.status, pipeline.status];
       let overallStatus: 'healthy' | 'degraded' | 'down' = 'healthy';
       if (statuses.includes('down')) {
         overallStatus = 'down';
