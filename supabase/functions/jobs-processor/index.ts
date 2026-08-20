@@ -471,11 +471,44 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // ---- Auth gate (runs BEFORE any service-role client or job access) ----
+  // Accepted credentials:
+  //   A) x-cron-secret header exactly matching CRON_SHARED_SECRET (pg_cron path)
+  //   B) Authorization: Bearer <SUPABASE_SERVICE_ROLE_KEY> (internal automation)
+  const jsonHeaders = { ...corsHeaders, 'Content-Type': 'application/json' };
+  {
+    const cronSecret = (Deno.env.get('CRON_SHARED_SECRET') ?? '').trim();
+    const serviceKey = (Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '').trim();
+    const headerSecret = (req.headers.get('x-cron-secret') ?? '').trim();
+    const authHeader = req.headers.get('Authorization') ?? '';
+    const bearer = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
+
+    if (!headerSecret && !bearer) {
+      console.warn('[JOBS-PROCESSOR] 401 - no credentials supplied');
+      return new Response(
+        JSON.stringify({ success: false, error: 'Unauthorized: missing credentials' }),
+        { status: 401, headers: jsonHeaders }
+      );
+    }
+
+    const cronOk = cronSecret.length > 0 && headerSecret.length > 0 && headerSecret === cronSecret;
+    const serviceOk = serviceKey.length > 0 && bearer.length > 0 && bearer === serviceKey;
+
+    if (!cronOk && !serviceOk) {
+      console.warn('[JOBS-PROCESSOR] 403 - invalid credentials');
+      return new Response(
+        JSON.stringify({ success: false, error: 'Forbidden: invalid credentials' }),
+        { status: 403, headers: jsonHeaders }
+      );
+    }
+  }
+
   try {
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
+
 
     const batchSize = 10;
     let jobs: Job[] = [];
