@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -8,8 +7,6 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
 export default function EmailDomainVerification() {
-  const [testing, setTesting] = useState(false);
-  const [testResult, setTestResult] = useState<any>(null);
   const { toast } = useToast();
 
   const domain = 'procannedu.com';
