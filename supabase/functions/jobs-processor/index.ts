@@ -477,7 +477,7 @@ serve(async (req) => {
   //   B) Authorization: Bearer <SUPABASE_SERVICE_ROLE_KEY> (internal automation)
   const jsonHeaders = { ...corsHeaders, 'Content-Type': 'application/json' };
   {
-    const cronSecret = (Deno.env.get('CRON_SHARED_SECRET') ?? '').trim();
+    const cronSecret = (Deno.env.get('CRON_SHARED_SECRET') ?? Deno.env.get('cron_shared_secret') ?? '').trim();
     const serviceKey = (Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '').trim();
     const headerSecret = (req.headers.get('x-cron-secret') ?? '').trim();
     const authHeader = req.headers.get('Authorization') ?? '';
