@@ -10,9 +10,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { ComplianceTimeline } from '@/components/compliance/ComplianceTimeline';
 import { detectComplianceGaps } from '@/services/gapDetectionService';
 import { GapBadge } from '@/components/admin/gaps/GapBadge';
-import { RVT_TRAINING_MODULE_COUNT } from '@/constants/tracks';
 
 // COMAR mapping is now stored in the database - no hardcoded mapping needed
+
+// The matrix documents the canonical workforce compliance course ONLY. Free
+// consumer-education modules are not part of this mapping and must never be
+// counted here.
+const CANONICAL_WORKFORCE_COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
 
 export default function ComplianceCurriculumMatrixPage() {
   const [expandedModules, setExpandedModules] = useState<Set<number>>(new Set());
@@ -23,6 +27,7 @@ export default function ComplianceCurriculumMatrixPage() {
       const { data, error } = await supabase
         .from('course_modules')
         .select('module_number, title, description, comar_reference, estimated_minutes, updated_at')
+        .eq('course_id', CANONICAL_WORKFORCE_COURSE_ID)
         .order('module_number');
       
       if (error) throw error;
@@ -42,9 +47,25 @@ export default function ComplianceCurriculumMatrixPage() {
     ) || [];
   };
 
-  const totalGaps = complianceGaps?.length || 0;
-  const criticalGaps = complianceGaps?.filter(g => g.severity === 'critical').length || 0;
-  const coveragePercentage = modules ? Math.round(((modules.length - totalGaps) / modules.length) * 100) : 100;
+  const moduleNumbers = new Set((modules || []).map(m => String(m.module_number)));
+  // Only count gaps that belong to a module actually in this matrix.
+  const scopedGaps = (complianceGaps || []).filter(g => moduleNumbers.has(String(g.affected_entity_id)));
+  const totalGaps = scopedGaps.length;
+  const criticalGaps = scopedGaps.filter(g => g.severity === 'critical').length;
+  const moduleCount = modules?.length ?? 0;
+  const modulesWithGaps = new Set(scopedGaps.map(g => String(g.affected_entity_id))).size;
+  const unmappedModules = (modules || []).filter(m => !m.comar_reference).length;
+  const coveragePercentage = moduleCount
+    ? Math.max(0, Math.round(((moduleCount - modulesWithGaps) / moduleCount) * 100))
+    : 0;
+  const hasBlockingGaps = totalGaps > 0 || unmappedModules > 0;
+  const statusLabel = isLoading
+    ? 'Checking…'
+    : moduleCount === 0
+      ? 'Unknown'
+      : hasBlockingGaps
+        ? `Gaps Outstanding (${totalGaps + unmappedModules})`
+        : 'No Outstanding Gaps';
 
   const toggleModule = (moduleNumber: number) => {
     setExpandedModules(prev => {
@@ -78,7 +99,7 @@ export default function ComplianceCurriculumMatrixPage() {
           COMAR 14.17.15.05 Compliance Matrix
         </h1>
         <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-          Documenting Full Alignment with Maryland RVT Standards
+          Internal mapping of the workforce compliance curriculum to COMAR 14.17.15.05
         </p>
       </div>
 
@@ -96,7 +117,12 @@ export default function ComplianceCurriculumMatrixPage() {
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Compliance Status</p>
-              <Badge variant="default" className="text-lg px-4 py-1">✓ Complete</Badge>
+              <Badge
+                variant={!isLoading && moduleCount > 0 && !hasBlockingGaps ? 'default' : 'destructive'}
+                className="text-lg px-4 py-1"
+              >
+                {statusLabel}
+              </Badge>
             </div>
           </div>
         </CardContent>
@@ -140,8 +166,9 @@ export default function ComplianceCurriculumMatrixPage() {
         <CardHeader>
           <CardTitle>Curriculum Compliance Mapping</CardTitle>
           <p className="text-sm text-muted-foreground">
-            All {RVT_TRAINING_MODULE_COUNT} modules mapped to COMAR 14.17.15.05 requirements, including Drug-Free Workplace (COMAR 21.11.08.03), 
-            Diversion Prevention, and Standard Operating Procedures
+            {moduleCount - unmappedModules} of {moduleCount} modules in the canonical workforce course carry a COMAR
+            reference{unmappedModules > 0 ? `; ${unmappedModules} still unmapped` : ''}. Referenced areas include Drug-Free
+            Workplace (COMAR 21.11.08.03), Diversion Prevention, and Standard Operating Procedures.
           </p>
         </CardHeader>
         <CardContent>
@@ -276,8 +303,19 @@ export default function ComplianceCurriculumMatrixPage() {
                                       <div className="bg-white rounded-lg p-3 border border-primary/20 shadow-sm">
                                         <p className="text-xs font-semibold text-muted-foreground mb-1">Compliance Status</p>
                                         <div className="flex items-center gap-2">
-                                          <CheckCircle className="h-4 w-4 text-green-600" />
-                                          <span className="text-sm text-foreground font-medium">Fully Compliant</span>
+                                          {hasGaps || !module.comar_reference ? (
+                                            <>
+                                              <AlertTriangle className="h-4 w-4 text-orange-600" />
+                                              <span className="text-sm text-foreground font-medium">
+                                                {hasGaps ? `${moduleGaps.length} open gap${moduleGaps.length === 1 ? '' : 's'}` : 'No COMAR reference mapped'}
+                                              </span>
+                                            </>
+                                          ) : (
+                                            <>
+                                              <CheckCircle className="h-4 w-4 text-green-600" />
+                                              <span className="text-sm text-foreground font-medium">No open gaps</span>
+                                            </>
+                                          )}
                                         </div>
                                       </div>
                                       <div className="bg-white rounded-lg p-3 border border-primary/20 shadow-sm">
@@ -313,7 +351,7 @@ export default function ComplianceCurriculumMatrixPage() {
                                       Interactive Content
                                     </Badge>
                                     <Badge variant="secondary">
-                                      Certificate Upon Completion
+                                      Completion Record Upon Completion
                                     </Badge>
                                   </div>
                                 </div>
@@ -336,7 +374,8 @@ export default function ComplianceCurriculumMatrixPage() {
         <CardContent className="pt-6">
           <div className="text-center">
             <p className="text-sm mb-2">
-              <strong>Certification:</strong> This curriculum has been reviewed and approved by the ProCann Edu Compliance Team.
+              <strong>Internal review:</strong> This mapping is maintained by the ProCann EDU compliance team for
+              internal documentation. It is not a regulatory approval or an MCA determination.
             </p>
             <p className="text-sm text-muted-foreground">
               For questions or verification, contact: <a href="mailto:compliance@procannedu.com" className="text-primary hover:underline">compliance@procannedu.com</a>
