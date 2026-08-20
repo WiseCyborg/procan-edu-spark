@@ -66,7 +66,7 @@ export const IncidentReportForm: React.FC<IncidentReportFormProps> = ({
     defaultValues: {
       incident_type: '',
       severity: 'medium',
-      employee_user_id: '',
+      employee_user_id: 'none',
       description: '',
       metadata: {
         location: '',
@@ -91,7 +91,7 @@ export const IncidentReportForm: React.FC<IncidentReportFormProps> = ({
           organization_id: organizationId,
           incident_type: data.incident_type,
           severity: data.severity,
-          employee_user_id: data.employee_user_id || null,
+          employee_user_id: data.employee_user_id && data.employee_user_id !== 'none' ? data.employee_user_id : null,
           description: data.description,
           reported_by: user.id,
           metadata: data.metadata,
@@ -107,7 +107,7 @@ export const IncidentReportForm: React.FC<IncidentReportFormProps> = ({
           body: { 
             incidentId: incident.id,
             incidentType: data.incident_type,
-            employeeUserId: data.employee_user_id,
+            employeeUserId: data.employee_user_id && data.employee_user_id !== 'none' ? data.employee_user_id : null,
             severity: data.severity,
           },
         });
@@ -220,7 +220,7 @@ export const IncidentReportForm: React.FC<IncidentReportFormProps> = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">None / Unknown</SelectItem>
+                        <SelectItem value="none">None / Unknown</SelectItem>
                         {employees.map((emp) => (
                           <SelectItem key={emp.id} value={emp.id}>
                             {emp.name} ({emp.email})

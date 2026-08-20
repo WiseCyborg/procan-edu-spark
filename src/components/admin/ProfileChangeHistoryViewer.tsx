@@ -34,7 +34,7 @@ export function ProfileChangeHistoryViewer({ userId, showAsUser = false }: Profi
   const [filters, setFilters] = useState({
     dateFrom: '',
     dateTo: '',
-    fieldName: '',
+    fieldName: 'all',
   });
   const { toast } = useToast();
 
@@ -71,7 +71,7 @@ export function ProfileChangeHistoryViewer({ userId, showAsUser = false }: Profi
 
     if (fromDate && changeDate < fromDate) return false;
     if (toDate && changeDate > toDate) return false;
-    if (filters.fieldName && change.field_name !== filters.fieldName) return false;
+    if (filters.fieldName && filters.fieldName !== 'all' && change.field_name !== filters.fieldName) return false;
 
     return true;
   });
@@ -163,7 +163,7 @@ export function ProfileChangeHistoryViewer({ userId, showAsUser = false }: Profi
                 <SelectValue placeholder="All Fields" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Fields</SelectItem>
+                <SelectItem value="all">All Fields</SelectItem>
                 <SelectItem value="first_name">First Name</SelectItem>
                 <SelectItem value="last_name">Last Name</SelectItem>
                 <SelectItem value="phone">Phone</SelectItem>

@@ -43,7 +43,7 @@ export const VideoAssetManager = () => {
   const [assetKey, setAssetKey] = useState('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [selectedModuleId, setSelectedModuleId] = useState<string>('');
+  const [selectedModuleId, setSelectedModuleId] = useState<string>('none');
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   
   useEffect(() => {
@@ -119,7 +119,7 @@ export const VideoAssetManager = () => {
           title: title,
           description: description || null,
           file_size_mb: Math.round((file.size / (1024 * 1024)) * 100) / 100,
-          module_id: selectedModuleId || null
+          module_id: selectedModuleId && selectedModuleId !== 'none' ? selectedModuleId : null
         });
 
       if (dbError) throw dbError;
@@ -221,7 +221,7 @@ export const VideoAssetManager = () => {
                       <SelectValue placeholder="Select module..." />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">No module</SelectItem>
+                      <SelectItem value="none">No module</SelectItem>
                       {modules.map((module) => (
                         <SelectItem key={module.id} value={module.id}>
                           Module {module.module_number}: {module.title}
@@ -292,14 +292,14 @@ export const VideoAssetManager = () => {
                             Copy URL
                           </Button>
                           <Select
-                            value={asset.module_id || ''}
-                            onValueChange={(value) => assignToModule(asset.id, value || null)}
+                            value={asset.module_id || 'none'}
+                            onValueChange={(value) => assignToModule(asset.id, value === 'none' ? null : value)}
                           >
                             <SelectTrigger className="h-8 w-[180px] text-xs">
                               <SelectValue placeholder="Assign to module..." />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="">Unassign</SelectItem>
+                              <SelectItem value="none">Unassign</SelectItem>
                               {modules.map((module) => (
                                 <SelectItem key={module.id} value={module.id}>
                                   Module {module.module_number}
