@@ -253,21 +253,17 @@ export default function EmailDomainVerification() {
             <li>Click "Verify" button next to {domain}</li>
             <li>Wait for Resend to check DNS records</li>
             <li>Once verified, status will show <Badge variant="default">Verified ✓</Badge></li>
-            <li>Test sending an email using the button above</li>
           </ol>
 
           <Alert className="mt-4">
-            <CheckCircle className="h-4 w-4" />
-            <AlertTitle>Success Checklist</AlertTitle>
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Delivery is not proven by verification</AlertTitle>
             <AlertDescription>
-              <ul className="list-disc list-inside space-y-1 mt-2">
-                <li>Domain shows "Verified" in Resend</li>
-                <li>Test email delivers successfully</li>
-                <li>No errors in email logs for 24 hours</li>
-                <li>All email types working (welcome, invites, certificates)</li>
-              </ul>
+              After provider verification, confirm delivery through instrumented delivery events; do
+              not infer delivery from API acceptance.
             </AlertDescription>
           </Alert>
+
         </CardContent>
       </Card>
 
