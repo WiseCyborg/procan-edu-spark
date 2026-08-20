@@ -208,9 +208,17 @@ const VideoRegenerationQueue: React.FC = () => {
             </Button>
           </div>
           <p className="text-muted-foreground mt-1">
-            Training videos flagged for regeneration after a Maryland COMAR regulation change — record the new
-            video and sign it off once reviewed.
+            Training videos flagged for regeneration after a Maryland COMAR regulation change. Approving a script
+            queues narration; registering a replacement candidate records it for review. Neither action clears the
+            regeneration flag or swaps the live video.
           </p>
+          <div className="mt-3 rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
+            <p className="font-medium">The regeneration flag stays open until every gate is met</p>
+            <p className="text-muted-foreground mt-1">
+              A flagged video is only cleared once the replacement is stored in R2, mapped to the module,
+              playback-verified, and explicitly published. Nothing on this page performs those steps.
+            </p>
+          </div>
         </div>
 
         <Card>
@@ -218,6 +226,7 @@ const VideoRegenerationQueue: React.FC = () => {
             <CardTitle className="text-lg">Flagged videos</CardTitle>
             <CardDescription>Only videos with an open regeneration flag appear here.</CardDescription>
           </CardHeader>
+
           <CardContent>
             {isLoading ? (
               <div className="space-y-3">
