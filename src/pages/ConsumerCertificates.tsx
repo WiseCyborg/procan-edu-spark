@@ -142,7 +142,7 @@ const ConsumerCertificates = () => {
       pdf.setTextColor(80, 80, 80);
       pdf.setFontSize(9);
       pdf.setFont('helvetica', 'italic');
-      pdf.text('This certifies that', W / 2, 70, { align: 'center' });
+      pdf.text('This records that', W / 2, 70, { align: 'center' });
 
       // === RECIPIENT NAME ===
       pdf.setTextColor(15, 82, 51);

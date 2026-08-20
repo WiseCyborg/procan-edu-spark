@@ -151,7 +151,7 @@ export default function TermsOfService() {
 
           <h2>16. MCA Compliance</h2>
           <p>
-            This training program is designed to comply with Maryland Cannabis Administration (MCA) requirements under COMAR 14.17.05. 
+            This training program's curriculum is designed to align with COMAR 14.17.15.05. 
             However, compliance requirements may change, and it is your responsibility to stay informed of current regulations.
           </p>
 
