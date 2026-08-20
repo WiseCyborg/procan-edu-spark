@@ -119,7 +119,8 @@ export const E2EValidationReport: React.FC<E2EValidationReportProps> = ({ onComp
       return data as E2EReport;
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['e2e-validation-report'] });
+      // Show the run we just did, not whatever the last stored report happens to be.
+      queryClient.setQueryData(['e2e-validation-report'], data);
       if (data.release_gate_status === 'SHIPPABLE') {
         toast.success(`E2E Validation Complete: SHIPPABLE - ${data.passed_tests}/${data.total_tests} passed`);
       } else if (data.release_gate_status === 'INCOMPLETE') {
@@ -231,17 +232,21 @@ export const E2EValidationReport: React.FC<E2EValidationReportProps> = ({ onComp
           {/* Release Gate Status Banner */}
           <Card className={latestReport.release_gate_status === 'SHIPPABLE' 
             ? 'border-green-500 bg-green-50 dark:bg-green-950/20' 
-            : 'border-red-500 bg-red-50 dark:bg-red-950/20'
+            : latestReport.release_gate_status === 'INCOMPLETE'
+              ? 'border-amber-500 bg-amber-50 dark:bg-amber-950/20'
+              : 'border-red-500 bg-red-50 dark:bg-red-950/20'
           }>
             <CardContent className="flex items-center justify-between py-6">
               <div className="flex items-center gap-4">
                 {latestReport.release_gate_status === 'SHIPPABLE' ? (
                   <Rocket className="h-12 w-12 text-green-600" />
+                ) : latestReport.release_gate_status === 'INCOMPLETE' ? (
+                  <ShieldAlert className="h-12 w-12 text-amber-600" />
                 ) : (
                   <Ban className="h-12 w-12 text-red-600" />
                 )}
                 <div>
-                  <h3 className={`text-2xl font-bold ${latestReport.release_gate_status === 'SHIPPABLE' ? 'text-green-700' : 'text-red-700'}`}>
+                  <h3 className={`text-2xl font-bold ${latestReport.release_gate_status === 'SHIPPABLE' ? 'text-green-700' : latestReport.release_gate_status === 'INCOMPLETE' ? 'text-amber-700' : 'text-red-700'}`}>
                     Release Gate: {latestReport.release_gate_status}
                   </h3>
                   <p className="text-muted-foreground">
@@ -263,7 +268,9 @@ export const E2EValidationReport: React.FC<E2EValidationReportProps> = ({ onComp
               <Badge 
                 className={`text-lg px-4 py-2 ${latestReport.release_gate_status === 'SHIPPABLE' 
                   ? 'bg-green-600 hover:bg-green-700' 
-                  : 'bg-red-600 hover:bg-red-700'
+                  : latestReport.release_gate_status === 'INCOMPLETE'
+                    ? 'bg-amber-500 hover:bg-amber-600'
+                    : 'bg-red-600 hover:bg-red-700'
                 }`}
               >
                 {latestReport.passed_tests}/{latestReport.total_tests} Tests Passed
