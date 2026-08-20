@@ -264,6 +264,8 @@ const VideoRegenerationQueue: React.FC = () => {
                       <TableHead>Flagged since</TableHead>
                       <TableHead>Draft script</TableHead>
                       <TableHead>Review status</TableHead>
+                      <TableHead>Pipeline stage</TableHead>
+                      <TableHead>Playback verified</TableHead>
                       <TableHead className="text-end">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -288,6 +290,10 @@ const VideoRegenerationQueue: React.FC = () => {
                           )}
                         </TableCell>
                         <TableCell>{reviewBadge(row.review_status)}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground max-w-[220px]">
+                          {pipelineStage(row)}
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">{VERIFICATION_UNKNOWN}</TableCell>
                         <TableCell className="text-end whitespace-nowrap">
                           <Button
                             variant="outline"
@@ -299,12 +305,13 @@ const VideoRegenerationQueue: React.FC = () => {
                               setMarkTarget(row);
                             }}
                           >
-                            Mark regenerated
+                            Register replacement candidate
                           </Button>
                           <Button size="sm" onClick={() => setApproveTarget(row)}>
-                            Approve
+                            Approve script &amp; queue narration
                           </Button>
                         </TableCell>
+
                       </TableRow>
                     ))}
                   </TableBody>
