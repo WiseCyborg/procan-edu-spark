@@ -4,8 +4,10 @@ import { Badge } from '@/components/ui/badge';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Calendar, FileText, Shield, AlertCircle, CheckCircle2, Clock } from 'lucide-react';
+import { useLastComarReview } from '@/hooks/useLastComarReview';
 
 export default function ComplianceContentReviewPage() {
+  const { lastReviewed, isLoading: reviewLoading } = useLastComarReview();
   const { data: regulatoryUpdates } = useQuery({
     queryKey: ['regulatory-updates'],
     queryFn: async () => {
@@ -52,7 +54,7 @@ export default function ComplianceContentReviewPage() {
           Annual Content Review & Regulatory Updates
         </h1>
         <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-          Ensuring Curriculum Remains Current with COMAR Changes
+          Internal tracking of curriculum currency against COMAR changes
         </p>
       </div>
 
@@ -81,42 +83,59 @@ export default function ComplianceContentReviewPage() {
               <p className="text-2xl font-bold">Quarterly</p>
             </div>
             <div className="text-center p-4 bg-muted rounded-lg">
-              <p className="text-sm text-muted-foreground mb-1">Last Completed Review</p>
+              <p className="text-sm text-muted-foreground mb-1">Last Completed Automated Scan</p>
               <p className="text-2xl font-bold">
-                {new Date().toLocaleDateString('en-US', { 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric' 
-                })}
+                {reviewLoading
+                  ? 'Checking…'
+                  : lastReviewed
+                    ? lastReviewed.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })
+                    : 'Never'}
               </p>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Compliance Officer Certification */}
+      {/* Internal Review Status */}
       <Card className="mb-8">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileText className="h-6 w-6 text-primary" />
-            Compliance Officer Certification
+            Internal Review Status
           </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Evidence of internal curriculum review. This page does not, on its own, certify compliance.
+          </p>
         </CardHeader>
         <CardContent>
-          <div className="bg-muted p-6 rounded-lg">
-            <p className="leading-relaxed mb-4">
-              "I, on behalf of the ProCann Edu Compliance Team, certify that all training materials 
-              have been reviewed as of <strong>{new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</strong> and 
-              are in full compliance with COMAR 14.17.15.05 requirements."
+          <div className="bg-muted p-6 rounded-lg space-y-4">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-orange-600" />
+              <span className="font-semibold">Awaiting named human sign-off</span>
+            </div>
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              Automated COMAR monitoring and module freshness tracking run continuously, and their
+              results are shown below. A review is only marked complete once a named reviewer records
+              a dated sign-off. Until then this status stays open.
             </p>
-            <div className="flex items-center justify-between border-t pt-4">
-              <div>
-                <p className="font-semibold">Chief Compliance Officer</p>
-                <p className="text-sm text-muted-foreground">ProCann Edu</p>
+            <div className="border-t pt-4 grid gap-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Reviewer</span>
+                <span className="font-medium">Not recorded</span>
               </div>
-              <div className="text-end">
-                <p className="text-sm text-muted-foreground">Digital Certification</p>
-                <p className="text-sm font-mono">{new Date().toLocaleDateString('en-US')}</p>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Sign-off date</span>
+                <span className="font-medium">Not recorded</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Last automated scan</span>
+                <span className="font-medium">
+                  {reviewLoading ? 'Checking…' : lastReviewed ? lastReviewed.toLocaleDateString('en-US') : 'Never'}
+                </span>
               </div>
             </div>
           </div>
