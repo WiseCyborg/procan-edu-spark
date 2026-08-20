@@ -53,7 +53,7 @@ const ConsumerEducation = () => {
       <div className="bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-800 py-2 px-4">
         <p className="text-center text-xs text-amber-800 dark:text-amber-300">
           <strong>Note:</strong> This is free educational content for the public. 
-          This is <strong>NOT</strong> Maryland RVT employee certification. 
+          This is <strong>NOT</strong> workforce cannabis compliance training for dispensary employees. 
           <button 
             onClick={() => navigate('/get-started')} 
             className="underline ms-1 hover:text-amber-600"
