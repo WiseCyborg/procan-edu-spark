@@ -10570,8 +10570,6 @@ export type Database = {
           access_level: string
           asset_key: string
           bucket_id: string
-          candidate_public_url: string | null
-          candidate_r2_key: string | null
           course_id: string | null
           created_at: string | null
           descript_project_id: string | null
@@ -10592,24 +10590,14 @@ export type Database = {
           last_regenerated_at: string | null
           legacy_bucket_id: string | null
           legacy_storage_path: string | null
-          mapping_verified_at: string | null
           migrated_at: string | null
           migration_error: string | null
           migration_status: string | null
           mime_type: string
           module_id: string | null
           needs_regeneration: boolean | null
-          pipeline_attempts: number
-          pipeline_last_error: string | null
-          pipeline_locked_at: string | null
-          pipeline_locked_by: string | null
-          pipeline_next_attempt_at: string | null
-          pipeline_stage: string
-          playback_verified_at: string | null
           public_url: string | null
-          published_at: string | null
           r2_key: string | null
-          r2_verified_at: string | null
           regeneration_notified_at: string | null
           regeneration_reason: string | null
           render_dispatched_at: string | null
@@ -10628,14 +10616,11 @@ export type Database = {
           title: string
           unmapped_reason: string | null
           updated_at: string | null
-          verification_metadata: Json
         }
         Insert: {
           access_level?: string
           asset_key: string
           bucket_id?: string
-          candidate_public_url?: string | null
-          candidate_r2_key?: string | null
           course_id?: string | null
           created_at?: string | null
           descript_project_id?: string | null
@@ -10656,24 +10641,14 @@ export type Database = {
           last_regenerated_at?: string | null
           legacy_bucket_id?: string | null
           legacy_storage_path?: string | null
-          mapping_verified_at?: string | null
           migrated_at?: string | null
           migration_error?: string | null
           migration_status?: string | null
           mime_type?: string
           module_id?: string | null
           needs_regeneration?: boolean | null
-          pipeline_attempts?: number
-          pipeline_last_error?: string | null
-          pipeline_locked_at?: string | null
-          pipeline_locked_by?: string | null
-          pipeline_next_attempt_at?: string | null
-          pipeline_stage?: string
-          playback_verified_at?: string | null
           public_url?: string | null
-          published_at?: string | null
           r2_key?: string | null
-          r2_verified_at?: string | null
           regeneration_notified_at?: string | null
           regeneration_reason?: string | null
           render_dispatched_at?: string | null
@@ -10692,14 +10667,11 @@ export type Database = {
           title: string
           unmapped_reason?: string | null
           updated_at?: string | null
-          verification_metadata?: Json
         }
         Update: {
           access_level?: string
           asset_key?: string
           bucket_id?: string
-          candidate_public_url?: string | null
-          candidate_r2_key?: string | null
           course_id?: string | null
           created_at?: string | null
           descript_project_id?: string | null
@@ -10720,24 +10692,14 @@ export type Database = {
           last_regenerated_at?: string | null
           legacy_bucket_id?: string | null
           legacy_storage_path?: string | null
-          mapping_verified_at?: string | null
           migrated_at?: string | null
           migration_error?: string | null
           migration_status?: string | null
           mime_type?: string
           module_id?: string | null
           needs_regeneration?: boolean | null
-          pipeline_attempts?: number
-          pipeline_last_error?: string | null
-          pipeline_locked_at?: string | null
-          pipeline_locked_by?: string | null
-          pipeline_next_attempt_at?: string | null
-          pipeline_stage?: string
-          playback_verified_at?: string | null
           public_url?: string | null
-          published_at?: string | null
           r2_key?: string | null
-          r2_verified_at?: string | null
           regeneration_notified_at?: string | null
           regeneration_reason?: string | null
           render_dispatched_at?: string | null
@@ -10756,7 +10718,6 @@ export type Database = {
           title?: string
           unmapped_reason?: string | null
           updated_at?: string | null
-          verification_metadata?: Json
         }
         Relationships: [
           {
@@ -11440,7 +11401,6 @@ export type Database = {
         Returns: string
       }
       calculate_slo_metrics: { Args: never; Returns: undefined }
-      can_manage_org_roster: { Args: { p_org_id: string }; Returns: boolean }
       check_access_key_rate_limit: {
         Args: { user_ip: string }
         Returns: boolean
