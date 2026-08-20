@@ -9139,6 +9139,7 @@ export type Database = {
           payload: Json
           queued_at: string
           retry_count: number
+          scheduled_for: string
           started_at: string | null
           status: string
         }
@@ -9156,6 +9157,7 @@ export type Database = {
           payload: Json
           queued_at?: string
           retry_count?: number
+          scheduled_for?: string
           started_at?: string | null
           status?: string
         }
@@ -9173,6 +9175,7 @@ export type Database = {
           payload?: Json
           queued_at?: string
           retry_count?: number
+          scheduled_for?: string
           started_at?: string | null
           status?: string
         }
@@ -11725,6 +11728,7 @@ export type Database = {
           payload: Json
           queued_at: string
           retry_count: number
+          scheduled_for: string
           started_at: string | null
           status: string
         }[]
@@ -12017,6 +12021,10 @@ export type Database = {
         Args: { admin_notes?: string; target_user_id: string }
         Returns: Json
       }
+      map_verified_video_candidate: {
+        Args: { p_asset_id: string }
+        Returns: Json
+      }
       mark_module_reviewed: {
         Args: {
           p_compliance_status?: string
@@ -12032,6 +12040,7 @@ export type Database = {
       move_to_deadletter: { Args: { p_job_id: string }; Returns: undefined }
       notify_pending_video_regenerations: { Args: never; Returns: number }
       prune_curriculum_findings: { Args: never; Returns: number }
+      publish_verified_video: { Args: { p_asset_id: string }; Returns: Json }
       purge_e2e_test_artifacts: { Args: never; Returns: Json }
       purge_old_automated_test_results: { Args: never; Returns: Json }
       purge_uat_seed_entities: { Args: { _batch?: string }; Returns: Json }
@@ -12070,6 +12079,10 @@ export type Database = {
         }[]
       }
       record_email_result: { Args: { p_success: boolean }; Returns: undefined }
+      record_video_playback_verification: {
+        Args: { p_asset_id: string; p_verification: Json }
+        Returns: Json
+      }
       redeem_join_code_for_user: {
         Args: {
           p_code: string
