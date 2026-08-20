@@ -123,7 +123,7 @@ const getContextInfo = (pathname: string): ContextInfo => {
       - ProCann Edu is Maryland's premier cannabis training platform
       - Training covers all aspects of cannabis compliance and regulations
       - 23 comprehensive modules plus final exam
-      - Certificates recognized by Maryland cannabis industry
+      - ProCann EDU completion records, verifiable by employers
       - Support contact: info@procannedu.com
       - Be enthusiastic about cannabis industry opportunities
       - Guide users toward starting their training journey`
