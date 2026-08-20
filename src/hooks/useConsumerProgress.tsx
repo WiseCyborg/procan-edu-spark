@@ -10,13 +10,28 @@ interface CourseProgress {
   completedAt: string | null;
 }
 
+// Admin review escape hatch: `?e2e_guest=<nonce>` forces the progress layer into
+// guest/local-only mode even when an authenticated (admin) session exists. It uses a
+// dedicated localStorage key so it can never read or write real learner progress, and
+// every Supabase progress/enrollment write is suppressed. A new nonce = a clean run.
+export const getE2EGuestNonce = (): string | null => {
+  if (typeof window === 'undefined') return null;
+  const raw = new URLSearchParams(window.location.search).get('e2e_guest');
+  if (!raw) return null;
+  const sanitized = raw.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 40);
+  return sanitized.length > 0 ? sanitized : null;
+};
+
 // Anonymous progress uses a STABLE per-course key (no guest session id), so it
 // survives reloads and cannot drift while the guest session hydrates.
-const getStorageKey = (courseId: string, userId?: string | null) =>
-  userId ? `procann_progress_${courseId}_${userId}` : `procann_progress_${courseId}_anon`;
+const getStorageKey = (courseId: string, userId?: string | null, e2eNonce?: string | null) => {
+  if (e2eNonce) return `procann_progress_${courseId}_e2e_guest_${e2eNonce}`;
+  return userId ? `procann_progress_${courseId}_${userId}` : `procann_progress_${courseId}_anon`;
+};
 
 export const useConsumerProgress = (courseId: string, totalModules: number = 0) => {
   const { user } = useAuth();
+  const e2eGuestNonce = getE2EGuestNonce();
   const [progress, setProgress] = useState<CourseProgress>({
     courseId,
     completedModules: [],
@@ -28,7 +43,10 @@ export const useConsumerProgress = (courseId: string, totalModules: number = 0) 
   const [isLoading, setIsLoading] = useState(true);
   const enrollmentIdRef = useRef<string | null>(null);
 
-  const userId = user?.id ?? null;
+  // In guest E2E mode we deliberately ignore the authenticated identity.
+  const userId = e2eGuestNonce ? null : (user?.id ?? null);
+  const dbUserId = e2eGuestNonce ? null : (user?.id ?? null);
+
 
   useEffect(() => {
     enrollmentIdRef.current = enrollmentId;
