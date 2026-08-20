@@ -233,7 +233,16 @@ const AdminDashboard = () => {
       const totalUsers = usersData?.length || 0;
       const totalOrganizations = organizationsData?.length || 0;
       const totalCertificates = certificatesData?.filter(cert => !cert.is_revoked).length || 0;
-      const totalRevenue = 0;
+      // Lifetime paid revenue (dollars) from completed seat purchases.
+      const { data: paidPurchases, error: purchasesError } = await supabase
+        .from('rvt_purchases')
+        .select('amount_paid, status')
+        .eq('status', 'paid');
+      if (purchasesError) throw purchasesError;
+      const totalRevenue = (paidPurchases || []).reduce(
+        (sum, p) => sum + Number(p.amount_paid || 0),
+        0
+      );
       
       // Calculate completion rate
       const completedUsers = certificatesData?.filter(cert => !cert.is_revoked).length || 0;
@@ -253,7 +262,7 @@ const AdminDashboard = () => {
         totalOrganizations,
         totalCertificates,
         totalRevenue,
-        monthlyGrowth: 12.5, // Mock data
+        monthlyGrowth: 0,
         completionRate,
         expiringCertificates
       });
@@ -443,9 +452,9 @@ const AdminDashboard = () => {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Revenue</p>
+                  <p className="text-sm font-medium text-gray-600">Lifetime Revenue</p>
                   <p className="text-3xl font-bold text-green-700">{formatCurrency(stats.totalRevenue)}</p>
-                  <p className="text-sm text-green-600">Total earnings</p>
+                  <p className="text-sm text-green-600">All paid seat purchases, all time</p>
                 </div>
                 <DollarSign className="h-8 w-8 text-green-600" />
               </div>
@@ -727,17 +736,13 @@ const AdminDashboard = () => {
                     <h3 className="text-lg font-semibold">Revenue Summary</h3>
                     <div className="space-y-3">
                       <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                        <span className="text-green-700">Total Revenue</span>
+                        <span className="text-green-700">Lifetime Revenue (all time)</span>
                         <span className="font-bold text-green-800">
                           {formatCurrency(stats.totalRevenue)}
                         </span>
                       </div>
-                      <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-                        <span className="text-blue-700">Monthly Growth</span>
-                        <span className="font-bold text-blue-800">+{stats.monthlyGrowth}%</span>
-                      </div>
                       <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
-                        <span className="text-purple-700">Avg. per User</span>
+                        <span className="text-purple-700">Lifetime Avg. per User</span>
                         <span className="font-bold text-purple-800">
                           {formatCurrency(stats.totalUsers > 0 ? stats.totalRevenue / stats.totalUsers : 0)}
                         </span>

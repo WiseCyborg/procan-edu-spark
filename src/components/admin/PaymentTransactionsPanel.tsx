@@ -238,9 +238,10 @@ export function PaymentTransactionsPanel() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-2 text-muted-foreground text-sm">
-              <DollarSign className="h-4 w-4" /> Total Revenue
+              <DollarSign className="h-4 w-4" /> Lifetime Revenue
             </div>
             <div className="text-2xl font-bold mt-2">{formatAmount(summary.total_revenue, 'USD')}</div>
+            <p className="text-xs text-muted-foreground mt-1">Paid transactions, all time</p>
           </CardContent>
         </Card>
         <Card>
