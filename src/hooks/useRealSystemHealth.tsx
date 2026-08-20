@@ -204,6 +204,19 @@ export const useRealSystemHealth = (autoRefresh = true, intervalMs = 30000) => {
     }
 
     const functions = functionStatus || [];
+
+    // No telemetry rows at all: we cannot claim anything is deployed or healthy.
+    if (functions.length === 0) {
+      return {
+        totalExecutions1h: 0,
+        failures1h: 0,
+        avgRuntimeMs: 0,
+        status: 'degraded',
+        lastError: 'Deployment telemetry not instrumented — zero observed checks',
+        instrumented: false,
+      };
+    }
+
     const deployed = functions.filter(f => f.is_deployed);
     const failed = functions.filter(f => !f.is_deployed);
     
@@ -224,6 +237,7 @@ export const useRealSystemHealth = (autoRefresh = true, intervalMs = 30000) => {
       avgRuntimeMs: Math.round(avgRuntime),
       status,
       lastError,
+      instrumented: true,
     };
   };
 
@@ -234,7 +248,7 @@ export const useRealSystemHealth = (autoRefresh = true, intervalMs = 30000) => {
       .select('*')
       .order('last_run_at', { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
 
     // Get today's events
     const todayStart = new Date();
@@ -249,25 +263,42 @@ export const useRealSystemHealth = (autoRefresh = true, intervalMs = 30000) => {
     const needsAttention = events?.filter(e => !e.auto_fixed && e.severity !== 'info').length || 0;
 
     if (snapshot) {
+      const s: any = snapshot;
+      const healthy = s.pipelines_healthy ?? null;
+      const total = s.pipelines_total ?? null;
+      const issues = (s.issues_detected || 0) + (s.seat_mismatches || 0);
+      const attention = s.needs_admin_attention ?? needsAttention;
+      const degraded =
+        healthy === null ||
+        total === null ||
+        healthy < total ||
+        issues > 0 ||
+        attention > 0;
+
       return {
-        healthyPipelines: snapshot.healthy_orgs || 0,
-        totalPipelines: 6, // app → org → seat → user → training → cert
-        issuesDetected: (snapshot.issues_detected || 0) + (snapshot.seat_mismatches || 0),
-        autoFixedToday: snapshot.auto_fixed_today || autoFixed,
-        needsAttention: snapshot.needs_admin_attention || needsAttention,
-        lastRunAt: snapshot.last_run_at,
+        healthyPipelines: healthy ?? 0,
+        totalPipelines: total ?? 0,
+        issuesDetected: issues,
+        autoFixedToday: s.auto_fixed_today ?? autoFixed,
+        needsAttention: attention,
+        lastRunAt: s.last_run_at,
+        status: degraded ? 'degraded' : 'healthy',
+        instrumented: healthy !== null && total !== null,
       };
     }
 
     return {
       healthyPipelines: 0,
-      totalPipelines: 6,
+      totalPipelines: 0,
       issuesDetected: 0,
       autoFixedToday: autoFixed,
       needsAttention,
       lastRunAt: null,
+      status: 'degraded',
+      instrumented: false,
     };
   };
+
 
   const fetchAllHealth = useCallback(async () => {
     setLoading(true);
