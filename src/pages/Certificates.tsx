@@ -303,7 +303,7 @@ export default function Certificates() {
         W / 2, H - 16, { align: 'center' }
       );
 
-      pdf.save(`${cert.certificate_number}-RVT-certificate.pdf`);
+      pdf.save(`${cert.certificate_number}-completion-record.pdf`);
 
       toast({ title: 'Certificate Downloaded', description: `${cert.certificate_number} is ready.` });
     } catch (error) {

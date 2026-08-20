@@ -134,7 +134,7 @@ export default function SuccessStories() {
         <div className="container text-center">
           <h2 className="text-3xl font-bold mb-4">Ready to Start Training?</h2>
           <p className="text-lg mb-8 opacity-90 max-w-2xl mx-auto">
-            Join Maryland cannabis professionals who trust ProCann Edu for comprehensive, COMAR-aligned RVT certification training
+            Join Maryland cannabis professionals who trust ProCann Edu for comprehensive, COMAR-aligned cannabis compliance training
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Button size="lg" variant="secondary" onClick={() => navigate('/signup')}>

@@ -29,7 +29,7 @@ export const TrackSidebar = ({
   currentModuleIndex,
   completedModules,
   onModuleSelect,
-  courseBadgeName = 'RVT Certified',
+  courseBadgeName = 'Core Track Complete',
   courseTitle = 'Maryland Cannabis Compliance Training'
 }: TrackSidebarProps) => {
   // Split modules into tracks
@@ -120,7 +120,7 @@ export const TrackSidebar = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <GraduationCap className="h-4 w-4 text-primary" />
-            <span className="text-sm font-semibold text-foreground">RVT Core</span>
+            <span className="text-sm font-semibold text-foreground">Core Track</span>
             <Badge variant="secondary" className="text-xs">Required</Badge>
           </div>
           <span className="text-xs font-medium text-muted-foreground">
@@ -133,7 +133,7 @@ export const TrackSidebar = ({
           {isRvtComplete && (
             <p className="text-xs text-primary font-medium flex items-center gap-1">
               <CheckCircle2 className="h-3 w-3" />
-              RVT Complete — Ready for Exam
+              Core Track Complete — Ready for Exam
             </p>
           )}
         </div>
@@ -159,7 +159,7 @@ export const TrackSidebar = ({
           
           {!isRvtComplete && (
             <p className="text-xs text-muted-foreground bg-muted p-2 rounded">
-              Complete RVT Core to unlock Manager Track
+              Complete the Core Track to unlock Manager Track
             </p>
           )}
           

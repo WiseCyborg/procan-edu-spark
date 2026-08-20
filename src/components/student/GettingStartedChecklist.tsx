@@ -44,7 +44,7 @@ export const GettingStartedChecklist: React.FC<GettingStartedChecklistProps> = (
     {
       id: 'welcome',
       title: 'Watch Welcome Video',
-      description: 'Learn about the RVT training program',
+      description: 'Learn about the training program',
       completed: hasWatchedWelcome,
       action: 'Watch Video',
       route: '/welcome-video',
@@ -101,7 +101,7 @@ export const GettingStartedChecklist: React.FC<GettingStartedChecklistProps> = (
           <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-4" />
           <h3 className="text-xl font-bold mb-2">Congratulations! You're Certified! 🎉</h3>
           <p className="text-muted-foreground mb-4">
-            You've completed all requirements for your RVT certification.
+            You've completed all requirements for your ProCann EDU completion record.
           </p>
           <Button onClick={() => navigate('/certificates')}>
             View Your Certificate

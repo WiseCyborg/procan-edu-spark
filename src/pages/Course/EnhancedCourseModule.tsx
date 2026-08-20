@@ -463,7 +463,7 @@ const EnhancedCourseModule: React.FC = () => {
     if (rolesReady && moduleData && moduleData.is_manager_only && !canAccessManagerTrack) {
       toast({
         title: 'Supervisory track',
-        description: 'The supervisory track opens after you pass the RVT final exam and receive your certificate.',
+        description: 'The supervisory track opens after you pass the final exam and receive your completion record.',
       });
       navigate('/course');
     }
@@ -494,7 +494,7 @@ const EnhancedCourseModule: React.FC = () => {
         if (result?.error === 'rvt_certificate_required') {
           toast({
             title: 'Supervisory track',
-            description: 'The supervisory track opens after you pass the RVT final exam and receive your certificate.',
+            description: 'The supervisory track opens after you pass the final exam and receive your completion record.',
           });
         }
         return null;
@@ -560,7 +560,7 @@ const EnhancedCourseModule: React.FC = () => {
           result?.error === 'rvt_certificate_required'
             ? {
                 title: 'Supervisory track',
-                description: 'The supervisory track opens after you pass the RVT final exam and receive your certificate.',
+                description: 'The supervisory track opens after you pass the final exam and receive your completion record.',
               }
             : {
                 title: 'Error',

@@ -58,7 +58,7 @@ const ConsumerEducation = () => {
             onClick={() => navigate('/get-started')} 
             className="underline ms-1 hover:text-amber-600"
           >
-            Need RVT certification?
+            Need workforce cannabis training?
           </button>
         </p>
       </div>

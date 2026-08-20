@@ -140,7 +140,7 @@ Be helpful, concise, and professional. Do not make up statistics or claims. If y
               <div>
                 <h3 className="font-semibold">{t('chatbot.title', { defaultValue: 'Ask AiLean' })}</h3>
                 <p className="text-xs opacity-90">
-                  {t('chatbot.subtitle', { defaultValue: 'Ask about RVT certification' })}
+                  {t('chatbot.subtitle', { defaultValue: 'Ask about cannabis compliance training' })}
                 </p>
               </div>
             </div>
