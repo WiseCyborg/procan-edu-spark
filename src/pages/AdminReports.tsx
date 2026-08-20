@@ -200,6 +200,27 @@ export default function AdminReports() {
             </Alert>
           )}
 
+          {!loading && !error && !result && (
+            <Card>
+              <CardContent className="space-y-2 p-8 text-center">
+                <Sparkles className="mx-auto h-8 w-8 text-muted-foreground" />
+                <p className="font-medium">No report run yet</p>
+                <p className="text-sm text-muted-foreground">
+                  Pick a preset above or type a question to generate a read-only query.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {loading && (
+            <Card>
+              <CardContent className="flex items-center justify-center gap-3 p-8 text-muted-foreground">
+                <Loader2 className="h-5 w-5 animate-spin" />
+                Generating and running your query...
+              </CardContent>
+            </Card>
+          )}
+
           {result && (
             <Card>
               <CardHeader className="flex flex-row items-center justify-between gap-4">
