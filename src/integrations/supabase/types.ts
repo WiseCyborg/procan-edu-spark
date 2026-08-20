@@ -11950,6 +11950,7 @@ export type Database = {
         Args: { p_email: string; p_organization_id?: string }
         Returns: number
       }
+      invoke_jobs_processor_cron: { Args: never; Returns: number }
       is_caller_email_confirmed: { Args: never; Returns: boolean }
       is_conversation_participant: {
         Args: { _conversation_id: string; _user_id: string }
