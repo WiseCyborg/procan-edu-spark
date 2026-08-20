@@ -133,7 +133,7 @@ export const useConsumerProgress = (courseId: string, totalModules: number = 0) 
     return () => {
       cancelled = true;
     };
-  }, [courseId, userId]);
+  }, [courseId, userId, dbUserId, e2eGuestNonce]);
 
   // Save progress to localStorage and (if enrollment exists) the SAME DB row
   const saveProgress = useCallback(async (updatedProgress: CourseProgress) => {
@@ -173,7 +173,7 @@ export const useConsumerProgress = (courseId: string, totalModules: number = 0) 
         console.error('Error saving progress to database:', error);
       }
     }
-  }, [courseId, userId]);
+  }, [courseId, userId, dbUserId, e2eGuestNonce]);
 
   // Also write to user_progress so admin/RVT reporting sees consumer progress.
   const writeUserProgress = useCallback(async (moduleId: string) => {
@@ -188,7 +188,7 @@ export const useConsumerProgress = (courseId: string, totalModules: number = 0) 
     } catch (error) {
       console.error('Error writing user_progress:', error);
     }
-  }, [courseId, user?.id]);
+  }, [courseId, dbUserId]);
 
   const markModuleComplete = useCallback((moduleId: string, totalModules?: number) => {
     setProgress((prev) => {
@@ -235,7 +235,7 @@ export const useConsumerProgress = (courseId: string, totalModules: number = 0) 
 
       return updatedProgress;
     });
-  }, [saveProgress, writeUserProgress, user?.id, courseId]);
+  }, [saveProgress, writeUserProgress, dbUserId, courseId]);
 
   const isModuleComplete = useCallback((moduleId: string) => {
     return progress.completedModules.includes(moduleId);
