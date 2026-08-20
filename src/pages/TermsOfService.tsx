@@ -149,9 +149,9 @@ export default function TermsOfService() {
             These terms are governed by the laws of the State of Maryland. Any disputes shall be resolved in Maryland courts.
           </p>
 
-          <h2>16. MCA Compliance</h2>
+          <h2>16. Regulatory Alignment</h2>
           <p>
-            This training program is designed to comply with Maryland Cannabis Administration (MCA) requirements under COMAR 14.17.05. 
+            This training program's curriculum is designed to align with COMAR 14.17.15.05. 
             However, compliance requirements may change, and it is your responsibility to stay informed of current regulations.
           </p>
 

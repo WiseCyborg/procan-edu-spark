@@ -61,7 +61,7 @@ async function buildCertificatePdf(opts: {
   center('PROCANN EDU COMPLETION RECORD', height - 90, 22, helvBold, navy);
   center('ProCannEdu — Maryland Cannabis Training', height - 115, 12, helvOblique, muted);
 
-  center('This certifies that', height - 175, 13, helv, muted);
+  center('This records that', height - 175, 13, helv, muted);
   center(opts.recipientName, height - 215, 30, helvBold, ink);
 
   // Decorative underline under name
@@ -75,7 +75,7 @@ async function buildCertificatePdf(opts: {
 
   center('has successfully completed', height - 255, 13, helv, muted);
   center(opts.courseTitle, height - 285, 18, helvBold, navy);
-  center(`Certification Level: ${opts.certificationLevel}`, height - 308, 12, helv, ink);
+  center(`Training Track: ${opts.certificationLevel}`, height - 308, 12, helv, ink);
 
   const fmt = (d: Date) =>
     d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -201,7 +201,7 @@ Deno.serve(async (req: Request) => {
         JSON.stringify({
           certificate_number: existingCert.certificate_number,
           pdf_path: existingCert.pdf_url,
-          message: 'Certificate already exists',
+          message: 'Completion record already exists',
         }),
         { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
       );
@@ -226,7 +226,7 @@ Deno.serve(async (req: Request) => {
       .eq('is_completed', true);
 
     let certificationType: 'rvt' | 'manager' = 'rvt';
-    let certificationLevel = 'RVT Agent'; // human-readable label (PDF/email only)
+    let certificationLevel = 'Core Track'; // human-readable label (PDF/email only)
     let certificationLevelDb: 'agent' | 'manager' = 'agent'; // DB CHECK constraint value
     let tierBadge = 'rvt';
     let trainingTrack = 'Maryland Cannabis Compliance Training';
@@ -253,7 +253,7 @@ Deno.serve(async (req: Request) => {
             certificationLevel = 'Manager';
             certificationLevelDb = 'manager';
             tierBadge = 'manager';
-            trainingTrack = 'RVT Required + Manager Leadership Track';
+            trainingTrack = 'Core Track + Manager Leadership Track';
           }
         }
       }
@@ -262,7 +262,7 @@ Deno.serve(async (req: Request) => {
     if (!rvtComplete) {
       console.error('RVT modules not complete - cannot issue certificate');
       return new Response(
-        JSON.stringify({ error: 'Complete all RVT Required modules (0-18) before requesting certification.' }),
+        JSON.stringify({ error: 'Complete all core training modules (0-18) before requesting a completion record.' }),
         { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
       );
     }
@@ -364,7 +364,7 @@ Deno.serve(async (req: Request) => {
     await supabase.from('user_certificates').insert({
       user_id: user.id,
       course_id: examAttempt.course_id,
-      certificate_name: certificationType === 'manager' ? 'Manager Leadership Certificate' : 'RVT Agent Certificate',
+      certificate_name: certificationType === 'manager' ? 'ProCann EDU Manager Leadership Completion Record' : 'ProCann EDU Core Track Completion Record',
       verification_code: verificationCode,
       recipient_name: recipientName,
       pdf_url: verifyUrl,
@@ -469,7 +469,7 @@ Deno.serve(async (req: Request) => {
         expiry_date: certificate.expiry_date,
         pdf_path: storedPdfPath,
         verify_url: verifyUrl,
-        message: 'Certificate generated successfully',
+        message: 'Completion record generated successfully',
       }),
       { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
     );

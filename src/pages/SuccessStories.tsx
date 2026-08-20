@@ -17,7 +17,7 @@ const platformFeatures = [
   {
     icon: Shield,
     title: "COMAR-Aligned Content",
-    description: "Curriculum designed to meet Maryland Cannabis Administration standards"
+    description: "Curriculum designed to align with COMAR 14.17.15.05"
   },
   {
     icon: MapPin,

@@ -58,7 +58,7 @@ export default function Certificates() {
       console.error('Error fetching certificates:', error);
       toast({
         title: "Error",
-        description: "Failed to load certificates",
+        description: "Failed to load completion records",
         variant: "destructive",
       });
     } finally {
@@ -114,13 +114,13 @@ export default function Certificates() {
 
       if (error) throw error;
 
-      toast({ title: 'Certificate Generated', description: 'Your certificate is now available.' });
+      toast({ title: 'Completion Record Generated', description: 'Your completion record is now available.' });
       await fetchCertificates();
     } catch (error: any) {
       console.error('Error generating certificate:', error);
       toast({
         title: 'Generation Failed',
-        description: error.message || 'Could not generate your certificate. Please contact support.',
+        description: error.message || 'Could not generate your completion record. Please contact support.',
         variant: 'destructive',
       });
     } finally {
@@ -218,7 +218,7 @@ export default function Certificates() {
       pdf.setTextColor(80, 80, 80);
       pdf.setFontSize(9);
       pdf.setFont('helvetica', 'italic');
-      pdf.text('This certifies that', W / 2, 70, { align: 'center' });
+      pdf.text('This records that', W / 2, 70, { align: 'center' });
 
       // RECIPIENT NAME — fetch from profile
       const { data: profile } = await supabase
@@ -260,7 +260,7 @@ export default function Certificates() {
       pdf.setTextColor(15, 82, 51);
       pdf.setFontSize(8);
       pdf.setFont('helvetica', 'bold');
-      pdf.text('COMAR 14.17.15.05 — Maryland Cannabis Administration', W / 2, 125, { align: 'center' });
+      pdf.text('Curriculum designed to align with COMAR 14.17.15.05', W / 2, 125, { align: 'center' });
 
       // BOTTOM 3 COLUMNS
       const issueDate = formatDate(cert.issue_date);
@@ -280,7 +280,7 @@ export default function Certificates() {
       pdf.setTextColor(20, 20, 20); pdf.setFontSize(8); pdf.setFont('helvetica', 'bold');
       pdf.text(cert.certificate_number, W / 2, 145, { align: 'center' });
       pdf.setTextColor(120, 120, 120); pdf.setFontSize(7); pdf.setFont('helvetica', 'normal');
-      pdf.text('CERTIFICATE NUMBER', W / 2, 153, { align: 'center' });
+      pdf.text('RECORD NUMBER', W / 2, 153, { align: 'center' });
 
       // Right — Expiry Date
       pdf.setDrawColor(200, 200, 200);
@@ -305,7 +305,7 @@ export default function Certificates() {
 
       pdf.save(`${cert.certificate_number}-completion-record.pdf`);
 
-      toast({ title: 'Certificate Downloaded', description: `${cert.certificate_number} is ready.` });
+      toast({ title: 'Completion Record Downloaded', description: `${cert.certificate_number} is ready.` });
     } catch (error) {
       console.error('Error generating PDF:', error);
       toast({ title: 'Download Failed', description: 'Failed to generate PDF. Please try again.', variant: 'destructive' });
@@ -323,7 +323,7 @@ export default function Certificates() {
         <div className="text-center">
           <Shield className="mx-auto h-12 w-12 text-gray-400 mb-4" />
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Authentication Required</h1>
-          <p className="text-gray-600">Please sign in to view your certificates.</p>
+          <p className="text-gray-600">Please sign in to view your completion records.</p>
         </div>
       </div>
     );
@@ -334,7 +334,7 @@ export default function Certificates() {
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading your certificates...</p>
+          <p className="text-gray-600">Loading your completion records...</p>
         </div>
       </div>
     );
@@ -344,9 +344,9 @@ export default function Certificates() {
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">My Certificates</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">My Completion Records</h1>
           <p className="text-gray-600">
-            View and download your earned certificates. All certificates are verified and comply with Maryland Cannabis Administration requirements.
+            View and download your ProCann EDU completion records. Each record can be verified using its unique record number.
           </p>
         </div>
 
@@ -356,19 +356,19 @@ export default function Certificates() {
               <FileCheck className="mx-auto h-12 w-12 text-gray-400 mb-4" />
               {passedAttempt ? (
                 <>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Certificate Not Issued Yet</h3>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Completion Record Not Issued Yet</h3>
                   <p className="text-gray-600 mb-6">
-                    You passed your final exam, but no certificate was issued. Generate it now.
+                    You passed your final exam, but no completion record was issued. Generate it now.
                   </p>
                   <Button onClick={handleGenerateMissingCertificate} disabled={generating}>
-                    {generating ? 'Generating…' : 'Get My Certificate'}
+                    {generating ? 'Generating…' : 'Get My Completion Record'}
                   </Button>
                 </>
               ) : (
                 <>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Certificates Yet</h3>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Completion Records Yet</h3>
                   <p className="text-gray-600 mb-6">
-                    Complete your training courses to earn certificates.
+                    Complete your training courses to earn completion records.
                   </p>
                   <Button onClick={() => window.location.href = '/course'}>
                     Start Training
@@ -391,7 +391,7 @@ export default function Certificates() {
                           {certificate.courses.title}
                         </CardTitle>
                         <p className="text-green-700 mt-1">
-                          Certificate #{certificate.certificate_number}
+                          Record #{certificate.certificate_number}
                         </p>
                       </div>
                       <div className="flex gap-2 flex-wrap">
@@ -479,7 +479,7 @@ export default function Certificates() {
                     {status.status === 'expired' && (
                       <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
                         <p className="text-sm text-yellow-800">
-                          This certificate has expired. Contact support if you need to renew your certification.
+                          This completion record has expired. Contact support about renewal training.
                         </p>
                       </div>
                     )}
@@ -487,7 +487,7 @@ export default function Certificates() {
                     {status.status === 'revoked' && (
                       <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
                         <p className="text-sm text-red-800">
-                          This certificate has been revoked and is no longer valid.
+                          This completion record has been revoked. Contact support about its record status.
                         </p>
                       </div>
                     )}
@@ -499,14 +499,13 @@ export default function Certificates() {
         )}
         
         <div className="mt-8 p-6 bg-blue-50 border border-blue-200 rounded-lg">
-          <h3 className="font-semibold text-blue-900 mb-2">Certificate Information</h3>
+          <h3 className="font-semibold text-blue-900 mb-2">Completion Record Information</h3>
           <ul className="text-sm text-blue-800 space-y-1">
-            <li>• All certificates are digitally verified and tamper-proof</li>
-            <li>• Certificates meet Maryland Cannabis Administration requirements</li>
-            <li>• <strong>Agent-Level:</strong> Covers all 18 required RVT modules</li>
-            <li>• <strong>Manager-Level:</strong> Includes 5 additional management modules (23 total)</li>
-            <li>• Download certificates for your records or employer verification</li>
-            <li>• Valid certificates are recognized throughout Maryland's cannabis industry</li>
+            <li>• Completion records are digitally verifiable and tamper-evident</li>
+            <li>• <strong>Core Track:</strong> documents completion of the core training modules and final exam</li>
+            <li>• <strong>Manager Track:</strong> documents completion of the supplemental management modules</li>
+            <li>• Download completion records for personal records or employer verification</li>
+            <li>• Each record is issued by ProCann EDU</li>
           </ul>
         </div>
       </div>
