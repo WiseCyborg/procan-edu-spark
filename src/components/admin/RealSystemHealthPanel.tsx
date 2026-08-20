@@ -212,23 +212,32 @@ export const RealSystemHealthPanel = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-3 gap-3">
-            <MetricCard 
-              label="Deployed" 
-              value={health.edgeFunctions.totalExecutions1h} 
-              icon={CheckCircle}
-            />
-            <MetricCard 
-              label="Failures" 
-              value={health.edgeFunctions.failures1h} 
-              icon={XCircle}
-            />
-            <MetricCard 
-              label="Avg Runtime" 
-              value={`${health.edgeFunctions.avgRuntimeMs}ms`} 
-              icon={Clock}
-            />
-          </div>
+          {!health.edgeFunctions.instrumented ? (
+            <div className="p-3 rounded-lg bg-muted/50 border border-border">
+              <p className="text-sm text-muted-foreground">
+                Deployment telemetry not instrumented — zero observed checks. Deployed function
+                count cannot be reported from this panel.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 gap-3">
+              <MetricCard
+                label="Deployed (observed)"
+                value={health.edgeFunctions.totalExecutions1h}
+                icon={CheckCircle}
+              />
+              <MetricCard
+                label="Failures"
+                value={health.edgeFunctions.failures1h}
+                icon={XCircle}
+              />
+              <MetricCard
+                label="Avg Runtime"
+                value={`${health.edgeFunctions.avgRuntimeMs}ms`}
+                icon={Clock}
+              />
+            </div>
+          )}
           {health.edgeFunctions.lastError && (
             <div className="mt-3 p-3 rounded-lg bg-destructive/10 border border-destructive/20">
               <p className="text-sm text-destructive">
@@ -238,6 +247,7 @@ export const RealSystemHealthPanel = () => {
           )}
         </CardContent>
       </Card>
+
 
       {/* Pipeline Health Summary */}
       <Card>
