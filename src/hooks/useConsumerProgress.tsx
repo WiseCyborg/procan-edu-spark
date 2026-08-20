@@ -266,6 +266,9 @@ export const useConsumerProgress = (courseId: string, totalModules: number = 0) 
     isModuleComplete,
     completeCourse,
     completionPercentage: completionPercentage(totalModules),
-    isLoading
+    isLoading,
+    isGuestE2E: !!e2eGuestNonce,
+    e2eGuestNonce,
+
   };
 };
