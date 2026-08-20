@@ -52,14 +52,15 @@ export interface TrackInfo {
 export const TRACKS: Record<keyof typeof TRACK_IDS, TrackInfo> = {
   RVT_CORE: {
     id: TRACK_IDS.RVT_CORE,
-    name: 'Responsible Vendor Training',
-    shortName: 'RVT Core',
-    description: 'Maryland MCA-compliant training for dispensary employees',
-    badgeName: 'RVT Certified',
+    name: 'Maryland Cannabis Compliance Training',
+    shortName: 'Compliance Core',
+    description: 'Workforce compliance education aligned to Maryland COMAR 14.17 topics',
+    badgeName: 'Compliance Training Completed',
     prerequisiteId: null,
     prerequisiteRequired: false,
     targetAudience: 'employees',
   },
+
   MANAGER: {
     id: TRACK_IDS.MANAGER,
     name: 'Manager Compliance Training',
