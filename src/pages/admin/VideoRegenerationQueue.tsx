@@ -363,7 +363,7 @@ const VideoRegenerationQueue: React.FC = () => {
             </Button>
             <Button onClick={submitMarkRegenerated} disabled={busy}>
               {busy && <Loader2 className="h-4 w-4 me-2 animate-spin" />}
-              Save
+              Register candidate
             </Button>
           </DialogFooter>
         </DialogContent>
