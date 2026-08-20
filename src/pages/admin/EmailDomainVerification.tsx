@@ -49,57 +49,27 @@ export default function EmailDomainVerification() {
     });
   };
 
-  const testDomain = async () => {
-    setTesting(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('_diagnostic-email', {
-        body: { to: 'ops@procannedu.com' }
-      });
+  // The live email diagnostic is retired: this page never sends a test email.
+  // Domain/DNS verification state must come from a real provider check.
 
-      if (error) throw error;
-
-      setTestResult(data);
-      
-      if (data.success) {
-        toast({
-          title: '✅ Domain Verified!',
-          description: 'Test email sent successfully. Domain is working.',
-        });
-      } else {
-        toast({
-          variant: 'destructive',
-          title: '❌ Domain Not Verified',
-          description: data.error || 'Domain verification failed',
-        });
-      }
-    } catch (error: any) {
-      setTestResult({ success: false, error: error.message });
-      toast({
-        variant: 'destructive',
-        title: 'Test Failed',
-        description: error.message,
-      });
-    } finally {
-      setTesting(false);
-    }
-  };
 
   return (
     <div className="container mx-auto p-6 max-w-5xl">
       <div className="mb-6">
         <h1 className="text-3xl font-bold mb-2">Email Domain Verification</h1>
         <p className="text-muted-foreground">
-          Fix email delivery by verifying {domain} with Resend
+          Reference for verifying {domain} with Resend
         </p>
       </div>
 
-      {/* Critical Alert */}
-      <Alert variant="destructive" className="mb-6">
+      <Alert className="mb-6">
         <AlertTriangle className="h-4 w-4" />
-        <AlertTitle>🚨 Critical: Domain Not Verified</AlertTitle>
+        <AlertTitle>Verification telemetry unavailable</AlertTitle>
         <AlertDescription>
-          All emails from {domain} are currently failing because the domain is not verified with Resend.
-          Follow the steps below to fix this immediately.
+          We have no live provider or DNS evidence for {domain}, so this page cannot state whether
+          the domain is verified. Provider acceptance IDs returned by Resend only prove the API
+          accepted a send request — they do not prove DNS/domain verification or that a message was
+          delivered to an inbox.
         </AlertDescription>
       </Alert>
 
@@ -107,7 +77,7 @@ export default function EmailDomainVerification() {
       <Card className="mb-6">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <XCircle className="h-5 w-5 text-destructive" />
+            <AlertTriangle className="h-5 w-5 text-muted-foreground" />
             Current Status
           </CardTitle>
         </CardHeader>
@@ -119,59 +89,25 @@ export default function EmailDomainVerification() {
             </div>
             <div className="flex items-center justify-between">
               <span className="font-medium">Verification Status:</span>
-              <Badge variant="destructive">Not Verified</Badge>
+              <Badge variant="outline">Unknown — telemetry unavailable</Badge>
             </div>
             <div className="flex items-center justify-between">
               <span className="font-medium">Email Provider:</span>
               <span>Resend</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="font-medium">Failed Emails:</span>
-              <span className="text-destructive font-bold">23+</span>
+              <span className="font-medium">Delivery evidence:</span>
+              <span className="text-muted-foreground">Not instrumented</span>
             </div>
           </div>
-          
-          <Button 
-            onClick={testDomain} 
-            disabled={testing}
-            className="w-full mt-4"
-            variant="outline"
-          >
-            {testing ? (
-              <>
-                <RefreshCw className="h-4 w-4 me-2 animate-spin" />
-                Testing Domain...
-              </>
-            ) : (
-              <>
-                <RefreshCw className="h-4 w-4 me-2" />
-                Test Domain Verification
-              </>
-            )}
-          </Button>
 
-          {testResult && (
-            <Alert className="mt-4" variant={testResult.success ? "default" : "destructive"}>
-              <AlertDescription>
-                {testResult.success ? (
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4" />
-                    <span>Domain verified! Emails are working.</span>
-                  </div>
-                ) : (
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <XCircle className="h-4 w-4" />
-                      <span className="font-semibold">Verification Failed</span>
-                    </div>
-                    <p className="text-sm">{testResult.error}</p>
-                  </div>
-                )}
-              </AlertDescription>
-            </Alert>
-          )}
+          <p className="text-xs text-muted-foreground mt-4">
+            The live email diagnostic is retired; this page does not send test emails. Confirm
+            domain status directly in the Resend dashboard.
+          </p>
         </CardContent>
       </Card>
+
 
       {/* Step-by-Step Instructions */}
       <Card className="mb-6">

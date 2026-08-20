@@ -141,12 +141,17 @@ export const RealSystemHealthPanel = () => {
             <div className="mt-3 p-3 rounded-lg bg-destructive/10 border border-destructive/20">
               <p className="text-sm text-destructive flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4" />
-                {health.email.failureRate >= 20 
+                {health.email.failureRate >= 20
                   ? 'High failure rate detected - check email provider configuration'
-                  : 'Elevated failure rate - monitoring recommended'}
+                  : health.email.sent24h === 0 && health.email.failed24h === 0
+                    ? 'No email telemetry in the last 24h — delivery health is unknown'
+                    : health.email.delivered24h === 0
+                      ? 'Delivery unverified: provider accepted sends but no delivery events were recorded'
+                      : 'Elevated failure rate - monitoring recommended'}
               </p>
             </div>
           )}
+
         </CardContent>
       </Card>
 
@@ -207,23 +212,32 @@ export const RealSystemHealthPanel = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-3 gap-3">
-            <MetricCard 
-              label="Deployed" 
-              value={health.edgeFunctions.totalExecutions1h} 
-              icon={CheckCircle}
-            />
-            <MetricCard 
-              label="Failures" 
-              value={health.edgeFunctions.failures1h} 
-              icon={XCircle}
-            />
-            <MetricCard 
-              label="Avg Runtime" 
-              value={`${health.edgeFunctions.avgRuntimeMs}ms`} 
-              icon={Clock}
-            />
-          </div>
+          {!health.edgeFunctions.instrumented ? (
+            <div className="p-3 rounded-lg bg-muted/50 border border-border">
+              <p className="text-sm text-muted-foreground">
+                Deployment telemetry not instrumented — zero observed checks. Deployed function
+                count cannot be reported from this panel.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 gap-3">
+              <MetricCard
+                label="Deployed (observed)"
+                value={health.edgeFunctions.totalExecutions1h}
+                icon={CheckCircle}
+              />
+              <MetricCard
+                label="Failures"
+                value={health.edgeFunctions.failures1h}
+                icon={XCircle}
+              />
+              <MetricCard
+                label="Avg Runtime"
+                value={`${health.edgeFunctions.avgRuntimeMs}ms`}
+                icon={Clock}
+              />
+            </div>
+          )}
           {health.edgeFunctions.lastError && (
             <div className="mt-3 p-3 rounded-lg bg-destructive/10 border border-destructive/20">
               <p className="text-sm text-destructive">
@@ -234,6 +248,7 @@ export const RealSystemHealthPanel = () => {
         </CardContent>
       </Card>
 
+
       {/* Pipeline Health Summary */}
       <Card>
         <CardHeader className="pb-3">
@@ -243,7 +258,11 @@ export const RealSystemHealthPanel = () => {
               <CardTitle className="text-lg">Pipeline Health</CardTitle>
             </div>
             <Badge variant="outline">
-              {health.pipeline.healthyPipelines}/{health.pipeline.totalPipelines} Healthy
+              {!health.pipeline.instrumented
+                ? 'Not instrumented'
+                : health.pipeline.status === 'healthy'
+                  ? `${health.pipeline.healthyPipelines}/${health.pipeline.totalPipelines} Healthy`
+                  : `Needs attention — ${health.pipeline.healthyPipelines}/${health.pipeline.totalPipelines} healthy`}
             </Badge>
           </div>
           <CardDescription>
@@ -269,12 +288,17 @@ export const RealSystemHealthPanel = () => {
               value={health.pipeline.needsAttention} 
               icon={AlertOctagon}
             />
-            <MetricCard 
-              label="Healthy Pipelines" 
-              value={`${health.pipeline.healthyPipelines}/${health.pipeline.totalPipelines}`} 
+            <MetricCard
+              label="Healthy Pipelines"
+              value={
+                health.pipeline.instrumented
+                  ? `${health.pipeline.healthyPipelines}/${health.pipeline.totalPipelines}`
+                  : 'Unknown'
+              }
               icon={Activity}
             />
           </div>
+
         </CardContent>
       </Card>
     </div>

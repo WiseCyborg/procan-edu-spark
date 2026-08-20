@@ -10,7 +10,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { format, formatDistanceToNow } from 'date-fns';
 
 const COURSE_ID = 'e6841a2f-4e92-47c3-9ed4-243ccc22338b';
-const TOTAL_MODULES = 24;
 
 // Brand palette (per spec)
 const BRAND = {
@@ -34,6 +33,10 @@ interface LearnerRow {
   total_time_minutes: number;
   certified: boolean;
   certificate_date: string | null;
+  /** Certificate was issued before core modules that the learner never completed. */
+  historical_curriculum: boolean;
+  /** Completed core modules that already existed when the certificate was issued. */
+  modules_at_issuance: number;
 }
 
 interface QuizScore {
@@ -42,18 +45,22 @@ interface QuizScore {
   completed_at: string | null;
 }
 
-type StatusKind = 'Certified' | 'In Progress' | 'Not Started';
+type StatusKind = 'Certified' | 'Certified — historical curriculum' | 'In Progress' | 'Not Started';
 
 const getStatus = (row: LearnerRow): StatusKind => {
-  if (row.certified) return 'Certified';
+  if (row.certified) {
+    return row.historical_curriculum ? 'Certified — historical curriculum' : 'Certified';
+  }
   if (row.modules_completed > 0) return 'In Progress';
   return 'Not Started';
 };
+
 
 export function LearnerProgressPanel() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [learners, setLearners] = useState<LearnerRow[]>([]);
+  const [coreModuleCount, setCoreModuleCount] = useState<number | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [quizScores, setQuizScores] = useState<QuizScore[]>([]);
   const [detailLoading, setDetailLoading] = useState(false);
@@ -69,14 +76,20 @@ export function LearnerProgressPanel() {
         .eq('course_id', COURSE_ID);
       if (progErr) throw progErr;
 
-      // 2. Module map to translate module_id -> module_number
+      // 2. Live module inventory — the current curriculum is derived, never hardcoded.
       const { data: modules } = await supabase
         .from('course_modules')
-        .select('id, module_number')
+        .select('id, module_number, is_active, is_manager_only, created_at')
         .eq('course_id', COURSE_ID);
       const moduleNumberById = new Map<string, number>(
         (modules ?? []).map((m: any) => [m.id, m.module_number]),
       );
+      const activeCoreModules = (modules ?? []).filter(
+        (m: any) => m.is_active !== false && m.is_manager_only !== true,
+      );
+      const activeCoreCount = activeCoreModules.length;
+      setCoreModuleCount(activeCoreCount || null);
+
 
       // 3. Certificates
       const { data: certs } = await supabase
@@ -134,17 +147,39 @@ export function LearnerProgressPanel() {
         const agg = perUser.get(p.user_id);
         const cert = certByUser.get(p.user_id);
         const name = [p.first_name, p.last_name].filter(Boolean).join(' ').trim();
+        const completedIds = agg?.completedModules ?? new Set<string>();
+
+        // A certificate is "historical curriculum" when active core modules were
+        // added AFTER it was issued and the learner never completed them.
+        let historical = false;
+        let modulesAtIssuance = completedIds.size;
+        if (cert) {
+          const issuedAt = new Date(cert.date).getTime();
+          const modulesAddedAfterIssue = activeCoreModules.filter((m: any) => {
+            const created = m.created_at ? new Date(m.created_at).getTime() : 0;
+            return created > issuedAt && !completedIds.has(m.id);
+          });
+          historical = modulesAddedAfterIssue.length > 0;
+          modulesAtIssuance = activeCoreModules.filter((m: any) => {
+            const created = m.created_at ? new Date(m.created_at).getTime() : 0;
+            return created <= issuedAt && completedIds.has(m.id);
+          }).length || completedIds.size;
+        }
+
         return {
           user_id: p.user_id,
           email: p.email_cache ?? '—',
           full_name: name || (p.email_cache ?? 'Unnamed Learner'),
-          modules_completed: agg?.completedModules.size ?? 0,
+          modules_completed: completedIds.size,
           current_module_number: agg?.currentModule ?? 0,
           last_activity: agg?.last ?? null,
           total_time_minutes: Math.round((agg?.time ?? 0) / 60),
           certified: !!cert,
           certificate_date: cert?.date ?? null,
+          historical_curriculum: historical,
+          modules_at_issuance: modulesAtIssuance,
         };
+
       });
 
       rows.sort((a, b) => {
@@ -224,11 +259,15 @@ export function LearnerProgressPanel() {
 
   const selected = learners.find((l) => l.user_id === selectedId) ?? null;
 
+  /** Current active core curriculum size, derived from live data. */
+  const currentCoreCount = coreModuleCount;
+  const coreLabel = currentCoreCount === null ? '—' : String(currentCoreCount);
+
   const statusBadge = (s: StatusKind) => {
-    if (s === 'Certified')
+    if (s === 'Certified' || s === 'Certified — historical curriculum')
       return (
         <Badge style={{ background: BRAND.gold, color: BRAND.bg, border: 'none' }}>
-          Certified
+          {s}
         </Badge>
       );
     if (s === 'In Progress')
@@ -237,6 +276,7 @@ export function LearnerProgressPanel() {
           In Progress
         </Badge>
       );
+
     return (
       <Badge
         variant="outline"
@@ -277,7 +317,9 @@ export function LearnerProgressPanel() {
             <div>
               <CardTitle style={{ color: BRAND.text }}>Learner Progress</CardTitle>
               <CardDescription style={{ color: BRAND.textMuted }}>
-                RVT course — live progress, time-on-task, and certification status
+                Compliance training — live progress, time-on-task, and completion records
+                {currentCoreCount ? ` (current curriculum: ${currentCoreCount} core modules)` : ''}
+
               </CardDescription>
             </div>
           </div>
@@ -311,7 +353,7 @@ export function LearnerProgressPanel() {
               No learners enrolled yet
             </p>
             <p className="text-sm max-w-md">
-              Once students start the RVT course, their progress will appear here in real time.
+              Once students start the compliance training, their progress will appear here in real time.
             </p>
           </div>
         ) : (
@@ -344,7 +386,9 @@ export function LearnerProgressPanel() {
               <ScrollArea className="h-[520px] pe-2">
                 <div className="flex flex-col gap-2">
                   {filtered.map((l) => {
-                    const pct = Math.round((l.modules_completed / TOTAL_MODULES) * 100);
+                    const pct = currentCoreCount
+                      ? Math.round((l.modules_completed / currentCoreCount) * 100)
+                      : 0;
                     const isSelected = l.user_id === selectedId;
                     return (
                       <button
@@ -371,15 +415,23 @@ export function LearnerProgressPanel() {
                           </div>
                           {statusBadge(getStatus(l))}
                         </div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <div className="flex-1">{renderBar(pct)}</div>
-                          <div
-                            className="text-xs font-mono tabular-nums"
-                            style={{ color: BRAND.textMuted }}
-                          >
-                            {l.modules_completed}/{TOTAL_MODULES}
+                        {l.historical_curriculum ? (
+                          <div className="text-xs mb-1" style={{ color: BRAND.textMuted }}>
+                            {l.modules_at_issuance} modules recorded at issuance; current
+                            curriculum: {coreLabel} core modules.
                           </div>
-                        </div>
+                        ) : (
+                          <div className="flex items-center gap-2 mb-1">
+                            <div className="flex-1">{renderBar(pct)}</div>
+                            <div
+                              className="text-xs font-mono tabular-nums"
+                              style={{ color: BRAND.textMuted }}
+                            >
+                              {l.modules_completed}/{coreLabel}
+                            </div>
+                          </div>
+                        )}
+
                         <div className="text-xs" style={{ color: BRAND.textMuted }}>
                           {l.last_activity
                             ? `Active ${formatDistanceToNow(new Date(l.last_activity), { addSuffix: true })}`
@@ -438,31 +490,44 @@ export function LearnerProgressPanel() {
                     {statusBadge(getStatus(selected))}
                   </div>
 
-                  {/* Overall progress */}
+                  {/* Progress against the CURRENT curriculum */}
                   <div>
                     <div className="flex items-baseline justify-between mb-2">
                       <div className="text-sm" style={{ color: BRAND.textMuted }}>
-                        Overall progress
+                        {selected.historical_curriculum
+                          ? 'Current-curriculum coverage'
+                          : 'Overall progress'}
                       </div>
                       <div
                         className="text-3xl font-bold tabular-nums"
                         style={{ color: BRAND.accent }}
                       >
-                        {Math.round((selected.modules_completed / TOTAL_MODULES) * 100)}%
+                        {currentCoreCount
+                          ? `${Math.round((selected.modules_completed / currentCoreCount) * 100)}%`
+                          : '—'}
                       </div>
                     </div>
                     {renderBar(
-                      (selected.modules_completed / TOTAL_MODULES) * 100,
+                      currentCoreCount
+                        ? (selected.modules_completed / currentCoreCount) * 100
+                        : 0,
                       12,
+                    )}
+                    {selected.historical_curriculum && (
+                      <p className="text-xs mt-2" style={{ color: BRAND.textMuted }}>
+                        Coverage against today's curriculum only. This learner's completion
+                        record was earned under the earlier curriculum and is unaffected.
+                      </p>
                     )}
                   </div>
 
                   {/* Stat grid */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <Stat
-                      label="Modules done"
-                      value={`${selected.modules_completed} / ${TOTAL_MODULES}`}
+                      label={selected.historical_curriculum ? 'Core modules covered' : 'Modules done'}
+                      value={`${selected.modules_completed} / ${coreLabel}`}
                     />
+
                     <Stat
                       label="Current module"
                       value={selected.current_module_number > 0 ? `#${selected.current_module_number}` : '—'}
@@ -499,14 +564,25 @@ export function LearnerProgressPanel() {
                         className="text-sm font-semibold"
                         style={{ color: selected.certified ? BRAND.gold : BRAND.text }}
                       >
-                        {selected.certified ? 'Certificate earned' : 'Certificate not yet earned'}
+                        {selected.certified
+                          ? selected.historical_curriculum
+                            ? 'Completion record earned — historical curriculum'
+                            : 'Completion record earned'
+                          : 'Completion record not yet earned'}
                       </div>
                       {selected.certified && selected.certificate_date && (
                         <div className="text-xs" style={{ color: BRAND.textMuted }}>
                           Issued {format(new Date(selected.certificate_date), 'PPP')}
                         </div>
                       )}
+                      {selected.certified && selected.historical_curriculum && (
+                        <div className="text-xs mt-1" style={{ color: BRAND.textMuted }}>
+                          {selected.modules_at_issuance} modules recorded at issuance; current
+                          curriculum: {coreLabel} core modules. The record remains valid.
+                        </div>
+                      )}
                     </div>
+
                   </div>
 
                   {/* Quiz scores */}

@@ -1,10 +1,16 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { RVT_TRAINING_MODULE_COUNT } from '@/constants/tracks';
+import { supabase } from '@/integrations/supabase/client';
+import {
+  RVT_TRAINING_MODULE_COUNT,
+  MANAGER_ONLY_MODULE_COUNT,
+  TRACK_IDS,
+} from '@/constants/tracks';
+
 import { 
   Shield, 
   FileText, 
@@ -28,12 +34,38 @@ const MCAComplianceReview = () => {
   const navigate = useNavigate();
   const { data: metrics, isLoading } = useMCAMetrics();
   const [searchQuery, setSearchQuery] = useState('');
+  const [liveCounts, setLiveCounts] = useState<{ core: number; manager: number } | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase
+        .from('course_modules')
+        .select('id, is_active, is_manager_only')
+        .eq('course_id', TRACK_IDS.RVT_CORE);
+      if (cancelled || error || !data) return;
+      const active = data.filter((m: any) => m.is_active !== false);
+      setLiveCounts({
+        core: active.filter((m: any) => m.is_manager_only !== true).length,
+        manager: active.filter((m: any) => m.is_manager_only === true).length,
+      });
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Prefer live data; otherwise fall back to the shared constants.
+  const coreModuleCount = liveCounts?.core ?? RVT_TRAINING_MODULE_COUNT;
+  const managerModuleCount = liveCounts?.manager ?? MANAGER_ONLY_MODULE_COUNT;
+  const totalActiveModules = coreModuleCount + managerModuleCount;
 
   const handleCertificateSearch = () => {
     if (searchQuery.trim()) {
       navigate(`/verify-certificate?number=${searchQuery.trim()}`);
     }
   };
+
 
   if (isLoading) {
     return (
@@ -60,29 +92,43 @@ const MCAComplianceReview = () => {
           <div className="flex items-center justify-center gap-3 mb-6">
             <Shield className="h-12 w-12 text-primary" />
             <h1 className="text-4xl font-bold text-foreground">
-              MCA Live Compliance Dashboard
+              MCA Compliance Readiness Review
             </h1>
           </div>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Real-time oversight and certificate verification for Maryland Cannabis Administration
+            Internal provider readiness and evidence page maintained by ProCann Edu, LLC. This
+            page is not operated by, endorsed by, or affiliated with the Maryland Cannabis
+            Administration.
           </p>
         </div>
 
-        {/* Certificate Verification Search - Prominent */}
+        <Card className="mb-8 border-yellow-500/40 bg-yellow-500/5">
+          <CardContent className="pt-6">
+            <p className="text-sm text-muted-foreground">
+              <strong className="text-foreground">Status disclosure:</strong> ProCann EDU
+              provides workforce compliance education and readiness training. It is not an
+              MCA-approved Responsible Vendor Training provider, and completion records issued
+              here are not an official Maryland credential. Formal review and application
+              preparation, including human sign-off, is in progress.
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Completion Record Verification */}
         <Card className="mb-8 border-primary/20 shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Search className="h-6 w-6" />
-              Verify Certificate
+              Completion Record Verification
             </CardTitle>
             <CardDescription>
-              Enter certificate number to instantly verify authenticity and view details
+              Enter a completion record number to verify that the record was issued by ProCann EDU
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex gap-2">
               <Input
-                placeholder="Enter certificate number (e.g., MCA-2025-00123)"
+                placeholder="Enter completion record number"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleCertificateSearch()}
@@ -95,6 +141,7 @@ const MCAComplianceReview = () => {
             </div>
           </CardContent>
         </Card>
+
 
         {/* Hero Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -119,7 +166,7 @@ const MCAComplianceReview = () => {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <Award className="h-4 w-4" />
-                Certified Employees
+                Learners with Completion Records
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -127,7 +174,8 @@ const MCAComplianceReview = () => {
                 {metrics?.totalCertifiedEmployees || 0}
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                Valid RVT certifications
+                Active ProCann EDU completion records
+
               </p>
             </CardContent>
           </Card>
@@ -144,7 +192,7 @@ const MCAComplianceReview = () => {
                 {metrics?.certificatesIssuedThisMonth || 0}
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                New certifications in {new Date().toLocaleString('default', { month: 'long' })}
+                New completion records in {new Date().toLocaleString('default', { month: 'long' })}
               </p>
             </CardContent>
           </Card>
@@ -181,8 +229,9 @@ const MCAComplianceReview = () => {
               <p className="text-muted-foreground">
                 <strong>Legal Name:</strong> ProCann Edu, LLC<br />
                 <strong>Location:</strong> Baltimore, Maryland<br />
-                <strong>Service Area:</strong> All 24 Maryland counties<br />
-                <strong>Platform Type:</strong> Online RVT training and compliance management
+                <strong>Service Area:</strong> Maryland<br />
+                <strong>Platform Type:</strong> Online workforce compliance education and training management
+
               </p>
             </div>
             <div>
@@ -204,19 +253,23 @@ const MCAComplianceReview = () => {
               COMAR 14.17.15.05 Alignment Matrix
             </CardTitle>
             <CardDescription>
-              Module-by-module mapping to Maryland regulations
+              Module-by-module mapping of our curriculum to Maryland regulatory topics
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-muted-foreground">
-              Our {RVT_TRAINING_MODULE_COUNT}-module curriculum is specifically designed to meet and exceed COMAR 14.17.15.05 requirements for Responsible Vendor Training in Maryland.
+              The workforce compliance track currently has {totalActiveModules} active modules:{' '}
+              {coreModuleCount} core modules and {managerModuleCount} manager-only modules. Content
+              is mapped to the topics described in COMAR 14.17.15.05. This mapping is our own
+              internal alignment work and has not been reviewed or approved by the MCA.
             </p>
+
             <div className="space-y-2">
               <div className="flex items-start gap-2">
                 <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
                 <div>
                   <strong className="text-foreground">Drug-Free Workplace Policy</strong>
-                  <p className="text-sm text-muted-foreground">COMAR 21.11.08.03 compliance included</p>
+                  <p className="text-sm text-muted-foreground">COMAR 21.11.08.03 topics covered</p>
                 </div>
               </div>
               <div className="flex items-start gap-2">
@@ -236,11 +289,12 @@ const MCAComplianceReview = () => {
             </div>
             <div className="bg-primary/5 p-4 rounded-lg border border-primary/20 mt-4">
               <p className="text-sm text-muted-foreground">
-                <strong className="text-foreground">Current Status:</strong> Formal COMAR compliance review in progress<br />
-                <strong className="text-foreground">Update Protocol:</strong> Automated monitoring system with formal review workflow<br />
-                <strong className="text-foreground">Review Frequency:</strong> Six-month compliance audits with continuous monitoring
+                <strong className="text-foreground">Current Status:</strong> Internal COMAR review and application preparation in progress; human sign-off pending<br />
+                <strong className="text-foreground">Update Protocol:</strong> Automated monitoring with a human review workflow before content changes ship<br />
+                <strong className="text-foreground">Review Frequency:</strong> Six-month internal reviews with continuous monitoring
               </p>
             </div>
+
             <Button variant="outline" className="mt-4">
               <FileText className="h-4 w-4 me-2" />
               View Detailed Curriculum Matrix
@@ -369,22 +423,23 @@ const MCAComplianceReview = () => {
         {/* Download & Contact Section */}
         <Card className="bg-gradient-to-br from-primary to-accent text-white">
           <CardHeader>
-            <CardTitle className="text-white">Download Complete Documentation</CardTitle>
+            <CardTitle className="text-white">Download Readiness Documentation</CardTitle>
             <CardDescription className="text-white/90">
-              Access the full MCA compliance package or contact our regulatory team
+              Access our internal compliance readiness package or contact our regulatory team
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <Button variant="secondary" size="lg" className="w-full md:w-auto">
               <Download className="h-4 w-4 me-2" />
-              Download MCA Compliance Package (PDF)
+              Download Compliance Readiness Package (PDF)
             </Button>
+
             <div className="border-t border-white/20 pt-4">
               <h3 className="text-lg font-semibold text-white mb-2">
                 Contact for Regulatory Inquiries
               </h3>
               <p className="text-white/90 mb-4">
-                For questions about compliance, curriculum alignment, or platform security, our regulatory team is available to assist MCA officials.
+                For questions about our curriculum alignment work, documentation, or platform security, our regulatory team can be reached directly.
               </p>
               <Button variant="secondary" size="lg">
                 <FileText className="h-4 w-4 me-2" />
