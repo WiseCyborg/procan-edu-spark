@@ -54,39 +54,34 @@ export default function StateOfficialsPage() {
         </p>
       </div>
 
-      {/* Application Status */}
+      {/* Disclosure */}
       <Card className="mb-8 border-2 border-primary">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileCheck className="h-6 w-6 text-primary" />
-            MCA Application Status
+            Disclosure
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <p className="text-sm text-muted-foreground">Application Status</p>
-              <p className="text-lg font-semibold">Application in Preparation</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Submission Target</p>
-              <p className="text-lg font-semibold">Within 14 Days</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">MCA Reference Portal</p>
-              <a 
-                href="https://cannabis.maryland.gov/pages/responsible_vendor_training.aspx"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-lg font-semibold text-primary hover:underline"
-              >
-                cannabis.maryland.gov
-              </a>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">COMAR Compliance</p>
-              <p className="text-lg font-semibold">14.17.15.05</p>
-            </div>
+        <CardContent className="space-y-2">
+          <p className="text-sm">
+            This page is not operated by, endorsed by, or affiliated with the Maryland Cannabis Administration.
+          </p>
+          <p className="text-sm">
+            It is not an MCA-approved Responsible Vendor Training provider, and completion records issued here are not an official Maryland credential.
+          </p>
+          <p className="text-sm">
+            This mapping is our own internal alignment work and has not been reviewed or approved by the MCA.
+          </p>
+          <div className="pt-2">
+            <p className="text-sm text-muted-foreground">MCA Reference Portal</p>
+            <a
+              href="https://cannabis.maryland.gov/pages/responsible_vendor_training.aspx"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-lg font-semibold text-primary hover:underline"
+            >
+              cannabis.maryland.gov
+            </a>
           </div>
         </CardContent>
       </Card>
