@@ -11,7 +11,7 @@ export default function CompetitorComparison() {
   const features = [
     { feature: "Maryland-Specific Content", proCannEdu: "Tailored to MD", industryStandard: "Multi-state generic" },
     { feature: "AI-Powered ROI Tracking", proCannEdu: "Real-time", industryStandard: "Manual reporting" },
-    { feature: "COMAR Regulatory Updates", proCannEdu: "Live & automatic", industryStandard: "Quarterly updates" },
+    { feature: "Maryland rule monitoring", proCannEdu: "We review published rules", industryStandard: "Quarterly updates" },
     { feature: "AI Compliance Assistant", proCannEdu: "24/7 access", industryStandard: "Email support" },
     { feature: "Analytics Dashboard", proCannEdu: "Real-time", industryStandard: "Basic reporting" },
     { feature: "Compliance Risk Scoring", proCannEdu: "Predictive AI", industryStandard: "Not available" },
@@ -133,7 +133,7 @@ export default function CompetitorComparison() {
                   </p>
                   <p className="flex items-start gap-2">
                     <Zap className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-                    <span><strong>Regulatory pricing compliance:</strong> $49.99 per employee (Maryland maximum: $50.00) with transparent pricing and no hidden fees</span>
+                    <span><strong>Pricing:</strong> $49.99 per employee. Transparent pricing and no hidden fees</span>
                   </p>
                   <p className="flex items-start gap-2">
                     <Zap className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />

@@ -97,8 +97,8 @@ const TrainingHandbook = () => {
       <CoursePaymentGate
         course={{
           id: COURSE_ID,
-          title: 'MCA Dispensary Agent Training',
-          description: 'Complete Maryland Cannabis Administration training with access to the Training Handbook',
+          title: 'ProCann EDU Training Handbook',
+          description: 'Independent Maryland cannabis workforce education. Does not fulfill MCA registered-agent annual training requirements.',
           price_cents: 4999,
           currency: 'USD',
           payment_required: true
@@ -117,10 +117,10 @@ const TrainingHandbook = () => {
           <div className="max-w-4xl mx-auto">
             <Badge className="mb-4">Maryland cannabis workforce handbook</Badge>
             <h1 className="text-4xl font-bold text-foreground mb-4">
-              MCA Dispensary Agent Training Handbook
+              ProCann EDU Training Handbook
             </h1>
             <p className="text-lg text-muted-foreground mb-6">
-              ProCann EDU training handbook. Independent education. Does not fulfill MCA registered-agent annual training requirements.
+              Independent Maryland cannabis workforce education. Does not fulfill MCA registered-agent annual training requirements.
             </p>
             <div className="flex flex-wrap gap-3">
               <Button onClick={() => navigate('/course')} variant="default">
