@@ -333,7 +333,6 @@ const MCAComplianceReview = () => {
                 <p>• Industry-standard SSL/TLS encryption for all data transmission</p>
                 <p>• Supabase enterprise-grade database security</p>
                 <p>• Regular security audits and penetration testing</p>
-                <p>• SOC 2 Type II compliance (via Supabase infrastructure)</p>
               </div>
             </div>
             <div>
