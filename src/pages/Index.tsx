@@ -5,7 +5,6 @@ import { CheckCircle } from 'lucide-react';
 import { CoursePreviewSystem } from '@/components/EnhancedCoursePreview';
 import { AccessibilityToolbar } from '@/components/MobileOptimization';
 import { TrustStats } from '@/components/TrustIndicators';
-import { WelcomeVideoSection } from '@/components/WelcomeVideoSection';
 import { LiveCOMARBadge } from '@/components/LiveCOMARBadge';
 import { ROIHighlightCard } from '@/components/ROIHighlightCard';
 import { LiveActivityTicker } from '@/components/LiveActivityTicker';
@@ -38,7 +37,7 @@ const Index = () => {
       weight: 1
     }, {
       id: 'comprehensive_training',
-      value: "Comprehensive Maryland Cannabis Compliance Training • 24 Modules • Self-Paced",
+      value: "Comprehensive Maryland Cannabis Compliance Training • Self-Paced",
       weight: 1
     }, {
       id: 'maryland_focused',
@@ -121,11 +120,6 @@ const Index = () => {
               Maryland cannabis workforce education — <span className="font-semibold">$49.99</span>, self-paced.
             </p>
           </div>
-
-          {/* Welcome Video Section - Desktop Only (keeps mobile CTA above fold) */}
-          {!isMobile && (
-            <WelcomeVideoSection className="mb-6" assetKey="welcome-intro" />
-          )}
 
           {/* Primary CTA + Secondary Link */}
           <div className={`text-center ${isMobile ? 'mb-3' : 'mb-5'}`}>
@@ -215,7 +209,7 @@ const Index = () => {
                 <div className="space-y-2 text-sm mb-4">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
-                    <span><strong>19 modules</strong> • 4-6 hours</span>
+                    <span><strong>Self-paced</strong></span>
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
@@ -253,7 +247,7 @@ const Index = () => {
                 <div className="space-y-2 text-sm mb-4">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                    <span><strong>5 modules</strong> • 2-3 hours</span>
+                    <span><strong>Self-paced</strong></span>
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
@@ -291,7 +285,7 @@ const Index = () => {
                 <div className="space-y-2 text-sm mb-4">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <span className="w-1.5 h-1.5 rounded-full bg-secondary"></span>
-                    <span><strong>8-12 modules</strong> • Self-paced</span>
+                    <span><strong>Self-paced</strong></span>
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
@@ -368,8 +362,7 @@ const Index = () => {
               <div>
                 <h4 className={`font-semibold text-primary ${isMobile ? 'text-lg mb-3' : 'text-xl mb-4'}`}>Course Details</h4>
                 <ul className="space-y-2 text-muted-foreground">
-                  <li><strong>Duration:</strong> Self-paced (typically 4-6 hours)</li>
-                  <li><strong>Modules:</strong> 19 required modules (plus 5 optional Manager Track modules)</li>
+                  <li><strong>Duration:</strong> Self-paced</li>
                   <li><strong>Exam:</strong> Final certification exam</li>
                   <li><strong>Certificate:</strong> Issued on completion, publicly verifiable</li>
                   <li><strong>Access:</strong> 24/7 online availability</li>
@@ -420,7 +413,6 @@ const Index = () => {
             <div>
               <h5 className="font-semibold mb-3">Compliance</h5>
               <ul className="space-y-2 text-sm">
-                <li><a href="/state-officials" className="text-gray-400 hover:text-white">For State Officials</a></li>
                 <li><a href="/compliance/curriculum-matrix" className="text-gray-400 hover:text-white">COMAR Compliance Matrix</a></li>
                 <li><a href="/compliance/content-review" className="text-gray-400 hover:text-white">Content Review Process</a></li>
                 <li><a href="/accessibility" className="text-gray-400 hover:text-white">Accessibility Statement</a></li>
@@ -439,11 +431,6 @@ const Index = () => {
           <div className="text-center text-sm text-white/60 pt-8 border-t border-white/10">
             <p>&copy; 2026 ProCann Edu. All rights reserved.</p>
             <p className="mt-2">Made with 💚 in Maryland</p>
-            <div className="mt-6">
-              <a href="/mca-compliance-review" className="text-white/80 hover:text-white underline text-xs">
-                For MCA Officials: View Compliance Documentation
-              </a>
-            </div>
           </div>
           
           {/* Compliance Disclaimers */}
