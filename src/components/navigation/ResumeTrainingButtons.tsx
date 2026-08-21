@@ -57,7 +57,7 @@ export const ResumeTrainingButtons: React.FC<ResumeTrainingButtonsProps> = ({
   const getResumeLabel = () => {
     if (status === 'not_started') return 'Start Training';
     if (status === 'all_complete') return 'View Certificates';
-    if (status === 'rvt_complete') return 'Take RVT Exam';
+    if (status === 'rvt_complete') return 'Take ProCann EDU Exam';
     return 'Resume where I left off';
   };
 

@@ -53,7 +53,7 @@ export const GettingStartedChecklist: React.FC<GettingStartedChecklistProps> = (
     {
       id: 'course',
       title: 'Start Module 1',
-      description: 'Begin your COMAR-aligned training',
+      description: 'Begin your ProCann EDU training',
       completed: hasStartedCourse,
       action: 'Start Learning',
       route: '/course',

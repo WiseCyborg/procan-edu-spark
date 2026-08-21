@@ -80,7 +80,7 @@ export const WelcomeModal = () => {
                 <span className="font-semibold text-foreground">{organization.name}</span>
               </div>
             )}
-            You're about to begin your Maryland Responsible Vendor Training certification journey.
+            You're about to begin your ProCann EDU training.
           </DialogDescription>
         </DialogHeader>
 

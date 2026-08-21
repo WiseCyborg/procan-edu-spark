@@ -47,7 +47,7 @@ export const MarylandCountyHeatmap = () => {
           {/* County List */}
           <div className="space-y-3 max-h-[600px] overflow-y-auto pe-2">
             <p className="text-sm text-muted-foreground mb-4">
-              Our COMAR-aligned training program is available to dispensary employees throughout the state:
+              Our workforce education is available to dispensary employees throughout the state:
             </p>
             <div className="grid grid-cols-2 gap-2">
               {marylandCounties.map((county) => (

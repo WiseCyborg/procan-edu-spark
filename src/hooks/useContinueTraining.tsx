@@ -130,13 +130,13 @@ export const useContinueTraining = (): ContinueTrainingResult => {
     let nextModuleNumber: number | null = null;
     let continueUrl = '/course';
     let ctaLabel = 'Start Training';
-    let ctaDescription = 'Begin your RVT certification journey';
+    let ctaDescription = 'Begin your ProCann EDU training';
     
     if (status === 'not_started') {
       nextModuleNumber = 0;
       continueUrl = '/course/part0';
       ctaLabel = 'Start Training';
-      ctaDescription = 'Begin your RVT certification journey';
+      ctaDescription = 'Begin your ProCann EDU training';
     } else if (status === 'in_progress') {
       // PRIORITY: Use persisted resume state if available
       if (resumeTarget && typeof resumeTarget.module_number === 'number') {
@@ -161,8 +161,8 @@ export const useContinueTraining = (): ContinueTrainingResult => {
     } else if (status === 'rvt_complete') {
       // RVT complete - show exam or manager track
       continueUrl = '/rvt-complete';
-      ctaLabel = 'Take RVT Exam';
-      ctaDescription = 'All RVT modules complete! Ready for certification';
+      ctaLabel = 'Take ProCann EDU Exam';
+      ctaDescription = 'All required modules complete! Ready for your exam';
       
       if (canAccessManagerTrack && managerCompleted < MANAGER_MODULE_COUNT) {
         nextModuleNumber = RVT_REQUIRED_MAX + 1 + managerCompleted;

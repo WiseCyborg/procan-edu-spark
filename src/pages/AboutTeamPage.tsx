@@ -40,8 +40,10 @@ export default function AboutTeamPage() {
                   </h4>
                   <p className="text-sm text-muted-foreground leading-relaxed">
                     Combined cannabis industry and compliance experience across Maryland's regulatory landscape. 
-                    Our team has worked directly with the Maryland Cannabis Administration (MCA) and understands 
-                    the unique challenges facing Maryland dispensaries and cannabis professionals.
+                    Our team's background includes prior professional experience with Maryland Cannabis 
+                    Administration (MCA) processes, and an understanding of the challenges facing Maryland 
+                    dispensaries and cannabis professionals. This experience is not an MCA endorsement, 
+                    approval, or affiliation.
                   </p>
                 </div>
                 
@@ -88,7 +90,7 @@ export default function AboutTeamPage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground mb-4">
-                <strong>COMAR Specialist</strong>
+                <strong>Maryland cannabis education</strong>
               </p>
               <p className="text-sm leading-relaxed">
                 Specializes in Maryland cannabis regulations and compliance frameworks. Works with 
@@ -97,7 +99,7 @@ export default function AboutTeamPage() {
               </p>
               <div className="mt-4 space-y-2">
                 <Badge variant="outline">Regulatory Compliance</Badge>
-                <Badge variant="outline">COMAR Expert</Badge>
+                <Badge variant="outline">Maryland cannabis education</Badge>
                 <Badge variant="outline">Audit Preparation</Badge>
               </div>
             </CardContent>
