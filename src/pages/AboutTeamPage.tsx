@@ -40,8 +40,10 @@ export default function AboutTeamPage() {
                   </h4>
                   <p className="text-sm text-muted-foreground leading-relaxed">
                     Combined cannabis industry and compliance experience across Maryland's regulatory landscape. 
-                    Our team has worked directly with the Maryland Cannabis Administration (MCA) and understands 
-                    the unique challenges facing Maryland dispensaries and cannabis professionals.
+                    Our team's background includes prior professional experience with Maryland Cannabis 
+                    Administration (MCA) processes, and an understanding of the challenges facing Maryland 
+                    dispensaries and cannabis professionals. This experience is not an MCA endorsement, 
+                    approval, or affiliation.
                   </p>
                 </div>
                 
