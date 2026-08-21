@@ -52,8 +52,8 @@ const RVTComplete = () => {
           </h1>
           
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Congratulations! You've completed all {RVT_MODULE_COUNT} RVT training modules. 
-            You're now ready for certification.
+            Congratulations! You've completed all {RVT_MODULE_COUNT} ProCann EDU training modules. 
+            You're now ready for your completion record.
           </p>
           
           <div className="flex items-center justify-center gap-2 mt-6">
@@ -74,7 +74,7 @@ const RVTComplete = () => {
                   <Shield className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <CardTitle>Take RVT Exam</CardTitle>
+                  <CardTitle>Take ProCann EDU Exam</CardTitle>
                   <CardDescription>Complete your training</CardDescription>
                 </div>
               </div>
@@ -100,7 +100,7 @@ const RVTComplete = () => {
                 className="w-full"
                 size="lg"
               >
-                Start RVT Exam
+                Start ProCann EDU Exam
                 <ArrowRight className="h-5 w-5 ms-2 rtl-flip" />
               </Button>
             </CardContent>
@@ -164,7 +164,7 @@ const RVTComplete = () => {
             <CardContent className="space-y-4">
               <p className="text-sm text-amber-700 dark:text-amber-300">
                 As a manager, you have access to {MANAGER_MODULE_COUNT} additional leadership modules. 
-                These are optional and do not affect your RVT certification.
+                These are optional and do not affect your ProCann EDU completion record.
               </p>
               
               <div className="flex items-center gap-2 text-sm">
@@ -208,7 +208,7 @@ const RVTComplete = () => {
           </div>
           
           <p className="text-xs text-muted-foreground">
-            This training is aligned with COMAR 10.62.35 standards for Maryland cannabis retail employees.
+            ProCann Edu is an independent training provider offering workforce education; completion results in a ProCann EDU completion record.
           </p>
         </div>
       </div>
