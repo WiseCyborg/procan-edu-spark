@@ -260,7 +260,7 @@ export default function Certificates() {
       pdf.setTextColor(15, 82, 51);
       pdf.setFontSize(8);
       pdf.setFont('helvetica', 'bold');
-      pdf.text('Curriculum designed to align with COMAR 14.17.15.05', W / 2, 125, { align: 'center' });
+      pdf.text('ProCann EDU completion record. Independent education. Not MCA-endorsed.', W / 2, 125, { align: 'center' });
 
       // BOTTOM 3 COLUMNS
       const issueDate = formatDate(cert.issue_date);
@@ -299,7 +299,7 @@ export default function Certificates() {
       pdf.rect(12, H - 24, W - 24, 12, 'F');
       pdf.setTextColor(255, 255, 255); pdf.setFontSize(6.5); pdf.setFont('helvetica', 'normal');
       pdf.text(
-        'ProCann EDU completion record. Curriculum designed to align with COMAR 14.17.15.05. Valid for 1 year from date of issue.',
+        "ProCann EDU completion record. Not MCA-endorsed. Does not satisfy Maryland's annual responsible vendor / agent training duty. Valid for 1 year from date of issue.",
         W / 2, H - 16, { align: 'center' }
       );
 

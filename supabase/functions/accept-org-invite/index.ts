@@ -239,7 +239,7 @@ serve(async (req) => {
             });
 
           enrollmentResult.enrolled = true;
-          enrollmentResult.message = 'Successfully enrolled in Responsible Vendor Training!';
+          enrollmentResult.message = 'Successfully enrolled in ProCann EDU training!';
 
           console.log('[ACCEPT-INVITE] ✅ Learning journey created for user:', user.id);
         }

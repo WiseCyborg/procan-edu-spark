@@ -28,7 +28,7 @@ const DemoPreview = () => {
     if (meta) {
       meta.setAttribute(
         'content',
-        'Preview Module 0 of the Maryland Responsible Vendor Training course — no signup required.'
+        'Preview Module 0 of the Maryland cannabis workforce education course — no signup required.'
       );
     }
 
