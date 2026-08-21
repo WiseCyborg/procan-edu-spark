@@ -247,6 +247,9 @@ export default function PurchaseSeats() {
           </Button>
 
           <p className="text-xs text-center text-muted-foreground">
+            Optional continuing education. This course does not satisfy Maryland's annual responsible vendor / agent training duty.
+          </p>
+          <p className="text-xs text-center text-muted-foreground">
             You will be redirected to PayPal to complete your secure payment
           </p>
         </CardContent>

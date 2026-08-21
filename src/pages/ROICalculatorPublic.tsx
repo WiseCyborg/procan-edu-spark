@@ -101,7 +101,7 @@ export default function ROICalculatorPublic() {
                   step={1}
                   className="mb-2"
                 />
-                <p className="text-xs text-muted-foreground">Employees who need RVT certification</p>
+                <p className="text-xs text-muted-foreground">Employees who need workforce education</p>
               </div>
 
               {/* Current Pass Rate */}
@@ -285,8 +285,7 @@ export default function ROICalculatorPublic() {
               Actual savings depend on your organization's size, current processes, employee performance, and other factors.
             </p>
             <p className="text-sm text-muted-foreground text-center">
-              <strong>Maryland Pricing Compliance:</strong> ProCann Edu charges ${BUSINESS_RULES.SEAT_PRICE_USD} per employee, 
-              maintaining compliance with Maryland's maximum charge of ${BUSINESS_RULES.MAX_ALLOWED_PRICE_MARYLAND.toFixed(2)} per employee.
+              ProCann Edu charges ${BUSINESS_RULES.SEAT_PRICE_USD} per employee.
             </p>
           </CardContent>
         </Card>

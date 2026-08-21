@@ -192,8 +192,9 @@ const ConsumerEducation = () => {
               Need Workforce Cannabis Training?
             </h2>
             <p className="text-muted-foreground">
-              Maryland dispensary employees are required to complete Responsible Vendor Training (RVT). 
-              Ask your manager for a join code to access the workforce training program.
+              Maryland requires registered agents to complete an MCA-approved Responsible Vendor Training. 
+              ProCann Edu is not on that approved list. Our workforce course is independent education and does 
+              not satisfy that annual duty. Ask your manager for a join code if they use ProCann EDU.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button 

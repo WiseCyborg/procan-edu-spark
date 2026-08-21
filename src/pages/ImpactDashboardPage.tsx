@@ -159,8 +159,8 @@ export default function ImpactDashboardPage() {
             <h3 className="text-2xl font-bold mb-4">Building Maryland's Cannabis Workforce</h3>
             <p className="text-lg opacity-90 max-w-3xl mx-auto leading-relaxed">
               ProCann Edu is proud to serve Maryland's cannabis industry by providing accessible, 
-              high-quality training that meets state standards and empowers professionals across all 
-              24 counties.
+              high-quality Maryland cannabis workforce education. This course does not satisfy Maryland's 
+              annual responsible vendor / agent training duty. We empower professionals across all 24 counties.
             </p>
           </div>
         </CardContent>

@@ -31,8 +31,8 @@ const platformFeatures = [
   },
   {
     icon: CheckCircle,
-    title: "Under $50 Compliance",
-    description: "Priced at $49.99 to comply with Maryland's maximum training cost requirements"
+    title: "$49.99 per seat",
+    description: "ProCann Edu charges $49.99 per student."
   }
 ];
 
@@ -122,7 +122,7 @@ export default function SuccessStories() {
               <div className="p-6 bg-background rounded-lg border">
                 <h3 className="font-semibold mb-2">Accessible Pricing</h3>
                 <p className="text-sm text-muted-foreground">
-                  $49.99 per student, compliant with Maryland's pricing requirements
+                  $49.99 per student.
                 </p>
               </div>
             </div>

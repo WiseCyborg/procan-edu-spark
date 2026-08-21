@@ -65,8 +65,8 @@ export default function AboutTeamPage() {
                   </h4>
                   <p className="text-sm text-muted-foreground leading-relaxed">
                     Deep understanding of Maryland's medical cannabis program, including patient verification 
-                    protocols, inventory management requirements, security standards, and responsible vendor 
-                    obligations under COMAR regulations.
+                    protocols, inventory management requirements, security standards, and Maryland cannabis 
+                    workplace topics.
                   </p>
                 </div>
               </div>
@@ -91,8 +91,8 @@ export default function AboutTeamPage() {
                 <strong>COMAR Specialist</strong>
               </p>
               <p className="text-sm leading-relaxed">
-                Specializes in Maryland cannabis regulations and compliance frameworks. Works directly 
-                with dispensaries to ensure adherence to COMAR 14.17.15.05 requirements. Provides up-to-date 
+                Specializes in Maryland cannabis regulations and compliance frameworks. Works with 
+                dispensaries on Maryland cannabis workplace education. Provides up-to-date 
                 guidance on evolving state regulations.
               </p>
               <div className="mt-4 space-y-2">
@@ -188,8 +188,8 @@ export default function AboutTeamPage() {
               <h4 className="font-semibold mb-2">Content Creation Process</h4>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 Our curriculum is developed through a collaborative process involving regulatory experts, 
-                industry practitioners, and educational specialists. Every module undergoes rigorous review 
-                to ensure accuracy, compliance with COMAR 14.17.15.05, and practical applicability.
+                industry practitioners, and educational specialists. Every module undergoes review for 
+                accuracy and practical applicability. Not MCA-endorsed.
               </p>
             </div>
             
