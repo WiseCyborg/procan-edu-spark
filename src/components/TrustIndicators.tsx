@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Shield, Users, Award, CheckCircle, Star, Clock, MapPin, DollarSign } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { RVT_TRAINING_MODULE_COUNT } from '@/constants/tracks';
 
 interface CounterProps {
   end: number;
@@ -72,14 +71,7 @@ export const AnimatedCounter: React.FC<CounterProps> = ({
 
 export const TrustStats = () => {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
-      <Card className="p-4 text-center bg-primary border-primary/20">
-        <div className="text-2xl font-bold text-primary-foreground">
-          {RVT_TRAINING_MODULE_COUNT}
-        </div>
-        <div className="text-sm text-primary-foreground/80">Training Modules</div>
-      </Card>
-      
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
       <Card className="p-4 text-center bg-primary border-primary/20">
         <div className="text-2xl font-bold text-primary-foreground">
           24/24
@@ -89,9 +81,9 @@ export const TrustStats = () => {
       
       <Card className="p-4 text-center bg-primary border-primary/20">
         <div className="text-2xl font-bold text-primary-foreground">
-          4-6
+          Self-paced
         </div>
-        <div className="text-sm text-primary-foreground/80">Hours Self-Paced</div>
+        <div className="text-sm text-primary-foreground/80">Learn on your schedule</div>
       </Card>
 
       <Card className="p-4 text-center bg-primary border-primary/20">

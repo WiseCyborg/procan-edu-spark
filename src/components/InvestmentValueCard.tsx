@@ -1,7 +1,6 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle, TrendingUp } from 'lucide-react';
-import { RVT_TRAINING_MODULE_COUNT } from '@/constants/tracks';
 
 export const InvestmentValueCard = () => {
   const features = [
@@ -22,7 +21,7 @@ export const InvestmentValueCard = () => {
     },
     {
       title: 'Maryland-Specific Content',
-      description: `${RVT_TRAINING_MODULE_COUNT} required modules tailored to MD regulations`,
+      description: 'Modules tailored to MD regulations',
       outcome: 'County-specific compliance scenarios',
     },
     {
@@ -36,7 +35,7 @@ export const InvestmentValueCard = () => {
       outcome: 'Publicly verifiable credentials',
     },
     {
-      title: '4-6 Hour Completion Time',
+      title: 'Self-paced',
       description: 'Self-paced learning',
       outcome: 'Mobile-friendly platform',
     },
