@@ -204,8 +204,8 @@ export default function StateOfficialsPage() {
               onClick={() => window.location.href = '/compliance/curriculum-matrix'}
             >
               <div className="text-start w-full">
-                <p className="font-semibold">COMAR 14.17.15.05 Compliance Matrix</p>
-                <p className="text-sm text-muted-foreground">Full curriculum mapping to state requirements</p>
+                <p className="font-semibold">Internal Curriculum Alignment Matrix</p>
+                <p className="text-sm text-muted-foreground">This mapping is our own internal alignment work and has not been reviewed or approved by the MCA.</p>
               </div>
             </Button>
             <Button 

@@ -115,12 +115,12 @@ const TrainingHandbook = () => {
       <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-background border-b">
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-4xl mx-auto">
-            <Badge className="mb-4">COMAR 14.17.15.05-Aligned Training</Badge>
+            <Badge className="mb-4">Maryland cannabis workforce handbook</Badge>
             <h1 className="text-4xl font-bold text-foreground mb-4">
               MCA Dispensary Agent Training Handbook
             </h1>
             <p className="text-lg text-muted-foreground mb-6">
-              Welcome to the MCA Dispensary Agent Training Handbook, developed by ProCann to meet the rigorous standards of COMAR 14.17.15.05. This handbook is your comprehensive guide to fulfilling Maryland Cannabis Administration (MCA) training requirements for registered agents.
+              ProCann EDU training handbook. Independent education. Does not fulfill MCA registered-agent annual training requirements.
             </p>
             <div className="flex flex-wrap gap-3">
               <Button onClick={() => navigate('/course')} variant="default">
@@ -289,7 +289,7 @@ const TrainingHandbook = () => {
                </CardHeader>
                <CardContent className="space-y-6">
                  <p className="text-lg leading-relaxed text-muted-foreground">
-                   Beyond annual requirements, COMAR 14.17.15.05.C mandates a separate Responsible Vendor Training Program, which ProCann proudly offers in compliance with §§36-1001—36-1003. This section prepares you for certification by covering advanced customer service, sales ethics, and regulatory adherence. An approved responsible vendor training program is registered with the MCA for three years (COMAR 14.17.15.05.E(3)); ProCann's program is designed to meet these minimum educational standards while enhancing your professional skills. We maintain records for four years, as required, making compliance seamless for you and your employer.
+                   Beyond annual requirements, COMAR 14.17.15.05.C requires a separate Responsible Vendor Training Program. An approved responsible vendor training program is registered with the MCA for three years (COMAR 14.17.15.05.E(3)) and records are maintained for four years. ProCann Edu is not on the MCA approved RVT list and is not a registered approved responsible vendor training program. This section covers advanced customer service, sales ethics, and regulatory awareness as independent workforce education.
                  </p>
                  <div className="rounded-lg overflow-hidden bg-muted">
                    <div className="aspect-video">
@@ -308,7 +308,7 @@ const TrainingHandbook = () => {
             <CardContent className="text-center py-8">
               <h3 className="text-2xl font-bold mb-4">Ready to Start Your Training?</h3>
               <p className="text-muted-foreground mb-6">
-                Access the full course with interactive modules, quizzes, and earn your Responsible Vendor Training certificate.
+                Access the full course with interactive modules, quizzes, and earn your ProCann EDU completion record.
               </p>
               <div className="flex flex-wrap gap-3 justify-center">
                 <Button onClick={() => navigate('/course')} size="lg">
