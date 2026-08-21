@@ -45,8 +45,7 @@ const GetStarted = () => {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-sm">
-                    <Badge variant="default" className="bg-primary">18 Modules</Badge>
-                    <Badge variant="outline">4-6 Hours</Badge>
+                    <Badge variant="outline">Self-Paced</Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">
                     Maryland cannabis workforce training for dispensary employees. Does not satisfy
@@ -85,8 +84,7 @@ const GetStarted = () => {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-sm">
-                    <Badge variant="outline" className="border-amber-500 text-amber-600">5 Modules</Badge>
-                    <Badge variant="outline">2-3 Hours</Badge>
+                    <Badge variant="outline">Self-Paced</Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">
                     Advanced leadership training for dispensary managers and supervisors. 
@@ -125,7 +123,6 @@ const GetStarted = () => {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-sm">
-                    <Badge variant="secondary">8-12 Modules</Badge>
                     <Badge variant="outline">Self-Paced</Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">
