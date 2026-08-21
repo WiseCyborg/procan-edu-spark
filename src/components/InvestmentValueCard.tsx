@@ -11,8 +11,8 @@ export const InvestmentValueCard = () => {
       outcome: 'Instant answers to your training questions',
     },
     {
-      title: 'Live COMAR Regulatory Updates',
-      description: 'Content aligned to current MCA standards',
+      title: 'Maryland regulation monitoring',
+      description: 'Content updated when we review published rules',
       outcome: 'Curriculum updated when regulations change',
     },
     {

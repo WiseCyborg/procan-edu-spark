@@ -80,7 +80,7 @@ export const WelcomeVideoSection: React.FC<WelcomeVideoSectionProps> = ({
         </h2>
         {!isMobile && (
           <p className="text-xl text-white/90 leading-relaxed max-w-2xl mx-auto">
-            Our curriculum is aligned to Maryland Cannabis Administration Responsible Vendor Training standards, helping Maryland lead as the <strong>Cannabis Education State</strong>.
+            Our curriculum covers Maryland cannabis workplace topics. ProCann Edu is independent and is not MCA-endorsed.
           </p>
         )}
       </div>

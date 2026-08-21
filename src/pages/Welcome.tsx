@@ -94,7 +94,7 @@ const Welcome = () => {
                   You're now ready to begin your certification journey.
                 </p>
                 <p className="text-sm text-gray-500">
-                  Aligned to MCA Responsible Vendor Training standards under COMAR 14.17.15.05
+                  Independent Maryland cannabis workforce education. Not MCA-endorsed; does not satisfy the annual agent training duty.
                 </p>
               </div>
 

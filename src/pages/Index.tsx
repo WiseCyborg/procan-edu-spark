@@ -34,7 +34,7 @@ const Index = () => {
     testName: 'hero_headline',
     variants: [{
       id: 'comar_aligned',
-      value: "COMAR-Aligned Maryland Cannabis Compliance Training",
+      value: "Maryland Cannabis Workforce Education",
       weight: 1
     }, {
       id: 'comprehensive_training',
@@ -53,7 +53,7 @@ const Index = () => {
   return <div className="min-h-screen">
       <Seo
         title="ProCann Edu — Maryland Cannabis Compliance Education"
-        description="Maryland-focused cannabis workforce training. COMAR-aligned dispensary compliance education, team management, and reporting in one platform."
+        description="Maryland cannabis workforce education for dispensary staff. Independent provider. Self-paced. Publicly verifiable completion records."
         path="/"
         jsonLd={[
           {
@@ -118,7 +118,7 @@ const Index = () => {
               Maryland cannabis training & certification
             </p>
             <p className={`text-white/90 mx-auto ${isMobile ? 'text-sm mt-2' : 'text-lg mt-3 max-w-2xl'}`}>
-              Maryland Responsible Vendor Training (RVT) — <span className="font-semibold">$49.99</span>, self-paced, COMAR-aligned.
+              Maryland cannabis workforce education — <span className="font-semibold">$49.99</span>, self-paced.
             </p>
           </div>
 
@@ -136,6 +136,9 @@ const Index = () => {
             >
               Start Training — $49.99
             </Button>
+            <p className={`text-white/80 mx-auto mt-3 ${isMobile ? 'text-[11px] max-w-sm' : 'text-xs max-w-xl'}`}>
+              Optional continuing education. This course does not satisfy Maryland's annual responsible vendor / agent training duty.
+            </p>
             <div className="mt-3">
               <button
                 onClick={() => navigate('/verify-certificate')}
@@ -148,7 +151,7 @@ const Index = () => {
 
           {/* Trust Strip */}
           <div className={`flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-white/85 ${isMobile ? 'text-xs mb-2' : 'text-sm mb-4'}`}>
-            <span className="inline-flex items-center gap-1.5"><CheckCircle className="h-3.5 w-3.5" /> COMAR-aligned</span>
+            <span className="inline-flex items-center gap-1.5"><CheckCircle className="h-3.5 w-3.5" /> Independent provider</span>
             <span className="opacity-50">•</span>
             <span className="inline-flex items-center gap-1.5"><CheckCircle className="h-3.5 w-3.5" /> Maryland-focused</span>
             <span className="opacity-50">•</span>
@@ -207,7 +210,7 @@ const Index = () => {
                 </div>
                 <h3 className="text-xl font-bold text-foreground mb-2">Cannabis Compliance Training</h3>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Maryland-focused cannabis workforce training designed to align with COMAR 14.17.15.05 for dispensary employees.
+                  Maryland-focused cannabis workforce training for Maryland dispensary employees. Does not satisfy the annual responsible vendor / agent training duty.
                 </p>
                 <div className="space-y-2 text-sm mb-4">
                   <div className="flex items-center gap-2 text-muted-foreground">
@@ -254,7 +257,7 @@ const Index = () => {
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
-                    <span>Requires <strong>RVT completion</strong></span>
+                    <span>Requires <strong>core training completion</strong></span>
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
@@ -296,7 +299,7 @@ const Index = () => {
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-                    <span>Issues <strong>Completion Badge</strong> (non-RVT)</span>
+                    <span>Issues <strong>Completion badge</strong> (not a state credential)</span>
                   </div>
                 </div>
                 <Button variant="secondary" className="w-full" onClick={(e) => { e.stopPropagation(); navigate('/learn'); }}>
@@ -309,8 +312,8 @@ const Index = () => {
           {/* Disclaimer */}
           <div className="mt-8 text-center">
             <p className="text-xs text-muted-foreground max-w-3xl mx-auto">
-              <strong>Note:</strong> Only Cannabis Compliance Training is designed to align with COMAR 14.17.15.05. 
-              Public Learning is for general educational purposes only.
+              <strong>Note:</strong> Cannabis Compliance Training is workforce education only. It does not satisfy
+              Maryland's annual responsible vendor / agent training duty. Public Learning is general education.
             </p>
           </div>
         </div>
@@ -334,7 +337,7 @@ const Index = () => {
         <div className="container mx-auto">
           <div className="max-w-4xl mx-auto">
             <h3 className={`font-bold text-center text-foreground ${isMobile ? 'text-2xl mb-6' : 'text-3xl md:text-4xl mb-8'}`}>
-              Maryland Responsible Vendor Training (RVT)
+              Maryland Cannabis Workforce Education
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
