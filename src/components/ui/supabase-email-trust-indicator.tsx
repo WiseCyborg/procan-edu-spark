@@ -6,16 +6,6 @@ import { CheckCircle, Shield, Globe, Clock, Lock, Zap } from 'lucide-react';
 export const SupabaseEmailTrustIndicator = () => {
   const trustMetrics = [
     {
-      icon: <CheckCircle className="h-5 w-5 text-green-600" />,
-      title: "99.9% Delivery Rate",
-      description: "Enterprise-grade email infrastructure"
-    },
-    {
-      icon: <Shield className="h-5 w-5 text-blue-600" />,
-      title: "SOC 2 Compliant",
-      description: "Enterprise security standards"
-    },
-    {
       icon: <Globe className="h-5 w-5 text-purple-600" />,
       title: "Global Infrastructure",
       description: "Reliable worldwide delivery"
