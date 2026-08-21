@@ -9,6 +9,7 @@ import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle, BookOpen, Award, Lock } from 'lucide-react';
+import { RVT_TRAINING_MODULE_COUNT } from '@/constants/tracks';
 
 const Welcome = () => {
   const { user } = useAuth();
@@ -182,7 +183,7 @@ const Welcome = () => {
                 <div className="text-center">
                   <BookOpen className="h-12 w-12 text-blue-600 mx-auto mb-4" />
                   <h3 className="font-semibold mb-2">Course Access</h3>
-                  <p className="text-sm text-gray-600">Modules now available</p>
+                  <p className="text-sm text-gray-600">{RVT_TRAINING_MODULE_COUNT} modules now available</p>
                 </div>
                 <div className="text-center">
                   <Award className="h-12 w-12 text-yellow-600 mx-auto mb-4" />
@@ -219,7 +220,7 @@ const Welcome = () => {
                 <div>
                   <h4 className="font-medium text-green-700 mb-3">Course Structure</h4>
                   <ul className="space-y-2 text-sm text-gray-600">
-                    <li>• Comprehensive modules</li>
+                    <li>• {RVT_TRAINING_MODULE_COUNT} comprehensive modules</li>
                     <li>• Self-paced learning</li>
                     <li>• Interactive quizzes</li>
                     <li>• Final certification exam</li>
