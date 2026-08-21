@@ -173,7 +173,7 @@ Once you mark the overview as complete, the next module will unlock automaticall
     roles: ['student'],
     template: `Welcome to your training, {{first_name}}.
 
-You're starting the Responsible Vendor Training course.
+You're starting the ProCann EDU Maryland cannabis workforce education course.
 There are 23 modules to complete, each covering important compliance topics.
 
 Take your time with each section.
