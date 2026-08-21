@@ -5221,6 +5221,72 @@ export type Database = {
           },
         ]
       }
+      metered_spend_thresholds: {
+        Row: {
+          critical_per_hour: number
+          event_key: string
+          note: string | null
+          updated_at: string
+          warn_per_hour: number
+        }
+        Insert: {
+          critical_per_hour: number
+          event_key: string
+          note?: string | null
+          updated_at?: string
+          warn_per_hour: number
+        }
+        Update: {
+          critical_per_hour?: number
+          event_key?: string
+          note?: string | null
+          updated_at?: string
+          warn_per_hour?: number
+        }
+        Relationships: []
+      }
+      metered_usage: {
+        Row: {
+          est_cost_usd: number | null
+          id: string
+          input_tokens: number
+          metadata: Json
+          model: string | null
+          occurred_at: string
+          operation: string | null
+          output_tokens: number
+          provider: string
+          source_function: string | null
+          units: number | null
+        }
+        Insert: {
+          est_cost_usd?: number | null
+          id?: string
+          input_tokens?: number
+          metadata?: Json
+          model?: string | null
+          occurred_at?: string
+          operation?: string | null
+          output_tokens?: number
+          provider: string
+          source_function?: string | null
+          units?: number | null
+        }
+        Update: {
+          est_cost_usd?: number | null
+          id?: string
+          input_tokens?: number
+          metadata?: Json
+          model?: string | null
+          occurred_at?: string
+          operation?: string | null
+          output_tokens?: number
+          provider?: string
+          source_function?: string | null
+          units?: number | null
+        }
+        Relationships: []
+      }
       module_attestations: {
         Row: {
           attestation_text: string
@@ -8959,6 +9025,33 @@ export type Database = {
           },
         ]
       }
+      system_health_log: {
+        Row: {
+          check_name: string
+          checked_at: string
+          id: string
+          message: string | null
+          observed: Json
+          status: string
+        }
+        Insert: {
+          check_name: string
+          checked_at?: string
+          id?: string
+          message?: string | null
+          observed?: Json
+          status: string
+        }
+        Update: {
+          check_name?: string
+          checked_at?: string
+          id?: string
+          message?: string | null
+          observed?: Json
+          status?: string
+        }
+        Relationships: []
+      }
       system_health_snapshots: {
         Row: {
           component_scores: Json
@@ -12080,6 +12173,20 @@ export type Database = {
         }[]
       }
       record_email_result: { Args: { p_success: boolean }; Returns: undefined }
+      record_metered_usage: {
+        Args: {
+          p_est_cost_usd?: number
+          p_input_tokens?: number
+          p_metadata?: Json
+          p_model?: string
+          p_operation?: string
+          p_output_tokens?: number
+          p_provider: string
+          p_source_function?: string
+          p_units?: number
+        }
+        Returns: string
+      }
       record_video_playback_verification: {
         Args: { p_asset_id: string; p_verification: Json }
         Returns: Json
@@ -12133,6 +12240,8 @@ export type Database = {
       }
       resolve_default_seat_course: { Args: never; Returns: string }
       run_pipeline_health_check: { Args: never; Returns: Json }
+      run_spend_health_checks: { Args: never; Returns: Json }
+      run_system_health_checks: { Args: never; Returns: Json }
       safe_assign_role: {
         Args: {
           p_role: Database["public"]["Enums"]["app_role"]
