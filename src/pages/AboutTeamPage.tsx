@@ -88,7 +88,7 @@ export default function AboutTeamPage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground mb-4">
-                <strong>COMAR Specialist</strong>
+                <strong>Maryland cannabis education</strong>
               </p>
               <p className="text-sm leading-relaxed">
                 Specializes in Maryland cannabis regulations and compliance frameworks. Works with 
@@ -97,7 +97,7 @@ export default function AboutTeamPage() {
               </p>
               <div className="mt-4 space-y-2">
                 <Badge variant="outline">Regulatory Compliance</Badge>
-                <Badge variant="outline">COMAR Expert</Badge>
+                <Badge variant="outline">Maryland cannabis education</Badge>
                 <Badge variant="outline">Audit Preparation</Badge>
               </div>
             </CardContent>

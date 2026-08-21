@@ -54,7 +54,7 @@ export const CourseCompletionCelebration: React.FC<CourseCompletionCelebrationPr
                 🎉 Training Complete!
               </h2>
               <p className="text-xl text-muted-foreground">
-                You've completed all 23 modules of Maryland Responsible Vendor Training
+                You've completed all 23 modules of ProCann EDU training
               </p>
             </motion.div>
 
