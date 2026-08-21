@@ -71,10 +71,10 @@ export const InvestmentValueCard = () => {
             <TrendingUp className="h-6 w-6 text-green-600" />
             <div className="text-center">
               <p className="text-sm text-muted-foreground">
-                <strong className="text-foreground">Investment: $49.99</strong> (under Maryland's $50 maximum)
+                <strong className="text-foreground">Investment: $49.99</strong>
               </p>
               <p className="text-sm font-semibold text-primary mt-1">
-                Complete certification in one affordable package
+                Workforce education in one package
               </p>
             </div>
           </div>
