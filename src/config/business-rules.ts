@@ -12,9 +12,9 @@ export const BUSINESS_RULES = {
   PRICING_REGULATION: {
     state: 'Maryland',
     max_charge_per_employee: 50.00,
-    reference: 'Maryland Cannabis Administration RVT Standards',
+    reference: 'ProCann Edu internal pricing policy',
     last_verified: '2025-03-01',
-    compliance_notes: 'ProCann Edu charges $49.99 per employee, maintaining compliance with state maximum of $50.00'
+    compliance_notes: 'ProCann Edu charges $49.99 per employee under an internal price cap of $49.99'
   },
   
   // Enrollment

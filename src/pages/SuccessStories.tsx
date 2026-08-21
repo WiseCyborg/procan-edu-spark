@@ -16,8 +16,8 @@ const platformFeatures = [
   },
   {
     icon: Shield,
-    title: "COMAR-Aligned Content",
-    description: "Curriculum designed to align with COMAR 14.17.15.05"
+    title: "Maryland-focused content",
+    description: "Does not satisfy the annual responsible vendor / agent training duty."
   },
   {
     icon: MapPin,
@@ -50,17 +50,18 @@ export default function SuccessStories() {
               Maryland Cannabis Compliance Training Built for Success
             </h1>
             <p className="text-xl text-muted-foreground mb-8">
-              ProCann Edu provides comprehensive, COMAR-aligned Responsible Vendor Training designed specifically for Maryland cannabis professionals
+              ProCann Edu provides Maryland cannabis workforce education designed specifically for Maryland cannabis professionals
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Button size="lg" onClick={() => navigate('/signup')}>
-                Start Your Certification
+                Start training — $49.99
                 <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
               </Button>
               <Button size="lg" variant="outline" onClick={() => navigate('/faq')}>
                 Learn More
               </Button>
             </div>
+            <p className="text-xs text-muted-foreground mt-4 max-w-xl mx-auto">Optional continuing education. This course does not satisfy Maryland's annual responsible vendor / agent training duty.</p>
           </div>
         </div>
       </section>
@@ -115,7 +116,7 @@ export default function SuccessStories() {
               <div className="p-6 bg-background rounded-lg border">
                 <h3 className="font-semibold mb-2">Regulatory Focus</h3>
                 <p className="text-sm text-muted-foreground">
-                  Content aligned with COMAR requirements and MCA standards
+                  Content written for Maryland cannabis workplaces
                 </p>
               </div>
               <div className="p-6 bg-background rounded-lg border">
@@ -134,17 +135,18 @@ export default function SuccessStories() {
         <div className="container text-center">
           <h2 className="text-3xl font-bold mb-4">Ready to Start Training?</h2>
           <p className="text-lg mb-8 opacity-90 max-w-2xl mx-auto">
-            Join Maryland cannabis professionals who trust ProCann Edu for comprehensive, COMAR-aligned cannabis compliance training
+            Join Maryland cannabis professionals who trust ProCann Edu for Maryland cannabis workforce education
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Button size="lg" variant="secondary" onClick={() => navigate('/signup')}>
-              Start Certification - $49.99
+              Start training — $49.99
               <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
             </Button>
             <Button size="lg" variant="outline" className="bg-transparent border-white text-white hover:bg-white/10" onClick={() => navigate('/why-procann')}>
               See Full Details
             </Button>
           </div>
+          <p className="text-xs mt-4 opacity-90 max-w-xl mx-auto">Optional continuing education. This course does not satisfy Maryland's annual responsible vendor / agent training duty.</p>
         </div>
       </section>
     </div>
