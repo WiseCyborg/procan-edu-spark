@@ -82,7 +82,7 @@
   "faq.items.manager-2.q": "如何一次注册多名员工？",
   "faq.items.manager-2.a": "在药房门户中使用批量注册功能。上传包含员工信息的 CSV 文件，或通过团队管理面板逐个添加。",
   "faq.items.manager-3.q": "我可以生成哪些合规报告？",
-  "faq.items.manager-3.a": "可生成符合 MCA 要求的报告，包括员工认证状态、完成日期、续证时间表、审计就绪文档以及团队进度分析。",
+  "faq.items.manager-3.a": "Generate ProCann EDU completion-record reports including employee completion status, completion dates, renewal schedules, and team progress analytics.",
   "faq.items.manager-4.q": "如何监控员工的进度和合规情况？",
   "faq.items.manager-4.a": "经理仪表板提供实时进度跟踪、完成率、合规状态和详细分析，并可导出用于审计的报告。",
   "faq.items.manager-5.q": "经理应遵循哪些安全协议？",

@@ -82,7 +82,7 @@
   "faq.items.manager-2.q": "여러 직원을 한 번에 등록하려면 어떻게 하나요?",
   "faq.items.manager-2.a": "디스펜서리 포털의 일괄 등록 기능을 사용하세요. 직원 정보가 담긴 CSV 파일을 업로드하거나 팀 관리 대시보드에서 개별적으로 추가할 수 있습니다.",
   "faq.items.manager-3.q": "어떤 규정 준수 보고서를 생성할 수 있나요?",
-  "faq.items.manager-3.a": "직원 인증 상태, 완료 일자, 갱신 일정, 감사 대응 문서, 팀 진행 분석 등 MCA 요건에 맞는 보고서를 생성할 수 있습니다.",
+  "faq.items.manager-3.a": "Generate ProCann EDU completion-record reports including employee completion status, completion dates, renewal schedules, and team progress analytics.",
   "faq.items.manager-4.q": "직원의 진행 상황과 규정 준수를 어떻게 모니터링하나요?",
   "faq.items.manager-4.a": "매니저 대시보드에서 실시간 진행 상황 추적, 완료율, 규정 준수 상태 및 상세 분석을 확인할 수 있습니다. 감사 목적으로 보고서를 내보낼 수 있습니다.",
   "faq.items.manager-5.q": "매니저가 따라야 할 보안 수칙은 무엇인가요?",

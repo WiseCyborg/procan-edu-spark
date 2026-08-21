@@ -7,7 +7,7 @@ const platformFeatures = [
   {
     icon: BookOpen,
     title: "24 Comprehensive Modules",
-    description: "Complete COMAR-aligned curriculum covering all aspects of Maryland cannabis compliance"
+    description: "Maryland-focused curriculum covering Maryland cannabis workplace compliance topics"
   },
   {
     icon: Clock,

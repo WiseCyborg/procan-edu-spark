@@ -82,7 +82,7 @@
   "faq.items.manager-2.q": "How do I enroll multiple employees at once?",
   "faq.items.manager-2.a": "Use the bulk enrollment feature in your Dispensary Portal. Upload a CSV file with employee information or add them individually through the team management dashboard.",
   "faq.items.manager-3.q": "What compliance reports can I generate?",
-  "faq.items.manager-3.a": "Generate MCA-compliant reports including employee certification status, completion dates, renewal schedules, audit-ready documentation, and team progress analytics.",
+  "faq.items.manager-3.a": "Generate ProCann EDU completion-record reports including employee completion status, completion dates, renewal schedules, and team progress analytics.",
   "faq.items.manager-4.q": "How do I monitor employee progress and compliance?",
   "faq.items.manager-4.a": "Your manager dashboard provides real-time progress tracking, completion rates, compliance status, and detailed analytics. Export reports for audit purposes.",
   "faq.items.manager-5.q": "What security protocols should managers follow?",

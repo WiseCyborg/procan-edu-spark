@@ -82,7 +82,7 @@
   "faq.items.manager-2.q": "Como inscrevo vários funcionários de uma só vez?",
   "faq.items.manager-2.a": "Use o recurso de inscrição em massa no Portal do Dispensário. Envie um arquivo CSV com as informações dos funcionários ou adicione-os individualmente pelo painel de gestão de equipe.",
   "faq.items.manager-3.q": "Quais relatórios de conformidade posso gerar?",
-  "faq.items.manager-3.a": "Gere relatórios em conformidade com a MCA, incluindo status de certificação dos funcionários, datas de conclusão, cronogramas de renovação, documentação pronta para auditoria e análises do progresso da equipe.",
+  "faq.items.manager-3.a": "Generate ProCann EDU completion-record reports including employee completion status, completion dates, renewal schedules, and team progress analytics.",
   "faq.items.manager-4.q": "Como monitoro o progresso e a conformidade dos funcionários?",
   "faq.items.manager-4.a": "Seu painel de gerente oferece acompanhamento de progresso em tempo real, taxas de conclusão, status de conformidade e análises detalhadas. Exporte relatórios para fins de auditoria.",
   "faq.items.manager-5.q": "Quais protocolos de segurança os gerentes devem seguir?",
