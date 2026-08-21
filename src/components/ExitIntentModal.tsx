@@ -94,15 +94,7 @@ export const ExitIntentModal = () => {
           <div className="grid grid-cols-2 gap-4 py-4">
             <div className="space-y-1">
               <div className="text-2xl font-bold text-primary">24</div>
-              <div className="text-sm text-muted-foreground">COMAR Points</div>
-            </div>
-            <div className="space-y-1">
-              <div className="text-2xl font-bold text-primary">$50</div>
-              <div className="text-sm text-muted-foreground">Max Allowed</div>
-            </div>
-            <div className="space-y-1">
-              <div className="text-2xl font-bold text-primary">COMAR</div>
-              <div className="text-sm text-muted-foreground">Aligned</div>
+              <div className="text-sm text-muted-foreground">Counties</div>
             </div>
             <div className="space-y-1">
               <div className="text-2xl font-bold text-primary">Free</div>
