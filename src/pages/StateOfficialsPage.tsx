@@ -243,11 +243,6 @@ export default function StateOfficialsPage() {
               <p className="text-xs text-muted-foreground">Accessible</p>
             </div>
             <div className="p-4 border rounded-lg">
-              <Shield className="h-8 w-8 mx-auto mb-2 text-purple-600" />
-              <p className="text-sm font-semibold">SOC 2 Type II</p>
-              <p className="text-xs text-muted-foreground">In Progress</p>
-            </div>
-            <div className="p-4 border rounded-lg">
               <Shield className="h-8 w-8 mx-auto mb-2 text-orange-600" />
               <p className="text-sm font-semibold">Data Residency</p>
               <p className="text-xs text-muted-foreground">US-Based</p>
