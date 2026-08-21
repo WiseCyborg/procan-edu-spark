@@ -18,7 +18,7 @@ export default function CompetitorComparison() {
     { feature: "Mobile Learning", proCannEdu: "Fully optimized", industryStandard: "Limited" },
     { feature: "Certificate Verification", proCannEdu: "Secure QR system", industryStandard: "PDF format" },
     { feature: "Exam Preparation", proCannEdu: "AI-powered study tools", industryStandard: "Self-study materials" },
-    { feature: "Average Completion Time", proCannEdu: "Self-paced", industryStandard: "6-12 hours" },
+    { feature: "Average Completion Time", proCannEdu: "4-6 hours", industryStandard: "6-12 hours" },
   ];
 
   const renderCell = (value: boolean | string) => {

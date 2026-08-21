@@ -223,7 +223,8 @@ const AdvancedAnalytics: React.FC = () => {
             <div className="pt-4 border-t">
               <h4 className="font-medium mb-2">Performance Insights</h4>
               <ul className="text-sm text-muted-foreground space-y-1">
-                                <li>• Most challenging module: Regulatory Compliance</li>
+                <li>• Average time to completion: 4-6 hours</li>
+                <li>• Most challenging module: Regulatory Compliance</li>
                 <li>• Peak learning hours: 10 AM - 2 PM</li>
               </ul>
             </div>
