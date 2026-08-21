@@ -71,8 +71,7 @@ PRODUCT TRUTH (STRICT): ProCann Edu is an independent training provider. It is N
 Key Facts:
 - ProCann charges $49.99 per seat
 - Available in all 24 Maryland counties
-- 4-6 hour self-paced online course
-- 24 training modules
+- Self-paced online course
 - AI-powered learning assistance with instant feedback
 - 24/7 access from any device
 - Secure QR-verified completion records

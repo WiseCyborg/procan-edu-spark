@@ -12,7 +12,7 @@ const platformFeatures = [
   {
     icon: Clock,
     title: "Self-Paced Learning",
-    description: "Complete your certification in 4-6 hours at your own pace, with 24/7 access"
+    description: "Complete your training at your own pace, self-paced with 24/7 access"
   },
   {
     icon: Shield,
