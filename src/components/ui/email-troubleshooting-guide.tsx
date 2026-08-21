@@ -118,8 +118,8 @@ export const EmailTroubleshootingGuide = () => {
               <span className="font-semibold">Important:</span>
             </div>
             <p className="text-muted-foreground">
-              All ProCann Edu emails are sent through <strong>Supabase's enterprise infrastructure</strong> 
-              with 99.9% delivery reliability. If you're not receiving emails, follow the steps below.
+              All ProCann Edu emails are sent through <strong>Supabase's enterprise infrastructure</strong>. 
+              If you're not receiving emails, follow the steps below.
             </p>
           </div>
 
