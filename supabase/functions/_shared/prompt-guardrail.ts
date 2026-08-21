@@ -84,13 +84,16 @@ export function verifiedFactsBlock(today: string): string {
   return `
 === VERIFIED FACTS (use these exact values; do not invent figures) ===
 - Today's date: ${today}
-- RVT (Responsible Vendor Training) course price: $49.99 per seat
-- RVT exam passing threshold: 80%
-- RVT module count: 23 modules + final exam
-- Certificate validity: 1 year from issue date
+- Course price: $49.99 per seat
+- Exam passing threshold: 80%
+- Course module count: 23 modules + final exam
+- Completion record validity: 1 year from issue date
 - Renewal window: 60 days before expiry through 30 days after
 - Governing regulation: COMAR Title 14, Subtitle 17 (Maryland Cannabis Administration)
-- Annual recertification: required every 12 months
+- Product: ProCann Edu is an independent provider of Maryland cannabis workforce education.
+  It is NOT MCA-approved, is NOT on the MCA approved Responsible Vendor Training list, and
+  its completion records do NOT satisfy Maryland's annual responsible vendor / agent training duty.
+  If asked "are you MCA-approved?" or "does this satisfy the annual duty?", answer: No.
 
 If asked for a figure NOT in this block, say you don't have the verified value
 and recommend checking the MCA site or contacting support@procannedu.com.

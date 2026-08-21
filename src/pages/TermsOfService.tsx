@@ -17,7 +17,7 @@ export default function TermsOfService() {
         <CardContent className="prose dark:prose-invert max-w-none pt-6">
           <h2>1. Agreement to Terms</h2>
           <p>
-            By accessing or using ProCann Edu's Maryland Responsible Vendor Training platform, you agree to be bound by these 
+            By accessing or using ProCann Edu's Maryland cannabis workforce education platform, you agree to be bound by these 
             Terms of Service. If you do not agree to these terms, you may not use our services.
           </p>
 
@@ -38,7 +38,7 @@ export default function TermsOfService() {
           <h2>4. Course Enrollment and Completion</h2>
           <h3>4.1 Training Requirements</h3>
           <p>
-            All Maryland cannabis dispensary employees must complete the RVT training as required by COMAR 14.17.05. 
+            Maryland cannabis dispensary employees may use this platform for workforce education. Completion does not satisfy the COMAR 14.17.15.05 annual agent duty.
             Completion includes:
           </p>
           <ul>
@@ -60,7 +60,7 @@ export default function TermsOfService() {
             Upon successful completion, you will receive a ProCann EDU completion record. This completion record:
           </p>
           <ul>
-            <li>Reflects completion of ProCann EDU training designed to align with COMAR 14.17.15.05</li>
+            <li>Reflects completion of ProCann EDU training only</li>
             <li>Must be renewed before expiration</li>
             <li>Can be revoked for violations of these terms or Maryland law</li>
             <li>Is non-transferable</li>
@@ -151,7 +151,7 @@ export default function TermsOfService() {
 
           <h2>16. Regulatory Alignment</h2>
           <p>
-            This training program's curriculum is designed to align with COMAR 14.17.15.05. 
+            This training program reflects completion of ProCann EDU training only.
             However, compliance requirements may change, and it is your responsibility to stay informed of current regulations.
           </p>
 

@@ -62,7 +62,7 @@ export const ExitIntentModal = () => {
 
     toast({
       title: "Success!",
-      description: "Check your email for the Maryland RVT Compliance Checklist.",
+      description: "Check your email for the Maryland workplace checklist.",
     });
 
     setIsOpen(false);
@@ -86,7 +86,7 @@ export const ExitIntentModal = () => {
             Wait! Get Your Free Compliance Checklist
           </DialogTitle>
           <DialogDescription className="text-center">
-            Download the <strong>Maryland RVT Compliance Checklist</strong> and ensure your dispensary meets all COMAR 14.17 requirements.
+            Download the <strong>Maryland workplace checklist</strong> — study aid only; not proof of MCA-approved training.
           </DialogDescription>
         </DialogHeader>
 

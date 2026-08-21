@@ -63,16 +63,16 @@ serve(async (req) => {
     const router = new EmailRouter();
     const emailResult = await router.sendWithFailover({
       to: employeeEmail,
-      subject: `🎓 You're Invited to Complete Responsible Vendor Training`,
+      subject: `🎓 You're invited to ProCann EDU training`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #16a34a;">Welcome to ProCannEdu!</h1>
-          <p>You've been invited by <strong>${organizationName}</strong> to complete Maryland Responsible Vendor Training.</p>
+          <p>You've been invited by <strong>${organizationName}</strong> to complete ProCann EDU Maryland cannabis workforce education.</p>
           
           <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h3 style="margin-top: 0;">Training Details</h3>
             <p><strong>Organization:</strong> ${organizationName}</p>
-            <p><strong>Course:</strong> Maryland Responsible Vendor Training</p>
+            <p><strong>Course:</strong> ProCann EDU Maryland cannabis workforce education</p>
             <p><strong>Deadline:</strong> ${new Date(deadline).toLocaleDateString()}</p>
             <p><strong>Duration:</strong> Approximately 3-4 hours</p>
           </div>

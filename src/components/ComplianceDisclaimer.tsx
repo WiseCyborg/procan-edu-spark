@@ -10,7 +10,7 @@ export const ComplianceDisclaimer = () => {
         <AlertDescription className="space-y-2">
           <div className="text-sm font-bold text-primary mb-2">COMAR Compliance</div>
           <p className="text-sm leading-relaxed text-foreground">
-            Curriculum designed to align with Maryland Cannabis Administration Responsible Vendor Training standards (COMAR 14.17.15.05). Content is reviewed and updated when regulations change. ProCann Edu is an independent training provider; completion of this course does not constitute MCA endorsement.
+            Content is reviewed when published Maryland cannabis rules change. ProCann Edu is an independent training provider; completion of this course does not constitute MCA endorsement and does not satisfy Maryland's annual responsible vendor / agent training duty.
           </p>
         </AlertDescription>
       </Alert>
@@ -20,7 +20,7 @@ export const ComplianceDisclaimer = () => {
         <AlertDescription className="space-y-2">
           <div className="text-sm font-bold text-primary mb-2">Pricing Compliance</div>
           <p className="text-sm leading-relaxed text-foreground">
-            ProCann Edu charges $49.99 per student, maintaining compliance with Maryland's $50.00 maximum charge per employee for RVT training as specified in Maryland Cannabis Administration RVT Standards.
+            ProCann Edu charges $49.99 per student.
           </p>
         </AlertDescription>
       </Alert>

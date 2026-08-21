@@ -58,12 +58,12 @@ export const documentContent: Record<string, DocumentContent> = {
     lastUpdated: '2025-01-15',
     comarReferences: ['14.17.15.05'],
     content: `
-      <h2>Responsible Vendor Training (RVT) Certification</h2>
-      <p>All Maryland dispensary agents must complete Responsible Vendor Training and pass a certification exam before selling cannabis products.</p>
+      <h2>Maryland Responsible Vendor Training (RVT) Requirement</h2>
+      <p>Maryland requires an MCA-approved RVT (hour minimum as published by MCA). ProCann Edu is not that approved program.</p>
       
       <h3>RVT Requirements (COMAR 14.17.15.05)</h3>
       <ul>
-        <li>Complete an approved RVT training program (minimum 4 hours)</li>
+        <li>Complete an MCA-approved RVT training program (minimum 4 hours as published by MCA)</li>
         <li>Pass a certification exam with a score of 80% or higher</li>
         <li>Renew certification annually</li>
         <li>Maintain proof of current certification at all times while working</li>

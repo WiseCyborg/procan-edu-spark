@@ -169,7 +169,7 @@ export default function AcceptInvite() {
                   <AlertCircle className={`h-4 w-4 ${enrollmentInfo.enrolled ? 'text-green-600' : 'text-yellow-600'}`} />
                   <AlertDescription className={enrollmentInfo.enrolled ? 'text-green-800' : 'text-yellow-800'}>
                     {enrollmentInfo.enrolled 
-                      ? "✅ You're enrolled in Responsible Vendor Training! Click below to start."
+                      ? "✅ You're enrolled in ProCann EDU training! Click below to start."
                       : enrollmentInfo.message || "Training enrollment pending - contact your admin."}
                   </AlertDescription>
                 </Alert>

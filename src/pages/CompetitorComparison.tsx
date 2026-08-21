@@ -89,10 +89,9 @@ export default function CompetitorComparison() {
           <div className="grid md:grid-cols-3 gap-6">
             <Card className="text-center p-6 hover:shadow-lg transition-shadow border-primary/20">
               <Shield className="h-16 w-16 text-primary mx-auto mb-4" />
-              <h3 className="text-xl font-bold mb-2 text-primary">Live COMAR Alignment</h3>
+              <h3 className="text-xl font-bold mb-2 text-primary">Maryland Rule Monitoring</h3>
               <p className="text-muted-foreground">
-                Automatic curriculum updates when Maryland regulations change. Always aligned to the latest 
-                COMAR 14.17.15.05 standards without manual content revisions.
+                We monitor published Maryland cannabis rules. We are not on the MCA approved RVT list.
               </p>
             </Card>
 
@@ -126,7 +125,7 @@ export default function CompetitorComparison() {
                 <div className="space-y-3 text-muted-foreground">
                   <p className="flex items-start gap-2">
                     <Zap className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-                    <span><strong>Real-time regulatory alignment:</strong> Curriculum automatically syncs with Maryland Cannabis Administration updates to COMAR 14.17.15.05</span>
+                    <span><strong>Maryland rule monitoring:</strong> We monitor published Maryland cannabis rules. We are not on the MCA approved RVT list.</span>
                   </p>
                   <p className="flex items-start gap-2">
                     <Zap className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />

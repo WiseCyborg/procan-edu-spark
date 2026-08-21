@@ -1,8 +1,9 @@
 # ProCann Edu
 
-> Maryland's AI-powered Responsible Vendor Training (RVT) platform — state-aligned cannabis dispensary certification, team management, and compliance reporting.
+> Maryland cannabis workforce education for dispensary staff. Independent provider. Self-paced. Publicly verifiable completion records.
+> ProCann Edu is not on the MCA approved RVT list.
 
-ProCann Edu provides verifiable Maryland RVT certification for dispensary employees, a consumer cannabis-education track, multi-method certificate verification, and dispensary-manager tools for enrolling staff, tracking compliance, and renewing certificates.
+ProCann Edu provides publicly verifiable Maryland cannabis workforce education completion records for dispensary employees, a consumer cannabis-education track, multi-method certificate verification, and dispensary-manager tools for enrolling staff, tracking compliance, and renewing certificates.
 
 ## Pages
 

@@ -52,7 +52,7 @@ export default function AboutTeamPage() {
                   </h4>
                   <div className="space-y-2">
                     <Badge variant="secondary">Cannabis Industry Certified</Badge>
-                    <Badge variant="secondary">COMAR 14.17.15.05 Specialist</Badge>
+                    <Badge variant="secondary">Maryland cannabis education</Badge>
                     <Badge variant="secondary">Maryland Regulatory Expert</Badge>
                     <Badge variant="secondary">Adult Education Certified</Badge>
                   </div>

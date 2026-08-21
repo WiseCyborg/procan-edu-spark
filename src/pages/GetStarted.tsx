@@ -49,8 +49,8 @@ const GetStarted = () => {
                     <Badge variant="outline">4-6 Hours</Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    Maryland-focused cannabis workforce training for dispensary employees, 
-                    designed to align with COMAR 14.17.15.05.
+                    Maryland cannabis workforce training for dispensary employees. Does not satisfy
+                    the annual responsible vendor / agent training duty.
                   </p>
                 </div>
                 <div className="space-y-2 text-sm">
@@ -60,11 +60,11 @@ const GetStarted = () => {
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Shield className="h-4 w-4" />
-                    <span>RVT certificate of completion issued</span>
+                    <span>ProCann EDU completion record issued</span>
                   </div>
                 </div>
                 <Button className="w-full group-hover:bg-primary/90">
-                  Begin RVT Training
+                  Begin training
                   <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
                 </Button>
               </CardContent>
@@ -90,13 +90,13 @@ const GetStarted = () => {
                   </div>
                   <p className="text-sm text-muted-foreground">
                     Advanced leadership training for dispensary managers and supervisors. 
-                    Builds on RVT Core certification.
+                    Builds on core training.
                   </p>
                 </div>
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Award className="h-4 w-4" />
-                    <span>Requires RVT Core completion</span>
+                    <span>Requires core training completion</span>
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Shield className="h-4 w-4" />
@@ -140,7 +140,7 @@ const GetStarted = () => {
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Award className="h-4 w-4" />
-                    <span>Completion badge (non-RVT)</span>
+                    <span>Completion badge (not a state credential)</span>
                   </div>
                 </div>
                 <Button className="w-full" variant="secondary" onClick={(e) => { e.stopPropagation(); navigate('/consumer-education'); }}>
@@ -154,8 +154,8 @@ const GetStarted = () => {
           {/* Disclaimer */}
           <div className="mt-6 p-4 bg-muted/50 rounded-lg border border-muted-foreground/20 max-w-4xl mx-auto">
             <p className="text-xs text-muted-foreground text-center">
-              <strong>Important:</strong> Only Cannabis Compliance Training is designed to align with 
-              COMAR 14.17.15.05. Public Learning courses are for general educational purposes only.
+              <strong>Important:</strong> Cannabis Compliance Training is workforce education only. It does not
+              satisfy Maryland's annual responsible vendor / agent training duty. Public Learning is general education.
             </p>
           </div>
         </div>
@@ -225,8 +225,7 @@ const GetStarted = () => {
                 <div className="mx-auto mb-4 p-4 bg-primary/10 rounded-full w-16 h-16 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                   <Shield className="h-8 w-8 text-primary" />
                 </div>
-                <CardTitle className="text-lg">MCA Official</CardTitle>
-                <CardDescription className="text-xs">Compliance portal</CardDescription>
+                <CardTitle className="text-lg">Regulator review page</CardTitle>
               </CardHeader>
               <CardContent>
                 <Button className="w-full" size="sm" onClick={() => navigate('/mca-compliance-review')}>
@@ -277,8 +276,8 @@ const GetStarted = () => {
                   <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-2">
                     <Shield className="h-8 w-8 text-green-600" />
                   </div>
-                  <p className="font-semibold">MCA Verifies</p>
-                  <p className="text-xs text-muted-foreground">Instant verification</p>
+                  <p className="font-semibold">Record check</p>
+                  <p className="text-xs text-muted-foreground">Public verification portal</p>
                 </div>
               </div>
             </CardContent>
