@@ -5,7 +5,7 @@
 import { writeFileSync } from 'fs';
 import { resolve } from 'path';
 
-const BASE_URL = 'https://www.procannedu.com';
+const BASE_URL = 'https://procannedu.com';
 
 interface SitemapEntry {
   path: string;
