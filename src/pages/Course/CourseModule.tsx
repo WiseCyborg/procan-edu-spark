@@ -17,7 +17,7 @@ const quizzes: {[key: string]: QuizQuestion[]} = {
   part1: [
     { q: "Which federal law classifies cannabis as a Schedule I drug?", a: "Controlled Substances Act", options: ["Controlled Substances Act", "Food and Drug Act", "Tax Code"] },
     { q: "What is Maryland's legal possession limit for personal cannabis use?", a: "1.5 oz", options: ["1 oz", "1.5 oz", "2 oz"] },
-    { q: "How often must dispensary agents complete RVT?", a: "Every 12 months", options: ["Every 6 months", "Every 12 months", "Every 2 years"] },
+    { q: "Under COMAR 14.17.15.05(C), when must dispensary agents complete RVT?", a: "Within 90 days of employment start date, and annually thereafter", options: ["Every 6 months", "Within 90 days of employment start date, and annually thereafter", "Every 2 years"] },
     { q: "Which agency enforces cannabis regulations in Maryland?", a: "Maryland Cannabis Administration", options: ["FDA", "DEA", "Maryland Cannabis Administration"] },
     { q: "What is a key Maryland regulation to prevent illegal sales?", a: "Age verification", options: ["Price controls", "Age verification", "Color coding"] }
   ],

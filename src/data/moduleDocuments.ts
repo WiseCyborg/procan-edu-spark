@@ -62,10 +62,11 @@ export const documentContent: Record<string, DocumentContent> = {
       <p>Maryland requires an MCA-approved RVT (hour minimum as published by MCA). ProCann Edu is not that approved program.</p>
       
       <h3>RVT Requirements (COMAR 14.17.15.05)</h3>
+      <blockquote>"C. Within 90 days of employment start date and annually thereafter, a registered agent employed by a cannabis licensee shall complete a responsible vendor training program that:"</blockquote>
       <ul>
-        <li>Complete an MCA-approved RVT training program (minimum 4 hours as published by MCA)</li>
+        <li>Complete an MCA-approved Responsible Vendor Training (RVT) program (minimum 4 hours as published by MCA)</li>
+        <li>If an agent starts after July 1, 2026 they must complete their annual training within 90 days of employment, then every year afterwards</li>
         <li>Pass a certification exam with a score of 80% or higher</li>
-        <li>Renew certification annually</li>
         <li>Maintain proof of current certification at all times while working</li>
       </ul>
       
@@ -74,7 +75,7 @@ export const documentContent: Record<string, DocumentContent> = {
         <li><strong>Format:</strong> 90 multiple choice questions</li>
         <li><strong>Passing Score:</strong> 80% or higher</li>
         <li><strong>Time Limit:</strong> 90 minutes</li>
-        <li><strong>Certificate:</strong> Valid for 12 months from issue date</li>
+        <li><strong>ProCann completion record:</strong> Valid for 1 year from issue date (this record does not satisfy the approved RVT duty)</li>
       </ul>
     `
   },

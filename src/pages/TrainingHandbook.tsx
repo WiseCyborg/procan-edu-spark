@@ -289,7 +289,7 @@ const TrainingHandbook = () => {
                </CardHeader>
                <CardContent className="space-y-6">
                  <p className="text-lg leading-relaxed text-muted-foreground">
-                   Beyond annual requirements, COMAR 14.17.15.05.C requires a separate Responsible Vendor Training Program. An approved responsible vendor training program is registered with the MCA for three years (COMAR 14.17.15.05.E(3)) and records are maintained for four years. ProCann Edu is not on the MCA approved RVT list and is not a registered approved responsible vendor training program. This section covers advanced customer service, sales ethics, and regulatory awareness as independent workforce education.
+                   COMAR 14.17.15.05(C) states: "C. Within 90 days of employment start date and annually thereafter, a registered agent employed by a cannabis licensee shall complete a responsible vendor training program that:" Training remains annual and is still named Responsible Vendor Training (RVT). If an agent starts after July 1, 2026 they must complete their annual training within 90 days of employment, then every year afterwards. An approved RVT program is registered with the MCA for three years (COMAR 14.17.15.05.E(3)) and records are maintained for four years. ProCann Edu is not on the MCA approved RVT list and is not a registered approved responsible vendor training program. This section covers advanced customer service, sales ethics, and regulatory awareness as independent workforce education.
                  </p>
                  <div className="rounded-lg overflow-hidden bg-muted">
                    <div className="aspect-video">

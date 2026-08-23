@@ -76,6 +76,7 @@ Key Facts:
 - AI-powered learning assistance with instant feedback
 - 24/7 access from any device
 - Secure QR-verified completion records
+- Maryland RVT (COMAR 14.17.15.05(C)): "C. Within 90 days of employment start date and annually thereafter, a registered agent employed by a cannabis licensee shall complete a responsible vendor training program that:" Training remains annual and is still called Responsible Vendor Training (RVT). If an agent starts after July 1, 2026 they must complete their annual training within 90 days of employment, then every year afterwards. This course does not satisfy that approved-training duty.
 
 Answer questions about:
 - ProCann Edu's course content and delivery

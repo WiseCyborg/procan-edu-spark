@@ -54,7 +54,7 @@ export const EnhancedFAQ: React.FC<EnhancedFAQProps> = ({
     {
       id: 'student-2',
       question: 'How long do I have to complete the course?',
-      answer: 'You can work through the course at your own pace. Note that COMAR 14.17.15.05.C requires registered cannabis agents to complete an approved Responsible Vendor Training within 90 days of the start of employment, and annually thereafter, so check your hire date with your manager. Our course does not satisfy that approved-training duty.',
+      answer: 'You can work through the course at your own pace. COMAR 14.17.15.05(C) states: "C. Within 90 days of employment start date and annually thereafter, a registered agent employed by a cannabis licensee shall complete a responsible vendor training program that:" If an agent starts after July 1, 2026 they must complete their annual Responsible Vendor Training (RVT) within 90 days of employment, then every year afterwards. Check your hire date with your manager. Our course does not satisfy that approved-training duty.',
       category: 'Course Access',
       securityLevel: 'student'
     },
@@ -174,7 +174,7 @@ export const EnhancedFAQ: React.FC<EnhancedFAQProps> = ({
     {
       id: 'general-1',
       question: 'What is the Responsible Vendor Training (RVT)?',
-      answer: 'Maryland requires registered agents to complete an MCA-approved Responsible Vendor Training. ProCann Edu is not on that approved list. Our course is independent workforce education and does not satisfy that annual duty.',
+      answer: 'Maryland requires registered agents to complete an MCA-approved Responsible Vendor Training (RVT). COMAR 14.17.15.05(C) states: "C. Within 90 days of employment start date and annually thereafter, a registered agent employed by a cannabis licensee shall complete a responsible vendor training program that:" If an agent starts after July 1, 2026 they must complete their annual training within 90 days of employment, then every year afterwards. ProCann Edu is not on that approved list. Our course is independent workforce education and does not satisfy that annual duty.',
       category: 'About Training',
       securityLevel: 'public'
     },

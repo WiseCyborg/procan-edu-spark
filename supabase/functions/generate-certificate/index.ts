@@ -310,15 +310,14 @@ Deno.serve(async (req: Request) => {
 
     const issueDate = new Date();
     const expiryDate = new Date(issueDate);
-    // COMAR 14.17.15.05(C): a registered agent must complete Responsible Vendor Training
-    // within 90 days of employment start date and ANNUALLY thereafter. The 2-year clock in
-    // COMAR 14.17.15.03(C) governs the agent ID CARD, not the training certificate.
-    // HB 622 (Ch. 375, eff. 2026-07-01) would move the training cycle to "at least once every
-    // 2 years," but as of this deploy that change has not been published into COMAR or reflected
-    // on the MCA's site. Per William Cunningham's explicit decision (2026-08-18): hold at 1 year
-    // — matching COMAR as currently published — until HB 622 actually lands in COMAR / the MCA's
-    // published regulations, then revisit. Do not change this without a new, explicit, recorded
-    // decision. See claude/BLOCKING_2026-08-18_certificate_expiry_three_competing_paths_unaudited_patch.md.
+    // COMAR 14.17.15.05(C) (Louis Hendricks III, Director of Compliance, Aug 16 2026;
+    // William F. Cunningham Jr. go 2026-08-23):
+    // "C. Within 90 days of employment start date and annually thereafter, a registered
+    // agent employed by a cannabis licensee shall complete a responsible vendor training
+    // program that:" Training remains annual and is still named Responsible Vendor Training
+    // (RVT). If an agent starts after July 1, 2026 they must complete their annual training
+    // within 90 days of employment, then every year afterwards. Do not implement a two-year
+    // cycle. The 2-year clock in COMAR 14.17.15.03(C) governs the agent ID CARD, not training.
     expiryDate.setFullYear(expiryDate.getFullYear() + 1);
 
     const verifyUrl = `https://www.procannedu.com/verify?code=${certNumber}`;
