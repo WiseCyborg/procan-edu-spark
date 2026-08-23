@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Loader2, AlertCircle, CheckCircle2, CreditCard, Building2 } from 'lucide-react';
 import { invokePublicFunction } from '@/lib/publicEdgeFunctions';
+import { paymentPathForApplication, readStoredApplicationId } from '@/lib/applyPaymentFlow';
 
 type AppStatus = {
   id: string;
@@ -27,13 +28,18 @@ const Payment: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [app, setApp] = useState<AppStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [pendingApproval, setPendingApproval] = useState(false);
+  const [missingId, setMissingId] = useState(false);
+  const [savedApplicationId, setSavedApplicationId] = useState<string | null>(null);
   const [redirecting, setRedirecting] = useState(false);
   const [retryable, setRetryable] = useState(false);
   const triggered = useRef(false);
 
   useEffect(() => {
     if (!applicationId) {
-      setError('No application ID provided. Please use the link from your approval email.');
+      setMissingId(true);
+      setSavedApplicationId(readStoredApplicationId());
+      setError('No application ID provided. Payment is not collected from this page.');
       setLoading(false);
       return;
     }
@@ -42,6 +48,9 @@ const Payment: React.FC = () => {
 
   const load = async () => {
     setLoading(true);
+    setPendingApproval(false);
+    setMissingId(false);
+    setRetryable(false);
     const { data, error: fnError } = await invokePublicFunction<{ success: boolean; application?: AppStatus; error_code?: string }>(
       'get-application-payment-status',
       { application_id: applicationId }
@@ -60,7 +69,7 @@ const Payment: React.FC = () => {
     setLoading(false);
 
     if (a.application_status !== 'approved' && a.application_status !== 'completed') {
-      setError('This application has not been approved yet. Please wait for admin approval.');
+      setPendingApproval(true);
       return;
     }
     if (a.payment_status === 'paid' || a.payment_status === 'completed') {
@@ -106,18 +115,58 @@ const Payment: React.FC = () => {
     );
   }
 
+  if (pendingApproval && app) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/5 p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CheckCircle2 className="h-12 w-12 text-primary mx-auto mb-2" />
+            <CardTitle>Payment not open yet</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-center text-muted-foreground">
+              This application is not approved for payment. Checkout is not started from this page
+              until the application is approved. The approval email uses this same payment link.
+            </p>
+            <p className="text-center text-sm">
+              <span className="font-medium">Application ID:</span>{' '}
+              <code className="font-mono break-all">{app.id}</code>
+            </p>
+            <Button onClick={() => navigate('/')} variant="outline" className="w-full">
+              Return home
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   if (error && !retryable) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/5 p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-2" />
-            <CardTitle>Payment Unavailable</CardTitle>
+            <CardTitle>{missingId ? 'Payment link required' : 'Payment Unavailable'}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-center text-muted-foreground">{error}</p>
-            <Button onClick={() => navigate('/')} variant="outline" className="w-full">
-              Go Home
+            {missingId && (
+              <p className="text-center text-sm text-muted-foreground">
+                New organizations apply at the dispensary application form. After approval, use the
+                payment link from that email — it includes your application ID.
+              </p>
+            )}
+            {missingId && savedApplicationId && (
+              <Button
+                onClick={() => navigate(paymentPathForApplication(savedApplicationId))}
+                className="w-full"
+              >
+                Open saved application payment page
+              </Button>
+            )}
+            <Button onClick={() => navigate(missingId ? '/org/apply' : '/')} variant="outline" className="w-full">
+              {missingId ? 'Go to application form' : 'Go Home'}
             </Button>
           </CardContent>
         </Card>
