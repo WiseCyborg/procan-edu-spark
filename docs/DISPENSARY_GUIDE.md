@@ -262,7 +262,7 @@ Upon passing the final exam:
 1. **Automatic Generation**: Certificate created immediately
 2. **PDF Download**: Available in your dashboard
 3. **Verification Number**: Unique certificate number assigned
-4. **Expiration Date**: Certificate valid for 2 years
+4. **Expiration Date**: ProCann completion record valid for 1 year (does not satisfy Maryland's approved RVT duty)
 5. **Employer Notification**: Manager receives completion notification
 
 ### Ongoing Compliance
@@ -274,7 +274,7 @@ Upon passing the final exam:
 - **Replacement**: Request new copy if lost
 
 #### Continuing Education
-- **Renewal Requirements**: Complete updated training every 2 years
+- **Maryland RVT duty (COMAR 14.17.15.05(C))**: "C. Within 90 days of employment start date and annually thereafter, a registered agent employed by a cannabis licensee shall complete a responsible vendor training program that:" If an agent starts after July 1, 2026 they must complete their annual Responsible Vendor Training (RVT) within 90 days of employment, then every year afterwards. This course does not satisfy that approved-training duty.
 - **Regulatory Updates**: Additional training for law changes
 - **Professional Development**: Optional advanced training modules
 - **Compliance Monitoring**: Regular knowledge assessments
