@@ -4,7 +4,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { ConsumerModuleContent } from '@/components/consumer/ConsumerModuleContent';
 import { ModuleNavigation } from '@/components/consumer/ModuleNavigation';
 import { ProgressBar } from '@/components/consumer/ProgressBar';
+import { StartEnrollmentEmailCapture } from '@/components/consumer/StartEnrollmentEmailCapture';
 import { useConsumerProgress } from '@/hooks/useConsumerProgress';
+import { useAuth } from '@/hooks/useAuth';
+import { useGuestSession } from '@/hooks/useGuestSession';
 import { Button } from '@/components/ui/button';
 import { Loader2, X, Menu } from 'lucide-react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
@@ -35,6 +38,10 @@ const ConsumerCourse = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  const { user } = useAuth();
+  const { email: guestEmail } = useGuestSession();
+  const [showStartCapture, setShowStartCapture] = useState(false);
+
   const {
     completedModules,
     markModuleComplete,
@@ -44,6 +51,17 @@ const ConsumerCourse = () => {
     completeCourse,
     isGuestE2E,
   } = useConsumerProgress(courseId || '', modules.length);
+
+  useEffect(() => {
+    if (isLoading || !course || user || guestEmail) return;
+    try {
+      const dismissed = localStorage.getItem(`procann_start_capture_dismissed_${course.id}`);
+      if (!dismissed) setShowStartCapture(true);
+    } catch (e) {
+      console.error('Error checking start-capture dismissal:', e);
+    }
+  }, [isLoading, course, user, guestEmail]);
+
 
 
   useEffect(() => {
@@ -233,6 +251,15 @@ const ConsumerCourse = () => {
           />
         </main>
       </div>
+
+      {course && (
+        <StartEnrollmentEmailCapture
+          open={showStartCapture}
+          onOpenChange={setShowStartCapture}
+          courseId={course.id}
+          courseTitle={course.title}
+        />
+      )}
     </div>
   );
 };
