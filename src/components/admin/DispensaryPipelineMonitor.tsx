@@ -133,12 +133,24 @@ export const DispensaryPipelineMonitor = () => {
 
       if (orgError) throw orgError;
 
-      // Fetch managers who registered via applications
-      const { data: managers, error: mgError } = await supabase
-        .from('profiles')
-        .select('*, user_roles!inner(*)')
-        .eq('user_roles.role', 'dispensary_manager')
-        .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
+      // Fetch managers who registered via applications.
+      // Two-step: profiles has no FK to user_roles, so an embedded join fails the schema cache.
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      const { data: managerRoles, error: mgRoleError } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .eq('role', 'dispensary_manager');
+
+      if (mgRoleError) throw mgRoleError;
+
+      const managerIds = (managerRoles || []).map(r => r.user_id);
+      const { data: managers, error: mgError } = managerIds.length > 0
+        ? await supabase
+            .from('profiles')
+            .select('*')
+            .in('id', managerIds)
+            .gte('created_at', thirtyDaysAgo)
+        : { data: [], error: null };
 
       if (mgError) throw mgError;
 
