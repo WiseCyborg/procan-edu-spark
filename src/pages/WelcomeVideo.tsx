@@ -71,7 +71,7 @@ const WelcomeVideo = () => {
               Welcome to ProCann Edu
             </h1>
             <p className="text-muted-foreground">
-              Watch this short introduction to get started with your compliance training
+              Watch this short introduction to get started with your RVT training
             </p>
           </div>
 
@@ -80,7 +80,7 @@ const WelcomeVideo = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Play className="h-5 w-5 text-primary" />
-                Training Overview
+                RVT Training Overview
               </CardTitle>
             </CardHeader>
             <CardContent>

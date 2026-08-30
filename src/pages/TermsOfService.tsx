@@ -17,7 +17,7 @@ export default function TermsOfService() {
         <CardContent className="prose dark:prose-invert max-w-none pt-6">
           <h2>1. Agreement to Terms</h2>
           <p>
-            By accessing or using ProCann Edu's Maryland cannabis workforce education platform, you agree to be bound by these 
+            By accessing or using ProCann Edu's Maryland Responsible Vendor Training platform, you agree to be bound by these 
             Terms of Service. If you do not agree to these terms, you may not use our services.
           </p>
 
@@ -38,7 +38,7 @@ export default function TermsOfService() {
           <h2>4. Course Enrollment and Completion</h2>
           <h3>4.1 Training Requirements</h3>
           <p>
-            Maryland cannabis dispensary employees may use this platform for workforce education. Completion does not satisfy the COMAR 14.17.15.05 annual agent duty.
+            All Maryland cannabis dispensary employees must complete the RVT training as required by COMAR 14.17.05. 
             Completion includes:
           </p>
           <ul>
@@ -55,12 +55,12 @@ export default function TermsOfService() {
             <li>Exam content is confidential and may not be shared</li>
           </ul>
 
-          <h2>5. Completion Records</h2>
+          <h2>5. Certification</h2>
           <p>
-            Upon successful completion, you will receive a ProCann EDU completion record. This completion record:
+            Upon successful completion, you will receive an official RVT certificate valid for [X years]. This certificate:
           </p>
           <ul>
-            <li>Reflects completion of ProCann EDU training only</li>
+            <li>Is issued in accordance with MCA requirements</li>
             <li>Must be renewed before expiration</li>
             <li>Can be revoked for violations of these terms or Maryland law</li>
             <li>Is non-transferable</li>
@@ -149,9 +149,9 @@ export default function TermsOfService() {
             These terms are governed by the laws of the State of Maryland. Any disputes shall be resolved in Maryland courts.
           </p>
 
-          <h2>16. Regulatory Alignment</h2>
+          <h2>16. MCA Compliance</h2>
           <p>
-            This training program reflects completion of ProCann EDU training only.
+            This training program is designed to comply with Maryland Cannabis Administration (MCA) requirements under COMAR 14.17.05. 
             However, compliance requirements may change, and it is your responsibility to stay informed of current regulations.
           </p>
 

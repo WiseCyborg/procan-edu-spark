@@ -28,7 +28,7 @@ export const AIFAQChat = () => {
         role: 'assistant',
         content: t('chatbot.greeting', {
           defaultValue:
-            "Hi! I'm AiLean, your ProCann training assistant. Ask me anything about Maryland cannabis compliance, COMAR requirements, or our training programs!",
+            "Hi! I'm AiLean, your ProCann training assistant. Ask me anything about Maryland RVT certification, COMAR compliance, or our training programs!",
         }),
       },
     ]);
@@ -62,27 +62,25 @@ export const AIFAQChat = () => {
           context: {
             page: 'homepage',
             type: 'faq',
-            systemPrompt: `You are AiLean, ProCann's AI training assistant for ProCann Edu's independent Maryland cannabis workforce education.
+            systemPrompt: `You are AiLean, ProCann's AI training assistant specializing in Maryland RVT (Responsible Vendor Training) certification and compliance.
 
 RESPONSE LANGUAGE (STRICT): Always respond in ${languageName}. This is the user's selected UI language. Reply in ${languageName} regardless of what language the user typed their question in. Keep proper nouns (ProCann, COMAR, Maryland, RVT) and regulatory citation numbers in their original form.
 
-PRODUCT TRUTH (STRICT): ProCann Edu is an independent training provider. It is NOT MCA-approved, is NOT on the MCA approved Responsible Vendor Training list, and its completion records are NOT an official Maryland credential and do NOT satisfy Maryland's annual responsible vendor / agent training duty. If asked "are you MCA-approved?" or "does this satisfy the annual duty?", answer: No. Never claim otherwise.
-
 Key Facts:
-- ProCann charges $49.99 per seat
+- ProCann offers $49.99 certification (Maryland max is $50.00 per COMAR 14.17.07.06)
 - Available in all 24 Maryland counties
-- 4-6 hour self-paced online course
-- 24 training modules
+- 4-6 hour self-paced online certification
+- 24 COMAR-aligned training modules
 - AI-powered learning assistance with instant feedback
 - 24/7 access from any device
-- Secure QR-verified completion records
-- Maryland RVT (COMAR 14.17.15.05(C)): "C. Within 90 days of employment start date and annually thereafter, a registered agent employed by a cannabis licensee shall complete a responsible vendor training program that:" Training remains annual and is still called Responsible Vendor Training (RVT). If an agent starts after July 1, 2026 they must complete their annual training within 90 days of employment, then every year afterwards. This course does not satisfy that approved-training duty.
+- Secure QR-verified certificates
 
 Answer questions about:
-- ProCann Edu's course content and delivery
+- Maryland COMAR 14.17 compliance requirements
+- RVT certification process
 - Pricing and features
-- Publicly verifiable completion records
-- Published Maryland cannabis rules, without claiming ProCann Edu satisfies them
+- Training content and delivery
+- State regulations and updates
 
 Be helpful, concise, and professional. Do not make up statistics or claims. If you don't know something, suggest contacting support@procannedu.com.`,
           },
@@ -142,7 +140,7 @@ Be helpful, concise, and professional. Do not make up statistics or claims. If y
               <div>
                 <h3 className="font-semibold">{t('chatbot.title', { defaultValue: 'Ask AiLean' })}</h3>
                 <p className="text-xs opacity-90">
-                  {t('chatbot.subtitle', { defaultValue: 'Ask about cannabis compliance training' })}
+                  {t('chatbot.subtitle', { defaultValue: 'Ask about RVT certification' })}
                 </p>
               </div>
             </div>

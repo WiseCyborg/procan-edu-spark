@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { GHOST_COURSE_IDS_PG_LIST } from '@/lib/ghostCourses';
 import AskBudPanel from '@/components/consumer/AskBudPanel';
+import { RvtApprovalNotice } from '@/components/RvtApprovalNotice';
 
 
 interface ConsumerCourse {
@@ -53,12 +54,12 @@ const ConsumerEducation = () => {
       <div className="bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-800 py-2 px-4">
         <p className="text-center text-xs text-amber-800 dark:text-amber-300">
           <strong>Note:</strong> This is free educational content for the public. 
-          This is <strong>NOT</strong> workforce cannabis compliance training for dispensary employees. 
+          This is <strong>NOT</strong> Maryland RVT employee certification. 
           <button 
             onClick={() => navigate('/get-started')} 
             className="underline ms-1 hover:text-amber-600"
           >
-            Need workforce cannabis training?
+            Need RVT certification?
           </button>
         </p>
       </div>
@@ -125,7 +126,7 @@ const ConsumerEducation = () => {
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
                 <Award className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="font-semibold text-foreground">Complete the Course</h3>
+              <h3 className="font-semibold text-foreground">Get Certified</h3>
               <p className="text-sm text-muted-foreground">Earn digital badges</p>
             </div>
             
@@ -150,7 +151,7 @@ const ConsumerEducation = () => {
               </h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
                 Start with whichever course fits your needs. All courses are completely free 
-                and you'll earn a completion badge upon completion.
+                and you'll earn a certificate upon completion.
               </p>
             </div>
 
@@ -189,19 +190,19 @@ const ConsumerEducation = () => {
               Work at a Dispensary?
             </div>
             <h2 className="text-3xl font-bold text-foreground">
-              Need Workforce Cannabis Training?
+              Need Official RVT Certification?
             </h2>
             <p className="text-muted-foreground">
-              Maryland requires registered agents to complete an MCA-approved Responsible Vendor Training. 
-              ProCann Edu is not on that approved list. Our workforce course is independent education and does 
-              not satisfy that annual duty. Ask your manager for a join code if they use ProCann EDU.
+              Maryland dispensary employees are required to complete Responsible Vendor Training (RVT). 
+              Ask your manager for a join code to access the official certification program.
             </p>
+            <RvtApprovalNotice />
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button 
                 onClick={() => navigate('/get-started')}
                 size="lg"
               >
-                Explore Professional Training
+                Get RVT Certified
                 <ArrowRight className="ms-2 h-4 w-4" />
               </Button>
               <Button 
@@ -234,8 +235,7 @@ const ConsumerEducation = () => {
                   <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">1</div>
                   <h3 className="font-semibold">Bring Your ID</h3>
                   <p className="text-sm text-muted-foreground">
-                    Adult-use: you must be 21+ with a valid government-issued photo ID. Medical purchases
-                    also require active Maryland patient registration verified through the state system.
+                    Valid Maryland medical cannabis card and government-issued ID required for entry.
                   </p>
                 </div>
                 
@@ -275,13 +275,12 @@ const ConsumerEducation = () => {
                 <div className="space-y-2">
                   <h3 className="font-semibold text-primary flex items-center gap-2">
                     <CheckCircle2 className="h-5 w-5" />
-                    Adult-Use Purchase Limits (21+)
+                    Legal Purchase Limits
                   </h3>
                   <ul className="space-y-1 text-sm text-muted-foreground ms-7">
-                    <li>• Up to 1.5 ounces of cannabis flower</li>
-                    <li>• Up to 12 grams of concentrate</li>
-                    <li>• Or cannabis products containing up to 750 mg THC</li>
-                    <li>• Adult-use sales began July 1, 2023</li>
+                    <li>• Up to 120 grams (4.2 oz) of flower per 30 days</li>
+                    <li>• Product limits vary by type and THC content</li>
+                    <li>• Dispensary staff track your allotment automatically</li>
                   </ul>
                 </div>
                 
@@ -312,25 +311,13 @@ const ConsumerEducation = () => {
                 <div className="space-y-2">
                   <h3 className="font-semibold text-primary flex items-center gap-2">
                     <CheckCircle2 className="h-5 w-5" />
-                    Medical Patients (Separate Rules)
+                    Valid Medical Card Required
                   </h3>
                   <ul className="space-y-1 text-sm text-muted-foreground ms-7">
-                    <li>• Requires active Maryland patient registration, verified through the state system</li>
-                    <li>• Patient registration currently lasts six years</li>
-                    <li>• Purchase allotments are set by your provider's written certification and differ from adult-use limits</li>
-                    <li>• Government-issued photo ID is still required</li>
+                    <li>• Must have active Maryland MCA registration</li>
+                    <li>• Card expires annually, requires renewal</li>
+                    <li>• Out-of-state cards not accepted</li>
                   </ul>
-                  <p className="text-xs text-muted-foreground ms-7">
-                    See the{' '}
-                    <a href="https://cannabis.maryland.gov/Pages/Adult-Use-FAQs.aspx" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                      MCA Adult-Use FAQ
-                    </a>{' '}
-                    and{' '}
-                    <a href="https://cannabis.maryland.gov/Pages/Patients.aspx" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                      MCA patient information
-                    </a>{' '}
-                    for current official guidance.
-                  </p>
                 </div>
               </div>
             </div>

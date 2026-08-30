@@ -1122,7 +1122,7 @@ const FinalExam: React.FC = () => {
     <ProtectedCourseAccess requiresCompleteProfile={true}>
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold text-center text-green-700 mb-6">
-          Maryland Cannabis Compliance Training
+          Maryland Responsible Vendor Training (RVT)
           <br />
           <span className="text-xl font-normal">Final Exam</span>
         </h1>

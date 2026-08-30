@@ -443,7 +443,7 @@ const EnhancedDispensaryPortal: React.FC = () => {
               <div className="p-4 bg-blue-50 border border-blue-200 rounded-md">
                 <h4 className="font-medium text-blue-800 mb-2">Invitation includes:</h4>
                 <ul className="text-sm text-blue-700 space-y-1">
-                  <li>• Access to the Maryland cannabis compliance training course</li>
+                  <li>• Access to the Maryland RVT training course</li>
                   <li>• Personal login credentials</li>
                   <li>• Progress tracking and certification</li>
                   <li>• Deadline reminders and support resources</li>

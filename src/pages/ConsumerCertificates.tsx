@@ -125,13 +125,13 @@ const ConsumerCertificates = () => {
       pdf.setFont('helvetica', 'bold');
       pdf.text('PROCANN', 50, 106, { align: 'center' });
       pdf.text('EDU', 50, 112, { align: 'center' });
-      pdf.text('COMPLETED', 50, 118, { align: 'center' });
+      pdf.text('CERTIFIED', 50, 118, { align: 'center' });
 
       // === CERTIFICATE OF COMPLETION ===
       pdf.setTextColor(100, 100, 100);
       pdf.setFontSize(10);
       pdf.setFont('helvetica', 'normal');
-      pdf.text('COMPLETION BADGE', W / 2, 56, { align: 'center' });
+      pdf.text('CERTIFICATE OF COMPLETION', W / 2, 56, { align: 'center' });
 
       // thin gold divider line
       pdf.setDrawColor(180, 140, 60);
@@ -142,7 +142,7 @@ const ConsumerCertificates = () => {
       pdf.setTextColor(80, 80, 80);
       pdf.setFontSize(9);
       pdf.setFont('helvetica', 'italic');
-      pdf.text('This records that', W / 2, 70, { align: 'center' });
+      pdf.text('This certifies that', W / 2, 70, { align: 'center' });
 
       // === RECIPIENT NAME ===
       pdf.setTextColor(15, 82, 51);
@@ -208,7 +208,7 @@ const ConsumerCertificates = () => {
       pdf.setTextColor(120, 120, 120);
       pdf.setFontSize(7);
       pdf.setFont('helvetica', 'normal');
-      pdf.text('COMPLETION BADGE NUMBER', W / 2, 153, { align: 'center' });
+      pdf.text('CERTIFICATE NUMBER', W / 2, 153, { align: 'center' });
 
       // Right col — ProCann Edu Director
       pdf.setDrawColor(200, 200, 200);
@@ -234,13 +234,13 @@ const ConsumerCertificates = () => {
       pdf.setFontSize(6.5);
       pdf.setFont('helvetica', 'normal');
       pdf.text(
-        'This is a ProCann EDU completion badge for free consumer education only. It is not a professional or regulatory credential.',
+        'This is a Certificate of Completion for consumer education only. This is NOT a Maryland RVT certification and does not satisfy dispensary employee compliance requirements.',
         W / 2, H - 16, { align: 'center' }
       );
 
       pdf.save(`${cert.certificate_number}-certificate.pdf`);
 
-      toast({ title: 'Completion Badge Downloaded', description: 'Your completion badge PDF is ready.' });
+      toast({ title: 'Certificate Downloaded', description: 'Your certificate PDF is ready.' });
     } catch (error) {
       console.error('Error generating PDF:', error);
       toast({ title: 'Download Failed', description: 'Failed to generate PDF. Please try again.', variant: 'destructive' });
@@ -266,7 +266,7 @@ const ConsumerCertificates = () => {
   };
 
   const handleShare = (cert: Certificate) => {
-    const text = `I just earned my ${cert.badge_name} completion badge from ProCann Edu! Verify it here: ${cert.verification_url}`;
+    const text = `I just earned my ${cert.badge_name} certificate from ProCann Edu! Verify it here: ${cert.verification_url}`;
     
     if (navigator.share) {
       navigator.share({
@@ -289,7 +289,7 @@ const ConsumerCertificates = () => {
         <div className="flex flex-col items-center justify-center gap-4">
           <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
           {certNumber && (
-            <p className="text-muted-foreground text-sm">Generating your completion badge...</p>
+            <p className="text-muted-foreground text-sm">Generating your certificate...</p>
           )}
         </div>
       </div>
@@ -302,7 +302,7 @@ const ConsumerCertificates = () => {
         <div className="container mx-auto px-4 py-16">
           <div className="flex flex-col items-center justify-center gap-4">
             <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
-            <p className="text-muted-foreground text-sm">Generating your completion badge...</p>
+            <p className="text-muted-foreground text-sm">Generating your certificate...</p>
           </div>
         </div>
       );
@@ -314,9 +314,9 @@ const ConsumerCertificates = () => {
           <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto">
             <Award className="h-8 w-8 text-muted-foreground" />
           </div>
-          <h1 className="text-3xl font-bold text-foreground">No Completion Badges Yet</h1>
+          <h1 className="text-3xl font-bold text-foreground">No Certificates Yet</h1>
           <p className="text-muted-foreground">
-            Complete a consumer education course to earn your first completion badge!
+            Complete a consumer education course to earn your first certificate!
           </p>
           <Button onClick={() => window.location.href = '/consumer-education'}>
             Browse Free Courses
@@ -332,8 +332,8 @@ const ConsumerCertificates = () => {
         {/* Disclaimer */}
         <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
           <p className="text-sm text-amber-800 dark:text-amber-300 text-center">
-            <strong>Important:</strong> These are ProCann EDU completion badges for free consumer education. 
-            They are not professional or regulatory credentials.
+            <strong>Important:</strong> These are Certificates of Completion for consumer education. 
+            These are <strong>NOT</strong> Maryland RVT employee certifications and do not satisfy dispensary compliance requirements.
           </p>
         </div>
 
@@ -383,7 +383,7 @@ const ConsumerCertificates = () => {
                       <p className="font-medium text-foreground">{completedDate}</p>
                     </div>
                     <div className="md:col-span-2">
-                      <span className="text-muted-foreground">Completion Badge Number:</span>
+                      <span className="text-muted-foreground">Certificate Number:</span>
                       <p className="font-mono font-medium text-foreground">{cert.certificate_number}</p>
                     </div>
                   </div>

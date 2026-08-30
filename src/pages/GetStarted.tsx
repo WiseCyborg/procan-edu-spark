@@ -39,17 +39,18 @@ const GetStarted = () => {
                 <div className="mx-auto mb-4 p-4 bg-primary/10 rounded-full w-20 h-20 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                   <Award className="h-10 w-10 text-primary" />
                 </div>
-                <CardTitle className="text-2xl">Cannabis Compliance Training</CardTitle>
-                <CardDescription>Maryland Cannabis Workforce Training</CardDescription>
+                <CardTitle className="text-2xl">RVT Core Training</CardTitle>
+                <CardDescription>Maryland Employee Certification</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-sm">
-                    <Badge variant="outline">Self-Paced</Badge>
+                    <Badge variant="default" className="bg-primary">18 Modules</Badge>
+                    <Badge variant="outline">4-6 Hours</Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    Maryland cannabis workforce training for dispensary employees. Does not satisfy
-                    the annual responsible vendor / agent training duty.
+                    Complete Maryland RVT certification for dispensary employees. 
+                    Meets all COMAR 14.17.15.05 requirements.
                   </p>
                 </div>
                 <div className="space-y-2 text-sm">
@@ -59,11 +60,11 @@ const GetStarted = () => {
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Shield className="h-4 w-4" />
-                    <span>ProCann EDU completion record issued</span>
+                    <span>RVT certificate of completion issued</span>
                   </div>
                 </div>
                 <Button className="w-full group-hover:bg-primary/90">
-                  Begin training
+                  Begin RVT Training
                   <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
                 </Button>
               </CardContent>
@@ -84,17 +85,18 @@ const GetStarted = () => {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-sm">
-                    <Badge variant="outline">Self-Paced</Badge>
+                    <Badge variant="outline" className="border-amber-500 text-amber-600">5 Modules</Badge>
+                    <Badge variant="outline">2-3 Hours</Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">
                     Advanced leadership training for dispensary managers and supervisors. 
-                    Builds on core training.
+                    Builds on RVT Core certification.
                   </p>
                 </div>
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Award className="h-4 w-4" />
-                    <span>Requires core training completion</span>
+                    <span>Requires RVT Core completion</span>
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Shield className="h-4 w-4" />
@@ -123,6 +125,7 @@ const GetStarted = () => {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-sm">
+                    <Badge variant="secondary">8-12 Modules</Badge>
                     <Badge variant="outline">Self-Paced</Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">
@@ -137,7 +140,7 @@ const GetStarted = () => {
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Award className="h-4 w-4" />
-                    <span>Completion badge (not a state credential)</span>
+                    <span>Completion badge (non-RVT)</span>
                   </div>
                 </div>
                 <Button className="w-full" variant="secondary" onClick={(e) => { e.stopPropagation(); navigate('/consumer-education'); }}>
@@ -151,8 +154,9 @@ const GetStarted = () => {
           {/* Disclaimer */}
           <div className="mt-6 p-4 bg-muted/50 rounded-lg border border-muted-foreground/20 max-w-4xl mx-auto">
             <p className="text-xs text-muted-foreground text-center">
-              <strong>Important:</strong> Cannabis Compliance Training is workforce education only. It does not
-              satisfy Maryland's annual responsible vendor / agent training duty. Public Learning is general education.
+              <strong>Important:</strong> Only RVT Core Training provides Maryland Responsible Vendor Training (RVT) 
+              aligned to COMAR 14.17.15.05. Public Learning courses are for educational purposes only and do not satisfy 
+              employee compliance requirements.
             </p>
           </div>
         </div>
@@ -222,7 +226,8 @@ const GetStarted = () => {
                 <div className="mx-auto mb-4 p-4 bg-primary/10 rounded-full w-16 h-16 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                   <Shield className="h-8 w-8 text-primary" />
                 </div>
-                <CardTitle className="text-lg">Regulator review page</CardTitle>
+                <CardTitle className="text-lg">MCA Official</CardTitle>
+                <CardDescription className="text-xs">Compliance portal</CardDescription>
               </CardHeader>
               <CardContent>
                 <Button className="w-full" size="sm" onClick={() => navigate('/mca-compliance-review')}>
@@ -240,7 +245,7 @@ const GetStarted = () => {
             <CardHeader>
               <CardTitle className="text-center flex items-center justify-center gap-2">
                 <FileText className="h-5 w-5" />
-                How Training Works
+                How RVT Certification Works
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -273,8 +278,8 @@ const GetStarted = () => {
                   <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-2">
                     <Shield className="h-8 w-8 text-green-600" />
                   </div>
-                  <p className="font-semibold">Record check</p>
-                  <p className="text-xs text-muted-foreground">Public verification portal</p>
+                  <p className="font-semibold">MCA Verifies</p>
+                  <p className="text-xs text-muted-foreground">Instant verification</p>
                 </div>
               </div>
             </CardContent>
@@ -287,7 +292,7 @@ const GetStarted = () => {
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold mb-2">Not sure which path to choose?</h3>
               <p className="text-sm text-muted-foreground mb-4">
-                <strong>Work at a dispensary?</strong> You need Cannabis Compliance Training — your manager will send you an email invite.{' '}
+                <strong>Work at a dispensary?</strong> You need RVT Core Training — your manager will send you an email invite.{' '}
                 <strong>Dispensary owner?</strong> Apply to set up your organization.{' '}
                 <strong>Just curious?</strong> Start with our free Public Learning courses.
               </p>

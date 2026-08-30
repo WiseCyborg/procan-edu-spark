@@ -24,8 +24,8 @@ export const RoleSelectorModal: React.FC<RoleSelectorModalProps> = ({
   const roles = [
     {
       icon: Award,
-      title: "I'm Ready to Start Training",
-      description: 'For individual students seeking Maryland cannabis compliance training',
+      title: "I'm Ready to Get Certified",
+      description: 'For individual students seeking Maryland RVT certification',
       path: '/auth?role=student',
       gradient: 'from-green-500 to-emerald-600',
     },

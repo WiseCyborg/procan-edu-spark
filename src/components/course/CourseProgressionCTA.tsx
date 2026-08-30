@@ -44,7 +44,7 @@ const resolveNextAction = (
       type: 'START_EXAM',
       route: '/course/final-exam',
       title: 'Ready for Your Certification Exam!',
-      description: "You've completed all required modules. Take the final exam to earn your ProCann EDU completion record.",
+      description: "You've completed all required modules. Take the final exam to earn your official Maryland RVT Certificate.",
       buttonText: 'Start Final Exam',
       icon: <Award className="h-6 w-6" />,
     };

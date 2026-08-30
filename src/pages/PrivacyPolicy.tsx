@@ -19,7 +19,7 @@ export default function PrivacyPolicy() {
           <p>
             ProCann Edu ("we," "our," or "us") is committed to protecting the privacy and security of your personal information. 
             This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our 
-            Maryland cannabis workforce education platform.
+            Maryland Responsible Vendor Training (RVT) platform.
           </p>
 
           <h2>Information We Collect</h2>
@@ -44,7 +44,7 @@ export default function PrivacyPolicy() {
           <p>We use the information we collect to:</p>
           <ul>
             <li>Provide, maintain, and improve our training platform</li>
-            <li>Track course progress and issue ProCann EDU completion records</li>
+            <li>Process certification and issue official certificates</li>
             <li>Communicate with you about your training progress</li>
             <li>Comply with Maryland Cannabis Administration (MCA) reporting requirements</li>
             <li>Verify identity and prevent fraud</li>

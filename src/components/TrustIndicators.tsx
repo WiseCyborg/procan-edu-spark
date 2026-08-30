@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Shield, Users, Award, CheckCircle, Star, Clock, MapPin, DollarSign } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { RVT_TRAINING_MODULE_COUNT } from '@/constants/tracks';
 
 interface CounterProps {
   end: number;
@@ -71,7 +72,14 @@ export const AnimatedCounter: React.FC<CounterProps> = ({
 
 export const TrustStats = () => {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+      <Card className="p-4 text-center bg-primary border-primary/20">
+        <div className="text-2xl font-bold text-primary-foreground">
+          {RVT_TRAINING_MODULE_COUNT}
+        </div>
+        <div className="text-sm text-primary-foreground/80">Training Modules</div>
+      </Card>
+      
       <Card className="p-4 text-center bg-primary border-primary/20">
         <div className="text-2xl font-bold text-primary-foreground">
           24/24
@@ -81,16 +89,16 @@ export const TrustStats = () => {
       
       <Card className="p-4 text-center bg-primary border-primary/20">
         <div className="text-2xl font-bold text-primary-foreground">
-          Self-paced
+          4-6
         </div>
-        <div className="text-sm text-primary-foreground/80">Learn on your schedule</div>
+        <div className="text-sm text-primary-foreground/80">Hours Self-Paced</div>
       </Card>
 
       <Card className="p-4 text-center bg-primary border-primary/20">
         <div className="text-2xl font-bold text-primary-foreground">
           $49.99
         </div>
-        <div className="text-sm text-primary-foreground/80">$49.99 per seat</div>
+        <div className="text-sm text-primary-foreground/80">Under MD Max</div>
       </Card>
       
       <Card className="p-4 text-center bg-primary border-primary/20">
@@ -118,7 +126,7 @@ export const ComplianceBadges = () => {
         className="floating-badge bg-white/20 text-white border-white/30 px-4 py-2 text-sm backdrop-blur-sm"
       >
         <Shield className="h-4 w-4 me-2" />
-        Maryland-focused
+        COMAR-Aligned
       </Badge>
       
       <Badge 
@@ -127,7 +135,7 @@ export const ComplianceBadges = () => {
         style={{ animationDelay: '0.5s' }}
       >
         <CheckCircle className="h-4 w-4 me-2" />
-        Maryland-focused
+        COMAR-Aligned
       </Badge>
       
       <Badge 
@@ -136,7 +144,7 @@ export const ComplianceBadges = () => {
         style={{ animationDelay: '1s' }}
       >
         <Award className="h-4 w-4 me-2" />
-        Workforce education
+        RVT Certification
       </Badge>
     </div>
   );
