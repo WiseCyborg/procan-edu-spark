@@ -104,8 +104,8 @@ const VerifyCertificate = () => {
         p_code: null,
         p_first_name: firstName.trim(),
         p_last_initial: lastInitial.trim().charAt(0).toUpperCase(),
-        p_course_id: selectedCourse || null,
-        p_year: selectedYear ? parseInt(selectedYear) : null
+        p_course_id: selectedCourse && selectedCourse !== ANY_COURSE ? selectedCourse : null,
+        p_year: selectedYear && selectedYear !== ANY_YEAR ? parseInt(selectedYear) : null
       });
       
       if (error) throw error;
