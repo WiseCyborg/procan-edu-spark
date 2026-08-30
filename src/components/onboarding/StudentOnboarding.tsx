@@ -146,22 +146,22 @@ const steps = [
   },
   {
     id: 'certificate',
-    title: 'Your Completion Record',
-    description: 'Verifiable proof of training completion',
+    title: 'Your Certificate',
+    description: 'Official credential for employment',
     content: (
       <div className="space-y-4">
         <div className="bg-gradient-to-br from-purple-50 to-blue-50 p-6 rounded-lg text-center">
           <Award className="h-12 w-12 text-primary mx-auto mb-4" />
-          <h3 className="font-semibold text-lg mb-2">ProCann EDU Completion Record</h3>
+          <h3 className="font-semibold text-lg mb-2">Official Certification</h3>
           <p className="text-muted-foreground">
-            Upon passing the final exam, you'll receive a ProCann EDU completion record 
-            documenting your completion of this training program.
+            Upon passing the final exam, you'll receive an official certificate 
+            proving your completion of this training program.
           </p>
         </div>
         <div className="bg-muted p-4 rounded-lg space-y-2">
-          <h4 className="font-semibold">Your Completion Record Includes:</h4>
+          <h4 className="font-semibold">Your Certificate Includes:</h4>
           <ul className="list-disc list-inside space-y-1 text-sm">
-            <li>Unique record number for verification</li>
+            <li>Unique certificate number for verification</li>
             <li>Your name and completion date</li>
             <li>Course name and certification type</li>
             <li>QR code for instant verification</li>

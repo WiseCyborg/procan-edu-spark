@@ -44,7 +44,7 @@ export const GettingStartedChecklist: React.FC<GettingStartedChecklistProps> = (
     {
       id: 'welcome',
       title: 'Watch Welcome Video',
-      description: 'Learn about the training program',
+      description: 'Learn about the RVT training program',
       completed: hasWatchedWelcome,
       action: 'Watch Video',
       route: '/welcome-video',
@@ -53,7 +53,7 @@ export const GettingStartedChecklist: React.FC<GettingStartedChecklistProps> = (
     {
       id: 'course',
       title: 'Start Module 1',
-      description: 'Begin your ProCann EDU training',
+      description: 'Begin your COMAR-aligned training',
       completed: hasStartedCourse,
       action: 'Start Learning',
       route: '/course',
@@ -71,7 +71,7 @@ export const GettingStartedChecklist: React.FC<GettingStartedChecklistProps> = (
     {
       id: 'certificate',
       title: 'Download Certificate',
-      description: 'Get your ProCann EDU completion record',
+      description: 'Get your official RVT certificate',
       completed: hasCertificate,
       action: 'Get Certificate',
       route: '/certificates',
@@ -101,7 +101,7 @@ export const GettingStartedChecklist: React.FC<GettingStartedChecklistProps> = (
           <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-4" />
           <h3 className="text-xl font-bold mb-2">Congratulations! You're Certified! 🎉</h3>
           <p className="text-muted-foreground mb-4">
-            You've completed all requirements for your ProCann EDU completion record.
+            You've completed all requirements for your RVT certification.
           </p>
           <Button onClick={() => navigate('/certificates')}>
             View Your Certificate

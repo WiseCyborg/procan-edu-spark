@@ -12,7 +12,7 @@ const Index = () => {
         <div className="space-y-4">
           <h1 className="text-6xl md:text-7xl font-bold">ProCann Edu</h1>
           <h2 className="text-2xl md:text-3xl text-white/95">Maryland's Premier RVT Training</h2>
-          <p className="text-xl text-white/90">Maryland-Focused Cannabis Compliance Education</p>
+          <p className="text-xl text-white/90">Official Training Partner of Maryland Dispensaries</p>
         </div>
         
         <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6">

@@ -105,7 +105,7 @@ export const ModuleSidebar = ({
             <div className="flex items-center gap-2 px-3 py-2 bg-primary/5 rounded-lg">
               <Award className="h-5 w-5 text-primary" />
               <div className="flex-1">
-                <h3 className="font-semibold text-sm">Core Required</h3>
+                <h3 className="font-semibold text-sm">RVT Required</h3>
                 <p className="text-xs text-muted-foreground">Complete for certification</p>
               </div>
               <Badge variant={isRvtComplete ? 'default' : 'secondary'} className="text-xs">

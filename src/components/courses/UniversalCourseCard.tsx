@@ -88,7 +88,7 @@ export const UniversalCourseCard = ({
       return (
         <>
           <Lock className="me-2 h-4 w-4" />
-          Complete Core Training First
+          Complete RVT First
         </>
       );
     }
@@ -110,7 +110,7 @@ export const UniversalCourseCard = ({
       return (
         <>
           <CheckCircle2 className="me-2 h-4 w-4" />
-          View Completion Record
+          View Certificate
         </>
       );
     }
@@ -126,7 +126,7 @@ export const UniversalCourseCard = ({
   const getCourseTypeBadge = () => {
     switch (course.course_type) {
       case 'professional':
-        return <Badge variant="default" className="bg-primary">Professional</Badge>;
+        return <Badge variant="default" className="bg-primary">Required</Badge>;
       case 'manager':
         return <Badge variant="secondary" className="bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300">Manager</Badge>;
       case 'specialty':
@@ -211,7 +211,7 @@ export const UniversalCourseCard = ({
         {isLocked && showPrerequisiteHint && (
           <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
             <p className="text-xs text-amber-700 dark:text-amber-300">
-              Complete Cannabis Compliance Training first to unlock this course.
+              Complete Maryland RVT Training first to unlock this course.
             </p>
           </div>
         )}
@@ -234,7 +234,7 @@ export const UniversalCourseCard = ({
         )}
         {course.is_public && !hasCertificate && (
           <p className="text-xs text-center text-muted-foreground">
-            No account required • Earn a completion badge
+            No account required • Earn certificate
           </p>
         )}
       </CardFooter>

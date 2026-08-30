@@ -78,7 +78,7 @@ export const ConsumerCourseCard = ({ course }: ConsumerCourseCardProps) => {
           <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
         </Button>
         <p className="text-xs text-center text-muted-foreground">
-          No account required • Earn completion badge
+          No account required • Earn certificate
         </p>
       </CardFooter>
     </Card>

@@ -24,10 +24,10 @@ type ReminderType =
 
 const LIFECYCLE_SUBJECTS: Record<ReminderType, string> = {
   profile_completion: "Finish setting up your ProCann Edu profile",
-  course_start: "Ready when you are — your Maryland cannabis compliance training is waiting",
+  course_start: "Ready when you are — your Maryland RVT training is waiting",
   stuck_learner: "Pick up where you left off in your RVT training",
   nearing_completion: "You're almost certified — just a bit left to go",
-  certificate_renewal: "Your ProCann EDU completion record is expiring soon",
+  certificate_renewal: "Your Maryland RVT certificate is expiring soon",
 };
 
 const DASHBOARD_URL = "https://www.procannedu.com/dashboard";
@@ -133,7 +133,7 @@ const handler = async (req: Request): Promise<Response> => {
     let html: string;
     
     if (isLifecycle) {
-      const body = message || 'You have an update on your Maryland cannabis compliance training.';
+      const body = message || 'You have an update on your Maryland RVT training.';
       try {
         // Per-type template if one exists (DB or filesystem); otherwise graceful fallback
         html = await loadEmailTemplate(`lifecycle-${reminderType}`, {

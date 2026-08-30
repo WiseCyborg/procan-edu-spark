@@ -48,7 +48,7 @@ export const useLaunchCourse = () => {
             navigate(`/auth?next=/courses/${courseId}`);
             return;
           case 'prerequisite_required':
-            toast.error('Please complete the Cannabis Compliance Training first.');
+            toast.error('Please complete the RVT Core Training first.');
             navigate(`/courses`);
             return;
           case 'course_not_found':

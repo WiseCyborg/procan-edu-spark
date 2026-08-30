@@ -61,7 +61,7 @@ serve(async (req) => {
         .from("notification_queue")
         .insert({
           recipient_email: authUser.user.email,
-          subject: `Training Reminder: Complete Your Maryland Cannabis Compliance Course`,
+          subject: `Training Reminder: Complete Your Maryland RVT Course`,
           message: `Hi ${profileByUser.get(journey.user_id)?.first_name || 'there'},\n\nIt's been ${daysSinceActivity} days since you last accessed your training. You're currently ${journey.completion_percentage}% complete.\n\nLog in now to continue: https://www.procannedu.com/course`,
           scheduled_for: new Date().toISOString(),
           priority: urgency,

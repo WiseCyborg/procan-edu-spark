@@ -35,7 +35,7 @@ export const WelcomeStep = ({ organizationName, onNext }: StepProps) => (
     
     <p className="text-muted-foreground max-w-md mx-auto">
       You're now the training manager for your organization. 
-      This quick setup wizard will help you configure your training seats and invite your team.
+      This quick setup wizard will help you configure your RVT seats and invite your team.
     </p>
     
     <Button onClick={onNext} size="lg" className="mt-6">

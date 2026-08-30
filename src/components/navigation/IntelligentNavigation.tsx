@@ -116,7 +116,7 @@ const getNavigationByRole = (role: RoleType): NavigationItem[] => {
           label: 'My Training',
           path: '/course',
           icon: BookOpen,
-          description: 'Continue your compliance training'
+          description: 'Continue your RVT training'
         },
         {
           id: 'certificates',

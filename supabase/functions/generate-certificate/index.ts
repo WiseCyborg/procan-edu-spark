@@ -58,10 +58,10 @@ async function buildCertificatePdf(opts: {
     page.drawText(text, { x: (width - w) / 2, y, size, font, color });
   };
 
-  center('PROCANN EDU COMPLETION RECORD', height - 90, 22, helvBold, navy);
+  center('CERTIFICATE OF COMPLETION', height - 90, 22, helvBold, navy);
   center('ProCannEdu — Maryland Cannabis Training', height - 115, 12, helvOblique, muted);
 
-  center('This records that', height - 175, 13, helv, muted);
+  center('This certifies that', height - 175, 13, helv, muted);
   center(opts.recipientName, height - 215, 30, helvBold, ink);
 
   // Decorative underline under name
@@ -75,7 +75,7 @@ async function buildCertificatePdf(opts: {
 
   center('has successfully completed', height - 255, 13, helv, muted);
   center(opts.courseTitle, height - 285, 18, helvBold, navy);
-  center(`Training Track: ${opts.certificationLevel}`, height - 308, 12, helv, ink);
+  center(`Certification Level: ${opts.certificationLevel}`, height - 308, 12, helv, ink);
 
   const fmt = (d: Date) =>
     d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -201,7 +201,7 @@ Deno.serve(async (req: Request) => {
         JSON.stringify({
           certificate_number: existingCert.certificate_number,
           pdf_path: existingCert.pdf_url,
-          message: 'Completion record already exists',
+          message: 'Certificate already exists',
         }),
         { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
       );
@@ -213,32 +213,10 @@ Deno.serve(async (req: Request) => {
       throw new Error('Failed to generate certificate number');
     }
 
-    // ------------------------------------------------------------------
-    // Curriculum truth: derive the required module ID sets from the LIVE
-    // course_modules rows for the course this exam attempt belongs to.
-    // No hardcoded module-number ranges or counts — set comparison only.
-    // Already-issued certificates are never revisited or modified here.
-    // ------------------------------------------------------------------
-    const { data: activeModules, error: activeModulesError } = await supabase
-      .from('course_modules')
-      .select('id, is_manager_only')
-      .eq('course_id', examAttempt.course_id)
-      .eq('is_active', true);
-
-    if (activeModulesError || !activeModules || activeModules.length === 0) {
-      console.error('Could not resolve active curriculum for course', examAttempt.course_id, activeModulesError);
-      return new Response(
-        JSON.stringify({ error: 'Could not resolve the active curriculum for this course. No completion record was issued.' }),
-        { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
-      );
-    }
-
-    const requiredCoreIds = new Set<string>(
-      activeModules.filter((m: any) => m.is_manager_only !== true).map((m: any) => m.id),
-    );
-    const requiredManagerIds = new Set<string>(
-      activeModules.filter((m: any) => m.is_manager_only === true).map((m: any) => m.id),
-    );
+    // Two-track logic preserved
+    const RVT_MODULE_MIN = 0, RVT_MODULE_MAX = 18;
+    const MANAGER_MODULE_MIN = 19, MANAGER_MODULE_MAX = 23;
+    const RVT_MODULE_COUNT = 19, MANAGER_MODULE_COUNT = 5;
 
     const { data: userProgress } = await supabase
       .from('user_progress')
@@ -247,77 +225,59 @@ Deno.serve(async (req: Request) => {
       .eq('course_id', examAttempt.course_id)
       .eq('is_completed', true);
 
-    const completedIds = new Set<string>(
-      (userProgress ?? []).map((p: any) => p.module_id).filter(Boolean),
-    );
-
-    const completedCoreIds = [...requiredCoreIds].filter((id) => completedIds.has(id));
-    const completedManagerIds = [...requiredManagerIds].filter((id) => completedIds.has(id));
-
-    // The exam attempt was already verified above as this user's PASSED attempt
-    // (is_passed = true) for this course — that is the exam evidence for both tracks.
-    const examPassed = examAttempt.is_passed === true;
-
-    const rvtComplete = completedCoreIds.length === requiredCoreIds.size && examPassed;
-    const managerComplete =
-      rvtComplete &&
-      requiredManagerIds.size > 0 &&
-      completedManagerIds.length === requiredManagerIds.size;
-
     let certificationType: 'rvt' | 'manager' = 'rvt';
-    let certificationLevel = 'Core Track'; // human-readable label (PDF/email only)
+    let certificationLevel = 'RVT Agent'; // human-readable label (PDF/email only)
     let certificationLevelDb: 'agent' | 'manager' = 'agent'; // DB CHECK constraint value
     let tierBadge = 'rvt';
-    let trainingTrack = 'Maryland Cannabis Compliance Training';
+    let trainingTrack = 'Maryland RVT Required Training';
+    let rvtComplete = false;
+    let managerComplete = false;
 
-    if (managerComplete) {
-      certificationType = 'manager';
-      certificationLevel = 'Manager';
-      certificationLevelDb = 'manager';
-      tierBadge = 'manager';
-      trainingTrack = 'Core Track + Manager Leadership Track';
+    if (userProgress && userProgress.length > 0) {
+      const moduleIds = userProgress.map((p) => p.module_id).filter(Boolean);
+      if (moduleIds.length > 0) {
+        const { data: completedModules } = await supabase
+          .from('course_modules')
+          .select('module_number')
+          .in('id', moduleIds);
+
+        if (completedModules) {
+          const completedNumbers = completedModules.map((m) => m.module_number);
+          const rvtModulesCompleted = completedNumbers.filter((n) => n >= RVT_MODULE_MIN && n <= RVT_MODULE_MAX);
+          rvtComplete = rvtModulesCompleted.length === RVT_MODULE_COUNT;
+          const managerModulesCompleted = completedNumbers.filter((n) => n >= MANAGER_MODULE_MIN && n <= MANAGER_MODULE_MAX);
+          managerComplete = managerModulesCompleted.length === MANAGER_MODULE_COUNT;
+
+          if (rvtComplete && managerComplete) {
+            certificationType = 'manager';
+            certificationLevel = 'Manager';
+            certificationLevelDb = 'manager';
+            tierBadge = 'manager';
+            trainingTrack = 'RVT Required + Manager Leadership Track';
+          }
+        }
+      }
     }
 
     if (!rvtComplete) {
-      console.error(
-        `Core curriculum incomplete — ${completedCoreIds.length}/${requiredCoreIds.size} required core modules, exam_passed=${examPassed}`,
-      );
+      console.error('RVT modules not complete - cannot issue certificate');
       return new Response(
-        JSON.stringify({
-          error: `Complete all ${requiredCoreIds.size} active core training modules and pass the exam before requesting a completion record.`,
-          required_core_modules: requiredCoreIds.size,
-          completed_core_modules: completedCoreIds.length,
-          exam_passed: examPassed,
-        }),
+        JSON.stringify({ error: 'Complete all RVT Required modules (0-18) before requesting certification.' }),
         { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
       );
     }
 
-    const issuanceSnapshot = {
-      required_core_count: requiredCoreIds.size,
-      required_manager_count: requiredManagerIds.size,
-      completed_required_count: completedCoreIds.length + completedManagerIds.length,
-      required_core_module_ids: [...requiredCoreIds],
-      required_manager_module_ids: [...requiredManagerIds],
-      completed_core_module_ids: completedCoreIds,
-      completed_manager_module_ids: completedManagerIds,
-      issued_curriculum_at: new Date().toISOString(),
-      exam_attempt_id,
-      exam_total_score: examAttempt.total_score ?? null,
-      exam_is_passed: examPassed,
-    };
-
-
     const issueDate = new Date();
     const expiryDate = new Date(issueDate);
-    // COMAR 14.17.15.05(C) (Louis Hendricks III, Director of Compliance, Aug 16 2026;
-    // William F. Cunningham Jr. go 2026-08-23):
-    // "C. Within 90 days of employment start date and annually thereafter, a registered
-    // agent employed by a cannabis licensee shall complete a responsible vendor training
-    // program that:" Training remains annual and is still named Responsible Vendor Training
-    // (RVT). If an agent starts after July 1, 2026 they must complete their annual training
-    // within 90 days of employment, then every year afterwards. Do not implement a two-year
-    // cycle. The 2-year clock in COMAR 14.17.15.03(C) governs the agent ID CARD, not training.
+    // COMAR 14.17.15.05(C): a registered agent must complete Responsible Vendor Training
+    // within 90 days of employment start date and ANNUALLY thereafter. The 2-year clock in
+    // COMAR 14.17.15.03(C) governs the agent ID CARD, not the training certificate.
+    // HB 622 (Ch. 375, eff. 2026-07-01) would move the training cycle to "at least once every
+    // 2 years," but as of this deploy that change has not been published into COMAR or reflected
+    // on the MCA's site. Per William Cunningham's explicit decision (2026-08-18): hold at 1 year
+    // — matching COMAR as currently published — until HB 622 actually lands in COMAR / the MCA's
+    // published regulations, then revisit. Do not change this without a new, explicit, recorded
+    // decision. See claude/BLOCKING_2026-08-18_certificate_expiry_three_competing_paths_unaudited_patch.md.
     expiryDate.setFullYear(expiryDate.getFullYear() + 1);
 
     const verifyUrl = `https://www.procannedu.com/verify?code=${certNumber}`;
@@ -347,8 +307,6 @@ Deno.serve(async (req: Request) => {
           rvt_complete: rvtComplete,
           manager_complete: managerComplete,
           verify_url: verifyUrl,
-          issuance_snapshot: issuanceSnapshot,
-
         },
       })
       .select()
@@ -390,7 +348,7 @@ Deno.serve(async (req: Request) => {
       user.email ||
       'Certificate Holder';
 
-    const courseTitle = course?.title || 'Maryland Cannabis Compliance Training';
+    const courseTitle = course?.title || 'Maryland Responsible Vendor Training (RVT)';
 
     // Audit log is written by the certificates DB trigger (metadata.source = "db_trigger").
     // The insert that used to live here was redundant and always failed.
@@ -406,7 +364,7 @@ Deno.serve(async (req: Request) => {
     await supabase.from('user_certificates').insert({
       user_id: user.id,
       course_id: examAttempt.course_id,
-      certificate_name: certificationType === 'manager' ? 'ProCann EDU Manager Leadership Completion Record' : 'ProCann EDU Core Track Completion Record',
+      certificate_name: certificationType === 'manager' ? 'Manager Leadership Certificate' : 'RVT Agent Certificate',
       verification_code: verificationCode,
       recipient_name: recipientName,
       pdf_url: verifyUrl,
@@ -511,7 +469,7 @@ Deno.serve(async (req: Request) => {
         expiry_date: certificate.expiry_date,
         pdf_path: storedPdfPath,
         verify_url: verifyUrl,
-        message: 'Completion record generated successfully',
+        message: 'Certificate generated successfully',
       }),
       { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
     );

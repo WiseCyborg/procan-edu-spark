@@ -93,7 +93,7 @@ export const CoursePaymentGate: React.FC<CoursePaymentGateProps> = ({
               <li>• Complete access to all course modules</li>
               <li>• Interactive learning materials</li>
               <li>• Final certification exam</li>
-              <li>• ProCann EDU completion record upon completion</li>
+              <li>• Official certificate upon completion</li>
               <li>• 24/7 online access</li>
               <li>• Maryland Cannabis Administration compliance</li>
             </ul>

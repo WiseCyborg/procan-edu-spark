@@ -7,7 +7,7 @@ import { EmailService } from "../_shared/email-service.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-cron-secret, x-invoked-by',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
 interface Job {
@@ -201,7 +201,7 @@ const JOB_HANDLERS: Record<string, (job: Job, supabase: any) => Promise<void>> =
     const courseTitle =
       course?.title ||
       (certificationType === 'manager'
-        ? 'Maryland Cannabis Compliance + Manager Leadership Training'
+        ? 'Maryland RVT + Manager Leadership Training'
         : 'Maryland Responsible Vendor Training');
     const fmt = (iso: string | null | undefined) =>
       iso ? new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
@@ -291,7 +291,7 @@ const JOB_HANDLERS: Record<string, (job: Job, supabase: any) => Promise<void>> =
         ModulesCompleted: modules_completed,
         TotalModules: total_modules,
         ContinueUrl: 'https://www.procannedu.com/course',
-        NextModule: 'Continue your Maryland cannabis compliance training',
+        NextModule: 'Continue your Maryland RVT certification training',
         NextModuleDuration: '10–15',
         RecentModule: `${modules_completed} of ${total_modules} modules`,
         QuizScore: '',
@@ -349,67 +349,7 @@ const JOB_HANDLERS: Record<string, (job: Job, supabase: any) => Promise<void>> =
     console.log('[video_migrate_verify] ✅', JSON.stringify(data?.results ?? []));
   },
 
-  'video_generate_narration': async (job, supabase) => {
-    // Single-asset worker. NEVER scans or bulk-processes flagged assets, and never
-    // touches other jobs. Fails closed unless narration is confirmed generated.
-    const assetId = job.payload?.asset_id;
-    if (!assetId) throw new Error('video_generate_narration: missing payload.asset_id');
-
-    const { data, error } = await supabase.functions.invoke('generate-video-narration', {
-      body: { asset_id: assetId, limit: 1 },
-    });
-    if (error) throw error;
-    if (!data || data.ok === false) {
-      throw new Error(data?.error || 'narration_generation_failed');
-    }
-
-    const result = (data.results ?? []).find((r: any) => r.asset_id === assetId);
-    const alreadyHadAudio = result?.status === 'skipped' && /already has draft_audio_url/i.test(result?.reason ?? '');
-    if (!result || (result.status !== 'succeeded' && !alreadyHadAudio)) {
-      throw new Error(
-        `narration_not_ready: ${result?.status ?? 'no result'}${result?.reason ? ` — ${result.reason}` : ''}`,
-      );
-    }
-
-    // Confirm narration is actually stored on the asset before moving downstream.
-    const { data: asset, error: assetErr } = await supabase
-      .from('video_assets')
-      .select('id, draft_audio_url')
-      .eq('id', assetId)
-      .maybeSingle();
-    if (assetErr) throw assetErr;
-    if (!asset?.draft_audio_url) throw new Error('narration_not_ready: draft_audio_url is still null');
-
-    // Idempotent hand-off: exactly one open render dispatch job per asset.
-    // The live system_jobs status constraint permits queued/processing/completed/failed only.
-    const { data: existing, error: existingErr } = await supabase
-      .from('system_jobs')
-      .select('id')
-      .eq('job_type', 'video_render_dispatch')
-      .in('status', ['queued', 'processing'])
-      .contains('payload', { asset_id: assetId })
-      .limit(1);
-    if (existingErr) throw existingErr;
-
-    if (existing && existing.length > 0) {
-      console.log(`[video_generate_narration] render dispatch already queued for ${assetId} — skipping enqueue`);
-      return;
-    }
-
-    // Use the repository queue_job RPC so status defaults to 'queued' and the
-    // idempotency key prevents duplicate render dispatch jobs for this asset.
-    const { data: queuedJobId, error: enqueueErr } = await supabase.rpc('queue_job', {
-      p_job_type: 'video_render_dispatch',
-      p_payload: { asset_id: assetId, limit: 1 },
-      p_idempotency_key: `video_render_dispatch:${assetId}`,
-    });
-    if (enqueueErr) throw enqueueErr;
-
-    console.log(`[video_generate_narration] ✅ narration ready for ${assetId}, render dispatch queued (${queuedJobId})`);
-  },
-
   'video_render_dispatch': async (job, supabase) => {
-
     const { asset_id, limit } = job.payload || {};
     const { data, error } = await supabase.functions.invoke('render-video', {
       body: { action: 'dispatch', asset_id, limit: limit ?? 1 },
@@ -418,15 +358,12 @@ const JOB_HANDLERS: Record<string, (job: Job, supabase: any) => Promise<void>> =
     if (data && data.ok === false) throw new Error(data.error || 'render_dispatch_failed');
 
     // Queue the collector for anything that actually got dispatched.
-    // queue_job cannot carry scheduled_for, so insert directly with the
-    // live-constraint-valid status 'queued' and preserve the delay.
     for (const r of (data?.results ?? [])) {
       if (r.status === 'dispatched') {
         await supabase.from('system_jobs').insert({
           job_type: 'video_render_collect',
-          payload: { asset_id: r.asset_id, poll_attempt: 0 },
-          status: 'queued',
-          idempotency_key: `video_render_collect:${r.asset_id}:0`,
+          payload: { asset_id: r.asset_id },
+          status: 'pending',
           scheduled_for: new Date(Date.now() + 60_000).toISOString(),
         });
       }
@@ -453,8 +390,7 @@ const JOB_HANDLERS: Record<string, (job: Job, supabase: any) => Promise<void>> =
       await supabase.from('system_jobs').insert({
         job_type: 'video_render_collect',
         payload: { asset_id, poll_attempt: attempt },
-        status: 'queued',
-        idempotency_key: `video_render_collect:${asset_id}:${attempt}`,
+        status: 'pending',
         scheduled_for: new Date(Date.now() + delayMs).toISOString(),
       });
       console.log(`[video_render_collect] still rendering, requeued (attempt ${attempt})`);
@@ -471,44 +407,11 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  // ---- Auth gate (runs BEFORE any service-role client or job access) ----
-  // Accepted credentials:
-  //   A) x-cron-secret header exactly matching CRON_SHARED_SECRET (pg_cron path)
-  //   B) Authorization: Bearer <SUPABASE_SERVICE_ROLE_KEY> (internal automation)
-  const jsonHeaders = { ...corsHeaders, 'Content-Type': 'application/json' };
-  {
-    const cronSecret = (Deno.env.get('CRON_SHARED_SECRET') ?? Deno.env.get('cron_shared_secret') ?? '').trim();
-    const serviceKey = (Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '').trim();
-    const headerSecret = (req.headers.get('x-cron-secret') ?? '').trim();
-    const authHeader = req.headers.get('Authorization') ?? '';
-    const bearer = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
-
-    if (!headerSecret && !bearer) {
-      console.warn('[JOBS-PROCESSOR] 401 - no credentials supplied');
-      return new Response(
-        JSON.stringify({ success: false, error: 'Unauthorized: missing credentials' }),
-        { status: 401, headers: jsonHeaders }
-      );
-    }
-
-    const cronOk = cronSecret.length > 0 && headerSecret.length > 0 && headerSecret === cronSecret;
-    const serviceOk = serviceKey.length > 0 && bearer.length > 0 && bearer === serviceKey;
-
-    if (!cronOk && !serviceOk) {
-      console.warn('[JOBS-PROCESSOR] 403 - invalid credentials');
-      return new Response(
-        JSON.stringify({ success: false, error: 'Forbidden: invalid credentials' }),
-        { status: 403, headers: jsonHeaders }
-      );
-    }
-  }
-
   try {
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
-
 
     const batchSize = 10;
     let jobs: Job[] = [];

@@ -136,7 +136,7 @@ const getContextInfo = (pathname: string, userRoles: string[]): ContextInfo => {
     helpTips: [
       'Tell me about ProCann Edu',
       'What training is available?',
-      'How do I start training?',
+      'How do I get certified?',
       'Cannabis industry questions'
     ],
     securityLevel

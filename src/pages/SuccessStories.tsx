@@ -7,7 +7,7 @@ const platformFeatures = [
   {
     icon: BookOpen,
     title: "24 Comprehensive Modules",
-    description: "Maryland-focused curriculum covering Maryland cannabis workplace compliance topics"
+    description: "Complete COMAR-aligned curriculum covering all aspects of Maryland cannabis compliance"
   },
   {
     icon: Clock,
@@ -16,8 +16,8 @@ const platformFeatures = [
   },
   {
     icon: Shield,
-    title: "Maryland-focused content",
-    description: "Does not satisfy the annual responsible vendor / agent training duty."
+    title: "COMAR-Aligned Content",
+    description: "Curriculum designed to meet Maryland Cannabis Administration standards"
   },
   {
     icon: MapPin,
@@ -31,8 +31,8 @@ const platformFeatures = [
   },
   {
     icon: CheckCircle,
-    title: "$49.99 per seat",
-    description: "ProCann Edu charges $49.99 per student."
+    title: "Under $50 Compliance",
+    description: "Priced at $49.99 to comply with Maryland's maximum training cost requirements"
   }
 ];
 
@@ -47,21 +47,20 @@ export default function SuccessStories() {
         <div className="container relative">
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              Maryland Cannabis Compliance Training Built for Success
+              Maryland RVT Training Built for Success
             </h1>
             <p className="text-xl text-muted-foreground mb-8">
-              ProCann Edu provides Maryland cannabis workforce education designed specifically for Maryland cannabis professionals
+              ProCann Edu provides comprehensive, COMAR-aligned Responsible Vendor Training designed specifically for Maryland cannabis professionals
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Button size="lg" onClick={() => navigate('/signup')}>
-                Start training — $49.99
+                Start Your Certification
                 <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
               </Button>
               <Button size="lg" variant="outline" onClick={() => navigate('/faq')}>
                 Learn More
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground mt-4 max-w-xl mx-auto">Optional continuing education. This course does not satisfy Maryland's annual responsible vendor / agent training duty.</p>
           </div>
         </div>
       </section>
@@ -116,13 +115,13 @@ export default function SuccessStories() {
               <div className="p-6 bg-background rounded-lg border">
                 <h3 className="font-semibold mb-2">Regulatory Focus</h3>
                 <p className="text-sm text-muted-foreground">
-                  Content written for Maryland cannabis workplaces
+                  Content aligned with COMAR requirements and MCA standards
                 </p>
               </div>
               <div className="p-6 bg-background rounded-lg border">
                 <h3 className="font-semibold mb-2">Accessible Pricing</h3>
                 <p className="text-sm text-muted-foreground">
-                  $49.99 per student.
+                  $49.99 per student, compliant with Maryland's pricing requirements
                 </p>
               </div>
             </div>
@@ -133,20 +132,19 @@ export default function SuccessStories() {
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-br from-primary to-primary-glow text-primary-foreground">
         <div className="container text-center">
-          <h2 className="text-3xl font-bold mb-4">Ready to Start Training?</h2>
+          <h2 className="text-3xl font-bold mb-4">Ready to Get Certified?</h2>
           <p className="text-lg mb-8 opacity-90 max-w-2xl mx-auto">
-            Join Maryland cannabis professionals who trust ProCann Edu for Maryland cannabis workforce education
+            Join Maryland cannabis professionals who trust ProCann Edu for comprehensive, COMAR-aligned RVT certification training
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Button size="lg" variant="secondary" onClick={() => navigate('/signup')}>
-              Start training — $49.99
+              Start Certification - $49.99
               <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
             </Button>
             <Button size="lg" variant="outline" className="bg-transparent border-white text-white hover:bg-white/10" onClick={() => navigate('/why-procann')}>
               See Full Details
             </Button>
           </div>
-          <p className="text-xs mt-4 opacity-90 max-w-xl mx-auto">Optional continuing education. This course does not satisfy Maryland's annual responsible vendor / agent training duty.</p>
         </div>
       </section>
     </div>

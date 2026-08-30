@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle, TrendingUp } from 'lucide-react';
+import { RVT_TRAINING_MODULE_COUNT } from '@/constants/tracks';
 
 export const InvestmentValueCard = () => {
   const features = [
@@ -10,8 +11,8 @@ export const InvestmentValueCard = () => {
       outcome: 'Instant answers to your training questions',
     },
     {
-      title: 'Maryland regulation monitoring',
-      description: 'Content updated when we review published rules',
+      title: 'Live COMAR Regulatory Updates',
+      description: 'Content aligned to current MCA standards',
       outcome: 'Curriculum updated when regulations change',
     },
     {
@@ -21,7 +22,7 @@ export const InvestmentValueCard = () => {
     },
     {
       title: 'Maryland-Specific Content',
-      description: 'Modules tailored to MD regulations',
+      description: `${RVT_TRAINING_MODULE_COUNT} required modules tailored to MD regulations`,
       outcome: 'County-specific compliance scenarios',
     },
     {
@@ -35,7 +36,7 @@ export const InvestmentValueCard = () => {
       outcome: 'Publicly verifiable credentials',
     },
     {
-      title: 'Self-paced',
+      title: '4-6 Hour Completion Time',
       description: 'Self-paced learning',
       outcome: 'Mobile-friendly platform',
     },
@@ -48,7 +49,7 @@ export const InvestmentValueCard = () => {
           What's Included in Your $49.99 Investment
         </CardTitle>
         <p className="text-muted-foreground mt-2">
-          Your Maryland cannabis compliance training includes:
+          Your Maryland RVT Certification includes:
         </p>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -70,10 +71,10 @@ export const InvestmentValueCard = () => {
             <TrendingUp className="h-6 w-6 text-green-600" />
             <div className="text-center">
               <p className="text-sm text-muted-foreground">
-                <strong className="text-foreground">Investment: $49.99</strong>
+                <strong className="text-foreground">Investment: $49.99</strong> (under Maryland's $50 maximum)
               </p>
               <p className="text-sm font-semibold text-primary mt-1">
-                Workforce education in one package
+                Complete certification in one affordable package
               </p>
             </div>
           </div>
