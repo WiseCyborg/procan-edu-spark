@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, Flame, ArrowUpRight } from 'lucide-react';
 import { CoursePreviewSystem } from '@/components/EnhancedCoursePreview';
 import { AccessibilityToolbar } from '@/components/MobileOptimization';
 import { TrustStats } from '@/components/TrustIndicators';
@@ -299,6 +299,46 @@ const Index = () => {
                 <Button variant="secondary" className="w-full" onClick={(e) => { e.stopPropagation(); navigate('/learn'); }}>
                   Start Free Learning
                 </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Flame Co EDU Partnership */}
+          <div className="mt-8 max-w-4xl mx-auto">
+            <div
+              className="relative bg-gradient-to-br from-orange-50 to-background dark:from-orange-950/20 dark:to-card border-2 border-orange-500/30 rounded-xl p-6 hover:shadow-xl transition-all cursor-pointer group"
+              onClick={() => navigate('/learn')}
+            >
+              <div className="absolute -top-3 start-4 bg-orange-500 text-white text-xs px-3 py-1 rounded-full font-semibold">
+                Partnership
+              </div>
+              <div className="flex flex-col md:flex-row gap-6 items-start pt-4">
+                <div className="w-14 h-14 rounded-full bg-orange-500/10 flex items-center justify-center flex-shrink-0 group-hover:bg-orange-500/20 transition-colors">
+                  <Flame className="h-7 w-7 text-orange-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold text-foreground mb-2">Consumer learning with Flame Co EDU</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Same responsibility message the dispensary floor uses, written for the public. Flame Co EDU points people here so Maryland consumers and dispensary teams learn from one bucket.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+                    <Button
+                      className="bg-orange-500 hover:bg-orange-600 text-white"
+                      onClick={(e) => { e.stopPropagation(); navigate('/learn'); }}
+                    >
+                      Start free consumer learning
+                    </Button>
+                    <a
+                      href="https://flamecoedu.org"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center text-sm text-orange-600 hover:text-orange-700 underline underline-offset-4"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      Flame Co EDU <ArrowUpRight className="ml-1 h-3.5 w-3.5" />
+                    </a>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
