@@ -14,7 +14,6 @@ import { dispensaryApplicationSchema } from '@/lib/validation-schemas';
 import { sanitizeFormData } from '@/lib/sanitization';
 import { PhoneInput } from '@/components/ui/phone-input';
 import { invokePublicFunction } from '@/lib/publicEdgeFunctions';
-import { extractApplicationId, paymentPathForApplication, storeApplicationId } from '@/lib/applyPaymentFlow';
 import type { z } from 'zod';
 
 type FormData = z.infer<typeof dispensaryApplicationSchema>;
@@ -23,8 +22,6 @@ const DispensaryApplication = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = React.useState(1);
   const [submitted, setSubmitted] = React.useState(false);
-  const [applicationId, setApplicationId] = React.useState<string | null>(null);
-  const [alreadyOnFile, setAlreadyOnFile] = React.useState(false);
 
   const {
     register,
@@ -70,19 +67,12 @@ const DispensaryApplication = () => {
 
       console.log('Full submission response:', { result, error, status, raw });
 
-      // Success: backend confirmed the save. It already returns applicationId;
-      // keep it so the applicant can bookmark /payment/:id. Checkout stays closed
-      // until approval — do not navigate into a collect.
+      // Success: backend confirmed the save
       if (!error && (result?.success === true || status === 201)) {
-        const savedId = extractApplicationId(result, raw);
-        if (savedId) {
-          storeApplicationId(savedId);
-          setApplicationId(savedId);
-        }
         setSubmitted(true);
         toast({
           title: "Application Received ✅",
-          description: "Saved and pending review. Payment is not collected until approval.",
+          description: "Your dispensary profile has been saved and is pending review.",
           duration: 6000,
         });
         return;
@@ -100,12 +90,6 @@ const DispensaryApplication = () => {
       }
 
       if (errorCode?.includes('DUPLICATE_APPLICATION') || errorCode?.includes('DUPLICATE_EMAIL')) {
-        const savedId = extractApplicationId(raw, result);
-        if (savedId) {
-          storeApplicationId(savedId);
-          setApplicationId(savedId);
-        }
-        setAlreadyOnFile(true);
         setSubmitted(true);
         toast({
           title: "Application Received ✅",
@@ -192,32 +176,13 @@ const DispensaryApplication = () => {
           </CardHeader>
           <CardContent className="text-center space-y-4">
             <p className="text-muted-foreground">
-              {alreadyOnFile
-                ? 'We already have an application on file for this contact email. It is still pending review.'
-                : 'Your application has been saved and is pending review.'}
+              Your dispensary profile has been saved and is now pending review. 
+              You can continue setup now, and we'll notify you once verification is complete.
             </p>
             <p className="text-sm text-muted-foreground">
-              Payment is not collected on this form. If the application is approved, you will receive
-              an email with a payment link. Keep your application ID — the payment page needs it.
+              Most reviews complete within 1 business day. If we need anything else, we'll contact you.
             </p>
-            {applicationId && (
-              <div className="text-start text-sm bg-muted/50 p-3 rounded-md space-y-2">
-                <p>
-                  <span className="font-medium">Application ID:</span>{' '}
-                  <code className="font-mono break-all">{applicationId}</code>
-                </p>
-                <p className="text-muted-foreground">
-                  Bookmark this payment page. Checkout stays closed until approval:
-                </p>
-                <a
-                  href={paymentPathForApplication(applicationId)}
-                  className="text-primary underline break-all"
-                >
-                  {paymentPathForApplication(applicationId)}
-                </a>
-              </div>
-            )}
-            <Button onClick={() => navigate('/')} className="w-full">Return home</Button>
+            <Button onClick={() => navigate('/')} className="w-full">Continue to Platform</Button>
           </CardContent>
         </Card>
       </div>
@@ -328,9 +293,7 @@ const DispensaryApplication = () => {
                   </div>
                 </div>
                 <p className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-md">
-                  <strong>Note:</strong> Submitting this form starts a review. Payment is not
-                  collected here. If the application is approved, you will receive an email with a
-                  payment link for that application ID.
+                  <strong>Note:</strong> You can complete setup now. Verification happens in the background and will not block access to the platform.
                 </p>
               </div>
             )}
