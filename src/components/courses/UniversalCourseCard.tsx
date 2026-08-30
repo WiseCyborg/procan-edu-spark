@@ -110,7 +110,7 @@ export const UniversalCourseCard = ({
       return (
         <>
           <CheckCircle2 className="me-2 h-4 w-4" />
-          View Certificate
+          View Completion Record
         </>
       );
     }
@@ -126,7 +126,7 @@ export const UniversalCourseCard = ({
   const getCourseTypeBadge = () => {
     switch (course.course_type) {
       case 'professional':
-        return <Badge variant="default" className="bg-primary">Required</Badge>;
+        return <Badge variant="default" className="bg-primary">Professional</Badge>;
       case 'manager':
         return <Badge variant="secondary" className="bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300">Manager</Badge>;
       case 'specialty':
@@ -234,7 +234,7 @@ export const UniversalCourseCard = ({
         )}
         {course.is_public && !hasCertificate && (
           <p className="text-xs text-center text-muted-foreground">
-            No account required • Earn certificate
+            No account required • Earn a completion badge
           </p>
         )}
       </CardFooter>
