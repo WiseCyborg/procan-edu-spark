@@ -102,9 +102,9 @@ export const TrustStats = () => {
 
       <Card className="p-4 text-center bg-primary border-primary/20">
         <div className="text-2xl font-bold text-primary-foreground">
-          ∞
+          1-year
         </div>
-        <div className="text-sm text-primary-foreground/80">Lifetime Certificate</div>
+        <div className="text-sm text-primary-foreground/80">Certificate</div>
       </Card>
     </div>
   );
