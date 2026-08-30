@@ -427,10 +427,10 @@ const VerifyCertificate = () => {
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
                     {result.reason === 'not_found' 
-                      ? 'No certificate found with this verification code. Please check the code and try again.'
+                      ? 'No completion record found with this verification code. Please check the code and try again.'
                       : result.reason === 'no_matches'
-                      ? 'No certificates found matching this name. Please verify the spelling and try again.'
-                      : 'Unable to verify this certificate. Please contact support if you believe this is an error.'}
+                      ? 'No completion records found matching this name. Please verify the spelling and try again.'
+                      : 'Unable to verify this completion record. Please contact support if you believe this is an error.'}
                   </p>
                 </CardContent>
               )}
@@ -439,7 +439,7 @@ const VerifyCertificate = () => {
 
           {/* Privacy Footer */}
           <p className="text-xs text-muted-foreground text-center">
-            Public verification confirms certificate validity only. Personal details are shown only to the certificate holder or authorized employers.
+            Public verification confirms completion record validity only. Personal details are shown only to the record holder or authorized employers.
           </p>
         </div>
       </div>
