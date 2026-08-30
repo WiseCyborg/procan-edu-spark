@@ -275,12 +275,13 @@ const ConsumerEducation = () => {
                 <div className="space-y-2">
                   <h3 className="font-semibold text-primary flex items-center gap-2">
                     <CheckCircle2 className="h-5 w-5" />
-                    Legal Purchase Limits
+                    Adult-Use Purchase Limits (21+)
                   </h3>
                   <ul className="space-y-1 text-sm text-muted-foreground ms-7">
-                    <li>• Up to 120 grams (4.2 oz) of flower per 30 days</li>
-                    <li>• Product limits vary by type and THC content</li>
-                    <li>• Dispensary staff track your allotment automatically</li>
+                    <li>• Adult-use sales have been legal in Maryland since July 1, 2023</li>
+                    <li>• Age 21+ with a government-issued photo ID</li>
+                    <li>• Up to 1.5 oz of flower, 12 g of concentrate, or cannabis products containing up to 750 mg THC</li>
+                    <li>• Medical patient allotments are separate and larger</li>
                   </ul>
                 </div>
                 
