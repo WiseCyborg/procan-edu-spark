@@ -33,7 +33,7 @@ export default function EmployersPage() {
         </p>
       </div>
 
-      {/* Single Certificate Verification */}
+      {/* Single Completion Record Verification */}
       <Card className="mb-8 border-2 border-primary">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -172,15 +172,15 @@ export default function EmployersPage() {
             <AccordionItem value="item-1">
               <AccordionTrigger>How do I verify a completion record?</AccordionTrigger>
               <AccordionContent>
-                Enter the certificate number in the verification form above. The system will immediately 
-                show you the certificate's status (valid, expired, or revoked), issue date, and expiry date.
+                Enter the verification code in the form above. The system will immediately 
+                show you the record's status (valid, expired, or revoked), issue date, and expiry date.
               </AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="item-2">
-              <AccordionTrigger>What if a certificate is expired?</AccordionTrigger>
+              <AccordionTrigger>What if a completion record is expired?</AccordionTrigger>
               <AccordionContent>
-                Maryland regulations require regular re-certification. If an employee's certificate is 
+                Ongoing training is recommended. If an employee's completion record is 
                 expired, they should re-enroll in the training program. Contact us at{' '}
                 <a href="mailto:employers@procannedu.com" className="text-primary hover:underline">
                   employers@procannedu.com
@@ -192,7 +192,7 @@ export default function EmployersPage() {
             <AccordionItem value="item-3">
               <AccordionTrigger>Can I integrate verification into my HR system?</AccordionTrigger>
               <AccordionContent>
-                Yes! We offer a REST API for programmatic certificate verification. Contact{' '}
+                Yes! We offer a REST API for programmatic completion record verification. Contact{' '}
                 <a href="mailto:api@procannedu.com" className="text-primary hover:underline">
                   api@procannedu.com
                 </a>{' '}
@@ -215,7 +215,7 @@ export default function EmployersPage() {
             <AccordionItem value="item-5">
               <AccordionTrigger>Is there a cost for verification?</AccordionTrigger>
               <AccordionContent>
-                No. Certificate verification is free for all employers. This service is provided to ensure 
+                No. Completion record verification is free for all employers. This service is provided to ensure 
                 compliance and protect the integrity of Maryland's cannabis industry.
               </AccordionContent>
             </AccordionItem>
