@@ -29,6 +29,11 @@ interface VerificationResult {
   hint?: string;
 }
 
+// Radix Select cannot use an empty string as an item value; these sentinels
+// map back to the "no filter" state.
+const ANY_COURSE = 'any-course';
+const ANY_YEAR = 'any-year';
+
 const VerifyCertificate = () => {
   const [searchParams] = useSearchParams();
   const [code, setCode] = useState(searchParams.get('code') || '');
@@ -39,8 +44,8 @@ const VerifyCertificate = () => {
   // Name search state
   const [firstName, setFirstName] = useState('');
   const [lastInitial, setLastInitial] = useState('');
-  const [selectedCourse, setSelectedCourse] = useState<string>('');
-  const [selectedYear, setSelectedYear] = useState<string>('');
+  const [selectedCourse, setSelectedCourse] = useState<string>(ANY_COURSE);
+  const [selectedYear, setSelectedYear] = useState<string>(ANY_YEAR);
 
   // Fetch courses for dropdown
   const { data: courses } = useQuery({
@@ -99,8 +104,8 @@ const VerifyCertificate = () => {
         p_code: null,
         p_first_name: firstName.trim(),
         p_last_initial: lastInitial.trim().charAt(0).toUpperCase(),
-        p_course_id: selectedCourse || null,
-        p_year: selectedYear ? parseInt(selectedYear) : null
+        p_course_id: selectedCourse && selectedCourse !== ANY_COURSE ? selectedCourse : null,
+        p_year: selectedYear && selectedYear !== ANY_YEAR ? parseInt(selectedYear) : null
       });
       
       if (error) throw error;
@@ -133,11 +138,11 @@ const VerifyCertificate = () => {
             <Shield className="h-8 w-8 text-primary" />
           </div>
           <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Certificate Verification
+            Completion Record Verification
           </h1>
           <p className="text-muted-foreground max-w-xl mx-auto">
-            Verify the authenticity and validity of ProCann Edu certificates. Enter a certificate
-            number below to check its current status.
+            Verify the authenticity and validity of ProCann EDU completion records. Enter a
+            verification code below to check its current status.
           </p>
         </div>
       </div>
@@ -148,7 +153,7 @@ const VerifyCertificate = () => {
           <Alert className="bg-muted/50 border-muted">
             <Lock className="h-4 w-4" />
             <AlertDescription>
-              <span className="font-medium">Public Verification:</span> This service only shows certificate validity status. For full certificate details, please log in to your account.
+              <span className="font-medium">Public Verification:</span> This service only shows completion record validity status. For full details, please log in to your account.
             </AlertDescription>
           </Alert>
 
@@ -157,7 +162,7 @@ const VerifyCertificate = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Search className="h-5 w-5" />
-                Verify Certificate
+                Verify Completion Record
               </CardTitle>
               <CardDescription>
                 Choose a verification method below
@@ -180,7 +185,7 @@ const VerifyCertificate = () => {
                 <TabsContent value="code" className="space-y-4">
                   <div>
                     <Input
-                      placeholder="Enter certificate number (e.g., RVT-202601-A3K9QZ)"
+                      placeholder="Enter verification code (e.g., RVT-202601-A3K9QZ)"
                       value={code}
                       onChange={(e) => setCode(e.target.value.toUpperCase())}
                       onKeyDown={(e) => e.key === 'Enter' && handleVerifyByCode()}
@@ -246,8 +251,8 @@ const VerifyCertificate = () => {
                           <SelectValue placeholder="Any course" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">Any course</SelectItem>
-                          {courses?.map((course) => (
+                          <SelectItem value={ANY_COURSE}>Any course</SelectItem>
+                          {courses?.filter((course) => !!course.id).map((course) => (
                             <SelectItem key={course.id} value={course.id}>
                               {course.title}
                             </SelectItem>
@@ -264,7 +269,7 @@ const VerifyCertificate = () => {
                           <SelectValue placeholder="Any year" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">Any year</SelectItem>
+                          <SelectItem value={ANY_YEAR}>Any year</SelectItem>
                           {years.map((year) => (
                             <SelectItem key={year} value={year.toString()}>
                               {year}
@@ -288,7 +293,7 @@ const VerifyCertificate = () => {
                     ) : (
                       <>
                         <UserSearch className="h-4 w-4 me-2" />
-                        Search Certificates
+                        Search Completion Records
                       </>
                     )}
                   </Button>
@@ -321,7 +326,7 @@ const VerifyCertificate = () => {
                   <div>
                     <CardTitle className={result.valid ? "text-green-700 dark:text-green-400" : "text-red-700 dark:text-red-400"}>
                       {result.valid 
-                        ? (result.method === 'name_search' ? 'Certificates Found' : 'Valid Certificate')
+                        ? 'Completion Record Found'
                         : 'Invalid or Not Found'
                       }
                     </CardTitle>
@@ -338,7 +343,7 @@ const VerifyCertificate = () => {
                     <div className="flex items-start gap-3">
                       <Award className="h-5 w-5 text-primary mt-0.5" />
                       <div>
-                        <p className="text-sm text-muted-foreground">Certificate</p>
+                        <p className="text-sm text-muted-foreground">Completion Record</p>
                         <p className="font-medium">{result.certificate_name}</p>
                       </div>
                     </div>
@@ -347,7 +352,7 @@ const VerifyCertificate = () => {
                       <User className="h-5 w-5 text-primary mt-0.5" />
                       <div>
                         <p className="text-sm text-muted-foreground">Issued To</p>
-                        <p className="font-medium">{result.recipient_name || 'Certificate Holder'}</p>
+                        <p className="font-medium">{result.recipient_name || 'Record Holder'}</p>
                       </div>
                     </div>
 
@@ -383,7 +388,7 @@ const VerifyCertificate = () => {
                   {result.is_compliance && (
                     <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
                       <p className="text-sm text-primary font-medium">
-                        ✓ This is an official Maryland Compliance Certificate
+                        ✓ Verified ProCann EDU completion record
                       </p>
                     </div>
                   )}
@@ -400,7 +405,7 @@ const VerifyCertificate = () => {
                 <CardContent className="space-y-4">
                   <div className="text-center py-4">
                     <p className="text-2xl font-bold text-green-600 dark:text-green-400 mb-2">
-                      {result.match_count} Certificate{result.match_count !== 1 ? 's' : ''} Found
+                      {result.match_count} Completion Record{result.match_count !== 1 ? 's' : ''} Found
                     </p>
                     <p className="text-sm text-muted-foreground">
                       {result.message}
@@ -422,10 +427,10 @@ const VerifyCertificate = () => {
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
                     {result.reason === 'not_found' 
-                      ? 'No certificate found with this verification code. Please check the code and try again.'
+                      ? 'No completion record found with this verification code. Please check the code and try again.'
                       : result.reason === 'no_matches'
-                      ? 'No certificates found matching this name. Please verify the spelling and try again.'
-                      : 'Unable to verify this certificate. Please contact support if you believe this is an error.'}
+                      ? 'No completion records found matching this name. Please verify the spelling and try again.'
+                      : 'Unable to verify this completion record. Please contact support if you believe this is an error.'}
                   </p>
                 </CardContent>
               )}
@@ -434,7 +439,7 @@ const VerifyCertificate = () => {
 
           {/* Privacy Footer */}
           <p className="text-xs text-muted-foreground text-center">
-            Public verification confirms certificate validity only. Personal details are shown only to the certificate holder or authorized employers.
+            Public verification confirms completion record validity only. Personal details are shown only to the record holder or authorized employers.
           </p>
         </div>
       </div>
