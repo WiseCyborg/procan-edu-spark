@@ -185,7 +185,7 @@ const VerifyCertificate = () => {
                 <TabsContent value="code" className="space-y-4">
                   <div>
                     <Input
-                      placeholder="Enter certificate number (e.g., RVT-202601-A3K9QZ)"
+                      placeholder="Enter verification code (e.g., RVT-202601-A3K9QZ)"
                       value={code}
                       onChange={(e) => setCode(e.target.value.toUpperCase())}
                       onKeyDown={(e) => e.key === 'Enter' && handleVerifyByCode()}
