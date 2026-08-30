@@ -246,8 +246,8 @@ const VerifyCertificate = () => {
                           <SelectValue placeholder="Any course" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">Any course</SelectItem>
-                          {courses?.map((course) => (
+                          <SelectItem value={ANY_COURSE}>Any course</SelectItem>
+                          {courses?.filter((course) => !!course.id).map((course) => (
                             <SelectItem key={course.id} value={course.id}>
                               {course.title}
                             </SelectItem>
@@ -264,7 +264,7 @@ const VerifyCertificate = () => {
                           <SelectValue placeholder="Any year" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">Any year</SelectItem>
+                          <SelectItem value={ANY_YEAR}>Any year</SelectItem>
                           {years.map((year) => (
                             <SelectItem key={year} value={year.toString()}>
                               {year}
