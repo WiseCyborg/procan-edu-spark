@@ -298,6 +298,7 @@ const PaymentSuccess: React.FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-5">
+            <RvtApprovalNotice />
             {appPolling && !appPaymentReady && (
               <p className="text-center text-muted-foreground text-sm">
                 Waiting for PayPal to confirm your payment. This usually takes a few seconds…
@@ -356,6 +357,7 @@ const PaymentSuccess: React.FC = () => {
             </p>
           </CardHeader>
           <CardContent className="space-y-6 pt-6">
+            <RvtApprovalNotice />
             {/* Join Code Display */}
             <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg border-2 border-blue-300">
               <h3 className="font-bold text-xl mb-3 text-center text-blue-900">
