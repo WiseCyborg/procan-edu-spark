@@ -360,10 +360,13 @@ const JOB_HANDLERS: Record<string, (job: Job, supabase: any) => Promise<void>> =
     // Queue the collector for anything that actually got dispatched.
     for (const r of (data?.results ?? [])) {
       if (r.status === 'dispatched') {
+        // queue_job does not accept scheduled_for, so insert directly with
+        // status='queued' (live constraint) and a deterministic idempotency key.
         await supabase.from('system_jobs').insert({
           job_type: 'video_render_collect',
           payload: { asset_id: r.asset_id },
-          status: 'pending',
+          status: 'queued',
+          idempotency_key: `video_render_collect:${r.asset_id}:dispatch`,
           scheduled_for: new Date(Date.now() + 60_000).toISOString(),
         });
       }
@@ -390,7 +393,8 @@ const JOB_HANDLERS: Record<string, (job: Job, supabase: any) => Promise<void>> =
       await supabase.from('system_jobs').insert({
         job_type: 'video_render_collect',
         payload: { asset_id, poll_attempt: attempt },
-        status: 'pending',
+        status: 'queued',
+        idempotency_key: `video_render_collect:${asset_id}:attempt:${attempt}`,
         scheduled_for: new Date(Date.now() + delayMs).toISOString(),
       });
       console.log(`[video_render_collect] still rendering, requeued (attempt ${attempt})`);
