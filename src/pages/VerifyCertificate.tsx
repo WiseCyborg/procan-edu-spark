@@ -29,6 +29,11 @@ interface VerificationResult {
   hint?: string;
 }
 
+// Radix Select cannot use an empty string as an item value; these sentinels
+// map back to the "no filter" state.
+const ANY_COURSE = 'any-course';
+const ANY_YEAR = 'any-year';
+
 const VerifyCertificate = () => {
   const [searchParams] = useSearchParams();
   const [code, setCode] = useState(searchParams.get('code') || '');
@@ -39,8 +44,8 @@ const VerifyCertificate = () => {
   // Name search state
   const [firstName, setFirstName] = useState('');
   const [lastInitial, setLastInitial] = useState('');
-  const [selectedCourse, setSelectedCourse] = useState<string>('');
-  const [selectedYear, setSelectedYear] = useState<string>('');
+  const [selectedCourse, setSelectedCourse] = useState<string>(ANY_COURSE);
+  const [selectedYear, setSelectedYear] = useState<string>(ANY_YEAR);
 
   // Fetch courses for dropdown
   const { data: courses } = useQuery({
