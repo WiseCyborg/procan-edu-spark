@@ -78,7 +78,8 @@ const AllCourses = () => {
           </h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             Comprehensive cannabis education from regulatory compliance to advanced expertise.
-            All courses issue a verifiable certificate upon completion.
+            Free courses earn a completion badge; professional training produces a ProCann EDU
+            completion record.
           </p>
         </div>
       </section>
