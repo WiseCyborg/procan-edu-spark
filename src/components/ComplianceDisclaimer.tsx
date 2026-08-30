@@ -30,8 +30,9 @@ export const ComplianceDisclaimer = () => {
         <AlertDescription className="space-y-2">
           <div className="text-sm font-bold text-primary mb-2">Completion Record Criteria</div>
           <p className="text-sm leading-relaxed text-foreground">
-            A completion record is issued once a student completes the required core modules and passes the final exam (minimum 80% score). The manager track adds optional supplemental modules. Historical completion records may reflect the curriculum in place at the time of issuance and do not imply completion of the current module set. Completion records can be checked at any time through our public verification portal. Individual results depend on study habits and prior knowledge.
+            A completion record is issued once a student completes all 25 active core modules and passes the final exam (minimum 80% score). The manager track adds 5 active manager-only modules, for 30 active modules in total. Historical completion records may reflect the curriculum in force at the time of issuance and do not imply completion of the current 25-module core set. Completion records can be checked at any time through our public verification portal. Individual results depend on study habits and prior knowledge.
           </p>
+
 
         </AlertDescription>
       </Alert>

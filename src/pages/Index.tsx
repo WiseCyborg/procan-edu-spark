@@ -373,7 +373,7 @@ const Index = () => {
                 <h4 className={`font-semibold text-primary ${isMobile ? 'text-lg mb-3' : 'text-xl mb-4'}`}>Course Details</h4>
                 <ul className="space-y-2 text-muted-foreground">
                   <li><strong>Duration:</strong> Self-paced (typically 4-6 hours)</li>
-                  <li><strong>Modules:</strong> 19 required modules (plus 5 optional Manager Track modules)</li>
+                  <li><strong>Modules:</strong> 25 active core modules (plus 5 manager-only modules)</li>
                   <li><strong>Exam:</strong> Final certification exam</li>
                   <li><strong>Certificate:</strong> Issued on completion, publicly verifiable</li>
                   <li><strong>Access:</strong> 24/7 online availability</li>
