@@ -413,7 +413,7 @@ const Index = () => {
             <div>
               <h5 className="font-semibold mb-3">Compliance</h5>
               <ul className="space-y-2 text-sm">
-                <li><a href="/compliance/curriculum-matrix" className="text-gray-400 hover:text-white">COMAR Compliance Matrix</a></li>
+                
                 <li><a href="/compliance/content-review" className="text-gray-400 hover:text-white">Content Review Process</a></li>
                 <li><a href="/accessibility" className="text-gray-400 hover:text-white">Accessibility Statement</a></li>
               </ul>

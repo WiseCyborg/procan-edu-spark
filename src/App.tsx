@@ -356,7 +356,7 @@ const AppRoutesLayout = () => {
             <Route path="/get-started" element={<GetStarted />} />
             <Route path="/state-officials" element={<StateOfficialsPage />} />
             <Route path="/about/team" element={<AboutTeamPage />} />
-            <Route path="/compliance/curriculum-matrix" element={<ComplianceCurriculumMatrixPage />} />
+            <Route path="/compliance/curriculum-matrix" element={<Navigate to="/" replace />} />
             <Route path="/compliance/content-review" element={<ComplianceContentReviewPage />} />
             <Route path="/employers" element={<EmployersPage />} />
             <Route path="/impact" element={<ImpactDashboardPage />} />
