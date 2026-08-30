@@ -343,7 +343,7 @@ const VerifyCertificate = () => {
                     <div className="flex items-start gap-3">
                       <Award className="h-5 w-5 text-primary mt-0.5" />
                       <div>
-                        <p className="text-sm text-muted-foreground">Certificate</p>
+                        <p className="text-sm text-muted-foreground">Completion Record</p>
                         <p className="font-medium">{result.certificate_name}</p>
                       </div>
                     </div>
@@ -352,7 +352,7 @@ const VerifyCertificate = () => {
                       <User className="h-5 w-5 text-primary mt-0.5" />
                       <div>
                         <p className="text-sm text-muted-foreground">Issued To</p>
-                        <p className="font-medium">{result.recipient_name || 'Certificate Holder'}</p>
+                        <p className="font-medium">{result.recipient_name || 'Record Holder'}</p>
                       </div>
                     </div>
 
