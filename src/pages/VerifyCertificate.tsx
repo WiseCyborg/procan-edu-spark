@@ -405,7 +405,7 @@ const VerifyCertificate = () => {
                 <CardContent className="space-y-4">
                   <div className="text-center py-4">
                     <p className="text-2xl font-bold text-green-600 dark:text-green-400 mb-2">
-                      {result.match_count} Certificate{result.match_count !== 1 ? 's' : ''} Found
+                      {result.match_count} Completion Record{result.match_count !== 1 ? 's' : ''} Found
                     </p>
                     <p className="text-sm text-muted-foreground">
                       {result.message}
