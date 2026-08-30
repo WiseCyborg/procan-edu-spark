@@ -62,7 +62,7 @@ const AllCourses = () => {
     <div className="min-h-screen bg-background">
       <Seo
         title="Cannabis Education Courses | ProCann Edu"
-        description="Browse Maryland Responsible Vendor Training and advanced cannabis education programs. State-aligned, certificate-issuing courses for dispensary staff and consumers."
+        description="Browse Maryland cannabis compliance training and advanced cannabis education programs for dispensary staff and consumers."
         path="/courses"
       />
 
