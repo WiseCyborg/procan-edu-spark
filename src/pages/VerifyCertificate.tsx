@@ -138,11 +138,11 @@ const VerifyCertificate = () => {
             <Shield className="h-8 w-8 text-primary" />
           </div>
           <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Certificate Verification
+            Completion Record Verification
           </h1>
           <p className="text-muted-foreground max-w-xl mx-auto">
-            Verify the authenticity and validity of ProCann Edu certificates. Enter a certificate
-            number below to check its current status.
+            Verify the authenticity and validity of ProCann EDU completion records. Enter a
+            verification code below to check its current status.
           </p>
         </div>
       </div>
@@ -153,7 +153,7 @@ const VerifyCertificate = () => {
           <Alert className="bg-muted/50 border-muted">
             <Lock className="h-4 w-4" />
             <AlertDescription>
-              <span className="font-medium">Public Verification:</span> This service only shows certificate validity status. For full certificate details, please log in to your account.
+              <span className="font-medium">Public Verification:</span> This service only shows completion record validity status. For full details, please log in to your account.
             </AlertDescription>
           </Alert>
 
@@ -162,7 +162,7 @@ const VerifyCertificate = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Search className="h-5 w-5" />
-                Verify Certificate
+                Verify Completion Record
               </CardTitle>
               <CardDescription>
                 Choose a verification method below
