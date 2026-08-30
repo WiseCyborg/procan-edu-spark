@@ -5,7 +5,6 @@ import { CheckCircle } from 'lucide-react';
 import { CoursePreviewSystem } from '@/components/EnhancedCoursePreview';
 import { AccessibilityToolbar } from '@/components/MobileOptimization';
 import { TrustStats } from '@/components/TrustIndicators';
-import { WelcomeVideoSection } from '@/components/WelcomeVideoSection';
 import { LiveCOMARBadge } from '@/components/LiveCOMARBadge';
 import { ROIHighlightCard } from '@/components/ROIHighlightCard';
 import { LiveActivityTicker } from '@/components/LiveActivityTicker';
@@ -18,7 +17,6 @@ import { useABTest } from '@/hooks/useABTest';
 import { RoleSelectorModal } from '@/components/RoleSelectorModal';
 import { InvestmentValueCard } from '@/components/InvestmentValueCard';
 import { ComplianceDisclaimer } from '@/components/ComplianceDisclaimer';
-import { RvtApprovalNotice } from '@/components/RvtApprovalNotice';
 import { SwipeUpIndicator } from '@/components/SwipeUpIndicator';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Seo } from '@/components/Seo';
@@ -35,26 +33,26 @@ const Index = () => {
     testName: 'hero_headline',
     variants: [{
       id: 'comar_aligned',
-      value: "COMAR-Aligned Maryland RVT Certification Training",
+      value: "Maryland Cannabis Workforce Education",
       weight: 1
     }, {
       id: 'comprehensive_training',
-      value: "Comprehensive Maryland RVT Training • 24 Modules • Self-Paced",
+      value: "Comprehensive Maryland Cannabis Compliance Training • Self-Paced",
       weight: 1
     }, {
       id: 'maryland_focused',
-      value: "Maryland RVT Certification Built by Local Cannabis Professionals",
+      value: "Maryland Cannabis Compliance Education Built by Local Cannabis Professionals",
       weight: 1
     }, {
       id: 'accessible_pricing',
-      value: "Complete Maryland RVT Training • $49.99 • Under MD Maximum",
+      value: "Complete Maryland Cannabis Compliance Training • $49.99",
       weight: 1
     }]
   });
   return <div className="min-h-screen">
       <Seo
-        title="ProCann Edu — Maryland RVT Certification Training"
-        description="Maryland's AI-powered Responsible Vendor Training. State-aligned cannabis dispensary certification, team management, and compliance reporting in one platform."
+        title="ProCann Edu — Maryland Cannabis Compliance Education"
+        description="Maryland cannabis workforce education for dispensary staff. Independent provider. Self-paced. Publicly verifiable completion records."
         path="/"
         jsonLd={[
           {
@@ -119,14 +117,9 @@ const Index = () => {
               Maryland cannabis training & certification
             </p>
             <p className={`text-white/90 mx-auto ${isMobile ? 'text-sm mt-2' : 'text-lg mt-3 max-w-2xl'}`}>
-              Maryland Responsible Vendor Training (RVT) — <span className="font-semibold">$49.99</span>, self-paced, COMAR-aligned.
+              Maryland cannabis workforce education — <span className="font-semibold">$49.99</span>, self-paced.
             </p>
           </div>
-
-          {/* Welcome Video Section - Desktop Only (keeps mobile CTA above fold) */}
-          {!isMobile && (
-            <WelcomeVideoSection className="mb-6" assetKey="welcome-intro" />
-          )}
 
           {/* Primary CTA + Secondary Link */}
           <div className={`text-center ${isMobile ? 'mb-3' : 'mb-5'}`}>
@@ -135,8 +128,11 @@ const Index = () => {
               size={isMobile ? 'default' : 'lg'}
               className={`bg-white text-primary hover:bg-white/90 font-semibold rounded-xl shadow-xl hover:shadow-2xl transition-all hover:scale-105 ${isMobile ? 'w-full px-6 py-5 text-base h-auto' : 'px-10 py-6 text-lg'}`}
             >
-              Get Certified — $49.99
+              Start Training — $49.99
             </Button>
+            <p className={`text-white/80 mx-auto mt-3 ${isMobile ? 'text-[11px] max-w-sm' : 'text-xs max-w-xl'}`}>
+              Optional continuing education. This course does not satisfy Maryland's annual responsible vendor / agent training duty.
+            </p>
             <div className="mt-3">
               <button
                 onClick={() => navigate('/verify-certificate')}
@@ -149,7 +145,7 @@ const Index = () => {
 
           {/* Trust Strip */}
           <div className={`flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-white/85 ${isMobile ? 'text-xs mb-2' : 'text-sm mb-4'}`}>
-            <span className="inline-flex items-center gap-1.5"><CheckCircle className="h-3.5 w-3.5" /> COMAR-aligned</span>
+            <span className="inline-flex items-center gap-1.5"><CheckCircle className="h-3.5 w-3.5" /> Independent provider</span>
             <span className="opacity-50">•</span>
             <span className="inline-flex items-center gap-1.5"><CheckCircle className="h-3.5 w-3.5" /> Maryland-focused</span>
             <span className="opacity-50">•</span>
@@ -173,12 +169,6 @@ const Index = () => {
           <SwipeUpIndicator />
         </div>
       </section>
-
-      <div className="bg-white dark:bg-background py-4 px-4">
-        <div className="container mx-auto">
-          <RvtApprovalNotice />
-        </div>
-      </div>
 
       {/* First Scroll - Social Proof & Value */}
       <section className={`bg-white dark:bg-background ${isMobile ? 'py-8 px-4' : 'py-16 px-4'}`}>
@@ -206,20 +196,20 @@ const Index = () => {
               onClick={() => navigate('/get-started')}
             >
               <div className="absolute -top-3 start-4 bg-primary text-primary-foreground text-xs px-3 py-1 rounded-full font-semibold">
-                Required for Employees
+                For Cannabis Professionals
               </div>
               <div className="pt-4">
                 <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
                   <CheckCircle className="h-7 w-7 text-primary" />
                 </div>
-                <h3 className="text-xl font-bold text-foreground mb-2">RVT Core Training</h3>
+                <h3 className="text-xl font-bold text-foreground mb-2">Cannabis Compliance Training</h3>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Maryland Responsible Vendor Training (RVT) aligned to COMAR 14.17.15.05 for dispensary employees.
+                  Maryland-focused cannabis workforce training for Maryland dispensary employees. Does not satisfy the annual responsible vendor / agent training duty.
                 </p>
                 <div className="space-y-2 text-sm mb-4">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
-                    <span><strong>19 modules</strong> • 4-6 hours</span>
+                    <span><strong>Self-paced</strong></span>
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
@@ -227,11 +217,11 @@ const Index = () => {
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                    <span>Issues <strong>RVT Certificate</strong></span>
+                    <span>Issues <strong>ProCann EDU Completion Record</strong></span>
                   </div>
                 </div>
                 <Button className="w-full group-hover:bg-primary/90" onClick={(e) => { e.stopPropagation(); navigate('/auth?role=student'); }}>
-                  Start RVT Training
+                  Start Training
                 </Button>
               </div>
             </div>
@@ -257,11 +247,11 @@ const Index = () => {
                 <div className="space-y-2 text-sm mb-4">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                    <span><strong>5 modules</strong> • 2-3 hours</span>
+                    <span><strong>Self-paced</strong></span>
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
-                    <span>Requires <strong>RVT completion</strong></span>
+                    <span>Requires <strong>core training completion</strong></span>
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
@@ -295,7 +285,7 @@ const Index = () => {
                 <div className="space-y-2 text-sm mb-4">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <span className="w-1.5 h-1.5 rounded-full bg-secondary"></span>
-                    <span><strong>8-12 modules</strong> • Self-paced</span>
+                    <span><strong>Self-paced</strong></span>
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
@@ -303,7 +293,7 @@ const Index = () => {
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-                    <span>Issues <strong>Completion Badge</strong> (non-RVT)</span>
+                    <span>Issues <strong>Completion badge</strong> (not a state credential)</span>
                   </div>
                 </div>
                 <Button variant="secondary" className="w-full" onClick={(e) => { e.stopPropagation(); navigate('/learn'); }}>
@@ -316,8 +306,8 @@ const Index = () => {
           {/* Disclaimer */}
           <div className="mt-8 text-center">
             <p className="text-xs text-muted-foreground max-w-3xl mx-auto">
-              <strong>Note:</strong> Only RVT Core Training provides Maryland Responsible Vendor Training (RVT) 
-              aligned to COMAR 14.17.15.05. Public Learning is for educational purposes only and does not satisfy employee compliance requirements.
+              <strong>Note:</strong> Cannabis Compliance Training is workforce education only. It does not satisfy
+              Maryland's annual responsible vendor / agent training duty. Public Learning is general education.
             </p>
           </div>
         </div>
@@ -341,7 +331,7 @@ const Index = () => {
         <div className="container mx-auto">
           <div className="max-w-4xl mx-auto">
             <h3 className={`font-bold text-center text-foreground ${isMobile ? 'text-2xl mb-6' : 'text-3xl md:text-4xl mb-8'}`}>
-              Maryland Responsible Vendor Training (RVT)
+              Maryland Cannabis Workforce Education
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
@@ -372,8 +362,7 @@ const Index = () => {
               <div>
                 <h4 className={`font-semibold text-primary ${isMobile ? 'text-lg mb-3' : 'text-xl mb-4'}`}>Course Details</h4>
                 <ul className="space-y-2 text-muted-foreground">
-                  <li><strong>Duration:</strong> Self-paced (typically 4-6 hours)</li>
-                  <li><strong>Modules:</strong> 25 active core modules (plus 5 manager-only modules)</li>
+                  <li><strong>Duration:</strong> Self-paced</li>
                   <li><strong>Exam:</strong> Final certification exam</li>
                   <li><strong>Certificate:</strong> Issued on completion, publicly verifiable</li>
                   <li><strong>Access:</strong> 24/7 online availability</li>
@@ -399,7 +388,7 @@ const Index = () => {
         <div className="container mx-auto">
           <div className="text-center mb-8 pb-8 border-b border-white/10">
             <h3 className={`font-bold mb-2 ${isMobile ? 'text-xl' : 'text-2xl'}`}>ProCann Edu</h3>
-            <p className={`text-white/90 mb-2 ${isMobile ? 'text-base' : 'text-xl'}`}>Maryland's Trusted RVT Provider</p>
+            <p className={`text-white/90 mb-2 ${isMobile ? 'text-base' : 'text-xl'}`}>Maryland-Focused Cannabis Compliance Education</p>
             <p className={`text-white/70 ${isMobile ? 'text-sm' : 'text-base'}`}>Headquarters: Baltimore, Maryland</p>
             <p className={`text-white/70 ${isMobile ? 'text-sm' : 'text-base'}`}>Serving dispensaries across all 24 counties</p>
           </div>
@@ -409,7 +398,7 @@ const Index = () => {
               <ul className="space-y-2 text-sm">
                 <li><a href="/auth" className="text-gray-400 hover:text-white">Get Started</a></li>
                 <li><a href="/faq" className="text-gray-400 hover:text-white">FAQ</a></li>
-                <li><a href="/training-handbook" className="text-gray-400 hover:text-white">Training Handbook</a></li>
+                <li><a href="/auth?next=/training-handbook" className="text-gray-400 hover:text-white">Training Handbook (sign in)</a></li>
               </ul>
             </div>
             <div>
@@ -417,14 +406,13 @@ const Index = () => {
               <ul className="space-y-2 text-sm">
                 <li><a href="/org/apply" className="text-gray-400 hover:text-white">Dispensary Application</a></li>
                 <li><a href="/employers" className="text-gray-400 hover:text-white">Verify Certificates</a></li>
-                <li><a href="/purchase-seats" className="text-gray-400 hover:text-white">Purchase Training Seats</a></li>
+                <li><a href="/auth?next=/purchase-seats" className="text-gray-400 hover:text-white">Purchase Training Seats (sign in)</a></li>
                 <li><a href="/ailean-info" className="text-gray-400 hover:text-white">✋ AiLean AI Coach</a></li>
               </ul>
             </div>
             <div>
               <h5 className="font-semibold mb-3">Compliance</h5>
               <ul className="space-y-2 text-sm">
-                <li><a href="/state-officials" className="text-gray-400 hover:text-white">For State Officials</a></li>
                 <li><a href="/compliance/curriculum-matrix" className="text-gray-400 hover:text-white">COMAR Compliance Matrix</a></li>
                 <li><a href="/compliance/content-review" className="text-gray-400 hover:text-white">Content Review Process</a></li>
                 <li><a href="/accessibility" className="text-gray-400 hover:text-white">Accessibility Statement</a></li>
@@ -443,11 +431,6 @@ const Index = () => {
           <div className="text-center text-sm text-white/60 pt-8 border-t border-white/10">
             <p>&copy; 2026 ProCann Edu. All rights reserved.</p>
             <p className="mt-2">Made with 💚 in Maryland</p>
-            <div className="mt-6">
-              <a href="/mca-compliance-review" className="text-white/80 hover:text-white underline text-xs">
-                For MCA Officials: View Compliance Documentation
-              </a>
-            </div>
           </div>
           
           {/* Compliance Disclaimers */}

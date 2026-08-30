@@ -130,7 +130,7 @@ const CertificateRenewal = () => {
             <div className="flex items-center gap-3">
               <Award className={`h-8 w-8 ${expiryStatus.color}`} />
               <div>
-                <CardTitle>Maryland RVT Certificate</CardTitle>
+                <CardTitle>ProCann EDU Completion Record</CardTitle>
                 <CardDescription className="mt-1">
                   Certificate #{certificate.certificate_number}
                 </CardDescription>
@@ -277,11 +277,10 @@ const CertificateRenewal = () => {
         </CardHeader>
         <CardContent className="space-y-3">
           <p className="text-sm text-muted-foreground">
-            Maryland law requires all cannabis dispensary agents to maintain current RVT certification. 
-            Renewing your certificate ensures:
+            Keeping your ProCann EDU completion record current ensures:
           </p>
           <ul className="space-y-2 text-sm text-muted-foreground ms-4 list-disc">
-            <li>Compliance with COMAR regulations</li>
+            <li>Up-to-date Maryland cannabis workforce education</li>
             <li>Knowledge of the latest industry guidelines</li>
             <li>Continued employment eligibility</li>
             <li>Professional development and best practices</li>

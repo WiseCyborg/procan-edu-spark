@@ -57,12 +57,11 @@ export const ConsumerModuleContent = ({
 
   const handleComplete = () => {
     onMarkComplete();
-    
-    // If this is the last module and all are now complete, show email capture
-    if (isLastModule && completedCount + 1 === totalCount) {
+
+    // Stay on the module so the learner can SEE the completed state and the
+    // updated progress bar. Only the final module opens the badge capture.
+    if (isLastModule && completedCount + 1 >= totalCount) {
       setShowEmailCapture(true);
-    } else if (hasNext) {
-      onNext();
     }
   };
 
@@ -165,7 +164,7 @@ export const ConsumerModuleContent = ({
               className="sm:w-auto"
             >
               <Award className="h-4 w-4 me-2" />
-              Get Certificate
+              Get Completion Badge
             </Button>
           )}
         </div>

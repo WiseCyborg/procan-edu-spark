@@ -103,7 +103,7 @@ MARYLAND CANNABIS CONTEXT:
 - HIPAA considerations for medical cannabis patients
 - Security protocols for cannabis retail (video surveillance, inventory tracking)
 - Maryland COMAR regulations impacting workplace operations
-- Responsible Vendor Training (RVT) requirements for employees: COMAR 14.17.15.05(C) — "C. Within 90 days of employment start date and annually thereafter, a registered agent employed by a cannabis licensee shall complete a responsible vendor training program that:" If an agent starts after July 1, 2026 they must complete their annual training within 90 days of employment, then every year afterwards. This course does not satisfy that approved-training duty.
+- Responsible Vendor Training (RVT) requirements for employees
 - Inventory management and compliance challenges
 - Regulatory compliance pressures on managers
 - Patient education and consultation protocols

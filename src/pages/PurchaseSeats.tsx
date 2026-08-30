@@ -11,7 +11,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
 import { Loader2, ShoppingCart, Users, AlertCircle } from "lucide-react";
 import { BUSINESS_RULES } from "@/config/business-rules";
-import { RvtApprovalNotice } from "@/components/RvtApprovalNotice";
 
 const SEAT_PRICE = BUSINESS_RULES.SEAT_PRICE_USD;
 
@@ -219,16 +218,14 @@ export default function PurchaseSeats() {
                 </p>
                 <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
                   <li>• {quantity} training seat{quantity > 1 ? 's' : ''} for your organization</li>
-                  <li>• Access to Maryland Responsible Vendor Training</li>
-                  <li>• Official certificates upon completion</li>
+                  <li>• Access to ProCann EDU Maryland cannabis workforce education</li>
+                  <li>• ProCann EDU completion records upon completion</li>
                   <li>• Progress tracking and analytics dashboard</li>
                   <li>• Email support for all trainees</li>
                 </ul>
               </div>
             </div>
           </div>
-
-          <RvtApprovalNotice />
 
           <Button
             onClick={handlePurchase}
@@ -249,6 +246,9 @@ export default function PurchaseSeats() {
             )}
           </Button>
 
+          <p className="text-xs text-center text-muted-foreground">
+            Optional continuing education. This course does not satisfy Maryland's annual responsible vendor / agent training duty.
+          </p>
           <p className="text-xs text-center text-muted-foreground">
             You will be redirected to PayPal to complete your secure payment
           </p>

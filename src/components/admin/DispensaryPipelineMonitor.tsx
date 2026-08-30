@@ -133,24 +133,12 @@ export const DispensaryPipelineMonitor = () => {
 
       if (orgError) throw orgError;
 
-      // Fetch managers who registered via applications.
-      // Two-step: profiles has no FK to user_roles, so an embedded join fails the schema cache.
-      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-      const { data: managerRoles, error: mgRoleError } = await supabase
-        .from('user_roles')
-        .select('user_id')
-        .eq('role', 'dispensary_manager');
-
-      if (mgRoleError) throw mgRoleError;
-
-      const managerIds = (managerRoles || []).map(r => r.user_id);
-      const { data: managers, error: mgError } = managerIds.length > 0
-        ? await supabase
-            .from('profiles')
-            .select('*')
-            .in('id', managerIds)
-            .gte('created_at', thirtyDaysAgo)
-        : { data: [], error: null };
+      // Fetch managers who registered via applications
+      const { data: managers, error: mgError } = await supabase
+        .from('profiles')
+        .select('*, user_roles!inner(*)')
+        .eq('user_roles.role', 'dispensary_manager')
+        .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
 
       if (mgError) throw mgError;
 
@@ -163,23 +151,13 @@ export const DispensaryPipelineMonitor = () => {
 
       if (invError) throw invError;
 
-      // Fetch employees (two-step for the same schema-cache reason as managers above)
-      const { data: studentRoles, error: stRoleError } = await supabase
-        .from('user_roles')
-        .select('user_id')
-        .eq('role', 'student');
-
-      if (stRoleError) throw stRoleError;
-
-      const studentIds = (studentRoles || []).map(r => r.user_id);
-      const { data: employees, error: empError } = studentIds.length > 0
-        ? await supabase
-            .from('profiles')
-            .select('*')
-            .in('id', studentIds)
-            .not('organization_id', 'is', null)
-            .gte('created_at', thirtyDaysAgo)
-        : { data: [], error: null };
+      // Fetch employees
+      const { data: employees, error: empError } = await supabase
+        .from('profiles')
+        .select('*, user_roles!inner(*)')
+        .eq('user_roles.role', 'student')
+        .not('organization_id', 'is', null)
+        .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
 
       if (empError) throw empError;
 

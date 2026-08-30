@@ -165,7 +165,7 @@ export const EmailCaptureModal = ({
       if (!certOk) {
         console.error('Certificate generation failed:', certError || certData);
         toast({
-          title: "We couldn't issue your certificate",
+          title: "We couldn't issue your completion badge",
           description: "Please try again in a moment. If the problem persists, contact support.",
           variant: 'destructive',
         });
@@ -177,7 +177,7 @@ export const EmailCaptureModal = ({
 
       toast({
         title: 'Success! 🎉',
-        description: 'Your certificate will be sent to your email shortly.',
+        description: 'Your completion badge will be sent to your email shortly.',
       });
 
       onOpenChange(false);
@@ -212,7 +212,7 @@ export const EmailCaptureModal = ({
             Congratulations! 🎉
           </DialogTitle>
           <DialogDescription className="text-center">
-            You've completed the course! Enter your email to receive your certificate.
+            You've completed the course! Enter your email to receive your completion badge.
           </DialogDescription>
         </DialogHeader>
 
@@ -221,7 +221,7 @@ export const EmailCaptureModal = ({
             <Label htmlFor="name">Name (Optional)</Label>
             <Input
               id="name"
-              placeholder="Your name for the certificate"
+              placeholder="Your name for the completion badge"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
@@ -238,7 +238,7 @@ export const EmailCaptureModal = ({
               required
             />
             <p className="text-xs text-muted-foreground">
-              We'll send your certificate here. We won't spam you.
+              We'll send your completion badge here. We won't spam you.
             </p>
           </div>
 

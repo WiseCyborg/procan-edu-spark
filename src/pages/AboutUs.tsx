@@ -18,7 +18,7 @@ export default function AboutUs() {
           <h2>Our Mission</h2>
           <p>
             ProCann Edu is dedicated to providing Maryland cannabis professionals with the highest quality 
-            Responsible Vendor Training (RVT) that exceeds Maryland Cannabis Administration (MCA) requirements. 
+            Maryland cannabis workforce education. We do not claim MCA approval or that this course satisfies the annual agent training duty. 
             We combine cutting-edge technology with deep regulatory expertise to ensure every dispensary employee 
             receives training that is compliant, engaging, and effective.
           </p>
@@ -36,10 +36,9 @@ export default function AboutUs() {
           </ul>
 
           <h2>What Makes Us Different</h2>
-          <h3>1. MCA-Aligned Content</h3>
+          <h3>1. Maryland-focused content</h3>
           <p>
-            Our training modules are directly aligned with COMAR 14.17.15.05 requirements and updated in real-time 
-            as regulations change. We don't just teach compliance—we embed it into every lesson.
+            Modules cover published Maryland cannabis workplace topics and are updated when we review rule changes.
           </p>
 
           <h3>2. AI-Powered Learning</h3>
@@ -54,10 +53,10 @@ export default function AboutUs() {
             Employees can complete training on their smartphones during breaks or between shifts.
           </p>
 
-          <h3>4. Real Certification</h3>
+          <h3>4. Verifiable Completion Records</h3>
           <p>
-            Upon successful completion, students receive official RVT certificates recognized by the MCA and 
-            all Maryland dispensaries. Certificates are tamper-proof and instantly verifiable.
+            Upon successful completion, students receive a ProCann EDU completion record. 
+            Completion records are tamper-evident and instantly verifiable.
           </p>
 
           <h2>Our Commitment to Quality</h2>
@@ -77,7 +76,7 @@ export default function AboutUs() {
           </p>
           <ul>
             <li>Maryland dispensaries across all 24 counties</li>
-            <li>Cannabis professionals seeking RVT certification</li>
+            <li>Cannabis professionals seeking workforce education records</li>
             <li>Organizations committed to compliance excellence</li>
             <li>Industry partners and advocacy groups</li>
           </ul>

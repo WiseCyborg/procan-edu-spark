@@ -11,7 +11,7 @@ export default function CompetitorComparison() {
   const features = [
     { feature: "Maryland-Specific Content", proCannEdu: "Tailored to MD", industryStandard: "Multi-state generic" },
     { feature: "AI-Powered ROI Tracking", proCannEdu: "Real-time", industryStandard: "Manual reporting" },
-    { feature: "COMAR Regulatory Updates", proCannEdu: "Live & automatic", industryStandard: "Quarterly updates" },
+    { feature: "Maryland rule monitoring", proCannEdu: "We review published rules", industryStandard: "Quarterly updates" },
     { feature: "AI Compliance Assistant", proCannEdu: "24/7 access", industryStandard: "Email support" },
     { feature: "Analytics Dashboard", proCannEdu: "Real-time", industryStandard: "Basic reporting" },
     { feature: "Compliance Risk Scoring", proCannEdu: "Predictive AI", industryStandard: "Not available" },
@@ -89,10 +89,9 @@ export default function CompetitorComparison() {
           <div className="grid md:grid-cols-3 gap-6">
             <Card className="text-center p-6 hover:shadow-lg transition-shadow border-primary/20">
               <Shield className="h-16 w-16 text-primary mx-auto mb-4" />
-              <h3 className="text-xl font-bold mb-2 text-primary">Live COMAR Alignment</h3>
+              <h3 className="text-xl font-bold mb-2 text-primary">Maryland Rule Monitoring</h3>
               <p className="text-muted-foreground">
-                Automatic curriculum updates when Maryland regulations change. Always aligned to the latest 
-                COMAR 14.17.15.05 standards without manual content revisions.
+                We monitor published Maryland cannabis rules. We are not on the MCA approved RVT list.
               </p>
             </Card>
 
@@ -126,7 +125,7 @@ export default function CompetitorComparison() {
                 <div className="space-y-3 text-muted-foreground">
                   <p className="flex items-start gap-2">
                     <Zap className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-                    <span><strong>Real-time regulatory alignment:</strong> Curriculum automatically syncs with Maryland Cannabis Administration updates to COMAR 14.17.15.05</span>
+                    <span><strong>Maryland rule monitoring:</strong> We monitor published Maryland cannabis rules. We are not on the MCA approved RVT list.</span>
                   </p>
                   <p className="flex items-start gap-2">
                     <Zap className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
@@ -134,7 +133,7 @@ export default function CompetitorComparison() {
                   </p>
                   <p className="flex items-start gap-2">
                     <Zap className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-                    <span><strong>Regulatory pricing compliance:</strong> $49.99 per employee (Maryland maximum: $50.00) with transparent pricing and no hidden fees</span>
+                    <span><strong>Pricing:</strong> $49.99 per employee. Transparent pricing and no hidden fees</span>
                   </p>
                   <p className="flex items-start gap-2">
                     <Zap className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
@@ -149,7 +148,7 @@ export default function CompetitorComparison() {
         {/* CTA Section */}
         <div className="text-center bg-gradient-to-r from-primary to-accent rounded-2xl p-8 text-white">
           <h3 className="text-3xl font-bold mb-4">
-            Experience Maryland-Specific RVT Training
+            Experience Maryland-Specific Cannabis Compliance Training
           </h3>
           <p className="text-xl mb-6 text-white/90">
             See how ProCann Edu's unique features support your compliance goals

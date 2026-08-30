@@ -58,10 +58,10 @@ async function buildCertificatePdf(opts: {
     page.drawText(text, { x: (width - w) / 2, y, size, font, color });
   };
 
-  center('CERTIFICATE OF COMPLETION', height - 90, 22, helvBold, navy);
+  center('PROCANN EDU COMPLETION RECORD', height - 90, 22, helvBold, navy);
   center('ProCannEdu — Maryland Cannabis Training', height - 115, 12, helvOblique, muted);
 
-  center('This certifies that', height - 175, 13, helv, muted);
+  center('This records that', height - 175, 13, helv, muted);
   center(opts.recipientName, height - 215, 30, helvBold, ink);
 
   // Decorative underline under name
@@ -75,7 +75,7 @@ async function buildCertificatePdf(opts: {
 
   center('has successfully completed', height - 255, 13, helv, muted);
   center(opts.courseTitle, height - 285, 18, helvBold, navy);
-  center(`Certification Level: ${opts.certificationLevel}`, height - 308, 12, helv, ink);
+  center(`Training Track: ${opts.certificationLevel}`, height - 308, 12, helv, ink);
 
   const fmt = (d: Date) =>
     d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -201,7 +201,7 @@ Deno.serve(async (req: Request) => {
         JSON.stringify({
           certificate_number: existingCert.certificate_number,
           pdf_path: existingCert.pdf_url,
-          message: 'Certificate already exists',
+          message: 'Completion record already exists',
         }),
         { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
       );
@@ -213,10 +213,32 @@ Deno.serve(async (req: Request) => {
       throw new Error('Failed to generate certificate number');
     }
 
-    // Two-track logic preserved
-    const RVT_MODULE_MIN = 0, RVT_MODULE_MAX = 18;
-    const MANAGER_MODULE_MIN = 19, MANAGER_MODULE_MAX = 23;
-    const RVT_MODULE_COUNT = 19, MANAGER_MODULE_COUNT = 5;
+    // ------------------------------------------------------------------
+    // Curriculum truth: derive the required module ID sets from the LIVE
+    // course_modules rows for the course this exam attempt belongs to.
+    // No hardcoded module-number ranges or counts — set comparison only.
+    // Already-issued certificates are never revisited or modified here.
+    // ------------------------------------------------------------------
+    const { data: activeModules, error: activeModulesError } = await supabase
+      .from('course_modules')
+      .select('id, is_manager_only')
+      .eq('course_id', examAttempt.course_id)
+      .eq('is_active', true);
+
+    if (activeModulesError || !activeModules || activeModules.length === 0) {
+      console.error('Could not resolve active curriculum for course', examAttempt.course_id, activeModulesError);
+      return new Response(
+        JSON.stringify({ error: 'Could not resolve the active curriculum for this course. No completion record was issued.' }),
+        { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+      );
+    }
+
+    const requiredCoreIds = new Set<string>(
+      activeModules.filter((m: any) => m.is_manager_only !== true).map((m: any) => m.id),
+    );
+    const requiredManagerIds = new Set<string>(
+      activeModules.filter((m: any) => m.is_manager_only === true).map((m: any) => m.id),
+    );
 
     const { data: userProgress } = await supabase
       .from('user_progress')
@@ -225,47 +247,66 @@ Deno.serve(async (req: Request) => {
       .eq('course_id', examAttempt.course_id)
       .eq('is_completed', true);
 
+    const completedIds = new Set<string>(
+      (userProgress ?? []).map((p: any) => p.module_id).filter(Boolean),
+    );
+
+    const completedCoreIds = [...requiredCoreIds].filter((id) => completedIds.has(id));
+    const completedManagerIds = [...requiredManagerIds].filter((id) => completedIds.has(id));
+
+    // The exam attempt was already verified above as this user's PASSED attempt
+    // (is_passed = true) for this course — that is the exam evidence for both tracks.
+    const examPassed = examAttempt.is_passed === true;
+
+    const rvtComplete = completedCoreIds.length === requiredCoreIds.size && examPassed;
+    const managerComplete =
+      rvtComplete &&
+      requiredManagerIds.size > 0 &&
+      completedManagerIds.length === requiredManagerIds.size;
+
     let certificationType: 'rvt' | 'manager' = 'rvt';
-    let certificationLevel = 'RVT Agent'; // human-readable label (PDF/email only)
+    let certificationLevel = 'Core Track'; // human-readable label (PDF/email only)
     let certificationLevelDb: 'agent' | 'manager' = 'agent'; // DB CHECK constraint value
     let tierBadge = 'rvt';
-    let trainingTrack = 'Maryland RVT Required Training';
-    let rvtComplete = false;
-    let managerComplete = false;
+    let trainingTrack = 'Maryland Cannabis Compliance Training';
 
-    if (userProgress && userProgress.length > 0) {
-      const moduleIds = userProgress.map((p) => p.module_id).filter(Boolean);
-      if (moduleIds.length > 0) {
-        const { data: completedModules } = await supabase
-          .from('course_modules')
-          .select('module_number')
-          .in('id', moduleIds);
-
-        if (completedModules) {
-          const completedNumbers = completedModules.map((m) => m.module_number);
-          const rvtModulesCompleted = completedNumbers.filter((n) => n >= RVT_MODULE_MIN && n <= RVT_MODULE_MAX);
-          rvtComplete = rvtModulesCompleted.length === RVT_MODULE_COUNT;
-          const managerModulesCompleted = completedNumbers.filter((n) => n >= MANAGER_MODULE_MIN && n <= MANAGER_MODULE_MAX);
-          managerComplete = managerModulesCompleted.length === MANAGER_MODULE_COUNT;
-
-          if (rvtComplete && managerComplete) {
-            certificationType = 'manager';
-            certificationLevel = 'Manager';
-            certificationLevelDb = 'manager';
-            tierBadge = 'manager';
-            trainingTrack = 'RVT Required + Manager Leadership Track';
-          }
-        }
-      }
+    if (managerComplete) {
+      certificationType = 'manager';
+      certificationLevel = 'Manager';
+      certificationLevelDb = 'manager';
+      tierBadge = 'manager';
+      trainingTrack = 'Core Track + Manager Leadership Track';
     }
 
     if (!rvtComplete) {
-      console.error('RVT modules not complete - cannot issue certificate');
+      console.error(
+        `Core curriculum incomplete — ${completedCoreIds.length}/${requiredCoreIds.size} required core modules, exam_passed=${examPassed}`,
+      );
       return new Response(
-        JSON.stringify({ error: 'Complete all RVT Required modules (0-18) before requesting certification.' }),
+        JSON.stringify({
+          error: `Complete all ${requiredCoreIds.size} active core training modules and pass the exam before requesting a completion record.`,
+          required_core_modules: requiredCoreIds.size,
+          completed_core_modules: completedCoreIds.length,
+          exam_passed: examPassed,
+        }),
         { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
       );
     }
+
+    const issuanceSnapshot = {
+      required_core_count: requiredCoreIds.size,
+      required_manager_count: requiredManagerIds.size,
+      completed_required_count: completedCoreIds.length + completedManagerIds.length,
+      required_core_module_ids: [...requiredCoreIds],
+      required_manager_module_ids: [...requiredManagerIds],
+      completed_core_module_ids: completedCoreIds,
+      completed_manager_module_ids: completedManagerIds,
+      issued_curriculum_at: new Date().toISOString(),
+      exam_attempt_id,
+      exam_total_score: examAttempt.total_score ?? null,
+      exam_is_passed: examPassed,
+    };
+
 
     const issueDate = new Date();
     const expiryDate = new Date(issueDate);
@@ -307,6 +348,8 @@ Deno.serve(async (req: Request) => {
           rvt_complete: rvtComplete,
           manager_complete: managerComplete,
           verify_url: verifyUrl,
+          issuance_snapshot: issuanceSnapshot,
+
         },
       })
       .select()
@@ -348,7 +391,7 @@ Deno.serve(async (req: Request) => {
       user.email ||
       'Certificate Holder';
 
-    const courseTitle = course?.title || 'Maryland Responsible Vendor Training (RVT)';
+    const courseTitle = course?.title || 'Maryland Cannabis Compliance Training';
 
     // Audit log is written by the certificates DB trigger (metadata.source = "db_trigger").
     // The insert that used to live here was redundant and always failed.
@@ -364,7 +407,7 @@ Deno.serve(async (req: Request) => {
     await supabase.from('user_certificates').insert({
       user_id: user.id,
       course_id: examAttempt.course_id,
-      certificate_name: certificationType === 'manager' ? 'Manager Leadership Certificate' : 'RVT Agent Certificate',
+      certificate_name: certificationType === 'manager' ? 'ProCann EDU Manager Leadership Completion Record' : 'ProCann EDU Core Track Completion Record',
       verification_code: verificationCode,
       recipient_name: recipientName,
       pdf_url: verifyUrl,
@@ -469,7 +512,7 @@ Deno.serve(async (req: Request) => {
         expiry_date: certificate.expiry_date,
         pdf_path: storedPdfPath,
         verify_url: verifyUrl,
-        message: 'Certificate generated successfully',
+        message: 'Completion record generated successfully',
       }),
       { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
     );

@@ -1,21 +1,3 @@
-/**
- * Maryland RVT duty — Louis Hendricks III (Director of Compliance), Aug 16 2026.
- * William F. Cunningham Jr. authorized applying this language on 2026-08-23.
- * Discard any earlier two-year / HB 622 "every 2 years" hypothesis.
- * MCA and COMAR still name this Responsible Vendor Training (RVT).
- * This platform is independent workforce education and does not satisfy that duty.
- */
-export const MARYLAND_RVT_DUTY = {
-  name: 'Responsible Vendor Training (RVT)',
-  comar: 'COMAR 14.17.15.05(C)',
-  quote:
-    'C. Within 90 days of employment start date and annually thereafter, a registered agent employed by a cannabis licensee shall complete a responsible vendor training program that:',
-  cadence: 'Within 90 days of employment start date, and annually thereafter',
-  firstYearRule:
-    'If an agent starts after July 1, 2026 they must complete their annual training within 90 days of employment, then every year afterwards.',
-  notTwoYear: true,
-} as const;
-
 export const BUSINESS_RULES = {
   // Course
   TOTAL_MODULES: 24,

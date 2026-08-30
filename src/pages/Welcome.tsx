@@ -21,8 +21,14 @@ const Welcome = () => {
   useEffect(() => {
     if (rolesLoading) return;
     
+    // Admin outranks every other role.
+    if (isAdmin) {
+      navigate('/admin', { replace: true });
+      return;
+    }
+
     // If employee/student only (not a manager/admin), redirect to student dashboard
-    if (isStudent && !isDispensaryManager && !isTrainingCoordinator && !isAdmin) {
+    if (isStudent && !isDispensaryManager && !isTrainingCoordinator) {
       navigate('/student-dashboard', { replace: true });
     }
   }, [rolesLoading, isStudent, isDispensaryManager, isTrainingCoordinator, isAdmin, navigate]);
@@ -88,7 +94,7 @@ const Welcome = () => {
                   You're now ready to begin your certification journey.
                 </p>
                 <p className="text-sm text-gray-500">
-                  Aligned to MCA Responsible Vendor Training standards under COMAR 14.17.15.05
+                  Independent Maryland cannabis workforce education. Not MCA-endorsed; does not satisfy the annual agent training duty.
                 </p>
               </div>
 
@@ -209,7 +215,7 @@ const Welcome = () => {
 
           <Card>
             <CardContent className="p-6">
-              <h3 className="font-semibold text-lg mb-4">Course Overview: Maryland RVT</h3>
+              <h3 className="font-semibold text-lg mb-4">Course Overview: Maryland Cannabis Compliance</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h4 className="font-medium text-green-700 mb-3">Course Structure</h4>

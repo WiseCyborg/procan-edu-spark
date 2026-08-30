@@ -54,7 +54,7 @@ export const CourseCompletionCelebration: React.FC<CourseCompletionCelebrationPr
                 🎉 Training Complete!
               </h2>
               <p className="text-xl text-muted-foreground">
-                You've completed all 23 modules of Maryland Responsible Vendor Training
+                You've completed all 23 modules of ProCann EDU training
               </p>
             </motion.div>
 
@@ -98,7 +98,7 @@ export const CourseCompletionCelebration: React.FC<CourseCompletionCelebrationPr
             <div className="border-t pt-6">
               <h3 className="text-xl font-semibold mb-2">Ready for Certification?</h3>
               <p className="text-muted-foreground mb-6">
-                Complete the Final Exam to receive your official Maryland RVT Certificate.
+                Complete the Final Exam to receive your ProCann EDU completion record.
                 You need 80% or higher to pass.
               </p>
               
