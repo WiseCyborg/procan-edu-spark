@@ -30,8 +30,8 @@ export const InvestmentValueCard = () => {
       outcome: 'Maryland regulatory expertise',
     },
     {
-      title: 'Lifetime Certificate Access',
-      description: 'Digital certificate with verification',
+      title: '1-Year Certificate',
+      description: 'Digital certificate valid for 1 year with verification',
       outcome: 'Publicly verifiable credentials',
     },
     {

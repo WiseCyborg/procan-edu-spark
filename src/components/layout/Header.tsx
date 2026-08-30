@@ -159,11 +159,10 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
           {(!user || isPublicMarketingRoute) && (
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
               <Button 
-                onClick={() => navigate(user ? '/training-handbook' : '/auth?next=/training-handbook')}
+                onClick={() => navigate('/training-handbook')}
                 variant="ghost"
                 size="sm"
                 className="hidden md:inline-flex"
-                title={user ? undefined : 'Sign in to open the Training Handbook'}
               >
                 {t('nav.handbook')}
               </Button>

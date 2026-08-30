@@ -398,7 +398,7 @@ const Index = () => {
               <ul className="space-y-2 text-sm">
                 <li><a href="/auth" className="text-gray-400 hover:text-white">Get Started</a></li>
                 <li><a href="/faq" className="text-gray-400 hover:text-white">FAQ</a></li>
-                <li><a href="/auth?next=/training-handbook" className="text-gray-400 hover:text-white">Training Handbook (sign in)</a></li>
+                <li><a href="/training-handbook" className="text-gray-400 hover:text-white">Training Handbook</a></li>
               </ul>
             </div>
             <div>
@@ -406,14 +406,14 @@ const Index = () => {
               <ul className="space-y-2 text-sm">
                 <li><a href="/org/apply" className="text-gray-400 hover:text-white">Dispensary Application</a></li>
                 <li><a href="/employers" className="text-gray-400 hover:text-white">Verify Certificates</a></li>
-                <li><a href="/auth?next=/purchase-seats" className="text-gray-400 hover:text-white">Purchase Training Seats (sign in)</a></li>
+                <li><a href="/purchase-seats" className="text-gray-400 hover:text-white">Purchase Training Seats</a></li>
                 <li><a href="/ailean-info" className="text-gray-400 hover:text-white">✋ AiLean AI Coach</a></li>
               </ul>
             </div>
             <div>
               <h5 className="font-semibold mb-3">Compliance</h5>
               <ul className="space-y-2 text-sm">
-                <li><a href="/compliance/curriculum-matrix" className="text-gray-400 hover:text-white">COMAR Compliance Matrix</a></li>
+                
                 <li><a href="/compliance/content-review" className="text-gray-400 hover:text-white">Content Review Process</a></li>
                 <li><a href="/accessibility" className="text-gray-400 hover:text-white">Accessibility Statement</a></li>
               </ul>

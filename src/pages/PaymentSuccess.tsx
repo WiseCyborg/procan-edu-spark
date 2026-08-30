@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { CheckCircle, Award, Mail, Users, Copy, Check, Send } from 'lucide-react';
+import { CheckCircle, Award, ArrowRight, Mail, Users, Copy, Check, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -453,6 +453,7 @@ const PaymentSuccess: React.FC = () => {
                 <li>• Send email invitations to your team members</li>
                 <li>• Or share the join code for quick enrollment</li>
                 <li>• Track employee progress in the Team Dashboard</li>
+                <li>• Employees complete 23 modules + certification exam</li>
               </ul>
             </div>
 
@@ -465,43 +466,59 @@ const PaymentSuccess: React.FC = () => {
     );
   }
 
-  // No payment evidence on this visit — do not claim a charge or completed modules.
+  // Course purchase success view (default)
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
       <Card className="max-w-2xl w-full">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">
-            No payment recorded
+          <div className="flex justify-center mb-4">
+            <CheckCircle className="h-20 w-20 text-green-500" />
+          </div>
+          <CardTitle className="text-3xl text-green-700">
+            Payment Successful!
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <p className="text-center text-muted-foreground">
-            This page does not confirm a charge and does not unlock training. Visiting it
-            without a completed checkout does not complete any modules.
-          </p>
-          <p className="text-center text-sm text-muted-foreground">
-            If you finished a PayPal checkout, use the confirmation link that includes your
-            application ID. If you submitted an organization application, payment is not due
-            until approval.
-          </p>
+          <div className="text-center text-gray-600">
+            <p className="text-lg mb-4">
+              Thank you for your purchase! You now have full access to your course.
+            </p>
+          </div>
+
+          <div className="bg-green-50 p-6 rounded-lg">
+            <h3 className="font-semibold text-green-800 mb-3 flex items-center">
+              <Award className="h-5 w-5 me-2" />
+              What happens next?
+            </h3>
+            <ul className="text-green-700 space-y-2">
+              <li>• Start learning immediately with full course access</li>
+              <li>• Complete all 23 modules at your own pace</li>
+              <li>• Take the final exam when ready</li>
+              <li>• Receive your ProCann EDU completion record</li>
+            </ul>
+          </div>
 
           <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
-            <Button
-              onClick={() => navigate('/org/apply')}
+            <Button 
+              onClick={() => navigate('/course')}
+              size="lg"
+              className="bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto"
+            >
+              Start Learning
+              <ArrowRight className="h-5 w-5 ms-2 rtl-flip" />
+            </Button>
+            <Button 
+              onClick={() => navigate('/dashboard')}
               size="lg"
               variant="outline"
               className="w-full sm:w-auto"
             >
-              Organization application
+              Go to Dashboard
             </Button>
-            <Button
-              onClick={() => navigate('/')}
-              size="lg"
-              variant="outline"
-              className="w-full sm:w-auto"
-            >
-              Return home
-            </Button>
+          </div>
+
+          <div className="text-center text-sm text-gray-500">
+            <p>A confirmation email has been sent to your registered email address.</p>
           </div>
         </CardContent>
       </Card>

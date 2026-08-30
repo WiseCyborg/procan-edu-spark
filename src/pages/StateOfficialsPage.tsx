@@ -201,16 +201,6 @@ export default function StateOfficialsPage() {
             <Button 
               variant="outline" 
               className="h-auto py-4"
-              onClick={() => window.location.href = '/compliance/curriculum-matrix'}
-            >
-              <div className="text-start w-full">
-                <p className="font-semibold">Internal Curriculum Alignment Matrix</p>
-                <p className="text-sm text-muted-foreground">This mapping is our own internal alignment work and has not been reviewed or approved by the MCA.</p>
-              </div>
-            </Button>
-            <Button 
-              variant="outline" 
-              className="h-auto py-4"
               onClick={() => window.location.href = '/compliance/content-review'}
             >
               <div className="text-start w-full">
