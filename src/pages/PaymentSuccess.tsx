@@ -11,6 +11,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import Confetti from 'react-confetti';
+import { RvtApprovalNotice } from '@/components/RvtApprovalNotice';
+
 
 interface SeatPurchaseData {
   quantity: number;
