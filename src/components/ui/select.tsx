@@ -109,18 +109,12 @@ const SelectLabel = React.forwardRef<
 ))
 SelectLabel.displayName = SelectPrimitive.Label.displayName
 
-// Radix throws a fatal error when a SelectItem receives an empty string value.
-// Guard defensively so a missing/blank id can never crash a page.
-const EMPTY_ITEM_SENTINEL = "__empty__"
-
 const SelectItem = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item>
->(({ className, children, value, disabled, ...props }, ref) => (
+>(({ className, children, ...props }, ref) => (
   <SelectPrimitive.Item
     ref={ref}
-    value={value === undefined || value === null || value === "" ? EMPTY_ITEM_SENTINEL : value}
-    disabled={value === undefined || value === null || value === "" ? true : disabled}
     className={cn(
       "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 ps-8 pe-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
       className

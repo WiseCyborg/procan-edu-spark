@@ -23,12 +23,12 @@ const DemoPreview = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    document.title = 'Preview the Maryland RVT Course | ProCann Edu';
+    document.title = 'Preview the Maryland Cannabis Compliance Course | ProCann Edu';
     const meta = document.querySelector('meta[name="description"]');
     if (meta) {
       meta.setAttribute(
         'content',
-        'Preview Module 0 of the Maryland Responsible Vendor Training course — no signup required.'
+        'Preview Module 0 of the Maryland cannabis workforce education course — no signup required.'
       );
     }
 
@@ -60,7 +60,7 @@ const DemoPreview = () => {
       <div className="bg-primary text-primary-foreground">
         <div className="container mx-auto px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-2 text-sm md:text-base">
           <span className="font-medium">
-            🎓 You're previewing the Maryland RVT Course
+            🎓 You're previewing the Maryland Cannabis Compliance Course
           </span>
           <Link
             to="/org/apply"

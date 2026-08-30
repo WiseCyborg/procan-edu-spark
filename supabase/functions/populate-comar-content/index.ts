@@ -38,8 +38,8 @@ const comarSections = [
   {
     section_number: "14.17.05.04",
     title: "Certification Requirements",
-    content: "COMAR 14.17.15.05(C): \"C. Within 90 days of employment start date and annually thereafter, a registered agent employed by a cannabis licensee shall complete a responsible vendor training program that:\" Training remains annual and is still named Responsible Vendor Training (RVT). If an agent starts after July 1, 2026 they must complete their annual training within 90 days of employment, then every year afterwards.",
-    plain_language_summary: "RVT is still annual: 90 days of employment start, then every year afterwards. Do not use a two-year cycle. This course does not satisfy the approved RVT duty.",
+    content: "Dispensary agents must pass a comprehensive examination with minimum 80% score to receive certification valid for 2 years.",
+    plain_language_summary: "Pass requirements: 80% minimum on final exam, 2-year certificate validity, renewal required every 2 years.",
     compliance_tips: "Track certificate expiration dates. Implement renewal reminders 60 days before expiration. Verify exam integrity controls.",
     last_mca_review_date: new Date().toISOString(),
     change_impact_level: "critical"

@@ -96,7 +96,7 @@ export const ContinueTrainingButton: React.FC<ContinueTrainingButtonProps> = ({
       {status === 'in_progress' && (
         <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
           <CheckCircle2 className="h-3 w-3 text-primary" />
-          <span>{rvtProgress.completed}/{rvtProgress.total} RVT modules complete</span>
+          <span>{rvtProgress.completed}/{rvtProgress.total} core modules complete</span>
         </div>
       )}
     </div>

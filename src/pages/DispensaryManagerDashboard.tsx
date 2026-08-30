@@ -240,7 +240,7 @@ const DispensaryManagerDashboard = () => {
       doc.setPage(i);
       doc.setFontSize(8);
       doc.text(
-        `ProCann Edu - Maryland RVT Compliance Report | Page ${i} of ${pageCount}`,
+        `ProCann Edu - Maryland Cannabis Compliance Report | Page ${i} of ${pageCount}`,
         pageWidth / 2,
         doc.internal.pageSize.getHeight() - 10,
         { align: 'center' }

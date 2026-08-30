@@ -80,11 +80,10 @@ Deno.serve(async (req: Request) => {
       throw new Error('Failed to generate certificate number');
     }
 
-    // Annual completion-record window. Matches generate-certificate and Louis Hendricks III
-    // (Aug 16 2026): RVT is 90 days of start, then annually — not a two-year cycle.
+    // Calculate expiry date (2 years from issue)
     const issueDate = new Date();
     const expiryDate = new Date(issueDate);
-    expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+    expiryDate.setFullYear(expiryDate.getFullYear() + 2);
 
     // Create certificate with retry metadata
     const { data: certificate, error: insertError } = await supabase

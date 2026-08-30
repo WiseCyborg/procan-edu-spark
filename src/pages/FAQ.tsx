@@ -49,7 +49,7 @@ const FAQ = () => {
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <Seo
         title="Frequently Asked Questions | ProCann Edu"
-        description="Answers about Maryland RVT certification training, exams, certificates, dispensary enrollment, and team management on ProCann Edu."
+        description="Answers about Maryland cannabis compliance training, exams, completion records, dispensary enrollment, and team management on ProCann Edu."
         path="/faq"
         jsonLd={faqJsonLd}
       />

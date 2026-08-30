@@ -29,11 +29,6 @@ interface VerificationResult {
   hint?: string;
 }
 
-// Radix Select cannot use an empty string as an item value; these sentinels
-// map back to the "no filter" state.
-const ANY_COURSE = 'any-course';
-const ANY_YEAR = 'any-year';
-
 const VerifyCertificate = () => {
   const [searchParams] = useSearchParams();
   const [code, setCode] = useState(searchParams.get('code') || '');
@@ -44,6 +39,8 @@ const VerifyCertificate = () => {
   // Name search state
   const [firstName, setFirstName] = useState('');
   const [lastInitial, setLastInitial] = useState('');
+  const ANY_COURSE = 'all';
+  const ANY_YEAR = 'all';
   const [selectedCourse, setSelectedCourse] = useState<string>(ANY_COURSE);
   const [selectedYear, setSelectedYear] = useState<string>(ANY_YEAR);
 
@@ -141,8 +138,8 @@ const VerifyCertificate = () => {
             Completion Record Verification
           </h1>
           <p className="text-muted-foreground max-w-xl mx-auto">
-            Verify the authenticity and validity of ProCann EDU completion records. Enter a
-            verification code below to check its current status.
+            Confirm a ProCann EDU completion record. Enter a record number below to check
+            its current status.
           </p>
         </div>
       </div>
@@ -153,7 +150,7 @@ const VerifyCertificate = () => {
           <Alert className="bg-muted/50 border-muted">
             <Lock className="h-4 w-4" />
             <AlertDescription>
-              <span className="font-medium">Public Verification:</span> This service only shows completion record validity status. For full details, please log in to your account.
+              <span className="font-medium">Public Verification:</span> This service only confirms whether a completion record is active. For full record details, please log in to your account.
             </AlertDescription>
           </Alert>
 
@@ -162,7 +159,7 @@ const VerifyCertificate = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Search className="h-5 w-5" />
-                Verify Completion Record
+                Verify a Completion Record
               </CardTitle>
               <CardDescription>
                 Choose a verification method below
@@ -185,7 +182,7 @@ const VerifyCertificate = () => {
                 <TabsContent value="code" className="space-y-4">
                   <div>
                     <Input
-                      placeholder="Enter verification code (e.g., RVT-202601-A3K9QZ)"
+                      placeholder="Enter record number (e.g., RVT-202601-A3K9QZ)"
                       value={code}
                       onChange={(e) => setCode(e.target.value.toUpperCase())}
                       onKeyDown={(e) => e.key === 'Enter' && handleVerifyByCode()}
@@ -252,7 +249,7 @@ const VerifyCertificate = () => {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value={ANY_COURSE}>Any course</SelectItem>
-                          {courses?.filter((course) => !!course.id).map((course) => (
+                          {courses?.map((course) => (
                             <SelectItem key={course.id} value={course.id}>
                               {course.title}
                             </SelectItem>
@@ -293,7 +290,7 @@ const VerifyCertificate = () => {
                     ) : (
                       <>
                         <UserSearch className="h-4 w-4 me-2" />
-                        Search Completion Records
+                        Search Records
                       </>
                     )}
                   </Button>
@@ -326,8 +323,8 @@ const VerifyCertificate = () => {
                   <div>
                     <CardTitle className={result.valid ? "text-green-700 dark:text-green-400" : "text-red-700 dark:text-red-400"}>
                       {result.valid 
-                        ? 'Completion Record Found'
-                        : 'Invalid or Not Found'
+                        ? (result.method === 'name_search' ? 'Completion Records Found' : 'Completion Record Found')
+                        : 'No Completion Record Found'
                       }
                     </CardTitle>
                     {result.status === 'revoked' && (
@@ -378,14 +375,14 @@ const VerifyCertificate = () => {
                       <div className="flex items-start gap-3">
                         <Shield className="h-5 w-5 text-primary mt-0.5" />
                         <div>
-                          <p className="text-sm text-muted-foreground">Course</p>
+                          <p className="text-sm text-muted-foreground">Training Completed</p>
                           <p className="font-medium">{result.course_title}</p>
                         </div>
                       </div>
                     )}
                   </div>
 
-                  {result.is_compliance && (
+                  {result.valid && (
                     <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
                       <p className="text-sm text-primary font-medium">
                         ✓ Verified ProCann EDU completion record
@@ -439,7 +436,7 @@ const VerifyCertificate = () => {
 
           {/* Privacy Footer */}
           <p className="text-xs text-muted-foreground text-center">
-            Public verification confirms completion record validity only. Personal details are shown only to the record holder or authorized employers.
+            Public verification confirms the status of a ProCann EDU completion record only. Personal details are shown only to the record holder or authorized employers.
           </p>
         </div>
       </div>

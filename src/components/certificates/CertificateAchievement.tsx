@@ -64,7 +64,7 @@ export const CertificateAchievement: React.FC<CertificateAchievementProps> = ({
               Achievement Unlocked!
             </h1>
             <p className="text-xl text-gray-600 font-inter">
-              You've completed the Maryland Responsible Vendor Training
+              You've completed ProCann EDU Maryland cannabis compliance training
             </p>
           </motion.div>
         </div>

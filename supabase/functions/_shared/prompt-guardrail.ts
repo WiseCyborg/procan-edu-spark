@@ -78,7 +78,7 @@ export function filterOutput(output: string, context: { fn: string; userId?: str
 }
 
 // Verified facts block — anchors the model on figures it has historically hallucinated.
-// Sourced from src/config/business-rules.ts (MARYLAND_RVT_DUTY), docs/audit/2026-07/, and COMAR 14.17.
+// Sourced from src/config/business-rules.ts, docs/audit/2026-07/, and COMAR 14.17.
 // Update here when canonical values change. Do NOT add unverified figures.
 export function verifiedFactsBlock(today: string): string {
   return `
@@ -90,10 +90,6 @@ export function verifiedFactsBlock(today: string): string {
 - Completion record validity: 1 year from issue date
 - Renewal window: 60 days before expiry through 30 days after
 - Governing regulation: COMAR Title 14, Subtitle 17 (Maryland Cannabis Administration)
-- Maryland RVT duty (COMAR 14.17.15.05(C)): "C. Within 90 days of employment start date and annually thereafter, a registered agent employed by a cannabis licensee shall complete a responsible vendor training program that:"
-  Training is still annual and is still named Responsible Vendor Training (RVT). MCA and COMAR still say RVT — do not rename it Cannabis Agent Training.
-  If an agent starts after July 1, 2026 they must complete their annual training within 90 days of employment, then every year afterwards.
-  Do not describe a two-year or 24-month recertification cycle.
 - Product: ProCann Edu is an independent provider of Maryland cannabis workforce education.
   It is NOT MCA-approved, is NOT on the MCA approved Responsible Vendor Training list, and
   its completion records do NOT satisfy Maryland's annual responsible vendor / agent training duty.
