@@ -326,7 +326,7 @@ const VerifyCertificate = () => {
                   <div>
                     <CardTitle className={result.valid ? "text-green-700 dark:text-green-400" : "text-red-700 dark:text-red-400"}>
                       {result.valid 
-                        ? (result.method === 'name_search' ? 'Certificates Found' : 'Valid Certificate')
+                        ? 'Completion Record Found'
                         : 'Invalid or Not Found'
                       }
                     </CardTitle>
