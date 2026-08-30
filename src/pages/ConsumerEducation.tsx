@@ -312,16 +312,40 @@ const ConsumerEducation = () => {
                 <div className="space-y-2">
                   <h3 className="font-semibold text-primary flex items-center gap-2">
                     <CheckCircle2 className="h-5 w-5" />
-                    Valid Medical Card Required
+                    Medical Patient Purchases
                   </h3>
                   <ul className="space-y-1 text-sm text-muted-foreground ms-7">
-                    <li>• Must have active Maryland MCA registration</li>
-                    <li>• Card expires annually, requires renewal</li>
-                    <li>• Out-of-state cards not accepted</li>
+                    <li>• Requires active Maryland patient registration, verified in the state system</li>
+                    <li>• Patient registration lasts six years; provider certification and allotment rules are separate</li>
+                    <li>• Bring a government-issued photo ID; a physical card is not a universal entry requirement</li>
+                    <li>• Out-of-state medical cards are not accepted for medical purchases</li>
                   </ul>
                 </div>
               </div>
+
+              <p className="text-xs text-muted-foreground">
+                Official sources:{' '}
+                <a
+                  href="https://cannabis.maryland.gov/Pages/Adult-Use-FAQs.aspx"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:text-foreground"
+                >
+                  Maryland Cannabis Administration Adult-Use FAQ
+                </a>{' '}
+                and{' '}
+                <a
+                  href="https://cannabis.maryland.gov/Pages/Patients.aspx"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:text-foreground"
+                >
+                  MCA patient information
+                </a>
+                .
+              </p>
             </div>
+
 
             {/* Product Types Guide */}
             <div data-guide-topic="products" className="space-y-6">
