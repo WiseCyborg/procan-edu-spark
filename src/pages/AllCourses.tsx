@@ -165,14 +165,14 @@ const AllCourses = () => {
           </section>
         )}
 
-        {/* Certificate Verification CTA */}
+        {/* Completion Record Verification CTA */}
         <section className="text-center py-12 border-t">
-          <h3 className="text-xl font-semibold mb-2">Verify a Certificate</h3>
+          <h3 className="text-xl font-semibold mb-2">Verify a Completion Record</h3>
           <p className="text-muted-foreground mb-4">
-            Have a certificate code? Verify its authenticity here.
+            Have a verification code? Check its authenticity here.
           </p>
           <Button variant="outline" onClick={() => navigate('/verify')}>
-            Verify Certificate
+            Verify Completion Record
           </Button>
         </section>
       </div>
