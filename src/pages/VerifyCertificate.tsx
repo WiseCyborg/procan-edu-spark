@@ -293,7 +293,7 @@ const VerifyCertificate = () => {
                     ) : (
                       <>
                         <UserSearch className="h-4 w-4 me-2" />
-                        Search Certificates
+                        Search Completion Records
                       </>
                     )}
                   </Button>
