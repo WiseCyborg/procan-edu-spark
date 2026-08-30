@@ -26,10 +26,10 @@ export default function EmployersPage() {
           For Employers
         </Badge>
         <h1 className="text-4xl font-bold mb-4">
-          Employer Certificate Verification
+          Employer Completion Record Verification
         </h1>
         <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-          Verify Employee Cannabis Training Credentials
+          Verify employee cannabis training completion records
         </p>
       </div>
 
@@ -38,14 +38,14 @@ export default function EmployersPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Search className="h-6 w-6 text-primary" />
-            Verify a Single Certificate
+            Verify a Single Completion Record
           </CardTitle>
-          <p className="text-sm text-muted-foreground">Enter a certificate number to verify its status</p>
+          <p className="text-sm text-muted-foreground">Enter a verification code to check its status</p>
         </CardHeader>
         <CardContent>
           <div className="flex gap-4">
             <Input
-              placeholder="Enter certificate number (e.g., CERT-2025-001-1234)"
+              placeholder="Enter verification code (e.g., CERT-2025-001-1234)"
               value={certNumber}
               onChange={(e) => setCertNumber(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleVerify()}
@@ -57,7 +57,7 @@ export default function EmployersPage() {
             </Button>
           </div>
           <p className="text-xs text-muted-foreground mt-3">
-            Certificate numbers can be found on the employee's training certificate or digital credential
+            Verification codes can be found on the employee's ProCann EDU completion record or digital credential
           </p>
         </CardContent>
       </Card>
@@ -67,9 +67,9 @@ export default function EmployersPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Upload className="h-6 w-6 text-primary" />
-            Bulk Certificate Verification
+            Bulk Completion Record Verification
           </CardTitle>
-          <p className="text-sm text-muted-foreground">Verify up to 100 certificates at once</p>
+          <p className="text-sm text-muted-foreground">Verify up to 100 completion records at once</p>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -77,7 +77,7 @@ export default function EmployersPage() {
               <Upload className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
               <p className="font-semibold mb-1">Upload CSV File</p>
               <p className="text-sm text-muted-foreground mb-3">
-                Upload a CSV file with certificate numbers (one per line)
+                Upload a CSV file with verification codes (one per line)
               </p>
               <div className="flex gap-3 justify-center">
                 <Button variant="outline" size="sm">
@@ -90,7 +90,7 @@ export default function EmployersPage() {
               </div>
             </div>
             <p className="text-xs text-muted-foreground">
-              Format: One certificate number per row. Maximum 100 certificates per upload.
+              Format: One verification code per row. Maximum 100 records per upload.
             </p>
           </div>
         </CardContent>
@@ -144,7 +144,7 @@ export default function EmployersPage() {
       "valid": true,
       "issue_date": "2025-01-15",
       "expiry_date": "2027-01-15",
-      "course_title": "Maryland RVT Certification"
+      "course_title": "ProCann EDU Maryland Cannabis Compliance Training"
     }
   ]
 }`}
@@ -170,7 +170,7 @@ export default function EmployersPage() {
         <CardContent>
           <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="item-1">
-              <AccordionTrigger>How do I verify a certificate?</AccordionTrigger>
+              <AccordionTrigger>How do I verify a completion record?</AccordionTrigger>
               <AccordionContent>
                 Enter the certificate number in the verification form above. The system will immediately 
                 show you the certificate's status (valid, expired, or revoked), issue date, and expiry date.
