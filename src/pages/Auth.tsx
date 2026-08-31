@@ -10,6 +10,7 @@ import DispensaryManagerAuthForm from '@/components/auth/DispensaryManagerAuthFo
 import AccessKeyEntry from '@/components/auth/AccessKeyEntry';
 import { PasswordReset } from '@/components/auth/PasswordReset';
 import { Info, Building2 } from 'lucide-react';
+import { authContinueCopy } from '@/lib/applyPaymentFlow';
 
 // Student access paths: email invitation, individual purchase, or an
 // organization join code (rvt_join_codes) entered on the registration form.
@@ -24,6 +25,17 @@ const Auth = () => {
   const forceRegister = searchParams.get('register') === 'true';
   const logoutReason = searchParams.get('reason');
   const savedParam = searchParams.get('saved');
+  const nextPath = searchParams.get('next');
+  const continueCopy = authContinueCopy(nextPath);
+
+  const ContinueBanner = () => {
+    if (!continueCopy) return null;
+    return (
+      <div className="mb-4 p-3 border rounded-lg bg-muted/50 text-center">
+        <p className="text-sm text-muted-foreground">{continueCopy}</p>
+      </div>
+    );
+  };
 
   // Inactivity/logout banner with save status
   const LogoutBanner = () => {
@@ -98,6 +110,7 @@ const Auth = () => {
           </CardHeader>
           <CardContent>
             <LogoutBanner />
+            <ContinueBanner />
             <div className="text-center mb-4 text-sm text-muted-foreground">
               If you received an email invitation, click the link in your email.
               Otherwise, sign in below — or register with your organization's join code.
@@ -165,6 +178,7 @@ const Auth = () => {
           </CardHeader>
           <CardContent>
             <LogoutBanner />
+            <ContinueBanner />
             {showAccessKey ? (
               <>
                 <div className="text-center mb-4 text-sm text-muted-foreground">
@@ -231,6 +245,7 @@ const Auth = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/5 p-4">
       <div className="w-full max-w-lg">
         <LogoutBanner />
+        <ContinueBanner />
         {renderAuthForm()}
       </div>
     </div>
