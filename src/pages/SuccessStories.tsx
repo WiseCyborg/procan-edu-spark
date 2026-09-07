@@ -2,6 +2,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { CheckCircle, Shield, Clock, MapPin, ArrowRight, BookOpen, Award } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { BUSINESS_RULES } from '@/config/business-rules';
+
+const checkoutEnabled = BUSINESS_RULES.PUBLIC_SELF_SERVE_CHECKOUT_ENABLED;
 
 const platformFeatures = [
   {
@@ -53,8 +56,8 @@ export default function SuccessStories() {
               ProCann Edu provides Maryland cannabis workforce education designed specifically for Maryland cannabis professionals
             </p>
             <div className="flex flex-wrap justify-center gap-4">
-              <Button size="lg" onClick={() => navigate('/signup')}>
-                Start training — $49.99
+              <Button size="lg" onClick={() => navigate(checkoutEnabled ? '/signup' : '/get-started')}>
+                {checkoutEnabled ? 'Start training — $49.99' : 'Explore workforce education'}
                 <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
               </Button>
               <Button size="lg" variant="outline" onClick={() => navigate('/faq')}>
@@ -138,8 +141,8 @@ export default function SuccessStories() {
             Join Maryland cannabis professionals who trust ProCann Edu for Maryland cannabis workforce education
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Button size="lg" variant="secondary" onClick={() => navigate('/signup')}>
-              Start training — $49.99
+            <Button size="lg" variant="secondary" onClick={() => navigate(checkoutEnabled ? '/signup' : '/get-started')}>
+              {checkoutEnabled ? 'Start training — $49.99' : 'Explore workforce education'}
               <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
             </Button>
             <Button size="lg" variant="outline" className="bg-transparent border-white text-white hover:bg-white/10" onClick={() => navigate('/why-procann')}>

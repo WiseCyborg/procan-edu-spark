@@ -9,6 +9,9 @@ import { useLaunchCourse } from '@/hooks/useLaunchCourse';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { BUSINESS_RULES } from '@/config/business-rules';
+
+const checkoutEnabled = BUSINESS_RULES.PUBLIC_SELF_SERVE_CHECKOUT_ENABLED;
 
 export interface CourseInfo {
   id: string;
@@ -98,6 +101,9 @@ export const UniversalCourseCard = ({
     }
 
     if (showPaygate && priceCents) {
+      if (!checkoutEnabled) {
+        return 'Contact us about workforce education';
+      }
       return (
         <>
           <ShoppingCart className="me-2 h-4 w-4" />
@@ -219,10 +225,16 @@ export const UniversalCourseCard = ({
 
       <CardFooter className="flex flex-col gap-2 pt-4">
         <Button 
-          onClick={() => requiresPayment ? handlePurchase() : launchCourse(course.id)}
+          onClick={() => {
+            if (showPaygate && !checkoutEnabled) {
+              window.location.href = 'mailto:info@procannedu.com';
+              return;
+            }
+            requiresPayment ? handlePurchase() : launchCourse(course.id);
+          }}
           className="w-full"
           size="lg"
-          variant={isLocked || isComingSoon ? "outline" : showPaygate ? "default" : hasCertificate ? "secondary" : "default"}
+          variant={isLocked || isComingSoon ? "outline" : showPaygate && checkoutEnabled ? "default" : hasCertificate ? "secondary" : "default"}
           disabled={isLoading || isComingSoon || isPurchasing}
         >
           {getButtonContent()}

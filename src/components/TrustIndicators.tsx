@@ -2,6 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Shield, Users, Award, CheckCircle, Star, Clock, MapPin, DollarSign } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { BUSINESS_RULES } from '@/config/business-rules';
+
+const checkoutEnabled = BUSINESS_RULES.PUBLIC_SELF_SERVE_CHECKOUT_ENABLED;
 
 interface CounterProps {
   end: number;
@@ -88,9 +91,11 @@ export const TrustStats = () => {
 
       <Card className="p-4 text-center bg-primary border-primary/20">
         <div className="text-2xl font-bold text-primary-foreground">
-          $49.99
+          {checkoutEnabled ? '$49.99' : 'Workforce'}
         </div>
-        <div className="text-sm text-primary-foreground/80">$49.99 per seat</div>
+        <div className="text-sm text-primary-foreground/80">
+          {checkoutEnabled ? '$49.99 per seat' : 'Education'}
+        </div>
       </Card>
       
       <Card className="p-4 text-center bg-primary border-primary/20">

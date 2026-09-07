@@ -2,6 +2,10 @@ export const BUSINESS_RULES = {
   // Course
   TOTAL_MODULES: 24,
   PASSING_SCORE_PERCENTAGE: 80,
+
+  // Public self-serve checkout is off until PayPal/collect is reconnected.
+  // Flip to true to restore existing $49.99 buy CTAs. Do not delete payment code.
+  PUBLIC_SELF_SERVE_CHECKOUT_ENABLED: false,
   
   // Seat Pricing - Maryland Regulatory Compliance
   SEAT_PRICE_USD: 49.99,

@@ -37,7 +37,9 @@ export const PredictiveAnalyticsPreview = () => {
           <div className="flex items-center justify-center gap-3 mb-4">
             <Brain className="h-10 w-10 text-primary" />
             <h3 className="text-3xl md:text-4xl font-bold">
-              See Your ROI Before You Buy
+              {BUSINESS_RULES.PUBLIC_SELF_SERVE_CHECKOUT_ENABLED
+                ? 'See Your ROI Before You Buy'
+                : 'Estimate workforce education ROI'}
             </h3>
           </div>
           <p className="text-lg text-muted-foreground">
