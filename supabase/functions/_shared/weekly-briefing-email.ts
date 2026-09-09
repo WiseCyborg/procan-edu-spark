@@ -160,6 +160,9 @@ export function parseMarkdownBlocks(md: string): Block[] {
     while (i < lines.length) {
       const lt = lines[i].trim();
       if (!lt || /^(#{1,3}\s|[-*+]\s|\d+[.)]\s|\|)/.test(lt) || /^(-{3,}|={3,})$/.test(lt)) break;
+      // A line that opens with a bold label ("**Owner:** …") is its own block,
+      // so meta lines and owner lines never merge into a run-on paragraph.
+      if (buf.length && /^\*\*[^*]+\*\*/.test(lt)) break;
       buf.push(lt);
       i++;
     }
