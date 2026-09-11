@@ -124,11 +124,13 @@ import { AdminProxyProvider } from "./contexts/AdminProxyContext";
 import { AdminProxyBanner } from "./components/admin/AdminProxyBanner";
 import { IdleTimeoutProvider } from "./components/auth/IdleTimeoutProvider";
 import { SaveStatusProvider } from "./hooks/useSaveStatus";
+import { isSafeInternalPath } from "@/lib/applyPaymentFlow";
 
 const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
+  const location = useLocation();
   
   if (loading) {
     return (
@@ -139,7 +141,13 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
   
   if (!user) {
-    return <Navigate to="/auth" replace />;
+    const dest = `${location.pathname}${location.search}`;
+    const params = new URLSearchParams();
+    if (isSafeInternalPath(dest) && dest !== '/auth') {
+      params.set('next', dest);
+    }
+    const qs = params.toString();
+    return <Navigate to={qs ? `/auth?${qs}` : '/auth'} replace />;
   }
   
   return <>{children}</>;
@@ -168,6 +176,10 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
 
   // Don't redirect if this is a password reset or utility registration tab
   if (user && !isPasswordReset && !isUtilityAuthTab) {
+    const next = searchParams.get('next');
+    if (isSafeInternalPath(next) && next !== '/auth') {
+      return <Navigate to={next} replace />;
+    }
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -271,6 +283,8 @@ const AppRoutesLayout = () => {
                 <ProCannLive />
               </ProtectedRoute>
             } />
+            <Route path="/login" element={<Navigate to="/auth" replace />} />
+            <Route path="/apply" element={<Navigate to="/org/apply" replace />} />
             <Route path="/auth" element={
               <PublicRoute>
                 <Auth />
