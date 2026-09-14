@@ -100,22 +100,40 @@ export const CoursePaymentGate: React.FC<CoursePaymentGateProps> = ({
           </div>
 
           <div className="flex justify-center">
-            <Button 
-              onClick={handlePayment}
-              disabled={isProcessing}
-              size="lg"
-              className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 md:px-8 h-12 md:h-11 text-base md:text-lg"
-            >
-              <CreditCard className="h-5 w-5 me-2 flex-shrink-0" />
-              <span className="truncate">
-                {isProcessing ? 'Processing...' : `Pay ${formatPrice(course.price_cents, course.currency)}`}
-              </span>
-            </Button>
+            {BUSINESS_RULES.PUBLIC_SELF_SERVE_CHECKOUT_ENABLED ? (
+              <Button
+                onClick={handlePayment}
+                disabled={isProcessing}
+                size="lg"
+                className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 md:px-8 h-12 md:h-11 text-base md:text-lg"
+              >
+                <CreditCard className="h-5 w-5 me-2 flex-shrink-0" />
+                <span className="truncate">
+                  {isProcessing ? 'Processing...' : `Pay ${formatPrice(course.price_cents, course.currency)}`}
+                </span>
+              </Button>
+            ) : (
+              <Button
+                asChild
+                size="lg"
+                className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 md:px-8 h-12 md:h-11 text-base md:text-lg"
+              >
+                <a href="mailto:info@procannedu.com">
+                  <span className="truncate">Contact us about workforce education</span>
+                </a>
+              </Button>
+            )}
           </div>
 
           <div className="text-center text-xs md:text-sm text-gray-500 space-y-1">
-            <p>Secure payment powered by PayPal</p>
-            <p>Your payment information is encrypted and secure</p>
+            {BUSINESS_RULES.PUBLIC_SELF_SERVE_CHECKOUT_ENABLED ? (
+              <>
+                <p>Secure payment powered by PayPal</p>
+                <p>Your payment information is encrypted and secure</p>
+              </>
+            ) : (
+              <p>Online checkout is temporarily unavailable. Email us and we'll help you get set up.</p>
+            )}
           </div>
         </CardContent>
       </Card>
