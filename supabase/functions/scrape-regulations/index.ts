@@ -36,7 +36,51 @@ interface SectionRecord {
   sourceUrl: string;
 }
 
+
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/** Retry edge-function invoke for transient / vendor failures. No retry on permanent client errors. */
+async function invokeAnalyzeWithRetry(
+  supabase: ReturnType<typeof createClient>,
+  body: { section_number: string; old_content: string | null; new_content: string },
+  attempts = 3,
+): Promise<{ ok: true } | { ok: false; message: string; attempts: number }> {
+  let lastMsg = "unknown";
+  for (let i = 1; i <= attempts; i++) {
+    try {
+      const { data, error } = await supabase.functions.invoke("analyze-regulatory-impact", { body });
+      if (!error) {
+        // Some gateway paths return 2xx with { error } payload — treat as failure.
+        if (data && typeof data === "object" && (data as { error?: string }).error) {
+          lastMsg = String((data as { error: string }).error);
+        } else {
+          return { ok: true };
+        }
+      } else {
+        lastMsg = error.message ?? String(error);
+      }
+    } catch (e) {
+      lastMsg = e instanceof Error ? e.message : String(e);
+    }
+    const permanent =
+      /not configured|invalid|400|401|403|credit balance|too low/i.test(lastMsg) &&
+      !/429|529|502|503|504|timeout|temporar/i.test(lastMsg);
+    // Always retry credit/429/5xx; only skip obvious permanent config errors without rate/timeout cues
+    const isCredit = /credit balance|too low to access/i.test(lastMsg);
+    if (permanent && !isCredit) {
+      return { ok: false, message: lastMsg, attempts: i };
+    }
+    if (i < attempts) {
+      const delay = 1000 * Math.pow(2, i - 1); // 1s, 2s
+      console.warn(
+        `[scrape-regulations] analyze ${body.section_number} attempt ${i}/${attempts} failed: ${lastMsg}; retry in ${delay}ms`,
+      );
+      await sleep(delay);
+    }
+  }
+  return { ok: false, message: lastMsg, attempts };
+}
+
 
 async function discoverChapters(): Promise<string[]> {
   const found = new Set<string>(FLOOR_CHAPTERS);
@@ -231,19 +275,15 @@ serve(async (req) => {
             });
 
             // AI analysis; non-fatal to the scrape, but surfaced in the run log.
+            // PCE-741: retry transient/non-2xx so a single Anthropic blip does not leave the row NULL forever.
             try {
-              const { error: analyzeErr } = await supabase.functions.invoke(
-                "analyze-regulatory-impact",
-                {
-                  body: {
-                    section_number: rec.number,
-                    old_content: existing?.content_text ?? null,
-                    new_content: rec.content,
-                  },
-                },
-              );
-              if (analyzeErr) {
-                const msg = analyzeErr.message ?? String(analyzeErr);
+              const result = await invokeAnalyzeWithRetry(supabase, {
+                section_number: rec.number,
+                old_content: existing?.content_text ?? null,
+                new_content: rec.content,
+              });
+              if (!result.ok) {
+                const msg = `${result.message} (after ${result.attempts} attempt(s))`;
                 console.error(`[scrape-regulations] analyze-regulatory-impact ${rec.number}:`, msg);
                 errors.push({ where: `analyze:${rec.number}`, message: msg });
               }
