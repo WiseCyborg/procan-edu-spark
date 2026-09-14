@@ -8,9 +8,11 @@ import { Label } from '@/components/ui/label';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { SUBSCRIPTION_TIERS, SPECIAL_PRICING, formatPrice } from '@/config/subscription-tiers';
 import { Check, Users, ArrowRight, Building2, HelpCircle } from 'lucide-react';
+import { BUSINESS_RULES } from '@/config/business-rules';
 
 export default function Pricing() {
   const navigate = useNavigate();
+  const checkoutEnabled = BUSINESS_RULES.PUBLIC_SELF_SERVE_CHECKOUT_ENABLED;
   const [isAnnual, setIsAnnual] = useState(true);
   const [showNonprofit, setShowNonprofit] = useState(false);
 
@@ -63,7 +65,7 @@ export default function Pricing() {
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Enterprise training that scales with your organization. All plans include full access
-              to the 24-module RVT curriculum and MCA-compliant certification.
+              to Maryland cannabis workforce education.
             </p>
 
             {/* Toggles */}
@@ -151,12 +153,20 @@ export default function Pricing() {
                   <div className="text-start">
                     <p className="font-medium">Need just a few seats?</p>
                     <p className="text-sm text-muted-foreground">
-                      Individual seats available at $49.99/employee (Maryland max: $50.00)
+                      {checkoutEnabled
+                        ? `Individual seats available at $${BUSINESS_RULES.SEAT_PRICE_USD}/employee (Maryland max: $50.00)`
+                        : 'Contact us about seats for your organization.'}
                     </p>
                   </div>
-                  <Button variant="outline" onClick={() => navigate('/dispensary-application')}>
-                    Apply Now
-                  </Button>
+                  {checkoutEnabled ? (
+                    <Button variant="outline" onClick={() => navigate('/dispensary-application')}>
+                      Apply Now
+                    </Button>
+                  ) : (
+                    <Button variant="outline" asChild>
+                      <a href="mailto:info@procannedu.com">Contact us about seats</a>
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>

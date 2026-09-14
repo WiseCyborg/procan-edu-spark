@@ -14,13 +14,14 @@ type RetakeFrequency = 'never' | 'rare' | 'occasional' | 'frequent';
 
 export default function ROICalculatorPublic() {
   const navigate = useNavigate();
+  const checkoutEnabled = BUSINESS_RULES.PUBLIC_SELF_SERVE_CHECKOUT_ENABLED;
   const [agents, setAgents] = useState(15);
   const [currentPassRate, setCurrentPassRate] = useState(70);
   const [hourlyWage, setHourlyWage] = useState(20);
   const [retakeFrequency, setRetakeFrequency] = useState<RetakeFrequency>('occasional');
 
   const calculations = useMemo(() => {
-    // Training cost (Maryland-compliant pricing)
+    // SEAT_PRICE_USD kept for flip-back; public $49.99 math is gated below.
     const trainingCost = agents * BUSINESS_RULES.SEAT_PRICE_USD;
     
     // Expected pass rate improvement
@@ -167,71 +168,84 @@ export default function ROICalculatorPublic() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6 space-y-4">
-                {/* Investment */}
+                {/* Investment — $49.99 seat math only when self-serve checkout is on */}
                 <div className="flex justify-between items-center p-4 bg-muted/50 rounded-lg">
                   <div>
-                    <p className="text-sm text-muted-foreground">Training Investment</p>
+                    <p className="text-sm text-muted-foreground">
+                      {checkoutEnabled ? 'Training Investment' : 'Workforce education'}
+                    </p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {agents} agents × ${BUSINESS_RULES.SEAT_PRICE_USD}
+                      {checkoutEnabled
+                        ? `${agents} agents × $${BUSINESS_RULES.SEAT_PRICE_USD}`
+                        : `About ${agents} agents — contact us about seats`}
                     </p>
                   </div>
-                  <div className="text-2xl font-bold text-primary">
-                    ${calculations.trainingCost.toLocaleString()}
-                  </div>
+                  {checkoutEnabled ? (
+                    <div className="text-2xl font-bold text-primary">
+                      ${calculations.trainingCost.toLocaleString()}
+                    </div>
+                  ) : (
+                    <Button variant="outline" size="sm" asChild>
+                      <a href="mailto:info@procannedu.com">Contact us about seats</a>
+                    </Button>
+                  )}
                 </div>
 
-                {/* Annual Savings */}
-                <div className="flex justify-between items-center p-4 bg-green-500/10 rounded-lg border border-green-500/20">
-                  <div>
-                    <p className="text-sm font-semibold text-green-700 dark:text-green-400">Annual Savings</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Retakes + Time efficiency
-                    </p>
-                  </div>
-                  <div className="text-2xl font-bold text-green-600">
-                    ${calculations.annualSavings.toLocaleString()}
-                  </div>
-                </div>
+                {checkoutEnabled && (
+                  <>
+                    <div className="flex justify-between items-center p-4 bg-green-500/10 rounded-lg border border-green-500/20">
+                      <div>
+                        <p className="text-sm font-semibold text-green-700 dark:text-green-400">Annual Savings</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Retakes + Time efficiency
+                        </p>
+                      </div>
+                      <div className="text-2xl font-bold text-green-600">
+                        ${calculations.annualSavings.toLocaleString()}
+                      </div>
+                    </div>
 
-                {/* ROI */}
-                <div className={`flex justify-between items-center p-4 rounded-lg border ${
-                  calculations.roi >= 0 
-                    ? 'bg-blue-500/10 border-blue-500/20' 
-                    : 'bg-amber-500/10 border-amber-500/20'
-                }`}>
-                  <div>
-                    <p className={`text-sm font-semibold ${
+                    <div className={`flex justify-between items-center p-4 rounded-lg border ${
                       calculations.roi >= 0 
-                        ? 'text-blue-700 dark:text-blue-400' 
-                        : 'text-amber-700 dark:text-amber-400'
-                    }`}>Return on Investment</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Payback in {calculations.paybackWeeks > 0 ? `${calculations.paybackWeeks} weeks` : 'N/A'}
-                    </p>
-                  </div>
-                  <div className={`text-3xl font-bold ${
-                    calculations.roi >= 0 ? 'text-blue-600' : 'text-amber-600'
-                  }`}>
-                    {calculations.roi}%
-                  </div>
-                </div>
+                        ? 'bg-blue-500/10 border-blue-500/20' 
+                        : 'bg-amber-500/10 border-amber-500/20'
+                    }`}>
+                      <div>
+                        <p className={`text-sm font-semibold ${
+                          calculations.roi >= 0 
+                            ? 'text-blue-700 dark:text-blue-400' 
+                            : 'text-amber-700 dark:text-amber-400'
+                        }`}>Return on Investment</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Payback in {calculations.paybackWeeks > 0 ? `${calculations.paybackWeeks} weeks` : 'N/A'}
+                        </p>
+                      </div>
+                      <div className={`text-3xl font-bold ${
+                        calculations.roi >= 0 ? 'text-blue-600' : 'text-amber-600'
+                      }`}>
+                        {calculations.roi}%
+                      </div>
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
 
-            {/* ROI Intelligence Agent */}
-            <ROIIntelligenceAgent
-              roi={calculations.roi}
-              currentPassRate={currentPassRate}
-              agents={agents}
-              annualSavings={calculations.annualSavings}
-              trainingCost={calculations.trainingCost}
-              retakeFrequency={retakeFrequency}
-              hourlyWage={hourlyWage}
-              onOptimize={() => {
-                setCurrentPassRate(70);
-                setRetakeFrequency('occasional');
-              }}
-            />
+            {checkoutEnabled && (
+              <ROIIntelligenceAgent
+                roi={calculations.roi}
+                currentPassRate={currentPassRate}
+                agents={agents}
+                annualSavings={calculations.annualSavings}
+                trainingCost={calculations.trainingCost}
+                retakeFrequency={retakeFrequency}
+                hourlyWage={hourlyWage}
+                onOptimize={() => {
+                  setCurrentPassRate(70);
+                  setRetakeFrequency('occasional');
+                }}
+              />
+            )}
 
             {/* Breakdown */}
             <Card className="shadow-lg">
@@ -284,9 +298,15 @@ export default function ROICalculatorPublic() {
               Projections are based on hypothetical scenarios and industry assumptions—not guaranteed outcomes. 
               Actual savings depend on your organization's size, current processes, employee performance, and other factors.
             </p>
-            <p className="text-sm text-muted-foreground text-center">
-              ProCann Edu charges ${BUSINESS_RULES.SEAT_PRICE_USD} per employee.
-            </p>
+            {checkoutEnabled ? (
+              <p className="text-sm text-muted-foreground text-center">
+                ProCann Edu charges ${BUSINESS_RULES.SEAT_PRICE_USD} per employee.
+              </p>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center">
+                Contact us about seats for your organization.
+              </p>
+            )}
           </CardContent>
         </Card>
       </div>
