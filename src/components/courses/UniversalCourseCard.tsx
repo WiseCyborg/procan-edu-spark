@@ -223,7 +223,14 @@ export const UniversalCourseCard = ({
 
       <CardFooter className="flex flex-col gap-2 pt-4">
         <Button 
-          onClick={() => requiresPayment ? handlePurchase() : launchCourse(course.id)}
+          onClick={() => {
+            const paygateBlocked = showPaygate && priceCents && !BUSINESS_RULES.PUBLIC_SELF_SERVE_CHECKOUT_ENABLED;
+            if (paygateBlocked) {
+              window.location.href = 'mailto:info@procannedu.com';
+              return;
+            }
+            return requiresPayment ? handlePurchase() : launchCourse(course.id);
+          }}
           className="w-full"
           size="lg"
           variant={isLocked || isComingSoon ? "outline" : showPaygate ? "default" : hasCertificate ? "secondary" : "default"}
