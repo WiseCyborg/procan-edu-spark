@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { CreditCard, Lock, Check } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
+import { BUSINESS_RULES } from '@/config/business-rules';
 
 interface Course {
   id: string;
