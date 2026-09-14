@@ -182,7 +182,7 @@ export const RealTimeSystemHealth = () => {
           <div className="pt-2 border-t space-y-2">
             <div className="flex items-center justify-between text-xs">
               <span className="text-muted-foreground">Uptime</span>
-              <span className="font-medium">99.98%</span>
+              <span className="font-medium">Monitored</span>
             </div>
             <div className="flex items-center justify-between text-xs">
               <span className="text-muted-foreground">Response Time (Avg)</span>

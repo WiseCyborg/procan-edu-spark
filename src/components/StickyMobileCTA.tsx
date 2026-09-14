@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Award, Building2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { BUSINESS_RULES } from '@/config/business-rules';
+
+const checkoutEnabled = BUSINESS_RULES.PUBLIC_SELF_SERVE_CHECKOUT_ENABLED;
 
 export const StickyMobileCTA = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -25,12 +28,12 @@ export const StickyMobileCTA = () => {
     <div className="fixed bottom-0 start-0 end-0 z-50 bg-card shadow-2xl border-t-2 border-primary p-3 md:hidden animate-slide-in-up">
       <div className="flex gap-2">
         <Button
-          onClick={() => navigate('/auth?role=student')}
+          onClick={() => navigate(checkoutEnabled ? '/auth?role=student' : '/get-started')}
           className="flex-1 bg-primary text-primary-foreground h-14 text-base font-semibold shadow-lg"
           size="touch"
         >
           <Award className="h-5 w-5 me-2" />
-          Start Training
+          {checkoutEnabled ? 'Start Training' : 'Explore workforce education'}
         </Button>
         <Button
           onClick={() => navigate('/org/apply')}

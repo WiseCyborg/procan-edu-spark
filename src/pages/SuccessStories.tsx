@@ -2,6 +2,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { CheckCircle, Shield, Clock, MapPin, ArrowRight, BookOpen, Award } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { BUSINESS_RULES } from '@/config/business-rules';
+
+const checkoutEnabled = BUSINESS_RULES.PUBLIC_SELF_SERVE_CHECKOUT_ENABLED;
 
 const platformFeatures = [
   {
@@ -12,7 +15,7 @@ const platformFeatures = [
   {
     icon: Clock,
     title: "Self-Paced Learning",
-    description: "Complete your certification in 4-6 hours at your own pace, with 24/7 access"
+    description: "Learn at your own pace, with 24/7 access"
   },
   {
     icon: Shield,
@@ -29,15 +32,25 @@ const platformFeatures = [
     title: "Verifiable Certificates",
     description: "Digital certificates with public verification portal for employers"
   },
-  {
-    icon: CheckCircle,
-    title: "$49.99 per seat",
-    description: "ProCann Edu charges $49.99 per student."
-  }
 ];
 
 export default function SuccessStories() {
   const navigate = useNavigate();
+
+  const features = [
+    ...platformFeatures,
+    checkoutEnabled
+      ? {
+          icon: CheckCircle,
+          title: "$49.99 per seat",
+          description: "ProCann Edu charges $49.99 per student."
+        }
+      : {
+          icon: CheckCircle,
+          title: "Workforce education",
+          description: "Contact us about seats for your team."
+        }
+  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -53,8 +66,8 @@ export default function SuccessStories() {
               ProCann Edu provides Maryland cannabis workforce education designed specifically for Maryland cannabis professionals
             </p>
             <div className="flex flex-wrap justify-center gap-4">
-              <Button size="lg" onClick={() => navigate('/signup')}>
-                Start training — $49.99
+              <Button size="lg" onClick={() => navigate(checkoutEnabled ? '/signup' : '/get-started')}>
+                {checkoutEnabled ? 'Start training — $49.99' : 'Explore workforce education'}
                 <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
               </Button>
               <Button size="lg" variant="outline" onClick={() => navigate('/faq')}>
@@ -77,7 +90,7 @@ export default function SuccessStories() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {platformFeatures.map((feature, idx) => (
+            {features.map((feature, idx) => (
               <Card key={idx} className="hover:shadow-lg transition-shadow">
                 <CardContent className="pt-6">
                   <div className="flex items-start gap-4">
@@ -120,9 +133,13 @@ export default function SuccessStories() {
                 </p>
               </div>
               <div className="p-6 bg-background rounded-lg border">
-                <h3 className="font-semibold mb-2">Accessible Pricing</h3>
+                <h3 className="font-semibold mb-2">
+                  {checkoutEnabled ? 'Accessible Pricing' : 'Workforce education'}
+                </h3>
                 <p className="text-sm text-muted-foreground">
-                  $49.99 per student.
+                  {checkoutEnabled
+                    ? '$49.99 per student.'
+                    : 'Contact us about seats for your organization.'}
                 </p>
               </div>
             </div>
@@ -133,13 +150,15 @@ export default function SuccessStories() {
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-br from-primary to-primary-glow text-primary-foreground">
         <div className="container text-center">
-          <h2 className="text-3xl font-bold mb-4">Ready to Start Training?</h2>
+          <h2 className="text-3xl font-bold mb-4">
+            {checkoutEnabled ? 'Ready to Start Training?' : 'Ready to explore workforce education?'}
+          </h2>
           <p className="text-lg mb-8 opacity-90 max-w-2xl mx-auto">
             Join Maryland cannabis professionals who trust ProCann Edu for Maryland cannabis workforce education
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Button size="lg" variant="secondary" onClick={() => navigate('/signup')}>
-              Start training — $49.99
+            <Button size="lg" variant="secondary" onClick={() => navigate(checkoutEnabled ? '/signup' : '/get-started')}>
+              {checkoutEnabled ? 'Start training — $49.99' : 'Explore workforce education'}
               <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
             </Button>
             <Button size="lg" variant="outline" className="bg-transparent border-white text-white hover:bg-white/10" onClick={() => navigate('/why-procann')}>

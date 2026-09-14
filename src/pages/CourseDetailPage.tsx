@@ -8,6 +8,9 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Seo } from '@/components/Seo';
 import { toast } from 'sonner';
+import { BUSINESS_RULES } from '@/config/business-rules';
+
+const checkoutEnabled = BUSINESS_RULES.PUBLIC_SELF_SERVE_CHECKOUT_ENABLED;
 
 interface CourseRow {
   id: string;
@@ -179,7 +182,7 @@ const CourseDetailPage = () => {
                 <span>Earn the {course.completion_badge_name} credential</span>
               </div>
             )}
-            {requiresPayment && (
+            {requiresPayment && checkoutEnabled && (
               <div className="flex items-center gap-2">
                 <ShoppingCart className="h-4 w-4 text-muted-foreground" />
                 <span className="text-xl font-bold text-foreground">{formatPrice(priceCents, currency)}</span>
@@ -193,6 +196,15 @@ const CourseDetailPage = () => {
             <CheckCircle2 className="h-5 w-5 me-2" />
             Continue Course
           </Button>
+        ) : requiresPayment && !checkoutEnabled ? (
+          <div className="space-y-3">
+            <Button size="lg" className="w-full sm:w-auto" asChild>
+              <a href="mailto:info@procannedu.com">Contact us about workforce education</a>
+            </Button>
+            <p className="text-xs text-muted-foreground">
+              Self-serve enrollment is temporarily unavailable.
+            </p>
+          </div>
         ) : requiresPayment ? (
           <Button size="lg" className="w-full sm:w-auto" onClick={handlePurchase} disabled={isPurchasing}>
             {isPurchasing ? (
@@ -208,7 +220,7 @@ const CourseDetailPage = () => {
           </Button>
         )}
 
-        {requiresPayment && !hasEntitlement && (
+        {requiresPayment && !hasEntitlement && checkoutEnabled && (
           <p className="text-xs text-muted-foreground mt-3">Secure checkout powered by PayPal.</p>
         )}
       </div>

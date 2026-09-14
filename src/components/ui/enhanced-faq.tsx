@@ -10,6 +10,7 @@ import { useUserRole } from '@/hooks/useUserRole';
 import { useContentLastUpdated } from '@/hooks/useContentLastUpdated';
 import { formatDistanceToNow } from 'date-fns';
 import { ListenButton } from '@/components/i18n/ListenButton';
+import { BUSINESS_RULES } from '@/config/business-rules';
 
 interface FAQItem {
   id: string;
@@ -33,12 +34,18 @@ export const EnhancedFAQ: React.FC<EnhancedFAQProps> = ({
 }) => {
   const { roles, isAdmin, isDispensaryManager } = useUserRole();
   const { t } = useTranslation();
+  const checkoutEnabled = BUSINESS_RULES.PUBLIC_SELF_SERVE_CHECKOUT_ENABLED;
   const [searchTerm, setSearchTerm] = useState('');
   const { lastUpdated, isLoading: isLoadingMetadata } = useContentLastUpdated('faq');
   const contentRef = useRef<HTMLDivElement>(null);
 
-  const tr = (id: string, field: 'q' | 'a', fallback: string) =>
-    t(`faq.items.${id}.${field}`, { defaultValue: fallback });
+  const tr = (id: string, field: 'q' | 'a', fallback: string) => {
+    // Do not surface i18n $49.99 copy while self-serve checkout is off.
+    if (id === 'general-3' && field === 'a') {
+      return fallback;
+    }
+    return t(`faq.items.${id}.${field}`, { defaultValue: fallback });
+  };
 
 
   const faqData: FAQItem[] = [
@@ -188,7 +195,9 @@ export const EnhancedFAQ: React.FC<EnhancedFAQProps> = ({
     {
       id: 'general-3',
       question: 'How much does the training cost?',
-      answer: 'Individual training is $49.99. Organizations receive volume discounts: 10-49 employees (10% off), 50+ employees (20% off). Contact us for custom enterprise pricing.',
+      answer: checkoutEnabled
+        ? `Individual training is $${BUSINESS_RULES.SEAT_PRICE_USD}. Organizations receive volume discounts: 10-49 employees (10% off), 50+ employees (20% off). Contact us for custom enterprise pricing.`
+        : 'Self-serve enrollment is temporarily unavailable. Contact us about seats for your organization.',
       category: 'Pricing',
       securityLevel: 'public'
     },
