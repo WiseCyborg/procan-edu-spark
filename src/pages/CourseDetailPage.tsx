@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Seo } from '@/components/Seo';
 import { toast } from 'sonner';
+import { BUSINESS_RULES } from '@/config/business-rules';
 
 interface CourseRow {
   id: string;
@@ -194,21 +195,27 @@ const CourseDetailPage = () => {
             Continue Course
           </Button>
         ) : requiresPayment ? (
-          <Button size="lg" className="w-full sm:w-auto" onClick={handlePurchase} disabled={isPurchasing}>
-            {isPurchasing ? (
-              <Loader2 className="h-5 w-5 me-2 animate-spin" />
-            ) : (
-              <ShoppingCart className="h-5 w-5 me-2" />
-            )}
-            {isPurchasing ? 'Redirecting…' : `Purchase — ${formatPrice(priceCents, currency)}`}
-          </Button>
+          BUSINESS_RULES.PUBLIC_SELF_SERVE_CHECKOUT_ENABLED ? (
+            <Button size="lg" className="w-full sm:w-auto" onClick={handlePurchase} disabled={isPurchasing}>
+              {isPurchasing ? (
+                <Loader2 className="h-5 w-5 me-2 animate-spin" />
+              ) : (
+                <ShoppingCart className="h-5 w-5 me-2" />
+              )}
+              {isPurchasing ? 'Redirecting…' : `Purchase — ${formatPrice(priceCents, currency)}`}
+            </Button>
+          ) : (
+            <Button size="lg" className="w-full sm:w-auto" asChild>
+              <a href="mailto:info@procannedu.com">Contact us about workforce education</a>
+            </Button>
+          )
         ) : (
           <Button size="lg" className="w-full sm:w-auto" onClick={() => navigate(`/courses/${course.id}/learn`)}>
             Start Course
           </Button>
         )}
 
-        {requiresPayment && !hasEntitlement && (
+        {requiresPayment && !hasEntitlement && BUSINESS_RULES.PUBLIC_SELF_SERVE_CHECKOUT_ENABLED && (
           <p className="text-xs text-muted-foreground mt-3">Secure checkout powered by PayPal.</p>
         )}
       </div>

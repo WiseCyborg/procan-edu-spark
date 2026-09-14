@@ -20,6 +20,7 @@ import { ComplianceDisclaimer } from '@/components/ComplianceDisclaimer';
 import { SwipeUpIndicator } from '@/components/SwipeUpIndicator';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Seo } from '@/components/Seo';
+import { BUSINESS_RULES } from '@/config/business-rules';
 const Index = () => {
 
   const navigate = useNavigate();
@@ -117,7 +118,9 @@ const Index = () => {
               Maryland cannabis training & certification
             </p>
             <p className={`text-white/90 mx-auto ${isMobile ? 'text-sm mt-2' : 'text-lg mt-3 max-w-2xl'}`}>
-              Maryland cannabis workforce education — <span className="font-semibold">$49.99</span>, self-paced.
+              {BUSINESS_RULES.PUBLIC_SELF_SERVE_CHECKOUT_ENABLED
+                ? <>Maryland cannabis workforce education — <span className="font-semibold">$49.99</span>, self-paced.</>
+                : <>Maryland cannabis workforce education — self-paced.</>}
             </p>
           </div>
 
@@ -128,7 +131,7 @@ const Index = () => {
               size={isMobile ? 'default' : 'lg'}
               className={`bg-white text-primary hover:bg-white/90 font-semibold rounded-xl shadow-xl hover:shadow-2xl transition-all hover:scale-105 ${isMobile ? 'w-full px-6 py-5 text-base h-auto' : 'px-10 py-6 text-lg'}`}
             >
-              Start Training — $49.99
+              {BUSINESS_RULES.PUBLIC_SELF_SERVE_CHECKOUT_ENABLED ? 'Start Training — $49.99' : 'Explore workforce education'}
             </Button>
             <p className={`text-white/80 mx-auto mt-3 ${isMobile ? 'text-[11px] max-w-sm' : 'text-xs max-w-xl'}`}>
               Optional continuing education. This course does not satisfy Maryland's annual responsible vendor / agent training duty.
@@ -407,7 +410,13 @@ const Index = () => {
               <ul className="space-y-2 text-sm">
                 <li><a href="/org/apply" className="text-gray-400 hover:text-white">Dispensary Application</a></li>
                 <li><a href="/employers" className="text-gray-400 hover:text-white">Verify Certificates</a></li>
-                <li><a href="/purchase-seats" className="text-gray-400 hover:text-white">Purchase Training Seats</a></li>
+                <li>
+                  {BUSINESS_RULES.PUBLIC_SELF_SERVE_CHECKOUT_ENABLED ? (
+                    <a href="/purchase-seats" className="text-gray-400 hover:text-white">Purchase Training Seats</a>
+                  ) : (
+                    <a href="mailto:info@procannedu.com" className="text-gray-400 hover:text-white">Contact us about seats</a>
+                  )}
+                </li>
                 <li><a href="/ailean-info" className="text-gray-400 hover:text-white">✋ AiLean AI Coach</a></li>
               </ul>
             </div>

@@ -7,6 +7,11 @@ export const BUSINESS_RULES = {
   SEAT_PRICE_USD: 49.99,
   MAX_ALLOWED_PRICE_MARYLAND: 50.00,
   CURRENCY: 'USD',
+
+  // Public self-serve checkout kill switch.
+  // false = public $49.99 buy CTAs are soft-disabled (contact/explore copy instead).
+  // Flip to true to restore the existing $49.99 buy CTAs. Payment code stays in place either way.
+  PUBLIC_SELF_SERVE_CHECKOUT_ENABLED: false,
   
   // Maryland Pricing Regulation
   PRICING_REGULATION: {

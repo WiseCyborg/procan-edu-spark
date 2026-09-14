@@ -2,6 +2,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { CheckCircle, Shield, Clock, MapPin, ArrowRight, BookOpen, Award } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { BUSINESS_RULES } from '@/config/business-rules';
+
+const CHECKOUT_ENABLED = BUSINESS_RULES.PUBLIC_SELF_SERVE_CHECKOUT_ENABLED;
+const BUY_CTA_LABEL = CHECKOUT_ENABLED ? 'Start training — $49.99' : 'Explore workforce education';
 
 const platformFeatures = [
   {
@@ -31,8 +35,10 @@ const platformFeatures = [
   },
   {
     icon: CheckCircle,
-    title: "$49.99 per seat",
-    description: "ProCann Edu charges $49.99 per student."
+    title: CHECKOUT_ENABLED ? "$49.99 per seat" : "Straightforward per-seat pricing",
+    description: CHECKOUT_ENABLED
+      ? "ProCann Edu charges $49.99 per student."
+      : "Contact us for current per-seat pricing and availability."
   }
 ];
 
@@ -53,8 +59,8 @@ export default function SuccessStories() {
               ProCann Edu provides Maryland cannabis workforce education designed specifically for Maryland cannabis professionals
             </p>
             <div className="flex flex-wrap justify-center gap-4">
-              <Button size="lg" onClick={() => navigate('/signup')}>
-                Start training — $49.99
+              <Button size="lg" onClick={() => navigate(CHECKOUT_ENABLED ? '/signup' : '/get-started')}>
+                {BUY_CTA_LABEL}
                 <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
               </Button>
               <Button size="lg" variant="outline" onClick={() => navigate('/faq')}>
@@ -122,7 +128,7 @@ export default function SuccessStories() {
               <div className="p-6 bg-background rounded-lg border">
                 <h3 className="font-semibold mb-2">Accessible Pricing</h3>
                 <p className="text-sm text-muted-foreground">
-                  $49.99 per student.
+                  {CHECKOUT_ENABLED ? '$49.99 per student.' : 'Contact us for current per-seat pricing.'}
                 </p>
               </div>
             </div>
@@ -138,8 +144,8 @@ export default function SuccessStories() {
             Join Maryland cannabis professionals who trust ProCann Edu for Maryland cannabis workforce education
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Button size="lg" variant="secondary" onClick={() => navigate('/signup')}>
-              Start training — $49.99
+            <Button size="lg" variant="secondary" onClick={() => navigate(CHECKOUT_ENABLED ? '/signup' : '/get-started')}>
+              {BUY_CTA_LABEL}
               <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
             </Button>
             <Button size="lg" variant="outline" className="bg-transparent border-white text-white hover:bg-white/10" onClick={() => navigate('/why-procann')}>
