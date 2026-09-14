@@ -15,7 +15,7 @@ const platformFeatures = [
   {
     icon: Clock,
     title: "Self-Paced Learning",
-    description: "Complete your certification in 4-6 hours at your own pace, with 24/7 access"
+    description: "Learn at your own pace, with 24/7 access"
   },
   {
     icon: Shield,
@@ -32,15 +32,25 @@ const platformFeatures = [
     title: "Verifiable Certificates",
     description: "Digital certificates with public verification portal for employers"
   },
-  {
-    icon: CheckCircle,
-    title: "$49.99 per seat",
-    description: "ProCann Edu charges $49.99 per student."
-  }
 ];
 
 export default function SuccessStories() {
   const navigate = useNavigate();
+
+  const features = [
+    ...platformFeatures,
+    checkoutEnabled
+      ? {
+          icon: CheckCircle,
+          title: "$49.99 per seat",
+          description: "ProCann Edu charges $49.99 per student."
+        }
+      : {
+          icon: CheckCircle,
+          title: "Workforce education",
+          description: "Contact us about seats for your team."
+        }
+  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -80,7 +90,7 @@ export default function SuccessStories() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {platformFeatures.map((feature, idx) => (
+            {features.map((feature, idx) => (
               <Card key={idx} className="hover:shadow-lg transition-shadow">
                 <CardContent className="pt-6">
                   <div className="flex items-start gap-4">
@@ -123,9 +133,13 @@ export default function SuccessStories() {
                 </p>
               </div>
               <div className="p-6 bg-background rounded-lg border">
-                <h3 className="font-semibold mb-2">Accessible Pricing</h3>
+                <h3 className="font-semibold mb-2">
+                  {checkoutEnabled ? 'Accessible Pricing' : 'Workforce education'}
+                </h3>
                 <p className="text-sm text-muted-foreground">
-                  $49.99 per student.
+                  {checkoutEnabled
+                    ? '$49.99 per student.'
+                    : 'Contact us about seats for your organization.'}
                 </p>
               </div>
             </div>
@@ -136,7 +150,9 @@ export default function SuccessStories() {
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-br from-primary to-primary-glow text-primary-foreground">
         <div className="container text-center">
-          <h2 className="text-3xl font-bold mb-4">Ready to Start Training?</h2>
+          <h2 className="text-3xl font-bold mb-4">
+            {checkoutEnabled ? 'Ready to Start Training?' : 'Ready to explore workforce education?'}
+          </h2>
           <p className="text-lg mb-8 opacity-90 max-w-2xl mx-auto">
             Join Maryland cannabis professionals who trust ProCann Edu for Maryland cannabis workforce education
           </p>

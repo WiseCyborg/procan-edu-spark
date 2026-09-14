@@ -6,6 +6,7 @@ import { Building2, Clock, CheckCircle, Award, ArrowRight } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useJourneyState } from '@/hooks/useJourneyState';
 import { supabase } from '@/integrations/supabase/client';
+import { BUSINESS_RULES } from '@/config/business-rules';
 
 interface Organization {
   name: string;
@@ -95,7 +96,7 @@ export const WelcomeModal = () => {
             <div className="grid gap-4 sm:grid-cols-3">
               <div className="p-4 border rounded-lg space-y-2">
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-lg px-3 py-1">19</Badge>
+                  <Badge variant="outline" className="text-lg px-3 py-1">{BUSINESS_RULES.TOTAL_MODULES}</Badge>
                   <span className="text-sm font-medium">Modules</span>
                 </div>
                 <p className="text-xs text-muted-foreground">
@@ -106,7 +107,7 @@ export const WelcomeModal = () => {
               <div className="p-4 border rounded-lg space-y-2">
                 <div className="flex items-center gap-2">
                   <Clock className="h-5 w-5 text-primary" />
-                  <span className="text-sm font-medium">~4 Hours</span>
+                  <span className="text-sm font-medium">Self-paced</span>
                 </div>
                 <p className="text-xs text-muted-foreground">
                   Complete at your own pace, progress is automatically saved
@@ -132,7 +133,7 @@ export const WelcomeModal = () => {
               {[
                 { step: 1, text: 'Complete your profile', subtext: 'Add your name, photo, and contact info' },
                 { step: 2, text: 'Watch the welcome video', subtext: 'Quick introduction to the platform' },
-                { step: 3, text: 'Complete all 19 required modules', subtext: 'Learn everything about Maryland cannabis regulations' },
+                { step: 3, text: `Complete the required modules`, subtext: 'Maryland cannabis workforce education' },
                 { step: 4, text: 'Pass the final exam', subtext: '80% score required for certification' },
                 { step: 5, text: 'Download your certificate', subtext: 'ProCann EDU completion record' }
               ].map(({ step, text, subtext }) => (

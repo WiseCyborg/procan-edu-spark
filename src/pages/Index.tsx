@@ -230,8 +230,8 @@ const Index = () => {
                     <span>Issues <strong>ProCann EDU Completion Record</strong></span>
                   </div>
                 </div>
-                <Button className="w-full group-hover:bg-primary/90" onClick={(e) => { e.stopPropagation(); navigate('/auth?role=student'); }}>
-                  Start Training
+                <Button className="w-full group-hover:bg-primary/90" onClick={(e) => { e.stopPropagation(); navigate(checkoutEnabled ? '/auth?role=student' : '/get-started'); }}>
+                  {checkoutEnabled ? 'Start Training' : 'Explore workforce education'}
                 </Button>
               </div>
             </div>
