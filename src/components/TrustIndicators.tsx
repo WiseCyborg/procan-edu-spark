@@ -88,9 +88,11 @@ export const TrustStats = () => {
 
       <Card className="p-4 text-center bg-primary border-primary/20">
         <div className="text-2xl font-bold text-primary-foreground">
-          $49.99
+          {BUSINESS_RULES.PUBLIC_SELF_SERVE_CHECKOUT_ENABLED ? '$49.99' : 'Workforce'}
         </div>
-        <div className="text-sm text-primary-foreground/80">$49.99 per seat</div>
+        <div className="text-sm text-primary-foreground/80">
+          {BUSINESS_RULES.PUBLIC_SELF_SERVE_CHECKOUT_ENABLED ? '$49.99 per seat' : 'Education program'}
+        </div>
       </Card>
       
       <Card className="p-4 text-center bg-primary border-primary/20">
