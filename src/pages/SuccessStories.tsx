@@ -2,6 +2,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { CheckCircle, Shield, Clock, MapPin, ArrowRight, BookOpen, Award } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { BUSINESS_RULES } from '@/config/business-rules';
+
+const CHECKOUT_ENABLED = BUSINESS_RULES.PUBLIC_SELF_SERVE_CHECKOUT_ENABLED;
+const BUY_CTA_LABEL = CHECKOUT_ENABLED ? 'Start training — $49.99' : 'Explore workforce education';
 
 const platformFeatures = [
   {

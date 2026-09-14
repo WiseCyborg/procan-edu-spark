@@ -410,7 +410,13 @@ const Index = () => {
               <ul className="space-y-2 text-sm">
                 <li><a href="/org/apply" className="text-gray-400 hover:text-white">Dispensary Application</a></li>
                 <li><a href="/employers" className="text-gray-400 hover:text-white">Verify Certificates</a></li>
-                <li><a href="/purchase-seats" className="text-gray-400 hover:text-white">Purchase Training Seats</a></li>
+                <li>
+                  {BUSINESS_RULES.PUBLIC_SELF_SERVE_CHECKOUT_ENABLED ? (
+                    <a href="/purchase-seats" className="text-gray-400 hover:text-white">Purchase Training Seats</a>
+                  ) : (
+                    <a href="mailto:info@procannedu.com" className="text-gray-400 hover:text-white">Contact us about seats</a>
+                  )}
+                </li>
                 <li><a href="/ailean-info" className="text-gray-400 hover:text-white">✋ AiLean AI Coach</a></li>
               </ul>
             </div>
