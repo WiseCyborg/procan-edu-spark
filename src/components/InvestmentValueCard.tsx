@@ -1,6 +1,9 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle, TrendingUp } from 'lucide-react';
+import { BUSINESS_RULES } from '@/config/business-rules';
+
+const CHECKOUT_ENABLED = BUSINESS_RULES.PUBLIC_SELF_SERVE_CHECKOUT_ENABLED;
 
 export const InvestmentValueCard = () => {
   const features = [
@@ -45,7 +48,9 @@ export const InvestmentValueCard = () => {
     <Card className="max-w-5xl mx-auto bg-gradient-to-br from-primary/5 to-accent/10 border-primary/20">
       <CardHeader className="text-center pb-4">
         <CardTitle className="text-2xl md:text-3xl text-foreground">
-          What's Included in Your $49.99 Investment
+          {CHECKOUT_ENABLED
+            ? "What's Included in Your $49.99 Investment"
+            : "What's Included in ProCann Edu Workforce Education"}
         </CardTitle>
         <p className="text-muted-foreground mt-2">
           Your Maryland cannabis compliance training includes:
