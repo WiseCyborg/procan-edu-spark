@@ -98,6 +98,9 @@ export const UniversalCourseCard = ({
     }
 
     if (showPaygate && priceCents) {
+      if (!BUSINESS_RULES.PUBLIC_SELF_SERVE_CHECKOUT_ENABLED) {
+        return 'Contact us about workforce education';
+      }
       return (
         <>
           <ShoppingCart className="me-2 h-4 w-4" />

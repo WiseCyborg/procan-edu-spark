@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Seo } from '@/components/Seo';
 import { toast } from 'sonner';
+import { BUSINESS_RULES } from '@/config/business-rules';
 
 interface CourseRow {
   id: string;
