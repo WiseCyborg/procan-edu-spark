@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Shield, Users, Award, CheckCircle, Star, Clock, MapPin, DollarSign } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { BUSINESS_RULES } from '@/config/business-rules';
 
 interface CounterProps {
   end: number;
