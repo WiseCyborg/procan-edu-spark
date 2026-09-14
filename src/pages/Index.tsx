@@ -20,6 +20,7 @@ import { ComplianceDisclaimer } from '@/components/ComplianceDisclaimer';
 import { SwipeUpIndicator } from '@/components/SwipeUpIndicator';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Seo } from '@/components/Seo';
+import { BUSINESS_RULES } from '@/config/business-rules';
 const Index = () => {
 
   const navigate = useNavigate();
