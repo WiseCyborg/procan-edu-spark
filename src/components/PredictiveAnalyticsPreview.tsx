@@ -12,10 +12,12 @@ type DispensarySize = 'small' | 'medium' | 'large';
 export const PredictiveAnalyticsPreview = () => {
   const [dispensarySize, setDispensarySize] = useState<DispensarySize>('medium');
   const navigate = useNavigate();
+  const checkoutEnabled = BUSINESS_RULES.PUBLIC_SELF_SERVE_CHECKOUT_ENABLED;
 
   const calculations = useMemo(() => {
     const agentCounts = { small: 7, medium: 15, large: 30 };
     const agents = agentCounts[dispensarySize];
+    // SEAT_PRICE_USD kept for flip-back; public $49.99 math is gated below.
     const trainingCost = agents * BUSINESS_RULES.SEAT_PRICE_USD;
     const annualSavings = agents * 800; // Estimated per agent
     const roi = ((annualSavings - trainingCost) / trainingCost) * 100;
@@ -37,7 +39,9 @@ export const PredictiveAnalyticsPreview = () => {
           <div className="flex items-center justify-center gap-3 mb-4">
             <Brain className="h-10 w-10 text-primary" />
             <h3 className="text-3xl md:text-4xl font-bold">
-              See Your ROI Before You Buy
+              {checkoutEnabled
+                ? 'See Your ROI Before You Buy'
+                : 'Estimate workforce education ROI'}
             </h3>
           </div>
           <p className="text-lg text-muted-foreground">
@@ -70,74 +74,98 @@ export const PredictiveAnalyticsPreview = () => {
               </Select>
             </div>
 
-            {/* Results Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-              <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 border-green-200 dark:border-green-800">
-                <CardContent className="p-4 text-center">
-                  <DollarSign className="h-8 w-8 text-green-600 dark:text-green-400 mx-auto mb-2" />
-                  <div className="text-2xl md:text-3xl font-bold text-green-700 dark:text-green-300">
-                    ${calculations.trainingCost.toLocaleString()}
-                  </div>
-                  <div className="text-xs text-muted-foreground mt-1">Training Investment</div>
-                </CardContent>
-              </Card>
+            {checkoutEnabled ? (
+              <>
+                {/* Results Grid */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                  <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 border-green-200 dark:border-green-800">
+                    <CardContent className="p-4 text-center">
+                      <DollarSign className="h-8 w-8 text-green-600 dark:text-green-400 mx-auto mb-2" />
+                      <div className="text-2xl md:text-3xl font-bold text-green-700 dark:text-green-300">
+                        ${calculations.trainingCost.toLocaleString()}
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1">Training Investment</div>
+                    </CardContent>
+                  </Card>
 
-              <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 border-blue-200 dark:border-blue-800">
-                <CardContent className="p-4 text-center">
-                  <TrendingUp className="h-8 w-8 text-blue-600 dark:text-blue-400 mx-auto mb-2" />
-                  <div className="text-2xl md:text-3xl font-bold text-blue-700 dark:text-blue-300">
-                    ${calculations.annualSavings.toLocaleString()}
-                  </div>
-                  <div className="text-xs text-muted-foreground mt-1">Annual Savings</div>
-                </CardContent>
-              </Card>
+                  <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 border-blue-200 dark:border-blue-800">
+                    <CardContent className="p-4 text-center">
+                      <TrendingUp className="h-8 w-8 text-blue-600 dark:text-blue-400 mx-auto mb-2" />
+                      <div className="text-2xl md:text-3xl font-bold text-blue-700 dark:text-blue-300">
+                        ${calculations.annualSavings.toLocaleString()}
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1">Annual Savings</div>
+                    </CardContent>
+                  </Card>
 
-              <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900 border-purple-200 dark:border-purple-800">
-                <CardContent className="p-4 text-center">
-                  <Brain className="h-8 w-8 text-purple-600 dark:text-purple-400 mx-auto mb-2" />
-                  <div className="text-2xl md:text-3xl font-bold text-purple-700 dark:text-purple-300">
-                    {calculations.roi}%
-                  </div>
-                  <div className="text-xs text-muted-foreground mt-1">ROI</div>
-                </CardContent>
-              </Card>
+                  <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900 border-purple-200 dark:border-purple-800">
+                    <CardContent className="p-4 text-center">
+                      <Brain className="h-8 w-8 text-purple-600 dark:text-purple-400 mx-auto mb-2" />
+                      <div className="text-2xl md:text-3xl font-bold text-purple-700 dark:text-purple-300">
+                        {calculations.roi}%
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1">ROI</div>
+                    </CardContent>
+                  </Card>
 
-              <Card className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950 dark:to-orange-900 border-orange-200 dark:border-orange-800">
-                <CardContent className="p-4 text-center">
-                  <Clock className="h-8 w-8 text-orange-600 dark:text-orange-400 mx-auto mb-2" />
-                  <div className="text-2xl md:text-3xl font-bold text-orange-700 dark:text-orange-300">
-                    {calculations.paybackWeeks}
-                  </div>
-                  <div className="text-xs text-muted-foreground mt-1">Weeks to Payback</div>
-                </CardContent>
-              </Card>
-            </div>
+                  <Card className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950 dark:to-orange-900 border-orange-200 dark:border-orange-800">
+                    <CardContent className="p-4 text-center">
+                      <Clock className="h-8 w-8 text-orange-600 dark:text-orange-400 mx-auto mb-2" />
+                      <div className="text-2xl md:text-3xl font-bold text-orange-700 dark:text-orange-300">
+                        {calculations.paybackWeeks}
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1">Weeks to Payback</div>
+                    </CardContent>
+                  </Card>
+                </div>
 
-            {/* Calculation Breakdown */}
-            <div className="bg-muted/30 rounded-lg p-4 mb-6 text-sm text-muted-foreground">
-              <p className="font-semibold mb-2">How this estimate is calculated:</p>
-              <ul className="space-y-1">
-                <li>• {calculations.agents} agents × ${BUSINESS_RULES.SEAT_PRICE_USD} = ${calculations.trainingCost} training cost</li>
-                <li>• Estimated savings per agent: ~$800/year (potential reduction in retakes, faster onboarding)</li>
-                <li>• Estimated ROI: ({calculations.annualSavings.toLocaleString()} - {calculations.trainingCost.toLocaleString()}) ÷ {calculations.trainingCost.toLocaleString()} × 100</li>
-              </ul>
-              <p className="text-xs mt-3 italic">
-                These are illustrative projections, not guarantees. Actual results depend on your organization's 
-                current training costs, compliance requirements, and operational factors.
-              </p>
-            </div>
+                {/* Calculation Breakdown */}
+                <div className="bg-muted/30 rounded-lg p-4 mb-6 text-sm text-muted-foreground">
+                  <p className="font-semibold mb-2">How this estimate is calculated:</p>
+                  <ul className="space-y-1">
+                    <li>• {calculations.agents} agents × ${BUSINESS_RULES.SEAT_PRICE_USD} = ${calculations.trainingCost} training cost</li>
+                    <li>• Estimated savings per agent: ~$800/year (potential reduction in retakes, faster onboarding)</li>
+                    <li>• Estimated ROI: ({calculations.annualSavings.toLocaleString()} - {calculations.trainingCost.toLocaleString()}) ÷ {calculations.trainingCost.toLocaleString()} × 100</li>
+                  </ul>
+                  <p className="text-xs mt-3 italic">
+                    These are illustrative projections, not guarantees. Actual results depend on your organization's 
+                    current training costs, compliance requirements, and operational factors.
+                  </p>
+                </div>
 
-            {/* CTA */}
-            <div className="text-center">
-              <Button 
-                size="lg" 
-                onClick={() => navigate('/roi-calculator-public')}
-                className="w-full md:w-auto shadow-lg"
-              >
-                <TrendingUp className="h-5 w-5 me-2" />
-                Get YOUR Actual ROI Analysis
-              </Button>
-            </div>
+                <div className="text-center">
+                  <Button 
+                    size="lg" 
+                    onClick={() => navigate('/roi-calculator-public')}
+                    className="w-full md:w-auto shadow-lg"
+                  >
+                    <TrendingUp className="h-5 w-5 me-2" />
+                    Get YOUR Actual ROI Analysis
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="bg-muted/30 rounded-lg p-6 mb-6 text-center">
+                  <p className="font-semibold mb-2">Workforce education for about {calculations.agents} agents</p>
+                  <p className="text-sm text-muted-foreground">
+                    Self-serve seat pricing is temporarily unavailable. Contact us about seats for your dispensary, or explore workforce education.
+                  </p>
+                </div>
+                <div className="flex flex-col md:flex-row gap-3 justify-center">
+                  <Button size="lg" asChild className="shadow-lg">
+                    <a href="mailto:info@procannedu.com">Contact us about seats</a>
+                  </Button>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    onClick={() => navigate('/get-started')}
+                  >
+                    Explore workforce education
+                  </Button>
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>

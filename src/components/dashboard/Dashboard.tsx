@@ -251,10 +251,7 @@ const Dashboard = () => {
                     {/* Enhanced course information */}
                     <div className="mt-3 flex flex-wrap gap-2">
                       <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded">
-                        4-6 hours
-                      </span>
-                      <span className="text-xs bg-green-50 text-green-700 px-2 py-1 rounded">
-                        MCA Compliant
+                        Self-paced
                       </span>
                       <span className="text-xs bg-purple-50 text-purple-700 px-2 py-1 rounded">
                         Certificate Included

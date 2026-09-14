@@ -1,6 +1,9 @@
 import React from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { DollarSign, Shield, FileCheck } from 'lucide-react';
+import { BUSINESS_RULES } from '@/config/business-rules';
+
+const checkoutEnabled = BUSINESS_RULES.PUBLIC_SELF_SERVE_CHECKOUT_ENABLED;
 
 export const ComplianceDisclaimer = () => {
   return (
@@ -18,9 +21,13 @@ export const ComplianceDisclaimer = () => {
       <Alert className="border-2 border-primary/30 bg-white shadow-sm">
         <DollarSign className="h-5 w-5 text-green-600" />
         <AlertDescription className="space-y-2">
-          <div className="text-sm font-bold text-primary mb-2">Pricing Compliance</div>
+          <div className="text-sm font-bold text-primary mb-2">
+            {checkoutEnabled ? 'Pricing Compliance' : 'Workforce education'}
+          </div>
           <p className="text-sm leading-relaxed text-foreground">
-            ProCann Edu charges $49.99 per student.
+            {checkoutEnabled
+              ? `ProCann Edu charges $${BUSINESS_RULES.SEAT_PRICE_USD} per student.`
+              : 'Contact us about seats. Self-serve enrollment is temporarily unavailable.'}
           </p>
         </AlertDescription>
       </Alert>

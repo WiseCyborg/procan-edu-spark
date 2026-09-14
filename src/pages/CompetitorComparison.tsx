@@ -4,9 +4,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Brain, Shield, Zap, TrendingUp, MapPin, DollarSign, Check, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { BUSINESS_RULES } from "@/config/business-rules";
 
 export default function CompetitorComparison() {
   const navigate = useNavigate();
+  const checkoutEnabled = BUSINESS_RULES.PUBLIC_SELF_SERVE_CHECKOUT_ENABLED;
 
   const features = [
     { feature: "Maryland-Specific Content", proCannEdu: "Tailored to MD", industryStandard: "Multi-state generic" },
@@ -18,7 +20,7 @@ export default function CompetitorComparison() {
     { feature: "Mobile Learning", proCannEdu: "Fully optimized", industryStandard: "Limited" },
     { feature: "Certificate Verification", proCannEdu: "Secure QR system", industryStandard: "PDF format" },
     { feature: "Exam Preparation", proCannEdu: "AI-powered study tools", industryStandard: "Self-study materials" },
-    { feature: "Average Completion Time", proCannEdu: "4-6 hours", industryStandard: "6-12 hours" },
+    { feature: "Average Completion Time", proCannEdu: "Self-paced", industryStandard: "Varies" },
   ];
 
   const renderCell = (value: boolean | string) => {
@@ -133,7 +135,9 @@ export default function CompetitorComparison() {
                   </p>
                   <p className="flex items-start gap-2">
                     <Zap className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-                    <span><strong>Pricing:</strong> $49.99 per employee. Transparent pricing and no hidden fees</span>
+                    <span><strong>{checkoutEnabled ? 'Pricing' : 'Workforce education'}:</strong> {checkoutEnabled
+                      ? `$${BUSINESS_RULES.SEAT_PRICE_USD} per employee. Transparent pricing and no hidden fees`
+                      : 'Contact us about seats for your organization.'}</span>
                   </p>
                   <p className="flex items-start gap-2">
                     <Zap className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
@@ -165,10 +169,10 @@ export default function CompetitorComparison() {
             <Button
               size="lg"
               variant="outline"
-              onClick={() => navigate('/roi-calculator-public')}
+              onClick={() => navigate(checkoutEnabled ? '/roi-calculator-public' : '/get-started')}
               className="bg-white/10 border-2 border-white text-white hover:bg-white/20"
             >
-              Calculate Your ROI
+              {checkoutEnabled ? 'Calculate Your ROI' : 'Explore workforce education'}
             </Button>
           </div>
         </div>
