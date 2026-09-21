@@ -63,10 +63,10 @@ const DemoPreview = () => {
             🎓 You're previewing the Maryland Cannabis Compliance Course
           </span>
           <Link
-            to="/org/apply"
+            to="/apply"
             className="inline-flex items-center gap-1 font-semibold underline underline-offset-4 hover:no-underline"
           >
-            Apply for Your Dispensary <ArrowRight className="h-4 w-4 rtl-flip" />
+            Request access <ArrowRight className="h-4 w-4 rtl-flip" />
           </Link>
         </div>
       </div>
@@ -140,7 +140,7 @@ const DemoPreview = () => {
           </CardHeader>
           <CardContent className="flex flex-col sm:flex-row gap-3 justify-center pb-8">
             <Button asChild size="lg">
-              <Link to="/org/apply">Apply for Dispensary Access</Link>
+              <Link to="/apply">Request access</Link>
             </Button>
             <Button asChild size="lg" variant="outline">
               <Link to="/get-started">Learn More</Link>

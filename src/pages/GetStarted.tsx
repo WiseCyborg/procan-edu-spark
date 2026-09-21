@@ -31,7 +31,7 @@ const GetStarted = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Path 1: RVT Core (Employee) */}
-            <Card className="hover:shadow-xl transition-shadow cursor-pointer group border-2 border-primary/20 relative overflow-hidden" onClick={() => navigate('/auth?role=student')}>
+            <Card className="hover:shadow-xl transition-shadow cursor-pointer group border-2 border-primary/20 relative overflow-hidden" onClick={() => navigate('/auth?role=student&register=true')}>
               <div className="absolute top-0 end-0 bg-primary text-primary-foreground text-xs px-3 py-1 rounded-bl-lg font-medium">
                 Required
               </div>
@@ -63,7 +63,7 @@ const GetStarted = () => {
                   </div>
                 </div>
                 <Button className="w-full group-hover:bg-primary/90">
-                  Begin training
+                  Have a join code?
                   <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
                 </Button>
               </CardContent>
@@ -166,17 +166,17 @@ const GetStarted = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Dispensary Manager */}
-            <Card className="hover:shadow-xl transition-shadow cursor-pointer group" onClick={() => navigate('/org/apply')}>
+            <Card className="hover:shadow-xl transition-shadow cursor-pointer group" onClick={() => navigate('/apply')}>
               <CardHeader className="text-center">
                 <div className="mx-auto mb-4 p-4 bg-primary/10 rounded-full w-16 h-16 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                   <Building2 className="h-8 w-8 text-primary" />
                 </div>
                 <CardTitle className="text-lg">Dispensary</CardTitle>
-                <CardDescription className="text-xs">Apply & manage team</CardDescription>
+                <CardDescription className="text-xs">Request access for your team</CardDescription>
               </CardHeader>
               <CardContent>
-                <Button className="w-full" size="sm" onClick={() => navigate('/org/apply')}>
-                  Apply Now
+                <Button className="w-full" size="sm" onClick={() => navigate('/apply')}>
+                  Request access
                   <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
                 </Button>
               </CardContent>
@@ -200,7 +200,7 @@ const GetStarted = () => {
             </Card>
 
             {/* Employee sign-in */}
-            <Card className="hover:shadow-xl transition-shadow cursor-pointer group" onClick={() => navigate('/auth?role=student')}>
+            <Card className="hover:shadow-xl transition-shadow cursor-pointer group" onClick={() => navigate('/auth?role=student&register=true')}>
               <CardHeader className="text-center">
                 <div className="mx-auto mb-4 p-4 bg-accent/10 rounded-full w-16 h-16 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
                   <GraduationCap className="h-8 w-8 text-accent" />
@@ -209,8 +209,8 @@ const GetStarted = () => {
                 <CardDescription className="text-xs">Sign in with your invite</CardDescription>
               </CardHeader>
               <CardContent>
-                <Button className="w-full" variant="outline" size="sm" onClick={() => navigate('/auth?role=student')}>
-                  Begin Training
+                <Button className="w-full" variant="outline" size="sm" onClick={() => navigate('/auth?role=student&register=true')}>
+                  Sign in with a join code
                   <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
                 </Button>
               </CardContent>
@@ -249,8 +249,8 @@ const GetStarted = () => {
                   <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-2">
                     <Building2 className="h-8 w-8 text-primary" />
                   </div>
-                  <p className="font-semibold">Dispensary Applies</p>
-                  <p className="text-xs text-muted-foreground">Submit application & pay</p>
+                  <p className="font-semibold">Dispensary requests access</p>
+                  <p className="text-xs text-muted-foreground">Contact us or use a join code</p>
                 </div>
                 <ArrowRight className="hidden md:block text-muted-foreground rtl-flip" />
                 <div className="text-center flex-1">
@@ -288,7 +288,7 @@ const GetStarted = () => {
               <h3 className="text-lg font-semibold mb-2">Not sure which path to choose?</h3>
               <p className="text-sm text-muted-foreground mb-4">
                 <strong>Work at a dispensary?</strong> You need Cannabis Compliance Training — your manager will send you an email invite.{' '}
-                <strong>Dispensary owner?</strong> Apply to set up your organization.{' '}
+                <strong>Dispensary owner?</strong> Request access or contact us.{' '}
                 <strong>Just curious?</strong> Start with our free Public Learning courses.
               </p>
               <Button variant="link" onClick={() => navigate('/faq')}>

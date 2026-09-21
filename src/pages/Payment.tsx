@@ -112,13 +112,25 @@ const Payment: React.FC = () => {
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-2" />
-            <CardTitle>Payment Unavailable</CardTitle>
+            <CardTitle>Payment is not available here</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-center text-muted-foreground">{error}</p>
-            <Button onClick={() => navigate('/')} variant="outline" className="w-full">
-              Go Home
-            </Button>
+            <p className="text-center text-sm text-muted-foreground">
+              Public checkout is not open. Approved organizations use the link in their email.
+              To request access or use a join code, do not start a purchase on this page.
+            </p>
+            <div className="flex flex-col gap-2">
+              <Button onClick={() => navigate('/apply')} className="w-full">
+                Request access
+              </Button>
+              <Button asChild variant="outline" className="w-full">
+                <a href="mailto:info@procannedu.com">Contact info@procannedu.com</a>
+              </Button>
+              <Button onClick={() => navigate('/')} variant="ghost" className="w-full">
+                Go Home
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>

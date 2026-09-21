@@ -9,8 +9,13 @@ export const BUSINESS_RULES = {
   CURRENCY: 'USD',
 
   // Public self-serve checkout kill switch.
-  // false = public $49.99 buy CTAs are soft-disabled (contact/explore copy instead).
-  // Flip to true to restore the existing $49.99 buy CTAs. Payment code stays in place either way.
+  // false = public $49.99 buy CTAs are parked; /apply and /org/apply show request-access
+  // (join code / contact) instead of a collect form. Payment code stays in place.
+  //
+  // Re-enable when apply → pay is leftover-clean:
+  // 1. Confirm /org/apply submits a dispensary application.
+  // 2. Confirm /payment?application_id=<approved> completes checkout (do not invent Stripe prices).
+  // 3. Flip this flag to true. Existing $49.99 / Start Training CTAs and the apply form restore.
   PUBLIC_SELF_SERVE_CHECKOUT_ENABLED: false,
   
   // Maryland Pricing Regulation

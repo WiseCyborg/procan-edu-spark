@@ -11,8 +11,9 @@ import AccessKeyEntry from '@/components/auth/AccessKeyEntry';
 import { PasswordReset } from '@/components/auth/PasswordReset';
 import { Info, Building2 } from 'lucide-react';
 
-// Student access paths: email invitation, individual purchase, or an
-// organization join code (rvt_join_codes) entered on the registration form.
+// Student access paths: email invitation or an organization join code
+// (rvt_join_codes) entered on the registration form. Public individual
+// purchase is parked until apply → pay is leftover-clean.
 
 const Auth = () => {
   const [searchParams] = useSearchParams();

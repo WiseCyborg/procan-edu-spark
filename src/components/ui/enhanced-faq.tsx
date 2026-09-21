@@ -53,7 +53,9 @@ export const EnhancedFAQ: React.FC<EnhancedFAQProps> = ({
     {
       id: 'student-1',
       question: 'How do I create an account and start training?',
-      answer: 'Click "Get Started" on the homepage, enter your email and create a password. After verification, you can access Maryland cannabis compliance training modules.',
+      answer: checkoutEnabled
+        ? 'Click "Get Started" on the homepage, enter your email and create a password. After verification, you can access Maryland cannabis compliance training modules.'
+        : 'Workforce training requires a join code or invitation from your employer. Request access or contact info@procannedu.com — self-serve checkout is not available.',
       category: 'Getting Started',
       securityLevel: 'student',
       tags: ['account', 'registration', 'training']
@@ -204,7 +206,9 @@ export const EnhancedFAQ: React.FC<EnhancedFAQProps> = ({
     {
       id: 'general-4',
       question: 'What payment methods do you accept?',
-      answer: 'We accept all major credit cards (Visa, MasterCard, American Express), ACH bank transfers for organizations, and PayPal. Billing is secure and PCI-compliant.',
+      answer: checkoutEnabled
+        ? 'We accept all major credit cards (Visa, MasterCard, American Express), ACH bank transfers for organizations, and PayPal. Billing is secure and PCI-compliant.'
+        : 'Public checkout is not available. Contact info@procannedu.com about seats for your organization. Do not use /payment to start a purchase.',
       category: 'Payment',
       securityLevel: 'public'
     },

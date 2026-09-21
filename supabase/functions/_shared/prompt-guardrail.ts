@@ -84,7 +84,7 @@ export function verifiedFactsBlock(today: string): string {
   return `
 === VERIFIED FACTS (use these exact values; do not invent figures) ===
 - Today's date: ${today}
-- Course price: $49.99 per seat
+- Course price: public self-serve checkout is not available. Do not quote $49.99 as a buy-now price. Direct people to request access, use an employer join code, or contact info@procannedu.com. Internal seat price remains $49.99 only after apply → pay is leftover-clean.
 - Exam passing threshold: 80%
 - Course module count: 23 modules + final exam
 - Completion record validity: 1 year from issue date

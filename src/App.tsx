@@ -54,6 +54,7 @@ import UnifiedOperationsDashboard from "./pages/UnifiedOperationsDashboard";
 import ContentReviewDashboard from "./pages/ContentReviewDashboard";
 import TrainingHandbook from "./pages/TrainingHandbook";
 import DispensaryApplication from "./pages/DispensaryApplication";
+import RequestAccess from "./pages/RequestAccess";
 import ManagerRegistration from "./pages/ManagerRegistration";
 import GetStarted from "./pages/GetStarted";
 import TeamManagement from "./pages/TeamManagement";
@@ -124,6 +125,7 @@ import { AdminProxyProvider } from "./contexts/AdminProxyContext";
 import { AdminProxyBanner } from "./components/admin/AdminProxyBanner";
 import { IdleTimeoutProvider } from "./components/auth/IdleTimeoutProvider";
 import { SaveStatusProvider } from "./hooks/useSaveStatus";
+import { BUSINESS_RULES } from "@/config/business-rules";
 
 const queryClient = new QueryClient();
 
@@ -347,7 +349,20 @@ const AppRoutesLayout = () => {
                 <PurchaseSeats />
               </ProtectedRoute>
             } />
-            <Route path="/org/apply" element={<DispensaryApplication />} />
+            {/* Park /apply and /org/apply until apply → pay is leftover-clean.
+                Flip PUBLIC_SELF_SERVE_CHECKOUT_ENABLED to restore the form. */}
+            <Route
+              path="/apply"
+              element={BUSINESS_RULES.PUBLIC_SELF_SERVE_CHECKOUT_ENABLED
+                ? <Navigate to="/org/apply" replace />
+                : <RequestAccess />}
+            />
+            <Route
+              path="/org/apply"
+              element={BUSINESS_RULES.PUBLIC_SELF_SERVE_CHECKOUT_ENABLED
+                ? <DispensaryApplication />
+                : <RequestAccess />}
+            />
             <Route path="/payment" element={<Payment />} />
             <Route path="/payment/:applicationId" element={<Payment />} />
             <Route path="/payment-cancel" element={<PaymentCancel />} />

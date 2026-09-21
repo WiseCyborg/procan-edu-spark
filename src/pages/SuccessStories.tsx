@@ -66,8 +66,8 @@ export default function SuccessStories() {
               ProCann Edu provides Maryland cannabis workforce education designed specifically for Maryland cannabis professionals
             </p>
             <div className="flex flex-wrap justify-center gap-4">
-              <Button size="lg" onClick={() => navigate(checkoutEnabled ? '/signup' : '/get-started')}>
-                {checkoutEnabled ? 'Start training — $49.99' : 'Explore workforce education'}
+              <Button size="lg" onClick={() => navigate(checkoutEnabled ? '/signup' : '/apply')}>
+                {checkoutEnabled ? 'Start training — $49.99' : 'Request access'}
                 <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
               </Button>
               <Button size="lg" variant="outline" onClick={() => navigate('/faq')}>
@@ -151,14 +151,14 @@ export default function SuccessStories() {
       <section className="py-20 bg-gradient-to-br from-primary to-primary-glow text-primary-foreground">
         <div className="container text-center">
           <h2 className="text-3xl font-bold mb-4">
-            {checkoutEnabled ? 'Ready to Start Training?' : 'Ready to explore workforce education?'}
+            {checkoutEnabled ? 'Ready to Start Training?' : 'Ready to request access?'}
           </h2>
           <p className="text-lg mb-8 opacity-90 max-w-2xl mx-auto">
             Join Maryland cannabis professionals who trust ProCann Edu for Maryland cannabis workforce education
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Button size="lg" variant="secondary" onClick={() => navigate(checkoutEnabled ? '/signup' : '/get-started')}>
-              {checkoutEnabled ? 'Start training — $49.99' : 'Explore workforce education'}
+            <Button size="lg" variant="secondary" onClick={() => navigate(checkoutEnabled ? '/signup' : '/apply')}>
+              {checkoutEnabled ? 'Start training — $49.99' : 'Request access'}
               <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
             </Button>
             <Button size="lg" variant="outline" className="bg-transparent border-white text-white hover:bg-white/10" onClick={() => navigate('/why-procann')}>

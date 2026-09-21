@@ -205,11 +205,11 @@ const ConsumerEducation = () => {
                 <ArrowRight className="ms-2 h-4 w-4" />
               </Button>
               <Button 
-                onClick={() => navigate('/org/apply')}
+                onClick={() => navigate('/apply')}
                 variant="outline"
                 size="lg"
               >
-                Dispensary? Apply Here
+                Dispensary? Request access
               </Button>
             </div>
           </div>
