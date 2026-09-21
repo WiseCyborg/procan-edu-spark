@@ -113,6 +113,8 @@ import SpecialtyCoursePlayer from "./pages/SpecialtyCoursePlayer";
 import DemoPreview from "./pages/DemoPreview";
 import Resources from "./pages/Resources";
 import VerifyCertificate from "./pages/VerifyCertificate";
+import AccessParkedPage from "./pages/AccessParkedPage";
+import { BUSINESS_RULES } from "./config/business-rules";
 
 import { ProtectedCourseAccess } from "./components/ProtectedCourseAccess";
 import { RequireAccess } from "./components/guards/RequireAccess";
@@ -347,7 +349,8 @@ const AppRoutesLayout = () => {
                 <PurchaseSeats />
               </ProtectedRoute>
             } />
-            <Route path="/org/apply" element={<DispensaryApplication />} />
+            <Route path="/apply" element={<AccessParkedPage />} />
+            <Route path="/org/apply" element={BUSINESS_RULES.PUBLIC_SELF_SERVE_CHECKOUT_ENABLED ? <DispensaryApplication /> : <AccessParkedPage />} />
             <Route path="/payment" element={<Payment />} />
             <Route path="/payment/:applicationId" element={<Payment />} />
             <Route path="/payment-cancel" element={<PaymentCancel />} />

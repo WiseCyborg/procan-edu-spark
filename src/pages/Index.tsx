@@ -136,8 +136,18 @@ const Index = () => {
               size={isMobile ? 'default' : 'lg'}
               className={`bg-white text-primary hover:bg-white/90 font-semibold rounded-xl shadow-xl hover:shadow-2xl transition-all hover:scale-105 ${isMobile ? 'w-full px-6 py-5 text-base h-auto' : 'px-10 py-6 text-lg'}`}
             >
-              {checkoutEnabled ? 'Start Training — $49.99' : 'Explore workforce education'}
+              {checkoutEnabled ? 'Start Training — $49.99' : 'Request access'}
             </Button>
+            {!checkoutEnabled && (
+              <div className="mt-3">
+                <button
+                  onClick={() => navigate('/auth?role=student&register=true')}
+                  className={`text-white/85 hover:text-white underline underline-offset-4 transition-colors ${isMobile ? 'text-xs' : 'text-sm'}`}
+                >
+                  Have a join code?
+                </button>
+              </div>
+            )}
             <p className={`text-white/80 mx-auto mt-3 ${isMobile ? 'text-[11px] max-w-sm' : 'text-xs max-w-xl'}`}>
               Optional continuing education. This course does not satisfy Maryland's annual responsible vendor / agent training duty.
             </p>
@@ -229,7 +239,7 @@ const Index = () => {
                   </div>
                 </div>
                 <Button className="w-full group-hover:bg-primary/90" onClick={(e) => { e.stopPropagation(); navigate(checkoutEnabled ? '/auth?role=student' : '/get-started'); }}>
-                  {checkoutEnabled ? 'Start Training' : 'Explore workforce education'}
+                  {checkoutEnabled ? 'Start Training' : 'Request access'}
                 </Button>
               </div>
             </div>
