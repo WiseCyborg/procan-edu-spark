@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Loader2, AlertCircle, CheckCircle2, CreditCard, Building2 } from 'lucide-react';
 import { invokePublicFunction } from '@/lib/publicEdgeFunctions';
+import { BUSINESS_RULES } from '@/config/business-rules';
 
 type AppStatus = {
   id: string;
@@ -30,6 +31,7 @@ const Payment: React.FC = () => {
   const [redirecting, setRedirecting] = useState(false);
   const [retryable, setRetryable] = useState(false);
   const triggered = useRef(false);
+  const checkoutEnabled = BUSINESS_RULES.PUBLIC_SELF_SERVE_CHECKOUT_ENABLED;
 
   useEffect(() => {
     if (!applicationId) {
@@ -94,6 +96,32 @@ const Payment: React.FC = () => {
     }
     window.location.href = data.url;
   };
+
+  if (!applicationId && !checkoutEnabled) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/5 p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <AlertCircle className="h-12 w-12 text-primary mx-auto mb-2" />
+            <CardTitle>Public checkout is not open</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 text-center">
+            <p className="text-muted-foreground">
+              If you have an approved payment link, use that exact link. Otherwise, request access or contact us.
+            </p>
+            <div className="space-y-2">
+              <Button onClick={() => navigate('/get-started')} className="w-full">
+                Request access
+              </Button>
+              <Button asChild variant="outline" className="w-full">
+                <a href="mailto:info@procannedu.com">Contact info@procannedu.com</a>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

@@ -24,6 +24,7 @@ import { LogoutConfirmModal } from '@/components/auth/LogoutConfirmModal';
 import { SaveIndicator } from '@/components/auth/SaveIndicator';
 import { LanguageSwitcher } from '@/components/i18n/LanguageSwitcher';
 import { usePreferredLanguage } from '@/hooks/usePreferredLanguage';
+import { BUSINESS_RULES } from '@/config/business-rules';
 
 interface HeaderProps {
   role?: string;
@@ -38,6 +39,8 @@ const PUBLIC_MARKETING_ROUTES = [
   '/dispensary-portal',
   '/employers',
   '/about',
+  '/apply',
+  '/org/apply',
   '/get-started',
   '/stoplight-standard',
   '/privacy-policy',
@@ -78,6 +81,7 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
   const { flags } = useFeatureFlags();
   const { setShortcutsDialogOpen } = useKeyboardShortcuts();
   const { navigateToDashboard, state: navState } = useGuardedNavigation();
+  const checkoutEnabled = BUSINESS_RULES.PUBLIC_SELF_SERVE_CHECKOUT_ENABLED;
 
   const isMac = typeof navigator !== 'undefined' && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
 
@@ -204,8 +208,18 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                     size="sm"
                     className="bg-green-600 hover:bg-green-700 text-white"
                   >
-                    {t('nav.getStarted')}
+                    {checkoutEnabled ? t('nav.getStarted') : 'Request access'}
                   </Button>
+                  {!checkoutEnabled && (
+                    <Button
+                      onClick={() => navigate('/auth?role=student&register=true')}
+                      variant="ghost"
+                      size="sm"
+                      className="hidden md:inline-flex"
+                    >
+                      Have a join code?
+                    </Button>
+                  )}
                 </>
               ) : (
                 /* Logged-in user on public page - show Go to Dashboard CTA with guarded navigation */

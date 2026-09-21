@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Award, Building2 } from 'lucide-react';
+import { Award, KeyRound } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { BUSINESS_RULES } from '@/config/business-rules';
 
@@ -33,16 +33,16 @@ export const StickyMobileCTA = () => {
           size="touch"
         >
           <Award className="h-5 w-5 me-2" />
-          {checkoutEnabled ? 'Start Training' : 'Explore workforce education'}
+          {checkoutEnabled ? 'Start Training' : 'Request access'}
         </Button>
         <Button
-          onClick={() => navigate('/org/apply')}
+          onClick={() => navigate(checkoutEnabled ? '/org/apply' : '/auth?role=student&register=true')}
           variant="outline"
           className="flex-1 border-2 border-primary h-14 text-base font-semibold"
           size="touch"
         >
-          <Building2 className="h-5 w-5 me-2" />
-          Get Audit
+          <KeyRound className="h-5 w-5 me-2" />
+          {checkoutEnabled ? 'Get Audit' : 'Have a join code?'}
         </Button>
       </div>
     </div>
