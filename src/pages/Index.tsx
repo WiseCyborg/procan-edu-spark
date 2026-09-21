@@ -132,16 +132,24 @@ const Index = () => {
           {/* Primary CTA + Secondary Link */}
           <div className={`text-center ${isMobile ? 'mb-3' : 'mb-5'}`}>
             <Button
-              onClick={() => navigate('/get-started')}
+              onClick={() => navigate(checkoutEnabled ? '/get-started' : '/apply')}
               size={isMobile ? 'default' : 'lg'}
               className={`bg-white text-primary hover:bg-white/90 font-semibold rounded-xl shadow-xl hover:shadow-2xl transition-all hover:scale-105 ${isMobile ? 'w-full px-6 py-5 text-base h-auto' : 'px-10 py-6 text-lg'}`}
             >
-              {checkoutEnabled ? 'Start Training — $49.99' : 'Explore workforce education'}
+              {checkoutEnabled ? 'Start Training — $49.99' : 'Request access'}
             </Button>
             <p className={`text-white/80 mx-auto mt-3 ${isMobile ? 'text-[11px] max-w-sm' : 'text-xs max-w-xl'}`}>
               Optional continuing education. This course does not satisfy Maryland's annual responsible vendor / agent training duty.
             </p>
-            <div className="mt-3">
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
+              {!checkoutEnabled && (
+                <button
+                  onClick={() => navigate('/auth?role=student&register=true')}
+                  className={`text-white/80 hover:text-white underline underline-offset-4 transition-colors ${isMobile ? 'text-xs' : 'text-sm'}`}
+                >
+                  Have a join code?
+                </button>
+              )}
               <button
                 onClick={() => navigate('/verify-certificate')}
                 className={`text-white/80 hover:text-white underline underline-offset-4 transition-colors ${isMobile ? 'text-xs' : 'text-sm'}`}
@@ -228,8 +236,8 @@ const Index = () => {
                     <span>Issues <strong>ProCann EDU Completion Record</strong></span>
                   </div>
                 </div>
-                <Button className="w-full group-hover:bg-primary/90" onClick={(e) => { e.stopPropagation(); navigate(checkoutEnabled ? '/auth?role=student' : '/get-started'); }}>
-                  {checkoutEnabled ? 'Start Training' : 'Explore workforce education'}
+                <Button className="w-full group-hover:bg-primary/90" onClick={(e) => { e.stopPropagation(); navigate(checkoutEnabled ? '/auth?role=student' : '/apply'); }}>
+                  {checkoutEnabled ? 'Start Training' : 'Request access'}
                 </Button>
               </div>
             </div>
@@ -413,7 +421,7 @@ const Index = () => {
             <div>
               <h5 className="font-semibold mb-3">For Organizations</h5>
               <ul className="space-y-2 text-sm">
-                <li><a href="/org/apply" className="text-gray-400 hover:text-white">Dispensary Application</a></li>
+                <li><a href="/apply" className="text-gray-400 hover:text-white">{checkoutEnabled ? 'Dispensary Application' : 'Request access'}</a></li>
                 <li><a href="/employers" className="text-gray-400 hover:text-white">Verify Certificates</a></li>
                 {checkoutEnabled ? (
                   <li><a href="/purchase-seats" className="text-gray-400 hover:text-white">Purchase Training Seats</a></li>

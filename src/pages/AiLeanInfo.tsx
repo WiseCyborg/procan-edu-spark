@@ -68,8 +68,8 @@ export const AiLeanInfo = () => {
             <Button size="lg" onClick={() => navigate('/auth')} className="text-lg px-8">
               Try AiLean Now
             </Button>
-            <Button size="lg" variant="outline" onClick={() => navigate('/org/apply')} className="text-lg px-8">
-              For Organizations
+            <Button size="lg" variant="outline" onClick={() => navigate('/apply')} className="text-lg px-8">
+              Request access
             </Button>
           </div>
         </div>

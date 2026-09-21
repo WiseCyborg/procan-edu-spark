@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Building2, CreditCard, Eye, EyeOff } from 'lucide-react';
+import { BUSINESS_RULES } from '@/config/business-rules';
 
 const DispensaryAuthForm = () => {
   const [loading, setLoading] = useState(false);
@@ -124,11 +125,31 @@ const DispensaryAuthForm = () => {
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="apply">Apply for Access</TabsTrigger>
+              <TabsTrigger value="apply">
+                {BUSINESS_RULES.PUBLIC_SELF_SERVE_CHECKOUT_ENABLED ? 'Apply for Access' : 'Request access'}
+              </TabsTrigger>
               <TabsTrigger value="login">Login</TabsTrigger>
             </TabsList>
             
             <TabsContent value="apply">
+              {!BUSINESS_RULES.PUBLIC_SELF_SERVE_CHECKOUT_ENABLED ? (
+                <div className="space-y-4">
+                  <div className="p-4 bg-muted border rounded-md">
+                    <h3 className="font-semibold mb-2">Request access</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Public application and payment are not available. Contact us about workforce
+                      education for your dispensary, or use a join code if you already have one.
+                    </p>
+                  </div>
+                  <Button asChild className="w-full bg-green-600 hover:bg-green-700">
+                    <Link to="/apply">Request access</Link>
+                  </Button>
+                  <Button asChild variant="outline" className="w-full">
+                    <a href="mailto:info@procannedu.com">Contact info@procannedu.com</a>
+                  </Button>
+                </div>
+              ) : (
+              <>
               <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-md">
                 <h3 className="font-semibold text-green-800 mb-2">Dispensary Application Process</h3>
                 <ol className="text-sm text-green-700 space-y-1">
@@ -209,6 +230,8 @@ const DispensaryAuthForm = () => {
                   {loading ? 'Submitting Application...' : 'Submit Application'}
                 </Button>
               </form>
+              </>
+              )}
             </TabsContent>
             
             <TabsContent value="login">

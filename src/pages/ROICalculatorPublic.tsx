@@ -280,11 +280,11 @@ export default function ROICalculatorPublic() {
             {/* CTA */}
             <Button
               size="lg"
-              onClick={() => navigate('/org/apply')}
+              onClick={() => navigate('/apply')}
               className="w-full shadow-lg text-lg h-14"
             >
               <DollarSign className="h-5 w-5 me-2" />
-              Get Your Free Compliance Audit
+              Request access
               <ArrowRight className="h-5 w-5 ms-2 rtl-flip" />
             </Button>
           </div>

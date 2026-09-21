@@ -24,9 +24,9 @@ export const RoleSelectorModal: React.FC<RoleSelectorModalProps> = ({
   const roles = [
     {
       icon: Award,
-      title: "I'm Ready to Start Training",
+      title: "I have a join code",
       description: 'For individual students seeking Maryland cannabis compliance training',
-      path: '/auth?role=student',
+      path: '/auth?role=student&register=true',
       gradient: 'from-green-500 to-emerald-600',
     },
     {
@@ -40,7 +40,7 @@ export const RoleSelectorModal: React.FC<RoleSelectorModalProps> = ({
       icon: Building2,
       title: 'I Own/Operate a Dispensary',
       description: 'For business owners seeking compliance solutions',
-      path: '/org/apply',
+      path: '/apply',
       gradient: 'from-purple-500 to-indigo-600',
     },
   ];

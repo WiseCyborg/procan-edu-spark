@@ -28,21 +28,21 @@ export const StickyMobileCTA = () => {
     <div className="fixed bottom-0 start-0 end-0 z-50 bg-card shadow-2xl border-t-2 border-primary p-3 md:hidden animate-slide-in-up">
       <div className="flex gap-2">
         <Button
-          onClick={() => navigate(checkoutEnabled ? '/auth?role=student' : '/get-started')}
+          onClick={() => navigate(checkoutEnabled ? '/auth?role=student' : '/apply')}
           className="flex-1 bg-primary text-primary-foreground h-14 text-base font-semibold shadow-lg"
           size="touch"
         >
           <Award className="h-5 w-5 me-2" />
-          {checkoutEnabled ? 'Start Training' : 'Explore workforce education'}
+          {checkoutEnabled ? 'Start Training' : 'Request access'}
         </Button>
         <Button
-          onClick={() => navigate('/org/apply')}
+          onClick={() => navigate(checkoutEnabled ? '/org/apply' : '/auth?role=student&register=true')}
           variant="outline"
           className="flex-1 border-2 border-primary h-14 text-base font-semibold"
           size="touch"
         >
           <Building2 className="h-5 w-5 me-2" />
-          Get Audit
+          {checkoutEnabled ? 'Get Audit' : 'Join code'}
         </Button>
       </div>
     </div>

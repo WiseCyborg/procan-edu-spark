@@ -160,11 +160,11 @@ export default function CompetitorComparison() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
               size="lg"
-              onClick={() => navigate('/org/apply')}
+              onClick={() => navigate('/apply')}
               className="bg-white text-primary hover:bg-white/90 shadow-lg"
             >
               <DollarSign className="h-5 w-5 me-2" />
-              Request Information
+              Request access
             </Button>
             <Button
               size="lg"

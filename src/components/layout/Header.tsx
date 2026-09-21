@@ -24,6 +24,7 @@ import { LogoutConfirmModal } from '@/components/auth/LogoutConfirmModal';
 import { SaveIndicator } from '@/components/auth/SaveIndicator';
 import { LanguageSwitcher } from '@/components/i18n/LanguageSwitcher';
 import { usePreferredLanguage } from '@/hooks/usePreferredLanguage';
+import { BUSINESS_RULES } from '@/config/business-rules';
 
 interface HeaderProps {
   role?: string;
@@ -39,6 +40,9 @@ const PUBLIC_MARKETING_ROUTES = [
   '/employers',
   '/about',
   '/get-started',
+  '/apply',
+  '/org/apply',
+  '/payment',
   '/stoplight-standard',
   '/privacy-policy',
   '/terms-of-service',
@@ -200,11 +204,13 @@ const Header = ({ role: headerRole }: HeaderProps = {}) => {
                     {t('nav.signIn')}
                   </Button>
                   <Button 
-                    onClick={() => navigate('/get-started')}
+                    onClick={() => navigate(BUSINESS_RULES.PUBLIC_SELF_SERVE_CHECKOUT_ENABLED ? '/get-started' : '/apply')}
                     size="sm"
                     className="bg-green-600 hover:bg-green-700 text-white"
                   >
-                    {t('nav.getStarted')}
+                    {BUSINESS_RULES.PUBLIC_SELF_SERVE_CHECKOUT_ENABLED
+                      ? t('nav.getStarted')
+                      : t('nav.requestAccess', { defaultValue: 'Request access' })}
                   </Button>
                 </>
               ) : (

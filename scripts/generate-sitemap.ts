@@ -37,7 +37,7 @@ const entries: SitemapEntry[] = [
   { path: '/regulatory-explorer', changefreq: 'weekly', priority: '0.6' },
   { path: '/stoplight-standard', changefreq: 'monthly', priority: '0.5' },
   { path: '/live', changefreq: 'weekly', priority: '0.5' },
-  { path: '/org/apply', changefreq: 'monthly', priority: '0.7' },
+  { path: '/apply', changefreq: 'monthly', priority: '0.7' },
 ];
 
 function generateSitemap(items: SitemapEntry[]) {
