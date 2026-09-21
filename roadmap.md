@@ -1,4 +1,4 @@
-- [ ] Replace public sell CTAs with request-access and join-code paths.
-- [ ] Park /apply, /org/apply, and no-link /payment while checkout is off.
-- [ ] Remove public submit/pay language from Get Started.
-- [ ] Verify visible public copy and list changed files.
+- [x] Replace public sell CTAs with request-access and join-code paths.
+- [x] Park /apply, /org/apply, and no-link /payment while checkout is off.
+- [x] Remove public submit/pay language from Get Started.
+- [x] Verify visible public copy and list changed files.
