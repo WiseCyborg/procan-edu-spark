@@ -1,0 +1,29 @@
+-- PCE-741 PROPOSAL — needs William/Ailean approval before apply.
+-- Problem: public.check_scraper_freshness() resolves scraper_stale when the
+-- NEXT scrape-regulations run has errorCount=0, even if regulatory_updates
+-- rows still have ai_impact_analysis IS NULL (Sep 5 → Sep 6 auto-resolve).
+--
+-- Live function body is DB-only (not in this repo's migrations). Do NOT
+-- CREATE OR REPLACE blindly — pull current def first:
+--   select pg_get_functiondef('public.check_scraper_freshness'::regproc);
+--
+-- Intended behaviour change (acceptance criterion 4):
+--   BEFORE auto-resolving open alert_type='scraper_stale':
+--     also require that there is no "analysis backlog" for recent changes, e.g.
+--
+--   SELECT count(*) FROM regulatory_updates
+--   WHERE ai_impact_analysis IS NULL
+--     AND review_status = 'pending'
+--     AND detected_at >= now() - interval '14 days'
+--     AND change_type IN ('added','modified');
+--
+--   If count > 0: keep alert open (or raise/refresh) with message like
+--     'COMAR scrape OK but N regulatory_updates still lack ai_impact_analysis.'
+--   Only resolve when last scrape errorCount=0 AND backlog count = 0
+--   (or backlog older than policy window).
+--
+-- Click-path (Supabase Dashboard → project zhmpwczrvitomsxjwpzc):
+--   1) SQL Editor → run pg_get_functiondef as above; save snapshot.
+--   2) Edit resolution branch to include backlog gate.
+--   3) Optionally schedule retry-pending-regulatory-impact dry_run cron
+--      after D15 fund + edge deploy of this PR.

@@ -9,6 +9,69 @@ const corsHeaders = {
 const SYSTEM_PROMPT =
   'You are an expert in Maryland cannabis regulations and compliance training. Analyze regulatory changes for their impact on training content. Return valid JSON only.';
 
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+function isRetriableAnthropicStatus(status: number): boolean {
+  return status === 429 || status === 529 || (status >= 500 && status <= 599);
+}
+
+function classifyAnthropicError(status: number, errText: string): { retriable: boolean; credit: boolean; message: string } {
+  const credit = /credit balance|too low to access|billing|purchase credits/i.test(errText);
+  const retriable = credit || isRetriableAnthropicStatus(status);
+  return {
+    retriable,
+    credit,
+    message: `Anthropic API failed: ${status} ${errText}`.slice(0, 1500),
+  };
+}
+
+/** Call Anthropic with bounded retries for 429/5xx and credit-exhaustion flakes. */
+async function callAnthropicWithRetry(
+  anthropicApiKey: string,
+  prompt: string,
+  attempts = 3,
+): Promise<{ ok: true; rawText: string } | { ok: false; status: number; message: string; credit: boolean }> {
+  let lastStatus = 0;
+  let lastMsg = "unknown";
+  let lastCredit = false;
+  for (let i = 1; i <= attempts; i++) {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "x-api-key": anthropicApiKey,
+        "anthropic-version": "2023-06-01",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 2000,
+        system: SYSTEM_PROMPT,
+        messages: [{ role: "user", content: prompt }],
+      }),
+    });
+    if (response.ok) {
+      const data = await response.json();
+      const rawText: string = data?.content?.[0]?.text ?? "";
+      return { ok: true, rawText };
+    }
+    const errText = await response.text();
+    const classified = classifyAnthropicError(response.status, errText);
+    lastStatus = response.status;
+    lastMsg = classified.message;
+    lastCredit = classified.credit;
+    if (!classified.retriable || i === attempts) {
+      return { ok: false, status: lastStatus, message: lastMsg, credit: lastCredit };
+    }
+    const delay = 1000 * Math.pow(2, i - 1);
+    console.warn(
+      `[analyze-regulatory-impact] Anthropic attempt ${i}/${attempts} failed (${response.status}); retry in ${delay}ms`,
+    );
+    await sleep(delay);
+  }
+  return { ok: false, status: lastStatus, message: lastMsg, credit: lastCredit };
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -70,28 +133,18 @@ Analyze this change and provide:
 Return as JSON with keys: summary, affected_topics (array), urgency, suggested_updates, compliance_risk
 Return ONLY the JSON object with no preamble, no explanation and no markdown fences.`;
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'x-api-key': anthropicApiKey,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 2000,
-        system: SYSTEM_PROMPT,
-        messages: [{ role: 'user', content: prompt }],
-      }),
-    });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      throw new Error(`Anthropic API failed: ${response.status} ${errText}`);
+    const anth = await callAnthropicWithRetry(anthropicApiKey, prompt);
+    if (!anth.ok) {
+      // Credit exhaustion → 402 so scrape retry logs are actionable (PCE-741 / D15).
+      const status = anth.credit ? 402 : (anth.status || 500);
+      await logRun('error', anth.message);
+      return new Response(
+        JSON.stringify({ error: anth.message, credit_exhausted: anth.credit }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status },
+      );
     }
 
-    const data = await response.json();
-    const rawText: string = data?.content?.[0]?.text ?? '';
+    const rawText: string = anth.rawText;
     const cleaned = rawText.replace(/```json\s*/gi, '').replace(/```\s*$/g, '').trim();
 
     let analysis: any;
