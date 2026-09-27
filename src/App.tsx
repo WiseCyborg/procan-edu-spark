@@ -62,7 +62,6 @@ import ActivateAiLean from "./pages/ActivateAiLean";
 import AiLeanInfo from "./pages/AiLeanInfo";
 import StateOfficialsPage from "./pages/StateOfficialsPage";
 import AboutTeamPage from "./pages/AboutTeamPage";
-import ComplianceCurriculumMatrixPage from "./pages/ComplianceCurriculumMatrixPage";
 import ComplianceContentReviewPage from "./pages/ComplianceContentReviewPage";
 import EmployersPage from "./pages/EmployersPage";
 import ImpactDashboardPage from "./pages/ImpactDashboardPage";
@@ -356,7 +355,6 @@ const AppRoutesLayout = () => {
             <Route path="/get-started" element={<GetStarted />} />
             <Route path="/state-officials" element={<StateOfficialsPage />} />
             <Route path="/about/team" element={<AboutTeamPage />} />
-            <Route path="/compliance/curriculum-matrix" element={<ComplianceCurriculumMatrixPage />} />
             <Route path="/compliance/content-review" element={<ComplianceContentReviewPage />} />
             <Route path="/employers" element={<EmployersPage />} />
             <Route path="/impact" element={<ImpactDashboardPage />} />

@@ -197,17 +197,7 @@ export default function StateOfficialsPage() {
           <CardTitle>Regulatory Compliance Documentation</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Button 
-              variant="outline" 
-              className="h-auto py-4"
-              onClick={() => window.location.href = '/compliance/curriculum-matrix'}
-            >
-              <div className="text-start w-full">
-                <p className="font-semibold">Internal Curriculum Alignment Matrix</p>
-                <p className="text-sm text-muted-foreground">This mapping is our own internal alignment work and has not been reviewed or approved by the MCA.</p>
-              </div>
-            </Button>
+          <div className="grid grid-cols-1 gap-4">
             <Button 
               variant="outline" 
               className="h-auto py-4"
