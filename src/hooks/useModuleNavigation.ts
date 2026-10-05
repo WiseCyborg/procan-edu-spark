@@ -4,35 +4,43 @@ import { useNavigate } from 'react-router-dom';
 interface UseModuleNavigationProps {
   currentModule: number;
   totalModules: number;
+  /** When set, next does not assume module numbers are consecutive. */
+  nextModule?: number | null;
+  previousModule?: number | null;
   onNavigate?: (moduleNumber: number) => void;
 }
 
 export const useModuleNavigation = ({
   currentModule,
   totalModules,
+  nextModule,
+  previousModule,
   onNavigate
 }: UseModuleNavigationProps) => {
   const navigate = useNavigate();
 
+  const resolvedPrevious = previousModule !== undefined
+    ? previousModule
+    : (currentModule > 0 ? currentModule - 1 : null);
+  const resolvedNext = nextModule !== undefined
+    ? nextModule
+    : (currentModule < totalModules - 1 ? currentModule + 1 : null);
+
   const goToPrevious = () => {
-    if (currentModule > 0) {
-      const target = currentModule - 1;
-      if (onNavigate) {
-        onNavigate(target);
-      } else {
-        navigate(`/course/part${target}`);
-      }
+    if (resolvedPrevious === null) return;
+    if (onNavigate) {
+      onNavigate(resolvedPrevious);
+    } else {
+      navigate(`/course/part${resolvedPrevious}`);
     }
   };
 
   const goToNext = () => {
-    if (currentModule < totalModules - 1) {
-      const target = currentModule + 1;
-      if (onNavigate) {
-        onNavigate(target);
-      } else {
-        navigate(`/course/part${target}`);
-      }
+    if (resolvedNext === null) return;
+    if (onNavigate) {
+      onNavigate(resolvedNext);
+    } else {
+      navigate(`/course/part${resolvedNext}`);
     }
   };
 
@@ -84,14 +92,14 @@ export const useModuleNavigation = ({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentModule, totalModules]);
+  }, [resolvedPrevious, resolvedNext]);
 
   return {
     goToPrevious,
     goToNext,
     goToModule,
     goToCourse,
-    canGoPrevious: currentModule > 0,
-    canGoNext: currentModule < totalModules - 1
+    canGoPrevious: resolvedPrevious !== null,
+    canGoNext: resolvedNext !== null,
   };
 };

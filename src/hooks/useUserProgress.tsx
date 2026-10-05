@@ -5,6 +5,13 @@ import { useAuth } from './useAuth';
 import { toast } from '@/components/ui/use-toast';
 import { useTierProgress } from './useTierProgress';
 import { useUserRole } from './useUserRole';
+import {
+  MANAGER_MODULE_NUMBERS,
+  REQUIRED_AGENT_MODULE_COUNT,
+  REQUIRED_AGENT_MODULE_NUMBERS,
+  isManagerTrackModule,
+  isRequiredAgentModule,
+} from '@/lib/requiredAgentModules';
 
 export interface UserProgress {
   id: string;
@@ -133,10 +140,10 @@ export const useUserProgress = (courseId?: string) => {
       // Check for tier unlock after completing a module
       if (variables.isCompleted) {
         const completedCount = (progressData?.filter(p => p.is_completed).length || 0) + 1;
-        const completionPercentage = Math.round((completedCount / RVT_MODULE_COUNT) * 100);
+        const completionPercentage = Math.round((completedCount / REQUIRED_AGENT_MODULE_COUNT) * 100);
 
-        // Write course_completions when RVT modules are all done (19 modules: 0-18)
-        if (completedCount >= RVT_MODULE_COUNT) {
+        // Course completion follows the 25 required agent modules, not modules 0-18 alone.
+        if (completedCount >= REQUIRED_AGENT_MODULE_COUNT) {
           try {
             await supabase.from('course_completions').upsert({
               user_id: user!.id,
@@ -178,8 +185,7 @@ export const useUserProgress = (courseId?: string) => {
             description: "Advanced protocols mastered. Red Tier unlocked!",
           });
           localStorage.setItem('yellow_tier_celebrated', 'true');
-        } else if (completedCount === 19 && !localStorage.getItem('rvt_complete_celebrated')) {
-          // RVT Complete at 19 modules (0-18)
+        } else if (completedCount === REQUIRED_AGENT_MODULE_COUNT && !localStorage.getItem('rvt_complete_celebrated')) {
           toast({
             title: '🎓 RVT Training Complete!',
             description: "All RVT modules mastered! Ready for certification exam!",
@@ -231,18 +237,22 @@ export const useUserProgress = (courseId?: string) => {
     21: '0afce5e1-eff1-41c2-b7a6-3a67511c43dc',
     22: '4c8c78c9-6080-40c3-98c0-9930389f771a',
     23: 'bdbbc605-a8f8-4a65-ba9a-a2451198174c',
+    24: '00850d05-4806-4b0d-ab24-c2ce81acb618',
+    25: '74e5fe1c-7ceb-46b7-8d1c-60d4e0a1e761',
+    26: '5c369f28-9dfb-40f5-980b-7fed302e8c83',
+    27: '5e4ca561-9d1b-4bac-81a5-9f01091608aa',
+    28: '77edad96-06eb-4ca1-a3c6-cd819bace3c0',
+    29: '5410b55d-4831-46aa-bfb6-89aedd86215b',
   };
 
-  // Track separation: RVT (0-18) vs Manager (19-23)
+  // Modules 0-18 are the first required block. Modules 19-23 are supervisory.
+  // The exam requires every buyer-visible module: 0-18 and 24-29.
   const RVT_REQUIRED_MAX = 18;
-  const RVT_MODULE_COUNT = 19; // Modules 0-18 (required for RVT Certificate)
-  const MANAGER_MODULE_COUNT = 5; // Modules 19-23 (optional Manager Track)
-  const TOTAL_ALL_MODULES = 24; // Total modules in course
-  
-  // For RVT certification, only modules 0-18 are required
-  // Manager modules are optional and don't block RVT certification
-  const TOTAL_MODULES = RVT_MODULE_COUNT;
-  const REQUIRED_FOR_EXAM = RVT_MODULE_COUNT; // RVT exam requires only RVT modules
+  const RVT_MODULE_COUNT = 19;
+  const MANAGER_MODULE_COUNT = 5;
+  const TOTAL_ALL_MODULES = 30;
+  const TOTAL_MODULES = REQUIRED_AGENT_MODULE_COUNT;
+  const REQUIRED_FOR_EXAM = REQUIRED_AGENT_MODULE_COUNT;
 
   // Helper functions
   const getModuleProgress = (moduleId: string): ModuleProgress | null => {
@@ -290,29 +300,30 @@ export const useUserProgress = (courseId?: string) => {
     return MODULE_UUID_MAP[moduleNumber];
   };
 
-  // Check if user can access a module (prerequisite check)
-  const canAccessModule = (moduleNumber: number): boolean => {
-    // Module 0 is always accessible
-    if (moduleNumber === 0) return true;
-    
-    // All previous modules must be completed
-    for (let i = 0; i < moduleNumber; i++) {
-      if (!isModuleCompletedByNumber(i)) {
-        return false;
-      }
+  const prerequisiteNumbers = (moduleNumber: number): readonly number[] => {
+    if (isRequiredAgentModule(moduleNumber)) {
+      const index = REQUIRED_AGENT_MODULE_NUMBERS.indexOf(
+        moduleNumber as (typeof REQUIRED_AGENT_MODULE_NUMBERS)[number],
+      );
+      return REQUIRED_AGENT_MODULE_NUMBERS.slice(0, index);
     }
-    return true;
+    if (isManagerTrackModule(moduleNumber)) {
+      const earlierRequired = REQUIRED_AGENT_MODULE_NUMBERS.filter((n) => n <= RVT_REQUIRED_MAX);
+      const earlierManager = MANAGER_MODULE_NUMBERS.filter((n) => n < moduleNumber);
+      return [...earlierRequired, ...earlierManager];
+    }
+    return [];
   };
 
-  // Check if all RVT required modules are completed (for RVT exam/certificate)
-  // Only modules 0-18 are required for RVT certification
+  // Required modules follow 0-18 then 24-29. Supervisory modules do not block them.
+  const canAccessModule = (moduleNumber: number): boolean => {
+    if (moduleNumber === 0) return true;
+    return prerequisiteNumbers(moduleNumber).every((n) => isModuleCompletedByNumber(n));
+  };
+
+  // Exam gate: every buyer-required module, matching get_course_state.required_total.
   const areAllModulesCompleted = (): boolean => {
-    for (let i = 0; i <= RVT_REQUIRED_MAX; i++) {
-      if (!isModuleCompletedByNumber(i)) {
-        return false;
-      }
-    }
-    return true;
+    return REQUIRED_AGENT_MODULE_NUMBERS.every((n) => isModuleCompletedByNumber(n));
   };
 
   // Check if all Manager Track modules are completed (for Manager certificate)
@@ -347,14 +358,18 @@ export const useUserProgress = (courseId?: string) => {
     return count;
   };
 
-  // Get first incomplete module number (within RVT required modules)
+  const getRequiredCompletedCount = (): number => {
+    return REQUIRED_AGENT_MODULE_NUMBERS.filter((n) => isModuleCompletedByNumber(n)).length;
+  };
+
+  // First unfinished buyer-required module. After 0-18 that is module 24, not 19.
   const getFirstIncompleteModule = (): number => {
-    for (let i = 0; i <= RVT_REQUIRED_MAX; i++) {
-      if (!isModuleCompletedByNumber(i)) {
-        return i;
+    for (const moduleNumber of REQUIRED_AGENT_MODULE_NUMBERS) {
+      if (!isModuleCompletedByNumber(moduleNumber)) {
+        return moduleNumber;
       }
     }
-    return RVT_REQUIRED_MAX + 1; // All RVT modules complete, return first manager module
+    return REQUIRED_AGENT_MODULE_NUMBERS[REQUIRED_AGENT_MODULE_NUMBERS.length - 1];
   };
 
   const updateProgress = async (
@@ -418,6 +433,7 @@ export const useUserProgress = (courseId?: string) => {
     areAllManagerModulesCompleted,
     getRvtCompletedCount,
     getManagerCompletedCount,
+    getRequiredCompletedCount,
     getFirstIncompleteModule,
     updateProgress,
     migrateFromLocalStorage,
