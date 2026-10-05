@@ -306,8 +306,8 @@ const VideoRegenerationQueue: React.FC = () => {
   const wideBlocks = queueWideBlockers(rows ?? []);
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-6 overflow-x-hidden">
-      <div className="max-w-3xl mx-auto space-y-6">
+    <div className="min-h-screen max-w-full overflow-x-clip bg-background p-4 md:p-6">
+      <div className="mx-auto w-full min-w-0 max-w-3xl space-y-6">
         <div>
           <Link to="/admin" className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
             <ArrowLeft className="h-4 w-4 rtl-flip" /> Admin
@@ -316,7 +316,7 @@ const VideoRegenerationQueue: React.FC = () => {
             <h1 className="text-3xl font-bold flex items-center gap-2">
               <Video className="h-7 w-7" /> Video Regeneration Queue
             </h1>
-            <div className="ms-auto flex flex-col items-end gap-1">
+            <div className="ms-auto flex w-full min-w-0 max-w-full flex-col items-stretch gap-1 sm:w-auto sm:items-end">
               <Button
                 type="button"
                 variant="outline"
@@ -332,7 +332,7 @@ const VideoRegenerationQueue: React.FC = () => {
                 )}
                 {refreshing ? 'Refreshing' : 'Refresh'}
               </Button>
-              <p className="text-xs text-muted-foreground" data-testid="last-refreshed">
+              <p className="max-w-full text-xs text-muted-foreground sm:text-right" data-testid="last-refreshed">
                 {lastRefreshedLabel}
               </p>
             </div>
@@ -368,7 +368,7 @@ const VideoRegenerationQueue: React.FC = () => {
           </div>
         ) : null}
 
-        <Card>
+        <Card className="min-w-0 max-w-full overflow-hidden">
           <CardHeader>
             <CardTitle className="text-lg">Flagged videos</CardTitle>
             <CardDescription>
@@ -413,8 +413,8 @@ const VideoRegenerationQueue: React.FC = () => {
                   const expanded = !!expandedReasons[row.asset_id];
                   const reasonLong = reason.length > 120;
                   return (
-                    <article key={row.asset_id} className="rounded-lg border bg-background p-4 space-y-3 break-words">
-                      <div className="flex flex-wrap items-start gap-2">
+                    <article key={row.asset_id} className="min-w-0 max-w-full space-y-3 break-words rounded-lg border bg-background p-4">
+                      <div className="flex min-w-0 flex-wrap items-start gap-2">
                         <div className="min-w-0 flex-1 space-y-1">
                           <h2 className="font-semibold">
                             {row.module_number != null ? `Module ${row.module_number}. ` : ''}
@@ -428,27 +428,27 @@ const VideoRegenerationQueue: React.FC = () => {
                         <Badge variant={tier.rank === 1 ? 'destructive' : 'secondary'}>{tier.label}</Badge>
                       </div>
 
-                      <ol className="flex flex-wrap gap-2" aria-label="Regeneration steps">
+                      <ol className="flex min-w-0 flex-wrap gap-2" aria-label="Regeneration steps">
                         {steps.map((step) => (
                           <li
                             key={step.key}
-                            className={`max-w-full rounded-md border px-2 py-1 text-xs ${stepClass(step.state)}`}
+                            className={`min-w-0 max-w-full break-words rounded-md border px-2 py-1 text-xs ${stepClass(step.state)}`}
                             data-testid={`step-${step.key}`}
                           >
                             <span className="font-medium">{step.label}</span>
-                            <span className="mt-0.5 block text-muted-foreground">{step.detail}</span>
+                            <span className="mt-0.5 block break-words text-muted-foreground">{step.detail}</span>
                           </li>
                         ))}
                       </ol>
 
-                      <div className="space-y-1 text-sm">
+                      <div className="min-w-0 space-y-1 text-sm">
                         <p data-testid="flagged-since">
                           Flagged since <span className="font-medium">{calendarDate(row.flagged_since)}</span>
                         </p>
                         <p data-testid="last-action">
                           Last action <span className="font-medium">{calendarStamp(row.last_action_at)}</span>
                         </p>
-                        <p className={expanded ? 'whitespace-pre-wrap' : 'truncate'}>{reason}</p>
+                        <p className={expanded ? 'whitespace-pre-wrap break-words' : 'line-clamp-1 break-words'}>{reason}</p>
                         {reasonLong ? (
                           <Button
                             type="button"
@@ -473,17 +473,17 @@ const VideoRegenerationQueue: React.FC = () => {
                         </p>
                       ))}
 
-                      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-                        <Button type="button" variant="outline" size="sm" onClick={() => openScript(row)}>
+                      <div className="flex min-w-0 flex-wrap gap-2">
+                        <Button type="button" variant="outline" size="sm" className="h-auto max-w-full whitespace-normal" onClick={() => openScript(row)}>
                           Read script
                         </Button>
                         {showApproveScript(row.review_status) ? (
-                          <Button type="button" size="sm" onClick={() => setApproveTarget(row)}>
+                          <Button type="button" size="sm" className="h-auto max-w-full whitespace-normal" onClick={() => setApproveTarget(row)}>
                             Approve script &amp; queue narration
                           </Button>
                         ) : null}
                         {showRequeueNarration(row.narration_status) ? (
-                          <Button type="button" variant="outline" size="sm" onClick={() => setRequeueTarget(row)}>
+                          <Button type="button" variant="outline" size="sm" className="h-auto max-w-full whitespace-normal" onClick={() => setRequeueTarget(row)}>
                             Re-queue narration
                           </Button>
                         ) : null}
@@ -491,6 +491,7 @@ const VideoRegenerationQueue: React.FC = () => {
                           type="button"
                           variant="outline"
                           size="sm"
+                          className="h-auto max-w-full whitespace-normal"
                           onClick={() => {
                             setNewUrl('');
                             setNote('');

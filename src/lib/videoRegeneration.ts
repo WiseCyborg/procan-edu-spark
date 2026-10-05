@@ -177,9 +177,28 @@ export function formatJobDetail(
   return `${label}${heldNote}`;
 }
 
+export function scriptStepDetail(row: {
+  has_draft_script: boolean | null;
+  review_status: string | null;
+  pipeline_stage: string | null;
+}): string {
+  const draft = row.has_draft_script ? "Draft ready" : "No draft";
+  const review =
+    row.review_status === "approved"
+      ? "approved"
+      : row.review_status === "script_pending_review" || row.review_status === "pending_review"
+        ? "pending review"
+        : row.review_status === "rejected"
+          ? "rejected"
+          : "no review status";
+  const stage = (row.pipeline_stage || "stage not recorded").split("_").join(" ");
+  return `${draft} · ${review} · ${stage}`;
+}
+
 export interface RegenerationStepsInput {
   review_status: string | null;
   has_draft_script: boolean | null;
+  pipeline_stage: string | null;
   render_status: string | null;
   candidate_stored_in_r2: boolean | null;
   mapped: boolean | null;
@@ -200,12 +219,7 @@ export function regenerationSteps(row: RegenerationStepsInput): StepView[] {
       : row.review_status === "rejected" || !row.has_draft_script
         ? "failed"
         : "current";
-  const scriptDetail =
-    row.review_status === "approved"
-      ? "approved"
-      : row.review_status === "script_pending_review"
-        ? "pending review"
-        : row.review_status || "missing";
+  const scriptDetail = scriptStepDetail(row);
 
   let renderState = jobState(row.render_job_status);
   let renderDetail = formatJobDetail(row.render_job_status, row.render_job_held, row.render_job_error);
