@@ -119,8 +119,9 @@ const VideoRegenerationQueue: React.FC = () => {
   const [expandedReasons, setExpandedReasons] = useState<Record<string, boolean>>({});
   const [busy, setBusy] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [refreshMessage, setRefreshMessage] = useState('Not refreshed yet');
 
-  const { data: rows, dataUpdatedAt, isLoading, isError, error, refetch, isFetching } = useQuery({
+  const { data: rows, isLoading, isError, error, refetch } = useQuery({
     queryKey: QUEUE_KEY,
     queryFn: async (): Promise<QueueRow[]> => {
       const { data, error } = await supabase.rpc('get_video_regeneration_queue' as any);
@@ -133,10 +134,14 @@ const VideoRegenerationQueue: React.FC = () => {
   });
 
   const refreshQueue = async () => {
+    if (refreshing) return;
     setRefreshing(true);
+    setRefreshMessage('Refreshing flagged videos and job statuses…');
+    const started = Date.now();
     try {
       const result = await refetch();
       if (result.error) {
+        setRefreshMessage('Refresh failed. The list was not updated.');
         toast({
           title: 'Refresh failed',
           description: result.error.message,
@@ -149,22 +154,22 @@ const VideoRegenerationQueue: React.FC = () => {
         minute: '2-digit',
         second: '2-digit',
       });
-      toast({
-        title: 'Queue refreshed',
-        description: `${result.data?.length ?? 0} flagged videos. Last refreshed ${when}.`,
-      });
+      const count = result.data?.length ?? 0;
+      const message = `Last refreshed ${when}. Reloaded ${count} flagged videos.`;
+      setRefreshMessage(message);
+      toast({ title: 'Queue refreshed', description: message });
     } finally {
+      const elapsed = Date.now() - started;
+      if (elapsed < 400) {
+        await new Promise((resolve) => setTimeout(resolve, 400 - elapsed));
+      }
       setRefreshing(false);
     }
   };
 
-  const lastRefreshedLabel = dataUpdatedAt
-    ? `Last refreshed ${new Date(dataUpdatedAt).toLocaleString(undefined, {
-        hour: 'numeric',
-        minute: '2-digit',
-        second: '2-digit',
-      })}`
-    : 'Not refreshed yet';
+  const lastRefreshedLabel = refreshing
+    ? 'Refreshing flagged videos and job statuses…'
+    : refreshMessage;
 
   const handleResult = (result: any, fallbackTitle: string) => {
     if (result?.already_approved) {
@@ -317,15 +322,15 @@ const VideoRegenerationQueue: React.FC = () => {
                 variant="outline"
                 size="sm"
                 onClick={refreshQueue}
-                disabled={refreshing || isFetching}
-                aria-busy={refreshing || isFetching}
+                disabled={refreshing}
+                aria-busy={refreshing}
               >
-                {refreshing || isFetching ? (
+                {refreshing ? (
                   <Loader2 className="h-4 w-4 me-2 animate-spin" />
                 ) : (
                   <RefreshCw className="h-4 w-4 me-2" />
                 )}
-                {refreshing || isFetching ? 'Refreshing' : 'Refresh'}
+                {refreshing ? 'Refreshing' : 'Refresh'}
               </Button>
               <p className="text-xs text-muted-foreground" data-testid="last-refreshed">
                 {lastRefreshedLabel}
