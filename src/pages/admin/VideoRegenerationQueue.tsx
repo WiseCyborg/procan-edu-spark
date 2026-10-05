@@ -424,6 +424,13 @@ const VideoRegenerationQueue: React.FC = () => {
                             {row.course_title || '—'}
                             {row.comar_reference ? ` · ${row.comar_reference}` : ''}
                           </p>
+                          <p className="text-sm" data-testid="flagged-since">
+                            Flagged since <span className="font-medium">{calendarDate(row.flagged_since)}</span>
+                            <span className="text-muted-foreground"> · </span>
+                            <span data-testid="last-action">
+                              Last action <span className="font-medium">{calendarStamp(row.last_action_at)}</span>
+                            </span>
+                          </p>
                         </div>
                         <Badge variant={tier.rank === 1 ? 'destructive' : 'secondary'}>{tier.label}</Badge>
                       </div>
@@ -442,12 +449,6 @@ const VideoRegenerationQueue: React.FC = () => {
                       </ol>
 
                       <div className="min-w-0 space-y-1 text-sm">
-                        <p data-testid="flagged-since">
-                          Flagged since <span className="font-medium">{calendarDate(row.flagged_since)}</span>
-                        </p>
-                        <p data-testid="last-action">
-                          Last action <span className="font-medium">{calendarStamp(row.last_action_at)}</span>
-                        </p>
                         <p className={expanded ? 'whitespace-pre-wrap break-words' : 'line-clamp-1 break-words'}>{reason}</p>
                         {reasonLong ? (
                           <Button
