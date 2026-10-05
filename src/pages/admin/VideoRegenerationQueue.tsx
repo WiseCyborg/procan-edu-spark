@@ -28,6 +28,7 @@ import { AlertTriangle, ArrowLeft, CheckCircle2, Loader2, RefreshCw, Shield, Vid
 import { supabase } from '@/integrations/supabase/client';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useToast } from '@/hooks/use-toast';
+import { candidateUrlRequired, playbackLabel, regenerationStageLabel } from '@/lib/videoRegeneration';
 
 interface QueueRow {
   asset_id: string;
@@ -40,6 +41,11 @@ interface QueueRow {
   has_draft_script: boolean | null;
   review_status: string | null;
   comar_reference: string | null;
+  pipeline_stage: string | null;
+  render_status: string | null;
+  candidate_registered: boolean | null;
+  candidate_stored_in_r2: boolean | null;
+  playback_verified: boolean | null;
 }
 
 const relativeDate = (iso: string | null) => {
@@ -68,20 +74,6 @@ const reviewBadge = (status: string | null) => {
       return <Badge variant="secondary">{status || '—'}</Badge>;
   }
 };
-
-// Pipeline stage derived only from data the queue already returns. Anything we
-// cannot see from here is reported as unknown rather than assumed complete.
-const pipelineStage = (row: QueueRow) => {
-  if (row.review_status === 'approved') return 'Script approved — narration/render pending';
-  if (row.review_status === 'rejected') return 'Script rejected — needs rework';
-  if (row.has_draft_script) return 'Draft script ready — awaiting review';
-  return 'No draft script yet';
-};
-
-// Playback verification and publication are tracked downstream (R2 storage +
-// mapping + playback check). This view has no telemetry for them.
-const VERIFICATION_UNKNOWN = 'Not verified from this view';
-
 
 const QUEUE_KEY = ['admin', 'video-regeneration-queue'];
 
@@ -122,8 +114,18 @@ const VideoRegenerationQueue: React.FC = () => {
     return false;
   };
 
+  const urlIsRequired = candidateUrlRequired(markTarget?.candidate_registered);
+
   const submitMarkRegenerated = async () => {
     if (!markTarget) return;
+    if (urlIsRequired && !newUrl.trim()) {
+      toast({
+        title: 'Candidate video URL is required',
+        description: 'Paste the replacement URL, or wait until the pipeline stores the regenerated video in R2 and registers it.',
+        variant: 'destructive',
+      });
+      return;
+    }
     setBusy(true);
     try {
       const { data, error } = await supabase.rpc('mark_video_regenerated' as any, {
@@ -224,7 +226,11 @@ const VideoRegenerationQueue: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Flagged videos</CardTitle>
-            <CardDescription>Only videos with an open regeneration flag appear here.</CardDescription>
+            <CardDescription>
+              {rows && rows.length > 0
+                ? `${rows.length} flagged videos, each with its stored regeneration stage.`
+                : 'Only videos with an open regeneration flag appear here.'}
+            </CardDescription>
           </CardHeader>
 
           <CardContent>
@@ -264,7 +270,7 @@ const VideoRegenerationQueue: React.FC = () => {
                       <TableHead>Flagged since</TableHead>
                       <TableHead>Draft script</TableHead>
                       <TableHead>Review status</TableHead>
-                      <TableHead>Pipeline stage</TableHead>
+                      <TableHead>Regeneration stage</TableHead>
                       <TableHead>Playback verified</TableHead>
                       <TableHead className="text-end">Actions</TableHead>
                     </TableRow>
@@ -290,10 +296,15 @@ const VideoRegenerationQueue: React.FC = () => {
                           )}
                         </TableCell>
                         <TableCell>{reviewBadge(row.review_status)}</TableCell>
-                        <TableCell className="text-sm text-muted-foreground max-w-[220px]">
-                          {pipelineStage(row)}
+                        <TableCell className="text-sm max-w-[240px]">
+                          <div>{regenerationStageLabel(row)}</div>
+                          <div className="text-muted-foreground">
+                            {row.pipeline_stage || '—'}
+                            {row.render_status ? ` · render ${row.render_status}` : ''}
+                            {row.candidate_stored_in_r2 ? ' · R2 candidate stored' : ''}
+                          </div>
                         </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">{VERIFICATION_UNKNOWN}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground">{playbackLabel(row.playback_verified)}</TableCell>
                         <TableCell className="text-end whitespace-nowrap">
                           <Button
                             variant="outline"
@@ -337,13 +348,22 @@ const VideoRegenerationQueue: React.FC = () => {
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="new-video-url">Candidate video URL (optional)</Label>
+              <Label htmlFor="new-video-url">
+                Candidate video URL{urlIsRequired ? ' (required)' : ' (already registered)'}
+              </Label>
               <Input
                 id="new-video-url"
                 value={newUrl}
                 onChange={(e) => setNewUrl(e.target.value)}
                 placeholder="https://..."
+                required={urlIsRequired}
+                aria-required={urlIsRequired}
               />
+              <p className="text-sm text-muted-foreground">
+                {urlIsRequired
+                  ? 'Required until the pipeline stores the regenerated MP4 in R2 and registers it. A blank URL is rejected.'
+                  : 'The pipeline already registered this replacement. Leave the URL blank to keep it, or paste a URL to replace it.'}
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="regeneration-note">Note (optional)</Label>
@@ -361,7 +381,7 @@ const VideoRegenerationQueue: React.FC = () => {
             <Button variant="outline" onClick={() => setMarkTarget(null)} disabled={busy}>
               Cancel
             </Button>
-            <Button onClick={submitMarkRegenerated} disabled={busy}>
+            <Button onClick={submitMarkRegenerated} disabled={busy || (urlIsRequired && !newUrl.trim())}>
               {busy && <Loader2 className="h-4 w-4 me-2 animate-spin" />}
               Register candidate
             </Button>

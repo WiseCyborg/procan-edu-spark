@@ -2,7 +2,8 @@
 //
 // Actions:
 //   dispatch (default)  select approved assets, build captions, dispatch a render job
-//   collect             poll the render job; on success push the MP4 to R2 and finalize
+//   collect             poll the render job; on success push the MP4 to R2 and
+//                       register it as the replacement candidate. Does not publish.
 //
 // Providers, in preference order:
 //   ffmpeg_micro  narration audio + burned-in captions over a branded background
@@ -47,7 +48,7 @@ const ANTHROPIC_MODEL = "claude-sonnet-4-6";
 const ASSET_COLUMNS =
   "id, asset_key, title, course_id, module_id, draft_script, draft_audio_url, draft_audio_duration_seconds, " +
   "draft_audio_generated_at, draft_video_url, render_status, render_provider, render_job_id, slide_outline, " +
-  "review_status, reviewed_by, reviewed_at, storage_path, public_url, r2_key";
+  "review_status, reviewed_by, reviewed_at, storage_path, public_url, r2_key, verification_metadata";
 
 /** The compliance gate. Returns null when the asset may be rendered. */
 function complianceBlockReason(asset: any): string | null {
@@ -535,36 +536,34 @@ serve(async (req) => {
             throw new Error(`r2 verify mismatch: expected ${mp4.byteLength}, got ${confirm.size}`);
           }
 
+          // Register the stored file as the replacement candidate. The live
+          // public_url, module mapping, playback check, and publish step stay
+          // where they are until those gates run.
+          const verifiedAt = new Date().toISOString();
+          const priorMeta = asset.verification_metadata && typeof asset.verification_metadata === "object"
+            ? asset.verification_metadata
+            : {};
           const { error: updErr } = await supabase
             .from("video_assets")
             .update({
-              public_url: r2PublicUrl(cfg, key),
-              storage_path: key,
-              bucket_id: cfg.bucket,
-              storage_provider: "r2",
-              r2_key: key,
-              render_status: "completed",
+              candidate_public_url: r2PublicUrl(cfg, key),
+              candidate_r2_key: key,
+              r2_verified_at: verifiedAt,
+              pipeline_stage: "r2_verified",
+              render_status: "collected",
               render_error: null,
-              needs_regeneration: false,
-              regeneration_reason: null,
-              last_regenerated_at: new Date().toISOString(),
-              review_status: null,
-              draft_video_url: null,
+              needs_regeneration: true,
+              pipeline_last_error: null,
+              verification_metadata: {
+                ...priorMeta,
+                r2_bucket: cfg.bucket,
+                r2_verified_at: verifiedAt,
+                candidate_registered_by: "render-video",
+                candidate_bytes: mp4.byteLength,
+              },
             })
             .eq("id", asset.id);
           if (updErr) throw new Error(`update failed: ${updErr.message}`);
-
-          // Close the review-queue entry for this asset, if one is open.
-          await supabase
-            .from("content_review_queue")
-            .update({
-              status: "completed",
-              completed_at: new Date().toISOString(),
-              goes_live_at: new Date().toISOString(),
-            })
-            .eq("content_type", "video")
-            .eq("content_id", asset.id)
-            .neq("status", "completed");
 
           collected++;
           results.push({ asset_id: asset.id, status: "collected", r2_key: key });

@@ -11979,13 +11979,18 @@ export type Database = {
         Returns: {
           asset_id: string
           asset_key: string
+          candidate_registered: boolean
+          candidate_stored_in_r2: boolean
           comar_reference: string
           course_title: string
           flagged_since: string
           has_draft_script: boolean
           module_number: number
           module_title: string
+          pipeline_stage: string
+          playback_verified: boolean
           reason: string
+          render_status: string
           review_status: string
         }[]
       }
