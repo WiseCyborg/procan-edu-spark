@@ -41,12 +41,13 @@ const PaymentSuccess: React.FC = () => {
   const paypalPayerId = searchParams.get('PayerID');
   const purchaseIdParam = searchParams.get('purchase_id');
   const [courseReturn, setCourseReturn] = useState<CourseReturnState>(() => {
-    if (applicationId || purchaseIdParam) return 'idle';
+    if (applicationId) return 'idle';
+    if (purchaseIdParam && (!paypalToken || !paypalPayerId)) return 'missing';
     if (!paypalToken || !paypalPayerId) return 'missing';
-    if (courseIdParam) return 'verifying';
+    if (courseIdParam || purchaseIdParam) return 'verifying';
     return 'missing';
   });
-  const [appPaymentReady, setAppPaymentReady] = useState<null | { organizationName: string; contactEmailMasked: string }>(null);
+  const [appPaymentReady, setAppPaymentReady] = useState<null | { organizationName: string; contactEmailMasked: string; joinCode: string | null }>(null);
   const [appPolling, setAppPolling] = useState<boolean>(!!applicationId);
 
   useEffect(() => {
@@ -67,6 +68,7 @@ const PaymentSuccess: React.FC = () => {
               setAppPaymentReady({
                 organizationName: a.organization_name,
                 contactEmailMasked: a.contact_email_masked,
+                joinCode: typeof a.join_code === 'string' && a.join_code ? a.join_code : null,
               });
               setShowConfetti(true);
               setTimeout(() => setShowConfetti(false), 4000);
@@ -334,6 +336,19 @@ const PaymentSuccess: React.FC = () => {
                   <p className="text-sm text-green-700">
                     Open that email and click the link to set your password and access your dashboard.
                   </p>
+                  {appPaymentReady.joinCode ? (
+                    <div className="pt-2">
+                      <p className="text-sm font-semibold text-green-800">Organization join code</p>
+                      <p className="font-mono text-2xl font-bold text-green-900">{appPaymentReady.joinCode}</p>
+                      <p className="text-sm text-green-700">
+                        A training coordinator can use this code only while you leave it active.
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-green-700">
+                      No active join code is on this payment yet, so coordinator entry stays closed.
+                    </p>
+                  )}
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <Button onClick={() => navigate('/auth')} className="w-full">Go to sign-in</Button>
@@ -490,7 +505,13 @@ const PaymentSuccess: React.FC = () => {
   }
 
   if (!applicationId && !seatPurchaseData && courseReturn !== 'paid' && courseReturn !== 'idle') {
-    const retryCourse = () => navigate(courseIdParam ? `/courses/${courseIdParam}` : '/courses');
+    const retryCourse = () => navigate(
+      purchaseIdParam && !courseIdParam
+        ? '/'
+        : courseIdParam
+          ? `/courses/${courseIdParam}`
+          : '/courses'
+    );
     const title =
       courseReturn === 'verifying' ? 'Confirming your payment' :
       courseReturn === 'unpaid' ? 'Payment not completed' :

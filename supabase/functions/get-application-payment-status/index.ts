@@ -35,7 +35,7 @@ serve(async (req) => {
     const { data: app, error } = await supabase
       .from("dispensary_applications")
       .select(
-        "id, organization_name, contact_person, contact_email, estimated_employees, requested_credits, application_status, payment_status"
+        "id, organization_id, organization_name, contact_person, contact_email, estimated_employees, requested_credits, application_status, payment_status"
       )
       .eq("id", application_id)
       .maybeSingle();
@@ -48,6 +48,20 @@ serve(async (req) => {
       estimated_employees: app.estimated_employees,
       requested_credits: app.requested_credits,
     });
+
+    let joinCode: string | null = null;
+    const paid = app.payment_status === "paid" || app.payment_status === "completed";
+    if (paid && app.organization_id) {
+      const { data: codeRow } = await supabase
+        .from("rvt_join_codes")
+        .select("code")
+        .eq("organization_id", app.organization_id)
+        .eq("is_active", true)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      joinCode = codeRow?.code ?? null;
+    }
 
     // Mask contact_email for privacy (scenario 4: stranger viewing link)
     const maskedEmail = (app.contact_email || "")
@@ -65,6 +79,7 @@ serve(async (req) => {
         quantity,
         price_per_seat: PRICE_PER_SEAT,
         total_amount: quantity * PRICE_PER_SEAT,
+        join_code: joinCode,
       },
     });
   } catch (err: any) {

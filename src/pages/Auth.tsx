@@ -9,6 +9,7 @@ import AdminAuthForm from '@/components/auth/AdminAuthForm';
 import DispensaryManagerAuthForm from '@/components/auth/DispensaryManagerAuthForm';
 import AccessKeyEntry from '@/components/auth/AccessKeyEntry';
 import { PasswordReset } from '@/components/auth/PasswordReset';
+import { CoordinatorJoinEntry } from '@/components/auth/CoordinatorJoinEntry';
 import { Info, Building2 } from 'lucide-react';
 
 // Student access paths: email invitation, individual purchase, or an
@@ -211,6 +212,14 @@ const Auth = () => {
             </div>
           </CardContent>
         </Card>
+      </div>
+    );
+  }
+
+  if (role === 'training_coordinator') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/5 p-4">
+        <CoordinatorJoinEntry />
       </div>
     );
   }
