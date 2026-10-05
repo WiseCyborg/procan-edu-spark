@@ -213,6 +213,29 @@ function mentionsPce(text: string): boolean {
   return /PCE[-\s]?744/i.test(text);
 }
 
+function trimToWordLimit(script: string, limit: number): string {
+  let sentences = sentencesOf(script);
+  if (sentences.length > 0 && !/[.!?]"?$/.test(sentences[sentences.length - 1])) {
+    sentences = sentences.slice(0, -1);
+  }
+  const kept: string[] = [];
+  let count = 0;
+  for (const sentence of sentences) {
+    const n = sentence.split(/\s+/).filter(Boolean).length;
+    if (count + n > limit && kept.length > 0) break;
+    kept.push(sentence);
+    count += n;
+  }
+  for (const sentence of sentences) {
+    if (!sentence.includes(PROPOSED_LABEL) || kept.includes(sentence)) continue;
+    const n = sentence.split(/\s+/).filter(Boolean).length;
+    if (count + n > 850) continue;
+    kept.push(sentence);
+    count += n;
+  }
+  return kept.join(' ').trim();
+}
+
 function withM29Closer(script: string): string {
   const trimmed = script.trim();
   if (trimmed.endsWith(M29_CLOSER)) return trimmed;
@@ -719,28 +742,24 @@ serve(async (req) => {
       try {
         let script = '';
         let scriptError = '';
-        let overlong = '';
         for (let attempt = 1; attempt <= 2; attempt++) {
-          const shortening = scriptError === 'shorten' && overlong.length > 0;
-          const userPrompt = shortening
-            ? `SHORTEN THIS NARRATION TO 700-740 WORDS. Never exceed 780 words. End on a complete sentence. Do not add rules, citations, or deadlines. Keep every sentence that contains "${PROPOSED_LABEL}" and keep that label exact. Return only the narration.\n\n${overlong}`
-            : scriptPrompt({
-                moduleNumber: mod.module_number,
-                title: mod.title,
-                regenReason,
-                moduleContent,
-                comarSlice,
-                proposed,
-              }) + (scriptError
-                ? `\n\nCORRECTION REQUIRED ON THIS ATTEMPT:\n${scriptError}\nRewrite the script so the problem is gone.`
-                : '');
+          const userPrompt = scriptPrompt({
+            moduleNumber: mod.module_number,
+            title: mod.title,
+            regenReason,
+            moduleContent,
+            comarSlice,
+            proposed,
+          }) + (scriptError
+            ? `\n\nCORRECTION REQUIRED ON THIS ATTEMPT:\n${scriptError}\nRewrite the script so the problem is gone.`
+            : '');
           let draft: { text: string; usage: unknown; stop_reason: string | null };
           try {
             draft = await callAnthropic(
               anthropicApiKey,
               SYSTEM_PROMPT,
               userPrompt,
-              shortening ? 1100 : SCRIPT_MAX_TOKENS,
+              SCRIPT_MAX_TOKENS,
             );
           } catch (callErr) {
             if (callErr instanceof AnthropicRequestError && callErr.status === 400) throw callErr;
@@ -748,18 +767,11 @@ serve(async (req) => {
           }
           usageCalls.push(draft.usage);
           absorbUsage(usage, draft.usage);
-          script = modNum === 29 ? withM29Closer(draft.text) : draft.text.trim();
+          const drafted = modNum === 29 ? withM29Closer(draft.text) : draft.text.trim();
+          script = trimToWordLimit(drafted, 780);
           const words = (script.match(/\S+/g) ?? []).length;
-          const finishedSentence = /[.!?]["']?\s*$/.test(script);
-          if (draft.stop_reason === 'max_tokens' && !(words >= 650 && words <= 800 && finishedSentence)) {
-            overlong = script;
-            scriptError = 'shorten';
-            script = '';
-            continue;
-          }
-          if (words > 800) {
-            overlong = script;
-            scriptError = 'shorten';
+          if (words < 600 || words > 850) {
+            scriptError = `The draft is ${words} words after trimming to complete sentences. Write 720 to 780 words.`;
             script = '';
             continue;
           }
@@ -781,10 +793,9 @@ serve(async (req) => {
           }
           break;
         }
-        if (!script) {
-          throw new Error(scriptError === 'shorten'
-            ? 'script stayed over 800 words after the shorten pass'
-            : (scriptError || 'script draft failed the proposed-rule check'));
+        if (!script) throw new Error(scriptError || 'script draft failed the proposed-rule check');
+        if (modNum != null && modNum in NOPA_TIES && !script.includes(PROPOSED_LABEL)) {
+          throw new Error('draft omitted the labeled proposed-rule tie');
         }
 
         const narration = partitionNarration(script);
