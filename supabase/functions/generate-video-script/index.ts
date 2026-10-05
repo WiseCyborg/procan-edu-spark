@@ -241,6 +241,20 @@ function trimToWordLimit(script: string, limit: number): string {
   return sentences.filter((sentence) => kept.includes(sentence)).join(' ').trim();
 }
 
+function ensureProposedTie(script: string, moduleNumber: number | null): string {
+  if (moduleNumber == null || !(moduleNumber in NOPA_TIES) || script.includes(PROPOSED_LABEL)) {
+    return script;
+  }
+  const tie = NOPA_TIES[moduleNumber];
+  const addition = `${tie.lines.join(' ')} ${PROPOSED_LABEL}.`;
+  const trimmed = script.trim();
+  if (trimmed.endsWith(M29_CLOSER)) {
+    const base = trimmed.slice(0, -M29_CLOSER.length).trim();
+    return `${base} ${addition} ${M29_CLOSER}`;
+  }
+  return `${trimmed} ${addition}`;
+}
+
 function withM29Closer(script: string): string {
   const trimmed = script.trim();
   if (trimmed.endsWith(M29_CLOSER)) return trimmed;
@@ -773,7 +787,10 @@ serve(async (req) => {
           usageCalls.push(draft.usage);
           absorbUsage(usage, draft.usage);
           const drafted = modNum === 29 ? withM29Closer(draft.text) : draft.text.trim();
-          script = trimToWordLimit(drafted, 780);
+          const trimmed = trimToWordLimit(drafted, 740);
+          script = trimmed.includes(PROPOSED_LABEL)
+            ? trimmed
+            : ensureProposedTie(trimToWordLimit(drafted, 680), modNum);
           const words = (script.match(/\S+/g) ?? []).length;
           if (words < 600 || words > 850) {
             scriptError = `The draft is ${words} words after trimming to complete sentences. Write 720 to 780 words.`;
