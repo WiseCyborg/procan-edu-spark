@@ -32,6 +32,7 @@ async function fetchLatestCOMARVersion(): Promise<COMARVersionData> {
   const { data: contentData } = await supabase
     .from('regulatory_content')
     .select('last_modified_at, section_number')
+    .eq('authority_status', 'current')
     .order('last_modified_at', { ascending: false })
     .limit(1)
     .maybeSingle();

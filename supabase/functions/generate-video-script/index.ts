@@ -6,8 +6,84 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const PROPOSED_LABEL = 'PROPOSED informal web draft 9/16/26, not final law';
+const PROPOSED_SECTION = '14.17.15.05';
+const PROPOSED_HASH = 'nopa-informal-web-draft-2026-09-16';
+const M29_CLOSER =
+  'Scripts derived from the module content live in the ProCann EDU production LMS, verified against COMAR Title 14 Subtitle 17 and MCA Bulletin 2019-017 on 18 August 2026.';
+
 const SYSTEM_PROMPT =
-  'You are a compliance training scriptwriter for Maryland cannabis Responsible Vendor Training. You write spoken narration scripts that stay strictly within the source material provided. You never introduce a rule, figure, deadline, citation, or regulatory fact that is not present in the supplied module content. You use plain spoken English suitable for narration.';
+  'You are a compliance training scriptwriter for Maryland cannabis Responsible Vendor Training. You write spoken narration scripts that stay strictly within the source material provided. You never introduce a rule, figure, deadline, citation, or regulatory fact that is not present in the supplied module content or in a supplied proposed-draft block. You use plain spoken English suitable for narration. ' +
+  `A block marked "${PROPOSED_LABEL}" is not current law and is not final law. You must never state a rule from that block as something the law currently requires. If you mention any rule from that block, including a 90-day item, an every-2-years item, a 10-day item, or a 30-day standard-operating-procedure item, the same sentence must contain the exact words: ${PROPOSED_LABEL}. Do not mention PCE-744.`;
+
+interface Tie {
+  cites: string;
+  lines: string[];
+}
+
+const NOPA_TIES: Record<number, Tie> = {
+  24: {
+    cites: 'D(3)(a) and D(3)(c)',
+    lines: [
+      'An approved training program shall provide a core curriculum of relevant statutory and regulatory provisions, including:',
+      '(a) Administrative and criminal liability and license and court sanctions;',
+      '(c) State and local licensing and enforcement;',
+    ],
+  },
+  25: {
+    cites: 'D(3)(d) and D(3)(e)',
+    lines: [
+      'An approved training program shall provide a core curriculum of relevant statutory and regulatory provisions, including:',
+      '(d) Public health and safety standards relevant to each license type;',
+      '(e) Grower, processor, or dispensary operations as established in this subtitle and Administration guidance;',
+    ],
+  },
+  26: {
+    cites: 'D(3)(e)',
+    lines: [
+      'An approved training program shall provide a core curriculum of relevant statutory and regulatory provisions, including:',
+      '(e) Grower, processor, or dispensary operations as established in this subtitle and Administration guidance;',
+    ],
+  },
+  27: {
+    cites: 'D(3)(b) and D(3)(e)',
+    lines: [
+      'An approved training program shall provide a core curriculum of relevant statutory and regulatory provisions, including:',
+      '(b) Statutory and regulatory requirements for employees and owners;',
+      '(e) Grower, processor, or dispensary operations as established in this subtitle and Administration guidance;',
+    ],
+  },
+  28: {
+    cites: 'D(3)(e) and D(3)(f)',
+    lines: [
+      'An approved training program shall provide a core curriculum of relevant statutory and regulatory provisions, including:',
+      '(e) Grower, processor, or dispensary operations as established in this subtitle and Administration guidance;',
+      '(f) Cannabis product requirements;',
+    ],
+  },
+  29: {
+    cites: 'A(2)(a) and A(2)(b), SOP training within 30 days',
+    lines: [
+      '(2) Standard operating procedures:',
+      "(a) Within 30 days of a new employee's start date; and",
+      "(b) Within 30 days of any changes to the licensee's standard operating procedures that impact the employee's duties or working conditions;",
+    ],
+  },
+};
+
+interface SlideSpecSlide {
+  heading: string;
+  bullets: string[];
+  chip?: string;
+  key?: boolean;
+}
+
+interface SlideSpec {
+  title: { module: string; lines: string[]; subtitle: string; chip: string };
+  slides: SlideSpecSlide[];
+  narration: string[];
+  closing: { lines: string[]; sub: string; chip: string };
+}
 
 interface AssetResult {
   asset_id: string;
@@ -16,7 +92,318 @@ interface AssetResult {
   script_length?: number;
   script_words?: number;
   estimated_minutes?: number;
+  slide_count?: number;
   reason?: string;
+}
+
+const collapse = (value: string) => value.replace(/\s+/g, ' ').trim();
+
+const sentencesOf = (value: string) =>
+  collapse(value).split(/(?<=[.!?])\s+/).map((s) => s.trim()).filter(Boolean);
+
+const DEADLINE_RE = /90[\s-]*days|ninety\s+days|every\s+2\s+years|every\s+two\s+years|10[\s-]*days|ten\s+days/i;
+const SOP_30_RE = /30[\s-]*days/i;
+
+function unlabeledProposedSentences(text: string): string[] {
+  const bad: string[] = [];
+  for (const sentence of sentencesOf(text)) {
+    const deadline = DEADLINE_RE.test(sentence);
+    const sopTiming = SOP_30_RE.test(sentence) && /standard operating|SOP/i.test(sentence);
+    if ((deadline || sopTiming) && !sentence.includes(PROPOSED_LABEL)) bad.push(sentence);
+  }
+  return bad;
+}
+
+function mentionsPce(text: string): boolean {
+  return /PCE[-\s]?744/i.test(text);
+}
+
+function withM29Closer(script: string): string {
+  const trimmed = script.trim();
+  if (trimmed.endsWith(M29_CLOSER)) return trimmed;
+  const marker = 'Scripts derived from the module content live in the ProCann EDU';
+  const idx = trimmed.indexOf(marker);
+  const base = (idx >= 0 ? trimmed.slice(0, idx) : trimmed).trim().replace(/[.?!]\s*$/, '.');
+  return `${base} ${M29_CLOSER}`;
+}
+
+function asStringArray(value: unknown): string[] | null {
+  if (!Array.isArray(value) || value.length === 0) return null;
+  if (!value.every((item) => typeof item === 'string' && item.trim().length > 0)) return null;
+  return value.map((item) => String(item).trim());
+}
+
+function validateSlideSpec(spec: SlideSpec, script: string, moduleNumber: number | null): void {
+  if (spec.slides.length < 4 || spec.slides.length > 8) {
+    throw new Error(`slide count ${spec.slides.length} is outside 4 to 8`);
+  }
+  if (spec.narration.length !== spec.slides.length + 2) {
+    throw new Error(`narration length ${spec.narration.length} is not slides + 2`);
+  }
+  if (!spec.title.module || !spec.title.subtitle || !spec.title.chip) {
+    throw new Error('title card is incomplete');
+  }
+  if (!spec.closing.sub || !spec.closing.chip) throw new Error('closing card is incomplete');
+  const joined = collapse(spec.narration.join(' '));
+  if (joined !== collapse(script)) {
+    throw new Error('slide narration does not match the draft script word for word');
+  }
+  const visible = [
+    spec.title.module,
+    spec.title.subtitle,
+    spec.title.chip,
+    ...spec.title.lines,
+    spec.closing.sub,
+    spec.closing.chip,
+    ...spec.closing.lines,
+    ...spec.narration,
+    ...spec.slides.flatMap((slide) => [slide.heading, slide.chip ?? '', ...slide.bullets]),
+  ].join('\n');
+  if (mentionsPce(visible) || mentionsPce(script)) throw new Error('draft mentions PCE-744');
+  const unlabeled = unlabeledProposedSentences(`${script}\n${visible}`);
+  if (unlabeled.length > 0) {
+    throw new Error(`proposed deadline stated without the required label: ${unlabeled[0].slice(0, 180)}`);
+  }
+  if (moduleNumber === 29 && !spec.narration[spec.narration.length - 1].trim().endsWith(M29_CLOSER)) {
+    throw new Error('module 29 closing narration does not keep the existing closer');
+  }
+}
+
+function proposedBlock(moduleNumber: number | null, storedText: string): string {
+  if (moduleNumber == null || !(moduleNumber in NOPA_TIES)) {
+    return `(none for this module). Do not add rules from ${PROPOSED_SECTION}.`;
+  }
+  const tie = NOPA_TIES[moduleNumber];
+  const missing = tie.lines.filter((line) => !storedText.includes(line));
+  if (missing.length > 0) {
+    throw new Error(`stored proposed draft is missing ${tie.cites}`);
+  }
+  return `${PROPOSED_LABEL}
+Section: COMAR ${PROPOSED_SECTION}. Tied provisions for this module only: ${tie.cites}.
+These lines are not current law and are not final law. Do not state them as a current obligation. If you say any of them aloud, the same sentence must include the exact label "${PROPOSED_LABEL}". Do not use any other subsection of this draft. Do not mention the 90-day, every-2-years, or 10-day items unless one of the lines below contains that item. Do not mention PCE-744.
+
+${tie.lines.join('\n')}`;
+}
+
+async function callAnthropic(
+  apiKey: string,
+  system: string,
+  user: string,
+  maxTokens: number,
+): Promise<string> {
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: maxTokens,
+      system,
+      messages: [{ role: 'user', content: user }],
+    }),
+  });
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`Anthropic ${response.status}: ${errText.slice(0, 300)}`);
+  }
+  const data = await response.json();
+  const text = String(data?.content?.[0]?.text ?? '').trim();
+  if (!text) throw new Error('Anthropic returned an empty response');
+  return text;
+}
+
+function scriptPrompt(args: {
+  moduleNumber: number;
+  title: string;
+  regenReason: string;
+  moduleContent: string;
+  comarSlice: string;
+  proposed: string;
+}): string {
+  const closerRule = args.moduleNumber === 29
+    ? `End the script with this sentence, character for character, and do not rewrite it: ${M29_CLOSER}`
+    : 'End with one short sentence telling the learner the full detail is in the module text below the video.';
+  return `MODULE ${args.moduleNumber}: ${args.title}
+
+REGENERATION REASON:
+${args.regenReason}
+
+MODULE CONTENT (authoritative for current rules — the only source of current rules, figures, deadlines, and citations you may use):
+${args.moduleContent}
+
+RELEVANT CURRENT COMAR SECTION TEXT (adopted text only — you may quote citations aloud as the module does, but do not introduce rules from here that are not in the module content above):
+${args.comarSlice || '(none available)'}
+
+PROPOSED-RULE INPUT:
+${args.proposed}
+
+TASK:
+Write a spoken narration script for a training video.
+
+LENGTH — this is a hard requirement:
+- Target 700 to 800 words. Never exceed 850 words.
+- At roughly 150 words per minute this produces a video of about 5 minutes.
+- Do NOT attempt to cover every point in the module. The module text remains the complete, authoritative version. The video is an overview that carries the most consequential material.
+
+WHAT TO PRIORITISE when the module contains more than fits:
+1. Any current rule with a specific figure, threshold, deadline or percentage — these must appear, stated exactly as written in the module.
+2. Any current rule where following the wrong version causes a violation.
+3. The tied proposed-draft provisions, each one spoken as proposed and not as current law, with the exact label "${PROPOSED_LABEL}" in the same sentence.
+4. One or two concrete scenarios showing a current rule applied at the counter.
+
+WHAT TO CUT FIRST:
+- Background, history, and rationale
+- Repetition and summary sections
+- Lists of examples where two or three suffice
+- Encouragement and closing motivational passages
+
+STYLE:
+- Plain spoken English suitable for narration. No headings, no bullet points, no stage directions, no speaker labels.
+- State current figures exactly as the module states them.
+- Cite COMAR sections aloud naturally where the module does, spelling out the numbers for speech — for example "COMAR fourteen point seventeen point twelve point ten".
+- Never mention PCE-744.
+- Never present the proposed draft, including any 90-day, every-2-years, or 10-day item, as current law.
+- ${closerRule}
+- Return ONLY the narration script text. No preamble, no title, no markdown, no commentary about the script.`;
+}
+
+function partitionNarration(script: string): string[] {
+  const collapsed = collapse(script);
+  let sentences = sentencesOf(collapsed);
+  if (collapse(sentences.join(' ')) !== collapsed) {
+    const words = collapsed.split(' ');
+    const size = Math.ceil(words.length / 12);
+    sentences = [];
+    for (let i = 0; i < words.length; i += size) sentences.push(words.slice(i, i + size).join(' '));
+  }
+  while (sentences.length < 6) {
+    let longestAt = 0;
+    sentences.forEach((sentence, index) => {
+      if (sentence.split(' ').length > sentences[longestAt].split(' ').length) longestAt = index;
+    });
+    const words = sentences[longestAt].split(' ');
+    if (words.length < 8) break;
+    const mid = Math.ceil(words.length / 2);
+    sentences.splice(longestAt, 1, words.slice(0, mid).join(' '), words.slice(mid).join(' '));
+  }
+  const title = sentences[0];
+  const closing = sentences[sentences.length - 1];
+  const middle = sentences.slice(1, -1);
+  const slideCount = Math.min(8, Math.max(4, Math.min(6, middle.length)));
+  const buckets: string[][] = Array.from({ length: slideCount }, () => []);
+  middle.forEach((sentence, index) => {
+    const bucket = Math.min(slideCount - 1, Math.floor((index * slideCount) / middle.length));
+    buckets[bucket].push(sentence);
+  });
+  const narration = [title, ...buckets.map((bucket) => bucket.join(' ')).filter(Boolean), closing];
+  if (collapse(narration.join(' ')) !== collapsed) {
+    throw new Error('could not partition the draft script into slides');
+  }
+  return narration;
+}
+
+function displayLine(chunk: string, words: number): string {
+  const short = chunk.split(' ').slice(0, words).join(' ');
+  if (unlabeledProposedSentences(short).length > 0 || (DEADLINE_RE.test(chunk) && !short.includes(PROPOSED_LABEL))) {
+    return `${short} — ${PROPOSED_LABEL}`;
+  }
+  return short;
+}
+
+function chipFor(chunk: string): string {
+  return chunk.includes(PROPOSED_LABEL) || DEADLINE_RE.test(chunk) ? PROPOSED_LABEL : '';
+}
+
+function fallbackSlideSpec(script: string, moduleNumber: number | null, title: string, narration: string[]): SlideSpec {
+  const slideNarration = narration.slice(1, -1);
+  const moduleLabel = `Module ${moduleNumber ?? ''}`.trim();
+  return {
+    title: {
+      module: moduleLabel,
+      lines: [displayLine(title, 6), displayLine(narration[0], 8)].filter((line, index, all) => all.indexOf(line) === index),
+      subtitle: displayLine(narration[0], 12),
+      chip: chipFor(narration[0]) || moduleLabel,
+    },
+    slides: slideNarration.map((chunk, index) => ({
+      heading: displayLine(chunk, 6),
+      bullets: [displayLine(chunk, 14)],
+      ...(chipFor(chunk) ? { chip: chipFor(chunk) } : {}),
+      key: index === 0,
+    })),
+    narration,
+    closing: {
+      lines: [displayLine(narration[narration.length - 1], 10)],
+      sub: displayLine(narration[narration.length - 1], 12),
+      chip: chipFor(narration[narration.length - 1]) || 'Close',
+    },
+  };
+}
+
+function slidePrompt(moduleNumber: number | null, title: string, narration: string[]): string {
+  const slides = narration.slice(1, -1).map((chunk, index) => `SLIDE ${index + 1} SPOKEN TEXT:\n${chunk}`).join('\n\n');
+  return `Write on-screen text for this narration. Do not rewrite the spoken text.
+
+MODULE ${moduleNumber ?? ''}: ${title}
+There are exactly ${narration.length - 2} slides. Return one object per slide, in order.
+
+TITLE SPOKEN TEXT:
+${narration[0]}
+
+${slides}
+
+CLOSING SPOKEN TEXT:
+${narration[narration.length - 1]}
+
+Return ONLY JSON:
+{
+  "title_lines": ["short line", "short line"],
+  "subtitle": "short subtitle",
+  "slides": [{ "heading": "short heading", "bullets": ["short bullet"], "key": false }],
+  "closing_lines": ["short line"],
+  "closing_sub": "short line"
+}
+
+If any spoken text states a proposed-draft rule, copy the exact label "${PROPOSED_LABEL}" into the matching heading or bullet. Do not mention PCE-744. Do not add deadlines that are not in the spoken text.`;
+}
+
+function applySlideCopy(base: SlideSpec, raw: string): SlideSpec {
+  const start = raw.indexOf('{');
+  const end = raw.lastIndexOf('}');
+  if (start < 0 || end <= start) return base;
+  const parsed = JSON.parse(raw.slice(start, end + 1));
+  const titleLines = asStringArray(parsed?.title_lines);
+  const closingLines = asStringArray(parsed?.closing_lines);
+  if (!titleLines || !closingLines || !Array.isArray(parsed?.slides) || parsed.slides.length !== base.slides.length) {
+    return base;
+  }
+  const slides = base.slides.map((slide, index) => {
+    const incoming = parsed.slides[index] ?? {};
+    const bullets = asStringArray(incoming.bullets) ?? slide.bullets;
+    const heading = typeof incoming.heading === 'string' && incoming.heading.trim() ? incoming.heading.trim() : slide.heading;
+    return {
+      heading,
+      bullets,
+      ...(slide.chip ? { chip: slide.chip } : {}),
+      key: typeof incoming.key === 'boolean' ? incoming.key : slide.key,
+    };
+  });
+  return {
+    ...base,
+    title: {
+      ...base.title,
+      lines: titleLines,
+      subtitle: typeof parsed.subtitle === 'string' && parsed.subtitle.trim() ? parsed.subtitle.trim() : base.title.subtitle,
+    },
+    slides,
+    closing: {
+      ...base.closing,
+      lines: closingLines,
+      sub: typeof parsed.closing_sub === 'string' && parsed.closing_sub.trim() ? parsed.closing_sub.trim() : base.closing.sub,
+    },
+  };
 }
 
 serve(async (req) => {
@@ -52,6 +439,7 @@ serve(async (req) => {
           assets_skipped: skipped,
           skip_reasons: skipReasons,
           api_key_present: apiKeyPresent,
+          proposed_label: PROPOSED_LABEL,
           ...(errorMessage ? { error: errorMessage } : {}),
         }),
       });
@@ -61,7 +449,6 @@ serve(async (req) => {
   };
 
   try {
-    // ---- Authorisation ----
     const authHeader = req.headers.get('Authorization') ?? '';
     const token = authHeader.replace(/^Bearer\s+/i, '');
     if (!token) {
@@ -90,11 +477,9 @@ serve(async (req) => {
         });
       }
     }
-    // Service-role (no user attached to JWT) is allowed for future cron use.
 
     if (!anthropicApiKey) throw new Error('ANTHROPIC_API_KEY not configured');
 
-    // ---- Input ----
     let body: { asset_id?: string; limit?: number } = {};
     try {
       body = await req.json();
@@ -104,7 +489,25 @@ serve(async (req) => {
     const rawLimit = typeof body.limit === 'number' ? body.limit : 3;
     const limit = Math.max(1, Math.min(10, rawLimit));
 
-    // ---- Asset selection ----
+    const { data: proposedRow, error: proposedErr } = await supabase
+      .from('regulatory_content')
+      .select('content_text, authority_status, authority_label, section_title, effective_date')
+      .eq('section_number', PROPOSED_SECTION)
+      .eq('version_hash', PROPOSED_HASH)
+      .eq('authority_status', 'proposed')
+      .maybeSingle();
+    if (proposedErr) throw new Error(`proposed rule lookup failed: ${proposedErr.message}`);
+    if (!proposedRow?.content_text) throw new Error('proposed COMAR 14.17.15.05 draft is not stored');
+    if (
+      proposedRow.authority_label !== PROPOSED_LABEL ||
+      !String(proposedRow.section_title).startsWith(PROPOSED_LABEL) ||
+      !String(proposedRow.content_text).startsWith(PROPOSED_LABEL) ||
+      proposedRow.effective_date != null
+    ) {
+      throw new Error('proposed COMAR draft is missing its not-final-law label');
+    }
+    const proposedText = String(proposedRow.content_text);
+
     let assets: any[] = [];
     if (body.asset_id) {
       const { data, error } = await supabase
@@ -123,8 +526,6 @@ serve(async (req) => {
       assets = data ?? [];
     }
 
-    // Sort: CONTENT CORRECTED first, then module_number (asc). module_number resolved after join,
-    // so fetch modules up front for ordering.
     const moduleIds = [...new Set(assets.map((a) => a.module_id).filter(Boolean))] as string[];
     const moduleMap = new Map<string, any>();
     if (moduleIds.length > 0) {
@@ -168,99 +569,108 @@ serve(async (req) => {
         continue;
       }
 
-      // COMAR text
       let comarText = '';
       const comarRef = mod.comar_section_ref || mod.comar_reference;
       if (comarRef) {
-        const { data: reg } = await supabase
+        const { data: reg, error: regErr } = await supabase
           .from('regulatory_content')
           .select('content_text')
           .eq('section_number', comarRef)
-          .order('updated_at', { ascending: false })
+          .eq('authority_status', 'current')
+          .order('last_modified_at', { ascending: false })
           .limit(1)
           .maybeSingle();
+        if (regErr) throw new Error(`current COMAR lookup failed: ${regErr.message}`);
         comarText = reg?.content_text ?? '';
       }
 
       const moduleContent = String(mod.content).slice(0, 8000);
       const comarSlice = comarText.slice(0, 4000);
       const regenReason = asset.regeneration_reason ?? '(none)';
-
-      const userPrompt = `MODULE ${mod.module_number}: ${mod.title}
-
-REGENERATION REASON:
-${regenReason}
-
-MODULE CONTENT (authoritative — the ONLY source of rules, figures, deadlines, and citations you may use):
-${moduleContent}
-
-RELEVANT COMAR SECTION TEXT (for reference — you may quote citations aloud as the module does, but do not introduce rules from here that are not in the module content above):
-${comarSlice || '(none available)'}
-
-TASK:
-Write a spoken narration script for a training video.
-
-LENGTH — this is a hard requirement:
-- Target 700 to 800 words. Never exceed 850 words.
-- At roughly 150 words per minute this produces a video of about 5 minutes, which is the maximum a learner will reliably watch without disengaging.
-- Do NOT attempt to cover every point in the module. The module text remains the complete, authoritative version. The video is an overview that carries the most consequential material.
-
-WHAT TO PRIORITISE when the module contains more than fits:
-1. Any rule with a specific figure, threshold, deadline or percentage — these must appear, stated exactly as written in the module. Examples of the kind of thing that must never be cut: reporting thresholds, retention periods, notification deadlines, dose limits, age requirements.
-2. Any rule where following the wrong version causes a violation — obligations the agent must act on, not background context.
-3. One or two concrete scenarios showing the rule applied at the counter.
-
-WHAT TO CUT FIRST:
-- Background, history, and rationale
-- Repetition and summary sections
-- Lists of examples where two or three suffice
-- Encouragement and closing motivational passages
-
-STYLE:
-- Plain spoken English suitable for narration. No headings, no bullet points, no stage directions, no speaker labels.
-- State figures exactly as the module states them.
-- Cite COMAR sections aloud naturally where the module does, spelling out the numbers for speech — for example "COMAR fourteen point seventeen point twelve point ten".
-- End with one short sentence telling the learner the full detail is in the module text below the video.
-- Return ONLY the narration script text. No preamble, no title, no markdown, no commentary about the script.`;
+      let proposed = '';
+      try {
+        proposed = proposedBlock(modNum, proposedText);
+      } catch (tieErr) {
+        const reason = tieErr instanceof Error ? tieErr.message : String(tieErr);
+        results.push({ asset_id: asset.id, module_number: modNum, status: 'error', reason });
+        continue;
+      }
 
       try {
-        const response = await fetch('https://api.anthropic.com/v1/messages', {
-          method: 'POST',
-          headers: {
-            'x-api-key': anthropicApiKey,
-            'anthropic-version': '2023-06-01',
-            'content-type': 'application/json',
-          },
-          body: JSON.stringify({
-            model: 'claude-sonnet-4-6',
-            max_tokens: 3000,
-            system: SYSTEM_PROMPT,
-            messages: [{ role: 'user', content: userPrompt }],
-          }),
-        });
-
-        if (!response.ok) {
-          const errText = await response.text();
-          throw new Error(`Anthropic ${response.status}: ${errText.slice(0, 300)}`);
+        let script = '';
+        let scriptError = '';
+        for (let attempt = 1; attempt <= 2; attempt++) {
+          const correction = scriptError
+            ? `\n\nCORRECTION REQUIRED ON THIS ATTEMPT:\n${scriptError}\nRewrite the script so the problem is gone.`
+            : '';
+          const draft = await callAnthropic(
+            anthropicApiKey,
+            SYSTEM_PROMPT,
+            scriptPrompt({
+              moduleNumber: mod.module_number,
+              title: mod.title,
+              regenReason,
+              moduleContent,
+              comarSlice,
+              proposed,
+            }) + correction,
+            3000,
+          );
+          script = modNum === 29 ? withM29Closer(draft) : draft.trim();
+          if (mentionsPce(script)) {
+            scriptError = 'Remove every mention of PCE-744.';
+            script = '';
+            continue;
+          }
+          const unlabeled = unlabeledProposedSentences(script);
+          if (unlabeled.length > 0) {
+            scriptError = `These sentences state a proposed deadline as if it were current law. Repeat each one with the exact label "${PROPOSED_LABEL}" in the same sentence, or delete the deadline: ${unlabeled[0]}`;
+            script = '';
+            continue;
+          }
+          if (modNum === 29 && !script.endsWith(M29_CLOSER)) {
+            scriptError = `End with this exact sentence: ${M29_CLOSER}`;
+            script = '';
+            continue;
+          }
+          break;
         }
+        if (!script) throw new Error(scriptError || 'script draft failed the proposed-rule check');
 
-        const data = await response.json();
-        const script: string = (data?.content?.[0]?.text ?? '').trim();
-        if (!script) throw new Error('Anthropic returned empty script');
+        const narration = partitionNarration(script);
+        const baseSpec = fallbackSlideSpec(script, modNum, mod.title, narration);
+        let spec = baseSpec;
+        try {
+          const raw = await callAnthropic(
+            anthropicApiKey,
+            `You write short on-screen training slides. You do not change spoken words. You never present proposed text as current law. The only status label for that text is: ${PROPOSED_LABEL}.`,
+            slidePrompt(modNum, mod.title, narration),
+            2500,
+          );
+          spec = applySlideCopy(baseSpec, raw);
+          validateSlideSpec(spec, script, modNum);
+        } catch (slideErr) {
+          spec = baseSpec;
+          validateSlideSpec(spec, script, modNum);
+          console.error('[generate-video-script] using exact narration slides:', slideErr instanceof Error ? slideErr.message : slideErr);
+        }
 
         const { error: updErr } = await supabase
           .from('video_assets')
           .update({
             draft_script: script,
             draft_generated_at: new Date().toISOString(),
+            slide_spec: spec,
             review_status: 'script_pending_review',
+            pipeline_stage: 'script_pending_review',
+            reviewed_by: null,
+            reviewed_at: null,
           })
           .eq('id', asset.id);
         if (updErr) throw new Error(`update failed: ${updErr.message}`);
 
         const scriptWords = (script.match(/\S+/g) ?? []).length;
         const estimatedMinutes = Math.round((scriptWords / 150) * 10) / 10;
-
         succeeded++;
         results.push({
           asset_id: asset.id,
@@ -269,6 +679,7 @@ STYLE:
           script_length: script.length,
           script_words: scriptWords,
           estimated_minutes: estimatedMinutes,
+          slide_count: spec.slides.length,
         });
       } catch (perAssetErr) {
         const reason = perAssetErr instanceof Error ? perAssetErr.message : String(perAssetErr);

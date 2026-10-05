@@ -61,6 +61,7 @@ Deno.serve(async (req) => {
     const { data: freshest } = await supabase
       .from("regulatory_content")
       .select("section_number, last_modified_at")
+      .eq("authority_status", "current")
       .order("last_modified_at", { ascending: false })
       .limit(1)
       .maybeSingle();
