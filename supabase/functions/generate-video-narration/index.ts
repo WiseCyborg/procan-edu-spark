@@ -8,6 +8,9 @@ const corsHeaders = {
 
 const MAX_CHUNK_BYTES = 4500;
 const BUCKET = "video-drafts";
+// William, 2026-10-05: every narration job uses this voice.
+const GOOGLE_VOICE = "en-US-Chirp3-HD-Charon";
+const ELEVENLABS_VOICE = "21m00Tcm4TlvDq8ikWAM";
 
 interface AssetResult {
   asset_id: string;
@@ -15,6 +18,8 @@ interface AssetResult {
   audio_path?: string;
   chunks?: number;
   estimated_seconds?: number;
+  voice?: string;
+  audio_encoding?: string;
   reason?: string;
 }
 
@@ -40,8 +45,8 @@ function chunkScript(script: string): string[] {
 }
 
 async function ttsElevenLabs(text: string, apiKey: string): Promise<Uint8Array> {
-  // Rachel voice — stable default.
-  const voiceId = "21m00Tcm4TlvDq8ikWAM";
+  // Kept behind NARRATION_TTS_PROVIDER=elevenlabs. Not the default.
+  const voiceId = ELEVENLABS_VOICE;
   const res = await fetch(
     `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?output_format=mp3_44100_128`,
     {
@@ -65,28 +70,56 @@ async function ttsElevenLabs(text: string, apiKey: string): Promise<Uint8Array> 
   return new Uint8Array(await res.arrayBuffer());
 }
 
-async function ttsGoogle(text: string, apiKey: string): Promise<Uint8Array> {
-  const res = await fetch(
-    `https://texttospeech.googleapis.com/v1/text:synthesize?key=${apiKey}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        input: { text },
-        voice: { languageCode: "en-US", name: "en-US-Neural2-D", ssmlGender: "MALE" },
-        audioConfig: { audioEncoding: "MP3", speakingRate: 1.0, pitch: 0.0 },
-      }),
-    },
-  );
-  const data = await res.json();
-  if (!res.ok || data.error) {
-    throw new Error(`Google TTS ${res.status}: ${data?.error?.message ?? "unknown"}`);
-  }
-  const b64: string = data.audioContent;
+function decodeAudio(b64: string): Uint8Array {
   const bin = atob(b64);
   const out = new Uint8Array(bin.length);
   for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
   return out;
+}
+
+function redactSecret(message: string, secret: string): string {
+  const scrubbed = secret ? message.split(secret).join("[redacted]") : message;
+  return scrubbed.replace(/AIza[0-9A-Za-z_-]{20,}/g, "[redacted]");
+}
+
+// Chirp 3 HD's plain MP3 encoding is 32 kb/s. v1beta1 accepts MP3_64_KBPS.
+// If that encoding is rejected, the caller falls back to Google's default MP3.
+async function synthesizeGoogle(
+  text: string,
+  apiKey: string,
+  encoding: "MP3_64_KBPS" | "MP3",
+): Promise<Uint8Array> {
+  const url = encoding === "MP3_64_KBPS"
+    ? "https://texttospeech.googleapis.com/v1beta1/text:synthesize"
+    : "https://texttospeech.googleapis.com/v1/text:synthesize";
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Goog-Api-Key": apiKey,
+    },
+    body: JSON.stringify({
+      input: { text },
+      voice: { languageCode: "en-US", name: GOOGLE_VOICE },
+      audioConfig: { audioEncoding: encoding, speakingRate: 1.0 },
+    }),
+  });
+  const data = await res.json();
+  if (!res.ok || data.error || !data.audioContent) {
+    const message = redactSecret(String(data?.error?.message ?? "unknown"), apiKey);
+    const err = new Error(`Google TTS ${res.status} ${encoding}: ${message}`);
+    (err as Error & { status?: number }).status = res.status;
+    throw err;
+  }
+  return decodeAudio(data.audioContent);
+}
+
+async function ttsGoogle(
+  text: string,
+  apiKey: string,
+  encoding: "MP3_64_KBPS" | "MP3",
+): Promise<Uint8Array> {
+  return await synthesizeGoogle(text, apiKey, encoding);
 }
 
 // Concatenate MP3 buffers by naive byte join. This is acceptable because
@@ -115,14 +148,18 @@ serve(async (req) => {
 
   const elevenKey = Deno.env.get("ELEVENLABS_API_KEY");
   const googleKey = Deno.env.get("GOOGLE_TTS_API_KEY");
+  // Default is Google Chirp 3 HD. ElevenLabs runs only when this is "elevenlabs".
+  const providerFlag = (Deno.env.get("NARRATION_TTS_PROVIDER") ?? "google").trim().toLowerCase();
   const providersChecked = {
     ELEVENLABS_API_KEY: !!elevenKey,
     GOOGLE_TTS_API_KEY: !!googleKey,
+    NARRATION_TTS_PROVIDER: providerFlag,
   };
 
   let provider: "elevenlabs" | "google" | null = null;
-  if (elevenKey) provider = "elevenlabs";
-  else if (googleKey) provider = "google";
+  if (providerFlag === "elevenlabs") provider = elevenKey ? "elevenlabs" : null;
+  else provider = googleKey ? "google" : null;
+  const voiceName = provider === "elevenlabs" ? ELEVENLABS_VOICE : GOOGLE_VOICE;
 
   const results: AssetResult[] = [];
   let processed = 0;
@@ -141,6 +178,7 @@ serve(async (req) => {
           assets_succeeded: succeeded,
           assets_skipped: skipped,
           provider_used: provider,
+          voice: voiceName,
           providers_checked: providersChecked,
           ...(errorMessage ? { error: errorMessage } : {}),
         }),
@@ -193,33 +231,31 @@ serve(async (req) => {
     }
 
     // ---- Input ----
-    let body: { asset_id?: string; limit?: number } = {};
+    // One asset per call. A missing id used to scan every draft that had no audio.
+    let body: { asset_id?: string } = {};
     try {
       body = await req.json();
     } catch {
-      // no body OK
+      body = {};
     }
-    const rawLimit = typeof body.limit === "number" ? body.limit : 1;
-    const limit = Math.max(1, Math.min(5, rawLimit));
+    if (!body.asset_id) {
+      return new Response(
+        JSON.stringify({
+          ok: false,
+          error: "asset_id is required. This function narrates one asset and will not scan the catalog.",
+          provider,
+          voice: voiceName,
+        }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
     // ---- Asset selection ----
-    let query = supabase
+    const query = supabase
       .from("video_assets")
       .select("id, draft_script, draft_generated_at, draft_audio_url")
-      .not("draft_script", "is", null)
-      .not("draft_generated_at", "is", null)
-      .is("draft_audio_url", null)
-      .order("draft_generated_at", { ascending: true });
-
-    if (body.asset_id) {
-      query = supabase
-        .from("video_assets")
-        .select("id, draft_script, draft_generated_at, draft_audio_url")
-        .eq("id", body.asset_id)
-        .limit(1);
-    } else {
-      query = query.limit(limit);
-    }
+      .eq("id", body.asset_id)
+      .limit(1);
 
     const { data: assets, error: selErr } = await query;
     if (selErr) throw new Error(`asset lookup failed: ${selErr.message}`);
@@ -241,11 +277,24 @@ serve(async (req) => {
       try {
         const chunks = chunkScript(asset.draft_script);
         const audioBuffers: Uint8Array[] = [];
+        let audioEncoding = provider === "google" ? "MP3_64_KBPS" : "mp3_44100_128";
         for (const chunk of chunks) {
-          const buf =
-            provider === "elevenlabs"
-              ? await ttsElevenLabs(chunk, elevenKey!)
-              : await ttsGoogle(chunk, googleKey!);
+          let buf: Uint8Array;
+          if (provider === "elevenlabs") {
+            buf = await ttsElevenLabs(chunk, elevenKey!);
+          } else {
+            try {
+              buf = await ttsGoogle(chunk, googleKey!, audioEncoding === "MP3" ? "MP3" : "MP3_64_KBPS");
+            } catch (googleErr) {
+              const status = (googleErr as { status?: number }).status;
+              if (audioEncoding === "MP3_64_KBPS" && status !== 401 && status !== 403) {
+                audioEncoding = "MP3";
+                buf = await ttsGoogle(chunk, googleKey!, "MP3");
+              } else {
+                throw googleErr;
+              }
+            }
+          }
           audioBuffers.push(buf);
         }
         const merged = concatMp3(audioBuffers);
@@ -266,7 +315,9 @@ serve(async (req) => {
           .update({
             draft_audio_url: path,
             draft_audio_generated_at: new Date().toISOString(),
-            draft_audio_provider: provider,
+            draft_audio_provider: provider === "google"
+              ? `google:${GOOGLE_VOICE}:${audioEncoding}`
+              : `elevenlabs:${ELEVENLABS_VOICE}`,
             draft_audio_duration_seconds: estimatedSeconds,
           })
           .eq("id", asset.id);
@@ -279,6 +330,8 @@ serve(async (req) => {
           audio_path: path,
           chunks: chunks.length,
           estimated_seconds: estimatedSeconds,
+          voice: voiceName,
+          audio_encoding: audioEncoding,
         });
       } catch (perAssetErr) {
         const reason = perAssetErr instanceof Error ? perAssetErr.message : String(perAssetErr);
@@ -289,7 +342,7 @@ serve(async (req) => {
 
     await logRun("success");
     return new Response(
-      JSON.stringify({ ok: true, provider, processed, succeeded, results }),
+      JSON.stringify({ ok: true, provider, voice: voiceName, processed, succeeded, results }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (error) {
