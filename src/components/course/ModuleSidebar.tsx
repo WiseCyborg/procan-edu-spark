@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { toast } from '@/components/ui/sonner';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { isManagerTrackModule, isRequiredAgentModule } from '@/lib/requiredAgentModules';
 
 interface Module {
   id: string;
@@ -21,17 +22,14 @@ interface ModuleSidebarProps {
   onModuleSelect: (moduleNumber: number) => void;
 }
 
-// RVT Required modules are 0-18 (19 total)
-const RVT_REQUIRED_MAX = 18;
-
 export const ModuleSidebar = ({
   modules,
   currentModuleNumber,
   onModuleSelect
 }: ModuleSidebarProps) => {
-  // Split into RVT Required vs Manager Track
-  const rvtRequiredModules = modules.filter(m => m.number <= RVT_REQUIRED_MAX);
-  const managerModules = modules.filter(m => m.number > RVT_REQUIRED_MAX);
+  // Required agent modules are 0-18 and 24-29. Supervisory modules are 19-23.
+  const rvtRequiredModules = modules.filter(m => isRequiredAgentModule(m.number));
+  const managerModules = modules.filter(m => isManagerTrackModule(m.number));
 
   const rvtCompletedCount = rvtRequiredModules.filter(m => m.isCompleted).length;
   const managerCompletedCount = managerModules.filter(m => m.isCompleted).length;
@@ -40,9 +38,9 @@ export const ModuleSidebar = ({
 
   const handleModuleClick = (module: Module) => {
     if (module.isLocked) {
-      const firstIncomplete = modules.find(m => !m.isCompleted);
+      const firstIncomplete = rvtRequiredModules.find(m => !m.isCompleted);
       toast.error(
-        `Complete Module ${firstIncomplete?.number || module.number - 1} first before accessing this module.`
+        `Complete Module ${firstIncomplete?.number ?? module.number} first before accessing this module.`
       );
       return;
     }
