@@ -10706,6 +10706,7 @@ export type Database = {
           published_at: string | null
           r2_key: string | null
           r2_verified_at: string | null
+          flagged_at: string | null
           regeneration_notified_at: string | null
           regeneration_reason: string | null
           render_dispatched_at: string | null
@@ -10770,6 +10771,7 @@ export type Database = {
           published_at?: string | null
           r2_key?: string | null
           r2_verified_at?: string | null
+          flagged_at?: string | null
           regeneration_notified_at?: string | null
           regeneration_reason?: string | null
           render_dispatched_at?: string | null
@@ -10834,6 +10836,7 @@ export type Database = {
           published_at?: string | null
           r2_key?: string | null
           r2_verified_at?: string | null
+          flagged_at?: string | null
           regeneration_notified_at?: string | null
           regeneration_reason?: string | null
           render_dispatched_at?: string | null
@@ -11979,13 +11982,24 @@ export type Database = {
         Returns: {
           asset_id: string
           asset_key: string
+          candidate_registered: boolean
+          candidate_stored_in_r2: boolean
           comar_reference: string
           course_title: string
           flagged_since: string
           has_draft_script: boolean
           module_number: number
           module_title: string
+          job_held: boolean
+          job_last_error: string
+          job_status: string
+          job_type: string
+          pipeline_last_error: string
+          pipeline_stage: string
+          playback_verified: boolean
           reason: string
+          render_error: string
+          render_status: string
           review_status: string
         }[]
       }

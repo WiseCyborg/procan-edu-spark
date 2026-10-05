@@ -16,18 +16,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { AlertTriangle, ArrowLeft, CheckCircle2, Loader2, RefreshCw, Shield, Video } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useToast } from '@/hooks/use-toast';
+import {
+  candidateUrlRequired,
+  jobStatusLabel,
+  playbackLabel,
+  queueBlockers,
+  regenerationStageLabel,
+  showApproveScript,
+} from '@/lib/videoRegeneration';
 
 interface QueueRow {
   asset_id: string;
@@ -40,6 +40,17 @@ interface QueueRow {
   has_draft_script: boolean | null;
   review_status: string | null;
   comar_reference: string | null;
+  pipeline_stage: string | null;
+  render_status: string | null;
+  candidate_registered: boolean | null;
+  candidate_stored_in_r2: boolean | null;
+  playback_verified: boolean | null;
+  pipeline_last_error: string | null;
+  render_error: string | null;
+  job_type: string | null;
+  job_status: string | null;
+  job_last_error: string | null;
+  job_held: boolean | null;
 }
 
 const relativeDate = (iso: string | null) => {
@@ -69,20 +80,6 @@ const reviewBadge = (status: string | null) => {
   }
 };
 
-// Pipeline stage derived only from data the queue already returns. Anything we
-// cannot see from here is reported as unknown rather than assumed complete.
-const pipelineStage = (row: QueueRow) => {
-  if (row.review_status === 'approved') return 'Script approved — narration/render pending';
-  if (row.review_status === 'rejected') return 'Script rejected — needs rework';
-  if (row.has_draft_script) return 'Draft script ready — awaiting review';
-  return 'No draft script yet';
-};
-
-// Playback verification and publication are tracked downstream (R2 storage +
-// mapping + playback check). This view has no telemetry for them.
-const VERIFICATION_UNKNOWN = 'Not verified from this view';
-
-
 const QUEUE_KEY = ['admin', 'video-regeneration-queue'];
 
 const VideoRegenerationQueue: React.FC = () => {
@@ -97,8 +94,9 @@ const VideoRegenerationQueue: React.FC = () => {
   const [note, setNote] = useState('');
   const [approveTarget, setApproveTarget] = useState<QueueRow | null>(null);
   const [busy, setBusy] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const { data: rows, isLoading, isError, error, refetch, isFetching } = useQuery({
+  const { data: rows, dataUpdatedAt, isLoading, isError, error, refetch } = useQuery({
     queryKey: QUEUE_KEY,
     queryFn: async (): Promise<QueueRow[]> => {
       const { data, error } = await supabase.rpc('get_video_regeneration_queue' as any);
@@ -106,7 +104,33 @@ const VideoRegenerationQueue: React.FC = () => {
       return (data ?? []) as unknown as QueueRow[];
     },
     enabled: allowed,
+    staleTime: 0,
+    refetchOnWindowFocus: false,
   });
+
+  const refreshQueue = async () => {
+    setRefreshing(true);
+    try {
+      const result = await refetch();
+      if (result.error) {
+        toast({
+          title: 'Refresh failed',
+          description: result.error.message,
+          variant: 'destructive',
+        });
+      }
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  const lastRefreshedLabel = dataUpdatedAt
+    ? `Last refreshed ${new Date(dataUpdatedAt).toLocaleString(undefined, {
+        hour: 'numeric',
+        minute: '2-digit',
+        second: '2-digit',
+      })}`
+    : 'Not refreshed yet';
 
   const handleResult = (result: any, fallbackTitle: string) => {
     if (result?.ok) {
@@ -122,8 +146,18 @@ const VideoRegenerationQueue: React.FC = () => {
     return false;
   };
 
+  const urlIsRequired = candidateUrlRequired(markTarget?.candidate_registered);
+
   const submitMarkRegenerated = async () => {
     if (!markTarget) return;
+    if (urlIsRequired && !newUrl.trim()) {
+      toast({
+        title: 'Candidate video URL is required',
+        description: 'Paste the replacement URL, or wait until the pipeline stores the regenerated video in R2 and registers it.',
+        variant: 'destructive',
+      });
+      return;
+    }
     setBusy(true);
     try {
       const { data, error } = await supabase.rpc('mark_video_regenerated' as any, {
@@ -187,25 +221,36 @@ const VideoRegenerationQueue: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-background p-4 md:p-6 overflow-x-hidden">
+      <div className="max-w-3xl mx-auto space-y-6">
         <div>
           <Link to="/admin" className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
             <ArrowLeft className="h-4 w-4 rtl-flip" /> Admin
           </Link>
-          <div className="flex items-center gap-3 mt-2">
+          <div className="flex flex-wrap items-center gap-3 mt-2">
             <h1 className="text-3xl font-bold flex items-center gap-2">
               <Video className="h-7 w-7" /> Video Regeneration Queue
             </h1>
-            <Button
-              variant="outline"
-              size="sm"
-              className="ms-auto"
-              onClick={() => refetch()}
-              disabled={isFetching}
-            >
-              <RefreshCw className={`h-4 w-4 me-2 ${isFetching ? 'animate-spin' : ''}`} /> Refresh
-            </Button>
+            <div className="ms-auto flex flex-col items-end gap-1">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={refreshQueue}
+                disabled={refreshing}
+                aria-busy={refreshing}
+              >
+                {refreshing ? (
+                  <Loader2 className="h-4 w-4 me-2 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-4 w-4 me-2" />
+                )}
+                {refreshing ? 'Refreshing' : 'Refresh'}
+              </Button>
+              <p className="text-xs text-muted-foreground" data-testid="last-refreshed">
+                {lastRefreshedLabel}
+              </p>
+            </div>
           </div>
           <p className="text-muted-foreground mt-1">
             Training videos flagged for regeneration after a Maryland COMAR regulation change. Approving a script
@@ -224,7 +269,11 @@ const VideoRegenerationQueue: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Flagged videos</CardTitle>
-            <CardDescription>Only videos with an open regeneration flag appear here.</CardDescription>
+            <CardDescription>
+              {rows && rows.length > 0
+                ? `${rows.length} flagged videos, each with its stored regeneration stage.`
+                : 'Only videos with an open regeneration flag appear here.'}
+            </CardDescription>
           </CardHeader>
 
           <CardContent>
@@ -240,7 +289,7 @@ const VideoRegenerationQueue: React.FC = () => {
                 <div>
                   <p className="font-medium">Could not load the queue</p>
                   <p className="text-sm text-muted-foreground">{(error as any)?.message || 'Unknown error'}</p>
-                  <Button variant="outline" size="sm" className="mt-3" onClick={() => refetch()}>
+                  <Button type="button" variant="outline" size="sm" className="mt-3" onClick={refreshQueue} disabled={refreshing}>
                     Try again
                   </Button>
                 </div>
@@ -253,69 +302,79 @@ const VideoRegenerationQueue: React.FC = () => {
                 </p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Module</TableHead>
-                      <TableHead>Course</TableHead>
-                      <TableHead>COMAR reference</TableHead>
-                      <TableHead>Reason flagged</TableHead>
-                      <TableHead>Flagged since</TableHead>
-                      <TableHead>Draft script</TableHead>
-                      <TableHead>Review status</TableHead>
-                      <TableHead>Pipeline stage</TableHead>
-                      <TableHead>Playback verified</TableHead>
-                      <TableHead className="text-end">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {rows.map((row) => (
-                      <TableRow key={row.asset_id}>
-                        <TableCell className="font-medium">
+              <div className="space-y-4">
+                {rows.map((row) => {
+                  const blockers = queueBlockers(row);
+                  return (
+                    <article key={row.asset_id} className="rounded-lg border bg-background p-4 space-y-3 break-words">
+                      <div className="space-y-1">
+                        <h2 className="font-semibold">
                           {row.module_number != null ? `${row.module_number}. ` : ''}
                           {row.module_title || row.asset_key || '—'}
-                        </TableCell>
-                        <TableCell>{row.course_title || '—'}</TableCell>
-                        <TableCell>{row.comar_reference || '—'}</TableCell>
-                        <TableCell className="max-w-[240px] text-sm text-muted-foreground">
-                          {row.reason || '—'}
-                        </TableCell>
-                        <TableCell className="text-sm">{relativeDate(row.flagged_since)}</TableCell>
-                        <TableCell>
-                          {row.has_draft_script ? (
-                            <Badge className="bg-emerald-600 hover:bg-emerald-600 text-white">Script ready</Badge>
-                          ) : (
-                            <Badge variant="secondary">No script</Badge>
-                          )}
-                        </TableCell>
-                        <TableCell>{reviewBadge(row.review_status)}</TableCell>
-                        <TableCell className="text-sm text-muted-foreground max-w-[220px]">
-                          {pipelineStage(row)}
-                        </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">{VERIFICATION_UNKNOWN}</TableCell>
-                        <TableCell className="text-end whitespace-nowrap">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="me-2"
-                            onClick={() => {
-                              setNewUrl('');
-                              setNote('');
-                              setMarkTarget(row);
-                            }}
-                          >
-                            Register replacement candidate
-                          </Button>
-                          <Button size="sm" onClick={() => setApproveTarget(row)}>
+                        </h2>
+                        <p className="text-sm text-muted-foreground">
+                          {row.course_title || '—'}
+                          {row.comar_reference ? ` · ${row.comar_reference}` : ''}
+                        </p>
+                      </div>
+                      <p className="text-sm">Flagged {relativeDate(row.flagged_since)}</p>
+                      <p className="text-sm text-muted-foreground">{row.reason || '—'}</p>
+                      <div className="flex flex-wrap gap-2">
+                        {row.has_draft_script ? (
+                          <Badge className="bg-emerald-600 hover:bg-emerald-600 text-white">Script ready</Badge>
+                        ) : (
+                          <Badge variant="secondary">No script</Badge>
+                        )}
+                        {reviewBadge(row.review_status)}
+                      </div>
+                      <p className="text-sm">
+                        {regenerationStageLabel(row)}
+                        <span className="text-muted-foreground">
+                          {' '}
+                          · {row.pipeline_stage || '—'}
+                          {row.render_status ? ` · render ${row.render_status}` : ''}
+                        </span>
+                      </p>
+                      <p className="text-sm text-muted-foreground">{playbackLabel(row.playback_verified)}</p>
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium">{jobStatusLabel(row)}</p>
+                        {row.job_last_error ? (
+                          <p className="text-sm text-muted-foreground">{row.job_last_error}</p>
+                        ) : null}
+                        {row.render_error ? (
+                          <p className="text-sm text-muted-foreground">Render error: {row.render_error}</p>
+                        ) : null}
+                        {row.pipeline_last_error ? (
+                          <p className="text-sm text-muted-foreground">Pipeline error: {row.pipeline_last_error}</p>
+                        ) : null}
+                        {blockers.map((blocker) => (
+                          <p key={blocker} className="text-sm font-medium text-destructive">
+                            {blocker}
+                          </p>
+                        ))}
+                      </div>
+                      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setNewUrl('');
+                            setNote('');
+                            setMarkTarget(row);
+                          }}
+                        >
+                          Register replacement candidate
+                        </Button>
+                        {showApproveScript(row.review_status) ? (
+                          <Button type="button" size="sm" onClick={() => setApproveTarget(row)}>
                             Approve script &amp; queue narration
                           </Button>
-                        </TableCell>
-
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                        ) : null}
+                      </div>
+                    </article>
+                  );
+                })}
               </div>
             )}
           </CardContent>
@@ -337,13 +396,22 @@ const VideoRegenerationQueue: React.FC = () => {
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="new-video-url">Candidate video URL (optional)</Label>
+              <Label htmlFor="new-video-url">
+                Candidate video URL{urlIsRequired ? ' (required)' : ' (already registered)'}
+              </Label>
               <Input
                 id="new-video-url"
                 value={newUrl}
                 onChange={(e) => setNewUrl(e.target.value)}
                 placeholder="https://..."
+                required={urlIsRequired}
+                aria-required={urlIsRequired}
               />
+              <p className="text-sm text-muted-foreground">
+                {urlIsRequired
+                  ? 'Required until the pipeline stores the regenerated MP4 in R2 and registers it. A blank URL is rejected.'
+                  : 'The pipeline already registered this replacement. Leave the URL blank to keep it, or paste a URL to replace it.'}
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="regeneration-note">Note (optional)</Label>
@@ -361,7 +429,7 @@ const VideoRegenerationQueue: React.FC = () => {
             <Button variant="outline" onClick={() => setMarkTarget(null)} disabled={busy}>
               Cancel
             </Button>
-            <Button onClick={submitMarkRegenerated} disabled={busy}>
+            <Button onClick={submitMarkRegenerated} disabled={busy || (urlIsRequired && !newUrl.trim())}>
               {busy && <Loader2 className="h-4 w-4 me-2 animate-spin" />}
               Register candidate
             </Button>
