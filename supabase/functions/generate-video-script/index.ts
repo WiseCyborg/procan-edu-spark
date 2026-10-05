@@ -779,7 +779,11 @@ serve(async (req) => {
           }
           break;
         }
-        if (!script) throw new Error(scriptError || 'script draft failed the proposed-rule check');
+        if (!script) {
+          throw new Error(scriptError === 'shorten'
+            ? 'script stayed over 800 words after the shorten pass'
+            : (scriptError || 'script draft failed the proposed-rule check'));
+        }
 
         const narration = partitionNarration(script);
         const baseSpec = fallbackSlideSpec(script, modNum, mod.title, narration);
