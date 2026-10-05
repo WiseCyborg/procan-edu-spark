@@ -349,7 +349,7 @@ const AppRoutesLayout = () => {
                 <PurchaseSeats />
               </ProtectedRoute>
             } />
-            <Route path="/apply" element={<AccessParkedPage />} />
+            <Route path="/apply" element={BUSINESS_RULES.PUBLIC_SELF_SERVE_CHECKOUT_ENABLED ? <DispensaryApplication /> : <AccessParkedPage />} />
             <Route path="/org/apply" element={BUSINESS_RULES.PUBLIC_SELF_SERVE_CHECKOUT_ENABLED ? <DispensaryApplication /> : <AccessParkedPage />} />
             <Route path="/payment" element={<Payment />} />
             <Route path="/payment/:applicationId" element={<Payment />} />

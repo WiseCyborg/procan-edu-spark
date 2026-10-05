@@ -28,18 +28,32 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // Validate join code
+    // Look up the code even when the owner has turned it off, so that case
+    // is distinct from a code that does not exist.
     const { data: joinCode, error } = await supabase
       .from("rvt_join_codes")
       .select("*, organizations(*)")
       .eq("code", code.toUpperCase())
-      .eq("is_active", true)
-      .single();
+      .order("is_active", { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
     if (error || !joinCode) {
       return new Response(JSON.stringify({ 
-        valid: false, 
+        valid: false,
+        error_code: "invalid",
         error: "Invalid or expired join code" 
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
+    if (joinCode.is_active !== true) {
+      return new Response(JSON.stringify({
+        valid: false,
+        error_code: "owner_not_allowed",
+        error: "The dispensary owner has not allowed coordinator entry.",
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
@@ -69,9 +83,11 @@ serve(async (req) => {
     }
 
     // Check seat availability
+    // check_seat_availability compares course_id with `=`, so a null course never matches.
+    // Seats from a dispensary payment are issued for Maryland Responsible Vendor Training.
     const { data: hasSeats, error: seatError } = await supabase.rpc('check_seat_availability', {
       org_id: joinCode.organization_id,
-      course_id: null // Will use default course
+      course_id: 'e6841a2f-4e92-47c3-9ed4-243ccc22338b'
     });
 
     if (seatError) {

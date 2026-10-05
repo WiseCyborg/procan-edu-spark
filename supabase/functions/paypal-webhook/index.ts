@@ -210,6 +210,28 @@ async function provisionDispensaryPayment(
     }
   }
 
+  // An active join code is the owner's permission for a coordinator to enter.
+  // Creating it here does not send email.
+  const { data: existingCode } = await supabase
+    .from("rvt_join_codes")
+    .select("id")
+    .eq("organization_id", ctx.organizationId)
+    .eq("is_active", true)
+    .limit(1)
+    .maybeSingle();
+
+  if (!existingCode) {
+    const code = `JOIN-${crypto.randomUUID().replace(/-/g, "").slice(0, 8).toUpperCase()}`;
+    const { error: joinErr } = await supabase.from("rvt_join_codes").insert({
+      organization_id: ctx.organizationId,
+      code,
+      is_active: true,
+      expires_at: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+      max_uses: ctx.quantity,
+    });
+    if (joinErr) console.error("[paypal-webhook] join code insert error", joinErr);
+  }
+
   // 4. Generate plaintext registration token, persist it (the BEFORE trigger
   //    hashes it into registration_token_hash and nulls the plaintext column),
   //    then hand the plaintext straight to the email sender so it doesn't need
