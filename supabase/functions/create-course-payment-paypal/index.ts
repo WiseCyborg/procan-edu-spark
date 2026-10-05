@@ -58,6 +58,21 @@ serve(async (req) => {
       throw new Error("Course currency is not configured");
     }
 
+    const { data: existingEnt } = await supabaseService
+      .from("course_entitlements")
+      .select("id, expires_at")
+      .eq("user_id", user.id)
+      .eq("course_id", courseId)
+      .eq("status", "active")
+      .maybeSingle();
+
+    if (existingEnt && (!existingEnt.expires_at || new Date(existingEnt.expires_at) > new Date())) {
+      return new Response(JSON.stringify({ alreadyPaid: true, courseId }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
     const paypalEnv = await getActivePayPalEnv();
     const { id: PAYPAL_CLIENT_ID, secret: PAYPAL_CLIENT_SECRET, baseUrl: PAYPAL_API_BASE } =
       resolvePayPalCreds(paypalEnv);
@@ -130,8 +145,8 @@ serve(async (req) => {
         custom_id: `course_${courseId}_user_${user.id}`,
       }],
       application_context: {
-        return_url: `https://www.procannedu.com/payment-success?course_id=${courseId}`,
-        cancel_url: `https://www.procannedu.com/courses/${courseId}?payment=cancelled`,
+        return_url: `https://procannedu.com/payment-success?course_id=${courseId}`,
+        cancel_url: `https://procannedu.com/payment-cancel?course_id=${courseId}`,
         brand_name: "ProCann Edu",
         landing_page: "BILLING",
         user_action: "PAY_NOW",

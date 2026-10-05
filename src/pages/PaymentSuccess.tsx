@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { CheckCircle, Award, ArrowRight, Mail, Users, Copy, Check, Send } from 'lucide-react';
+import { CheckCircle, Award, ArrowRight, Mail, Users, Copy, Check, Send, AlertCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -11,6 +11,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import Confetti from 'react-confetti';
+import { paidCourseEntryPath } from '@/lib/paidCourseEntry';
+
+type CourseReturnState = 'idle' | 'missing' | 'verifying' | 'paid' | 'unpaid' | 'failed';
 
 interface SeatPurchaseData {
   quantity: number;
@@ -33,6 +36,16 @@ const PaymentSuccess: React.FC = () => {
   // and sends the manager-registration token email. Here we just poll status and
   // tell the user to check their email.
   const applicationId = searchParams.get('application_id');
+  const courseIdParam = searchParams.get('course_id');
+  const paypalToken = searchParams.get('token');
+  const paypalPayerId = searchParams.get('PayerID');
+  const purchaseIdParam = searchParams.get('purchase_id');
+  const [courseReturn, setCourseReturn] = useState<CourseReturnState>(() => {
+    if (applicationId || purchaseIdParam) return 'idle';
+    if (!paypalToken || !paypalPayerId) return 'missing';
+    if (courseIdParam) return 'verifying';
+    return 'missing';
+  });
   const [appPaymentReady, setAppPaymentReady] = useState<null | { organizationName: string; contactEmailMasked: string }>(null);
   const [appPolling, setAppPolling] = useState<boolean>(!!applicationId);
 
@@ -81,10 +94,17 @@ const PaymentSuccess: React.FC = () => {
       const courseId = searchParams.get('course_id');
       const purchaseId = searchParams.get('purchase_id');
 
+      if (!applicationId && !purchaseId && (!token || !PayerID)) {
+        setCourseReturn('missing');
+        return;
+      }
+
       if (token && PayerID) {
         try {
           if (courseId) {
-            // Verify course payment
+            setCourseReturn('verifying');
+            // Verify course payment. This captures an approved order; do not call it
+            // except when PayPal has returned token and PayerID for that buyer.
             const { data, error } = await supabase.functions.invoke('verify-payment-paypal', {
               body: { orderId: token }
             });
@@ -92,6 +112,7 @@ const PaymentSuccess: React.FC = () => {
             if (error) throw error;
 
             if (data?.paid) {
+              setCourseReturn('paid');
               setShowConfetti(true);
               setTimeout(() => setShowConfetti(false), 3000);
               
@@ -100,10 +121,11 @@ const PaymentSuccess: React.FC = () => {
                 description: "Your course access has been activated.",
               });
               
-              // Redirect to course after 2 seconds
               setTimeout(() => {
-                navigate(`/courses/${courseId}`);
+                navigate(paidCourseEntryPath(courseId));
               }, 2000);
+            } else {
+              setCourseReturn('unpaid');
             }
           } else if (purchaseId) {
             // P4 (2026-06-16): verify endpoint is read-only. It returns
@@ -177,6 +199,7 @@ const PaymentSuccess: React.FC = () => {
 
         } catch (error) {
           console.error('Payment verification error:', error);
+          if (courseId) setCourseReturn('failed');
           toast({
             title: "Payment Verification Failed",
             description: "Please contact support if you continue to see this message.",
@@ -466,7 +489,45 @@ const PaymentSuccess: React.FC = () => {
     );
   }
 
-  // Course purchase success view (default)
+  if (!applicationId && !seatPurchaseData && courseReturn !== 'paid' && courseReturn !== 'idle') {
+    const retryCourse = () => navigate(courseIdParam ? `/courses/${courseIdParam}` : '/courses');
+    const title =
+      courseReturn === 'verifying' ? 'Confirming your payment' :
+      courseReturn === 'unpaid' ? 'Payment not completed' :
+      courseReturn === 'failed' ? 'Payment could not be confirmed' :
+      'Payment confirmation missing';
+    const body =
+      courseReturn === 'verifying' ? 'PayPal sent you back. We are checking the payment before opening the course.' :
+      courseReturn === 'unpaid' ? 'PayPal did not report a completed payment. No course access was granted. You can try checkout again.' :
+      courseReturn === 'failed' ? 'We could not confirm this PayPal return. If you were charged, contact support before trying again.' :
+      'This page did not receive the PayPal token and payer id, so it cannot confirm a payment.';
+
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary/5 flex items-center justify-center p-4">
+        <Card className="max-w-xl w-full">
+          <CardHeader className="text-center">
+            <div className="flex justify-center mb-4">
+              {courseReturn === 'verifying'
+                ? <Loader2 className="h-16 w-16 text-primary animate-spin" />
+                : <AlertCircle className="h-16 w-16 text-orange-500" />}
+            </div>
+            <CardTitle className="text-2xl">{title}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-center text-muted-foreground">{body}</p>
+            {courseReturn !== 'verifying' && (
+              <div className="flex flex-col gap-3">
+                <Button onClick={retryCourse} className="w-full">Back to the course</Button>
+                <Button variant="outline" onClick={() => navigate('/')} className="w-full">Back to home</Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Course purchase success view. Shown only after PayPal verification returns paid.
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
       <Card className="max-w-2xl w-full">
@@ -500,7 +561,7 @@ const PaymentSuccess: React.FC = () => {
 
           <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
             <Button 
-              onClick={() => navigate('/course')}
+              onClick={() => navigate(courseIdParam ? paidCourseEntryPath(courseIdParam) : '/course')}
               size="lg"
               className="bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto"
             >

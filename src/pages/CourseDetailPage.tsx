@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Seo } from '@/components/Seo';
 import { toast } from 'sonner';
 import { BUSINESS_RULES } from '@/config/business-rules';
+import { paidCourseEntryPath } from '@/lib/paidCourseEntry';
 
 interface CourseRow {
   id: string;
@@ -106,6 +107,10 @@ const CourseDetailPage = () => {
         body: { courseId },
       });
       if (fnError) throw fnError;
+      if (data?.alreadyPaid) {
+        navigate(paidCourseEntryPath(courseId));
+        return;
+      }
       if (data?.url) {
         window.location.href = data.url;
         return;
@@ -190,7 +195,7 @@ const CourseDetailPage = () => {
         </Card>
 
         {hasEntitlement ? (
-          <Button size="lg" className="w-full sm:w-auto" onClick={() => navigate(`/courses/${course.id}/learn`)}>
+          <Button size="lg" className="w-full sm:w-auto" onClick={() => navigate(paidCourseEntryPath(course.id))}>
             <CheckCircle2 className="h-5 w-5 me-2" />
             Continue Course
           </Button>
@@ -210,7 +215,7 @@ const CourseDetailPage = () => {
             </Button>
           )
         ) : (
-          <Button size="lg" className="w-full sm:w-auto" onClick={() => navigate(`/courses/${course.id}/learn`)}>
+          <Button size="lg" className="w-full sm:w-auto" onClick={() => navigate(paidCourseEntryPath(course.id))}>
             Start Course
           </Button>
         )}

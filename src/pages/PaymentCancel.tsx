@@ -10,7 +10,8 @@ const PaymentCancel: React.FC = () => {
   const navigate = useNavigate();
   const applicationId = searchParams.get('application_id');
   const purchaseId = searchParams.get('purchase_id');
-  const isTopup = searchParams.get('topup') === '1' || (!applicationId && !!purchaseId);
+  const courseId = searchParams.get('course_id');
+  const isTopup = searchParams.get('topup') === '1' || (!applicationId && !courseId && !!purchaseId);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/5 p-4">
@@ -19,12 +20,23 @@ const PaymentCancel: React.FC = () => {
           <XCircle className="h-12 w-12 text-orange-500 mx-auto mb-2" />
           <CardTitle>Payment Cancelled</CardTitle>
           <CardDescription>
-            {isTopup
+            {courseId
+              ? 'No charge was made. You can return to the course and start checkout again.'
+              : isTopup
               ? "No charge was made. You can restart your seat purchase whenever you're ready."
               : "No charge was made and your application is still approved. You can complete payment whenever you're ready."}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
+          {courseId && (
+            <Button
+              onClick={() => navigate(`/courses/${courseId}`)}
+              className="w-full"
+              size="lg"
+            >
+              <RotateCcw className="h-4 w-4 me-2" /> Try payment again
+            </Button>
+          )}
           {applicationId && (
             <Button
               onClick={() => navigate(`/payment/${applicationId}`)}
