@@ -11,15 +11,46 @@ export interface R2Config {
   publicBaseUrl: string;
 }
 
+const LIVE_BUCKET = "procannedu-videos";
+const LEGACY_BUCKETS = new Set(["procannvideos", "training-videos", "procann-videos"]);
+const WORKER_PUBLIC_BASE = "https://procannedu-video.wisecyborg.workers.dev";
+
+function readEnv(name: string): string {
+  return (Deno.env.get(name) ?? "").trim().replace(/^['"]|['"]$/g, "").trim();
+}
+
 export function loadR2Config(): R2Config {
+  const accountId = readEnv("R2_ACCOUNT_ID");
+  let endpoint = readEnv("R2_ENDPOINT").replace(/\/+$/, "");
+  if (!endpoint && accountId) {
+    endpoint = `https://${accountId}.r2.cloudflarestorage.com`;
+  }
+  // Path-style requests add the bucket themselves. An endpoint that already
+  // includes /<bucket> makes the signed path disagree with the URL R2 sees.
+  if (endpoint) {
+    try {
+      const parsed = new URL(endpoint);
+      if (parsed.pathname && parsed.pathname !== "/") endpoint = parsed.origin;
+    } catch {
+      // Leave a malformed endpoint for the missing-field check below.
+    }
+  }
+
+  let bucket = readEnv("R2_BUCKET");
+  if (LEGACY_BUCKETS.has(bucket.toLowerCase())) bucket = LIVE_BUCKET;
+
+  // Cloudflare R2 SigV4 only validates the region name "auto".
+  const region = "auto";
+  const publicBaseUrl = (readEnv("R2_PUBLIC_BASE_URL") || WORKER_PUBLIC_BASE).replace(/\/+$/, "");
+
   const cfg: R2Config = {
-    accountId: Deno.env.get("R2_ACCOUNT_ID") ?? "",
-    bucket: Deno.env.get("R2_BUCKET") ?? "",
-    endpoint: (Deno.env.get("R2_ENDPOINT") ?? "").replace(/\/+$/, ""),
-    region: Deno.env.get("R2_REGION") ?? "auto",
-    accessKeyId: Deno.env.get("R2_ACCESS_KEY_ID") ?? "",
-    secretAccessKey: Deno.env.get("R2_SECRET_ACCESS_KEY") ?? "",
-    publicBaseUrl: (Deno.env.get("R2_PUBLIC_BASE_URL") ?? "").replace(/\/+$/, ""),
+    accountId,
+    bucket,
+    endpoint,
+    region,
+    accessKeyId: readEnv("R2_ACCESS_KEY_ID"),
+    secretAccessKey: readEnv("R2_SECRET_ACCESS_KEY"),
+    publicBaseUrl,
   };
   const missing = Object.entries(cfg)
     .filter(([, v]) => !v)
@@ -123,6 +154,12 @@ export async function r2Request(
   });
 }
 
+async function r2ErrorCode(res: Response): Promise<string> {
+  const text = await res.text().catch(() => "");
+  const code = text.match(/<Code>([A-Za-z0-9]+)<\/Code>/)?.[1];
+  return code ? `${res.status} ${code}` : String(res.status);
+}
+
 export async function r2Head(
   cfg: R2Config,
   key: string,
@@ -130,7 +167,7 @@ export async function r2Head(
   const res = await r2Request(cfg, "HEAD", key);
   if (res.status === 404) return { exists: false, size: 0 };
   if (!res.ok) {
-    throw new Error(`r2_head_failed [${res.status}]: ${await res.text().catch(() => "")}`);
+    throw new Error(`r2_head_failed [${await r2ErrorCode(res)}]`);
   }
   await res.body?.cancel();
   return { exists: true, size: Number(res.headers.get("content-length") ?? 0) };
@@ -144,7 +181,7 @@ export async function r2Put(
 ): Promise<void> {
   const res = await r2Request(cfg, "PUT", key, bytes, contentType);
   if (!res.ok) {
-    throw new Error(`r2_put_failed [${res.status}]: ${(await res.text().catch(() => "")).slice(0, 300)}`);
+    throw new Error(`r2_put_failed [${await r2ErrorCode(res)}]`);
   }
   await res.body?.cancel();
 }
