@@ -81,14 +81,23 @@ serve(async (req) => {
 
     // Check if user exists
     const { data: existingUser } = await supabase.auth.admin.listUsers();
-    const user = existingUser.users.find(u => u.email === user_email);
+    const assignee = existingUser?.users?.find(u => u.email === user_email);
 
-    if (user) {
-      // User exists, assign role
+    if (assignee) {
+      // Link the profile before the role insert so the roster trigger can
+      // see organization_id. The trigger writes organization_members, which
+      // is what the coordinator dashboard's roster RPC requires.
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ organization_id })
+        .eq('user_id', assignee.id);
+
+      if (profileError) throw profileError;
+
       const { error: roleError } = await supabase
         .from('user_roles')
         .insert({
-          user_id: user.id,
+          user_id: assignee.id,
           role: 'training_coordinator'
         });
 
@@ -96,13 +105,21 @@ serve(async (req) => {
         throw roleError;
       }
 
-      // Update organization_id in profile
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({ organization_id })
-        .eq('user_id', user.id);
+      // A role that already exists does not fire the insert trigger.
+      if (roleError) {
+        const { error: memberError } = await supabase
+          .from('organization_members')
+          .upsert({
+            organization_id,
+            user_id: assignee.id,
+            email: assignee.email,
+            role: 'training_coordinator',
+            status: 'active',
+            member_type: 'coordinator',
+          }, { onConflict: 'organization_id,email,role' });
 
-      if (profileError) throw profileError;
+        if (memberError) throw memberError;
+      }
 
       console.log('Training coordinator role assigned to existing user');
     } else {

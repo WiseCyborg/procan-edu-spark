@@ -145,6 +145,8 @@ export default function ManagerRegistration() {
         options: { 
           emailRedirectTo: `${window.location.origin}/onboarding/setup-team?first_login=true`,
           data: { 
+            first_name: firstName,
+            last_name: lastName,
             firstName: firstName,
             lastName: lastName,
             registration_type: 'dispensary_manager'
@@ -190,13 +192,17 @@ export default function ManagerRegistration() {
           });
         }
 
-        // Create dispensary_manager role entry using safe function (handles duplicates)
-        const { error: roleError } = await supabase
-          .rpc('safe_assign_role', {
-            p_user_id: authData.user.id,
-            p_role: 'dispensary_manager'
-          });
-          
+        // safe_assign_role is not executable by a new manager, and the
+        // application row is not writable by them either. This function
+        // assigns only dispensary_manager. For an application link it also
+        // marks that registration complete.
+        const { error: roleError } = await supabase.rpc(
+          'complete_manager_registration' as never,
+          (registrationType === 'application' && applicationData?.id
+            ? { p_application_id: applicationData.id }
+            : { p_join_code: token }) as never
+        );
+
         if (roleError) {
           console.error('Role assignment error:', roleError);
           toast({ 
@@ -205,13 +211,6 @@ export default function ManagerRegistration() {
             variant: "destructive" 
           });
         }
-      }
-
-      // Only update dispensary_applications for application-based registrations.
-      // Match by application id (returned from validate_registration_token) since the
-      // plaintext registration_token is no longer persisted at rest.
-      if (registrationType === 'application' && applicationData?.id) {
-        await supabase.from('dispensary_applications').update({ registration_completed: true }).eq('id', applicationData.id);
       }
       
       toast({ title: "Account Created!", description: "Redirecting to setup..." });
