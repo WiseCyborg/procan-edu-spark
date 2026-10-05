@@ -69,7 +69,9 @@ const CourseLayout: React.FC = () => {
   const { courseState } = useCourseState(COURSE_ID);
   const requiredTotal = courseState.required_total || REQUIRED_FOR_EXAM;
   const requiredCompleted = Math.min(courseState.required_completed ?? 0, requiredTotal);
-  const examEligible = courseState.exam_eligible || areAllModulesCompleted();
+  const examEligible = courseState.required_total > 0
+    ? courseState.exam_eligible
+    : areAllModulesCompleted();
   const requiredRemaining = Math.max(requiredTotal - requiredCompleted, 0);
   const requiredPercent = requiredTotal > 0
     ? Math.round((requiredCompleted / requiredTotal) * 100)

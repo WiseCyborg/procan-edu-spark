@@ -32,6 +32,7 @@ import { ModuleSidebar } from '@/components/course/ModuleSidebar';
 import { MobileNavBar } from '@/components/course/MobileNavBar';
 import { CourseCompletionCelebration } from '@/components/course/CourseCompletionCelebration';
 import { useModuleNavigation } from '@/hooks/useModuleNavigation';
+import { adjacentModule, isManagerTrackModule } from '@/lib/requiredAgentModules';
 import { SCORMStylePlayer, CourseConfig } from '@/components/course/SCORMStylePlayer';
 import { PaginatedContent } from '@/components/course/PaginatedContent';
 import { DocumentReadTracker } from '@/components/course/DocumentReadTracker';
@@ -163,13 +164,15 @@ const EnhancedCourseModule: React.FC = () => {
     const key = `${moduleData.id}:${moduleData.asset_key}`;
     if (videoLoadErrorEmittedRef.current === key) return;
     videoLoadErrorEmittedRef.current = key;
-    if (!signedVideoData.is_admin_preview) {
+    const waitingOnVideo = signedVideoData.error_code === 'not_uploaded' || signedVideoData.error_code === 'not_found';
+    if (!waitingOnVideo && !signedVideoData.is_admin_preview) {
       primaryTracking.emitManual('error', {
         position: 0,
         duration: 0,
         rate: 1,
       });
     }
+    if (waitingOnVideo) return;
     console.error('[course-video] load failed', {
       module: moduleData.module_number,
       assetKey: moduleData.asset_key,
@@ -190,7 +193,13 @@ const EnhancedCourseModule: React.FC = () => {
   const rolesReady = !rolesLoading && !certLoading;
   
   const currentModuleNumber = parseInt(moduleId?.replace('part', '') || '0');
-  const isLastModuleForUser = rolesReady && (canAccessManagerTrack ? currentModuleNumber === 23 : currentModuleNumber === 18);
+  const nextModuleNumber = rolesReady
+    ? adjacentModule(currentModuleNumber, canAccessManagerTrack, 'next')
+    : null;
+  const previousModuleNumber = rolesReady
+    ? adjacentModule(currentModuleNumber, canAccessManagerTrack, 'previous')
+    : null;
+  const isLastModuleForUser = rolesReady && nextModuleNumber === null && previousModuleNumber !== null;
 
 
   // Save resume state whenever tab or page changes
@@ -247,6 +256,12 @@ const EnhancedCourseModule: React.FC = () => {
     { id: '0afce5e1-eff1-41c2-b7a6-3a67511c43dc', number: 21, title: 'Team Training & Development Coordination', tier: 'red' as const, isCompleted: isModuleCompletedByNumber(21), isLocked: !canAccessModule(21) },
     { id: '4c8c78c9-6080-40c3-98c0-9930389f771a', number: 22, title: 'Incident Documentation & Investigation', tier: 'red' as const, isCompleted: isModuleCompletedByNumber(22), isLocked: !canAccessModule(22) },
     { id: 'bdbbc605-a8f8-4a65-ba9a-a2451198174c', number: 23, title: 'Advanced Diversion Prevention Strategies', tier: 'red' as const, isCompleted: isModuleCompletedByNumber(23), isLocked: !canAccessModule(23) },
+    { id: '00850d05-4806-4b0d-ab24-c2ce81acb618', number: 24, title: 'Prohibited Acts, Liability and Enforcement', tier: 'red' as const, isCompleted: isModuleCompletedByNumber(24), isLocked: !canAccessModule(24) },
+    { id: '74e5fe1c-7ceb-46b7-8d1c-60d4e0a1e761', number: 25, title: 'Green Waste, Destruction and Disposal', tier: 'red' as const, isCompleted: isModuleCompletedByNumber(25), isLocked: !canAccessModule(25) },
+    { id: '5c369f28-9dfb-40f5-980b-7fed302e8c83', number: 26, title: 'Visitors and Access Control', tier: 'red' as const, isCompleted: isModuleCompletedByNumber(26), isLocked: !canAccessModule(26) },
+    { id: '5e4ca561-9d1b-4bac-81a5-9f01091608aa', number: 27, title: 'Discrepancy, Theft and Diversion Reporting; Trade Practices', tier: 'red' as const, isCompleted: isModuleCompletedByNumber(27), isLocked: !canAccessModule(27) },
+    { id: '77edad96-06eb-4ca1-a3c6-cd819bace3c0', number: 28, title: 'Facility Operations: Tracking, Acquisition and Sanitary Storage', tier: 'red' as const, isCompleted: isModuleCompletedByNumber(28), isLocked: !canAccessModule(28) },
+    { id: '5410b55d-4831-46aa-bfb6-89aedd86215b', number: 29, title: 'Transport, Waste, Visitors, Diversion Reporting and SOPs', tier: 'red' as const, isCompleted: isModuleCompletedByNumber(29), isLocked: !canAccessModule(29) },
   ], [isModuleCompletedByNumber, canAccessModule]);
   
   // Calculate actual completed count
@@ -265,11 +280,12 @@ const EnhancedCourseModule: React.FC = () => {
   const { goToPrevious, goToNext, canGoPrevious, canGoNext } = useModuleNavigation({
     currentModule: currentModuleNumber,
     totalModules: modulesWithCompletion.length,
+    nextModule: nextModuleNumber,
+    previousModule: previousModuleNumber,
   });
 
-  // Non-managers stop at module 18; managers continue through module 23.
-  // Wait for roles to load so managers are not briefly capped at 18.
-  const effectiveCanGoNext = rolesReady && canGoNext && (canAccessManagerTrack || currentModuleNumber < 18);
+  // Students go from module 18 to module 24. Supervisory modules stay off that path.
+  const effectiveCanGoNext = rolesReady && canGoNext;
 
 
   // Transition handlers for smooth module navigation
@@ -338,6 +354,20 @@ const EnhancedCourseModule: React.FC = () => {
 
     const moduleNumber = parseInt(moduleId.replace('part', ''));
 
+    // Buyers never walk the supervisory track. Tell them that before the
+    // prerequisite check, which would otherwise send them to module 19.
+    if (isManagerTrackModule(moduleNumber)) {
+      if (!rolesReady) return;
+      if (!canAccessManagerTrack) {
+        toast({
+          title: 'Supervisory track',
+          description: 'The supervisory track opens after you pass the final exam and receive your completion record.',
+        });
+        navigate('/course');
+        return;
+      }
+    }
+
     if (!canAccessModule(moduleNumber)) {
       const firstIncomplete = getFirstIncompleteModule();
       toast({
@@ -348,7 +378,7 @@ const EnhancedCourseModule: React.FC = () => {
       navigate(`/course/part${firstIncomplete}`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [moduleId, isProgressLoading, navigate]);
+  }, [moduleId, isProgressLoading, navigate, rolesReady, canAccessManagerTrack]);
 
   useEffect(() => {
     if (!moduleId) return;
@@ -358,9 +388,17 @@ const EnhancedCourseModule: React.FC = () => {
 
     const moduleNumber = parseInt(moduleId.replace('part', ''));
 
+    // Supervisory modules are hidden from buyers. Skip the fetch so a missing
+    // row is not shown as a broken "Module not found" player. The prerequisite
+    // effect tells the buyer why and sends them back to the course home.
+    if (isManagerTrackModule(moduleNumber)) {
+      if (!rolesReady) return;
+      if (!canAccessManagerTrack) return;
+    }
+
     // Don't fetch if module is locked (prerequisite effect will redirect).
+    // Leave the loading state up so the student does not see "Module not found".
     if (!canAccessModule(moduleNumber)) {
-      setIsLoading(false);
       return;
     }
 
@@ -454,7 +492,7 @@ const EnhancedCourseModule: React.FC = () => {
     // fetch to spam on every re-render (which produced spurious "Module not found"
     // toasts when tab changes triggered re-renders).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [moduleId, isProgressLoading]);
+  }, [moduleId, isProgressLoading, rolesReady, canAccessManagerTrack]);
 
   // Redirect non-managers away from manager-only modules. The server already
   // refuses to grade these, so this is purely a content-visibility guard.
@@ -932,7 +970,7 @@ const EnhancedCourseModule: React.FC = () => {
                     </Card>
                   )}
 
-                  {moduleData.asset_key && !moduleData.video_pending && signedVideoData?.success === false && (
+                  {moduleData.asset_key && !moduleData.video_pending && signedVideoData?.success === false && signedVideoData.error_code !== 'not_uploaded' && signedVideoData.error_code !== 'not_found' && (
                     <Card className="border-accent bg-accent/10">
                       <CardContent className="py-8">
                         <div className="flex items-start gap-3">
@@ -982,12 +1020,12 @@ const EnhancedCourseModule: React.FC = () => {
                     </Card>
                   )}
 
-                  {(!moduleData.asset_key || moduleData.video_pending || signedVideoData?.success === true) && (
+                  {(!moduleData.asset_key || moduleData.video_pending || signedVideoData?.error_code === 'not_uploaded' || signedVideoData?.error_code === 'not_found' || signedVideoData?.success === true) && (
                     <SCORMStylePlayer 
                       config={{
                         id: moduleData.id,
                         title: moduleData.title,
-                        tagLabel: `Module ${moduleData.module_number} • ${currentModule?.tier.toUpperCase()} Tier`,
+                        tagLabel: `Module ${moduleData.module_number} • ${(currentModule?.tier ?? 'red').toUpperCase()} Tier`,
                         estimatedMinutes: moduleData.lessons && moduleData.lessons.length > 0 
                           ? moduleData.lessons.reduce((sum, l) => sum + (parseInt(l.duration) || 0), 0)
                           : 15,
@@ -1002,17 +1040,24 @@ const EnhancedCourseModule: React.FC = () => {
                                 title: moduleData.title,
                                 duration: '15 min',
                                 videoType: (() => {
-                                  if (moduleData.video_pending) return 'none' as const;
+                                  const videoInProgress = moduleData.video_pending
+                                    || signedVideoData?.error_code === 'not_uploaded'
+                                    || signedVideoData?.error_code === 'not_found'
+                                    || !moduleData.asset_key;
+                                  if (videoInProgress) return 'none' as const;
                                   if (signedVideoData?.success && signedVideoData.provider === 'vimeo') return 'embed' as const;
                                   if (signedVideoData?.success && signedVideoData.url) return 'file' as const;
                                   return 'none' as const;
                                 })(),
+                                videoNote: (moduleData.video_pending || signedVideoData?.error_code === 'not_uploaded' || signedVideoData?.error_code === 'not_found' || !moduleData.asset_key)
+                                  ? "This module's video is being prepared. The written lesson below is available now, and the video will play here once it is uploaded."
+                                  : undefined,
                                 videoUrl: signedVideoData?.success ? (signedVideoData.url ?? '') : '',
                                 markdownContent: moduleData.content || '',
-                                htmlSummary: moduleData.video_pending
+                                htmlSummary: (moduleData.video_pending || signedVideoData?.error_code === 'not_uploaded' || signedVideoData?.error_code === 'not_found' || !moduleData.asset_key)
                                   ? `<div style="padding:16px;background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;margin-bottom:16px;">
-                                      <p style="font-weight:600;color:#92400e;margin:0 0 4px;">📹 Video Coming Soon</p>
-                                      <p style="color:#78350f;font-size:14px;margin:0;">This module's video is being prepared. The written content below covers all learning objectives.</p>
+                                      <p style="font-weight:600;color:#92400e;margin:0 0 4px;">Video in progress</p>
+                                      <p style="color:#78350f;font-size:14px;margin:0;">This module's video is being prepared. The written lesson below is available now, and the video will play here once it is uploaded.</p>
                                     </div>
                                     <div>${sanitizeHtml(markdownToHtml(moduleData.content || ''))}</div>`
                                   : `<div>${sanitizeHtml(markdownToHtml(moduleData.content || ''))}</div>`,
@@ -1214,7 +1259,7 @@ const EnhancedCourseModule: React.FC = () => {
                             Continue to the next module to begin your training.
                           </p>
                           <Button onClick={goToNext} disabled={!effectiveCanGoNext}>
-                            {effectiveCanGoNext ? `Continue to Module ${currentModuleNumber + 1}` : 'Complete'}
+                            {effectiveCanGoNext ? `Continue to Module ${nextModuleNumber}` : 'Complete'}
                           </Button>
                         </CardContent>
                       </Card>

@@ -13,6 +13,7 @@ import { ExamAttemptHistory } from '@/components/exam/ExamAttemptHistory';
 import { AwaitingVerification } from '@/components/exam/AwaitingVerification';
 import { useExamAttempts } from '@/hooks/useExamAttempts';
 import { useUserProgress } from '@/hooks/useUserProgress';
+import { useCourseState } from '@/hooks/useCourseState';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Clock, History, AlertTriangle, BookOpen } from 'lucide-react';
 import {
@@ -54,11 +55,12 @@ const FinalExam: React.FC = () => {
   // Use user progress hook for module completion checking
   const { 
     areAllModulesCompleted, 
-    getCompletedModulesCount, 
+    getRequiredCompletedCount,
     getFirstIncompleteModule,
     isLoading: progressLoading,
     REQUIRED_FOR_EXAM 
   } = useUserProgress(COURSE_ID);
+  const { courseState, isLoading: courseStateLoading } = useCourseState(COURSE_ID);
   
   // Use exam attempts hook for cooldown and history
   const {
@@ -130,24 +132,29 @@ const FinalExam: React.FC = () => {
 
   // Check if all modules are completed before allowing exam access
   useEffect(() => {
-    if (progressLoading) return;
-    
-    const allComplete = areAllModulesCompleted();
-    const completedCount = getCompletedModulesCount();
-    
+    if (progressLoading || courseStateLoading) return;
+
+    // Course home uses get_course_state.required_total (active modules that
+    // are not manager-only). The exam uses that same count when the server
+    // state is available, and the same 25-module client list otherwise.
+    const usesServerCount = courseState.required_total > 0 && !courseState.error;
+    const requiredTotal = usesServerCount ? courseState.required_total : REQUIRED_FOR_EXAM;
+    const completedCount = usesServerCount ? courseState.required_completed : getRequiredCompletedCount();
+    const allComplete = usesServerCount ? courseState.exam_eligible : areAllModulesCompleted();
+
     if (!allComplete) {
       const firstIncomplete = getFirstIncompleteModule();
       toast.error(
-        `You must complete all ${REQUIRED_FOR_EXAM} modules before taking the final exam. ` +
-        `You have completed ${completedCount} of ${REQUIRED_FOR_EXAM}. ` +
+        `You must complete all ${requiredTotal} modules before taking the final exam. ` +
+        `You have completed ${completedCount} of ${requiredTotal}. ` +
         `Please complete Module ${firstIncomplete} next.`
       );
       navigate('/course');
       return;
     }
-    
+
     setModuleGatingChecked(true);
-  }, [progressLoading, areAllModulesCompleted, getCompletedModulesCount, getFirstIncompleteModule, navigate, REQUIRED_FOR_EXAM]);
+  }, [progressLoading, courseStateLoading, courseState.required_total, courseState.required_completed, courseState.exam_eligible, courseState.error, areAllModulesCompleted, getRequiredCompletedCount, getFirstIncompleteModule, navigate, REQUIRED_FOR_EXAM]);
 
   useEffect(() => {
     // Get user's IP address

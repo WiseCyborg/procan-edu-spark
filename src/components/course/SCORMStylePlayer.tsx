@@ -13,6 +13,8 @@ export interface Lesson {
   duration: string;
   videoType: 'embed' | 'file' | 'none';
   videoUrl?: string;
+  /** Shown in the video area when the file is not uploaded yet. */
+  videoNote?: string;
   htmlSummary: string;
   markdownContent?: string; // Raw markdown for paginated display
   resourceLinks: { label: string; href: string }[];
@@ -240,9 +242,18 @@ export const SCORMStylePlayer: React.FC<SCORMStylePlayerProps> = ({
           ) : (
             <div className="text-center p-8">
               <VideoIcon className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-              <p className="text-muted-foreground text-sm">
-                No video for this lesson. Review the summary and resources below.
-              </p>
+              {activeLesson.videoNote ? (
+                <>
+                  <p className="font-semibold text-foreground">Video in progress</p>
+                  <p className="text-muted-foreground text-sm mt-1 max-w-md mx-auto">
+                    {activeLesson.videoNote}
+                  </p>
+                </>
+              ) : (
+                <p className="text-muted-foreground text-sm">
+                  No video for this lesson. Review the summary and resources below.
+                </p>
+              )}
             </div>
           )}
         </div>
