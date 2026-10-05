@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { isManagerTrackModule, isRequiredAgentModule } from '@/lib/requiredAgentModules';
 
 interface Module {
   id: string;
@@ -18,10 +19,6 @@ interface Module {
   tier: 'green' | 'yellow' | 'red';
   isCompleted: boolean;
 }
-
-// RVT Required modules are 0-18 (19 total)
-const RVT_REQUIRED_MAX = 18;
-const RVT_MODULE_COUNT = 19; // Modules 0-18
 
 interface CourseNavigationHeaderProps {
   currentModuleNumber: number;
@@ -42,20 +39,18 @@ export const CourseNavigationHeader = ({
   onModuleSelect,
   onClose
 }: CourseNavigationHeaderProps) => {
-  // Split modules into RVT and Manager tracks
-  const rvtModules = modules.filter(m => m.number <= RVT_REQUIRED_MAX);
-  const managerModules = modules.filter(m => m.number > RVT_REQUIRED_MAX);
+  // Required agent modules are 0-18 and 24-29. Supervisory modules are 19-23.
+  const rvtModules = modules.filter(m => isRequiredAgentModule(m.number));
+  const managerModules = modules.filter(m => isManagerTrackModule(m.number));
   
-  // Calculate RVT-specific progress
   const rvtCompletedCount = rvtModules.filter(m => m.isCompleted).length;
   const managerCompletedCount = managerModules.filter(m => m.isCompleted).length;
   
-  // Determine if current module is RVT or Manager track
-  const isManagerModule = currentModuleNumber > RVT_REQUIRED_MAX;
+  const isManagerModule = isManagerTrackModule(currentModuleNumber);
   
-  // Progress bar shows RVT progress (the required certification path)
-  const rvtProgressPercentage = (rvtCompletedCount / RVT_MODULE_COUNT) * 100;
-  const isRvtComplete = rvtCompletedCount === RVT_MODULE_COUNT;
+  const requiredTotal = rvtModules.length || 1;
+  const rvtProgressPercentage = (rvtCompletedCount / requiredTotal) * 100;
+  const isRvtComplete = rvtModules.length > 0 && rvtCompletedCount === rvtModules.length;
 
   return (
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-b">
@@ -95,11 +90,11 @@ export const CourseNavigationHeader = ({
           <div className="flex items-center gap-2 min-w-[160px]">
             {isManagerModule ? (
               <span className="text-sm font-medium text-amber-600">
-                Manager {currentModuleNumber - RVT_REQUIRED_MAX} of {managerModules.length}
+                Supervisory module {currentModuleNumber}
               </span>
             ) : (
               <span className="text-sm font-medium">
-                RVT Module {currentModuleNumber === 0 ? 'Intro' : currentModuleNumber} of {RVT_REQUIRED_MAX}
+                Module {currentModuleNumber}
               </span>
             )}
           </div>
@@ -112,7 +107,7 @@ export const CourseNavigationHeader = ({
             <div className="flex items-center gap-1">
               <Award className="h-4 w-4 text-primary" />
               <span className={isRvtComplete ? 'text-green-600 font-medium' : ''}>
-                RVT: {rvtCompletedCount}/{RVT_MODULE_COUNT}
+                Required: {rvtCompletedCount}/{rvtModules.length}
               </span>
             </div>
             {managerModules.length > 0 && (
@@ -133,7 +128,7 @@ export const CourseNavigationHeader = ({
             <SelectContent className="max-h-[400px]">
               {/* RVT Modules */}
               <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground bg-muted/50">
-                RVT Required ({rvtCompletedCount}/{RVT_MODULE_COUNT})
+                Required ({rvtCompletedCount}/{rvtModules.length})
               </div>
               {rvtModules.map((module) => (
                 <SelectItem 
