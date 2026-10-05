@@ -218,22 +218,25 @@ function trimToWordLimit(script: string, limit: number): string {
   if (sentences.length > 0 && !/[.!?]"?$/.test(sentences[sentences.length - 1])) {
     sentences = sentences.slice(0, -1);
   }
+  const wordCount = (sentence: string) => sentence.split(/\s+/).filter(Boolean).length;
+  const labeled = new Set(sentences.filter((sentence) => sentence.includes(PROPOSED_LABEL)));
   const kept: string[] = [];
   let count = 0;
   for (const sentence of sentences) {
-    const n = sentence.split(/\s+/).filter(Boolean).length;
+    if (!labeled.has(sentence)) continue;
+    const n = wordCount(sentence);
+    if (count + n > 850 && kept.length > 0) break;
+    kept.push(sentence);
+    count += n;
+  }
+  for (const sentence of sentences) {
+    if (labeled.has(sentence) || kept.includes(sentence)) continue;
+    const n = wordCount(sentence);
     if (count + n > limit && kept.length > 0) break;
     kept.push(sentence);
     count += n;
   }
-  for (const sentence of sentences) {
-    if (!sentence.includes(PROPOSED_LABEL) || kept.includes(sentence)) continue;
-    const n = sentence.split(/\s+/).filter(Boolean).length;
-    if (count + n > 850) continue;
-    kept.push(sentence);
-    count += n;
-  }
-  return kept.join(' ').trim();
+  return sentences.filter((sentence) => kept.includes(sentence)).join(' ').trim();
 }
 
 function withM29Closer(script: string): string {
@@ -791,12 +794,14 @@ serve(async (req) => {
             script = '';
             continue;
           }
+          if (modNum != null && modNum in NOPA_TIES && !script.includes(PROPOSED_LABEL)) {
+            scriptError = `Say the tied proposed provisions aloud. The same sentence must contain this exact label: ${PROPOSED_LABEL}`;
+            script = '';
+            continue;
+          }
           break;
         }
         if (!script) throw new Error(scriptError || 'script draft failed the proposed-rule check');
-        if (modNum != null && modNum in NOPA_TIES && !script.includes(PROPOSED_LABEL)) {
-          throw new Error('draft omitted the labeled proposed-rule tie');
-        }
 
         const narration = partitionNarration(script);
         const baseSpec = fallbackSlideSpec(script, modNum, mod.title, narration);
