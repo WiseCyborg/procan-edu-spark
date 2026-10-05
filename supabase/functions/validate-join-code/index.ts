@@ -83,9 +83,11 @@ serve(async (req) => {
     }
 
     // Check seat availability
+    // check_seat_availability compares course_id with `=`, so a null course never matches.
+    // Seats from a dispensary payment are issued for Maryland Responsible Vendor Training.
     const { data: hasSeats, error: seatError } = await supabase.rpc('check_seat_availability', {
       org_id: joinCode.organization_id,
-      course_id: null // Will use default course
+      course_id: 'e6841a2f-4e92-47c3-9ed4-243ccc22338b'
     });
 
     if (seatError) {
