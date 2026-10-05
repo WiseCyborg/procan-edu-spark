@@ -343,7 +343,8 @@ TASK:
 Write a spoken narration script for a training video.
 
 LENGTH — this is a hard requirement:
-- Target 700 to 800 words. Never exceed 850 words.
+- Write 720 to 780 words. Never exceed 800 words.
+- Stop when you reach 780 words, even if more module points remain.
 - At roughly 150 words per minute this produces a video of about 5 minutes.
 - Do NOT attempt to cover every point in the module. The module text remains the complete, authoritative version. The video is an overview that carries the most consequential material.
 
@@ -718,24 +719,28 @@ serve(async (req) => {
       try {
         let script = '';
         let scriptError = '';
+        let overlong = '';
         for (let attempt = 1; attempt <= 2; attempt++) {
-          const correction = scriptError
-            ? `\n\nCORRECTION REQUIRED ON THIS ATTEMPT:\n${scriptError}\nRewrite the script so the problem is gone.`
-            : '';
-          let draft: { text: string; usage: unknown; stop_reason: string | null };
-          try {
-            draft = await callAnthropic(
-              anthropicApiKey,
-              SYSTEM_PROMPT,
-              scriptPrompt({
+          const shortening = scriptError === 'shorten' && overlong.length > 0;
+          const userPrompt = shortening
+            ? `SHORTEN THIS NARRATION TO 720-780 WORDS. Never exceed 800 words. Do not add rules, citations, or deadlines. Keep every sentence that contains "${PROPOSED_LABEL}" and keep that label exact. Return only the narration.\n\n${overlong}`
+            : scriptPrompt({
                 moduleNumber: mod.module_number,
                 title: mod.title,
                 regenReason,
                 moduleContent,
                 comarSlice,
                 proposed,
-              }) + correction,
-              SCRIPT_MAX_TOKENS,
+              }) + (scriptError
+                ? `\n\nCORRECTION REQUIRED ON THIS ATTEMPT:\n${scriptError}\nRewrite the script so the problem is gone.`
+                : '');
+          let draft: { text: string; usage: unknown; stop_reason: string | null };
+          try {
+            draft = await callAnthropic(
+              anthropicApiKey,
+              SYSTEM_PROMPT,
+              userPrompt,
+              shortening ? 1000 : SCRIPT_MAX_TOKENS,
             );
           } catch (callErr) {
             if (callErr instanceof AnthropicRequestError && callErr.status === 400) throw callErr;
@@ -750,8 +755,9 @@ serve(async (req) => {
           }
           script = modNum === 29 ? withM29Closer(draft.text) : draft.text.trim();
           const words = (script.match(/\S+/g) ?? []).length;
-          if (words > 850) {
-            scriptError = `The draft is ${words} words. Rewrite it in 700 to 800 words and never exceed 850.`;
+          if (words > 800) {
+            overlong = script;
+            scriptError = 'shorten';
             script = '';
             continue;
           }
