@@ -9,9 +9,10 @@ export const BUSINESS_RULES = {
   CURRENCY: 'USD',
 
   // Public self-serve checkout kill switch.
-  // false = public $49.99 buy CTAs are soft-disabled (contact/explore copy instead).
-  // Flip to true to restore the existing $49.99 buy CTAs. Payment code stays in place either way.
-  PUBLIC_SELF_SERVE_CHECKOUT_ENABLED: false,
+  // true = public buy CTAs call create-course-payment-paypal.
+  // The charged amount is courses.price_cents for that course (RVT is 4999 = $49.99).
+  // Set false again if a live PayPal order create stops returning an approval URL.
+  PUBLIC_SELF_SERVE_CHECKOUT_ENABLED: true,
   
   // Maryland Pricing Regulation
   PRICING_REGULATION: {

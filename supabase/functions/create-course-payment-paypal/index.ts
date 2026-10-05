@@ -17,6 +17,12 @@ serve(async (req) => {
     Deno.env.get("SUPABASE_ANON_KEY") ?? ""
   );
 
+  const supabaseService = createClient(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+    { auth: { persistSession: false } }
+  );
+
   try {
     const { courseId } = await req.json();
     if (!courseId) {
@@ -29,14 +35,27 @@ serve(async (req) => {
     const user = data.user;
     if (!user?.email) throw new Error("User not authenticated or email not available");
 
-    const { data: course, error: courseError } = await supabaseClient
-      .from('courses')
-      .select('*')
-      .eq('id', courseId)
-      .single();
+    // Service role: anon/authenticated cannot SELECT * on courses (provider id
+    // columns are revoked), so the previous select('*') failed as "Course not found"
+    // before PayPal was ever called. Charge only the stored price.
+    const { data: course, error: courseError } = await supabaseService
+      .from("courses")
+      .select("id, title, price_cents, currency, payment_required, is_active")
+      .eq("id", courseId)
+      .maybeSingle();
 
-    if (courseError || !course) {
+    if (courseError || !course || course.is_active !== true) {
       throw new Error("Course not found");
+    }
+    if (!course.payment_required) {
+      throw new Error("This course does not require payment");
+    }
+    if (typeof course.price_cents !== "number" || !Number.isInteger(course.price_cents) || course.price_cents <= 0) {
+      throw new Error("Course price is not configured");
+    }
+    const currency = String(course.currency || "").trim();
+    if (!currency) {
+      throw new Error("Course currency is not configured");
     }
 
     const paypalEnv = await getActivePayPalEnv();
@@ -57,13 +76,11 @@ serve(async (req) => {
     });
 
     const tokenData = await tokenResponse.json();
+    if (!tokenResponse.ok || !tokenData.access_token) {
+      console.error("[create-course-payment-paypal] token failed", tokenData);
+      throw new Error("PayPal auth failed");
+    }
     const accessToken = tokenData.access_token;
-
-    const supabaseService = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-      { auth: { persistSession: false } }
-    );
 
     // IDEMPOTENCY FIX (2026-08-07): reuse an existing still-approvable pending
     // order for this user+course instead of stacking a new PayPal order on
@@ -99,14 +116,14 @@ serve(async (req) => {
       }
     }
 
-    const amount = ((course.price_cents || 4999) / 100).toFixed(2);
+    const amount = (course.price_cents / 100).toFixed(2);
 
     const orderPayload = {
       intent: "CAPTURE",
       purchase_units: [{
         reference_id: courseId,
         amount: {
-          currency_code: (course.currency || "USD").toUpperCase(),
+          currency_code: currency.toUpperCase(),
           value: amount,
         },
         description: `${course.title} - Course Access`,
@@ -142,8 +159,8 @@ serve(async (req) => {
       user_id: user.id,
       course_id: courseId,
       paypal_order_id: orderData.id,
-      amount: course.price_cents || 4999,
-      currency: course.currency || "usd",
+      amount: course.price_cents,
+      currency,
       status: "pending",
       metadata: {
         course_title: course.title,
@@ -163,9 +180,12 @@ serve(async (req) => {
       throw new Error("PayPal approval URL not found");
     }
 
+    const charged = orderData.purchase_units?.[0]?.amount;
     return new Response(JSON.stringify({
       url: approvalUrl,
-      orderId: orderData.id
+      orderId: orderData.id,
+      amount: charged?.value ?? amount,
+      currency: charged?.currency_code ?? currency.toUpperCase(),
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
