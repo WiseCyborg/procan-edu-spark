@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Clock, BookOpen, Award, ArrowRight, Lock, CheckCircle2, Loader2, ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { BUSINESS_RULES } from '@/config/business-rules';
+import { paidCourseEntryPath } from '@/lib/paidCourseEntry';
 
 export interface CourseInfo {
   id: string;
@@ -34,6 +35,7 @@ export const UniversalCourseCard = ({
   className,
   showPrerequisiteHint = true 
 }: UniversalCourseCardProps) => {
+  const navigate = useNavigate();
   const { data: launchTarget, isLoading } = useCourseLaunchTarget(course.id);
   const { launchCourse, getCtaLabel } = useLaunchCourse();
   const [isPurchasing, setIsPurchasing] = useState(false);
@@ -60,6 +62,10 @@ export const UniversalCourseCard = ({
       });
 
       if (error) throw error;
+      if (data?.alreadyPaid) {
+        navigate(paidCourseEntryPath(course.id));
+        return;
+      }
       if (data?.url) {
         window.open(data.url, '_blank');
       }

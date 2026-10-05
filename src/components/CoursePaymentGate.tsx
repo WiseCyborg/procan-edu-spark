@@ -6,6 +6,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { CreditCard, Lock, Check } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { BUSINESS_RULES } from '@/config/business-rules';
+import { paidCourseEntryPath } from '@/lib/paidCourseEntry';
+import { useNavigate } from 'react-router-dom';
 
 interface Course {
   id: string;
@@ -26,6 +28,7 @@ export const CoursePaymentGate: React.FC<CoursePaymentGateProps> = ({
   onPaymentSuccess
 }) => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
 
   const formatPrice = (cents: number, currency: string) => {
@@ -45,6 +48,11 @@ export const CoursePaymentGate: React.FC<CoursePaymentGateProps> = ({
       });
 
       if (error) throw error;
+
+      if (data?.alreadyPaid) {
+        navigate(paidCourseEntryPath(course.id));
+        return;
+      }
 
       if (data?.url) {
         // Redirect to PayPal - payment verification happens on return
