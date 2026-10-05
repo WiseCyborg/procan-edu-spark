@@ -723,7 +723,7 @@ serve(async (req) => {
         for (let attempt = 1; attempt <= 2; attempt++) {
           const shortening = scriptError === 'shorten' && overlong.length > 0;
           const userPrompt = shortening
-            ? `SHORTEN THIS NARRATION TO 720-780 WORDS. Never exceed 800 words. Do not add rules, citations, or deadlines. Keep every sentence that contains "${PROPOSED_LABEL}" and keep that label exact. Return only the narration.\n\n${overlong}`
+            ? `SHORTEN THIS NARRATION TO 700-740 WORDS. Never exceed 780 words. End on a complete sentence. Do not add rules, citations, or deadlines. Keep every sentence that contains "${PROPOSED_LABEL}" and keep that label exact. Return only the narration.\n\n${overlong}`
             : scriptPrompt({
                 moduleNumber: mod.module_number,
                 title: mod.title,
@@ -740,7 +740,7 @@ serve(async (req) => {
               anthropicApiKey,
               SYSTEM_PROMPT,
               userPrompt,
-              shortening ? 1000 : SCRIPT_MAX_TOKENS,
+              shortening ? 1100 : SCRIPT_MAX_TOKENS,
             );
           } catch (callErr) {
             if (callErr instanceof AnthropicRequestError && callErr.status === 400) throw callErr;
@@ -748,13 +748,15 @@ serve(async (req) => {
           }
           usageCalls.push(draft.usage);
           absorbUsage(usage, draft.usage);
-          if (draft.stop_reason === 'max_tokens') {
-            scriptError = 'The draft was cut off at the token cap. Rewrite it in 700 to 800 words and finish the last sentence.';
+          script = modNum === 29 ? withM29Closer(draft.text) : draft.text.trim();
+          const words = (script.match(/\S+/g) ?? []).length;
+          const finishedSentence = /[.!?]["']?\s*$/.test(script);
+          if (draft.stop_reason === 'max_tokens' && !(words >= 650 && words <= 800 && finishedSentence)) {
+            overlong = script;
+            scriptError = 'shorten';
             script = '';
             continue;
           }
-          script = modNum === 29 ? withM29Closer(draft.text) : draft.text.trim();
-          const words = (script.match(/\S+/g) ?? []).length;
           if (words > 800) {
             overlong = script;
             scriptError = 'shorten';
