@@ -11977,6 +11977,10 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_video_draft_script: {
+        Args: { p_asset_id: string }
+        Returns: string
+      }
       get_video_regeneration_queue: {
         Args: never
         Returns: {
@@ -11988,18 +11992,27 @@ export type Database = {
           course_title: string
           flagged_since: string
           has_draft_script: boolean
-          module_number: number
-          module_title: string
           job_held: boolean
           job_last_error: string
           job_status: string
           job_type: string
+          last_action_at: string
+          mapped: boolean
+          module_number: number
+          module_title: string
+          narration_error: string
+          narration_held: boolean
+          narration_status: string
           pipeline_last_error: string
           pipeline_stage: string
           playback_verified: boolean
           reason: string
           render_error: string
+          render_job_error: string
+          render_job_held: boolean
+          render_job_status: string
           render_status: string
+          replacement_published: boolean
           review_status: string
         }[]
       }
@@ -12242,6 +12255,10 @@ export type Database = {
       }
       reprovision_user: {
         Args: { p_organization_id: string; p_role?: string; p_user_id: string }
+        Returns: Json
+      }
+      requeue_video_narration: {
+        Args: { p_asset_id: string }
         Returns: Json
       }
       requeue_failed_certificate_email: {

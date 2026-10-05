@@ -22,11 +22,15 @@ import { useUserRole } from '@/hooks/useUserRole';
 import { useToast } from '@/hooks/use-toast';
 import {
   candidateUrlRequired,
-  jobStatusLabel,
-  playbackLabel,
+  compareQueueRows,
+  priorityTier,
   queueBlockers,
-  regenerationStageLabel,
+  queueSummary,
+  queueWideBlockers,
+  regenerationSteps,
   showApproveScript,
+  showRequeueNarration,
+  type StepState,
 } from '@/lib/videoRegeneration';
 
 interface QueueRow {
@@ -51,32 +55,47 @@ interface QueueRow {
   job_status: string | null;
   job_last_error: string | null;
   job_held: boolean | null;
+  last_action_at: string | null;
+  narration_status: string | null;
+  narration_error: string | null;
+  narration_held: boolean | null;
+  render_job_status: string | null;
+  render_job_error: string | null;
+  render_job_held: boolean | null;
+  mapped: boolean | null;
+  replacement_published: boolean | null;
 }
 
-const relativeDate = (iso: string | null) => {
+const calendarDate = (iso: string | null) => {
   if (!iso) return '—';
-  const then = new Date(iso).getTime();
-  if (Number.isNaN(then)) return '—';
-  const days = Math.floor((Date.now() - then) / 86400000);
-  if (days <= 0) return 'today';
-  if (days === 1) return '1 day ago';
-  if (days < 30) return `${days} days ago`;
-  const months = Math.floor(days / 30);
-  return months === 1 ? '1 month ago' : `${months} months ago`;
+  const then = new Date(iso);
+  if (Number.isNaN(then.getTime())) return '—';
+  return then.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 };
 
-const reviewBadge = (status: string | null) => {
-  switch (status) {
-    case 'approved':
-      return <Badge className="bg-emerald-600 hover:bg-emerald-600 text-white">Script approved</Badge>;
-    case 'pending_review':
-      return <Badge className="bg-amber-500 hover:bg-amber-500 text-white">Pending review</Badge>;
-    case 'script_pending_review':
-      return <Badge className="bg-amber-500 hover:bg-amber-500 text-white">Script pending review</Badge>;
-    case 'rejected':
-      return <Badge variant="destructive">Rejected</Badge>;
+const calendarStamp = (iso: string | null) => {
+  if (!iso) return '—';
+  const then = new Date(iso);
+  if (Number.isNaN(then.getTime())) return '—';
+  return then.toLocaleString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+};
+
+const stepClass = (state: StepState) => {
+  switch (state) {
+    case 'done':
+      return 'border-emerald-600/40 bg-emerald-600/10';
+    case 'failed':
+      return 'border-destructive/40 bg-destructive/10';
+    case 'current':
+      return 'border-amber-500/50 bg-amber-500/10';
     default:
-      return <Badge variant="secondary">{status || '—'}</Badge>;
+      return 'border-border bg-muted/30';
   }
 };
 
@@ -93,15 +112,21 @@ const VideoRegenerationQueue: React.FC = () => {
   const [newUrl, setNewUrl] = useState('');
   const [note, setNote] = useState('');
   const [approveTarget, setApproveTarget] = useState<QueueRow | null>(null);
+  const [requeueTarget, setRequeueTarget] = useState<QueueRow | null>(null);
+  const [scriptTarget, setScriptTarget] = useState<QueueRow | null>(null);
+  const [scriptText, setScriptText] = useState('');
+  const [scriptLoading, setScriptLoading] = useState(false);
+  const [expandedReasons, setExpandedReasons] = useState<Record<string, boolean>>({});
   const [busy, setBusy] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [refreshMessage, setRefreshMessage] = useState('Not refreshed yet');
 
-  const { data: rows, dataUpdatedAt, isLoading, isError, error, refetch } = useQuery({
+  const { data: rows, isLoading, isError, error, refetch } = useQuery({
     queryKey: QUEUE_KEY,
     queryFn: async (): Promise<QueueRow[]> => {
       const { data, error } = await supabase.rpc('get_video_regeneration_queue' as any);
       if (error) throw error;
-      return (data ?? []) as unknown as QueueRow[];
+      return ((data ?? []) as unknown as QueueRow[]).slice().sort(compareQueueRows);
     },
     enabled: allowed,
     staleTime: 0,
@@ -109,30 +134,52 @@ const VideoRegenerationQueue: React.FC = () => {
   });
 
   const refreshQueue = async () => {
+    if (refreshing) return;
     setRefreshing(true);
+    setRefreshMessage('Refreshing flagged videos and job statuses…');
+    const started = Date.now();
     try {
       const result = await refetch();
       if (result.error) {
+        setRefreshMessage('Refresh failed. The list was not updated.');
         toast({
           title: 'Refresh failed',
           description: result.error.message,
           variant: 'destructive',
         });
+        return;
       }
+      const when = new Date().toLocaleTimeString(undefined, {
+        hour: 'numeric',
+        minute: '2-digit',
+        second: '2-digit',
+      });
+      const count = result.data?.length ?? 0;
+      const message = `Last refreshed ${when}. Reloaded ${count} flagged videos.`;
+      setRefreshMessage(message);
+      toast({ title: 'Queue refreshed', description: message });
     } finally {
+      const elapsed = Date.now() - started;
+      if (elapsed < 400) {
+        await new Promise((resolve) => setTimeout(resolve, 400 - elapsed));
+      }
       setRefreshing(false);
     }
   };
 
-  const lastRefreshedLabel = dataUpdatedAt
-    ? `Last refreshed ${new Date(dataUpdatedAt).toLocaleString(undefined, {
-        hour: 'numeric',
-        minute: '2-digit',
-        second: '2-digit',
-      })}`
-    : 'Not refreshed yet';
+  const lastRefreshedLabel = refreshing
+    ? 'Refreshing flagged videos and job statuses…'
+    : refreshMessage;
 
   const handleResult = (result: any, fallbackTitle: string) => {
+    if (result?.already_approved) {
+      toast({
+        title: 'Script already approved',
+        description: 'No new narration job was queued, and the flag date was left as it was.',
+      });
+      queryClient.invalidateQueries({ queryKey: QUEUE_KEY });
+      return true;
+    }
     if (result?.ok) {
       toast({ title: fallbackTitle, description: result.review_status ? `Status: ${result.review_status}` : undefined });
       queryClient.invalidateQueries({ queryKey: QUEUE_KEY });
@@ -196,6 +243,41 @@ const VideoRegenerationQueue: React.FC = () => {
     }
   };
 
+  const submitRequeue = async () => {
+    if (!requeueTarget) return;
+    setBusy(true);
+    try {
+      const { data, error } = await supabase.rpc('requeue_video_narration' as any, {
+        p_asset_id: requeueTarget.asset_id,
+      });
+      if (error) throw error;
+      if (handleResult(data, 'Narration re-queued for this module')) {
+        setRequeueTarget(null);
+      }
+    } catch (err: any) {
+      toast({ title: 'Re-queue failed', description: err.message, variant: 'destructive' });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const openScript = async (row: QueueRow) => {
+    setScriptTarget(row);
+    setScriptText('');
+    setScriptLoading(true);
+    try {
+      const { data, error } = await supabase.rpc('get_video_draft_script' as any, {
+        p_asset_id: row.asset_id,
+      });
+      if (error) throw error;
+      setScriptText(typeof data === 'string' && data.trim() ? data : 'No draft script is stored for this module.');
+    } catch (err: any) {
+      setScriptText(err.message || 'The script could not be loaded.');
+    } finally {
+      setScriptLoading(false);
+    }
+  };
+
   if (roleLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -220,9 +302,12 @@ const VideoRegenerationQueue: React.FC = () => {
     );
   }
 
+  const summary = queueSummary(rows ?? []);
+  const wideBlocks = queueWideBlockers(rows ?? []);
+
   return (
-    <div className="min-h-screen bg-background p-4 md:p-6 overflow-x-hidden">
-      <div className="max-w-3xl mx-auto space-y-6">
+    <div className="min-h-screen max-w-full overflow-x-clip bg-background p-4 md:p-6">
+      <div className="mx-auto w-full min-w-0 max-w-3xl space-y-6">
         <div>
           <Link to="/admin" className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
             <ArrowLeft className="h-4 w-4 rtl-flip" /> Admin
@@ -231,7 +316,7 @@ const VideoRegenerationQueue: React.FC = () => {
             <h1 className="text-3xl font-bold flex items-center gap-2">
               <Video className="h-7 w-7" /> Video Regeneration Queue
             </h1>
-            <div className="ms-auto flex flex-col items-end gap-1">
+            <div className="ms-auto flex w-full min-w-0 max-w-full flex-col items-stretch gap-1 sm:w-auto sm:items-end">
               <Button
                 type="button"
                 variant="outline"
@@ -247,15 +332,15 @@ const VideoRegenerationQueue: React.FC = () => {
                 )}
                 {refreshing ? 'Refreshing' : 'Refresh'}
               </Button>
-              <p className="text-xs text-muted-foreground" data-testid="last-refreshed">
+              <p className="max-w-full text-xs text-muted-foreground sm:text-right" data-testid="last-refreshed">
                 {lastRefreshedLabel}
               </p>
             </div>
           </div>
           <p className="text-muted-foreground mt-1">
-            Training videos flagged for regeneration after a Maryland COMAR regulation change. Approving a script
-            queues narration; registering a replacement candidate records it for review. Neither action clears the
-            regeneration flag or swaps the live video.
+            Training videos flagged for regeneration. Approving a script queues narration for that module only.
+            Re-queue appears only after the latest narration job has failed. Neither action clears the flag or
+            swaps the live video.
           </p>
           <div className="mt-3 rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
             <p className="font-medium">The regeneration flag stays open until every gate is met</p>
@@ -266,12 +351,29 @@ const VideoRegenerationQueue: React.FC = () => {
           </div>
         </div>
 
-        <Card>
+        {rows && rows.length > 0 ? (
+          <div className="space-y-3" data-testid="queue-summary">
+            <div className="flex flex-wrap gap-2">
+              {summary.map((item) => (
+                <Badge key={item.label} variant="secondary">
+                  {item.label}: {item.value}
+                </Badge>
+              ))}
+            </div>
+            {wideBlocks.map((blocker) => (
+              <p key={blocker} className="text-sm font-medium text-destructive">
+                {blocker}
+              </p>
+            ))}
+          </div>
+        ) : null}
+
+        <Card className="min-w-0 max-w-full overflow-hidden">
           <CardHeader>
             <CardTitle className="text-lg">Flagged videos</CardTitle>
             <CardDescription>
               {rows && rows.length > 0
-                ? `${rows.length} flagged videos, each with its stored regeneration stage.`
+                ? 'Sorted by priority tier, then module number. One card per flagged video.'
                 : 'Only videos with an open regeneration flag appear here.'}
             </CardDescription>
           </CardHeader>
@@ -280,7 +382,7 @@ const VideoRegenerationQueue: React.FC = () => {
             {isLoading ? (
               <div className="space-y-3">
                 {[0, 1, 2].map((i) => (
-                  <Skeleton key={i} className="h-12 w-full" />
+                  <Skeleton key={i} className="h-28 w-full" />
                 ))}
               </div>
             ) : isError ? (
@@ -305,72 +407,100 @@ const VideoRegenerationQueue: React.FC = () => {
               <div className="space-y-4">
                 {rows.map((row) => {
                   const blockers = queueBlockers(row);
+                  const tier = priorityTier(row.module_number, row.reason);
+                  const steps = regenerationSteps(row);
+                  const reason = row.reason || '—';
+                  const expanded = !!expandedReasons[row.asset_id];
+                  const reasonLong = reason.length > 120;
                   return (
-                    <article key={row.asset_id} className="rounded-lg border bg-background p-4 space-y-3 break-words">
-                      <div className="space-y-1">
-                        <h2 className="font-semibold">
-                          {row.module_number != null ? `${row.module_number}. ` : ''}
-                          {row.module_title || row.asset_key || '—'}
-                        </h2>
-                        <p className="text-sm text-muted-foreground">
-                          {row.course_title || '—'}
-                          {row.comar_reference ? ` · ${row.comar_reference}` : ''}
-                        </p>
-                      </div>
-                      <p className="text-sm">Flagged {relativeDate(row.flagged_since)}</p>
-                      <p className="text-sm text-muted-foreground">{row.reason || '—'}</p>
-                      <div className="flex flex-wrap gap-2">
-                        {row.has_draft_script ? (
-                          <Badge className="bg-emerald-600 hover:bg-emerald-600 text-white">Script ready</Badge>
-                        ) : (
-                          <Badge variant="secondary">No script</Badge>
-                        )}
-                        {reviewBadge(row.review_status)}
-                      </div>
-                      <p className="text-sm">
-                        {regenerationStageLabel(row)}
-                        <span className="text-muted-foreground">
-                          {' '}
-                          · {row.pipeline_stage || '—'}
-                          {row.render_status ? ` · render ${row.render_status}` : ''}
-                        </span>
-                      </p>
-                      <p className="text-sm text-muted-foreground">{playbackLabel(row.playback_verified)}</p>
-                      <div className="space-y-1">
-                        <p className="text-sm font-medium">{jobStatusLabel(row)}</p>
-                        {row.job_last_error ? (
-                          <p className="text-sm text-muted-foreground">{row.job_last_error}</p>
-                        ) : null}
-                        {row.render_error ? (
-                          <p className="text-sm text-muted-foreground">Render error: {row.render_error}</p>
-                        ) : null}
-                        {row.pipeline_last_error ? (
-                          <p className="text-sm text-muted-foreground">Pipeline error: {row.pipeline_last_error}</p>
-                        ) : null}
-                        {blockers.map((blocker) => (
-                          <p key={blocker} className="text-sm font-medium text-destructive">
-                            {blocker}
+                    <article key={row.asset_id} className="min-w-0 max-w-full space-y-3 break-words rounded-lg border bg-background p-4">
+                      <div className="flex min-w-0 flex-wrap items-start gap-2">
+                        <div className="min-w-0 flex-1 space-y-1">
+                          <h2 className="font-semibold">
+                            {row.module_number != null ? `Module ${row.module_number}. ` : ''}
+                            {row.module_title || row.asset_key || '—'}
+                          </h2>
+                          <p className="text-sm text-muted-foreground">
+                            {row.course_title || '—'}
+                            {row.comar_reference ? ` · ${row.comar_reference}` : ''}
                           </p>
-                        ))}
+                          <p className="text-sm" data-testid="flagged-since">
+                            Flagged since <span className="font-medium">{calendarDate(row.flagged_since)}</span>
+                            <span className="text-muted-foreground"> · </span>
+                            <span data-testid="last-action">
+                              Last action <span className="font-medium">{calendarStamp(row.last_action_at)}</span>
+                            </span>
+                          </p>
+                        </div>
+                        <Badge variant={tier.rank === 1 ? 'destructive' : 'secondary'}>{tier.label}</Badge>
                       </div>
-                      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+
+                      <ol className="flex min-w-0 flex-wrap gap-2" aria-label="Regeneration steps">
+                        {steps.map((step) => (
+                          <li
+                            key={step.key}
+                            className={`min-w-0 max-w-full break-words rounded-md border px-2 py-1 text-xs ${stepClass(step.state)}`}
+                            data-testid={`step-${step.key}`}
+                          >
+                            <span className="font-medium">{step.label}</span>
+                            <span className="mt-0.5 block break-words text-muted-foreground">{step.detail}</span>
+                          </li>
+                        ))}
+                      </ol>
+
+                      <div className="min-w-0 space-y-1 text-sm">
+                        <p className={expanded ? 'whitespace-pre-wrap break-words' : 'line-clamp-1 break-words'}>{reason}</p>
+                        {reasonLong ? (
+                          <Button
+                            type="button"
+                            variant="link"
+                            size="sm"
+                            className="h-auto px-0"
+                            onClick={() =>
+                              setExpandedReasons((current) => ({
+                                ...current,
+                                [row.asset_id]: !current[row.asset_id],
+                              }))
+                            }
+                          >
+                            {expanded ? 'Show less' : 'Show more'}
+                          </Button>
+                        ) : null}
+                      </div>
+
+                      {blockers.map((blocker) => (
+                        <p key={blocker} className="text-sm font-medium text-destructive">
+                          {blocker}
+                        </p>
+                      ))}
+
+                      <div className="flex min-w-0 flex-wrap gap-2">
+                        <Button type="button" variant="outline" size="sm" className="h-auto max-w-full whitespace-normal" onClick={() => openScript(row)}>
+                          Read script
+                        </Button>
+                        {showApproveScript(row.review_status) ? (
+                          <Button type="button" size="sm" className="h-auto max-w-full whitespace-normal" onClick={() => setApproveTarget(row)}>
+                            Approve script &amp; queue narration
+                          </Button>
+                        ) : null}
+                        {showRequeueNarration(row.narration_status) ? (
+                          <Button type="button" variant="outline" size="sm" className="h-auto max-w-full whitespace-normal" onClick={() => setRequeueTarget(row)}>
+                            Re-queue narration
+                          </Button>
+                        ) : null}
                         <Button
                           type="button"
                           variant="outline"
                           size="sm"
+                          className="h-auto max-w-full whitespace-normal"
                           onClick={() => {
                             setNewUrl('');
                             setNote('');
                             setMarkTarget(row);
                           }}
                         >
-                          Register replacement candidate
+                          Register candidate
                         </Button>
-                        {showApproveScript(row.review_status) ? (
-                          <Button type="button" size="sm" onClick={() => setApproveTarget(row)}>
-                            Approve script &amp; queue narration
-                          </Button>
-                        ) : null}
                       </div>
                     </article>
                   );
@@ -381,16 +511,15 @@ const VideoRegenerationQueue: React.FC = () => {
         </Card>
       </div>
 
-      {/* Register replacement candidate dialog */}
       <Dialog open={!!markTarget} onOpenChange={(open) => !open && setMarkTarget(null)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Register replacement candidate</DialogTitle>
             <DialogDescription>
               Records a candidate replacement for{' '}
-              {markTarget?.module_title || markTarget?.asset_key || 'this module'} and sets it to pending review.
-              This does not clear the regeneration flag: the flag stays open until the replacement is stored in R2,
-              mapped to the module, playback-verified, and explicitly published.
+              {markTarget?.module_title || markTarget?.asset_key || 'this module'}. A stored R2 file is registered
+              by the render step, so this URL is only required when that file is not already registered. This does
+              not clear the regeneration flag.
             </DialogDescription>
           </DialogHeader>
 
@@ -415,7 +544,6 @@ const VideoRegenerationQueue: React.FC = () => {
             </div>
             <div className="space-y-2">
               <Label htmlFor="regeneration-note">Note (optional)</Label>
-
               <Textarea
                 id="regeneration-note"
                 value={note}
@@ -437,16 +565,14 @@ const VideoRegenerationQueue: React.FC = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Approve script confirm dialog */}
       <Dialog open={!!approveTarget} onOpenChange={(open) => !open && setApproveTarget(null)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Approve script &amp; queue narration?</DialogTitle>
             <DialogDescription>
               Compliance sign-off on the reviewed script for{' '}
-              {approveTarget?.module_title || approveTarget?.asset_key || 'this module'}. Narration and rendering
-              happen downstream. The live video is unchanged, and the regeneration flag remains open until the
-              replacement is stored in R2, mapped, playback-verified, and explicitly published.
+              {approveTarget?.module_title || approveTarget?.asset_key || 'this module'}. This queues narration for
+              this module only. The live video is unchanged, and the original flag date stays in place.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -458,7 +584,50 @@ const VideoRegenerationQueue: React.FC = () => {
               Approve script &amp; queue narration
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
+      <Dialog open={!!requeueTarget} onOpenChange={(open) => !open && setRequeueTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Re-queue narration?</DialogTitle>
+            <DialogDescription>
+              Queues one new narration job for{' '}
+              {requeueTarget?.module_title || requeueTarget?.asset_key || 'this module'} because the latest narration
+              job failed. Other failed narration jobs are left as they are.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRequeueTarget(null)} disabled={busy}>
+              Cancel
+            </Button>
+            <Button onClick={submitRequeue} disabled={busy}>
+              {busy && <Loader2 className="h-4 w-4 me-2 animate-spin" />}
+              Re-queue narration
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!scriptTarget} onOpenChange={(open) => !open && setScriptTarget(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              {scriptTarget?.module_number != null ? `Module ${scriptTarget.module_number}. ` : ''}
+              {scriptTarget?.module_title || 'Draft script'}
+            </DialogTitle>
+            <DialogDescription>The stored draft. This view does not approve it.</DialogDescription>
+          </DialogHeader>
+          {scriptLoading ? (
+            <Loader2 className="h-5 w-5 animate-spin" />
+          ) : (
+            <div className="max-h-[60vh] overflow-y-auto whitespace-pre-wrap text-sm">{scriptText}</div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setScriptTarget(null)}>
+              Close
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
