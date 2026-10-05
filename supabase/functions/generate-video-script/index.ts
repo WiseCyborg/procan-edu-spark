@@ -133,55 +133,6 @@ function asStringArray(value: unknown): string[] | null {
   return value.map((item) => String(item).trim());
 }
 
-function parseSlideSpec(raw: string): SlideSpec {
-  const start = raw.indexOf('{');
-  const end = raw.lastIndexOf('}');
-  if (start < 0 || end <= start) throw new Error('slide response was not JSON');
-  const parsed = JSON.parse(raw.slice(start, end + 1));
-  const lines = asStringArray(parsed?.title?.lines);
-  const closingLines = asStringArray(parsed?.closing?.lines);
-  const narration = asStringArray(parsed?.narration);
-  if (!lines || !closingLines || !narration) throw new Error('slide JSON is missing required text arrays');
-  if (typeof parsed?.title?.module !== 'string' || !parsed.title.module.trim()) {
-    throw new Error('slide title.module is empty');
-  }
-  if (typeof parsed?.title?.subtitle !== 'string' || typeof parsed?.title?.chip !== 'string') {
-    throw new Error('slide title subtitle or chip is missing');
-  }
-  if (!Array.isArray(parsed?.slides)) throw new Error('slide JSON has no slides array');
-  const slides: SlideSpecSlide[] = parsed.slides.map((slide: any, index: number) => {
-    const bullets = asStringArray(slide?.bullets);
-    if (typeof slide?.heading !== 'string' || !slide.heading.trim() || !bullets) {
-      throw new Error(`slide ${index + 1} is missing a heading or bullets`);
-    }
-    const chip = typeof slide?.chip === 'string' ? slide.chip.trim() : '';
-    return {
-      heading: slide.heading.trim(),
-      bullets,
-      ...(chip ? { chip } : {}),
-      key: !!slide?.key,
-    };
-  });
-  if (typeof parsed?.closing?.sub !== 'string' || typeof parsed?.closing?.chip !== 'string') {
-    throw new Error('slide closing sub or chip is missing');
-  }
-  return {
-    title: {
-      module: parsed.title.module.trim(),
-      lines,
-      subtitle: parsed.title.subtitle.trim(),
-      chip: parsed.title.chip.trim(),
-    },
-    slides,
-    narration,
-    closing: {
-      lines: closingLines,
-      sub: parsed.closing.sub.trim(),
-      chip: parsed.closing.chip.trim(),
-    },
-  };
-}
-
 function validateSlideSpec(spec: SlideSpec, script: string, moduleNumber: number | null): void {
   if (spec.slides.length < 4 || spec.slides.length > 8) {
     throw new Error(`slide count ${spec.slides.length} is outside 4 to 8`);
@@ -319,34 +270,140 @@ STYLE:
 - Return ONLY the narration script text. No preamble, no title, no markdown, no commentary about the script.`;
 }
 
-function slidePrompt(script: string, moduleNumber: number | null, title: string): string {
+function partitionNarration(script: string): string[] {
   const collapsed = collapse(script);
-  return `Turn this approved-for-review narration into an on-screen slide spec. Do not rewrite the narration.
-
-MODULE ${moduleNumber ?? ''}: ${title}
-LABEL, when a slide states a proposed-draft rule: ${PROPOSED_LABEL}
-
-NARRATION, already collapsed to single spaces. The narration array must be an exact split of this string. Joining the array with single spaces must reproduce it character for character:
-${collapsed}
-
-Return ONLY JSON with this shape:
-{
-  "title": { "module": "Module N", "lines": ["short line", "short line"], "subtitle": "current COMAR cites from the narration", "chip": "Module N" },
-  "slides": [
-    { "heading": "short heading", "bullets": ["short bullet"], "chip": "", "key": false }
-  ],
-  "narration": ["title spoken text", "slide 1 spoken text", "closing spoken text"],
-  "closing": { "lines": ["short line"], "sub": "one short line", "chip": "Close" }
+  let sentences = sentencesOf(collapsed);
+  if (collapse(sentences.join(' ')) !== collapsed) {
+    const words = collapsed.split(' ');
+    const size = Math.ceil(words.length / 12);
+    sentences = [];
+    for (let i = 0; i < words.length; i += size) sentences.push(words.slice(i, i + size).join(' '));
+  }
+  while (sentences.length < 6) {
+    let longestAt = 0;
+    sentences.forEach((sentence, index) => {
+      if (sentence.split(' ').length > sentences[longestAt].split(' ').length) longestAt = index;
+    });
+    const words = sentences[longestAt].split(' ');
+    if (words.length < 8) break;
+    const mid = Math.ceil(words.length / 2);
+    sentences.splice(longestAt, 1, words.slice(0, mid).join(' '), words.slice(mid).join(' '));
+  }
+  const title = sentences[0];
+  const closing = sentences[sentences.length - 1];
+  const middle = sentences.slice(1, -1);
+  const slideCount = Math.min(8, Math.max(4, Math.min(6, middle.length)));
+  const buckets: string[][] = Array.from({ length: slideCount }, () => []);
+  middle.forEach((sentence, index) => {
+    const bucket = Math.min(slideCount - 1, Math.floor((index * slideCount) / middle.length));
+    buckets[bucket].push(sentence);
+  });
+  const narration = [title, ...buckets.map((bucket) => bucket.join(' ')).filter(Boolean), closing];
+  if (collapse(narration.join(' ')) !== collapsed) {
+    throw new Error('could not partition the draft script into slides');
+  }
+  return narration;
 }
 
-RULES:
-- Use 4 to 8 slides.
-- narration.length must equal slides.length + 2. Index 0 is the title card. The last index is the closing card. The entries in between are one per slide, in order.
-- Do not add, drop, or rephrase any word of the narration. Split only on sentence boundaries.
-- Headings and bullets are short on-screen text taken from the narration. They are not a new script.
-- If a heading, bullet, subtitle, or narration sentence states a rule from the proposed draft, including a 90-day, every-2-years, 10-day, or 30-day SOP item, that same text must include "${PROPOSED_LABEL}", and that slide's chip must be "${PROPOSED_LABEL}".
-- Do not mention PCE-744.
-- ${moduleNumber === 29 ? `The last narration entry must end with: ${M29_CLOSER}` : 'The last narration entry is the closing sentence already in the script.'}`;
+function displayLine(chunk: string, words: number): string {
+  const short = chunk.split(' ').slice(0, words).join(' ');
+  if (unlabeledProposedSentences(short).length > 0 || (DEADLINE_RE.test(chunk) && !short.includes(PROPOSED_LABEL))) {
+    return `${short} — ${PROPOSED_LABEL}`;
+  }
+  return short;
+}
+
+function chipFor(chunk: string): string {
+  return chunk.includes(PROPOSED_LABEL) || DEADLINE_RE.test(chunk) ? PROPOSED_LABEL : '';
+}
+
+function fallbackSlideSpec(script: string, moduleNumber: number | null, title: string, narration: string[]): SlideSpec {
+  const slideNarration = narration.slice(1, -1);
+  const moduleLabel = `Module ${moduleNumber ?? ''}`.trim();
+  return {
+    title: {
+      module: moduleLabel,
+      lines: [displayLine(title, 6), displayLine(narration[0], 8)].filter((line, index, all) => all.indexOf(line) === index),
+      subtitle: displayLine(narration[0], 12),
+      chip: chipFor(narration[0]) || moduleLabel,
+    },
+    slides: slideNarration.map((chunk, index) => ({
+      heading: displayLine(chunk, 6),
+      bullets: [displayLine(chunk, 14)],
+      ...(chipFor(chunk) ? { chip: chipFor(chunk) } : {}),
+      key: index === 0,
+    })),
+    narration,
+    closing: {
+      lines: [displayLine(narration[narration.length - 1], 10)],
+      sub: displayLine(narration[narration.length - 1], 12),
+      chip: chipFor(narration[narration.length - 1]) || 'Close',
+    },
+  };
+}
+
+function slidePrompt(moduleNumber: number | null, title: string, narration: string[]): string {
+  const slides = narration.slice(1, -1).map((chunk, index) => `SLIDE ${index + 1} SPOKEN TEXT:\n${chunk}`).join('\n\n');
+  return `Write on-screen text for this narration. Do not rewrite the spoken text.
+
+MODULE ${moduleNumber ?? ''}: ${title}
+There are exactly ${narration.length - 2} slides. Return one object per slide, in order.
+
+TITLE SPOKEN TEXT:
+${narration[0]}
+
+${slides}
+
+CLOSING SPOKEN TEXT:
+${narration[narration.length - 1]}
+
+Return ONLY JSON:
+{
+  "title_lines": ["short line", "short line"],
+  "subtitle": "short subtitle",
+  "slides": [{ "heading": "short heading", "bullets": ["short bullet"], "key": false }],
+  "closing_lines": ["short line"],
+  "closing_sub": "short line"
+}
+
+If any spoken text states a proposed-draft rule, copy the exact label "${PROPOSED_LABEL}" into the matching heading or bullet. Do not mention PCE-744. Do not add deadlines that are not in the spoken text.`;
+}
+
+function applySlideCopy(base: SlideSpec, raw: string): SlideSpec {
+  const start = raw.indexOf('{');
+  const end = raw.lastIndexOf('}');
+  if (start < 0 || end <= start) return base;
+  const parsed = JSON.parse(raw.slice(start, end + 1));
+  const titleLines = asStringArray(parsed?.title_lines);
+  const closingLines = asStringArray(parsed?.closing_lines);
+  if (!titleLines || !closingLines || !Array.isArray(parsed?.slides) || parsed.slides.length !== base.slides.length) {
+    return base;
+  }
+  const slides = base.slides.map((slide, index) => {
+    const incoming = parsed.slides[index] ?? {};
+    const bullets = asStringArray(incoming.bullets) ?? slide.bullets;
+    const heading = typeof incoming.heading === 'string' && incoming.heading.trim() ? incoming.heading.trim() : slide.heading;
+    return {
+      heading,
+      bullets,
+      ...(slide.chip ? { chip: slide.chip } : {}),
+      key: typeof incoming.key === 'boolean' ? incoming.key : slide.key,
+    };
+  });
+  return {
+    ...base,
+    title: {
+      ...base.title,
+      lines: titleLines,
+      subtitle: typeof parsed.subtitle === 'string' && parsed.subtitle.trim() ? parsed.subtitle.trim() : base.title.subtitle,
+    },
+    slides,
+    closing: {
+      ...base.closing,
+      lines: closingLines,
+      sub: typeof parsed.closing_sub === 'string' && parsed.closing_sub.trim() ? parsed.closing_sub.trim() : base.closing.sub,
+    },
+  };
 }
 
 serve(async (req) => {
@@ -580,27 +637,23 @@ serve(async (req) => {
         }
         if (!script) throw new Error(scriptError || 'script draft failed the proposed-rule check');
 
-        let spec: SlideSpec | null = null;
-        let slideError = '';
-        for (let attempt = 1; attempt <= 2; attempt++) {
-          const correction = slideError ? `\n\nCORRECTION REQUIRED:\n${slideError}` : '';
+        const narration = partitionNarration(script);
+        const baseSpec = fallbackSlideSpec(script, modNum, mod.title, narration);
+        let spec = baseSpec;
+        try {
           const raw = await callAnthropic(
             anthropicApiKey,
-            `You convert a finished narration into on-screen slides. You do not change the spoken words. You never present proposed text as current law. The only status label you may use for that text is: ${PROPOSED_LABEL}.`,
-            slidePrompt(script, modNum, mod.title) + correction,
-            4000,
+            `You write short on-screen training slides. You do not change spoken words. You never present proposed text as current law. The only status label for that text is: ${PROPOSED_LABEL}.`,
+            slidePrompt(modNum, mod.title, narration),
+            2500,
           );
-          try {
-            const candidate = parseSlideSpec(raw);
-            validateSlideSpec(candidate, script, modNum);
-            spec = candidate;
-            break;
-          } catch (err) {
-            slideError = err instanceof Error ? err.message : String(err);
-            spec = null;
-          }
+          spec = applySlideCopy(baseSpec, raw);
+          validateSlideSpec(spec, script, modNum);
+        } catch (slideErr) {
+          spec = baseSpec;
+          validateSlideSpec(spec, script, modNum);
+          console.error('[generate-video-script] using exact narration slides:', slideErr instanceof Error ? slideErr.message : slideErr);
         }
-        if (!spec) throw new Error(slideError || 'draft-to-slide failed');
 
         const { error: updErr } = await supabase
           .from('video_assets')
