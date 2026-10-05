@@ -200,6 +200,7 @@ serve(async (req) => {
             .from("regulatory_content")
             .select("id, version_hash, content_text")
             .eq("section_number", rec.number)
+            .eq("authority_status", "current")
             .order("created_at", { ascending: false })
             .limit(1)
             .maybeSingle();
@@ -213,6 +214,7 @@ serve(async (req) => {
               section_title: rec.title,
               content_text: rec.content,
               source_url: rec.sourceUrl,
+              authority_status: "current",
               version_hash: hash,
               last_modified_at: new Date().toISOString(),
             });
@@ -276,6 +278,7 @@ serve(async (req) => {
           .from("regulatory_content")
           .select("id, version_hash")
           .eq("section_number", "MCA.laws.index")
+          .eq("authority_status", "current")
           .order("created_at", { ascending: false })
           .limit(1)
           .maybeSingle();

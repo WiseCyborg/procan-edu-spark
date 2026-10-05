@@ -7215,6 +7215,8 @@ export type Database = {
       }
       regulatory_content: {
         Row: {
+          authority_label: string | null
+          authority_status: string
           change_impact_level: string | null
           compliance_tips: Json | null
           content_html: string | null
@@ -7233,6 +7235,8 @@ export type Database = {
           version_hash: string
         }
         Insert: {
+          authority_label?: string | null
+          authority_status?: string
           change_impact_level?: string | null
           compliance_tips?: Json | null
           content_html?: string | null
@@ -7251,6 +7255,8 @@ export type Database = {
           version_hash: string
         }
         Update: {
+          authority_label?: string | null
+          authority_status?: string
           change_impact_level?: string | null
           compliance_tips?: Json | null
           content_html?: string | null

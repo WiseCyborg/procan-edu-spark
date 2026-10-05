@@ -61,6 +61,7 @@ Deno.serve(async (req: Request) => {
     const { data: regs, error: regsErr } = await supabase
       .from('regulatory_content')
       .select('id, section_number, section_title, content_text')
+      .eq('authority_status', 'current')
       .order('section_number', { ascending: true });
 
     if (regsErr) throw regsErr;
