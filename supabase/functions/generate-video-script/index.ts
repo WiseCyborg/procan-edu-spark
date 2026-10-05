@@ -219,7 +219,9 @@ function trimToWordLimit(script: string, limit: number): string {
     sentences = sentences.slice(0, -1);
   }
   const wordCount = (sentence: string) => sentence.split(/\s+/).filter(Boolean).length;
-  const labeled = new Set(sentences.filter((sentence) => sentence.includes(PROPOSED_LABEL)));
+  const labeled = new Set(sentences.filter((sentence) =>
+    sentence.includes(PROPOSED_LABEL) || sentence.includes(M29_CLOSER)
+  ));
   const kept: string[] = [];
   let count = 0;
   for (const sentence of sentences) {
