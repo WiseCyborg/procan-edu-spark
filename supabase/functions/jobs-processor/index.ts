@@ -355,8 +355,16 @@ const JOB_HANDLERS: Record<string, (job: Job, supabase: any) => Promise<void>> =
     const assetId = job.payload?.asset_id;
     if (!assetId) throw new Error('video_generate_narration: missing payload.asset_id');
 
+    const body: Record<string, unknown> = { asset_id: assetId, limit: 1 };
+    // Optional per-job override. Absent values leave the function on its
+    // Neural2-G / en-US default (or NARRATION_VOICE_NAME / NARRATION_LANGUAGE_CODE).
+    const voiceName = typeof job.payload?.voice_name === 'string' ? job.payload.voice_name.trim() : '';
+    const languageCode = typeof job.payload?.language_code === 'string' ? job.payload.language_code.trim() : '';
+    if (voiceName) body.voice_name = voiceName;
+    if (languageCode) body.language_code = languageCode;
+
     const { data, error } = await supabase.functions.invoke('generate-video-narration', {
-      body: { asset_id: assetId, limit: 1 },
+      body,
     });
     if (error) throw error;
     if (!data || data.ok === false) {
