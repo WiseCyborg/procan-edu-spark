@@ -7,7 +7,7 @@ interface SeoProps {
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
 }
 
-const SITE_ORIGIN = 'https://www.procannedu.com';
+const SITE_ORIGIN = 'https://procannedu.com';
 
 /**
  * Per-route head metadata.
