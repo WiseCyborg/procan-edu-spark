@@ -1,5 +1,14 @@
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import {
+  ELEVENLABS_VOICE,
+  initialGoogleEncoding,
+  googleSynthesisRequest,
+  resolveNarrationProvider,
+  resolveNarrationVoice,
+  type GoogleEncoding,
+  type ResolvedVoice,
+} from "./voice.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -8,9 +17,6 @@ const corsHeaders = {
 
 const MAX_CHUNK_BYTES = 4500;
 const BUCKET = "video-drafts";
-// William, 2026-10-05: every narration job uses this voice.
-const GOOGLE_VOICE = "en-US-Chirp3-HD-Charon";
-const ELEVENLABS_VOICE = "21m00Tcm4TlvDq8ikWAM";
 
 interface AssetResult {
   asset_id: string;
@@ -83,26 +89,23 @@ function redactSecret(message: string, secret: string): string {
 }
 
 // Chirp 3 HD's plain MP3 encoding is 32 kb/s. v1beta1 accepts MP3_64_KBPS.
-// If that encoding is rejected, the caller falls back to Google's default MP3.
+// That fallback stays on the same voice. It is only used for an explicit
+// Chirp override. Neural2-G is requested as MP3 directly, and a failure
+// does not switch the voice to Charon or the provider to ElevenLabs.
 async function synthesizeGoogle(
   text: string,
   apiKey: string,
-  encoding: "MP3_64_KBPS" | "MP3",
+  voice: { voiceName: string; languageCode: string },
+  encoding: GoogleEncoding,
 ): Promise<Uint8Array> {
-  const url = encoding === "MP3_64_KBPS"
-    ? "https://texttospeech.googleapis.com/v1beta1/text:synthesize"
-    : "https://texttospeech.googleapis.com/v1/text:synthesize";
-  const res = await fetch(url, {
+  const request = googleSynthesisRequest(text, voice, encoding);
+  const res = await fetch(request.url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "X-Goog-Api-Key": apiKey,
     },
-    body: JSON.stringify({
-      input: { text },
-      voice: { languageCode: "en-US", name: GOOGLE_VOICE },
-      audioConfig: { audioEncoding: encoding, speakingRate: 1.0 },
-    }),
+    body: JSON.stringify(request.body),
   });
   const data = await res.json();
   if (!res.ok || data.error || !data.audioContent) {
@@ -117,9 +120,10 @@ async function synthesizeGoogle(
 async function ttsGoogle(
   text: string,
   apiKey: string,
-  encoding: "MP3_64_KBPS" | "MP3",
+  voice: { voiceName: string; languageCode: string },
+  encoding: GoogleEncoding,
 ): Promise<Uint8Array> {
-  return await synthesizeGoogle(text, apiKey, encoding);
+  return await synthesizeGoogle(text, apiKey, voice, encoding);
 }
 
 // Concatenate MP3 buffers by naive byte join. This is acceptable because
@@ -148,18 +152,24 @@ serve(async (req) => {
 
   const elevenKey = Deno.env.get("ELEVENLABS_API_KEY");
   const googleKey = Deno.env.get("GOOGLE_TTS_API_KEY");
-  // Default is Google Chirp 3 HD. ElevenLabs runs only when this is "elevenlabs".
-  const providerFlag = (Deno.env.get("NARRATION_TTS_PROVIDER") ?? "google").trim().toLowerCase();
+  // Default provider is Google. ElevenLabs Rachel runs only when
+  // NARRATION_TTS_PROVIDER is exactly "elevenlabs". A missing Google key
+  // does not fall back to ElevenLabs, and a missing ElevenLabs key does
+  // not fall back to Google.
+  const envVoice = Deno.env.get("NARRATION_VOICE_NAME");
+  const envLanguage = Deno.env.get("NARRATION_LANGUAGE_CODE");
+  const { providerFlag, provider } = resolveNarrationProvider(
+    Deno.env.get("NARRATION_TTS_PROVIDER"),
+    { google: !!googleKey, elevenlabs: !!elevenKey },
+  );
+  let googleVoice: ResolvedVoice = resolveNarrationVoice({ envVoice, envLanguage });
+  let voiceName = provider === "elevenlabs" ? ELEVENLABS_VOICE : googleVoice.voiceName;
   const providersChecked = {
     ELEVENLABS_API_KEY: !!elevenKey,
     GOOGLE_TTS_API_KEY: !!googleKey,
     NARRATION_TTS_PROVIDER: providerFlag,
+    NARRATION_VOICE_NAME: googleVoice.source === "default" ? null : envVoice?.trim() || null,
   };
-
-  let provider: "elevenlabs" | "google" | null = null;
-  if (providerFlag === "elevenlabs") provider = elevenKey ? "elevenlabs" : null;
-  else provider = googleKey ? "google" : null;
-  const voiceName = provider === "elevenlabs" ? ELEVENLABS_VOICE : GOOGLE_VOICE;
 
   const results: AssetResult[] = [];
   let processed = 0;
@@ -179,6 +189,8 @@ serve(async (req) => {
           assets_skipped: skipped,
           provider_used: provider,
           voice: voiceName,
+          voice_source: provider === "elevenlabs" ? "elevenlabs" : googleVoice.source,
+          language_code: provider === "elevenlabs" ? null : googleVoice.languageCode,
           providers_checked: providersChecked,
           ...(errorMessage ? { error: errorMessage } : {}),
         }),
@@ -232,12 +244,22 @@ serve(async (req) => {
 
     // ---- Input ----
     // One asset per call. A missing id used to scan every draft that had no audio.
-    let body: { asset_id?: string } = {};
+    let body: { asset_id?: string; voice_name?: string; language_code?: string } = {};
     try {
       body = await req.json();
     } catch {
       body = {};
     }
+    googleVoice = resolveNarrationVoice({
+      bodyVoice: body.voice_name,
+      envVoice,
+      bodyLanguage: body.language_code,
+      envLanguage,
+    });
+    // voice_name / NARRATION_VOICE_NAME select the Google voice. They do
+    // not switch the provider, and they do not replace ElevenLabs Rachel
+    // when that provider was explicitly requested.
+    if (provider !== "elevenlabs") voiceName = googleVoice.voiceName;
     if (!body.asset_id) {
       return new Response(
         JSON.stringify({
@@ -245,6 +267,7 @@ serve(async (req) => {
           error: "asset_id is required. This function narrates one asset and will not scan the catalog.",
           provider,
           voice: voiceName,
+          language_code: provider === "elevenlabs" ? null : googleVoice.languageCode,
         }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
@@ -277,19 +300,31 @@ serve(async (req) => {
       try {
         const chunks = chunkScript(asset.draft_script);
         const audioBuffers: Uint8Array[] = [];
-        let audioEncoding = provider === "google" ? "MP3_64_KBPS" : "mp3_44100_128";
+        let audioEncoding = provider === "google"
+          ? initialGoogleEncoding(googleVoice.voiceName)
+          : "mp3_44100_128";
+        const googleVoiceRequest = {
+          voiceName: googleVoice.voiceName,
+          languageCode: googleVoice.languageCode,
+        };
         for (const chunk of chunks) {
           let buf: Uint8Array;
           if (provider === "elevenlabs") {
             buf = await ttsElevenLabs(chunk, elevenKey!);
           } else {
             try {
-              buf = await ttsGoogle(chunk, googleKey!, audioEncoding === "MP3" ? "MP3" : "MP3_64_KBPS");
+              buf = await ttsGoogle(
+                chunk,
+                googleKey!,
+                googleVoiceRequest,
+                audioEncoding === "MP3" ? "MP3" : "MP3_64_KBPS",
+              );
             } catch (googleErr) {
               const status = (googleErr as { status?: number }).status;
+              // Same voice, Chirp encoding only. Never retry as Charon or ElevenLabs.
               if (audioEncoding === "MP3_64_KBPS" && status !== 401 && status !== 403) {
                 audioEncoding = "MP3";
-                buf = await ttsGoogle(chunk, googleKey!, "MP3");
+                buf = await ttsGoogle(chunk, googleKey!, googleVoiceRequest, "MP3");
               } else {
                 throw googleErr;
               }
@@ -316,7 +351,7 @@ serve(async (req) => {
             draft_audio_url: path,
             draft_audio_generated_at: new Date().toISOString(),
             draft_audio_provider: provider === "google"
-              ? `google:${GOOGLE_VOICE}:${audioEncoding}`
+              ? `google:${googleVoice.voiceName}:${audioEncoding}`
               : `elevenlabs:${ELEVENLABS_VOICE}`,
             draft_audio_duration_seconds: estimatedSeconds,
           })
@@ -342,7 +377,15 @@ serve(async (req) => {
 
     await logRun("success");
     return new Response(
-      JSON.stringify({ ok: true, provider, voice: voiceName, processed, succeeded, results }),
+      JSON.stringify({
+        ok: true,
+        provider,
+        voice: voiceName,
+        language_code: provider === "elevenlabs" ? null : googleVoice.languageCode,
+        processed,
+        succeeded,
+        results,
+      }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (error) {
