@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { McaIndependenceNotice } from '@/components/layout/McaIndependenceNotice';
 
 export const Footer = () => (
   <footer role="contentinfo" className="border-t bg-background py-8 mt-12">
@@ -15,6 +16,9 @@ export const Footer = () => (
           About
         </Link>
       </nav>
+      <p className="mx-auto mt-4 max-w-3xl text-xs leading-relaxed">
+        <McaIndependenceNotice linkClassName="underline hover:text-foreground" />
+      </p>
     </div>
   </footer>
 );
