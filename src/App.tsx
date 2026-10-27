@@ -57,7 +57,6 @@ import DispensaryApplication from "./pages/DispensaryApplication";
 import ManagerRegistration from "./pages/ManagerRegistration";
 import GetStarted from "./pages/GetStarted";
 import TeamManagement from "./pages/TeamManagement";
-import { COMARBanner } from "./components/layout/COMARBanner";
 import ActivateAiLean from "./pages/ActivateAiLean";
 import AiLeanInfo from "./pages/AiLeanInfo";
 import StateOfficialsPage from "./pages/StateOfficialsPage";
@@ -223,9 +222,6 @@ const AppRoutesLayout = () => {
           <>
             <SkipNavigation />
             <Header />
-            <div className="container mx-auto px-4 py-2">
-              <COMARBanner />
-            </div>
           </>
         )}
         <main id="main-content" role="main">

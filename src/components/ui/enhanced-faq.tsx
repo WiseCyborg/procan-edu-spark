@@ -11,11 +11,13 @@ import { useContentLastUpdated } from '@/hooks/useContentLastUpdated';
 import { formatDistanceToNow } from 'date-fns';
 import { ListenButton } from '@/components/i18n/ListenButton';
 import { BUSINESS_RULES } from '@/config/business-rules';
+import { MCA_APPROVED_LIST_URL, McaIndependenceNotice } from '@/components/layout/McaIndependenceNotice';
 
 interface FAQItem {
   id: string;
   question: string;
   answer: string;
+  answerContent?: React.ReactNode;
   category: string;
   securityLevel: 'student' | 'manager' | 'admin' | 'public';
   tags?: string[];
@@ -190,6 +192,16 @@ export const EnhancedFAQ: React.FC<EnhancedFAQProps> = ({
       question: 'Is ProCann Edu aligned with Maryland Cannabis Administration requirements?',
       answer: "No. ProCann Edu is an independent provider, not MCA-endorsed, and not on the approved RVT list.",
       category: 'Certification',
+      securityLevel: 'public'
+    },
+    {
+      id: 'general-5',
+      question: 'Is ProCann Edu MCA-approved Responsible Vendor Training?',
+      answer: `ProCann Edu is an independent training provider and is not on the MCA approved Responsible Vendor Training list (see MCA's approved list: ${MCA_APPROVED_LIST_URL}); this course does not satisfy Maryland's annual responsible vendor / agent training duty. Last reviewed: October 2026`,
+      answerContent: (
+        <McaIndependenceNotice linkClassName="font-semibold underline hover:text-primary" />
+      ),
+      category: 'About Training',
       securityLevel: 'public'
     },
     {
@@ -370,7 +382,7 @@ export const EnhancedFAQ: React.FC<EnhancedFAQProps> = ({
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="text-muted-foreground">
-                  {tr(faq.id, 'a', faq.answer)}
+                  {faq.answerContent ?? tr(faq.id, 'a', faq.answer)}
                 </AccordionContent>
               </AccordionItem>
             ))}

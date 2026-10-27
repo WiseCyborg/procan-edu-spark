@@ -32,6 +32,11 @@ const FAQ_JSONLD_ITEMS: Array<{ question: string; answer: string }> = [
     answer:
       'Your dispensary manager will provide you with an access key during enrollment. This links your account to your organization for compliance tracking.',
   },
+  {
+    question: 'Is ProCann Edu MCA-approved Responsible Vendor Training?',
+    answer:
+      "ProCann Edu is an independent training provider and is not on the MCA approved Responsible Vendor Training list (see MCA's approved list: https://cannabis.maryland.gov/pages/responsible_vendor_training.aspx); this course does not satisfy Maryland's annual responsible vendor / agent training duty. Last reviewed: October 2026",
+  },
 ];
 
 const FAQ = () => {
