@@ -11,7 +11,7 @@ export const ComplianceDisclaimer = () => {
       <Alert className="border-2 border-primary/30 bg-white shadow-sm">
         <Shield className="h-5 w-5 text-primary" />
         <AlertDescription className="space-y-2">
-          <div className="text-sm font-bold text-primary mb-2">COMAR Compliance</div>
+          <div className="text-sm font-bold text-primary mb-2">Built with Maryland COMAR in mind; not MCA-approved</div>
           <p className="text-sm leading-relaxed text-foreground">
             Content is reviewed when published Maryland cannabis rules change. ProCann Edu is an independent training provider; completion of this course does not constitute MCA endorsement and does not satisfy Maryland's annual responsible vendor / agent training duty.
           </p>
