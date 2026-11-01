@@ -22,6 +22,7 @@ const DispensaryApplication = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = React.useState(1);
   const [submitted, setSubmitted] = React.useState(false);
+  const [applicationId, setApplicationId] = React.useState<string | null>(null);
 
   const {
     register,
@@ -69,6 +70,7 @@ const DispensaryApplication = () => {
 
       // Success: backend confirmed the save
       if (!error && (result?.success === true || status === 201)) {
+        setApplicationId(result?.applicationId ?? raw?.applicationId ?? null);
         setSubmitted(true);
         toast({
           title: "Application Received ✅",
@@ -90,6 +92,7 @@ const DispensaryApplication = () => {
       }
 
       if (errorCode?.includes('DUPLICATE_APPLICATION') || errorCode?.includes('DUPLICATE_EMAIL')) {
+        setApplicationId(raw?.applicationId ?? null);
         setSubmitted(true);
         toast({
           title: "Application Received ✅",
@@ -182,6 +185,17 @@ const DispensaryApplication = () => {
             <p className="text-sm text-muted-foreground">
               Most reviews complete within 1 business day. If we need anything else, we'll contact you.
             </p>
+            {applicationId && (
+              <div className="rounded-md border p-3 text-sm text-left space-y-1">
+                <p>Application ID: <span className="font-mono">{applicationId}</span></p>
+                <p className="text-muted-foreground">
+                  Keep this ID. Once approved, pay at the link in your approval email or here:
+                </p>
+                <Button variant="outline" className="w-full" onClick={() => navigate(`/payment/${applicationId}`)}>
+                  Check status / pay
+                </Button>
+              </div>
+            )}
             <Button onClick={() => navigate('/')} className="w-full">Continue to Platform</Button>
           </CardContent>
         </Card>
