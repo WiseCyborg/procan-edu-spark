@@ -356,7 +356,11 @@ const AppRoutesLayout = () => {
             <Route path="/state-officials" element={<StateOfficialsPage />} />
             <Route path="/about/team" element={<AboutTeamPage />} />
             <Route path="/compliance/curriculum-matrix" element={<Navigate to="/" replace />} />
-            <Route path="/compliance/content-review" element={<ComplianceContentReviewPage />} />
+            <Route path="/compliance/content-review" element={
+              <ProtectedRoute>
+                <ComplianceContentReviewPage />
+              </ProtectedRoute>
+            } />
             <Route path="/employers" element={<EmployersPage />} />
             <Route path="/impact" element={<ImpactDashboardPage />} />
             <Route path="/accessibility" element={<AccessibilityPage />} />
@@ -457,7 +461,6 @@ const AppRoutesLayout = () => {
               </ProtectedRoute>
             } />
             <Route path="/accept-invitation" element={<AcceptInvitation />} />
-            <Route path="/system-health" element={<SystemHealthDashboard />} />
             <Route path="/uat/validation-checklist" element={
               <ProtectedRoute>
                 <UATValidationPage />

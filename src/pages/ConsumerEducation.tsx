@@ -322,7 +322,7 @@ const ConsumerEducation = () => {
                   </ul>
                   <p className="text-xs text-muted-foreground ms-7">
                     See the{' '}
-                    <a href="https://cannabis.maryland.gov/Pages/Adult-Use-FAQs.aspx" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                    <a href="https://cannabis.maryland.gov/Pages/cannabisfaq.aspx" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
                       MCA Adult-Use FAQ
                     </a>{' '}
                     and{' '}
